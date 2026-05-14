@@ -4,73 +4,182 @@
     box-sizing: border-box;
 }
 
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    color: #f0f0f0;
-    background: #1a1a1a;
-    background-image:
-        radial-gradient(circle at 20% 20%, rgba(80, 100, 120, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(120, 100, 80, 0.1) 0%, transparent 50%);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #3a3a3a;
+    background: #fafafa;
+    line-height: 1.6;
+    font-size: 16px;
     min-height: 100vh;
+}
+
+/* Top navigation */
+
+.topbar {
+    background: #fafafa;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.topbar-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    justify-content: space-between;
 }
+
+.wordmark-small {
+    height: 24px;
+    width: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    font-size: 0.875rem;
+    color: #3a3a3a;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+}
+
+.nav-links a:hover {
+    color: #475569;
+}
+
+/* Main */
 
 main {
-    max-width: 540px;
-    width: 100%;
-    padding: 2.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
 }
 
-h1 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    color: #ffffff;
-    background: linear-gradient(135deg, #ffffff 0%, #b0b0c0 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* Sections */
+
+section {
+    margin-bottom: 2.5rem;
 }
+
+section:last-of-type {
+    margin-bottom: 0;
+}
+
+h2 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+section p {
+    color: #3a3a3a;
+    font-size: 1rem;
+    margin-bottom: 0.875rem;
+}
+
+section p:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Figures */
+
+figure {
+    margin: 1.5rem 0;
+}
+
+figcaption {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #888888;
+    margin-top: 0.625rem;
+    text-align: left;
+}
+
+/* Preview image */
+
+.preview-image {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+/* Meta-model diagram */
+
+.meta-model {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Hairlines */
 
 hr {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
-    margin: 1.5rem 0;
+    background: #e5e5e5;
+    margin: 2rem 0;
 }
 
-p {
-    color: #c0c0c8;
-    font-size: 1rem;
+/* Links */
+
+a {
+    color: #475569;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
 }
 
-.status {
+a:hover {
+    color: #334155;
+}
+
+/* Footer */
+
+footer {
+    margin-top: 2rem;
+}
+
+footer p {
     font-size: 0.8rem;
-    font-weight: 600;
-    color: #88aaff;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    display: inline-block;
+    color: #888888;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
 }
 
-.status::before {
-    content: '● ';
-    color: #88aaff;
-    margin-right: 0.3rem;
-    animation: pulse 2s ease-in-out infinite;
-}
+/* Responsive */
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+@media (max-width: 600px) {
+    .topbar-inner {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    main {
+        padding: 2rem 1.5rem;
+    }
+    
+    .nav-links {
+        gap: 1.25rem;
+        flex-wrap: wrap;
+    }
 }
