@@ -1,0 +1,119 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Sida-1" id="7X_28n3lPa_rbXtdb2Rk">
+    <mxGraphModel dx="773" dy="1040" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-74" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=260;height=20;fillColor=#FAFAFA;swimlaneFillColor=#FAFAFA;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=12;" value="Conceptual metamodel for openconformity" vertex="1">
+          <mxGeometry height="680" width="880" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-36" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-35" value="defines">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-34" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;European&lt;/div&gt;&lt;div&gt;legislation&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="60" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-35" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Essential requirement" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-38" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-35" value="triggers">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Hazard" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-40" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-34" value="harmonized to">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-42" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-41" value="defines">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-39" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Harmonized&lt;/div&gt;&lt;div&gt;standard&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="60" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-43" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-35" value="satisfies">
+          <mxGeometry relative="1" x="-0.0007" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Standard requirement" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-45" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-34" value="subject to">
+          <mxGeometry relative="1" x="0.0087" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-85" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;" target="6oigFcFnZJ_pR6voIVSi-80" value="contains">
+          <mxGeometry relative="1" x="-0.1667" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-44" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="System" vertex="1">
+          <mxGeometry height="60" width="120" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-55" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Safety&lt;/div&gt;&lt;div&gt;function&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="780" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-76" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-77" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
+          <mxGeometry relative="1" x="-0.7242" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="840" y="530" />
+            </Array>
+            <mxPoint x="950" y="610" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-78" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
+          <mxGeometry relative="1" x="-0.7241" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="360" y="530" />
+            </Array>
+            <mxPoint x="310" y="750" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-57" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;System&lt;/div&gt;&lt;div&gt;requirement&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="499.99999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-79" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="verifies">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Verification&lt;/div&gt;&lt;div&gt;activity&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-68" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-37" value="mitigates">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-69" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-67" value="realized by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-73" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-55" value="realized by">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-67" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Risk-reducing measure" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="359.99999999999994" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-84" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-82" value="contains">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-80" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Subsystem" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-83" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-37" value="presents">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6oigFcFnZJ_pR6voIVSi-82" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;System&lt;/div&gt;&lt;div&gt;element&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
