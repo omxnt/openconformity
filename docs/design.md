@@ -18,7 +18,16 @@ This document describes the design of openconformity: the background and reasoni
   - [2.6 Avoid Conclusions](#26-avoid-conclusions)
   - [2.7 Engineering Work](#27-engineering-work)
 - [3. Scope](#3-scope)
+  - [3.1 In Scope](#31-in-scope)
+  - [3.2 Out of Scope](#32-out-of-scope)
+  - [3.3 Non-Goals](#33-non-goals)
 - [4. Concept](#4-concept)
+  - [4.1 General](#41-general)
+  - [4.2 Metamodel](#42-metamodel)
+  - [4.3 The Model](#43-the-model)
+  - [4.4 Working With the Model](#44-working-with-the-model)
+  - [4.5 Views and Export](#45-views-and-export)
+  - [4.6 Reuse](#46-reuse)
 - [5. Implementation](#5-implementation)
 - [6. Release Plan](#6-release-plan)
 - [7. Licensing](#7-licensing)
@@ -125,16 +134,32 @@ This chapter describes the concept of the tool, including the metamodel that def
 
 ### 4.2 Metamodel
 
+*Status: not yet started.*
+
 ### 4.3 The Model
 
-### 4.3 The Modeling
+*Status: not yet started.*
 
-### 4.4 Views and Export
+### 4.4 Working With the Model
 
+*Status: not yet started.*
+
+### 4.5 Views and Export
+
+*Status: not yet started.*
+
+### 4.6 Reuse
+
+*Status: not yet started.*
 
 ## 5. Implementation
 
+*Status: not yet started.*
+
 ## 6. Release Plan
+
+*Status: not yet started.*
 
 ## 7. Licensing
 
+The project is licensed under the [EUPL-1.2](../LICENSE), covering the source code, the design documents, and the diagrams. The reasoning behind the choice is documented in [decisions.md](decisions.md).
