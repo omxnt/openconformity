@@ -1,117 +1,385 @@
 <mxfile host="app.diagrams.net">
-  <diagram name="Sida-1" id="7X_28n3lPa_rbXtdb2Rk">
-    <mxGraphModel dx="773" dy="1040" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <diagram id="bA8PoTu9tmvcTYxLlBaD" name="MetaModel">
+    <mxGraphModel dx="2508" dy="1493" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="740" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-74" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=260;height=20;fillColor=#FAFAFA;swimlaneFillColor=#FAFAFA;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=12;" value="Conceptual metamodel for openconformity" vertex="1">
-          <mxGeometry height="680" width="880" x="40" y="40" as="geometry" />
+        <mxCell id="qkm095DuFagqvQK6s5gQ-43" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=200;height=20;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=10;fontStyle=1;gradientColor=none;swimlaneFillColor=default;" value="Metamodel for openconformity" vertex="1">
+          <mxGeometry height="740" width="1640" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-36" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-35" value="defines">
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-1" edge="1" parent="1" source="HezU-401WASi6Kru2aL2-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=diamond;startFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1;fontSize=8;" target="qape28Ufknq84NzUUioS-1" value="defines">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-34" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;European&lt;/div&gt;&lt;div&gt;legislation&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="60" y="220" as="geometry" />
+        <mxCell id="W6TdAJBLszMVB8aFe-7G-5" edge="1" parent="1" source="HezU-401WASi6Kru2aL2-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;fontStyle=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;endArrow=block;endFill=1;startArrow=diamond;startFill=1;" target="gw-j3l2peuWRDppQOoIJ-1" value="defines">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-35" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Essential requirement" vertex="1">
-          <mxGeometry height="60" width="120" x="300" y="220" as="geometry" />
+        <mxCell id="HezU-401WASi6Kru2aL2-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#ffe6cc;strokeColor=#d79b00;" value="European Legislation" vertex="1">
+          <mxGeometry height="40" width="160" x="320" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-38" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-35" value="triggers">
+        <mxCell id="qape28Ufknq84NzUUioS-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#f8cecc;strokeColor=#b85450;" value="Essential Requirement" vertex="1">
+          <mxGeometry height="40" width="160" x="600" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-5" edge="1" parent="1" source="6xdc49j7Mo1MFW50ZXJd-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="HezU-401WASi6Kru2aL2-1" value="harmonized to">
           <mxGeometry relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Hazard" vertex="1">
-          <mxGeometry height="60" width="120" x="540" y="220" as="geometry" />
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#ffe6cc;strokeColor=#d79b00;" value="European Standard" vertex="1">
+          <mxGeometry height="40" width="160" x="320" y="400" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-40" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-34" value="harmonized to">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#f8cecc;strokeColor=#b85450;" value="Standard Requirement" vertex="1">
+          <mxGeometry height="40" width="160" x="600" y="400" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-42" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-41" value="defines">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-39" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Harmonized&lt;/div&gt;&lt;div&gt;standard&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="60" y="360" as="geometry" />
-        </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-43" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-35" value="satisfies">
-          <mxGeometry relative="1" x="-0.0007" as="geometry">
-            <mxPoint as="offset" />
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-4" edge="1" parent="1" source="6xdc49j7Mo1MFW50ZXJd-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=diamond;startFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1;fontSize=8;" target="6xdc49j7Mo1MFW50ZXJd-3" value="defines">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="550" y="310" as="sourcePoint" />
+            <mxPoint x="710" y="310" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Standard requirement" vertex="1">
-          <mxGeometry height="60" width="120" x="300" y="360" as="geometry" />
-        </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-45" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-34" value="subject to">
-          <mxGeometry relative="1" x="0.0087" as="geometry">
-            <mxPoint as="offset" />
+        <mxCell id="6xdc49j7Mo1MFW50ZXJd-7" edge="1" parent="1" source="6xdc49j7Mo1MFW50ZXJd-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="qape28Ufknq84NzUUioS-1" value="satisfies">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="810" y="400" as="sourcePoint" />
+            <mxPoint x="810" y="320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-85" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;" target="6oigFcFnZJ_pR6voIVSi-80" value="contains">
-          <mxGeometry relative="1" x="-0.1667" as="geometry">
-            <mxPoint as="offset" />
+        <mxCell id="W6TdAJBLszMVB8aFe-7G-6" edge="1" parent="1" source="gw-j3l2peuWRDppQOoIJ-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=diamond;startFill=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="W6TdAJBLszMVB8aFe-7G-2" value="involves">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="80" y="360" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-44" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="System" vertex="1">
-          <mxGeometry height="60" width="120" x="60" y="80" as="geometry" />
+        <mxCell id="gw-j3l2peuWRDppQOoIJ-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Conformity Assessment" vertex="1">
+          <mxGeometry height="40" width="160" x="40" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-55" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Safety&lt;/div&gt;&lt;div&gt;function&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="780" y="360" as="geometry" />
+        <mxCell id="W6TdAJBLszMVB8aFe-7G-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Notified Body" vertex="1">
+          <mxGeometry height="40" width="160" x="40" y="400" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-76" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="SeV3fcPwjP8KBrEute-g-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#f8cecc;strokeColor=#b85450;" value="System Requirement" vertex="1">
+          <mxGeometry height="40" width="160" x="600" y="520" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-77" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-55" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
-          <mxGeometry relative="1" x="-0.7242" as="geometry">
+        <mxCell id="SeV3fcPwjP8KBrEute-g-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#f8cecc;strokeColor=#b85450;" value="Verification Activity" vertex="1">
+          <mxGeometry height="40" width="160" x="600" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="5GUEnL2a6QElsWbJLm2A-1" edge="1" parent="1" source="SeV3fcPwjP8KBrEute-g-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="6xdc49j7Mo1MFW50ZXJd-3" value="derives from">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="750" y="500" as="sourcePoint" />
+            <mxPoint x="750" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hevrfNV6DYwqbwr3dlHH-1" edge="1" parent="1" source="SeV3fcPwjP8KBrEute-g-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="SeV3fcPwjP8KBrEute-g-1" value="verifies">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="580" as="sourcePoint" />
+            <mxPoint x="670" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hevrfNV6DYwqbwr3dlHH-2" edge="1" parent="1" source="SeV3fcPwjP8KBrEute-g-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;startArrow=diamond;startFill=1;endArrow=block;endFill=1;fontStyle=1" target="SeV3fcPwjP8KBrEute-g-1" value="decompose">
+          <mxGeometry relative="1" x="-0.3" y="5" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
-              <mxPoint x="840" y="530" />
+              <mxPoint x="610" y="580" />
+              <mxPoint x="580" y="580" />
+              <mxPoint x="580" y="550" />
             </Array>
-            <mxPoint x="950" y="610" as="sourcePoint" />
+            <mxPoint x="560" y="564" as="sourcePoint" />
+            <mxPoint x="570" y="590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-78" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="derives">
-          <mxGeometry relative="1" x="-0.7241" as="geometry">
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#d5e8d4;strokeColor=#82b366;" value="Safety Function" vertex="1">
+          <mxGeometry height="40" width="160" x="1160" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-4" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;startArrow=diamond;startFill=1;endArrow=block;endFill=1;fontStyle=1" target="TvU9smkUcsTKKPMDlw4y-1" value="decompose">
+          <mxGeometry relative="1" x="-0.3" y="5" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
-              <mxPoint x="360" y="530" />
+              <mxPoint x="1170" y="460" />
+              <mxPoint x="1140" y="460" />
+              <mxPoint x="1140" y="430" />
             </Array>
-            <mxPoint x="310" y="750" as="sourcePoint" />
+            <mxPoint x="1169.97" y="440" as="sourcePoint" />
+            <mxPoint x="1159.97" y="430" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-57" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;System&lt;/div&gt;&lt;div&gt;requirement&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="540" y="499.99999999999994" as="geometry" />
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="System Element" vertex="1">
+          <mxGeometry height="40" width="160" x="880" y="160" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-79" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-57" value="verifies">
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-16" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=middle;align=center;verticalAlign=middle;startArrow=diamond;startFill=1;endArrow=block;endFill=1;fontStyle=1" target="TvU9smkUcsTKKPMDlw4y-8" value="decompose">
+          <mxGeometry relative="1" x="-0.3" y="5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="890" y="220" />
+              <mxPoint x="860" y="220" />
+              <mxPoint x="860" y="190" />
+            </Array>
+            <mxPoint x="889.97" y="200" as="sourcePoint" />
+            <mxPoint x="879.97" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-18" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=8;fontStyle=1" target="6xdc49j7Mo1MFW50ZXJd-3" value="implements">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="860" y="420" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#d5e8d4;strokeColor=#82b366;" value="Protective Measure" vertex="1">
+          <mxGeometry height="40" width="160" x="880" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-25" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1" target="TvU9smkUcsTKKPMDlw4y-17" value="realizes">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="720" y="560" as="sourcePoint" />
+            <mxPoint x="720" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9X4uvqqAOB1Wfqv2Z5f0-4" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1;endArrow=block;endFill=1;" target="943CJNNX5jIQFLrKNtD5-9" value="leads to">
+          <mxGeometry relative="1" x="0.6" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1520" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="TvU9smkUcsTKKPMDlw4y-27" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="System Task" vertex="1">
+          <mxGeometry height="40" width="160" x="1440" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="qKDUMtkRVLD28JYOykvn-1" edge="1" parent="1" source="hjhJ4XcIKnkD4yHKD6_y-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1" target="943CJNNX5jIQFLrKNtD5-9" value="contributes to">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-61" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;Verification&lt;/div&gt;&lt;div&gt;activity&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="540" y="640" as="geometry" />
+        <mxCell id="hjhJ4XcIKnkD4yHKD6_y-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#d5e8d4;strokeColor=#82b366;" value="Single Hazard" vertex="1">
+          <mxGeometry height="40" width="160" x="880" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-68" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-37" value="mitigates">
+        <mxCell id="9X4uvqqAOB1Wfqv2Z5f0-3" edge="1" parent="1" source="hjhJ4XcIKnkD4yHKD6_y-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;endArrow=block;endFill=1;" target="943CJNNX5jIQFLrKNtD5-9" value="&lt;b&gt;exposed in&lt;/b&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-69" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-67" value="realized by">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="hjhJ4XcIKnkD4yHKD6_y-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="System Actor" vertex="1">
+          <mxGeometry height="40" width="160" x="1160" y="160" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-73" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-55" value="realized by">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="SY_tRLt246E3v6wzDDad-2" edge="1" parent="1" source="hjhJ4XcIKnkD4yHKD6_y-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=8;fontStyle=1" target="qape28Ufknq84NzUUioS-1" value="triggers">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="910" y="440" as="sourcePoint" />
+            <mxPoint x="790" y="440" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-67" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FEFCE8;strokeColor=#3A3A3A;strokeWidth=1;fontColor=#3A3A3A;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Risk-reducing measure" vertex="1">
-          <mxGeometry height="60" width="120" x="540" y="359.99999999999994" as="geometry" />
+        <mxCell id="SdttDlVkakxr6SV91b_K-20" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=diamond;startFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;fontStyle=1;fontSize=8;" target="hjhJ4XcIKnkD4yHKD6_y-1" value="exhibits">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="340" as="sourcePoint" />
+            <mxPoint x="630" y="340" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-84" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;" target="6oigFcFnZJ_pR6voIVSi-82" value="contains">
+        <mxCell id="943CJNNX5jIQFLrKNtD5-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#d5e8d4;strokeColor=#82b366;" value="Accident Scenario" vertex="1">
+          <mxGeometry height="40" width="160" x="1160" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="qKDUMtkRVLD28JYOykvn-7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="hjhJ4XcIKnkD4yHKD6_y-1" value="mitigates">
           <mxGeometry relative="1" as="geometry">
             <mxPoint as="offset" />
+            <mxPoint x="960" y="380" as="sourcePoint" />
+            <mxPoint x="959.71" y="340" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-80" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="Subsystem" vertex="1">
-          <mxGeometry height="60" width="120" x="300" y="80" as="geometry" />
+        <mxCell id="qKDUMtkRVLD28JYOykvn-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=middle;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="System Phase" vertex="1">
+          <mxGeometry height="40" width="160" x="880" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-83" edge="1" parent="1" source="6oigFcFnZJ_pR6voIVSi-82" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=1;fontColor=#3A3A3A;strokeColor=#3A3A3A;labelBackgroundColor=#FAFAFA;fontSize=10;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" target="6oigFcFnZJ_pR6voIVSi-37" value="presents">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="qKDUMtkRVLD28JYOykvn-10" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="qKDUMtkRVLD28JYOykvn-9" value="has">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="980" y="450" as="sourcePoint" />
+            <mxPoint x="980" y="370" as="targetPoint" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="6oigFcFnZJ_pR6voIVSi-82" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E2E8F0;strokeColor=#3A3A3A;fontColor=#3A3A3A;strokeWidth=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;" value="&lt;div&gt;System&lt;/div&gt;&lt;div&gt;element&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="540" y="80" as="geometry" />
+        <mxCell id="qKDUMtkRVLD28JYOykvn-11" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=8;fontStyle=1" target="qKDUMtkRVLD28JYOykvn-9" value="during">
+          <mxGeometry relative="1" x="0.7931" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1520" y="60" />
+            </Array>
+            <mxPoint x="940" y="310" as="sourcePoint" />
+            <mxPoint x="1000" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qKDUMtkRVLD28JYOykvn-12" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=8;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1" target="hjhJ4XcIKnkD4yHKD6_y-2" value="has">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1070" y="160" as="sourcePoint" />
+            <mxPoint x="1190" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qKDUMtkRVLD28JYOykvn-13" edge="1" parent="1" source="hjhJ4XcIKnkD4yHKD6_y-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=8;endArrow=block;endFill=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1" target="TvU9smkUcsTKKPMDlw4y-27" value="performs">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="960" y="220" as="sourcePoint" />
+            <mxPoint x="960" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SrE7QA_y1k1KTSxHFVGq-1" edge="1" parent="1" source="TvU9smkUcsTKKPMDlw4y-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontSize=8;fontStyle=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" value="subject to">
+          <mxGeometry relative="1" x="-0.7966" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="750" y="200" as="sourcePoint" />
+            <mxPoint x="400" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-20" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="860" y="480" as="sourcePoint" />
+            <mxPoint x="860" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-21" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1340" y="380" as="sourcePoint" />
+            <mxPoint x="860" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-22" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1340" y="480" as="sourcePoint" />
+            <mxPoint x="860" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-23" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1340" y="480" as="sourcePoint" />
+            <mxPoint x="1340" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-24" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1;" target="943CJNNX5jIQFLrKNtD5-9" value="mitigates">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1239.62" y="380" as="sourcePoint" />
+            <mxPoint x="1240" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-25" edge="1" parent="1" source="SeV3fcPwjP8KBrEute-g-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=8;endArrow=block;endFill=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;fontStyle=1" value="derives from">
+          <mxGeometry relative="1" x="-0.5385" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="700" y="570" as="sourcePoint" />
+            <mxPoint x="960" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-26" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="780" y="260" as="sourcePoint" />
+            <mxPoint x="570" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-27" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1360" y="360" as="sourcePoint" />
+            <mxPoint x="780" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-29" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1360" y="500" as="sourcePoint" />
+            <mxPoint x="780" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-30" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="780" y="360" as="sourcePoint" />
+            <mxPoint x="780" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-31" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="780" y="700" as="sourcePoint" />
+            <mxPoint x="780" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-32" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="570" y="700" as="sourcePoint" />
+            <mxPoint x="570" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-33" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="780" y="700" as="sourcePoint" />
+            <mxPoint x="570" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-34" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1360" y="500" as="sourcePoint" />
+            <mxPoint x="1360" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-36" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=8;endArrow=block;endFill=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;fontStyle=1" target="TvU9smkUcsTKKPMDlw4y-8" value="allocated to">
+          <mxGeometry relative="1" x="-0.8571" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="680" y="180" />
+            </Array>
+            <mxPoint x="680" y="260" as="sourcePoint" />
+            <mxPoint x="679.69" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-37" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="500" y="260" as="sourcePoint" />
+            <mxPoint x="300" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-38" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="500" y="460" as="sourcePoint" />
+            <mxPoint x="300" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-39" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="500" y="460" as="sourcePoint" />
+            <mxPoint x="500" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-40" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="300" y="460" as="sourcePoint" />
+            <mxPoint x="300" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-45" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=10;verticalAlign=top;fontStyle=1" value="Metamodel Legend" vertex="1">
+          <mxGeometry height="160" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-46" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=top;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="50" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-47" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=top;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="50" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-48" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=top;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="50" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-49" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;verticalAlign=top;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="10" width="10" x="50" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-50" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https%3A%2F%2Ffonts.googleapis.com%2Fcss%3Ffamily%3DIBM%2BPlex%2BSans;fontSize=10;" value="Legislative Pillar" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-51" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=10;" value="Requirements Pillar" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-52" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=10;" value="Hazard Analysis Pillar" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-53" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=10;" value="Structure Pillar" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-54" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=8;fontStyle=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;endArrow=block;endFill=1;startArrow=diamond;startFill=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="65" y="179.93" as="sourcePoint" />
+            <mxPoint x="45" y="179.93" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-57" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=8;fontStyle=1;labelPosition=center;verticalLabelPosition=top;align=center;verticalAlign=bottom;endArrow=block;endFill=1;startArrow=none;startFill=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="45" y="155.85999999999999" />
+              <mxPoint x="45" y="155.85999999999999" />
+            </Array>
+            <mxPoint x="65" y="155.85999999999999" as="sourcePoint" />
+            <mxPoint x="45" y="155.85999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-58" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=10;" value="Directed Association" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="qkm095DuFagqvQK6s5gQ-59" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=IBM Plex Sans;fontSource=https://fonts.googleapis.com/css?family=IBM+Plex+Sans;fontSize=10;" value="Composition Association" vertex="1">
+          <mxGeometry height="10" width="160" x="70" y="175" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

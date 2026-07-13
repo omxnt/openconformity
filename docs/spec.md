@@ -1,115 +1,78 @@
 # Requirements Specification
 
-## Assumptions
-
-- TBD
-
-## Constraints
-
-- TBD
-
-## Functional
-
-- TBD
-
-## Non-Functional
+## Non-Functional Requirements
 
 ### Technical Stack
 
-#### NFR-TS-01: Implementation language
+#### NFR-TS-01 Programming language
 
-The tool shall be implemented using HTML, CSS, and JavaScript only.
+The tool shall be implemented with
 
-> *Limits the technology surface to native browser languages, and supports long-term project maintainability without framework dependencies or build toolchains.*
+
+
+
+# OLD
+
+#### NFR-TS-01: Browser-based tool
+
+The tool shall run in a web browser.
+
+> *Users access the tool by visiting a URL, with no installation or setup required.*
 
 ---
 
-#### NFR-TS-02: Module system
+#### NFR-TS-02: No user accounts
+
+The tool shall not require user accounts.
+
+> *Users access the tool instantly without friction, keeping the experience simple. The tool itself collects no personal data.*
+
+---
+
+#### NFR-TS-03: No external communication
+
+The tool shall not communicate with any external service.
+
+> *All resources are served from the tool's own origin. No external fonts, analytics, CDNs, or third-party services. User data cannot leak; the tool has no runtime dependency on external services.*
+
+---
+
+#### NFR-TS-04: Static file deployment
+
+The tool shall consist of static files served as-is, with no server-side processing.
+
+> *Files are deployed unchanged from source. No backend, no server-side rendering, no edge functions, no build-time transformation. All logic runs in the user's browser. Any static file host can serve the tool; anyone can self-host by copying the folder and serving it with any static file server.*
+
+---
+
+#### NFR-TS-05: Vanilla web technology
+
+The tool shall be built using HTML, CSS, and JavaScript only.
+
+> *Native browser languages, understood directly by every modern browser. No transpilation, no compilation, no intermediate languages.*
+
+---
+
+#### NFR-TS-06: No third-party dependencies
+
+The tool shall not depend on any third-party JavaScript or CSS code.
+
+> *No external codebases are incorporated — no libraries, frameworks, or copied-in code from other projects. Minimizes attack surface, avoids dependency rot, and supports long-term stability.*
+
+---
+
+#### NFR-TS-07: Module system
 
 The tool shall organize JavaScript code using ES modules.
 
-> *ES modules are the native standard for code organization in modern browsers, supporting modular development without requiring a bundler.*
+> *Native standard for JavaScript modules in modern browsers, providing clear imports and exports without requiring a bundler.*
 
 ---
 
-#### NFR-TS-03: No build step
+#### NFR-TS-08: No toolchain
 
-The tool shall not require any build step, compiler, bundler, or transpiler.
+The tool shall not require any build step, package manager, or development toolchain to run.
 
-> *Source files are deployed and served as-is, removing the toolchain layer between code and execution.*
-
----
-
-#### NFR-TS-04: No package manager
-
-The tool shall not depend on any package manager.
-
-> *Avoids external package registries and dependency management toolchains, reducing supply-chain risk and simplifying setup.*
-
----
-
-#### NFR-TS-05: No third-party libraries
-
-The tool shall not depend on any third-party JavaScript or CSS libraries.
-
-> *Avoids dependency on external ecosystems and maintains long-term project simplicity.*
-
----
-
-#### NFR-TS-06: Client-side execution
-
-The tool shall execute entirely client-side in a web browser.
-
-> *Removes infrastructure dependencies and supports operation without network access.*
-
----
-
-#### NFR-TS-07: No backend
-
-The tool shall not require a server-side backend for its core functionality.
-
-> *Eliminates hosting infrastructure, ongoing costs, and operational complexity.*
-
----
-
-#### NFR-TS-08: No external data transmission
-
-The tool shall not transmit user data to any external service.
-
-> *Ensures privacy by design; user project data remains under the user's control.*
-
----
-
-#### NFR-TS-09: No user accounts
-
-The tool shall not require user accounts or authentication.
-
-> *Reduces friction for users and avoids identity management complexity.*
-
----
-
-### Compatibility
-
-#### NFR-CO-01: Browser compatibility
-
-The tool shall function in current versions of Chrome, Firefox, Safari, and Edge.
-
-> *Targets the major modern browsers covering the vast majority of users without requiring legacy support.*
-
----
-
-#### NFR-CO-02: Minimum screen width
-
-The tool shall be usable on desktop screens at 1024px width or wider.
-
-> *Establishes a baseline screen size aligned with the desktop-focused workflow.*
-
----
-
-#### NFR-CO-03: Operating system
-
-The tool shall function on any operating system that supports the targeted browsers.
-
-> *Inherits cross-platform support from the browser layer, avoiding OS-specific dependencies.*
+> *Source files in the repository are what runs in the browser. No compilation, bundling, or dependency installation required. Contributors may use personal development tools (linters, formatters, editors) but nothing in the repository shall require them.*
 
 ---
