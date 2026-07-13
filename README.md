@@ -1,56 +1,36 @@
-# OpenConformity
+# openconformity
 
-**Open-source Conformity Assessment**
+The openconformity project, short for open-source conformity assessment, is an initiative to develop a free, open-source tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230. The tool is browser-based and runs entirely client-side, with no installation or account required.
 
-OpenConformity is a personal hobby project, built as a way to learn software development. The project is built and maintained by a single person on personal time. There is no company, no funding, and no commercial agenda behind this project. The project will be updated when time allows.
+*Personal hobby project maintained by [omxnt](https://github.com/omxnt), with no company and no commercial interests behind it. Updated when time allows.*
 
 ## Status
 
-The tool is currently in early development, and not yet usable. First version is in progress.
+In design phase, not yet usable. The design work is documented in [docs/](docs/), including the design document, the metamodel, and the requirements specification.
 
 ## What it is
 
-OpenConformity is a free, open-source, browser-based tool assisting the work of CE marking under European product legislation.
+The tool offers an approach to CE marking using concepts borrowed from the domain of Systems Engineering (SE). The CE marking work itself is modeled using entities with semantic relationships between them, where each entity carries its own attributes. The semantic relationships represent the meaningful connection between the different types of entities, defining how they interact and relate to each other.
 
-The tool offers an approach to CE marking inspired by Model-Based Systems Engineering (MBSE), meaning a structured environment for modeling the conceptual relationships between different types of entities associated with the CE marking process, with full traceability between them.
+Artefacts can be generated as views of the model, exported and intended as input to the engineering documents that the user assembles under their own quality system. The idea behind the tool is to aid the user in producing the meaningful artefacts of the CE marking work, rather than to generate reports.
 
-Supported entities include:
-- Systems and subsystems
-- European legislations
-- Essential requirements
-- Preliminary hazards
-- Consolidated hazards
-- Risk-reducing measures
-- Safety functions
-- Derived requirements
-- Verification activities
+## Technology
 
-The tool runs entirely in the browser, with no installation or account required. Projects are saved as a single JSON file. Each artefact can be exported as CSV, intended as input to the engineering documents that the user assembles under their own quality system.
-
-## Why it exists
-
-Knowledge about CE marking is publicly available in European directives, regulations, and guidelines. Software that applies this knowledge should be freely available to anyone doing the work.
-
-OpenConformity is a free and open-source alternative to existing paid software for CE marking. The project is built on the belief that CE marking is engineering work, and that the tool supporting it should enable that work, not substitute for it.
-
-## Tech stack
-
-Vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. The tool runs directly in the browser, with no installation or dependencies.
+Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. Projects are saved as a single local JSON file. Artefacts can be exported as CSV files.
 
 ## Disclaimer
 
-OpenConformity is provided as-is, without warranty of any kind. Use of the tool is at the user's own discretion. The tool may be inaccurate or contain errors, and all outputs should be verified by the user.
-
-The manufacturer of the product is responsible for the conformity assessment, and that their product complies with all applicable European directives and regulations.
+Provided as-is, without warranty of any kind. Outputs may contain errors and should be verified by the user. The manufacturer is responsible for the conformity assessment and for the compliance of their product.
 
 ## License
 
-Released under the MIT License, see [LICENSE](LICENSE).
-
-## Contributions
-
-Personal project. Pull requests are not accepted. Forks are welcome.
+[EUPL-1.2](LICENSE). © 2026 omxnt
 
 ## Contact
 
-Contact details will be added when project email is configured.
+[info@openconformity.org](mailto:info@openconformity.org)
+
+## Links
+
+* [openconformity.org](https://openconformity.org)
+* [LinkedIn](https://www.linkedin.com/company/openconformity)
