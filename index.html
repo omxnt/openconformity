@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>openconformity</title>
+    <meta name="description" content="Open-source conformity assessment. A free, browser-based tool for the work of CE marking under European product legislation.">
+    
+    <link rel="icon" type="image/svg+xml" href="assets/openconformity-favicon-v1.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/openconformity-favicon-v1-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/openconformity-favicon-v1-16.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="topbar">
+        <div class="topbar-inner">
+            <img src="assets/openconformity-wordmark-v1.svg" alt="OpenConformity" class="wordmark-small">
+            <div class="nav-links">
+                <a href="#about">about</a>
+                <a href="#concept">concept</a>
+                <a href="#status">status</a>
+                <a href="#github">github</a>
+                <a href="#contact">contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="about">
+            <h2>About</h2>
+            <p>
+                Knowledge about CE marking is publicly available in European directives,
+                regulations, and guidelines. OpenConformity is an initiative to develop
+                a free, open-source tool that applies this knowledge to support the work
+                of CE marking under European product legislation. The idea is to provide
+                a browser-based tool that runs entirely client-side, with no installation
+                or account required.
+            </p>
+        </section>
+
+        <section id="concept">
+            <h2>Concept</h2>
+            <p>
+                The idea behind the tool is to offer an approach to CE marking using
+                concepts borrowed from the domain of Systems Engineering (SE). The CE
+                marking work itself will be modeled using entities with semantic relationships
+                between them, where each entity carries its own attributes. The semantic
+                relationships will represent the meaningful connection between the different
+                types of entities, defining how they interact and relate to each other. The tool
+                will support entities such as legislations, standards, hazards, risk-reducing
+                measures, safety functions, system requirements, and verification activities.
+            </p>
+            <figure>
+                <img src="assets/openconformity-metamodel-v1.svg" alt="OpenConformity conceptual meta-model" class="meta-model">
+                <figcaption>Figure 1. Conceptual meta-model for openconformity.</figcaption>
+            </figure>
+            <p>
+                The artefacts generated in the tool, such as applicable essential
+                requirements, identified hazards, and requirements, will be exportable,
+                intended as input to the engineering documents that the user assembles
+                under their own quality system. The idea behind the tool is to aid the
+                user in producing the meaningful artefacts of the CE marking work,
+                rather than to generate reports.
+            </p>
+            <p>
+                The user interface will be based on a tree-based navigator pane, an
+                editor pane, and a relationship pane. The tool will be built using
+                vanilla HTML, CSS, and JavaScript ES modules, with no framework, no
+                build step, and no package manager. Projects will be saved as a single
+                JSON file. Each artefact can be exported as CSV.
+            </p>
+            <figure>
+                <img src="assets/openconformity-poc-v1.png" alt="OpenConformity proof of concept" class="preview-image">
+                <figcaption>Figure 2. Screenshot of the proof of concept for openconformity.</figcaption>
+            </figure>
+        </section>
+
+        <section id="status">
+            <h2>Status</h2>
+            <p>In development.</p>
+        </section>
+
+        <section id="github">
+            <h2>GitHub</h2>
+            <p>Source code will be made public when ready.</p>
+        </section>
+
+        <section id="contact">
+            <h2>Contact</h2>
+            <p><a href="mailto:info@openconformity.org">info@openconformity.org</a></p>
+        </section>
+
+        <hr>
+
+        <footer>
+            <p>&copy; 2026 openconformity</p>
+        </footer>
+    </main>
+</body>
+</html>
