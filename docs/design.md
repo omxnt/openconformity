@@ -7,7 +7,7 @@ This document describes the design of openconformity: the background and reasoni
 
 - [1. Background](#1-background)
   - [1.1 Current Market](#11-current-market)
-  - [1.2 Model-based Systems Engineering](#12-model-based-systems-engineering)
+  - [1.2 Model-based Approach](#12-model-based-systems-engineering)
   - [1.3 Problem Statement](#13-problem-statement)
 - [2. Vision](#2-vision)
   - [2.1 Open Source](#21-open-source)
@@ -42,7 +42,7 @@ The knowledge these tools are built on, such as directives, regulations, and gui
 
 To the author's knowledge, no open-source alternative currently exists. One may reason that an open-source tool would be preferable, since the legislative knowledge is public, and the harmonized standards have already been paid for by the manufacturer. As CE marking is an obligation placed on the product manufacturer, a free, open-source tool supporting this work would benefit the industry as a whole.
 
-### 1.2 Model-based Systems Engineering
+### 1.2 Model-based Approach
 
 Within the domain of Systems Engineering (SE), Model-based Systems Engineering (MBSE) is the practice of using a shared model, rather than a collection of separately maintained documents, as the primary artefact of the engineering work. The model consists of elements with attributes, connected by typed, semantic relationships. Documents are then generated as views of the model rather than authored and maintained by hand, so that the model serves as the single source of truth for the system's definition.
 
@@ -50,9 +50,9 @@ Compared to a document-centric approach, where the same information is repeated 
 
 ### 1.3 Problem Statement
 
-When studying the framework behind CE marking, it becomes apparent that this work has the same character as the problems MBSE tries to solve. Legislation defines essential requirements, which are triggered by the hazards the product exhibits. The essential requirements are usually met by applying harmonized standards, where the hazards are fed into the risk analysis. Multiple hazards can contribute to different accident scenarios, mitigated by a set of protective measures. A mature organization usually translates this into system requirements, which are later verified by verification activities.
+When studying the framework behind CE marking, it becomes apparent that this work has the same character as the problems MBSE tries to solve. Legislation defines essential requirements, which are triggered by the hazards the product exhibits. The essential requirements are usually met by applying harmonized standards, where the hazards are fed into the risk analysis. Multiple hazards can contribute to different accident scenarios, mitigated by a set of risk-reduction measures. A mature organization usually translates this into system requirements, which are later verified by verification activities.
 
-Traditional document-centric CE marking implies that the same information is stated multiple times, from different points of view. The relationships within the CE marking work are inherently many-to-many, where a single protective measure may reduce the risk of several hazards, a single hazard may appear in several accident scenarios, and a harmonized standard may relate both to essential requirements and to the protective measures that implement its clauses. In a document-centric approach, each of these connections is repeated wherever it is relevant, for example, the same protective measure is written into the row of every hazard it mitigates. This means that each repetition must be maintained by hand.
+Traditional document-centric CE marking implies that the same information is stated multiple times, from different points of view. The relationships within the CE marking work are inherently many-to-many, where a single risk-reduction measure may reduce the risk of several hazards, a single hazard may appear in several accident scenarios, and a harmonized standard may relate both to essential requirements and to the risk-reduction measures that implement its clauses. In a document-centric approach, each of these connections is repeated wherever it is relevant, for example, the same risk-reduction measure is written into the row of every hazard it mitigates. This means that each repetition must be maintained by hand.
 
 In a model-based approach, every entity is stated once, and the connections are expressed as semantic relationships. Views can then be exported for any purpose, such as a hazard list, a requirement specification, or a verification plan. All of these artefacts are generated from the same model, always consistent with each other, with the traceability between legislation, standards, hazards, measures, requirements, and verifications preserved automatically.
 
@@ -118,13 +118,12 @@ The tool does not support national legislation or national deviations, such as w
 
 Following the vision principles of Meaningful Output (2.5) and Avoid Conclusions (2.6), the tool deliberately does **not**:
 
-* generate the technical file, or any content presented as part of it
-* generate or template the EU Declaration of Conformity
-* state, score, or indicate conformity, compliance, or approval in any form
+* generate the technical file or the EU Declaration of Conformity
+* indicate conformity, compliance, or approval in any form
 * present any output as complete, correct, or legally sufficient
 * include or reproduce copyrighted content from harmonized standards
 
-Any content generated or proposed by the tool is treated as a proposal, pending the user's review. The non-goals are a permanent design principle, not missing features since they follow from the position that responsibility for the CE marking rests with the manufacturer and cannot be delegated to a tool.
+Any content generated or proposed by the tool is treated as a draft, pending the user's review. The non-goals are permanent design principles, not missing features, since they follow from the position that responsibility for the CE marking rests with the manufacturer and cannot be delegated to a tool.
 
 ## 4. Concept
 
