@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "description": "Built-in legislation library for OpenConformity. Texts are paraphrased summaries intended as starting points for the user's own analysis — not verbatim Official Journal text and not regulatory advice. Verify against the current authoritative sources.",
+    "lastUpdated": "2026-05-03"
+  },
+  "legislations": [
+    {
+      "libraryRef": "machinery-2023-1230",
+      "name": "Machinery Regulation",
+      "reference": "(EU) 2023/1230",
+      "description": "Regulation on machinery products, repealing Directive 2006/42/EC. Applies from 14 January 2027.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "machinery-2023-1230:1.1.2",
+          "code": "1.1.2",
+          "title": "Principles of safety integration",
+          "text": "Machinery shall be designed and constructed so as to be fit for its function and to be operated, adjusted and maintained without putting persons at risk when these operations are carried out under the conditions foreseen, taking also into account any reasonably foreseeable misuse."
+        },
+        {
+          "libraryRef": "machinery-2023-1230:1.3.2",
+          "code": "1.3.2",
+          "title": "Risk of break-up during operation",
+          "text": "The various parts of machinery and their linkages shall be able to withstand the stresses to which they are subject during use. The durability of the materials used shall be adequate for the nature of the working environment foreseen by the manufacturer."
+        },
+        {
+          "libraryRef": "machinery-2023-1230:1.3.7",
+          "code": "1.3.7",
+          "title": "Risks related to moving parts",
+          "text": "The moving parts of machinery shall be designed and constructed in such a way as to prevent risks of contact which could lead to accidents or, where risks persist, be fitted with guards or protective devices."
+        },
+        {
+          "libraryRef": "machinery-2023-1230:1.5.6",
+          "code": "1.5.6",
+          "title": "Fire",
+          "text": "Machinery shall be designed and constructed to avoid all risk of fire or overheating posed by the machinery itself or by gases, liquids, dusts, vapours or other substances produced or used by the machinery."
+        },
+        {
+          "libraryRef": "machinery-2023-1230:1.6.1",
+          "code": "1.6.1",
+          "title": "Machinery maintenance",
+          "text": "Adjustment and maintenance points shall be located outside danger zones. It shall be possible to carry out adjustment, maintenance, repair, cleaning and servicing operations while the machinery is at a standstill."
+        }
+      ]
+    },
+    {
+      "libraryRef": "lvd-2014-35",
+      "name": "Low Voltage Directive",
+      "reference": "2014/35/EU",
+      "description": "Electrical equipment designed for use within certain voltage limits (50–1000 V AC, 75–1500 V DC).",
+      "essentialRequirements": [
+        {
+          "libraryRef": "lvd-2014-35:annex-i.1.a",
+          "code": "Annex I (1)(a)",
+          "title": "General conditions and marking",
+          "text": "Essential characteristics, the recognition and observance of which will ensure that electrical equipment will be used safely and in applications for which it was made, shall be marked on the electrical equipment, or, if this is not possible, on an accompanying document."
+        },
+        {
+          "libraryRef": "lvd-2014-35:annex-i.2.b",
+          "code": "Annex I (2)(b)",
+          "title": "Protection against hazards arising from the electrical equipment",
+          "text": "Persons and domestic animals are adequately protected against danger of physical injury or other harm which might be caused by direct or indirect contact, and against hazards of a non-electrical nature caused by the electrical equipment which are revealed by experience."
+        },
+        {
+          "libraryRef": "lvd-2014-35:annex-i.3.b",
+          "code": "Annex I (3)(b)",
+          "title": "Protection against hazards from external influences",
+          "text": "The electrical equipment is resistant to non-mechanical influences in expected environmental conditions, in such a way that persons and domestic animals and property are not endangered."
+        }
+      ]
+    },
+    {
+      "libraryRef": "emc-2014-30",
+      "name": "Electromagnetic Compatibility Directive",
+      "reference": "2014/30/EU",
+      "description": "Electromagnetic compatibility of equipment.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "emc-2014-30:annex-i.1.a",
+          "code": "Annex I (1)(a)",
+          "title": "Limit on electromagnetic disturbance generated",
+          "text": "Equipment shall be so designed and manufactured, having regard to the state of the art, as to ensure that the electromagnetic disturbance generated does not exceed the level above which radio and telecommunications equipment or other equipment cannot operate as intended."
+        },
+        {
+          "libraryRef": "emc-2014-30:annex-i.1.b",
+          "code": "Annex I (1)(b)",
+          "title": "Level of intrinsic immunity",
+          "text": "Equipment shall have a level of immunity to the electromagnetic disturbance to be expected in its intended use which allows it to operate without unacceptable degradation of its intended use."
+        }
+      ]
+    },
+    {
+      "libraryRef": "red-2014-53",
+      "name": "Radio Equipment Directive",
+      "reference": "2014/53/EU",
+      "description": "Radio equipment placed on the EU market.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "red-2014-53:3.1.a",
+          "code": "Article 3(1)(a)",
+          "title": "Health and safety",
+          "text": "Radio equipment shall be constructed so as to ensure the protection of health and safety of persons and of domestic animals and the protection of property, including the objectives with respect to safety requirements set out in Directive 2014/35/EU, but with no voltage limit applying."
+        },
+        {
+          "libraryRef": "red-2014-53:3.1.b",
+          "code": "Article 3(1)(b)",
+          "title": "Adequate level of electromagnetic compatibility",
+          "text": "Radio equipment shall be constructed so as to ensure an adequate level of electromagnetic compatibility as set out in Directive 2014/30/EU."
+        },
+        {
+          "libraryRef": "red-2014-53:3.2",
+          "code": "Article 3(2)",
+          "title": "Effective use of the radio spectrum",
+          "text": "Radio equipment shall be so constructed that it both effectively uses and supports the efficient use of radio spectrum in order to avoid harmful interference."
+        }
+      ]
+    },
+    {
+      "libraryRef": "ped-2014-68",
+      "name": "Pressure Equipment Directive",
+      "reference": "2014/68/EU",
+      "description": "Pressure equipment and assemblies with maximum allowable pressure greater than 0.5 bar.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "ped-2014-68:annex-i.2.1",
+          "code": "Annex I (2.1)",
+          "title": "Design for adequate strength",
+          "text": "Pressure equipment shall be designed for loadings appropriate to its intended use and other reasonably foreseeable operating conditions. The following loadings shall be taken into account in particular: internal/external pressure, ambient and operational temperatures, static pressure and mass of contents, traffic, wind, earthquake loading, reaction forces and moments."
+        },
+        {
+          "libraryRef": "ped-2014-68:annex-i.2.2.4",
+          "code": "Annex I (2.2.4)",
+          "title": "Drainage and venting",
+          "text": "Adequate means shall be provided for the drainage and venting of pressure equipment where necessary, to avoid harmful effects such as water hammer, vacuum collapse, corrosion and uncontrolled chemical reactions, and to permit cleaning, inspection and maintenance to be carried out safely."
+        },
+        {
+          "libraryRef": "ped-2014-68:annex-i.3.4",
+          "code": "Annex I (3.4)",
+          "title": "Means of examination",
+          "text": "Pressure equipment shall be designed and constructed so that all necessary examinations to ensure safety can be carried out."
+        }
+      ]
+    },
+    {
+      "libraryRef": "atex-2014-34",
+      "name": "ATEX Directive",
+      "reference": "2014/34/EU",
+      "description": "Equipment and protective systems intended for use in potentially explosive atmospheres.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "atex-2014-34:annex-ii.1.0.1",
+          "code": "Annex II (1.0.1)",
+          "title": "General requirements for equipment and protective systems",
+          "text": "Equipment and protective systems intended for use in potentially explosive atmospheres must be designed from the point of view of integrated explosion safety. Manufacturers shall take measures to prevent the formation of explosive atmospheres, prevent ignition, and halt or limit the range of flame and pressure of any explosion."
+        },
+        {
+          "libraryRef": "atex-2014-34:annex-ii.1.0.2",
+          "code": "Annex II (1.0.2)",
+          "title": "Selection of materials",
+          "text": "Materials used for the construction of equipment and protective systems must not trigger off an explosion, taking into account foreseeable operational stresses."
+        },
+        {
+          "libraryRef": "atex-2014-34:annex-ii.1.0.6",
+          "code": "Annex II (1.0.6)",
+          "title": "Marking",
+          "text": "All equipment and protective systems must be marked legibly and indelibly with the minimum particulars listed: name and address of the manufacturer, CE marking, designation of series or type, serial number if any, year of construction, specific marking of explosion protection, equipment group and category."
+        }
+      ]
+    },
+    {
+      "libraryRef": "toy-2009-48",
+      "name": "Toy Safety Directive",
+      "reference": "2009/48/EC",
+      "description": "Safety of toys placed on the EU market.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "toy-2009-48:annex-ii.i.4",
+          "code": "Annex II Part I (4)",
+          "title": "Mechanical and physical properties",
+          "text": "Toys and their parts and, in the case of fixed toys, their anchorages, must have the required mechanical strength and, where applicable, stability to withstand stresses to which they are subjected during use, without breaking or becoming liable to distortion at the risk of causing physical injury."
+        },
+        {
+          "libraryRef": "toy-2009-48:annex-ii.ii",
+          "code": "Annex II Part II",
+          "title": "Flammability",
+          "text": "Toys must not constitute a dangerous flammable element in the child's environment. They must therefore be composed of materials which do not burn if directly exposed to a flame, spark or other potential source of fire, or are flame retardant, or are slow to burn."
+        },
+        {
+          "libraryRef": "toy-2009-48:annex-ii.iii",
+          "code": "Annex II Part III",
+          "title": "Chemical properties",
+          "text": "Toys must be designed and manufactured in such a way that there are no risks of adverse effects on human health due to exposure to the chemical substances or mixtures of which the toys are composed or which they contain, when the toys are used as specified in Article 10(2), first subparagraph."
+        }
+      ]
+    },
+    {
+      "libraryRef": "mdr-2017-745",
+      "name": "Medical Devices Regulation",
+      "reference": "(EU) 2017/745",
+      "description": "Regulation on medical devices, replacing Directives 90/385/EEC and 93/42/EEC.",
+      "essentialRequirements": [
+        {
+          "libraryRef": "mdr-2017-745:annex-i.1",
+          "code": "Annex I (1)",
+          "title": "General safety and performance",
+          "text": "Devices shall achieve the performance intended by their manufacturer and shall be designed and manufactured in such a way that, during normal conditions of use, they are suitable for their intended purpose. They shall be safe and effective and shall not compromise the clinical condition or the safety of patients, or the safety and health of users or, where applicable, other persons, provided that any risks which may be associated with their use constitute acceptable risks when weighed against the benefits to the patient."
+        },
+        {
+          "libraryRef": "mdr-2017-745:annex-i.8",
+          "code": "Annex I (8)",
+          "title": "Infection and microbial contamination",
+          "text": "Devices and their manufacturing processes shall be designed in such a way as to eliminate or to reduce as far as possible the risk of infection to patients, users and, where applicable, other persons."
+        },
+        {
+          "libraryRef": "mdr-2017-745:annex-i.14",
+          "code": "Annex I (14)",
+          "title": "Construction of devices and interaction with their environment",
+          "text": "If the device is intended for use in combination with other devices or equipment, the whole combination, including the connection system, shall be safe and shall not impair the specified performance of the devices."
+        }
+      ]
+    }
+  ]
+}

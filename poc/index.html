@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenConformity</title>
+    <meta name="description" content="Open-source conformity assessment for CE marking under European product legislation." />
+    <meta name="color-scheme" content="light" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="menu-bar" role="banner">
+      <div class="brand" aria-label="OpenConformity">
+        <span class="brand-mark" aria-hidden="true">◇</span>
+        <span class="brand-name">OpenConformity</span>
+      </div>
+      <nav class="menus" aria-label="Application menus">
+        <button class="menu-button" type="button" data-menu="file" disabled>File</button>
+        <button class="menu-button" type="button" data-menu="edit" disabled>Edit</button>
+        <button class="menu-button" type="button" data-menu="export" disabled>Export</button>
+        <button class="menu-button" type="button" data-menu="help" disabled>Help</button>
+      </nav>
+      <button class="header-link-button" type="button" id="btn-meta-model" title="Show the OpenConformity meta model">Meta model</button>
+      <div class="header-spacer" aria-hidden="true"></div>
+      <div class="project-name" id="project-name" aria-live="polite">Untitled project</div>
+    </header>
+
+    <main class="layout" id="layout">
+      <aside class="pane pane-tree" id="pane-tree" aria-label="Project tree">
+        <div class="pane-header">
+          <span class="pane-title">Project</span>
+          <div class="pane-actions" id="tree-actions"></div>
+        </div>
+        <div class="pane-body" id="tree-body">
+          <p class="empty-state">Tree pane — artifacts will appear here.</p>
+        </div>
+      </aside>
+
+      <div
+        class="pane-resizer pane-resizer-vertical"
+        id="resizer-tree"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize tree pane"
+        tabindex="0"
+        data-target="pane-tree"
+      ></div>
+
+      <section class="pane pane-editor" id="pane-editor" aria-label="Editor">
+        <div class="pane-header">
+          <span class="pane-title" id="editor-title">Editor</span>
+          <div class="pane-actions" id="editor-actions"></div>
+        </div>
+        <div class="pane-body" id="editor-body">
+          <p class="empty-state">No artifact selected.</p>
+        </div>
+      </section>
+    </main>
+
+    <div
+      class="pane-resizer pane-resizer-horizontal"
+      id="resizer-trace"
+      role="separator"
+      aria-orientation="horizontal"
+      aria-label="Resize trace pane"
+      tabindex="0"
+      data-target="pane-trace"
+    ></div>
+
+    <footer class="pane pane-trace" id="pane-trace" aria-label="Traceability">
+      <div class="pane-header">
+        <span class="pane-title">Traceability</span>
+        <div class="pane-actions" id="trace-actions"></div>
+      </div>
+      <div class="pane-body" id="trace-body">
+        <p class="empty-state">Select an artifact to see its links.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
