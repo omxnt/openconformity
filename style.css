@@ -1,3 +1,21 @@
+/* Vendored fonts, see assets/fonts/ORIGIN.md */
+
+@font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('assets/fonts/IBMPlexSans-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('assets/fonts/IBMPlexSans-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -77,7 +95,7 @@ section:last-of-type {
 h2 {
     font-family: 'IBM Plex Sans', sans-serif;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -160,7 +178,7 @@ footer {
 footer p {
     font-size: 0.8rem;
     color: #888888;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'IBM Plex Sans', sans-serif;
     letter-spacing: 0.05em;
 }
 

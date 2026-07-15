@@ -4,27 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>openconformity</title>
-    <meta name="description" content="Open-source conformity assessment. A free, browser-based tool for the work of CE marking under European product legislation.">
-    
-    <link rel="icon" type="image/svg+xml" href="assets/openconformity-favicon-v1.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/openconformity-favicon-v1-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/openconformity-favicon-v1-16.png">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
+    <meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
+
+    <link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/brand/favicon-16.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="topbar">
         <div class="topbar-inner">
-            <img src="assets/openconformity-wordmark-v1.svg" alt="OpenConformity" class="wordmark-small">
+            <img src="assets/brand/logo.svg" alt="openconformity" class="wordmark-small">
             <div class="nav-links">
                 <a href="#about">about</a>
                 <a href="#concept">concept</a>
+                <a href="#demo">demo</a>
                 <a href="#status">status</a>
                 <a href="#github">github</a>
+                <a href="#linkedin">linkedin</a>
                 <a href="#contact">contact</a>
             </div>
         </div>
@@ -34,12 +32,12 @@
         <section id="about">
             <h2>About</h2>
             <p>
-                Knowledge about CE marking is publicly available in European directives,
-                regulations, and guidelines. OpenConformity is an initiative to develop
-                a free, open-source tool that applies this knowledge to support the work
-                of CE marking under European product legislation. The idea is to provide
-                a browser-based tool that runs entirely client-side, with no installation
-                or account required.
+                The openconformity project is an initiative to develop a free,
+                open-source, browser-based tool for CE marking of machinery according
+                to the Machinery Regulation (EU) 2023/1230. With no commercial
+                interests behind the project, the idea is to provide a browser-based
+                tool that runs entirely client-side, with no installation or account
+                required.
             </p>
         </section>
 
@@ -48,36 +46,43 @@
             <p>
                 The idea behind the tool is to offer an approach to CE marking using
                 concepts borrowed from the domain of Systems Engineering (SE). The CE
-                marking work itself will be modeled using entities with semantic relationships
-                between them, where each entity carries its own attributes. The semantic
-                relationships will represent the meaningful connection between the different
-                types of entities, defining how they interact and relate to each other. The tool
-                will support entities such as legislations, standards, hazards, risk-reducing
-                measures, safety functions, system requirements, and verification activities.
+                marking work is built as a model, using entities with semantic
+                relationships between them, where each entity carries its own
+                attributes. The semantic relationships represent the meaningful
+                connections between the different types of entities, defining how they
+                interact and relate to each other. The available entity types and
+                relationships are defined by a metamodel, built into the tool.
             </p>
             <figure>
-                <img src="assets/openconformity-metamodel-v1.svg" alt="OpenConformity conceptual meta-model" class="meta-model">
-                <figcaption>Figure 1. Conceptual meta-model for openconformity.</figcaption>
+                <img src="assets/meta.svg" alt="Metamodel for openconformity" class="meta-model">
+                <figcaption>Figure 1. Metamodel for openconformity.</figcaption>
             </figure>
             <p>
-                The artefacts generated in the tool, such as applicable essential
-                requirements, identified hazards, and requirements, will be exportable,
-                intended as input to the engineering documents that the user assembles
-                under their own quality system. The idea behind the tool is to aid the
-                user in producing the meaningful artefacts of the CE marking work,
-                rather than to generate reports.
+                The model is built from entities such as European legislations,
+                essential requirements, single hazards, and system requirements.
+                Artefacts are generated as views of this model, such as a hazard list
+                or a requirement specification, and exported as input to the
+                engineering documents that the user assembles under their own quality
+                system. The idea behind the tool is to aid the user in producing the
+                meaningful artefacts of the CE marking work, rather than to generate
+                reports.
             </p>
             <p>
-                The user interface will be based on a tree-based navigator pane, an
-                editor pane, and a relationship pane. The tool will be built using
-                vanilla HTML, CSS, and JavaScript ES modules, with no framework, no
-                build step, and no package manager. Projects will be saved as a single
-                JSON file. Each artefact can be exported as CSV.
+                The user interface is based on a tree-based navigator pane, an
+                editor pane, and a relationship pane. The tool is built using
+                vanilla HTML, CSS, and JavaScript ES modules, with no framework,
+                no build step, and no package manager. Projects are saved as a
+                single local JSON file. Each artefact can be exported as CSV.
             </p>
-            <figure>
-                <img src="assets/openconformity-poc-v1.png" alt="OpenConformity proof of concept" class="preview-image">
-                <figcaption>Figure 2. Screenshot of the proof of concept for openconformity.</figcaption>
-            </figure>
+        </section>
+
+        <section id="demo">
+            <h2>Demo</h2>
+            <p>
+                A concept demo of the user interface is available. It is a mockup
+                showing the layout and the concept of the tool, and is not functional.
+            </p>
+            <p><a href="app/">Open the demo</a></p>
         </section>
 
         <section id="status">
@@ -87,7 +92,12 @@
 
         <section id="github">
             <h2>GitHub</h2>
-            <p>Source code will be made public when ready.</p>
+            <p><a href="https://github.com/omxnt/openconformity">github.com/omxnt/openconformity</a></p>
+        </section>
+
+        <section id="linkedin">
+            <h2>LinkedIn</h2>
+            <p><a href="https://www.linkedin.com/company/openconformity">linkedin.com/company/openconformity</a></p>
         </section>
 
         <section id="contact">
