@@ -97,8 +97,7 @@
 | Item | Location |
 |---|---|
 | Rendering | `docs/brand.html` |
-| Logo | `docs/logo/` |
-| Favicon | `docs/logo/` |
+| Iconography | `docs/logo/` |
 | Fonts | `assets/fonts/` |
 
 **Note 1:** Logo assets are SVG with the lettering as paths. No font is required to render them.
