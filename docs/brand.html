@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>openconformity — Brand</title>
+<link rel="icon" href="logo/openconformity-favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("../assets/fonts/IBMPlexSans-Medium.woff2") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+:root {
+  --blue: #0F6480;
+  --bg: #FAFAFA;
+  --ink: #23272B;
+  --muted: #5C6166;
+  --hairline: #E3E3E1;
+  --wordmark: #0F6480;
+}
+body.night {
+  --blue: #3D93AD;
+  --bg: #121417;
+  --ink: #E8EAEC;
+  --muted: #9BA1A6;
+  --hairline: #262B30;
+  --wordmark: #FFFFFF;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+  padding: 64px 32px 96px;
+}
+
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.wrap { max-width: 880px; margin: 0 auto; }
+
+.head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--ink);
+}
+.title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+.sub { color: var(--muted); font-size: 13px; }
+
+section { margin-top: 52px; }
+
+h2 {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 8px; border-bottom: 1px solid var(--hairline); margin-bottom: 20px;
+}
+h3 {
+  font-size: 13px; font-weight: 500;
+  margin: 28px 0 10px;
+}
+h3:first-of-type { margin-top: 0; }
+
+.note { color: var(--muted); font-size: 13px; margin-top: 14px; max-width: 66ch; }
+
+table { border-collapse: collapse; width: 100%; }
+th {
+  text-align: left;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 14px 7px 0; border-bottom: 1px solid var(--hairline);
+}
+td { padding: 8px 14px 8px 0; border-bottom: 1px solid var(--hairline); vertical-align: middle; }
+td.k { font-weight: 500; white-space: nowrap; }
+td.v { color: var(--muted); }
+
+.val { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+.sw { width: 22px; height: 22px; border-radius: 2px; border: 1px solid var(--hairline); flex: none; }
+
+.btn {
+  font-family: inherit; font-size: 13px;
+  padding: 5px 14px; border-radius: 2px; cursor: pointer;
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: var(--bg);
+}
+.btn-secondary { background: none; border-color: var(--hairline); color: var(--ink); }
+.btn-secondary:hover { border-color: var(--blue); }
+.btn:focus-visible, .btn-secondary:focus-visible, a:focus-visible {
+  outline: 2px solid var(--blue); outline-offset: 2px;
+}
+.focus-demo { outline: 2px solid var(--blue); outline-offset: 2px; }
+a { color: var(--blue); }
+
+.row { display: flex; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+.cell { display: flex; flex-direction: column; gap: 8px; }
+.clabel { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+.marks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: 2px; }
+.mark { display: flex; align-items: center; justify-content: center; height: 96px; padding: 0 16px; }
+.m-light { background: #FAFAFA; }
+.m-dark { background: #121417; }
+.m-invert { background: #0F6480; }
+.wm { font-size: 23px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; }
+.wm-blue { color: #0F6480; }
+.wm-white { color: #FFFFFF; }
+.caps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 8px; }
+.cap { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); text-align: center; }
+
+.favs { display: flex; align-items: flex-end; gap: 18px; margin-top: 26px; }
+.fav { background: #0F6480; color: #FFFFFF; font-weight: 500; letter-spacing: -0.04em; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
+.f64 { width: 64px; height: 64px; font-size: 32px; }
+.f32 { width: 32px; height: 32px; font-size: 16px; }
+.f16 { width: 16px; height: 16px; font-size: 8px; border-radius: 1px; }
+
+.pm { width: 9px; height: 9px; border-radius: 1px; display: inline-block; vertical-align: middle; margin-right: 9px; flex: none; }
+
+.situ { border: 1px solid var(--hairline); border-radius: 2px; }
+.situ-bar { display: flex; align-items: center; gap: 20px; padding: 8px 12px; border-bottom: 1px solid var(--hairline); }
+.situ-wm { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--wordmark); }
+.situ-menu { display: flex; gap: 14px; font-size: 13px; color: var(--ink); }
+.situ-head { display: flex; padding: 7px 12px; border-bottom: 1px solid var(--hairline); }
+.situ-title { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.situ-body { display: grid; grid-template-columns: 210px 1fr; }
+.situ-nav { padding: 10px 12px; border-right: 1px solid var(--hairline); }
+.situ-main { padding: 10px 12px; }
+.nrow { display: flex; align-items: center; padding: 3px 0; }
+.nrow-sel { background: var(--blue); color: #FFFFFF; padding: 3px 8px; border-radius: 2px; margin: 2px -8px; }
+.nrow-sel .nid { color: #FFFFFF; opacity: 0.75; }
+.nid { font-size: 11px; color: var(--muted); margin-right: 10px; }
+.arow { display: flex; padding: 6px 0; border-top: 1px solid var(--hairline); font-size: 13px; }
+.arow:first-child { border-top: none; }
+.alab { width: 110px; color: var(--muted); flex: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <div class="title">Brand</div>
+      <div class="sub">openconformity</div>
+    </div>
+    <button type="button" class="btn btn-secondary" id="toggle">Night</button>
+  </div>
+
+  <section>
+    <h2>1 &middot; Typography</h2>
+    <table>
+      <tr><th>Role</th><th>Typeface</th><th>Weights</th><th>Sample</th></tr>
+      <tr>
+        <td class="k">UI &amp; body</td><td class="v">IBM Plex Sans</td><td class="mono v">400, 500</td>
+        <td>Crushing at infeed rollers</td>
+      </tr>
+      <tr>
+        <td class="k">Data &amp; IDs</td><td class="v">IBM Plex Mono</td><td class="mono v">400, 500</td>
+        <td class="mono">HZ-003 &middot; EN ISO 13854:2019</td>
+      </tr>
+    </table>
+    <p class="note">No second display face, no italic headings.</p>
+  </section>
+
+  <section>
+    <h2>2 &middot; Color Profile</h2>
+
+    <h3>2.1 Light Mode Colors</h3>
+    <table>
+      <tr><th>Name</th><th>Value</th><th>Use</th></tr>
+      <tr>
+        <td class="k">Blue</td>
+        <td><span class="val"><span class="sw" style="background:#0F6480"></span><span class="mono v">#0F6480</span></span></td>
+        <td class="v">Wordmark, inverted fill, favicon. Links, focus ring, selection, one primary action per view</td>
+      </tr>
+      <tr>
+        <td class="k">Paper</td>
+        <td><span class="val"><span class="sw" style="background:#FAFAFA"></span><span class="mono v">#FAFAFA</span></span></td>
+        <td class="v">Page and pane background — the only background</td>
+      </tr>
+      <tr>
+        <td class="k">Ink</td>
+        <td><span class="val"><span class="sw" style="background:#23272B"></span><span class="mono v">#23272B</span></span></td>
+        <td class="v">All text and headings</td>
+      </tr>
+      <tr>
+        <td class="k">Muted</td>
+        <td><span class="val"><span class="sw" style="background:#5C6166"></span><span class="mono v">#5C6166</span></span></td>
+        <td class="v">Secondary text, labels, captions</td>
+      </tr>
+      <tr>
+        <td class="k">Hairline</td>
+        <td><span class="val"><span class="sw" style="background:#E3E3E1"></span><span class="mono v">#E3E3E1</span></span></td>
+        <td class="v">1 px rules and borders — the only divider</td>
+      </tr>
+    </table>
+
+    <h3>2.2 Dark Mode Colors</h3>
+    <table>
+      <tr><th>Name</th><th>Value</th><th>Use</th></tr>
+      <tr>
+        <td class="k">Blue</td>
+        <td><span class="val"><span class="sw" style="background:#3D93AD"></span><span class="mono v">#3D93AD</span></span></td>
+        <td class="v">Links, focus ring, selection, one primary action per view</td>
+      </tr>
+      <tr>
+        <td class="k">Night</td>
+        <td><span class="val"><span class="sw" style="background:#121417"></span><span class="mono v">#121417</span></span></td>
+        <td class="v">Page and pane background — the only background</td>
+      </tr>
+      <tr>
+        <td class="k">Snow</td>
+        <td><span class="val"><span class="sw" style="background:#E8EAEC"></span><span class="mono v">#E8EAEC</span></span></td>
+        <td class="v">All text and headings</td>
+      </tr>
+      <tr>
+        <td class="k">Muted</td>
+        <td><span class="val"><span class="sw" style="background:#9BA1A6"></span><span class="mono v">#9BA1A6</span></span></td>
+        <td class="v">Secondary text, labels, captions</td>
+      </tr>
+      <tr>
+        <td class="k">Hairline</td>
+        <td><span class="val"><span class="sw" style="background:#262B30"></span><span class="mono v">#262B30</span></span></td>
+        <td class="v">1 px rules and borders — the only divider</td>
+      </tr>
+    </table>
+    <p class="note">Blue reaches 6.4:1 on Paper and 6.7:1 under white. The light value fails on Night at 2.8:1 and never appears there: the wordmark goes white, and the dark value carries interaction at 5.3:1. The favicon keeps the light value in both modes.</p>
+
+    <h3>2.3 Functional Colors</h3>
+    <table>
+      <tr><th>Pillar</th><th>Value</th><th>On Paper</th><th>On Night</th></tr>
+      <tr>
+        <td class="k"><span class="pm" style="background:#7B6BC8"></span>Legislative</td>
+        <td><span class="val"><span class="sw" style="background:#7B6BC8"></span><span class="mono v">#7B6BC8</span></span></td>
+        <td class="mono v">4.2:1</td><td class="mono v">4.2:1</td>
+      </tr>
+      <tr>
+        <td class="k"><span class="pm" style="background:#BA598D"></span>Requirements</td>
+        <td><span class="val"><span class="sw" style="background:#BA598D"></span><span class="mono v">#BA598D</span></span></td>
+        <td class="mono v">4.1:1</td><td class="mono v">4.3:1</td>
+      </tr>
+      <tr>
+        <td class="k"><span class="pm" style="background:#BE5B50"></span>Hazard Analysis</td>
+        <td><span class="val"><span class="sw" style="background:#BE5B50"></span><span class="mono v">#BE5B50</span></span></td>
+        <td class="mono v">4.2:1</td><td class="mono v">4.2:1</td>
+      </tr>
+      <tr>
+        <td class="k"><span class="pm" style="background:#3C8054"></span>Structure</td>
+        <td><span class="val"><span class="sw" style="background:#3C8054"></span><span class="mono v">#3C8054</span></span></td>
+        <td class="mono v">4.6:1</td><td class="mono v">3.9:1</td>
+      </tr>
+    </table>
+    <p class="note">Entity identification only. A small marker beside the entity name — never a text fill, never a status, never in the logo or on marketing surfaces. The four are separated for normal, deuteranopic, and protanopic vision. Worst pair: &Delta;E 25. Color is never the sole carrier of meaning — the pillar is always named beside the marker. No color in the palette means pass or fail.</p>
+  </section>
+
+  <section>
+    <h2>3 &middot; Iconography</h2>
+
+    <h3>3.1 Logo</h3>
+    <div class="marks">
+      <div class="mark m-light"><span class="wm wm-blue">openconformity</span></div>
+      <div class="mark m-dark"><span class="wm wm-white">openconformity</span></div>
+      <div class="mark m-invert"><span class="wm wm-white">openconformity</span></div>
+    </div>
+    <div class="caps">
+      <div class="cap">Blue on light</div>
+      <div class="cap">White on dark</div>
+      <div class="cap">White on Blue</div>
+    </div>
+    <p class="note">IBM Plex Sans Medium, lowercase, &minus;1% letter spacing. Single color, single weight — never split or restyled. Clear space is the height of the "o", baked into every SVG viewBox.</p>
+
+    <h3>3.2 Favicon</h3>
+    <div class="favs" style="margin-top:0">
+      <div class="fav f64">oc</div>
+      <div class="fav f32">oc</div>
+      <div class="fav f16">oc</div>
+    </div>
+    <p class="note">IBM Plex Sans Medium, lowercase. White on Blue, 2 px radius at 32 px. Shown at 64, 32, and 16 px. The same asset in both modes.</p>
+  </section>
+
+  <section>
+    <h2>4 &middot; Usage</h2>
+
+    <h3>4.1 Interaction</h3>
+    <div class="row">
+      <div class="cell">
+        <span class="clabel">Primary</span>
+        <button type="button" class="btn">Save project</button>
+      </div>
+      <div class="cell">
+        <span class="clabel">Secondary</span>
+        <button type="button" class="btn btn-secondary">Cancel</button>
+      </div>
+      <div class="cell">
+        <span class="clabel">Focus</span>
+        <button type="button" class="btn btn-secondary focus-demo">Cancel</button>
+      </div>
+      <div class="cell">
+        <span class="clabel">Link</span>
+        <span style="font-size:13px; padding-top:5px">See <a href="#">the metamodel</a></span>
+      </div>
+      <div class="cell">
+        <span class="clabel">Selection</span>
+        <span class="nrow nrow-sel" style="margin:0"><span class="nid mono">HZ-003</span><span style="font-weight:500">Crushing at infeed</span></span>
+      </div>
+    </div>
+    <p class="note">One primary action per view. Focus ring 2 px Blue, offset 2 px. Radius 2 px. No hover ramps, no gradients, no shadows.</p>
+
+    <h3>4.2 In situ</h3>
+    <div class="situ">
+      <div class="situ-bar">
+        <span class="situ-wm">openconformity</span>
+        <span class="situ-menu"><span>File</span><span>Edit</span><span>Export</span><span>Help</span></span>
+      </div>
+      <div class="situ-head">
+        <span class="situ-title" style="width:198px">Navigator</span>
+        <span class="situ-title">Editor</span>
+      </div>
+      <div class="situ-body">
+        <div class="situ-nav">
+          <div class="nrow"><span class="pm" style="background:#3C8054"></span><span style="font-weight:500">Structure</span></div>
+          <div class="nrow"><span class="pm" style="background:#7B6BC8"></span><span style="font-weight:500">Legislative</span></div>
+          <div class="nrow"><span class="pm" style="background:#BA598D"></span><span style="font-weight:500">Requirements</span></div>
+          <div class="nrow"><span class="pm" style="background:#BE5B50"></span><span style="font-weight:500">Hazard Analysis</span></div>
+          <div class="nrow nrow-sel" style="margin-left:10px"><span class="nid mono">HZ-003</span><span style="font-weight:500">Crushing at infeed</span></div>
+          <div class="nrow" style="margin-left:10px"><span class="nid mono">HZ-004</span><span>Entanglement</span></div>
+        </div>
+        <div class="situ-main">
+          <div class="arow"><span class="alab">Type</span><span><span class="pm" style="background:#BE5B50"></span>Single Hazard</span></div>
+          <div class="arow"><span class="alab">Identifier</span><span class="mono">HZ-003</span></div>
+          <div class="arow"><span class="alab">Name</span><span>Crushing at infeed rollers</span></div>
+          <div class="arow"><span class="alab">Hazard type</span><span>Mechanical, crushing</span></div>
+          <div class="arow"><span class="alab">Mitigated by</span><span class="mono">RRM-001</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Flat panes on one background, separated by hairlines. No cards, no shadows, no radius above 2 px. Identifiers in Plex Mono, language in Plex Sans.</p>
+  </section>
+
+  <section>
+    <h2>5 &middot; References</h2>
+    <table>
+      <tr><th>Item</th><th>Location</th></tr>
+      <tr><td class="k">Specification</td><td class="mono v">docs/brand.md</td></tr>
+      <tr><td class="k">Logo and favicon assets</td><td class="mono v">docs/logo/</td></tr>
+      <tr><td class="k">Fonts</td><td class="mono v">assets/fonts/</td></tr>
+    </table>
+    <p class="note">Logo assets are SVG with the lettering as paths. No font is required to render them.</p>
+  </section>
+
+</div>
+
+<script>
+  var btn = document.getElementById("toggle");
+  btn.addEventListener("click", function () {
+    var night = document.body.classList.toggle("night");
+    btn.textContent = night ? "Day" : "Night";
+  });
+</script>
+</body>
+</html>
