@@ -268,6 +268,22 @@ Amber and red collapse to the same color under deuteranopia — worst-pair ΔE 1
 
 Open: whether the palette should instead be drawn from the Okabe–Ito color-universal palette, which scores ΔE 32. Not adopted — the current palette is the project's own and its semantic assignment is better — but the trade was never formally decided.
 
+### D-030 Graphical profile: Reasonable Colors
+
+`2026-07-17` `brand`
+
+Recorded in brand.md. Every chromatic color comes from Reasonable Colors under one rule: shade 4 in light mode, shade 3 in dark mode, on the canvas of its mode. Grays are a separate ramp that mirrors across modes. The rule guarantees WCAG AA on either canvas for any hue, so the palette is derived rather than chosen.
+
+Cerulean is the accent and means interactive. The four pillars are violet, magenta, orange, and green. The wordmark is Ink, never Cerulean.
+
+Supersedes D-028 and D-029 entirely. The profile they describe, its palette, and the reasoning behind its hexes are void. Amends D-026: Hazard Analysis is orange, not red; the principle stands, and orange is not a verdict either.
+
+The palette is external, versioned, and MIT-licensed, which removes taste from the argument. Any future hue follows the same rule, so there is nothing to relitigate.
+
+Verification is by Brettel 1997 dichromacy with distances in CAM02-UCS, and it is honest about the cost: no palette of four hues separates under every deficiency. Deuteranopia merges Hazard Analysis with Structure, protanopia merges Legislative with Requirements, and tritanopia renders Legislative and Structure as the same teal at ΔE 1.6. Not corrected, and not a defect. R6 carries all three: the entity name always accompanies the marker.
+
+ΔE figures in brand.md are CAM02-UCS. D-029's ΔE 25 was CIE76. The two scales are not comparable, and comparing them produced a wrong conclusion during this session.
+
 ---
 
 ## Open
@@ -281,4 +297,3 @@ Identified, not yet decided.
 | Import granularity: whole standard, or clause by clause? | Library implementation |
 | Essential requirements that apply regardless of hazards: how do they enter the model? | Workflow, design.md |
 | Whether a base library of standard identities can be shipped | D-014 |
-| Whether the pillar palette should be Okabe–Ito | D-029 |
