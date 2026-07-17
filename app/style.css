@@ -73,8 +73,13 @@ body.resizing-h { cursor: row-resize; user-select: none; }
 }
 
 .logo {
-  height: 20px;
-  display: block;
+    display: block;
+    width: 129px;
+    height: 32px;
+    flex: none;
+    background: #222222;
+    -webkit-mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
+    mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
 }
 
 .menu {
