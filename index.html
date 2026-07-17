@@ -7,23 +7,22 @@
     <meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
 
     <link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/brand/favicon-16.png">
+    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
 
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="topbar">
         <div class="topbar-inner">
-            <img src="assets/brand/logo.svg" alt="openconformity" class="wordmark-small">
-            <div class="nav-links">
-                <a href="#about">about</a>
-                <a href="#concept">concept</a>
-                <a href="#demo">demo</a>
-                <a href="#status">status</a>
-                <a href="#github">github</a>
-                <a href="#linkedin">linkedin</a>
-                <a href="#contact">contact</a>
+            <a href="/" class="wordmark" aria-label="openconformity"></a>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="#about">about</a>
+                    <a href="#concept">concept</a>
+                    <a href="#demo">demo</a>
+                    <a href="#status">status</a>
+                </div>
+                <button type="button" class="mode" id="mode">dark</button>
             </div>
         </div>
     </nav>
@@ -45,7 +44,7 @@
             <h2>Concept</h2>
             <p>
                 The idea behind the tool is to offer an approach to CE marking using
-                concepts borrowed from the domain of Systems Engineering (SE). The CE
+                concepts borrowed from the domain of Systems Engineering. The CE
                 marking work is built as a model, using entities with semantic
                 relationships between them, where each entity carries its own
                 attributes. The semantic relationships represent the meaningful
@@ -54,7 +53,9 @@
                 relationships are defined by a metamodel, built into the tool.
             </p>
             <figure>
-                <img src="assets/meta.svg" alt="Metamodel for openconformity" class="meta-model">
+                <a href="assets/meta.svg" target="_blank" rel="noopener">
+                    <img src="assets/meta.svg" alt="Metamodel for openconformity" class="meta-model">
+                </a>
                 <figcaption>Figure 1. Metamodel for openconformity.</figcaption>
             </figure>
             <p>
@@ -79,37 +80,47 @@
         <section id="demo">
             <h2>Demo</h2>
             <p>
-                A concept demo of the user interface is available. It is a mockup
-                showing the layout and the concept of the tool, and is not functional.
+                A non-functional demo of the user interface is available. It shows the
+                layout and the concept of the tool with fixed example content. Nothing
+                can be created, edited, or saved.
             </p>
-            <p><a href="app/">Open the demo</a></p>
+            <p><a href="app/" class="action">Open the demo</a></p>
         </section>
 
         <section id="status">
             <h2>Status</h2>
             <p>In development.</p>
         </section>
-
-        <section id="github">
-            <h2>GitHub</h2>
-            <p><a href="https://github.com/omxnt/openconformity">github.com/omxnt/openconformity</a></p>
-        </section>
-
-        <section id="linkedin">
-            <h2>LinkedIn</h2>
-            <p><a href="https://www.linkedin.com/company/openconformity">linkedin.com/company/openconformity</a></p>
-        </section>
-
-        <section id="contact">
-            <h2>Contact</h2>
-            <p><a href="mailto:info@openconformity.org">info@openconformity.org</a></p>
-        </section>
-
-        <hr>
-
-        <footer>
-            <p>&copy; 2026 openconformity</p>
-        </footer>
     </main>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-links">
+                <a href="https://github.com/omxnt/openconformity">github</a>
+                <a href="https://www.linkedin.com/company/openconformity">linkedin</a>
+                <a href="mailto:info@openconformity.org">info@openconformity.org</a>
+            </div>
+            <small>&copy; 2026 openconformity</small>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var btn = document.getElementById("mode");
+            var root = document.documentElement;
+
+            function set(dark) {
+                root.classList.toggle("dark", dark);
+                root.classList.toggle("light", !dark);
+                btn.textContent = dark ? "light" : "dark";
+            }
+
+            set(window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+            btn.addEventListener("click", function () {
+                set(!root.classList.contains("dark"));
+            });
+        })();
+    </script>
 </body>
 </html>
