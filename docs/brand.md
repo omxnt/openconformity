@@ -195,7 +195,7 @@ Dark mode:
 | Item | Location |
 |---|---|
 | Rendering | `docs/brand.html` |
-| Iconography | `docs/logo/` |
+| Iconography | `assets/brand/` |
 
 **Note 1:** Logo assets are SVG with the lettering as paths. No font is required to render them.
 
