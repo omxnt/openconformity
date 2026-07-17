@@ -2,102 +2,186 @@
 
 ## Table of Contents
 
-- [1. Typography](#1-typography)
-- [2. Color Profile](#2-color-profile)
-  - [2.1 Light Mode Colors](#21-light-mode-colors)
-  - [2.2 Dark Mode Colors](#22-dark-mode-colors)
-  - [2.3 Functional Colors](#23-functional-colors)
-- [3. Iconography](#3-iconography)
-  - [3.1 Logo](#31-logo)
-  - [3.2 Favicon](#32-favicon)
-- [4. Usage](#4-usage)
-- [5. References](#5-references)
+- [1. Wordmark](#1-wordmark)
+  - [1.1 Specification](#11-specification)
+  - [1.2 Variants](#12-variants)
+  - [1.3 Selection](#13-selection)
+  - [1.4 Favicon](#14-favicon)
+- [2. Typography](#2-typography)
+- [3. Color](#3-color)
+  - [3.1 General](#31-general)
+  - [3.2 Light Mode](#32-light-mode)
+  - [3.3 Dark Mode](#33-dark-mode)
+  - [3.4 Verification](#34-verification)
+- [4. Application](#4-application)
+- [5. Rules](#5-rules)
+- [6. References](#6-references)
+  - [6.1 Project Files](#61-project-files)
+  - [6.2 External Material](#62-external-material)
 
-## 1. Typography
+## 1. Wordmark
+
+### 1.1 Specification
+
+| Property | Value |
+|---|---|
+| Lettering | "openconformity" |
+| Case | Lowercase |
+| Typeface | IBM Plex Sans, Medium (500) |
+| Letter spacing | −1% |
+| Color | Single color, single weight |
+| On canvas | Ink |
+| On the banner | White `#FFFFFF` |
+| Clear space | Height of the "o", baked into every SVG viewBox |
+
+### 1.2 Variants
+
+| Variant | Wordmark | Surface | Light | Dark |
+|---|---|---|---|---|
+| Default | Ink | Canvas | 15.9:1 | 16.1:1 |
+| Inverted banner | White | Cerulean `#00749D` | 5.3:1 | 5.3:1 |
+
+**Note 1:** Two renderings, no others. The white wordmark on a dark canvas is the default in dark mode, not the inverted banner.
+
+### 1.3 Selection
+
+| Situation | Example | Use |
+|---|---|---|
+| Surface you control | App, docs, README | Default |
+| Surface you do not control | LinkedIn banner and avatar, GitHub social preview, og-image, title slides | Inverted banner |
+| Icon | Browser tab, app icon | Favicon (1.4) |
+| Monochrome | Print, engraving | Default |
+| Not listed above | | Inverted banner |
+
+### 1.4 Favicon
+
+| Property | Value |
+|---|---|
+| Lettering | "oc" |
+| Case | Lowercase |
+| Typeface | IBM Plex Sans, Medium (500) |
+| Color | White on Cerulean `#00749D`, 5.3:1 |
+| Radius | 2 px at 32 px |
+| Modes | One asset, both modes. Never theme-switched |
+
+## 2. Typography
 
 | Role | Typeface | Weights |
 |---|---|---|
-| UI & body | IBM Plex Sans | 400, 500 |
-| Data & IDs | IBM Plex Mono | 400, 500 |
+| UI and body | IBM Plex Sans | 400, 500 |
+| IDs, clauses, data | IBM Plex Mono | 400 |
 
-## 2. Color Profile
+## 3. Color
 
-### 2.1 Light Mode Colors
+### 3.1 General
 
-| Name | Value | Use |
+Every chromatic color is Reasonable Colors under one rule: **shade 4 in light mode, shade 3 in dark mode**, on the canvas of its mode. Any hue under this rule yields at least 4.5:1 on its canvas. Sections 3.2 and 3.3 are the complete set.
+
+**Note 1:** Grays do not follow the rule. They mirror across modes. The rule guarantees AA, which is the floor for a marker and wrong for body text: gray-4 gives 5:1 where Ink gives 15.9:1.
+
+**Note 2:** Canvas values are not from the palette. Light is pure white, against which the palette's guarantees are anchored. Dark is `#1A1A1A` because gray-6 as a canvas leaves cerulean-3 at 4.48:1, under AA.
+
+**Note 3:** Cerulean is never a marker, and a marker is never interactive. On Cerulean fills, text is the canvas color of the current mode.
+
+**Note 4:** Markers identify entity kinds only. Beside the entity name, never a text fill, never a status, never in the wordmark or on marketing surfaces.
+
+### 3.2 Light Mode
+
+| Role | Use | Source | Value | Ratio |
+|---|---|---|---|---|
+| Canvas | The only background | n/a | `#FFFFFF` | n/a |
+| Ink | All text, and the wordmark | gray-6 | `#222222` | 15.9:1 |
+| Muted | Secondary text, labels | gray-4 | `#6F6F6F` | 5.0:1 |
+| Hairline | The only divider, 1 px | gray-2 | `#E2E2E2` | n/a |
+| Cerulean | Links, focus ring, selection, one primary action per view | cerulean-4 | `#00749D` | 5.3:1 |
+| Legislative | Marker | violet-4 | `#794AFF` | 5.0:1 |
+| Requirements | Marker | magenta-4 | `#CA00B6` | 5.0:1 |
+| Hazard Analysis | Marker | orange-4 | `#CD3C00` | 5.0:1 |
+| Structure | Marker | green-4 | `#008217` | 5.0:1 |
+
+### 3.3 Dark Mode
+
+| Role | Use | Source | Value | Ratio |
+|---|---|---|---|---|
+| Canvas | The only background | n/a | `#1A1A1A` | n/a |
+| Ink | All text, and the wordmark | gray-1 | `#F6F6F6` | 16.1:1 |
+| Muted | Secondary text, labels | gray-3 | `#8B8B8B` | 5.1:1 |
+| Hairline | The only divider, 1 px | gray-5 | `#3E3E3E` | n/a |
+| Cerulean | Links, focus ring, selection, one primary action per view | cerulean-3 | `#0092C5` | 4.9:1 |
+| Legislative | Marker | violet-3 | `#9B70FF` | 5.1:1 |
+| Requirements | Marker | magenta-3 | `#F911E0` | 5.1:1 |
+| Hazard Analysis | Marker | orange-3 | `#FD4D00` | 5.2:1 |
+| Structure | Marker | green-3 | `#00A21F` | 5.1:1 |
+
+### 3.4 Verification
+
+Minimum pairwise ΔE between the four markers:
+
+| Vision | Light | Dark |
 |---|---|---|
-| Blue | `#0F6480` | Wordmark, inverted fill, favicon. Links, focus ring, selection, one primary action per view |
-| Paper | `#FAFAFA` | Page and pane background — the only background |
-| Ink | `#23272B` | All text and headings |
-| Muted | `#5C6166` | Secondary text, labels, captions |
-| Hairline | `#E3E3E1` | 1 px rules and borders — the only divider |
+| Typical | 34.4 | 31.4 |
+| Deuteranopia | 9.9 | 10.9 |
+| Protanopia | 10.7 | 8.4 |
+| Tritanopia | 12.4 | 13.4 |
 
-### 2.2 Dark Mode Colors
+**Note 1:** ΔE is CAM02-UCS, where 1 is approximately a just-noticeable difference. Not comparable to CIE76.
 
-| Name | Value | Use |
-|---|---|---|
-| Blue | `#3D93AD` | Links, focus ring, selection, one primary action per view |
-| Night | `#121417` | Page and pane background — the only background |
-| Snow | `#E8EAEC` | All text and headings |
-| Muted | `#9BA1A6` | Secondary text, labels, captions |
-| Hairline | `#262B30` | 1 px rules and borders — the only divider |
+**Note 2:** The weakest pair is Hazard Analysis against Structure, on the red-green axis. R6 carries it.
 
-**Note 1:** Blue reaches 6.4:1 on Paper and 6.7:1 under white. The light value fails on Night at 2.8:1 and never appears there: the wordmark goes white, and the dark value carries interaction at 5.3:1. The favicon keeps the light value in both modes.
+**Note 3:** Cerulean sits 7.4 from its nearest marker in light mode and 8.2 in dark. Recorded, not constrained: Cerulean and the markers never share a visual role.
 
-### 2.3 Functional Colors
+**Note 4:** Method: WCAG 2.1 relative luminance; CVD simulation via colorspacious `sRGB1+CVD` at severity 100; distances in CAM02-UCS. Simulated swatches are rendered in `docs/brand.html`.
 
-| Pillar | Hex | On Paper | On Night |
-|---|---|---|---|
-| Legislative | `#7B6BC8` | 4.2:1 | 4.2:1 |
-| Requirements | `#BA598D` | 4.1:1 | 4.3:1 |
-| Hazard Analysis | `#BE5B50` | 4.2:1 | 4.2:1 |
-| Structure | `#3C8054` | 4.6:1 | 3.9:1 |
+**Note 5:** Contrast ratios are in 3.2 and 3.3.
 
-**Note 1:** Entity identification only. Small marker beside the entity name — never a text fill, never a status, never in the logo or on marketing surfaces.
+## 4. Application
 
-**Note 2:** The four are separated for normal, deuteranopic, and protanopic vision. Worst pair: ΔE 25. Colors are never the sole carrier of meaning — the pillar is always named beside the marker. No color in the palette means pass or fail.
-
-## 3. Iconography
-
-### 3.1 Logo
-
-| Property | Value |
+| Element | Specification |
 |---|---|
-| Typeface | IBM Plex Sans, Medium (500) |
-| Letter spacing | −1% |
-| Lettering | "openconformity" |
-| Case | Lowercase |
-| Color | Single color, single weight — never split or restyled |
-| On light | Blue |
-| On dark | White |
-| Inverted | White on Blue |
-| Clear space | Height of the "o", baked into every SVG viewBox |
+| Canvas | The only background. No second surface color |
+| Pane | Flat on the canvas, separated by a hairline. No fill, border, or shadow |
+| Hairline | 1 px, Hairline color. The only divider |
+| Radius | 2 px maximum. Buttons, markers, and the favicon only |
+| Label | Muted. Plex Mono naming a field, Plex Sans as language |
+| Link | Cerulean. Underlined on hover |
+| Button, primary | Cerulean fill, canvas-color text. One per view |
+| Button, secondary | Hairline border, Ink text, no fill |
+| Focus | 2 px Cerulean ring, 2 px offset |
+| Selection | 2 px Cerulean inset bar, Medium weight |
+| Marker | 8 px square, 2 px radius, functional color, beside the entity name |
+| Identifier | Plex Mono |
+| Status | Text and weight. Never color |
 
-### 3.2 Favicon
+## 5. Rules
 
-| Property | Value |
+| # | Rule |
 |---|---|
-| Typeface | IBM Plex Sans, Medium (500) |
-| Lettering | "oc" |
-| Case | Lowercase |
-| Color | White on Blue, 2 px radius at 32 px |
+| R1 | The wordmark is "openconformity", IBM Plex Sans Medium, −1% tracking. Never split, never with a symbol |
+| R2 | Wordmark color: Ink on canvas, white on the banner. Never any other color. Cerulean goes behind the wordmark, never in it |
+| R3 | Two typefaces, three cuts: Plex Sans 400/500 for language, Plex Mono 400 for identifiers and data |
+| R4 | Every chromatic color is Reasonable Colors: shade 4 light, shade 3 dark. Grays mirror. §3 is the complete set |
+| R5 | Cerulean means interactive. On Cerulean fills, text is the canvas color |
+| R6 | The four functional colors identify entity kinds only. Marker beside the name, and the name always accompanies the marker |
+| R7 | No color means pass or fail. Status is words |
+| R8 | Surfaces are flat panes on one canvas, divided by hairlines. No shadows, gradients, or radius above 2 px |
+| R9 | One favicon, both modes, always |
 
-## 4. Usage
+## 6. References
 
-| Element | Do | Don't |
-|---|---|---|
-| Wordmark | Blue on light, white on dark, white on solid blue | Tinting, splits, gradients, outlines, symbols |
-| Blue | Brand surfaces; links and accents | The light value on Night; fills larger than a button (inverted excepted) |
-| Palette | This file is the complete set | New hues, hover ramps, semantic green/red for status |
-| Surfaces | Flat panes on one background, separated by hairlines | Cards, shadows, radius above 2 px, gradients |
-| Type | IBM Plex Sans + Plex Mono only | Second display face, italic headings |
-
-## 5. References
+### 6.1 Project Files
 
 | Item | Location |
 |---|---|
 | Rendering | `docs/brand.html` |
 | Iconography | `docs/logo/` |
-| Fonts | `assets/fonts/` |
 
 **Note 1:** Logo assets are SVG with the lettering as paths. No font is required to render them.
+
+### 6.2 External Material
+
+| Material | Version | License | Location | Origin record |
+|---|---|---|---|---|
+| IBM Plex | | OFL-1.1 | `assets/fonts/` | `assets/fonts/ORIGIN.md` |
+| Reasonable Colors | 0.4.0 | MIT | This file | This table |
+
+**Note 1:** The palette is not vendored as a file. Its values are transcribed into §3, and this table is their attribution.
