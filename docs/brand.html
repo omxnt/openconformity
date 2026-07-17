@@ -35,9 +35,9 @@
   --structure: #008217;
 
   --sim-typ-1: #794AFF; --sim-typ-2: #CA00B6; --sim-typ-3: #CD3C00; --sim-typ-4: #008217; --sim-typ-5: #00749D;
-  --sim-deu-1: #006BFC; --sim-deu-2: #5D78B2; --sim-deu-3: #8C7C00; --sim-deu-4: #796C24; --sim-deu-5: #4D669C;
-  --sim-pro-1: #0074FF; --sim-pro-2: #005FBA; --sim-pro-3: #695B00; --sim-pro-4: #857500; --sim-pro-5: #5F739F;
-  --sim-tri-1: #437BA0; --sim-tri-2: #D42A6A; --sim-tri-3: #E20034; --sim-tri-4: #007E6E; --sim-tri-5: #007F82;
+  --sim-deu-1: #0078FD; --sim-deu-2: #5B7AB3; --sim-deu-3: #8C7700; --sim-deu-4: #7A6920; --sim-deu-5: #4C6A9D;
+  --sim-pro-1: #005FFE; --sim-pro-2: #004FB6; --sim-pro-3: #695A07; --sim-pro-4: #8C7814; --sim-pro-5: #58709C;
+  --sim-tri-1: #447688; --sim-tri-2: #BF4357; --sim-tri-3: #CF3251; --sim-tri-4: #3A778A; --sim-tri-5: #007690;
 }
 
 body.dark {
@@ -53,9 +53,9 @@ body.dark {
   --structure: #00A21F;
 
   --sim-typ-1: #9B70FF; --sim-typ-2: #F911E0; --sim-typ-3: #FD4D00; --sim-typ-4: #00A21F; --sim-typ-5: #0092C5;
-  --sim-deu-1: #3289FC; --sim-deu-2: #7796DB; --sim-deu-3: #AE9A00; --sim-deu-4: #97872F; --sim-deu-5: #6181C4;
-  --sim-pro-1: #218CFF; --sim-pro-2: #0078E5; --sim-pro-3: #837300; --sim-pro-4: #A59200; --sim-pro-5: #7891C7;
-  --sim-tri-1: #818FAD; --sim-tri-2: #FF3985; --sim-tri-3: #FF0043; --sim-tri-4: #009D8A; --sim-tri-5: #00A0A3;
+  --sim-deu-1: #3091FD; --sim-deu-2: #7499DC; --sim-deu-3: #AF9400; --sim-deu-4: #98842A; --sim-deu-5: #6185C5;
+  --sim-pro-1: #007EFE; --sim-pro-2: #0065E0; --sim-pro-3: #84710C; --sim-pro-4: #AF961B; --sim-pro-5: #708DC4;
+  --sim-tri-1: #7C8D95; --sim-tri-2: #EC566F; --sim-tri-3: #FE4167; --sim-tri-4: #4B94AC; --sim-tri-5: #0095B4;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,10 +84,7 @@ h2 {
   margin: 56px 0 0;
   padding-bottom: 8px; border-bottom: 1px solid var(--ink);
 }
-h3 {
-  font-size: 13px; font-weight: 500; color: var(--muted);
-  margin: 32px 0 12px;
-}
+h3 { font-size: 13px; font-weight: 500; color: var(--muted); margin: 32px 0 12px; }
 
 .note { color: var(--muted); font-size: 13px; margin-top: 12px; max-width: 68ch; }
 .note b { color: var(--ink); font-weight: 500; }
@@ -109,8 +106,7 @@ td.n { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--muted
 .val { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
 .sw { width: 22px; height: 22px; border-radius: 2px; border: 1px solid var(--hairline); flex: none; }
 
-a { color: var(--cerulean); text-decoration: none; }
-a:hover { text-decoration: underline; }
+a { color: var(--cerulean); text-decoration: underline; }
 a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
 
 .btn {
@@ -131,7 +127,6 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
 }
 
-/* Wordmark */
 .marks { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: 2px; }
 .mark { display: flex; align-items: center; justify-content: center; height: 104px; padding: 0 16px; }
 .m-canvas { background: var(--canvas); }
@@ -145,21 +140,18 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
 .favs { display: flex; align-items: flex-end; gap: 18px; margin-top: 8px; }
 .fav {
   background: #00749D; color: #FFFFFF; font-weight: 500; letter-spacing: -0.04em;
-  display: flex; align-items: center; justify-content: center; border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
 }
-.f64 { width: 64px; height: 64px; font-size: 32px; }
-.f32 { width: 32px; height: 32px; font-size: 16px; }
+.f64 { width: 64px; height: 64px; font-size: 32px; border-radius: 4px; }
+.f32 { width: 32px; height: 32px; font-size: 16px; border-radius: 2px; }
 .f16 { width: 16px; height: 16px; font-size: 8px; border-radius: 1px; }
 
-/* Markers */
 .pm { width: 8px; height: 8px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 10px; flex: none; }
 
-/* Simulation */
 .sim { display: grid; grid-template-columns: 108px repeat(5, 1fr); gap: 8px; align-items: center; margin-bottom: 6px; }
 .sim-lab { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .band { height: 16px; border-radius: 2px; }
 
-/* Application specimen */
 .pane-set { border: 1px solid var(--hairline); border-radius: 2px; display: grid; grid-template-columns: 240px 1fr; }
 .pane { padding: 12px 14px; }
 .pane + .pane { border-left: 1px solid var(--hairline); }
@@ -169,10 +161,8 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--hairline);
 }
 .item { display: flex; align-items: center; padding: 4px 0; }
-.item-sel {
-  border-left: 2px solid var(--cerulean);
-  padding-left: 8px; margin-left: -10px; font-weight: 500;
-}
+.item-sel { border-left: 2px solid var(--cerulean); padding-left: 8px; margin-left: -10px; font-weight: 500; }
+.item-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); margin-right: 10px; }
 .field { display: flex; padding: 6px 0; border-top: 1px solid var(--hairline); }
 .field:first-child { border-top: none; }
 .field-label { width: 96px; color: var(--muted); flex: none; }
@@ -210,8 +200,8 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
     <div class="mark m-banner"><span class="wm wm-white">openconformity</span></div>
   </div>
   <div class="caps">
-    <div class="cap">Default &mdash; Ink on canvas</div>
-    <div class="cap">Inverted banner &mdash; white on Cerulean</div>
+    <div class="cap">Default, Ink on canvas</div>
+    <div class="cap">Inverted banner, white on Cerulean</div>
   </div>
   <table style="margin-top:20px">
     <tr><th>Variant</th><th>Wordmark</th><th>Surface</th><th>Light</th><th>Dark</th></tr>
@@ -242,7 +232,7 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
     <tr><td class="k">Case</td><td class="v">Lowercase</td></tr>
     <tr><td class="k">Typeface</td><td class="v">IBM Plex Sans, Medium (500)</td></tr>
     <tr><td class="k">Color</td><td class="v">White on Cerulean <span class="mono">#00749D</span>, 5.3:1</td></tr>
-    <tr><td class="k">Radius</td><td class="v">2 px at 32 px</td></tr>
+    <tr><td class="k">Radius</td><td class="v">2 px at 32 px, scaled with the asset</td></tr>
     <tr><td class="k">Modes</td><td class="v">One asset, both modes. Never theme-switched</td></tr>
   </table>
 
@@ -315,13 +305,13 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   </table>
 
   <h3>3.4 Verification</h3>
-  <p class="lead">Minimum pairwise &Delta;E between the four markers:</p>
+  <p class="lead">Minimum pairwise &Delta;E between the four markers, and the pair that sets it:</p>
   <table>
-    <tr><th>Vision</th><th>Light</th><th>Dark</th></tr>
-    <tr><td class="k">Typical</td><td class="n">34.4</td><td class="n">31.4</td></tr>
-    <tr><td class="k">Deuteranopia</td><td class="n">9.9</td><td class="n">10.9</td></tr>
-    <tr><td class="k">Protanopia</td><td class="n">10.7</td><td class="n">8.4</td></tr>
-    <tr><td class="k">Tritanopia</td><td class="n">12.4</td><td class="n">13.4</td></tr>
+    <tr><th>Vision</th><th>Light</th><th>Pair</th><th>Dark</th><th>Pair</th></tr>
+    <tr><td class="k">Typical</td><td class="n">34.4</td><td class="v">Legislative / Requirements</td><td class="n">31.4</td><td class="v">Legislative / Requirements</td></tr>
+    <tr><td class="k">Deuteranopia</td><td class="n">8.0</td><td class="v">Hazard Analysis / Structure</td><td class="n">8.7</td><td class="v">Hazard Analysis / Structure</td></tr>
+    <tr><td class="k">Protanopia</td><td class="n">11.7</td><td class="v">Legislative / Requirements</td><td class="n">9.2</td><td class="v">Legislative / Requirements</td></tr>
+    <tr><td class="k">Tritanopia</td><td class="n">1.6</td><td class="v">Legislative / Structure</td><td class="n">5.3</td><td class="v">Requirements / Hazard Analysis</td></tr>
   </table>
 
   <p class="lead" style="margin-top:28px">Simulated appearance, current mode:</p>
@@ -367,10 +357,11 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   </div>
 
   <p class="note"><b>Note 1:</b> &Delta;E is CAM02-UCS, where 1 is approximately a just-noticeable difference. Not comparable to CIE76.</p>
-  <p class="note"><b>Note 2:</b> The weakest pair is Hazard Analysis against Structure, on the red-green axis. R6 carries it.</p>
-  <p class="note"><b>Note 3:</b> Cerulean sits 7.4 from its nearest marker in light mode and 8.2 in dark. Recorded, not constrained: Cerulean and the markers never share a visual role.</p>
-  <p class="note"><b>Note 4:</b> Method: WCAG 2.1 relative luminance; CVD simulation via colorspacious <span class="mono">sRGB1+CVD</span> at severity 100; distances in CAM02-UCS.</p>
-  <p class="note"><b>Note 5:</b> Contrast ratios are in 3.2 and 3.3.</p>
+  <p class="note"><b>Note 2:</b> Each deficiency collapses a different pair. No marker is distinct under every vision, and no palette of four hues can be. R6 is what carries this: the entity name always accompanies the marker, so nothing is read from color alone.</p>
+  <p class="note"><b>Note 3:</b> Tritanopia is the extreme case. Legislative and Structure render as the same teal in light mode, &Delta;E 1.6. Tritanopia affects roughly 1 in 10,000, against roughly 8% of men for red-green deficiency. Not corrected in the palette, and not a defect: R6 carries it.</p>
+  <p class="note"><b>Note 4:</b> Cerulean sits 4.4 from its nearest marker in light mode and 4.7 in dark, in both cases Structure under tritanopia. Recorded, not constrained: Cerulean and the markers never share a visual role.</p>
+  <p class="note"><b>Note 5:</b> Method: Brettel 1997 dichromacy at full severity, computed with daltonlens; distances in CAM02-UCS; WCAG 2.1 relative luminance for contrast.</p>
+  <p class="note"><b>Note 6:</b> Contrast ratios are in 3.2 and 3.3.</p>
 
   <h2>4. Application</h2>
 
@@ -408,8 +399,8 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
       <div class="item"><span class="pm" style="background:var(--legislative)"></span>Entity kind</div>
       <div class="item"><span class="pm" style="background:var(--requirements)"></span>Entity kind</div>
       <div class="item"><span class="pm" style="background:var(--hazard)"></span>Entity kind</div>
-      <div class="item item-sel" style="margin-left:8px"><span class="mono" style="font-size:11px; opacity:.75; margin-right:10px">ID-000</span>Selected item</div>
-      <div class="item" style="margin-left:18px"><span class="mono" style="font-size:11px; color:var(--muted); margin-right:10px">ID-001</span>Item</div>
+      <div class="item item-sel" style="margin-left:8px"><span class="item-id">ID-000</span>Selected item</div>
+      <div class="item" style="margin-left:18px"><span class="item-id">ID-001</span>Item</div>
     </div>
     <div class="pane">
       <div class="pane-title">Pane</div>
@@ -426,9 +417,9 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
     <tr><td class="k">Canvas</td><td class="v">The only background. No second surface color</td></tr>
     <tr><td class="k">Pane</td><td class="v">Flat on the canvas, separated by a hairline. No fill, border, or shadow</td></tr>
     <tr><td class="k">Hairline</td><td class="v">1 px, Hairline color. The only divider</td></tr>
-    <tr><td class="k">Radius</td><td class="v">2 px maximum. Buttons, markers, and the favicon only</td></tr>
+    <tr><td class="k">Radius</td><td class="v">2 px maximum</td></tr>
     <tr><td class="k">Label</td><td class="v">Muted. Plex Mono naming a field, Plex Sans as language</td></tr>
-    <tr><td class="k">Link</td><td class="v">Cerulean. Underlined on hover</td></tr>
+    <tr><td class="k">Link</td><td class="v">Cerulean, always underlined</td></tr>
     <tr><td class="k">Button, primary</td><td class="v">Cerulean fill, canvas-color text. One per view</td></tr>
     <tr><td class="k">Button, secondary</td><td class="v">Hairline border, Ink text, no fill</td></tr>
     <tr><td class="k">Focus</td><td class="v">2 px Cerulean ring, 2 px offset</td></tr>
@@ -437,6 +428,7 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
     <tr><td class="k">Identifier</td><td class="v">Plex Mono</td></tr>
     <tr><td class="k">Status</td><td class="v">Text and weight. Never color</td></tr>
   </table>
+  <p class="note"><b>Note 1:</b> Links are underlined at rest, not on hover. Cerulean against Ink is 3.02:1 and against Muted is 1.05:1, so color alone does not mark a link.</p>
 
   <h2>5. Rules</h2>
   <table>
@@ -462,11 +454,11 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   </table>
   <p class="note"><b>Note 1:</b> Logo assets are SVG with the lettering as paths. No font is required to render them.</p>
 
-  <h3>6.2 External Material</h3>
+  <h3>6.2 Third-party Material</h3>
   <table>
     <tr><th>Material</th><th>Version</th><th>License</th><th>Location</th><th>Origin record</th></tr>
     <tr><td class="k">IBM Plex</td><td class="n"></td><td class="n">OFL-1.1</td><td class="n">assets/fonts/</td><td class="n">assets/fonts/ORIGIN.md</td></tr>
-    <tr><td class="k">Reasonable Colors</td><td class="n">0.4.0</td><td class="n">MIT</td><td class="v">docs/brand.md</td><td class="v">docs/brand.md</td></tr>
+    <tr><td class="k">Reasonable Colors</td><td class="n">0.4.0</td><td class="n">MIT</td><td class="n">docs/brand.md</td><td class="n">docs/brand.md</td></tr>
   </table>
   <p class="note"><b>Note 1:</b> The palette is not vendored as a file. Its values are transcribed into the specification, and its table is their attribution.</p>
 

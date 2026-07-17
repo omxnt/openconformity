@@ -17,7 +17,7 @@
 - [5. Rules](#5-rules)
 - [6. References](#6-references)
   - [6.1 Project Files](#61-project-files)
-  - [6.2 External Material](#62-external-material)
+  - [6.2 Third-party Material](#62-third-party-material)
 
 ## 1. Wordmark
 
@@ -61,7 +61,7 @@
 | Case | Lowercase |
 | Typeface | IBM Plex Sans, Medium (500) |
 | Color | White on Cerulean `#00749D`, 5.3:1 |
-| Radius | 2 px at 32 px |
+| Radius | 2 px at 32 px, scaled with the asset |
 | Modes | One asset, both modes. Never theme-switched |
 
 ## 2. Typography
@@ -115,24 +115,44 @@ Every chromatic color is Reasonable Colors under one rule: **shade 4 in light mo
 
 ### 3.4 Verification
 
-Minimum pairwise ΔE between the four markers:
+Minimum pairwise ΔE between the four markers, and the pair that sets it:
 
-| Vision | Light | Dark |
-|---|---|---|
-| Typical | 34.4 | 31.4 |
-| Deuteranopia | 9.9 | 10.9 |
-| Protanopia | 10.7 | 8.4 |
-| Tritanopia | 12.4 | 13.4 |
+| Vision | Light | Pair | Dark | Pair |
+|---|---|---|---|---|
+| Typical | 34.4 | Legislative / Requirements | 31.4 | Legislative / Requirements |
+| Deuteranopia | 8.0 | Hazard Analysis / Structure | 8.7 | Hazard Analysis / Structure |
+| Protanopia | 11.7 | Legislative / Requirements | 9.2 | Legislative / Requirements |
+| Tritanopia | 1.6 | Legislative / Structure | 5.3 | Requirements / Hazard Analysis |
 
 **Note 1:** ΔE is CAM02-UCS, where 1 is approximately a just-noticeable difference. Not comparable to CIE76.
 
-**Note 2:** The weakest pair is Hazard Analysis against Structure, on the red-green axis. R6 carries it.
+**Note 2:** Each deficiency collapses a different pair. No marker is distinct under every vision, and no palette of four hues can be. R6 is what carries this: the entity name always accompanies the marker, so nothing is read from color alone.
 
-**Note 3:** Cerulean sits 7.4 from its nearest marker in light mode and 8.2 in dark. Recorded, not constrained: Cerulean and the markers never share a visual role.
+**Note 3:** Tritanopia is the extreme case. Legislative and Structure render as the same teal in light mode, ΔE 1.6. Tritanopia affects roughly 1 in 10,000, against roughly 8% of men for red-green deficiency. Not corrected in the palette, and not a defect: R6 carries it.
 
-**Note 4:** Method: WCAG 2.1 relative luminance; CVD simulation via colorspacious `sRGB1+CVD` at severity 100; distances in CAM02-UCS. Simulated swatches are rendered in `docs/brand.html`.
+**Note 4:** Cerulean sits 4.4 from its nearest marker in light mode and 4.7 in dark, in both cases Structure under tritanopia. Recorded, not constrained: Cerulean and the markers never share a visual role.
 
-**Note 5:** Contrast ratios are in 3.2 and 3.3.
+**Note 5:** Method: Brettel 1997 dichromacy at full severity, computed with daltonlens; distances in CAM02-UCS; WCAG 2.1 relative luminance for contrast. Simulated swatches are rendered in `docs/brand.html`.
+
+**Note 6:** Contrast ratios are in 3.2 and 3.3.
+
+Simulated appearance under dichromacy, light mode:
+
+| Vision | Legislative | Requirements | Hazard Analysis | Structure | Cerulean |
+|---|---|---|---|---|---|
+| Typical | `#794AFF` | `#CA00B6` | `#CD3C00` | `#008217` | `#00749D` |
+| Deuteranopia | `#0078FD` | `#5B7AB3` | `#8C7700` | `#7A6920` | `#4C6A9D` |
+| Protanopia | `#005FFE` | `#004FB6` | `#695A07` | `#8C7814` | `#58709C` |
+| Tritanopia | `#447688` | `#BF4357` | `#CF3251` | `#3A778A` | `#007690` |
+
+Dark mode:
+
+| Vision | Legislative | Requirements | Hazard Analysis | Structure | Cerulean |
+|---|---|---|---|---|---|
+| Typical | `#9B70FF` | `#F911E0` | `#FD4D00` | `#00A21F` | `#0092C5` |
+| Deuteranopia | `#3091FD` | `#7499DC` | `#AF9400` | `#98842A` | `#6185C5` |
+| Protanopia | `#007EFE` | `#0065E0` | `#84710C` | `#AF961B` | `#708DC4` |
+| Tritanopia | `#7C8D95` | `#EC566F` | `#FE4167` | `#4B94AC` | `#0095B4` |
 
 ## 4. Application
 
@@ -141,9 +161,9 @@ Minimum pairwise ΔE between the four markers:
 | Canvas | The only background. No second surface color |
 | Pane | Flat on the canvas, separated by a hairline. No fill, border, or shadow |
 | Hairline | 1 px, Hairline color. The only divider |
-| Radius | 2 px maximum. Buttons, markers, and the favicon only |
+| Radius | 2 px maximum |
 | Label | Muted. Plex Mono naming a field, Plex Sans as language |
-| Link | Cerulean. Underlined on hover |
+| Link | Cerulean, always underlined |
 | Button, primary | Cerulean fill, canvas-color text. One per view |
 | Button, secondary | Hairline border, Ink text, no fill |
 | Focus | 2 px Cerulean ring, 2 px offset |
@@ -151,6 +171,8 @@ Minimum pairwise ΔE between the four markers:
 | Marker | 8 px square, 2 px radius, functional color, beside the entity name |
 | Identifier | Plex Mono |
 | Status | Text and weight. Never color |
+
+**Note 1:** Links are underlined at rest, not on hover. Cerulean against Ink is 3.02:1 and against Muted is 1.05:1, so color alone does not mark a link.
 
 ## 5. Rules
 
@@ -177,7 +199,7 @@ Minimum pairwise ΔE between the four markers:
 
 **Note 1:** Logo assets are SVG with the lettering as paths. No font is required to render them.
 
-### 6.2 External Material
+### 6.2 Third-party Material
 
 | Material | Version | License | Location | Origin record |
 |---|---|---|---|---|
