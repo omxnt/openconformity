@@ -7,7 +7,16 @@
     <meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
 
     <link rel="icon" type="image/svg+xml" href="assets/brand/favicon.svg">
-    <link rel="icon" type="image/png" href="assets/brand/favicon.png">
+
+    <script>
+        (function () {
+            var stored = localStorage.getItem("mode");
+            var dark = stored
+                ? stored === "dark"
+                : window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.add(dark ? "dark" : "light");
+        })();
+    </script>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -109,16 +118,18 @@
             var btn = document.getElementById("mode");
             var root = document.documentElement;
 
-            function set(dark) {
-                root.classList.toggle("dark", dark);
-                root.classList.toggle("light", !dark);
-                btn.textContent = dark ? "light" : "dark";
+            function label() {
+                btn.textContent = root.classList.contains("dark") ? "light" : "dark";
             }
 
-            set(window.matchMedia("(prefers-color-scheme: dark)").matches);
+            label();
 
             btn.addEventListener("click", function () {
-                set(!root.classList.contains("dark"));
+                var dark = !root.classList.contains("dark");
+                root.classList.toggle("dark", dark);
+                root.classList.toggle("light", !dark);
+                localStorage.setItem("mode", dark ? "dark" : "light");
+                label();
             });
         })();
     </script>
