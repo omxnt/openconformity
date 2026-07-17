@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>openconformity — Brand</title>
-<link rel="icon" href="logo/openconformity-favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
 <style>
 @font-face {
   font-family: "IBM Plex Sans";
@@ -40,7 +40,7 @@
   --sim-tri-1: #447688; --sim-tri-2: #BF4357; --sim-tri-3: #CF3251; --sim-tri-4: #3A778A; --sim-tri-5: #007690;
 }
 
-body.dark {
+html.dark {
   --canvas: #1A1A1A;
   --ink: #F6F6F6;
   --muted: #8B8B8B;
@@ -127,30 +127,34 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
 }
 
-.marks { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); border-radius: 2px; }
-.mark { display: flex; align-items: center; justify-content: center; height: 104px; padding: 0 16px; }
-.m-canvas { background: var(--canvas); }
-.m-banner { background: #00749D; }
-.wm { font-size: 24px; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; }
-.wm-ink { color: var(--ink); }
-.wm-white { color: #FFFFFF; }
-.caps { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-top: 8px; }
-.cap { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); text-align: center; }
+.marks { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.mark-box {
+  border: 1px solid var(--hairline); border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  height: 104px; padding: 0 24px;
+}
+.mark-box.on-cerulean { background: #00749D; border-color: #00749D; }
+.wm {
+  display: block;
+  width: 260px; height: 35px;
+  background: var(--ink);
+  -webkit-mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
+  mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
+}
+.wm-white { background: #FFFFFF; }
 
 .favs { display: flex; align-items: flex-end; gap: 18px; margin-top: 8px; }
-.fav {
-  background: #00749D; color: #FFFFFF; font-weight: 500; letter-spacing: -0.04em;
-  display: flex; align-items: center; justify-content: center;
-}
-.f64 { width: 64px; height: 64px; font-size: 32px; border-radius: 4px; }
-.f32 { width: 32px; height: 32px; font-size: 16px; border-radius: 2px; }
-.f16 { width: 16px; height: 16px; font-size: 8px; border-radius: 1px; }
+.fav { display: block; }
+.f64 { width: 64px; height: 64px; }
+.f32 { width: 32px; height: 32px; }
+.f16 { width: 16px; height: 16px; }
 
 .pm { width: 8px; height: 8px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 10px; flex: none; }
 
 .sim { display: grid; grid-template-columns: 108px repeat(5, 1fr); gap: 8px; align-items: center; margin-bottom: 6px; }
 .sim-lab { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .band { height: 16px; border-radius: 2px; }
+.cap { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); }
 
 .pane-set { border: 1px solid var(--hairline); border-radius: 2px; display: grid; grid-template-columns: 240px 1fr; }
 .pane { padding: 12px 14px; }
@@ -166,6 +170,12 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
 .field { display: flex; padding: 6px 0; border-top: 1px solid var(--hairline); }
 .field:first-child { border-top: none; }
 .field-label { width: 96px; color: var(--muted); flex: none; }
+
+@media (max-width: 640px) {
+  .marks { grid-template-columns: 1fr; }
+  .pane-set { grid-template-columns: 1fr; }
+  .pane + .pane { border-left: none; border-top: 1px solid var(--hairline); }
+}
 </style>
 </head>
 <body>
@@ -182,59 +192,38 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   <h2>1. Wordmark</h2>
 
   <h3>1.1 Specification</h3>
-  <table>
+  <div class="marks">
+    <div class="mark-box"><span class="wm"></span></div>
+    <div class="mark-box on-cerulean"><span class="wm wm-white"></span></div>
+  </div>
+  <table style="margin-top:20px">
     <tr><th>Property</th><th>Value</th></tr>
     <tr><td class="k">Lettering</td><td class="v">"openconformity"</td></tr>
     <tr><td class="k">Case</td><td class="v">Lowercase</td></tr>
     <tr><td class="k">Typeface</td><td class="v">IBM Plex Sans, Medium (500)</td></tr>
     <tr><td class="k">Letter spacing</td><td class="v">&minus;1%</td></tr>
-    <tr><td class="k">Color</td><td class="v">Single color, single weight</td></tr>
-    <tr><td class="k">On canvas</td><td class="v">Ink</td></tr>
-    <tr><td class="k">On the banner</td><td class="v">White <span class="mono">#FFFFFF</span></td></tr>
-    <tr><td class="k">Clear space</td><td class="v">Height of the "o", baked into every SVG viewBox</td></tr>
+    <tr><td class="k">Color</td><td class="v">Single color, single weight. Never split, never with a symbol</td></tr>
+    <tr><td class="k">Default</td><td class="v">Ink on canvas. <span class="mono">15.9:1</span> light, <span class="mono">16.1:1</span> dark</td></tr>
+    <tr><td class="k">On Cerulean</td><td class="v">White on <span class="mono">#00749D</span>. <span class="mono">5.3:1</span></td></tr>
   </table>
+  <p class="note"><b>Note 1:</b> The asset is the lettering as paths, tight to the ink. No font is required to render it, and no space is built into it.</p>
 
-  <h3>1.2 Variants</h3>
-  <div class="marks">
-    <div class="mark m-canvas"><span class="wm wm-ink">openconformity</span></div>
-    <div class="mark m-banner"><span class="wm wm-white">openconformity</span></div>
-  </div>
-  <div class="caps">
-    <div class="cap">Default, Ink on canvas</div>
-    <div class="cap">Inverted banner, white on Cerulean</div>
-  </div>
-  <table style="margin-top:20px">
-    <tr><th>Variant</th><th>Wordmark</th><th>Surface</th><th>Light</th><th>Dark</th></tr>
-    <tr><td class="k">Default</td><td class="v">Ink</td><td class="v">Canvas</td><td class="n">15.9:1</td><td class="n">16.1:1</td></tr>
-    <tr><td class="k">Inverted banner</td><td class="v">White</td><td class="v">Cerulean <span class="mono">#00749D</span></td><td class="n">5.3:1</td><td class="n">5.3:1</td></tr>
-  </table>
-  <p class="note"><b>Note 1:</b> Two renderings, no others. The white wordmark on a dark canvas is the default in dark mode, not the inverted banner.</p>
-
-  <h3>1.3 Selection</h3>
-  <table>
-    <tr><th>Situation</th><th>Example</th><th>Use</th></tr>
-    <tr><td class="k">Surface you control</td><td class="v">App, docs, README</td><td class="v">Default</td></tr>
-    <tr><td class="k">Surface you do not control</td><td class="v">LinkedIn banner and avatar, GitHub social preview, og-image, title slides</td><td class="v">Inverted banner</td></tr>
-    <tr><td class="k">Icon</td><td class="v">Browser tab, app icon</td><td class="v">Favicon (1.4)</td></tr>
-    <tr><td class="k">Monochrome</td><td class="v">Print, engraving</td><td class="v">Default</td></tr>
-    <tr><td class="k">Not listed above</td><td class="v"></td><td class="v">Inverted banner</td></tr>
-  </table>
-
-  <h3>1.4 Favicon</h3>
+  <h3>1.2 Favicon</h3>
   <div class="favs">
-    <div class="fav f64">oc</div>
-    <div class="fav f32">oc</div>
-    <div class="fav f16">oc</div>
+    <img src="../assets/brand/favicon.svg" alt="" class="fav f64">
+    <img src="../assets/brand/favicon.svg" alt="" class="fav f32">
+    <img src="../assets/brand/favicon.svg" alt="" class="fav f16">
   </div>
   <table style="margin-top:20px">
     <tr><th>Property</th><th>Value</th></tr>
-    <tr><td class="k">Lettering</td><td class="v">"oc"</td></tr>
+    <tr><td class="k">Lettering</td><td class="v">"o"</td></tr>
     <tr><td class="k">Case</td><td class="v">Lowercase</td></tr>
     <tr><td class="k">Typeface</td><td class="v">IBM Plex Sans, Medium (500)</td></tr>
-    <tr><td class="k">Color</td><td class="v">White on Cerulean <span class="mono">#00749D</span>, 5.3:1</td></tr>
-    <tr><td class="k">Radius</td><td class="v">2 px at 32 px, scaled with the asset</td></tr>
-    <tr><td class="k">Modes</td><td class="v">One asset, both modes. Never theme-switched</td></tr>
+    <tr><td class="k">Color</td><td class="v">White on Cerulean <span class="mono">#00749D</span>, <span class="mono">5.3:1</span></td></tr>
+    <tr><td class="k">Radius</td><td class="v">2 px at 32 px</td></tr>
+    <tr><td class="k">Modes</td><td class="v">One asset, both modes</td></tr>
   </table>
+  <p class="note"><b>Note 1:</b> The letter is taken from the wordmark. It is not a monogram and carries no meaning on its own.</p>
 
   <h2>2. Typography</h2>
   <table>
@@ -255,8 +244,8 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   <p class="lead">Every chromatic color is Reasonable Colors under one rule: <b>shade 4 in light mode, shade 3 in dark mode</b>, on the canvas of its mode. Any hue under this rule yields at least 4.5:1 on its canvas. Sections 3.2 and 3.3 are the complete set.</p>
   <p class="note"><b>Note 1:</b> Grays do not follow the rule. They mirror across modes. The rule guarantees AA, which is the floor for a marker and wrong for body text: gray-4 gives 5:1 where Ink gives 15.9:1.</p>
   <p class="note"><b>Note 2:</b> Canvas values are not from the palette. Light is pure white, against which the palette's guarantees are anchored. Dark is <span class="mono">#1A1A1A</span> because gray-6 as a canvas leaves cerulean-3 at 4.48:1, under AA.</p>
-  <p class="note"><b>Note 3:</b> Cerulean is never a marker, and a marker is never interactive. On Cerulean fills, text is the canvas color of the current mode.</p>
-  <p class="note"><b>Note 4:</b> Markers identify entity kinds only. Beside the entity name, never a text fill, never a status, never in the wordmark or on marketing surfaces.</p>
+  <p class="note"><b>Note 3:</b> The four markers identify entity kinds. The entity name always accompanies the marker, so nothing is read from color alone.</p>
+  <p class="note"><b>Note 4:</b> No color means pass or fail.</p>
 
   <h3>3.2 Light Mode</h3>
   <table>
@@ -269,7 +258,7 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
         <td><span class="val"><span class="sw" style="background:#6F6F6F"></span><span class="mono v">#6F6F6F</span></span></td><td class="n">5.0:1</td></tr>
     <tr><td class="k">Hairline</td><td class="v">The only divider, 1 px</td><td class="n">gray-2</td>
         <td><span class="val"><span class="sw" style="background:#E2E2E2"></span><span class="mono v">#E2E2E2</span></span></td><td class="n">n/a</td></tr>
-    <tr><td class="k">Cerulean</td><td class="v">Links, focus ring, selection, one primary action per view</td><td class="n">cerulean-4</td>
+    <tr><td class="k">Cerulean</td><td class="v">Links, focus ring, selection, primary action, favicon</td><td class="n">cerulean-4</td>
         <td><span class="val"><span class="sw" style="background:#00749D"></span><span class="mono v">#00749D</span></span></td><td class="n">5.3:1</td></tr>
     <tr><td class="k">Legislative</td><td class="v">Marker</td><td class="n">violet-4</td>
         <td><span class="val"><span class="sw" style="background:#794AFF"></span><span class="mono v">#794AFF</span></span></td><td class="n">5.0:1</td></tr>
@@ -292,7 +281,7 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
         <td><span class="val"><span class="sw" style="background:#8B8B8B"></span><span class="mono v">#8B8B8B</span></span></td><td class="n">5.1:1</td></tr>
     <tr><td class="k">Hairline</td><td class="v">The only divider, 1 px</td><td class="n">gray-5</td>
         <td><span class="val"><span class="sw" style="background:#3E3E3E"></span><span class="mono v">#3E3E3E</span></span></td><td class="n">n/a</td></tr>
-    <tr><td class="k">Cerulean</td><td class="v">Links, focus ring, selection, one primary action per view</td><td class="n">cerulean-3</td>
+    <tr><td class="k">Cerulean</td><td class="v">Links, focus ring, selection, primary action</td><td class="n">cerulean-3</td>
         <td><span class="val"><span class="sw" style="background:#0092C5"></span><span class="mono v">#0092C5</span></span></td><td class="n">4.9:1</td></tr>
     <tr><td class="k">Legislative</td><td class="v">Marker</td><td class="n">violet-3</td>
         <td><span class="val"><span class="sw" style="background:#9B70FF"></span><span class="mono v">#9B70FF</span></span></td><td class="n">5.1:1</td></tr>
@@ -303,6 +292,7 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
     <tr><td class="k">Structure</td><td class="v">Marker</td><td class="n">green-3</td>
         <td><span class="val"><span class="sw" style="background:#00A21F"></span><span class="mono v">#00A21F</span></span></td><td class="n">5.1:1</td></tr>
   </table>
+  <p class="note"><b>Note 1:</b> The favicon keeps the light value of Cerulean in both modes.</p>
 
   <h3>3.4 Verification</h3>
   <p class="lead">Minimum pairwise &Delta;E between the four markers, and the pair that sets it:</p>
@@ -349,19 +339,18 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   </div>
   <div class="sim" style="margin-top:8px">
     <span></span>
-    <span class="cap" style="text-align:left">Legislative</span>
-    <span class="cap" style="text-align:left">Requirements</span>
-    <span class="cap" style="text-align:left">Hazard</span>
-    <span class="cap" style="text-align:left">Structure</span>
-    <span class="cap" style="text-align:left">Cerulean</span>
+    <span class="cap">Legislative</span>
+    <span class="cap">Requirements</span>
+    <span class="cap">Hazard</span>
+    <span class="cap">Structure</span>
+    <span class="cap">Cerulean</span>
   </div>
 
   <p class="note"><b>Note 1:</b> &Delta;E is CAM02-UCS, where 1 is approximately a just-noticeable difference. Not comparable to CIE76.</p>
-  <p class="note"><b>Note 2:</b> Each deficiency collapses a different pair. No marker is distinct under every vision, and no palette of four hues can be. R6 is what carries this: the entity name always accompanies the marker, so nothing is read from color alone.</p>
-  <p class="note"><b>Note 3:</b> Tritanopia is the extreme case. Legislative and Structure render as the same teal in light mode, &Delta;E 1.6. Tritanopia affects roughly 1 in 10,000, against roughly 8% of men for red-green deficiency. Not corrected in the palette, and not a defect: R6 carries it.</p>
+  <p class="note"><b>Note 2:</b> Each deficiency collapses a different pair. No marker is distinct under every vision, and no palette of four hues can be. The name beside the marker is what carries this.</p>
+  <p class="note"><b>Note 3:</b> Tritanopia is the extreme case. Legislative and Structure render as the same teal in light mode, &Delta;E 1.6. Tritanopia affects roughly 1 in 10,000, against roughly 8% of men for red-green deficiency. Not corrected, and not a defect.</p>
   <p class="note"><b>Note 4:</b> Cerulean sits 4.4 from its nearest marker in light mode and 4.7 in dark, in both cases Structure under tritanopia. Recorded, not constrained: Cerulean and the markers never share a visual role.</p>
   <p class="note"><b>Note 5:</b> Method: Brettel 1997 dichromacy at full severity, computed with daltonlens; distances in CAM02-UCS; WCAG 2.1 relative luminance for contrast.</p>
-  <p class="note"><b>Note 6:</b> Contrast ratios are in 3.2 and 3.3.</p>
 
   <h2>4. Application</h2>
 
@@ -430,45 +419,21 @@ a:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; }
   </table>
   <p class="note"><b>Note 1:</b> Links are underlined at rest, not on hover. Cerulean against Ink is 3.02:1 and against Muted is 1.05:1, so color alone does not mark a link.</p>
 
-  <h2>5. Rules</h2>
+  <h2>5. Attribution</h2>
   <table>
-    <tr><th>#</th><th>Rule</th></tr>
-    <tr><td class="n">R1</td><td>The wordmark is "openconformity", IBM Plex Sans Medium, &minus;1% tracking. Never split, never with a symbol</td></tr>
-    <tr><td class="n">R2</td><td>Wordmark color: Ink on canvas, white on the banner. Never any other color. Cerulean goes behind the wordmark, never in it</td></tr>
-    <tr><td class="n">R3</td><td>Two typefaces, three cuts: Plex Sans 400/500 for language, Plex Mono 400 for identifiers and data</td></tr>
-    <tr><td class="n">R4</td><td>Every chromatic color is Reasonable Colors: shade 4 light, shade 3 dark. Grays mirror. §3 is the complete set</td></tr>
-    <tr><td class="n">R5</td><td>Cerulean means interactive. On Cerulean fills, text is the canvas color</td></tr>
-    <tr><td class="n">R6</td><td>The four functional colors identify entity kinds only. Marker beside the name, and the name always accompanies the marker</td></tr>
-    <tr><td class="n">R7</td><td>No color means pass or fail. Status is words</td></tr>
-    <tr><td class="n">R8</td><td>Surfaces are flat panes on one canvas, divided by hairlines. No shadows, gradients, or radius above 2 px</td></tr>
-    <tr><td class="n">R9</td><td>One favicon, both modes, always</td></tr>
+    <tr><th>Material</th><th>Version</th><th>License</th></tr>
+    <tr><td class="k">IBM Plex Sans</td><td class="n">1.1.0</td><td class="n">OFL-1.1</td></tr>
+    <tr><td class="k">IBM Plex Mono</td><td class="n">2.5.0</td><td class="n">OFL-1.1</td></tr>
+    <tr><td class="k">Reasonable Colors</td><td class="n">0.4.0</td><td class="n">MIT</td></tr>
   </table>
-
-  <h2>6. References</h2>
-
-  <h3>6.1 Project Files</h3>
-  <table>
-    <tr><th>Item</th><th>Location</th></tr>
-    <tr><td class="k">Specification</td><td class="n">docs/brand.md</td></tr>
-    <tr><td class="k">Iconography</td><td class="n">assets/brand/</td></tr>
-  </table>
-  <p class="note"><b>Note 1:</b> Logo assets are SVG with the lettering as paths. No font is required to render them.</p>
-
-  <h3>6.2 Third-party Material</h3>
-  <table>
-    <tr><th>Material</th><th>Version</th><th>License</th><th>Location</th><th>Origin record</th></tr>
-    <tr><td class="k">IBM Plex Sans</td><td class="n">1.1.0</td><td class="n">OFL-1.1</td><td class="n">assets/fonts/</td><td class="n">assets/fonts/ORIGIN.md</td></tr>
-    <tr><td class="k">IBM Plex Mono</td><td class="n">2.5.0</td><td class="n">OFL-1.1</td><td class="n">assets/fonts/</td><td class="n">assets/fonts/ORIGIN.md</td></tr>
-    <tr><td class="k">Reasonable Colors</td><td class="n">0.4.0</td><td class="n">MIT</td><td class="n">docs/brand.md</td><td class="n">docs/brand.md</td></tr>
-  </table>
-  <p class="note"><b>Note 1:</b> The palette is not vendored as a file. Its values are transcribed into the specification, and its table is their attribution.</p>
+  <p class="note"><b>Note 1:</b> The palette is not vendored as a file. Its values are transcribed into section 3, and this table is their attribution.</p>
 
 </div>
 
 <script>
   var btn = document.getElementById("toggle");
   btn.addEventListener("click", function () {
-    var dark = document.body.classList.toggle("dark");
+    var dark = document.documentElement.classList.toggle("dark");
     btn.textContent = dark ? "Light" : "Dark";
   });
 </script>
