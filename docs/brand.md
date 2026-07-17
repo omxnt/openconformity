@@ -203,7 +203,8 @@ Dark mode:
 
 | Material | Version | License | Location | Origin record |
 |---|---|---|---|---|
-| IBM Plex | | OFL-1.1 | `assets/fonts/` | `assets/fonts/ORIGIN.md` |
+| IBM Plex Sans | 1.1.0 | OFL-1.1 | `assets/fonts/` | `assets/fonts/ORIGIN.md` |
+| IBM Plex Mono | 2.5.0 | OFL-1.1 | `assets/fonts/` | `assets/fonts/ORIGIN.md` |
 | Reasonable Colors | 0.4.0 | MIT | This file | This table |
 
 **Note 1:** The palette is not vendored as a file. Its values are transcribed into §3, and this table is their attribution.
