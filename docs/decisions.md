@@ -107,7 +107,7 @@ The metamodel is built into the tool and versioned with it. Users cannot extend 
 
 The canonical term is Risk Reduction Measure (RRM), not Protective Measure.
 
-> *Chosen with knowledge of ISO 12100, which uses "protective measure" formally. "Risk reduction measure" is more widely used in industry and more self-explanatory to readers without ISO fluency. Earlier public posts use the old term.*
+> *Chosen with knowledge of ISO 12100, which uses "protective measure" formally. "Risk reduction measure" is more widely used in industry and more self-explanatory to readers without ISO fluency.*
 
 ---
 
@@ -167,7 +167,7 @@ A project is saved as a single local file, owned and controlled by the user. It 
 
 Third-party material is copied into the repository as files, with its licence and an origin record beside it. Package managers are not used.
 
-> *Demonstrated by the first case: IBM Plex ships npm telemetry that runs at install time. Vendoring the woff2 files takes the glyph data and structurally excludes the telemetry.*
+> *A package manager pulls a dependency and everything it carries, and re-resolves it over time. Copying the artifact itself — the woff2 files, with their licence and origin beside them — takes exactly what is needed, nothing else, and never changes unless the maintainer changes it. This follows from the no-build, no-supply-chain stance of D-010.*
 
 ---
 
@@ -207,7 +207,7 @@ Entities copied between projects arrive without their relationships. The user re
 
 Development uses `python3 -m http.server`, not the VS Code Live Server extension.
 
-> *Live Server injects a reload script into every file it serves. This is invisible in HTML and breaks SVG: the injected markup follows the closing tag and makes the file invalid XML. It cost an evening of debugging a file that was never broken.*
+> *Live Server injects a reload script into every file it serves. This is invisible in HTML but breaks SVG: the injected markup follows the closing tag and makes the file invalid XML.*
 
 ---
 
@@ -217,7 +217,7 @@ Development uses `python3 -m http.server`, not the VS Code Live Server extension
 
 `develop` and `main` carry identical content. `main` is a release snapshot of `develop`, produced by merging. The branches never diverge in content.
 
-> *Divergence caused a landing page deletion. A partial merge is not possible without recreating that class of error.*
+> *When the branches held different content — a landing page on `main`, absent from `develop` — merging `develop` into `main` propagated the absence and deleted the page. Keeping the branches identical, with `main` a straight snapshot of `develop`, removes that class of error.*
 
 ---
 
@@ -227,7 +227,7 @@ Development uses `python3 -m http.server`, not the VS Code Live Server extension
 
 One commit, one logical change, with the project working after each.
 
-> *`git bisect` finds the commit that broke something by binary search, and its precision equals commit size. This matters specifically for AI-assisted development by a beginner: when a change made weeks ago breaks something, bisect over atomic commits is how a non-expert finds which session did it.*
+> *`git bisect` finds a breaking change by binary search over commits, and its precision equals commit size. Small, single-purpose commits make it possible to locate what broke; large mixed commits do not.*
 
 ---
 
@@ -264,7 +264,7 @@ The proof of concept is archived in `poc/`, frozen and unmaintained. The concept
 
 Three documents, each with one job. `design.md` describes what the product is and why. `spec.md` states what it shall be and do. `decisions.md` records what was chosen and why. `README.md` owns the links between them.
 
-> *Values are specified in spec.md, the design document carries the concept, and this log carries the reasoning. No document restates another.*
+> *Values are specified in spec.md, the design document carries the concept, and this log carries the reasoning. No document restates another. The README owns the links and points down; nothing links up or sideways, so a rename breaks one thing rather than four.*
 
 ---
 
@@ -284,17 +284,17 @@ Requirements language is reserved for the specification. design.md is written in
 
 design.md is the stable why and what. spec.md grows in build order, not in one pass. The exception is the data model, which is specified before code.
 
-> *Everything depends on the data model, and changing it later means rewriting the tool, so it is specified first. Otherwise the project's own history argues for iteration: the proof of concept came before any specification and proved the idea, and the mockup came before design.md was finished and improved the design. Motivation is the scarce resource, not clarity.*
+> *Everything depends on the data model, and changing it later means rewriting the tool, so it is specified first. Beyond that, specifying only the slice being built keeps the specification honest: it describes what exists or is about to, not a guess at the whole tool.*
 
 ---
 
-### D-025 Specifications carry values, not policy
+### D-025 Specifications state what must be true, not how to build it
 
 `2026-07-17` `documentation`
 
-A line belongs in a specification if it is a value, or if deleting it would let someone silently break a value. It does not belong if it is a claim about a world that can move.
+A specification states what must be true of the tool, not how to implement it or how it should currently look. It fixes the values that matter and leaves everything derivable to the implementation.
 
-> *Statements of fact are stable; statements of policy drift. Documents live independent of each other: the README owns the links and points down, nothing links up or sideways, so a rename breaks one thing rather than four. Origin records live beside their artifact, which is a filesystem fact rather than a reference.*
+> *A specification that dictates exact implementation forces endless redo: every build detail written as a requirement is a line that breaks the moment the build changes. The interface greys are not specified; they follow from the contrast requirements. The favicon's corner radius is not specified; it is a build choice. What is specified is what a rebuild must still honour.*
 
 ---
 
