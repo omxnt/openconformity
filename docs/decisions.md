@@ -13,6 +13,7 @@
   - [2.5 Template](#25-template)
 - [3. Decisions](#3-decisions)
 - [4. Open Topics](#4-open-topics)
+- [5. References](#5-references)
 
 ## 1. Introduction
 
@@ -375,3 +376,9 @@ The tool does not include or reproduce content from harmonized standards beyond 
 | 3 | Import granularity: whole standard, or clause by clause? | Library implementation |
 | 4 | Essential requirements that apply regardless of hazards: how do they enter the model? | Workflow |
 | 5 | Whether a base library of standard identities can be shipped | D-014 |
+
+## 5. References
+
+| No. | Reference | Link |
+|---|---|---|
+| *[1]* | *Reference*| *Link* |
