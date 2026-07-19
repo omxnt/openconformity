@@ -31,7 +31,7 @@ Each decision is written using the template below.
 
 ---
 
-#### D-NNN Decision title
+### D-NNN Decision title
 
 `YYYY-MM-DD` `tag`
 
