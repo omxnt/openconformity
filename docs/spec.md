@@ -129,7 +129,7 @@ The software shall be licensed under the EUPL-1.2.
 
 ##### C-PRJ-004 Funding
 
-The software shall not be supplied in the course of a commercial activity.
+The project shall not be supplied in the course of a commercial activity.
 
 > *Supplied outside any commercial activity, the project stays outside the scope of the Product Liability Directive and the Cyber Resilience Act, which apply to software placed on the market in the course of a commercial activity. Such activity covers, among other things, advertising, paid features, and sponsorship.*
 
