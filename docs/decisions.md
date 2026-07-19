@@ -4,30 +4,58 @@
 
 - [1. Introduction](#1-introduction)
   - [1.1 Purpose](#11-purpose)
-  - [1.2 Conventions](#12-conventions)
-  - [1.3 Template](#13-template)
-- [2. Decision Log](#2-decision-log)
-- [3. Open Topics](#3-open-topics)
+  - [1.2 Scope](#12-scope)
+- [2. Conventions](#2-conventions)
+  - [2.1 Identifier](#21-identifier)
+  - [2.2 Tags](#22-tags)
+  - [2.3 Content](#23-content)
+  - [2.4 Supersession](#24-supersession)
+  - [2.5 Template](#25-template)
+- [3. Decisions](#3-decisions)
+- [4. Open Topics](#4-open-topics)
 
 ## 1. Introduction
 
 ### 1.1 Purpose
 
-The purpose of this document is to record the decisions behind openconformity: what was chosen, and why. It is the reasoning that accompanies the design and the specification, kept so that a settled question is not reopened without cause.
+The purpose of this document is to record the decisions behind openconformity: what was chosen, and why. It is the reasoning that accompanies the design document and the specification, kept so that a settled question is not reopened without cause.
 
-### 1.2 Conventions
+### 1.2 Scope
 
-Decisions are numbered `D-NNN` and ordered by number, grouped loosely by theme. Numbering is append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited.
+This decision log covers the decisions made for openconformity and their rationale, across all themes of the project: legal, product, architecture, repository, documentation, and graphical.
 
-Each entry carries one or more tags: `legal`, `product`, `architecture`, `repository`, `documentation`, `graphical`.
+This decision log does not restate the specification. The specification states what openconformity shall be and do; this log records why those choices were made.
 
-An entry names what was decided and why. It does not restate the specification, since values live in spec.md.
+## 2. Conventions
 
-A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
+### 2.1 Identifier
+
+Each decision shall have a unique identifier of the form `D-NNN`, and decisions are ordered by number, grouped loosely by theme. Identifiers are append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited.
 
 *This log was consolidated on 2026-07-19 to reflect the project's current position, and entries before that date were renumbered. Append-only applies from that point.*
 
-### 1.3 Template
+### 2.2 Tags
+
+Each entry carries one or more tags from the table below.
+
+| Tag | Description |
+|---|---|
+| `legal` | Licensing, liability, and the legislative scope the project operates within. |
+| `product` | What the tool is and does: its purpose, features, and audience. |
+| `architecture` | How the software is built: stack, dependencies, structure, and hosting. |
+| `repository` | How the project is developed and maintained: platform, workflow, and tooling. |
+| `documentation` | How the project is documented: which documents exist and how they are written. |
+| `graphical` | The visual identity and interface profile: typefaces, colour, and marks. |
+
+### 2.3 Content
+
+An entry states what was decided and why. It does not repeat requirement text: where a decision resulted in a requirement, the entry gives the reasoning and refers to the requirement by its identifier.
+
+### 2.4 Supersession
+
+A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
+
+### 2.5 Template
 
 Each decision is written using the template below.
 
@@ -41,7 +69,7 @@ The decision, stated plainly.
 
 > *The rationale.*
 
-## 2. Decision Log
+## 3. Decisions
 
 ### D-001 Licence: EUPL-1.2
 
@@ -328,6 +356,8 @@ The brand is the wordmark "openconformity" and a favicon, and nothing else: no l
 
 > *A wordmark renders identically anywhere with no asset to maintain, and a single accent square is legible at 16 pixels where a wordmark is not. A monogram becomes a second mark to recognise; a plain square does not. Composition onto any surface is done per surface, so no banner or social-preview assets are kept in the repository.*
 
+---
+
 ### D-029 Standards content usable only as published in the OJEU
 
 `2026-07-19` `legal`
@@ -336,9 +366,7 @@ The tool does not include or reproduce content from harmonized standards beyond 
 
 > *Standards are sold by national standardization bodies, so the tool is built only on public information: legislation, guidance, and the OJEU lists. The boundary is what the OJEU publishes. References and titles appear there and carry no separate licence, so they are usable; the body of a standard does not and is not. Specified in spec.md C-PRJ-005.*
 
-## 3. Open Topics
-
-Identified, not yet decided.
+## 4. Open Topics
 
 | # | Question | Blocks |
 |---|---|---|
