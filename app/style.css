@@ -78,8 +78,8 @@ body.resizing-h { cursor: row-resize; user-select: none; }
     height: 32px;
     flex: none;
     background: #222222;
-    -webkit-mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
-    mask: url('../assets/brand/wordmark.svg') no-repeat center / contain;
+    -webkit-mask: url('../assets/marks/wordmark.svg') no-repeat center / contain;
+    mask: url('../assets/marks/wordmark.svg') no-repeat center / contain;
 }
 
 .menu {

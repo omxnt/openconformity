@@ -83,8 +83,8 @@ body {
     height: 22px;
     flex: none;
     background: var(--ink);
-    -webkit-mask: url('assets/brand/wordmark.svg') no-repeat center / contain;
-    mask: url('assets/brand/wordmark.svg') no-repeat center / contain;
+    -webkit-mask: url('assets/marks/wordmark.svg') no-repeat center / contain;
+    mask: url('assets/marks/wordmark.svg') no-repeat center / contain;
 }
 
 .nav-right {
