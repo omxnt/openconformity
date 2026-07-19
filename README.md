@@ -10,7 +10,7 @@ In design phase, not yet usable.
 
 ## What it is
 
-The tool offers an approach to CE marking using concepts borrowed from the domain of Systems Engineering (SE). The CE marking work itself is modeled using entities with semantic relationships between them, where each entity carries its own attributes. The semantic relationships represent the meaningful connection between the different types of entities, defining how they interact and relate to each other.
+The tool offers an approach to CE marking using concepts borrowed from the domain of Systems Engineering (SE). The CE marking work itself is modeled using entities with semantic relationships between them, where each entity carries its own attributes. The semantic relationships represent the connections between the different types of entities, defining how they interact and relate to each other.
 
 Artefacts can be generated as views of the model, exported and intended as input to the engineering documents that the user assembles under their own quality system. The idea behind the tool is to aid the user in producing the meaningful artefacts of the CE marking work, rather than to generate reports.
 
@@ -22,13 +22,12 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 
 | Document | Contents |
 |---|---|
-| [design.md](docs/design.md) | What the tool is and why |
-| [spec.md](docs/spec.md) | What it shall do |
+| [design.md](docs/design.md) | What it is and why |
+| [spec.md](docs/spec.md) | What it shall be and do |
 | [decisions.md](docs/decisions.md) | What was chosen and why |
-| [brand.md](docs/brand.md) | What it looks like |
-| [meta.svg](assets/meta.svg) | The metamodel |
+| [meta.svg](assets/diagrams/meta.svg) | The model of the model |
 
-The design document is in progress and the specification is not yet written.
+The design document and specification are both in progress.
 
 ## Disclaimer
 
