@@ -147,7 +147,7 @@ The software shall not reproduce content from harmonized standards beyond what i
 
 ##### C-DEV-001 Repository
 
-The software's source shall be maintained in a public GitHub repository.
+The source shall be maintained in a public GitHub repository.
 
 > *GitHub is a common platform. Public development keeps the source open and the history inspectable, consistent with the licence.*
 
@@ -163,17 +163,17 @@ The software shall be hosted on Cloudflare Pages.
 
 ##### C-DEV-003 Diagrams
 
-The project's diagrams shall be maintained in draw.io format (.drawio) in the repository.
+The diagrams shall be maintained in draw.io.
 
-> *draw.io is free, stores diagrams as open XML, and requires no account. The source file lives in the repository and exports to SVG as assets for the site.*
+> *draw.io is free, stores its source as open XML, and requires no account. The source lives in the repository as a .drawio file and exports to SVG for the site.*
 
 ---
 
-##### C-DEV-004 Design
+##### C-DEV-004 Marks
 
-The project's marks shall be maintained as a Figma source file (.fig) in the repository.
+The marks shall be maintained in Figma.
 
-> *Figma is a common design tool with a free tier. The source file lives in the repository and exports to SVG, PNG, or JPEG as assets for the site.*
+> *Figma is a common design tool with a free tier. The source lives in the repository as a .fig file and exports to SVG, PNG, or JPEG for the site.*
 
 #### 3.1.3 Technical
 
@@ -243,7 +243,7 @@ The software shall use `#00618E` as its single accent colour.
 
 ##### G-MRK-001 Wordmark
 
-The software's identity shall be the wordmark "openconformity", set in the language typeface.
+The wordmark shall be "openconformity" in the language typeface.
 
 > *The name is the identity. A wordmark renders identically in a title bar, a document, and plain text, with no separate logo to design or maintain.*
 
@@ -251,7 +251,7 @@ The software's identity shall be the wordmark "openconformity", set in the langu
 
 ##### G-MRK-002 Favicon
 
-The software's favicon shall be a square filled with the accent colour.
+The favicon shall be a square filled with the accent colour.
 
 > *A favicon is too small to render the wordmark legibly. A filled accent square is unmistakable at 16 pixels and reduces the identity to its simplest form: the name and one colour.*
 
