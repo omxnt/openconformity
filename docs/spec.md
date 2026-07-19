@@ -15,6 +15,7 @@
   - [3.1 Constraints](#31-constraints)
     - [3.1.1 Project](#311-project)
     - [3.1.2 Development](#312-development)
+    - [3.1.3 Technical](#313-technical)
   - [3.2 Graphical](#32-graphical)
     - [3.2.1 System](#321-system)
     - [3.2.2 Marks](#322-marks)
@@ -26,13 +27,13 @@
 
 ### 1.1 Purpose
 
-The purpose of this document is to specify what openconformity shall be and what it shall do. This document is the single source of truth for the tool's requirements, and the basis against which the tool is implemented and verified.
+The purpose of this document is to specify what openconformity shall be and what it shall do. This document is the single source of truth for the software requirements, and the basis against which openconformity is implemented and verified.
 
 ### 1.2 Scope
 
-This specification covers the openconformity tool. The requirements specify what the tool shall look like (graphical), what it shall do (functional), and what qualities it shall hold (non-functional). Each requirement is stated together with its rationale.
+This specification covers the software requirements for openconformity. The requirements are organised in four classes: the constraints openconformity operates within (constraints), its graphical profile (graphical), its functional behaviour (functional), and its non-functional qualities (non-functional). Each software requirement has a sequential number and is stated together with its rationale.
 
-This specification does not cover the conceptual idea behind the tool, the reasoning for its existence, or the domain knowledge it builds on. These are described elsewhere in the project's documentation.
+This specification does not cover the conceptual idea behind openconformity, the reasoning for its existence, or the domain knowledge it builds on. These are described elsewhere in the project documentation.
 
 ## 2. Conventions
 
@@ -132,6 +133,14 @@ The software shall be non-commercial and not carry advertising, paid features, o
 
 > *Kept non-commercial, the project stays outside the commercial-activity scope of the Product Liability Directive and the Cyber Resilience Act, which apply to software placed on the market as a commercial activity.*
 
+---
+
+##### C-PRJ-005 Content
+
+The software shall not reproduce copyrighted content from harmonized standards.
+
+> *Standards are sold by national standardization bodies. The tool is built only on public information: legislation, guidance, and the published lists of harmonized standards. It ships no clause text, titles, or Annex ZA mappings.*
+
 #### 3.1.2 Development
 
 ---
@@ -165,6 +174,32 @@ The software's technical diagrams shall be drawn in draw.io.
 The software's visual assets shall be designed in Figma.
 
 > *Figma is a common design tool with a free tier. The source file lives in the repository as a .fig export. Assets are exported as SVG, PNG, or JPEG.*
+
+#### 3.1.3 Technical
+
+---
+
+##### C-TEC-001 Stack
+
+The software shall be built with HTML, CSS, and JavaScript only, with no framework or third-party code.
+
+> *Native browser languages, understood directly by every modern browser with no transpilation. No third-party libraries or frameworks means no supply chain to secure and no dependency to rot, which a solo maintainer can neither audit nor keep current.*
+
+---
+
+##### C-TEC-002 Build
+
+The software shall run directly from its source files, with no build step or package manager.
+
+> *The files in the repository are the files the browser runs. Nothing is compiled, bundled, or installed, so the deployed tool is exactly the source, and anyone can serve it by copying the folder.*
+
+---
+
+##### C-TEC-003 Modules
+
+The software shall organise its JavaScript as native ES modules.
+
+> *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack (C-TEC-002) workable at scale: the alternatives, a single large file or global scripts, do not scale for a maintainer.*
 
 ### 3.2 Graphical
 
