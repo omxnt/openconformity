@@ -21,6 +21,7 @@
     - [3.2.2 Marks](#322-marks)
   - [3.3 Functional](#33-functional)
   - [3.4 Non-functional](#34-non-functional)
+    - [3.4.1 Operation](#341-operation)
 - [4. References](#4-references)
 
 ## 1. Introduction
