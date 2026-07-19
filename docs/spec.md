@@ -129,17 +129,17 @@ The software shall be licensed under the EUPL-1.2.
 
 ##### C-PRJ-004 Funding
 
-The software shall be non-commercial and not carry advertising, paid features, or sponsorship.
+The software shall not be supplied in the course of a commercial activity.
 
-> *Kept non-commercial, the project stays outside the commercial-activity scope of the Product Liability Directive and the Cyber Resilience Act, which apply to software placed on the market as a commercial activity.*
+> *Supplied outside any commercial activity, the project stays outside the scope of the Product Liability Directive and the Cyber Resilience Act, which apply to software placed on the market in the course of a commercial activity. Such activity covers, among other things, advertising, paid features, and sponsorship.*
 
 ---
 
 ##### C-PRJ-005 Content
 
-The software shall not reproduce copyrighted content from harmonized standards.
+The software shall not reproduce content from harmonized standards beyond what is published in the Official Journal of the European Union.
 
-> *Standards are sold by national standardization bodies. The tool is built only on public information: legislation, guidance, and the published lists of harmonized standards. It ships no clause text, titles, or Annex ZA mappings.*
+> *Standards are sold by national standardization bodies. The tool is built only on public information: legislation, guidance, and the harmonized standards lists published in the OJEU. Those lists include standard references and titles, which the tool may therefore use; clause text, tables, figures, and Annex ZA mappings are not published there and are not reproduced.*
 
 #### 3.1.2 Development
 
@@ -147,7 +147,7 @@ The software shall not reproduce copyrighted content from harmonized standards.
 
 ##### C-DEV-001 Repository
 
-The software shall be developed in a public GitHub repository.
+The software's source shall be maintained in a public GitHub repository.
 
 > *GitHub is a common platform. Public development keeps the source open and the history inspectable, consistent with the licence.*
 
@@ -163,17 +163,17 @@ The software shall be hosted on Cloudflare Pages.
 
 ##### C-DEV-003 Diagrams
 
-The software's technical diagrams shall be drawn in draw.io.
+The project's diagrams shall be maintained in draw.io format (.drawio) in the repository.
 
-> *draw.io is free, stores diagrams as open XML, and requires no account. The source file lives in the repository and exports to SVG for the site.*
+> *draw.io is free, stores diagrams as open XML, and requires no account. The source file lives in the repository and exports to SVG as assets for the site.*
 
 ---
 
 ##### C-DEV-004 Design
 
-The software's visual assets shall be designed in Figma.
+The project's marks shall be maintained as a Figma source file (.fig) in the repository.
 
-> *Figma is a common design tool with a free tier. The source file lives in the repository as a .fig export. Assets are exported as SVG, PNG, or JPEG.*
+> *Figma is a common design tool with a free tier. The source file lives in the repository and exports to SVG, PNG, or JPEG as assets for the site.*
 
 #### 3.1.3 Technical
 
@@ -181,13 +181,21 @@ The software's visual assets shall be designed in Figma.
 
 ##### C-TEC-001 Stack
 
-The software shall be built with HTML, CSS, and JavaScript only, with no framework or third-party code.
+The software shall be built with HTML, CSS, and JavaScript only.
 
-> *Native browser languages, understood directly by every modern browser with no transpilation. No third-party libraries or frameworks means no supply chain to secure and no dependency to rot, which a solo maintainer can neither audit nor keep current.*
+> *Native browser languages, understood directly by every modern browser with no transpilation.*
 
 ---
 
-##### C-TEC-002 Build
+##### C-TEC-002 Dependencies
+
+The software shall not include third-party code (frameworks or libraries).
+
+> *No third-party libraries or frameworks means no supply chain to secure and no dependency to rot, which a solo maintainer can neither audit nor keep current. Third-party assets, such as the IBM Plex typefaces, are permitted when self-hosted and open-licensed.*
+
+---
+
+##### C-TEC-003 Build
 
 The software shall run directly from its source files, with no build step or package manager.
 
@@ -195,11 +203,11 @@ The software shall run directly from its source files, with no build step or pac
 
 ---
 
-##### C-TEC-003 Modules
+##### C-TEC-004 Modules
 
 The software shall organise its JavaScript as native ES modules.
 
-> *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack (C-TEC-002) workable at scale: the alternatives, a single large file or global scripts, do not scale for a maintainer.*
+> *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack workable at scale: the alternatives, a single large file or global scripts, do not scale for a maintainer.*
 
 ### 3.2 Graphical
 
@@ -209,7 +217,7 @@ The software shall organise its JavaScript as native ES modules.
 
 ##### G-SYS-001 Language typeface
 
-The software shall set language in IBM Plex Sans.
+The software shall render prose text in IBM Plex Sans.
 
 > *A humanist sans keeps prose legible at interface sizes. It is open-licensed and can be self-hosted.*
 
@@ -217,9 +225,9 @@ The software shall set language in IBM Plex Sans.
 
 ##### G-SYS-002 Data typeface
 
-The software shall set identifiers and data in IBM Plex Mono.
+The software shall render identifiers and data values in IBM Plex Mono.
 
-> *A monospace face marks machine-referenceable content — identifiers, clauses, values — as distinct from prose at a glance. It is open-licensed and can be self-hosted.*
+> *A monospace face marks machine-referenceable content, such as identifiers, clauses, and values, as distinct from prose at a glance.*
 
 ---
 
