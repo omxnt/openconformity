@@ -261,7 +261,31 @@ The favicon shall be a square filled with the accent colour.
 
 ### 3.4 Non-functional
 
-*Not started yet.*
+#### 3.4.1 Operation
+
+---
+
+##### N-OPS-001 Browser-based
+
+The software shall run in a standard web browser, with no installation required.
+
+> *The user reaches the tool by opening a URL. There is nothing to install, update, or maintain on their machine, and any current browser can run it.*
+
+---
+
+##### N-OPS-002 No account
+
+The software shall not require an account or a sign-in.
+
+> *The tool stores nothing remotely and identifies no one, so there is nothing to sign in to. The user opens it and works.*
+
+---
+
+##### N-OPS-003 Self-contained
+
+The software shall load completely when first opened, and shall fetch nothing further during use.
+
+> *Once loaded, the tool runs from what the browser already holds, so work continues uninterrupted if the connection drops.*
 
 ## 4. References
 
