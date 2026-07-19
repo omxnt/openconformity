@@ -17,11 +17,13 @@ The purpose of this document is to record the decisions behind openconformity: w
 
 ### 1.2 Conventions
 
-Decisions are numbered `D-NNN` and ordered by number, grouped loosely by theme. Numbering is append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited, with the superseded entry kept and a note pointing forward.
+Decisions are numbered `D-NNN` and ordered by number, grouped loosely by theme. Numbering is append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited.
 
 Each entry carries one or more tags: `legal`, `product`, `architecture`, `repository`, `documentation`, `graphical`.
 
-An entry names what was decided and why. It does not restate the specification, since values live in spec.md, and it does not cite a section or identifier in another document, since those move.
+An entry names what was decided and why. It does not restate the specification, since values live in spec.md.
+
+A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
 
 *This log was consolidated on 2026-07-19 to reflect the project's current position, and entries before that date were renumbered. Append-only applies from that point.*
 
@@ -63,7 +65,7 @@ No sales, no donations, no sponsorship, no paid support.
 
 ### D-003 No reproduction of standard content
 
-`2026-07-14` `legal`
+`2026-07-14` `legal` `superseded by D-029`
 
 The tool does not include or reproduce copyrighted content from harmonized standards: no clause text, no clause titles, no Annex ZA mappings.
 
@@ -325,6 +327,14 @@ Entity type is distinguished by icon, not by colour. The interface is monochrome
 The brand is the wordmark "openconformity" and a favicon, and nothing else: no logo, no symbol, no monogram. The favicon is a square in the accent colour. The full graphical profile — typefaces, accent, and marks — is specified in spec.md.
 
 > *A wordmark renders identically anywhere with no asset to maintain, and a single accent square is legible at 16 pixels where a wordmark is not. A monogram becomes a second mark to recognise; a plain square does not. Composition onto any surface is done per surface, so no banner or social-preview assets are kept in the repository.*
+
+### D-029 Standards content usable only as published in the OJEU
+
+`2026-07-19` `legal`
+
+The tool does not include or reproduce content from harmonized standards beyond what is published in the harmonized-standards lists in the Official Journal of the European Union. Those lists publish standard references and titles, which may be used. Clause text, tables, figures, and Annex ZA mappings are not published there and are not reproduced.
+
+> *Standards are sold by national standardization bodies, so the tool is built only on public information: legislation, guidance, and the OJEU lists. The boundary is what the OJEU publishes. References and titles appear there and carry no separate licence, so they are usable; the body of a standard does not and is not. Specified in spec.md C-PRJ-005.*
 
 ## 3. Open Topics
 
