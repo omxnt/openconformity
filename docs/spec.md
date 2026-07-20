@@ -22,6 +22,7 @@
   - [3.3 Functional](#33-functional)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
+    - [3.4.2 Accessibility](#342-accessibility)
 - [4. References](#4-references)
 
 ## 1. Introduction
@@ -284,9 +285,35 @@ The software shall not require an account or a sign-in.
 
 ##### N-OPS-003 Self-contained
 
-The software shall load completely when first opened, and shall fetch nothing further during use.
+The software shall load all of its resources on initial load, and shall fetch nothing further during use.
 
 > *Once loaded, the tool runs from what the browser already holds, so work continues uninterrupted if the connection drops.*
+
+#### 3.4.2 Accessibility
+
+---
+
+##### N-ACC-001 Standard conformance
+
+The software shall meet WCAG 2.2 Level AA [4].
+
+> *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal: a single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
+
+---
+
+##### N-ACC-002 Colour independence
+
+The software shall distinguish entity types by shape, not by colour alone.
+
+> *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision; a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
+
+---
+
+##### N-ACC-003 Keyboard operability
+
+The software shall be fully operable by keyboard.
+
+> *A modeling tool is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed: it is required for users who cannot use a pointer, and it is faster for those building a large model.*
 
 ## 4. References
 
@@ -295,3 +322,4 @@ The software shall load completely when first opened, and shall fetch nothing fu
 | [1] | INCOSE Guide to Writing Requirements V4 – Summary Sheet | https://www.incose.org/wp-content/uploads/legacy/working-groups/requirements-wg/guidetowritingrequirements/incose_rwg_gtwr_v4_summary_sheet.pdf |
 | [2] | Easy Approach to Requirements Syntax (EARS) | https://alistairmavin.com/ears/ |
 | [3] | SEBoK System Requirements Definition | https://sebokwiki.org/wiki/System_Requirements_Definition |
+| [4] | Web Content Accessibility Guidelines (WCAG) 2.2 | https://www.w3.org/TR/WCAG22/ |
