@@ -23,6 +23,7 @@
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
     - [3.4.2 Accessibility](#342-accessibility)
+    - [3.4.3 Privacy](#343-privacy)
 - [4. References](#4-references)
 
 ## 1. Introduction
@@ -314,6 +315,40 @@ The software shall distinguish entity types by shape, not by colour alone.
 The software shall be fully operable by keyboard.
 
 > *A modeling tool is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed: it is required for users who cannot use a pointer, and it is faster for those building a large model.*
+
+#### 3.4.3 Privacy
+
+---
+
+##### N-PRV-001 Local processing
+
+The software shall perform all processing on the user's device.
+
+> *All computation happens in the browser, on the user's own device. Nothing is sent away to be processed, so the tool needs no server and the data being worked on stays where it already is.*
+
+---
+
+##### N-PRV-002 No data transmission
+
+The software shall not transmit user data to any external service.
+
+> *The confidential data a user enters, their model and its content, stays on their device and is never sent anywhere. Fetching the tool itself is an ordinary web request to the host; the user's data is not part of it.*
+
+---
+
+##### N-PRV-003 No tracking
+
+The software shall not track, profile, or collect analytics on the user.
+
+> *The software records nothing about who uses it or how. This is a property of the tool itself, separate from the ordinary request logs any web host keeps when serving a page.*
+
+---
+
+##### N-PRV-004 Local storage
+
+The software shall store all project data on the user's own device.
+
+> *The user's data lives only on their own device, whether held in the browser between sessions or saved as a file. It is never stored remotely, in an account, or on a server.*
 
 ## 4. References
 
