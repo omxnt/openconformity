@@ -8,16 +8,6 @@
 
     <link rel="icon" type="image/svg+xml" href="assets/marks/favicon.svg">
 
-    <script>
-        (function () {
-            var stored = localStorage.getItem("mode");
-            var dark = stored
-                ? stored === "dark"
-                : window.matchMedia("(prefers-color-scheme: dark)").matches;
-            document.documentElement.classList.add(dark ? "dark" : "light");
-        })();
-    </script>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,10 +18,10 @@
                 <div class="nav-links">
                     <a href="#about">about</a>
                     <a href="#concept">concept</a>
-                    <a href="#demo">demo</a>
+                    <a href="#development">development</a>
                     <a href="#status">status</a>
+                    <a href="#demo">demo</a>
                 </div>
-                <button type="button" class="mode" id="mode">dark</button>
             </div>
         </div>
     </nav>
@@ -86,19 +76,35 @@
             </p>
         </section>
 
-        <section id="demo">
-            <h2>Demo</h2>
+        <section id="development">
+            <h2>Development</h2>
             <p>
-                A non-functional demo of the user interface is available. It shows the
-                layout and the concept of the tool with fixed example content. Nothing
-                can be created, edited, or saved.
+                The project is being developed in a public repository on
+                <a href="https://github.com/omxnt/openconformity">GitHub</a>. The
+                repository contains a design document which describes the concept and
+                implementation of the tool, a requirements specification which defines
+                the requirements for the implementation, and a decision log which
+                records key decisions in the project. These documents are maintained
+                alongside the source and iterated as the tool is built.
             </p>
-            <p><a href="app/" class="action">Open the demo</a></p>
         </section>
 
         <section id="status">
             <h2>Status</h2>
-            <p>In development.</p>
+            <p>
+                The tool is in development. Progress is shared on
+                <a href="https://www.linkedin.com/company/openconformity">LinkedIn</a>.
+            </p>
+        </section>
+
+        <section id="demo">
+            <h2>Demo</h2>
+            <p>
+                A demo of the user interface is available. It shows the current layout
+                and concept with fixed example content, and is updated as the tool is
+                developed. The demo is a preview, and not a working tool.
+            </p>
+            <p><a href="app/" class="action">Open the demo</a></p>
         </section>
     </main>
 
@@ -112,26 +118,5 @@
             <small>&copy; 2026 openconformity</small>
         </div>
     </footer>
-
-    <script>
-        (function () {
-            var btn = document.getElementById("mode");
-            var root = document.documentElement;
-
-            function label() {
-                btn.textContent = root.classList.contains("dark") ? "light" : "dark";
-            }
-
-            label();
-
-            btn.addEventListener("click", function () {
-                var dark = !root.classList.contains("dark");
-                root.classList.toggle("dark", dark);
-                root.classList.toggle("light", !dark);
-                localStorage.setItem("mode", dark ? "dark" : "light");
-                label();
-            });
-        })();
-    </script>
 </body>
 </html>
