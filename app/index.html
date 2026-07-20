@@ -1,485 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>openconformity</title>
-  <link rel="icon" type="image/svg+xml" href="../assets/marks/favicon.svg">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>openconformity</title>
+<link rel="icon" type="image/svg+xml" href="../assets/marks/favicon.svg">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header class="menubar">
-    <a href="../" class="logo" aria-label="openconformity"></a>
-    <nav class="menu">
-      <div class="menu-wrap">
-        <span class="menu-item" data-menu="file">File</span>
-        <div class="dropdown" id="menu-file">
-          <span class="dd-item">New project</span>
-          <span class="dd-item">Open project...</span>
-          <span class="dd-item">Save project</span>
-        </div>
-      </div>
-      <div class="menu-wrap">
-        <span class="menu-item" data-menu="edit">Edit</span>
-        <div class="dropdown" id="menu-edit">
-          <span class="dd-item">Undo</span>
-          <span class="dd-item">Redo</span>
-          <div class="dd-sep"></div>
-          <span class="dd-item">Cut</span>
-          <span class="dd-item">Copy</span>
-          <span class="dd-item">Paste</span>
-          <span class="dd-item">Delete</span>
-        </div>
-      </div>
-      <div class="menu-wrap">
-        <span class="menu-item" data-menu="export">Export</span>
-        <div class="dropdown" id="menu-export">
-          <span class="dd-item">Hazard list (CSV)</span>
-          <span class="dd-item">Requirement specification (CSV)</span>
-          <span class="dd-item">Verification plan (CSV)</span>
-          <span class="dd-item">Essential Requirements (CSV)</span>
-        </div>
-      </div>
-      <div class="menu-wrap">
-        <span class="menu-item" data-menu="help">Help</span>
-        <div class="dropdown" id="menu-help">
-          <span class="dd-item">About project</span>
-          <span class="dd-item">Documentation</span>
-          <span class="dd-item">Report an issue</span>
-        </div>
-      </div>
-    </nav>
-    <button type="button" class="bar-btn metamodel-btn" id="btn-metamodel">Metamodel</button>
-    <button type="button" class="bar-btn" id="btn-mock">Concept mockup</button>
-  </header>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-element" viewBox="0 0 16 16"><path d="M8 1 15 5v6l-7 4-7-4V5zM8 3 3.5 5.6 8 8.2l4.5-2.6zM3 7.3v3.6l4 2.3V9.6zm10 0-4 2.3v3.6l4-2.3z"/></symbol>
+    <symbol id="i-phase" viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm-1 1v4.6l3.2 2 1-1.6L9 6.4V4z"/></symbol>
+    <symbol id="i-task" viewBox="0 0 16 16"><path d="M9.5 1a4.5 4.5 0 00-4.2 6.1L1 11.4V15h3.6l4.3-4.3A4.5 4.5 0 109.5 1zm0 2a2.5 2.5 0 110 5 2.5 2.5 0 010-5zM3 12.2l1-1 .8.8-1 1H3z"/></symbol>
+    <symbol id="i-actor" viewBox="0 0 16 16"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zm0 7c-3 0-6 1.6-6 3.6V15h12v-3.4C14 9.6 11 8 8 8z"/></symbol>
+    <symbol id="i-legislation" viewBox="0 0 16 16"><path d="M2 1h9l3 3v11H2zm8 1v3h3zM4 7h8v1.4H4zm0 3h8v1.4H4zm0 3h5v1.4H4z"/></symbol>
+    <symbol id="i-standard" viewBox="0 0 16 16"><path d="M2 2h5c.8 0 1.5.3 2 .8.5-.5 1.2-.8 2-.8h3v11h-3c-.8 0-1.5.3-2 .8-.5-.5-1.2-.8-2-.8H2zm5 1.6H3.6v7.8H7c.4 0 .7.1 1 .2V4.6c-.3-.6-.6-1-1-1zm5 0c-.4 0-.7.4-1 1v7c.3-.1.6-.2 1-.2h1.4V3.6z"/></symbol>
+    <symbol id="i-assessment" viewBox="0 0 16 16"><path d="M6 1h4v1h2v13H4V2h2zm-.6 6.5L4 8.9l2.6 2.6 5-5-1.4-1.4-3.6 3.6z"/></symbol>
+    <symbol id="i-body" viewBox="0 0 16 16"><path d="M2 6 8 2l6 4v1H2zM3 8h1.6v4H3zm3 0h1.6v4H6zm3 0h1.6v4H9zm3 0h1.6v4H12zM2 13h12v1.6H2z"/></symbol>
+    <symbol id="i-er" viewBox="0 0 16 16"><path d="M2 1h8l4 4v10H2zm7 1.4V5h2.6zM8 6.6l.8 1.9 2 .2-1.5 1.4.4 2L8 11l-1.7 1.1.4-2L5.2 8.7l2-.2z"/></symbol>
+    <symbol id="i-sr" viewBox="0 0 16 16"><path d="M2 1h8l4 4v10H2zm7 1.4V5h2.6zM4.6 7.4h6.8v1.3H4.6zm0 2.6h6.8v1.3H4.6zm0 2.6h4.2v1.3H4.6z"/></symbol>
+    <symbol id="i-rq" viewBox="0 0 16 16"><path d="M2 1h8l4 4v10H2zm7 1.4V5h2.6zM4.4 8.2 6 6.6l.9.9-1 1 1 1-.9.9zm7.2 0L10 9.6l.9.9 1.6-1.6-.9-.7zM10 6.6l-.9-.9-1.6 1.6.9.9zM6.9 12l.9.9 1.6-1.6-.9-.9z"/></symbol>
+    <symbol id="i-va" viewBox="0 0 16 16"><path d="M6.5 1a5.5 5.5 0 104.2 9L14 13.3 13.3 14 10 10.7A5.5 5.5 0 006.5 1zm0 2a3.5 3.5 0 110 7 3.5 3.5 0 010-7z"/></symbol>
+    <symbol id="i-hazard" viewBox="0 0 16 16"><path d="M8 1 15 14H1zm-.9 4.4.2 4.6h1.4l.2-4.6zM8 11a.9.9 0 100 1.8A.9.9 0 008 11z"/></symbol>
+    <symbol id="i-scenario" viewBox="0 0 16 16"><path d="M9.4 1 3 8.8h3.4L5.6 15 12 7.2H8.6z"/></symbol>
+    <symbol id="i-rrm" viewBox="0 0 16 16"><path d="M8 1 2 3.2v5.2c0 3.3 2.5 5.6 6 6.6 3.5-1 6-3.3 6-6.6V3.2zm0 1.8 4.2 1.5v3.9c0 2.2-1.6 3.9-4.2 4.8V2.8z"/></symbol>
+    <symbol id="i-sf" viewBox="0 0 16 16"><path d="M8 1 2 3.2v5.2c0 3.3 2.5 5.6 6 6.6 3.5-1 6-3.3 6-6.6V3.2zM7 5.6h2v1.8h1.8v2H9v1.8H7V9.4H5.2v-2H7z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 16 16"><path d="M1 2.6h5.4l1.4 1.6H15v9.2H1z"/></symbol>
+    <symbol id="i-project" viewBox="0 0 16 16"><path d="M8 1 15 5v6l-7 4-7-4V5zm0 2.2L3.2 5.6 8 8l4.8-2.4z"/></symbol>
+    <symbol id="i-action" viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="2"/></symbol>
+  </defs>
+</svg>
 
-  <div class="workspace">
+<div class="menubar">
+  <a href="../" class="wordmark" aria-label="openconformity"></a>
+  <nav class="menu">
+    <span class="menu-item" data-menu="file">File</span>
+    <span class="menu-item" data-menu="edit">Edit</span>
+    <span class="menu-item" data-menu="export">Export</span>
+    <span class="menu-item" data-menu="help">Help</span>
+  </nav>
+</div>
 
-    <aside class="navigator" id="navigator">
-      <div class="pane-head">
-        <span class="pane-title">Navigator</span>
+<div class="dropdown-layer">
+  <div class="dropdown" id="menu-file"><span class="dd-item">New project</span><span class="dd-item">Open project...</span><span class="dd-item">Save project</span></div>
+  <div class="dropdown" id="menu-edit"><span class="dd-item">Undo</span><span class="dd-item">Redo</span><div class="dd-sep"></div><span class="dd-item">Cut</span><span class="dd-item">Copy</span><span class="dd-item">Paste</span><span class="dd-item">Delete</span></div>
+  <div class="dropdown" id="menu-export"><span class="dd-item">Hazard list (CSV)</span><span class="dd-item">Requirement specification (CSV)</span><span class="dd-item">Verification plan (CSV)</span></div>
+  <div class="dropdown" id="menu-help"><span class="dd-item">About project</span><span class="dd-item">Documentation</span><span class="dd-item">Report an issue</span></div>
+</div>
+
+<div class="toolbar">
+  <button class="tb-btn" disabled><svg class="icon"><use href="#i-action"/></svg>Action</button>
+  <button class="tb-btn" disabled><svg class="icon"><use href="#i-action"/></svg>Action</button>
+  <div class="tb-sep"></div>
+  <button class="tb-btn" disabled><svg class="icon"><use href="#i-action"/></svg>Action</button>
+  <button class="tb-btn" disabled><svg class="icon"><use href="#i-action"/></svg>Action</button>
+  <div style="margin-left:auto; display:flex; gap:4px">
+    <button class="tb-btn" id="btn-metamodel">Metamodel</button>
+    <button class="tb-btn" id="btn-mock">Demo</button>
+  </div>
+</div>
+
+<div class="workspace">
+
+  <div class="col col-left">
+    <div class="pane" style="flex:1">
+      <div class="pane-head"><span>Navigator</span></div>
+      <div class="search">
+        <input type="text" id="nav-filter" placeholder="Filter" autocomplete="off">
+        <button type="button" id="nav-filter-clear" class="nav-clear" title="Clear">&times;</button>
       </div>
-
       <div class="pane-body">
-        <div class="nav-search">
-          <input type="text" id="nav-filter" placeholder="Filter" autocomplete="off">
-          <button type="button" id="nav-filter-clear" class="nav-clear" title="Clear">&times;</button>
-        </div>
-
         <div class="tree">
-          <div class="node root">
-            <span class="twisty">&minus;</span><span class="node-label">Packaging machine</span>
-          </div>
-
-          <div class="children">
-
-            <div class="node lvl1 pillar-structure">
-              <span class="twisty">&minus;</span><span class="node-label">Structure</span>
-            </div>
-            <div class="children">
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">System Elements</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">SE-001</span><span class="node-label">Packaging machine</span></div>
-                <div class="node leaf"><span class="node-id">SE-002</span><span class="node-label">Infeed unit</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">System Phases</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">SP-001</span><span class="node-label">Operation</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">System Tasks</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">ST-001</span><span class="node-label">Feeding material</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">System Actors</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">SA-001</span><span class="node-label">Operator</span></div>
-              </div>
-            </div>
-
-            <div class="node lvl1 pillar-legislative">
-              <span class="twisty">&minus;</span><span class="node-label">Legislative</span>
-            </div>
-            <div class="children">
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">European Legislations</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">EL-001</span><span class="node-label">Machinery Regulation (EU) 2023/1230</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">European Standards</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">ES-001</span><span class="node-label">EN ISO 13854:2019</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">+</span><span class="node-label">Conformity Assessments</span></div>
-              <div class="node lvl2"><span class="twisty">+</span><span class="node-label">Notified Bodies</span></div>
-            </div>
-
-            <div class="node lvl1 pillar-requirements">
-              <span class="twisty">&minus;</span><span class="node-label">Requirements</span>
-            </div>
-            <div class="children">
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Essential Requirements</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">ER-001</span><span class="node-label">1.3.7 Moving parts</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Standard Requirements</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">SR-001</span><span class="node-label">Table 1 Minimum gaps</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">System Requirements</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">RQ-001</span><span class="node-label">Minimum gap 100 mm</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Verification Activities</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">VA-001</span><span class="node-label">Measure minimum gap</span></div>
-              </div>
-            </div>
-
-            <div class="node lvl1 pillar-hazard">
-              <span class="twisty">&minus;</span><span class="node-label">Hazard Analysis</span>
-            </div>
-            <div class="children">
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Single Hazards</span></div>
-              <div class="children">
-                <div class="node leaf selected"><span class="node-id">HZ-003</span><span class="node-label">Crushing at infeed rollers</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Accident Scenarios</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">AS-001</span><span class="node-label">Hand crushed during feeding</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">&minus;</span><span class="node-label">Risk Reduction Measures</span></div>
-              <div class="children">
-                <div class="node leaf"><span class="node-id">RRM-001</span><span class="node-label">Minimum gaps according to EN ISO 13854</span></div>
-              </div>
-              <div class="node lvl2"><span class="twisty">+</span><span class="node-label">Safety Functions</span></div>
-            </div>
-
-          </div>
+        <div class="tnode root"><div class="row"><span class="twisty">&minus;</span><span>Packaging machine</span></div>
+          <div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span class="pillar">Structure</span></div><div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>System Elements</span></div><div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span class="sw sw-structure"></span><span class="id">SE-001</span><span>Packaging machine</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-structure"></span><span class="id">SE-002</span><span>Infeed unit</span></div></div></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>System Phases</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-structure"></span><span class="id">SP-001</span><span>Operation</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>System Tasks</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-structure"></span><span class="id">ST-001</span><span>Feeding material</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>System Actors</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-structure"></span><span class="id">SA-001</span><span>Operator</span></div></div></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span class="pillar">Legislative</span></div><div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>European Legislations</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-legislative"></span><span class="id">EL-001</span><span>Machinery Regulation (EU) 2023/1230</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>European Standards</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-legislative"></span><span class="id">ES-001</span><span>EN ISO 13854:2019</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">+</span><span>Conformity Assessments</span></div><div class="tchildren collapsed"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-legislative"></span><span class="id">CA-001</span><span>Internal control</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">+</span><span>Notified Bodies</span></div><div class="tchildren collapsed"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-legislative"></span><span class="id">NB-001</span><span>Notified body</span></div></div></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span class="pillar">Requirements</span></div><div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Essential Requirements</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-requirements"></span><span class="id">ER-001</span><span>1.3.7 Moving parts</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Standard Requirements</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-requirements"></span><span class="id">SR-001</span><span>Table 1 Minimum gaps</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>System Requirements</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-requirements"></span><span class="id">RQ-001</span><span>Minimum gap 100 mm</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Verification Activities</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-requirements"></span><span class="id">VA-001</span><span>Measure minimum gap</span></div></div></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span class="pillar">Hazard Analysis</span></div><div class="tchildren"><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Single Hazards</span></div><div class="tchildren"><div class="tnode leaf sel"><div class="row"><span class="tw-none"></span><span class="sw sw-hazard"></span><span class="id">HZ-003</span><span>Crushing at infeed rollers</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Accident Scenarios</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-hazard"></span><span class="id">AS-001</span><span>Hand crushed during feeding</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">&minus;</span><span>Risk Reduction Measures</span></div><div class="tchildren"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-hazard"></span><span class="id">RRM-001</span><span>Minimum gaps, EN ISO 13854</span></div></div></div></div><div class="tnode"><div class="row"><span class="twisty">+</span><span>Safety Functions</span></div><div class="tchildren collapsed"><div class="tnode leaf"><div class="row"><span class="tw-none"></span><span class="sw sw-hazard"></span><span class="id">SF-001</span><span>Safety function</span></div></div></div></div></div></div></div></div>
         </div>
       </div>
-    </aside>
+    </div>
+  </div>
 
-    <div class="splitter-v" id="splitter-v"></div>
+  <div class="splitter-v" id="splitter-v"></div>
 
-    <main class="editor">
+  <div class="col col-right">
+
+    <div class="pane" style="flex:1">
+      <div class="pane-head"><span>Editor</span></div>
+      <div class="entity-head">
+        <span class="sw sw-hazard"></span>
+        <span class="entity-kind">Single Hazard</span>
+        <span class="entity-name">Crushing at infeed rollers</span>
+      </div>
+      <div class="editor-body">
+        <div class="field-row"><label class="field-label">ID</label><input class="field-in ro" value="HZ-003" readonly></div>
+        <div class="field-row"><label class="field-label">Name</label><input class="field-in" value="Crushing at infeed rollers"></div>
+        <div class="field-row"><label class="field-label">Hazard type</label><input class="field-in" value="Mechanical, crushing"></div>
+        <div class="field-row" style="align-items:flex-start"><label class="field-label" style="padding-top:4px">Description</label><textarea class="field-in">The infeed rollers form a converging nip. A hand can be drawn in during manual feeding.</textarea></div>
+        <div class="field-row"><label class="field-label">Origin</label><input class="field-in" value="ISO 12100 Table B.1"></div>
+        <div class="btn-row">
+          <button class="btn primary" type="button">Save</button>
+          <button class="btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="splitter-h" id="splitter-h"></div>
+
+    <div class="pane rel" id="rel-pane">
       <div class="pane-head">
-        <span class="pane-title">Editor</span>
+        <span>Relationships</span>
+        <span class="tabs"><span class="tab" data-tab="list">List</span><span class="tab on" data-tab="graph">Graph</span></span>
       </div>
-
       <div class="pane-body">
-        <div class="entity-header">
-          <span class="entity-badge badge-hazard">Single Hazard</span>
-          <h1 class="entity-name">Crushing at infeed rollers</h1>
+        <div id="rel-list" class="rel-view hidden">
+          <table class="rel-t">
+            <tr><th>Relationship</th><th>Direction</th><th>ID</th><th>Related entity</th><th>Entity type</th></tr>
+            <tr><td>exhibits</td><td><span class="dir-arrow">&#8592;</span> incoming</td><td class="mono">SE-002</td><td>Infeed unit</td><td><span class="cellsw"><span class="sw sw-structure"></span>System Element</span></td></tr>
+            <tr><td>mitigates</td><td><span class="dir-arrow">&#8592;</span> incoming</td><td class="mono">RRM-001</td><td>Minimum gaps, EN ISO 13854</td><td><span class="cellsw"><span class="sw sw-hazard"></span>Risk Reduction Measure</span></td></tr>
+            <tr><td>triggers</td><td><span class="dir-arrow">&#8594;</span> outgoing</td><td class="mono">ER-001</td><td>1.3.7 Moving parts</td><td><span class="cellsw"><span class="sw sw-requirements"></span>Essential Requirement</span></td></tr>
+            <tr><td>contributes to</td><td><span class="dir-arrow">&#8594;</span> outgoing</td><td class="mono">AS-001</td><td>Hand crushed during feeding</td><td><span class="cellsw"><span class="sw sw-hazard"></span>Accident Scenario</span></td></tr>
+          </table>
         </div>
-
-        <table class="attributes">
-          <tr>
-            <td class="attr-label">ID</td>
-            <td class="attr-value">HZ-003</td>
-          </tr>
-          <tr>
-            <td class="attr-label">Name</td>
-            <td class="attr-value">Crushing at infeed rollers</td>
-          </tr>
-          <tr>
-            <td class="attr-label">Hazard type</td>
-            <td class="attr-value">Mechanical, crushing</td>
-          </tr>
-        </table>
+        <div id="rel-graph" class="rel-view" style="padding:10px">
+          <svg viewBox="0 0 900 190" class="graph-svg" role="img" aria-label="Neighbourhood graph of the selected entity">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#8B8B8B"/></marker></defs>
+            <g class="g-node g-structure" transform="translate(20,18)"><rect width="200" height="50"/><text x="12" y="17" class="g-type">System Element</text><text x="12" y="32" class="g-id">SE-002</text><text x="12" y="45" class="g-name">Infeed unit</text></g>
+            <line x1="222" y1="48" x2="351" y2="82" stroke="#8B8B8B" marker-end="url(#arrow)"/><text x="285" y="58" class="g-label">exhibits</text>
+            <g class="g-node g-hazard" transform="translate(20,120)"><rect width="200" height="50"/><text x="12" y="17" class="g-type">Risk Reduction Measure</text><text x="12" y="32" class="g-id">RRM-001</text><text x="12" y="45" class="g-name">Minimum gaps</text></g>
+            <line x1="222" y1="140" x2="351" y2="106" stroke="#8B8B8B" marker-end="url(#arrow)"/><text x="285" y="142" class="g-label">mitigates</text>
+            <g class="g-node g-sel g-hazard" transform="translate(353,66)"><rect width="200" height="56"/><text x="12" y="19" class="g-type">Single Hazard</text><text x="12" y="35" class="g-id">HZ-003</text><text x="12" y="49" class="g-name">Crushing at infeed rollers</text></g>
+            <g class="g-node g-requirements" transform="translate(680,18)"><rect width="200" height="50"/><text x="12" y="17" class="g-type">Essential Requirement</text><text x="12" y="32" class="g-id">ER-001</text><text x="12" y="45" class="g-name">1.3.7 Moving parts</text></g>
+            <line x1="555" y1="82" x2="678" y2="48" stroke="#8B8B8B" marker-end="url(#arrow)"/><text x="620" y="58" class="g-label">triggers</text>
+            <g class="g-node g-hazard" transform="translate(680,120)"><rect width="200" height="50"/><text x="12" y="17" class="g-type">Accident Scenario</text><text x="12" y="32" class="g-id">AS-001</text><text x="12" y="45" class="g-name">Hand crushed during feeding</text></g>
+            <line x1="555" y1="106" x2="678" y2="140" stroke="#8B8B8B" marker-end="url(#arrow)"/><text x="617" y="136" class="g-label">contributes to</text>
+          </svg>
+        </div>
       </div>
-    </main>
+    </div>
 
   </div>
+</div>
 
-  <div class="splitter-h" id="splitter-h"></div>
+<div class="statusbar">
+  <span>Packaging machine</span>
+  <span>21 entities</span>
+  <span>36 relationships</span>
+</div>
 
-  <footer class="relationships" id="relationships">
-    <div class="pane-head">
-      <span class="pane-title">Relationships</span>
-      <div class="rel-toggle">
-        <button id="btn-graph" class="toggle-btn active">Graph</button>
-        <button id="btn-list" class="toggle-btn">List</button>
-      </div>
-    </div>
+<div class="modal-overlay hidden" id="metamodel-modal">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title">Metamodel</span><button type="button" class="modal-close">&times;</button></div>
+    <div class="modal-body"><img src="../assets/diagrams/meta.svg" alt="The openconformity metamodel"></div>
+  </div>
+</div>
 
-    <div class="pane-body">
-      <div id="rel-graph" class="rel-view">
-        <svg viewBox="0 0 900 200" class="graph-svg" role="img" aria-label="Graph of the selected entity and its closest relationships">
-          <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#3A3A3A"/>
-            </marker>
-          </defs>
-
-          <rect x="20" y="22" width="200" height="52" rx="4" class="g-structure"/>
-          <text x="30" y="38" class="g-type">System Element</text>
-          <text x="30" y="53" class="g-id">SE-002</text>
-          <text x="30" y="67" class="g-name">Infeed unit</text>
-          <line x1="222" y1="54" x2="351" y2="88" stroke="#3A3A3A" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="280" y="61" class="g-label">exhibits</text>
-
-          <rect x="20" y="126" width="200" height="52" rx="4" class="g-hazard"/>
-          <text x="30" y="142" class="g-type">Risk Reduction Measure</text>
-          <text x="30" y="157" class="g-id">RRM-001</text>
-          <text x="30" y="171" class="g-name">Minimum gaps, EN ISO 13854</text>
-          <line x1="222" y1="146" x2="351" y2="112" stroke="#3A3A3A" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="280" y="147" class="g-label">mitigates</text>
-
-          <rect x="353" y="70" width="200" height="60" rx="4" class="g-hazard g-selected"/>
-          <text x="363" y="88" class="g-type">Single Hazard</text>
-          <text x="363" y="104" class="g-id">HZ-003</text>
-          <text x="363" y="119" class="g-name">Crushing at infeed rollers</text>
-
-          <rect x="680" y="22" width="200" height="52" rx="4" class="g-requirements"/>
-          <text x="690" y="38" class="g-type">Essential Requirement</text>
-          <text x="690" y="53" class="g-id">ER-001</text>
-          <text x="690" y="67" class="g-name">1.3.7 Moving parts</text>
-          <line x1="555" y1="88" x2="678" y2="54" stroke="#3A3A3A" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="617" y="61" class="g-label">triggers</text>
-
-          <rect x="680" y="126" width="200" height="52" rx="4" class="g-hazard"/>
-          <text x="690" y="142" class="g-type">Accident Scenario</text>
-          <text x="690" y="157" class="g-id">AS-001</text>
-          <text x="690" y="171" class="g-name">Hand crushed during feeding</text>
-          <line x1="555" y1="112" x2="678" y2="146" stroke="#3A3A3A" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="614" y="140" class="g-label">contributes to</text>
-        </svg>
-      </div>
-
-      <div id="rel-list" class="rel-view hidden">
-        <table class="rel-table">
-          <tr class="rel-table-head">
-            <td>Relationship</td>
-            <td>Direction</td>
-            <td>ID</td>
-            <td>Related entity</td>
-            <td>Entity type</td>
-          </tr>
-          <tr>
-            <td class="rel-type">exhibits</td>
-            <td class="rel-dir">incoming</td>
-            <td class="rel-id">SE-002</td>
-            <td>Infeed unit</td>
-            <td><span class="type-label pillar-structure-text">System Element</span></td>
-          </tr>
-          <tr>
-            <td class="rel-type">mitigates</td>
-            <td class="rel-dir">incoming</td>
-            <td class="rel-id">RRM-001</td>
-            <td>Minimum gaps according to EN ISO 13854</td>
-            <td><span class="type-label pillar-hazard-text">Risk Reduction Measure</span></td>
-          </tr>
-          <tr>
-            <td class="rel-type">triggers</td>
-            <td class="rel-dir">outgoing</td>
-            <td class="rel-id">ER-001</td>
-            <td>1.3.7 Moving parts</td>
-            <td><span class="type-label pillar-requirements-text">Essential Requirement</span></td>
-          </tr>
-          <tr>
-            <td class="rel-type">contributes to</td>
-            <td class="rel-dir">outgoing</td>
-            <td class="rel-id">AS-001</td>
-            <td>Hand crushed during feeding</td>
-            <td><span class="type-label pillar-hazard-text">Accident Scenario</span></td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Metamodel modal -->
-  <div class="modal-overlay hidden" id="metamodel-modal">
-    <div class="modal">
-      <div class="modal-head">
-        <span class="modal-title">Metamodel</span>
-        <button type="button" class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <img src="../assets/diagrams/meta.svg" alt="The openconformity metamodel">
-      </div>
+<div class="modal-overlay hidden" id="mock-modal">
+  <div class="modal modal-narrow">
+    <div class="modal-head"><span class="modal-title">Demo</span><button type="button" class="modal-close">&times;</button></div>
+    <div class="modal-body modal-text">
+      <p>This is a preview of the openconformity user interface. It shows the layout and concept of the tool with fixed example content.</p>
+      <p>The demo is a preview, and not a working tool. See <a href="https://openconformity.org">openconformity.org</a> for the project.</p>
     </div>
   </div>
+</div>
 
-  <!-- Mockup modal -->
-  <div class="modal-overlay hidden" id="mock-modal">
-    <div class="modal modal-narrow">
-      <div class="modal-head">
-        <span class="modal-title">Concept mockup</span>
-        <button type="button" class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body modal-text">
-        <p>
-          This is a non-functional mockup of the openconformity user interface. It
-          shows the layout and the concept of the tool with fixed example content.
-          Nothing can be created, edited, or saved.
-        </p>
-        <p>
-          The tool is in design phase. See
-          <a href="https://openconformity.org">openconformity.org</a> for the project.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Relationship pane toggle
-    const btnList = document.getElementById("btn-list");
-    const btnGraph = document.getElementById("btn-graph");
-    const viewList = document.getElementById("rel-list");
-    const viewGraph = document.getElementById("rel-graph");
-
-    btnList.addEventListener("click", () => {
-      viewList.classList.remove("hidden");
-      viewGraph.classList.add("hidden");
-      btnList.classList.add("active");
-      btnGraph.classList.remove("active");
-    });
-
-    btnGraph.addEventListener("click", () => {
-      viewGraph.classList.remove("hidden");
-      viewList.classList.add("hidden");
-      btnGraph.classList.add("active");
-      btnList.classList.remove("active");
-    });
-
-    // Menus
-    const menuItems = document.querySelectorAll(".menu-item[data-menu]");
-    const closeMenus = () => {
-      document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("open"));
-      menuItems.forEach(m => m.classList.remove("open"));
-    };
-
-    menuItems.forEach(item => {
-      item.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const dd = document.getElementById("menu-" + item.dataset.menu);
-        const isOpen = dd.classList.contains("open");
-        closeMenus();
-        if (!isOpen) {
-          dd.classList.add("open");
-          item.classList.add("open");
-        }
-      });
-    });
-
-    document.addEventListener("click", closeMenus);
-
-    // Modals
-    const openModal = (id) => {
+<script>
+  // Menus (positioned under their menu-item)
+  var layer = document.querySelector('.dropdown-layer');
+  var items = document.querySelectorAll('.menu-item[data-menu]');
+  function closeMenus(){ document.querySelectorAll('.dropdown').forEach(function(d){d.classList.remove('open');}); items.forEach(function(m){m.classList.remove('open');}); }
+  items.forEach(function(item){
+    item.addEventListener('click', function(e){
+      e.stopPropagation();
+      var dd = document.getElementById('menu-'+item.dataset.menu);
+      var open = dd.classList.contains('open');
       closeMenus();
-      document.getElementById(id).classList.remove("hidden");
-    };
-    const closeModals = () => {
-      document.querySelectorAll(".modal-overlay").forEach(m => m.classList.add("hidden"));
-    };
-
-    document.getElementById("btn-metamodel").addEventListener("click", (e) => {
-      e.stopPropagation();
-      openModal("metamodel-modal");
-    });
-    document.getElementById("btn-mock").addEventListener("click", (e) => {
-      e.stopPropagation();
-      openModal("mock-modal");
-    });
-    document.querySelectorAll(".modal-close").forEach(b => {
-      b.addEventListener("click", closeModals);
-    });
-    document.querySelectorAll(".modal-overlay").forEach(overlay => {
-      overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) closeModals();
-      });
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeModals();
-        closeMenus();
+      if(!open){
+        var r = item.getBoundingClientRect();
+        dd.style.left = r.left+'px'; dd.style.top = r.bottom+'px';
+        dd.classList.add('open'); item.classList.add('open');
       }
     });
+  });
+  document.addEventListener('click', closeMenus);
 
-    // Tree expand/collapse
-    document.querySelectorAll(".twisty").forEach(t => {
-      t.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const node = t.closest(".node");
-        const kids = node.nextElementSibling;
-        if (!kids || !kids.classList.contains("children")) return;
-        const collapsed = kids.classList.toggle("collapsed");
-        t.innerHTML = collapsed ? "+" : "&minus;";
-      });
+  // List / Graph
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+      tab.classList.add('on');
+      var g = tab.dataset.tab==='graph';
+      document.getElementById('rel-list').classList.toggle('hidden', g);
+      document.getElementById('rel-graph').classList.toggle('hidden', !g);
     });
+  });
 
-    // Filter
-    const filter = document.getElementById("nav-filter");
-    const applyFilter = () => {
-      const q = filter.value.trim().toLowerCase();
-      if (!q) {
-        document.querySelectorAll(".node, .children").forEach(el => el.classList.remove("hit-hidden"));
-        return;
-      }
-      document.querySelectorAll(".node, .children").forEach(el => el.classList.add("hit-hidden"));
-      document.querySelectorAll(".node.leaf").forEach(leaf => {
-        if (leaf.textContent.toLowerCase().includes(q)) {
-          leaf.classList.remove("hit-hidden");
-          let el = leaf.parentElement;
-          while (el && !el.classList.contains("tree")) {
-            if (el.classList.contains("children")) {
-              el.classList.remove("hit-hidden");
-              const parentNode = el.previousElementSibling;
-              if (parentNode && parentNode.classList.contains("node")) parentNode.classList.remove("hit-hidden");
-            }
-            el = el.parentElement;
-          }
-          document.querySelector(".node.root").classList.remove("hit-hidden");
+  // Modals
+  function openModal(id){ closeMenus(); document.getElementById(id).classList.remove('hidden'); }
+  function closeModals(){ document.querySelectorAll('.modal-overlay').forEach(function(m){m.classList.add('hidden');}); }
+  document.getElementById('btn-metamodel').addEventListener('click', function(e){e.stopPropagation();openModal('metamodel-modal');});
+  document.getElementById('btn-mock').addEventListener('click', function(e){e.stopPropagation();openModal('mock-modal');});
+  document.querySelectorAll('.modal-close').forEach(function(b){b.addEventListener('click', closeModals);});
+  document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click', function(e){if(e.target===o) closeModals();});});
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeModals(); closeMenus(); } });
+
+  // Tree collapse/expand (nested)
+  document.querySelectorAll('.twisty').forEach(function(tw){
+    tw.addEventListener('click', function(e){
+      e.stopPropagation();
+      var node = tw.closest('.tnode');
+      var kids = node.querySelector(':scope > .tchildren');
+      if(!kids) return;
+      var collapsed = kids.classList.toggle('collapsed');
+      tw.innerHTML = collapsed ? '+' : '\u2212';
+    });
+  });
+
+  // Selection is fixed to the example entity (HZ-003) in this mockup.
+
+  // Filter
+  var filter = document.getElementById('nav-filter');
+  function applyFilter(){
+    var q = filter.value.trim().toLowerCase();
+    if(!q){
+      document.querySelectorAll('.tnode').forEach(function(n){ n.style.display=''; });
+      return;
+    }
+    // hide all, then reveal matching leaves and their ancestors
+    document.querySelectorAll('.tnode').forEach(function(n){ n.style.display='none'; });
+    document.querySelectorAll('.tnode.leaf').forEach(function(leaf){
+      if(leaf.textContent.toLowerCase().indexOf(q) > -1){
+        var el = leaf;
+        while(el && el.classList && el.classList.contains('tnode')){
+          el.style.display='';
+          el = el.parentElement.closest('.tnode');
         }
-      });
-    };
-    filter.addEventListener("input", applyFilter);
-    document.getElementById("nav-filter-clear").addEventListener("click", () => {
-      filter.value = "";
-      applyFilter();
-      filter.focus();
-    });
-    filter.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        filter.value = "";
-        applyFilter();
       }
     });
+  }
+  filter.addEventListener('input', applyFilter);
+  document.getElementById('nav-filter-clear').addEventListener('click', function(){ filter.value=''; applyFilter(); filter.focus(); });
 
-    // Resizable panes
-    const navigator = document.getElementById("navigator");
-    const relationships = document.getElementById("relationships");
-    let dragging = null;
-
-    document.getElementById("splitter-v").addEventListener("mousedown", (e) => {
-      dragging = "v";
-      e.preventDefault();
-      document.body.classList.add("resizing-v");
-    });
-
-    document.getElementById("splitter-h").addEventListener("mousedown", (e) => {
-      dragging = "h";
-      e.preventDefault();
-      document.body.classList.add("resizing-h");
-    });
-
-    document.addEventListener("mousemove", (e) => {
-      if (!dragging) return;
-      if (dragging === "v") {
-        const w = Math.min(Math.max(e.clientX, 200), 560);
-        navigator.style.width = w + "px";
+  // Resizable panes
+  (function(){
+    var nav = document.querySelector('.col-left');
+    var rel = document.getElementById('rel-pane');
+    var drag = null;
+    var sv = document.getElementById('splitter-v');
+    var sh = document.getElementById('splitter-h');
+    if(sv) sv.addEventListener('mousedown', function(e){ drag='v'; e.preventDefault(); document.body.classList.add('resizing-v'); });
+    if(sh) sh.addEventListener('mousedown', function(e){ drag='h'; e.preventDefault(); document.body.classList.add('resizing-h'); });
+    document.addEventListener('mousemove', function(e){
+      if(!drag) return;
+      if(drag==='v'){
+        var w = Math.min(Math.max(e.clientX - 4, 200), 560);
+        nav.style.width = w + 'px';
       } else {
-        const h = Math.min(Math.max(window.innerHeight - e.clientY, 120), window.innerHeight - 200);
-        relationships.style.height = h + "px";
+        var wsRect = document.querySelector('.workspace').getBoundingClientRect();
+        var h = Math.min(Math.max(wsRect.bottom - e.clientY, 120), wsRect.height - 160);
+        rel.style.height = h + 'px';
+        rel.style.flex = 'none';
       }
     });
+    document.addEventListener('mouseup', function(){ drag=null; document.body.classList.remove('resizing-v','resizing-h'); });
+  })();
 
-    document.addEventListener("mouseup", () => {
-      dragging = null;
-      document.body.classList.remove("resizing-v", "resizing-h");
-    });
-  </script>
+</script>
 
 </body>
 </html>
