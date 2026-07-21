@@ -12,6 +12,37 @@
   - [2.4 Supersession](#24-supersession)
   - [2.5 Template](#25-template)
 - [3. Decisions](#3-decisions)
+  - [D-001 EUPL-1.2 licence](#d-001-eupl-12-licence)
+  - [D-002 Non-commercial](#d-002-non-commercial)
+  - [D-003 No standard content reproduced](#d-003-no-standard-content-reproduced)
+  - [D-004 Artefacts not assertions](#d-004-artefacts-not-assertions)
+  - [D-005 Machinery scope](#d-005-machinery-scope)
+  - [D-006 Hardcoded metamodel](#d-006-hardcoded-metamodel)
+  - [D-007 Risk Reduction Measure term](#d-007-risk-reduction-measure-term)
+  - [D-008 Direct entry to the tool](#d-008-direct-entry-to-the-tool)
+  - [D-009 Neighborhood graph view](#d-009-neighborhood-graph-view)
+  - [D-010 Vanilla web stack](#d-010-vanilla-web-stack)
+  - [D-011 Privacy by design](#d-011-privacy-by-design)
+  - [D-012 Single local file](#d-012-single-local-file)
+  - [D-013 Vendor the artifact](#d-013-vendor-the-artifact)
+  - [D-014 User-provided standards](#d-014-user-provided-standards)
+  - [D-015 Copy on import](#d-015-copy-on-import)
+  - [D-016 Reuse without relationships](#d-016-reuse-without-relationships)
+  - [D-017 Development server](#d-017-development-server)
+  - [D-018 Branch model](#d-018-branch-model)
+  - [D-019 Atomic commits](#d-019-atomic-commits)
+  - [D-020 Repository layout](#d-020-repository-layout)
+  - [D-021 Throwaway prototypes](#d-021-throwaway-prototypes)
+  - [D-022 Document set](#d-022-document-set)
+  - [D-023 "Shall" is spec.md only](#d-023-shall-is-specmd-only)
+  - [D-024 Iterative build](#d-024-iterative-build)
+  - [D-025 Specs state what not how](#d-025-specs-state-what-not-how)
+  - [D-026 No verdict colours](#d-026-no-verdict-colours)
+  - [D-027 Type by shape](#d-027-type-by-shape)
+  - [D-028 Wordmark and favicon identity](#d-028-wordmark-and-favicon-identity)
+  - [D-029 Standard content from OJEU](#d-029-standard-content-from-ojeu)
+  - [D-030 Browser-based and server-less](#d-030-browser-based-and-server-less)
+  - [D-031 Desktop only](#d-031-desktop-only)
 - [4. Open Topics](#4-open-topics)
 - [5. References](#5-references)
 
@@ -72,7 +103,7 @@ The decision, stated plainly.
 
 ## 3. Decisions
 
-### D-001 Licence: EUPL-1.2
+### D-001 EUPL-1.2 licence
 
 `2026-07-14` `legal`
 
@@ -92,7 +123,7 @@ No sales, no donations, no sponsorship, no paid support.
 
 ---
 
-### D-003 No reproduction of standard content
+### D-003 No standard content reproduced
 
 `2026-07-14` `legal` `superseded by D-029`
 
@@ -102,7 +133,7 @@ The tool does not include or reproduce copyrighted content from harmonized stand
 
 ---
 
-### D-004 Artefacts, not assertions
+### D-004 Artefacts not assertions
 
 `2026-07-14` `product`
 
@@ -112,7 +143,7 @@ The tool never states a conclusion about the safety or conformity of the product
 
 ---
 
-### D-005 Scope: machinery
+### D-005 Machinery scope
 
 `2026-07-14` `product`
 
@@ -132,7 +163,7 @@ The metamodel is built into the tool and versioned with it. Users cannot extend 
 
 ---
 
-### D-007 Terminology: Risk Reduction Measure
+### D-007 Risk Reduction Measure term
 
 `2026-07-15` `product`
 
@@ -142,7 +173,7 @@ The canonical term is Risk Reduction Measure (RRM), not Protective Measure.
 
 ---
 
-### D-008 The user lands directly in the tool
+### D-008 Direct entry to the tool
 
 `2026-07-15` `product`
 
@@ -152,7 +183,7 @@ Opening the site places the user in the workspace. No homepage, wizard, or proje
 
 ---
 
-### D-009 Graph view shows the neighborhood, not the model
+### D-009 Neighborhood graph view
 
 `2026-07-15` `product`
 
@@ -162,7 +193,7 @@ The relationship pane's graph shows the selected entity and its directly related
 
 ---
 
-### D-010 Stack: vanilla HTML, CSS, and JavaScript
+### D-010 Vanilla web stack
 
 `2026-07-15` `architecture`
 
@@ -182,7 +213,7 @@ No server contact, no tracking, no analytics, no data collection. All processing
 
 ---
 
-### D-012 User-owned data, single local file
+### D-012 Single local file
 
 `2026-07-15` `architecture`
 
@@ -192,7 +223,7 @@ A project is saved as a single local file, owned and controlled by the user. It 
 
 ---
 
-### D-013 Vendoring takes the artifact, not the package
+### D-013 Vendor the artifact
 
 `2026-07-15` `architecture`
 
@@ -202,7 +233,7 @@ Third-party material is copied into the repository as files, with its licence an
 
 ---
 
-### D-014 Standards content is user-provided
+### D-014 User-provided standards
 
 `2026-07-16` `architecture`
 
@@ -212,7 +243,7 @@ The tool does not ship the content of harmonized standards. The user builds a li
 
 ---
 
-### D-015 Copy on import, not reference
+### D-015 Copy on import
 
 `2026-07-16` `architecture`
 
@@ -222,7 +253,7 @@ Content imported from a library is copied into the project. The project does not
 
 ---
 
-### D-016 Reuse without relationships, with one exception
+### D-016 Reuse without relationships
 
 `2026-07-16` `architecture`
 
@@ -279,7 +310,7 @@ assets/
 
 ---
 
-### D-021 The proof of concept and mockup are throwaway
+### D-021 Throwaway prototypes
 
 `2026-07-16` `repository`
 
@@ -299,7 +330,7 @@ Three documents, each with one job. `design.md` describes what the product is an
 
 ---
 
-### D-023 "Shall" belongs to spec.md only
+### D-023 "Shall" is spec.md only
 
 `2026-07-16` `documentation`
 
@@ -309,7 +340,7 @@ Requirements language is reserved for the specification. design.md is written in
 
 ---
 
-### D-024 Build iteratively, spec the slice being built
+### D-024 Iterative build
 
 `2026-07-17` `documentation`
 
@@ -319,7 +350,7 @@ design.md is the stable why and what. spec.md grows in build order, not in one p
 
 ---
 
-### D-025 Specifications state what must be true, not how to build it
+### D-025 Specs state what not how
 
 `2026-07-17` `documentation`
 
@@ -339,7 +370,7 @@ No colour in the interface means pass or fail. Green and red as status are exclu
 
 ---
 
-### D-027 Type is carried by shape, not colour
+### D-027 Type by shape
 
 `2026-07-19` `graphical`
 
@@ -349,7 +380,7 @@ Entity type is distinguished by icon, not by colour. The interface is monochrome
 
 ---
 
-### D-028 The identity is a wordmark and a favicon
+### D-028 Wordmark and favicon identity
 
 `2026-07-19` `graphical`
 
@@ -359,7 +390,7 @@ The brand is the wordmark "openconformity" and a favicon, and nothing else: no l
 
 ---
 
-### D-029 Standards content usable only as published in the OJEU
+### D-029 Standard content from OJEU
 
 `2026-07-19` `legal`
 
@@ -369,7 +400,7 @@ The tool does not include or reproduce content from harmonized standards beyond 
 
 ---
 
-### D-030 Browser-based and server-less are technical constraints
+### D-030 Browser-based and server-less
 
 `2026-07-21` `architecture`
 
