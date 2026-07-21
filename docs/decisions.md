@@ -367,6 +367,26 @@ The tool does not include or reproduce content from harmonized standards beyond 
 
 > *Standards are sold by national standardization bodies, so the tool is built only on public information: legislation, guidance, and the OJEU lists. The boundary is what the OJEU publishes. References and titles appear there and carry no separate licence, so they are usable; the body of a standard does not and is not. Specified in spec.md C-PRJ-005.*
 
+---
+
+### D-030 Browser-based and server-less are technical constraints
+
+`2026-07-21` `architecture`
+
+Running in a web browser and consisting of static files with no server-side code are technical constraints, not operational qualities. Browser-based moved from the non-functional Operation group to C-TEC in spec.md, and a no-server-side-code constraint was added alongside it.
+
+> *Browser-based is a property of what the software is built as, verified against the build rather than by using the running tool, which places it with the technical constraints as the root the stack, build, and dependency constraints follow from. No server-side code is the constraint that makes the privacy and operation qualities structurally guaranteed rather than promised: with nothing executing on the host, there is nowhere for user data to be received, processed, or stored remotely. Specified in spec.md C-TEC-006 and C-TEC-007.*
+
+---
+
+### D-031 Desktop only
+
+`2026-07-21` `product`
+
+The tool targets desktop-sized viewports and is not supported on mobile. Below the supported viewport it shows a notice that a desktop-sized screen is required, rather than a degraded interface.
+
+> *The multi-pane interface, the navigator, editor, and relationship views side by side, needs the screen space of a desktop viewport to function. Optimising for touch and small screens is scope the project does not carry. The exact minimum viewport is set during implementation once the layout's real constraints are known. Specified in spec.md N-CMP-001; the notice behaviour is a functional requirement, added when the functional requirements are written.*
+
 ## 4. Open Topics
 
 | # | Question | Blocks |

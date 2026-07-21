@@ -80,7 +80,7 @@ Each requirement shall have a rationale, see the SEBoK guidelines [3].
 
 ### 2.4 Identifier
 
-Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. Identifiers are append-only. A requirement that is removed is not reissued under the same identifier.
+Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. Once the specification is issued, identifiers are append-only: a requirement that is removed is not reissued under the same identifier. While the specification is in draft, identifiers may be reorganised.
 
 | Field | Meaning |
 |---|---|
@@ -222,6 +222,22 @@ Where the software uses third-party assets, they shall be self-hosted and open-l
 
 > *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers; open licensing keeps redistribution compatible with the EUPL.*
 
+---
+
+##### C-TEC-006 Browser-based
+
+The software shall run in a web browser, with no installation required.
+
+> *The browser is the delivery platform. The user reaches the tool by opening a URL, with nothing to install, update, or maintain on their machine. This is the root technical constraint from which the stack, build, and dependency constraints follow.*
+
+---
+
+##### C-TEC-007 No server-side code
+
+The software shall consist of static files only, with no server-side code.
+
+> *The host serves files and executes nothing. With no server-side code there is nowhere for user data to be received, processed, or stored remotely, which makes the privacy and operation qualities structurally guaranteed rather than promised. It also rules out any server functions the hosting platform would otherwise permit.*
+
 ### 3.2 Graphical
 
 #### 3.2.1 System
@@ -278,15 +294,7 @@ The favicon shall be a square filled with the accent colour.
 
 ---
 
-##### N-OPS-001 Browser-based
-
-The software shall run in a web browser, with no installation required.
-
-> *The user reaches the tool by opening a URL. There is nothing to install, update, or maintain on their machine.*
-
----
-
-##### N-OPS-002 No account
+##### N-OPS-001 No account
 
 The software shall not require an account or a sign-in.
 
@@ -294,7 +302,7 @@ The software shall not require an account or a sign-in.
 
 ---
 
-##### N-OPS-003 Self-contained
+##### N-OPS-002 Self-contained
 
 The software shall load all of its resources on initial load, and shall fetch nothing further during use.
 
