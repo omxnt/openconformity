@@ -22,9 +22,10 @@
   - [3.3 Functional](#33-functional)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
-    - [3.4.2 Accessibility](#342-accessibility)
-    - [3.4.3 Privacy](#343-privacy)
-    - [3.4.4 Compatibility](#344-compatibility)
+    - [3.4.2 Privacy](#342-privacy)
+    - [3.4.3 Security](#343-security)
+    - [3.4.4 Accessibility](#344-accessibility)
+    - [3.4.5 Compatibility](#345-compatibility)
 - [4. References](#4-references)
 
 ## 1. Introduction
@@ -299,33 +300,7 @@ The software shall load all of its resources on initial load, and shall fetch no
 
 > *Once loaded, the tool runs from what the browser already holds, so work continues uninterrupted if the connection drops.*
 
-#### 3.4.2 Accessibility
-
----
-
-##### N-ACC-001 Standard conformance
-
-The software shall meet WCAG 2.2 Level AA [4].
-
-> *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal: a single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
-
----
-
-##### N-ACC-002 Colour independence
-
-The software shall distinguish entity types by shape, not by colour alone.
-
-> *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision; a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
-
----
-
-##### N-ACC-003 Keyboard operability
-
-The software shall be fully operable by keyboard.
-
-> *A modeling tool is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed: it is required for users who cannot use a pointer, and it is faster for those building a large model.*
-
-#### 3.4.3 Privacy
+#### 3.4.2 Privacy
 
 ---
 
@@ -359,7 +334,51 @@ The software shall store all project data on the user's own device.
 
 > *The user's data lives only on their own device, whether held in the browser between sessions or saved as a file. It is never stored remotely, in an account, or on a server.*
 
-#### 3.4.4 Compatibility
+#### 3.4.3 Security
+
+---
+
+##### N-SEC-001 Safe parsing
+
+The software shall not execute code contained in imported data.
+
+> *A project file comes from wherever the user obtained it and cannot be assumed safe. It is parsed as data, never evaluated as code, so a crafted file cannot cause the tool to run instructions on the user's device.*
+
+---
+
+##### N-SEC-002 Safe rendering
+
+The software shall render user-provided content as text, not as markup.
+
+> *Names, values, and descriptions a user enters are shown throughout the interface. They are rendered as text, never interpreted as markup, so content such as a tag or script in an entity name cannot alter or execute within the interface.*
+
+#### 3.4.4 Accessibility
+
+---
+
+##### N-ACC-001 Standard conformance
+
+The software shall meet WCAG 2.2 Level AA [4].
+
+> *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal: a single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
+
+---
+
+##### N-ACC-002 Colour independence
+
+The software shall distinguish entity types by shape, not by colour alone.
+
+> *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision; a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
+
+---
+
+##### N-ACC-003 Keyboard operability
+
+The software shall be fully operable by keyboard.
+
+> *A modeling tool is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed: it is required for users who cannot use a pointer, and it is faster for those building a large model.*
+
+#### 3.4.5 Compatibility
 
 ---
 
