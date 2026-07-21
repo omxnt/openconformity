@@ -14,22 +14,22 @@
 - [3. Requirements](#3-requirements)
   - [3.1 Constraints](#31-constraints)
     - [3.1.1 Project](#311-project)
-        - [C-PRJ-001 Name](#c-prj-001-name)
-        - [C-PRJ-002 Domain](#c-prj-002-domain)
-        - [C-PRJ-003 Licence](#c-prj-003-licence)
-        - [C-PRJ-004 Funding](#c-prj-004-funding)
-        - [C-PRJ-005 Content](#c-prj-005-content)
+        - [C-PRJ-001 Project name](#c-prj-001-project-name)
+        - [C-PRJ-002 Domain name](#c-prj-002-domain-name)
+        - [C-PRJ-003 Software licence](#c-prj-003-software-licence)
+        - [C-PRJ-004 Funding model](#c-prj-004-funding-model)
+        - [C-PRJ-005 Standards content](#c-prj-005-standards-content)
     - [3.1.2 Development](#312-development)
-        - [C-DEV-001 Repository](#c-dev-001-repository)
-        - [C-DEV-002 Hosting](#c-dev-002-hosting)
-        - [C-DEV-003 Diagrams](#c-dev-003-diagrams)
-        - [C-DEV-004 Marks](#c-dev-004-marks)
+        - [C-DEV-001 Source repository](#c-dev-001-source-repository)
+        - [C-DEV-002 Hosting platform](#c-dev-002-hosting-platform)
+        - [C-DEV-003 Diagram source](#c-dev-003-diagram-source)
+        - [C-DEV-004 Mark source](#c-dev-004-mark-source)
     - [3.1.3 Technical](#313-technical)
-        - [C-TEC-001 Stack](#c-tec-001-stack)
-        - [C-TEC-002 Dependencies](#c-tec-002-dependencies)
-        - [C-TEC-003 Build](#c-tec-003-build)
-        - [C-TEC-004 Modules](#c-tec-004-modules)
-        - [C-TEC-005 Assets](#c-tec-005-assets)
+        - [C-TEC-001 Technology stack](#c-tec-001-technology-stack)
+        - [C-TEC-002 No dependencies](#c-tec-002-no-dependencies)
+        - [C-TEC-003 Build process](#c-tec-003-build-process)
+        - [C-TEC-004 JavaScript modules](#c-tec-004-javascript-modules)
+        - [C-TEC-005 Third-party assets](#c-tec-005-third-party-assets)
         - [C-TEC-006 Browser-based](#c-tec-006-browser-based)
         - [C-TEC-007 No server-side code](#c-tec-007-no-server-side-code)
   - [3.2 Graphical](#32-graphical)
@@ -142,7 +142,7 @@ Requirement text.
 
 ---
 
-##### C-PRJ-001 Name
+##### C-PRJ-001 Project name
 
 The software shall be named "openconformity".
 
@@ -150,7 +150,7 @@ The software shall be named "openconformity".
 
 ---
 
-##### C-PRJ-002 Domain
+##### C-PRJ-002 Domain name
 
 The software shall be served at [openconformity.org](https://openconformity.org).
 
@@ -158,7 +158,7 @@ The software shall be served at [openconformity.org](https://openconformity.org)
 
 ---
 
-##### C-PRJ-003 Licence
+##### C-PRJ-003 Software licence
 
 The software shall be licensed under the EUPL-1.2.
 
@@ -166,7 +166,7 @@ The software shall be licensed under the EUPL-1.2.
 
 ---
 
-##### C-PRJ-004 Funding
+##### C-PRJ-004 Funding model
 
 The project shall not be supplied in the course of a commercial activity.
 
@@ -174,7 +174,7 @@ The project shall not be supplied in the course of a commercial activity.
 
 ---
 
-##### C-PRJ-005 Content
+##### C-PRJ-005 Standards content
 
 The software shall not reproduce content from harmonized standards beyond what is published in the Official Journal of the European Union.
 
@@ -184,7 +184,7 @@ The software shall not reproduce content from harmonized standards beyond what i
 
 ---
 
-##### C-DEV-001 Repository
+##### C-DEV-001 Source repository
 
 The source shall be maintained in a public GitHub repository.
 
@@ -192,7 +192,7 @@ The source shall be maintained in a public GitHub repository.
 
 ---
 
-##### C-DEV-002 Hosting
+##### C-DEV-002 Hosting platform
 
 The software shall be hosted on Cloudflare Pages.
 
@@ -200,7 +200,7 @@ The software shall be hosted on Cloudflare Pages.
 
 ---
 
-##### C-DEV-003 Diagrams
+##### C-DEV-003 Diagram source
 
 The diagrams shall be maintained in draw.io.
 
@@ -208,7 +208,7 @@ The diagrams shall be maintained in draw.io.
 
 ---
 
-##### C-DEV-004 Marks
+##### C-DEV-004 Mark source
 
 The marks shall be maintained in Figma.
 
@@ -218,7 +218,7 @@ The marks shall be maintained in Figma.
 
 ---
 
-##### C-TEC-001 Stack
+##### C-TEC-001 Technology stack
 
 The software shall be built with HTML, CSS, and JavaScript only.
 
@@ -226,7 +226,7 @@ The software shall be built with HTML, CSS, and JavaScript only.
 
 ---
 
-##### C-TEC-002 Dependencies
+##### C-TEC-002 No dependencies
 
 The software shall not include third-party code (frameworks or libraries).
 
@@ -234,7 +234,7 @@ The software shall not include third-party code (frameworks or libraries).
 
 ---
 
-##### C-TEC-003 Build
+##### C-TEC-003 Build process
 
 The software shall run directly from its source files, with no build step or package manager.
 
@@ -242,7 +242,7 @@ The software shall run directly from its source files, with no build step or pac
 
 ---
 
-##### C-TEC-004 Modules
+##### C-TEC-004 JavaScript modules
 
 The software shall organise its JavaScript as native ES modules.
 
@@ -250,7 +250,7 @@ The software shall organise its JavaScript as native ES modules.
 
 ---
 
-##### C-TEC-005 Assets
+##### C-TEC-005 Third-party assets
 
 Where the software uses third-party assets, they shall be self-hosted and open-licensed.
 
