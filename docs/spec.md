@@ -27,7 +27,7 @@
     - [3.1.3 Technical](#313-technical)
         - [C-TEC-001 Technology stack](#c-tec-001-technology-stack)
         - [C-TEC-002 No dependencies](#c-tec-002-no-dependencies)
-        - [C-TEC-003 Build process](#c-tec-003-build-process)
+        - [C-TEC-003 No build process](#c-tec-003-no-build-process)
         - [C-TEC-004 JavaScript modules](#c-tec-004-javascript-modules)
         - [C-TEC-005 Third-party assets](#c-tec-005-third-party-assets)
         - [C-TEC-006 Browser-based](#c-tec-006-browser-based)
@@ -234,7 +234,7 @@ The software shall not include third-party code (frameworks or libraries).
 
 ---
 
-##### C-TEC-003 Build process
+##### C-TEC-003 No build process
 
 The software shall run directly from its source files, with no build step or package manager.
 
