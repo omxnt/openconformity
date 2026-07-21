@@ -43,6 +43,7 @@
   - [3.3 Functional](#33-functional)
     - [3.3.1 Persistence](#331-persistence)
         - [F-PER-001 Project persistence](#f-per-001-project-persistence)
+        - [F-PER-002 Library persistence](#f-per-002-library-persistence)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
         - [N-OPS-001 No user account](#n-ops-001-no-user-account)
