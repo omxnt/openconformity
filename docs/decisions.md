@@ -43,6 +43,7 @@
   - [D-029 Standard content from OJEU](#d-029-standard-content-from-ojeu)
   - [D-030 Browser-based and server-less](#d-030-browser-based-and-server-less)
   - [D-031 Desktop only](#d-031-desktop-only)
+  - [D-032 Referenced data model](#d-032-referenced-data-model)
 - [4. Open Topics](#4-open-topics)
 - [5. References](#5-references)
 
@@ -417,6 +418,16 @@ Running in a web browser and consisting of static files with no server-side code
 The tool targets desktop-sized viewports and is not supported on mobile. Below the supported viewport it shows a notice that a desktop-sized screen is required, rather than a degraded interface.
 
 > *The multi-pane interface, the navigator, editor, and relationship views side by side, needs the screen space of a desktop viewport to function. Optimising for touch and small screens is scope the project does not carry. The exact minimum viewport is set during implementation once the layout's real constraints are known. Specified in spec.md N-CMP-001; the notice behaviour is a functional requirement, added when the functional requirements are written.*
+
+---
+
+### D-032 Referenced data model
+
+`2026-07-21` `architecture` `documentation`
+
+The data model is defined by a schema, versioned as its own artifact and referenced by spec.md. The schema is the authoritative definition. design.md explains the model as readable context but binds nothing; where design.md and the schema disagree, the schema is truth and design.md is corrected to match. spec.md states a stable conformance requirement and does not restate the model's structure.
+
+> *The metamodel is expected to iterate heavily through building and testing, so the model cannot live in spec.md without churning the specification. Separating the stable commitment from the volatile definition lets each change at its own rate: spec.md commits that projects conform to the data model and stays put, while the schema and design.md iterate until the model freezes at a first version. The schema is machine-readable and enforceable; design.md is the red thread a reader follows to understand the whole. Follows D-024, which specifies the data model before code, and keeps to D-022 by giving each document one job: spec.md requires, the schema defines, design.md explains.*
 
 ## 4. Open Topics
 
