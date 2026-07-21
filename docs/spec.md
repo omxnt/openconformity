@@ -43,12 +43,12 @@
   - [3.3 Functional](#33-functional)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
-        - [N-OPS-001 No account](#n-ops-001-no-account)
+        - [N-OPS-001 No user account](#n-ops-001-no-user-account)
         - [N-OPS-002 Self-contained](#n-ops-002-self-contained)
     - [3.4.2 Privacy](#342-privacy)
         - [N-PRV-001 Local processing](#n-prv-001-local-processing)
         - [N-PRV-002 No data transmission](#n-prv-002-no-data-transmission)
-        - [N-PRV-003 No tracking](#n-prv-003-no-tracking)
+        - [N-PRV-003 No user tracking](#n-prv-003-no-user-tracking)
         - [N-PRV-004 On-device storage](#n-prv-004-on-device-storage)
     - [3.4.3 Security](#343-security)
         - [N-SEC-001 Safe parsing](#n-sec-001-safe-parsing)
@@ -328,7 +328,7 @@ The favicon shall be a square filled with the accent colour.
 
 ---
 
-##### N-OPS-001 No account
+##### N-OPS-001 No user account
 
 The software shall not require an account or a sign-in.
 
@@ -362,7 +362,7 @@ The software shall not transmit user data to any external service.
 
 ---
 
-##### N-PRV-003 No tracking
+##### N-PRV-003 No user tracking
 
 The software shall not track, profile, or collect analytics on the user.
 
