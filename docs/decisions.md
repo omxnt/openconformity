@@ -14,7 +14,7 @@
 - [3. Decisions](#3-decisions)
   - [D-001 EUPL-1.2 licence](#d-001-eupl-12-licence)
   - [D-002 Non-commercial](#d-002-non-commercial)
-  - [D-003 No standard content reproduced](#d-003-no-standard-content-reproduced)
+  - [~~D-003 No standard content reproduced~~](#d-003-no-standard-content-reproduced)
   - [D-004 Artefacts not assertions](#d-004-artefacts-not-assertions)
   - [D-005 Machinery scope](#d-005-machinery-scope)
   - [D-006 Hardcoded metamodel](#d-006-hardcoded-metamodel)
@@ -31,7 +31,7 @@
   - [D-017 Development server](#d-017-development-server)
   - [D-018 Branch model](#d-018-branch-model)
   - [D-019 Atomic commits](#d-019-atomic-commits)
-  - [D-020 Repository layout](#d-020-repository-layout)
+  - [~~D-020 Repository layout~~](#d-020-repository-layout)
   - [D-021 Throwaway prototypes](#d-021-throwaway-prototypes)
   - [D-022 Document set](#d-022-document-set)
   - [D-023 "Shall" is spec.md only](#d-023-shall-is-specmd-only)
@@ -44,6 +44,7 @@
   - [D-030 Browser-based and server-less](#d-030-browser-based-and-server-less)
   - [D-031 Desktop only](#d-031-desktop-only)
   - [D-032 Referenced data model](#d-032-referenced-data-model)
+  - [D-033 Repository layout](#d-033-repository-layout)
 - [4. Open Topics](#4-open-topics)
 - [5. References](#5-references)
 
@@ -296,7 +297,7 @@ One commit, one logical change, with the project working after each.
 
 ### D-020 Repository layout
 
-`2026-07-19` `repository`
+`2026-07-19` `repository` `superseded by D-033`
 
 Assets are grouped by kind, with the editable source beside its exports. One Figma file per mark set and one draw.io file per diagram set, each exporting the artefacts the site consumes.
 
@@ -429,6 +430,25 @@ The data model is defined by a schema, versioned as its own artifact and referen
 
 > *The metamodel is expected to iterate heavily through building and testing, so the model cannot live in spec.md without churning the specification. Separating the stable commitment from the volatile definition lets each change at its own rate: spec.md commits that projects conform to the data model and stays put, while the schema and design.md iterate until the model freezes at a first version. The schema is machine-readable and enforceable; design.md is the red thread a reader follows to understand the whole. Follows D-024, which specifies the data model before code, and keeps to D-022 by giving each document one job: spec.md requires, the schema defines, design.md explains.*
 
+
+---
+
+### D-033 Repository layout
+
+`2026-07-21` `repository`
+
+Assets are grouped by kind, with the editable source beside its exports. Schemas live in their own directory. One Figma file per mark set and one draw.io file per diagram set, each exporting the artefacts the site consumes.
+
+```
+assets/
+  fonts/        vendored typefaces, with licence and origin
+  marks/        marks.fig, and the wordmark, favicon, and square it exports
+  diagrams/     diagrams.drawio, and the SVG it exports
+schema/         the data model, as one schema file per document type
+```
+
+> *One copy of each artifact, referenced from everywhere, duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. The extension distinguishes source from export, so the two live together rather than split across folders. Supersedes D-020, adding the schema directory that holds the data model (D-032).*
+
 ## 4. Open Topics
 
 | # | Question | Blocks |
@@ -438,6 +458,8 @@ The data model is defined by a schema, versioned as its own artifact and referen
 | 3 | Import granularity: whole standard, or clause by clause? | Library implementation |
 | 4 | Essential requirements that apply regardless of hazards: how do they enter the model? | Workflow |
 | 5 | Whether a base library of standard identities can be shipped | D-014 |
+| 6 | Library scope: which item types are reusable across projects, beyond standards | Library implementation |
+| 7 | Whether the tool ships any default content, or the user populates everything | Library implementation |
 
 ## 5. References
 
