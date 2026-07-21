@@ -24,6 +24,7 @@
     - [3.4.1 Operation](#341-operation)
     - [3.4.2 Accessibility](#342-accessibility)
     - [3.4.3 Privacy](#343-privacy)
+    - [3.4.4 Compatibility](#344-compatibility)
 - [4. References](#4-references)
 
 ## 1. Introduction
@@ -194,7 +195,7 @@ The software shall be built with HTML, CSS, and JavaScript only.
 
 The software shall not include third-party code (frameworks or libraries).
 
-> *No third-party libraries or frameworks means no supply chain to secure and no dependency to rot, which a solo maintainer can neither audit nor keep current. Third-party assets, such as the IBM Plex typefaces, are permitted when self-hosted and open-licensed.*
+> *No third-party libraries or frameworks means no supply chain to secure and no dependency to rot, which a solo maintainer can neither audit nor keep current.*
 
 ---
 
@@ -212,13 +213,21 @@ The software shall organise its JavaScript as native ES modules.
 
 > *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack workable at scale: the alternatives, a single large file or global scripts, do not scale for a maintainer.*
 
+---
+
+##### C-TEC-005 Assets
+
+Where the software uses third-party assets, they shall be self-hosted and open-licensed.
+
+> *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers; open licensing keeps redistribution compatible with the EUPL.*
+
 ### 3.2 Graphical
 
 #### 3.2.1 System
 
 ---
 
-##### G-SYS-001 Language typeface
+##### G-SYS-001 Prose typeface
 
 The software shall render prose text in IBM Plex Sans.
 
@@ -246,7 +255,7 @@ The software shall use `#00618E` as its single accent colour.
 
 ##### G-MRK-001 Wordmark
 
-The wordmark shall be "openconformity" in the language typeface.
+The wordmark shall be "openconformity" in the prose typeface.
 
 > *The name is the identity. A wordmark renders identically in a title bar, a document, and plain text, with no separate logo to design or maintain.*
 
@@ -270,9 +279,9 @@ The favicon shall be a square filled with the accent colour.
 
 ##### N-OPS-001 Browser-based
 
-The software shall run in a standard web browser, with no installation required.
+The software shall run in a web browser, with no installation required.
 
-> *The user reaches the tool by opening a URL. There is nothing to install, update, or maintain on their machine, and any current browser can run it.*
+> *The user reaches the tool by opening a URL. There is nothing to install, update, or maintain on their machine.*
 
 ---
 
@@ -344,11 +353,29 @@ The software shall not track, profile, or collect analytics on the user.
 
 ---
 
-##### N-PRV-004 Local storage
+##### N-PRV-004 On-device storage
 
 The software shall store all project data on the user's own device.
 
 > *The user's data lives only on their own device, whether held in the browser between sessions or saved as a file. It is never stored remotely, in an account, or on a server.*
+
+#### 3.4.4 Compatibility
+
+---
+
+##### N-CMP-001 Desktop viewport
+
+The software shall be operable on desktop-sized viewports.
+
+> *The software presents a multi-pane interface that requires the screen space of a desktop-sized viewport. The exact minimum is set during implementation, once the layout's real constraints are known. Behaviour on smaller viewports is specified in the functional requirements.*
+
+---
+
+##### N-CMP-002 Browser support
+
+The software shall be compatible with evergreen major web browsers.
+
+> *Major web browsers, such as Chrome, Edge, Firefox, and Safari, update themselves to the current version. The software targets these current versions and does not support legacy or end-of-life browsers.*
 
 ## 4. References
 
