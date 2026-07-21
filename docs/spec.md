@@ -41,6 +41,8 @@
         - [G-MRK-001 Wordmark](#g-mrk-001-wordmark)
         - [G-MRK-002 Favicon](#g-mrk-002-favicon)
   - [3.3 Functional](#33-functional)
+    - [3.3.1 Persistence](#331-persistence)
+        - [F-PER-001 Project persistence](#f-per-001-project-persistence)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
         - [N-OPS-001 No user account](#n-ops-001-no-user-account)
@@ -320,7 +322,23 @@ The favicon shall be a square filled with the accent colour.
 
 ### 3.3 Functional
 
-*Not started yet.*
+#### 3.3.1 Persistence
+
+---
+
+##### F-PER-001 Project persistence
+
+The software shall persist a project as a single local file conforming to `schema/project.schema.json`.
+
+> *A project is the user's model of one product's conformity: its entities and their relationships, following the metamodel. Saved as a single local file the user owns and controls, a project is portable, inspectable, and reloadable without any server or account. The schema is the authoritative definition of a valid project file.*
+
+---
+
+##### F-PER-002 Library persistence
+
+The software shall persist a library as a single local file conforming to `schema/library.schema.json`.
+
+> *A library holds reusable items the user saves independently of any project, to apply across projects. Held as a single local file the user owns and controls, it is imported from into projects. The schema is the authoritative definition of a valid library file.*
 
 ### 3.4 Non-functional
 
