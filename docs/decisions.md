@@ -437,17 +437,18 @@ The data model is defined by a schema, versioned as its own artifact and referen
 
 `2026-07-21` `repository`
 
-Assets are grouped by kind, with the editable source beside its exports. Schemas live in their own directory. One Figma file per mark set and one draw.io file per diagram set, each exporting the artefacts the site consumes.
+The repository is organised by kind, with the site at the root and a directory for each kind of content. Assets are grouped by type, with the editable source beside the artefacts it exports.
 
-```
-assets/
-  fonts/        vendored typefaces, with licence and origin
-  marks/        marks.fig, and the wordmark, favicon, and square it exports
-  diagrams/     diagrams.drawio, and the SVG it exports
-schema/         the data model, as one schema file per document type
-```
+    app/            the demo mockup
+    poc/            throwaway proofs of concept
+    docs/           the specification, decisions, and design
+    assets/
+      fonts/        vendored typefaces, with licence and origin
+      marks/        marks.fig, and the wordmark, favicon, and square it exports
+      diagrams/     diagrams.drawio, and the SVG it exports
+    schema/         the data model, as one schema file per document type
 
-> *One copy of each artifact, referenced from everywhere, duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. The extension distinguishes source from export, so the two live together rather than split across folders. Supersedes D-020, adding the schema directory that holds the data model (D-032).*
+> *One copy of each artefact, referenced from everywhere and duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. Keeping an editable source beside its exports means the two are found and updated together rather than split across folders. Supersedes D-020, which covered assets only, and adds the schema directory holding the data model (D-032).*
 
 ## 4. Open Topics
 
