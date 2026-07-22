@@ -10,7 +10,8 @@
   - [2.2 Syntax](#22-syntax)
   - [2.3 Rationale](#23-rationale)
   - [2.4 Identifier](#24-identifier)
-  - [2.5 Template](#25-template)
+  - [2.5 Status](#25-status)
+  - [2.6 Template](#26-template)
 - [3. Requirements](#3-requirements)
   - [3.1 Constraints](#31-constraints)
     - [3.1.1 Project](#311-project)
@@ -102,7 +103,7 @@ Each requirement shall be written following the INCOSE characteristics [1].
 
 ### 2.2 Syntax
 
-Each requirement shall be written using the EARS syntax [2].
+Each requirement shall be written using the EARS syntax [2], and be tagged with the type of pattern which was used.
 
 | Type | Description | Syntax | Example |
 |---|---|---|---|
@@ -130,17 +131,28 @@ Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. O
 | `GROUP` | The group within the requirement class. |
 | `NNN` | The sequential number within the group. |
 
-### 2.5 Template
+### 2.5 Status
+
+Each requirement shall carry a status tag.
+
+| Tag | Meaning |
+|---|---|
+| `draft` | Newly written, or still being worked on. |
+| `stable` | Settled as written, and not expected to change. |
+
+### 2.6 Template
 
 Each requirement shall be written using the template below.
 
----
-
+```markdown
 #### CLASS-GROUP-NNN Requirement title
+
+`syntax` `status`
 
 Requirement text.
 
 > *Requirement rationale.*
+```
 
 ## 3. Requirements
 
@@ -152,6 +164,8 @@ Requirement text.
 
 ##### C-PRJ-001 Project name
 
+`ubiquitous` `stable`
+
 The software shall be named "openconformity".
 
 > *Short for "open-source conformity assessment", meaning free and open-source software for the process by which a product is shown to meet European product legislation.*
@@ -159,6 +173,8 @@ The software shall be named "openconformity".
 ---
 
 ##### C-PRJ-002 Domain name
+
+`ubiquitous` `stable`
 
 The software shall be served at [openconformity.org](https://openconformity.org).
 
@@ -168,6 +184,8 @@ The software shall be served at [openconformity.org](https://openconformity.org)
 
 ##### C-PRJ-003 Software licence
 
+`ubiquitous` `stable`
+
 The software shall be licensed under the EUPL-1.2.
 
 > *A copyleft licence that keeps derivatives open, covers documents and diagrams as well as code, and holds up under EU law.*
@@ -176,6 +194,8 @@ The software shall be licensed under the EUPL-1.2.
 
 ##### C-PRJ-004 Funding model
 
+`ubiquitous` `stable`
+
 The project shall not be supplied in the course of a commercial activity.
 
 > *Supplied outside any commercial activity, the project stays outside the scope of the Product Liability Directive and the Cyber Resilience Act, which apply to software placed on the market in the course of a commercial activity. Such activity covers, among other things, advertising, paid features, and sponsorship.*
@@ -183,6 +203,8 @@ The project shall not be supplied in the course of a commercial activity.
 ---
 
 ##### C-PRJ-005 Standards content
+
+`ubiquitous` `stable`
 
 The software shall not reproduce content from harmonized standards beyond what is published in the Official Journal of the European Union.
 
@@ -194,6 +216,8 @@ The software shall not reproduce content from harmonized standards beyond what i
 
 ##### C-DEV-001 Source repository
 
+`ubiquitous` `stable`
+
 The source shall be maintained in a public GitHub repository.
 
 > *GitHub is a common platform. Public development keeps the source open and the history inspectable, consistent with the licence.*
@@ -201,6 +225,8 @@ The source shall be maintained in a public GitHub repository.
 ---
 
 ##### C-DEV-002 Hosting platform
+
+`ubiquitous` `stable`
 
 The software shall be hosted on Cloudflare Pages.
 
@@ -210,6 +236,8 @@ The software shall be hosted on Cloudflare Pages.
 
 ##### C-DEV-003 Diagram source
 
+`ubiquitous` `stable`
+
 The diagrams shall be maintained in draw.io.
 
 > *draw.io is free, stores its source as open XML, and requires no account. The source lives in the repository as a .drawio file and exports to SVG for the site.*
@@ -217,6 +245,8 @@ The diagrams shall be maintained in draw.io.
 ---
 
 ##### C-DEV-004 Mark source
+
+`ubiquitous` `stable`
 
 The marks shall be maintained in Figma.
 
@@ -228,6 +258,8 @@ The marks shall be maintained in Figma.
 
 ##### C-TEC-001 Technology stack
 
+`ubiquitous` `stable`
+
 The software shall be built with HTML, CSS, and JavaScript only.
 
 > *Native browser languages, understood directly by every modern browser with no transpilation.*
@@ -235,6 +267,8 @@ The software shall be built with HTML, CSS, and JavaScript only.
 ---
 
 ##### C-TEC-002 No dependencies
+
+`ubiquitous` `stable`
 
 The software shall not include third-party code (frameworks or libraries).
 
@@ -244,6 +278,8 @@ The software shall not include third-party code (frameworks or libraries).
 
 ##### C-TEC-003 No build process
 
+`ubiquitous` `stable`
+
 The software shall run directly from its source files, with no build step or package manager.
 
 > *The files in the repository are the files the browser runs. Nothing is compiled, bundled, or installed, so the deployed tool is exactly the source, and anyone can serve it by copying the folder.*
@@ -251,6 +287,8 @@ The software shall run directly from its source files, with no build step or pac
 ---
 
 ##### C-TEC-004 JavaScript modules
+
+`ubiquitous` `stable`
 
 The software shall organise its JavaScript as native ES modules.
 
@@ -260,6 +298,8 @@ The software shall organise its JavaScript as native ES modules.
 
 ##### C-TEC-005 Third-party assets
 
+`optional feature` `stable`
+
 Where the software uses third-party assets, they shall be self-hosted and open-licensed.
 
 > *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers; open licensing keeps redistribution compatible with the EUPL.*
@@ -268,6 +308,8 @@ Where the software uses third-party assets, they shall be self-hosted and open-l
 
 ##### C-TEC-006 Browser-based
 
+`ubiquitous` `stable`
+
 The software shall run in a web browser, with no installation required.
 
 > *The browser is the delivery platform. The user reaches the tool by opening a URL, with nothing to install, update, or maintain on their machine. This is the root technical constraint from which the stack, build, and dependency constraints follow.*
@@ -275,6 +317,8 @@ The software shall run in a web browser, with no installation required.
 ---
 
 ##### C-TEC-007 No server-side code
+
+`ubiquitous` `stable`
 
 The software shall consist of static files only, with no server-side code.
 
@@ -288,6 +332,8 @@ The software shall consist of static files only, with no server-side code.
 
 ##### G-SYS-001 Prose typeface
 
+`ubiquitous` `stable`
+
 The software shall render prose text in IBM Plex Sans.
 
 > *A humanist sans keeps prose legible at interface sizes. It is open-licensed and can be self-hosted.*
@@ -296,6 +342,8 @@ The software shall render prose text in IBM Plex Sans.
 
 ##### G-SYS-002 Data typeface
 
+`ubiquitous` `stable`
+
 The software shall render identifiers and data values in IBM Plex Mono.
 
 > *A monospace face marks machine-referenceable content, such as identifiers, clauses, and values, as distinct from prose at a glance.*
@@ -303,6 +351,8 @@ The software shall render identifiers and data values in IBM Plex Mono.
 ---
 
 ##### G-SYS-003 Accent colour
+
+`ubiquitous` `stable`
 
 The software shall use `#00618E` as its single accent colour.
 
@@ -314,6 +364,8 @@ The software shall use `#00618E` as its single accent colour.
 
 ##### G-MRK-001 Wordmark
 
+`ubiquitous` `stable`
+
 The wordmark shall be "openconformity" in the prose typeface.
 
 > *The name is the identity. A wordmark renders identically in a title bar, a document, and plain text, with no separate logo to design or maintain.*
@@ -321,6 +373,8 @@ The wordmark shall be "openconformity" in the prose typeface.
 ---
 
 ##### G-MRK-002 Favicon
+
+`ubiquitous` `stable`
 
 The favicon shall be a square filled with the accent colour.
 
@@ -334,6 +388,8 @@ The favicon shall be a square filled with the accent colour.
 
 ##### F-APP-001 Small-viewport notice
 
+`unwanted behaviour` `draft`
+
 If the viewport is smaller than the supported viewport, then the software shall display a notice that a desktop-sized screen is required.
 
 > *Below the supported viewport the multi-pane interface cannot function. A notice is honest about the limitation, where a degraded interface would misrepresent what the software can do.*
@@ -344,6 +400,8 @@ If the viewport is smaller than the supported viewport, then the software shall 
 
 ##### F-PER-001 Project persistence
 
+`ubiquitous` `draft`
+
 The software shall persist a project as a single local file conforming to `schema/project.schema.json`.
 
 > *A project is the user's model of one product's conformity: its entities and their relationships, following the metamodel. Saved as a single local file the user owns and controls, a project is portable, inspectable, and reloadable without any server or account. The schema is the authoritative definition of a valid project file.*
@@ -351,6 +409,8 @@ The software shall persist a project as a single local file conforming to `schem
 ---
 
 ##### F-PER-002 Library persistence
+
+`ubiquitous` `draft`
 
 The software shall persist a library as a single local file conforming to `schema/library.schema.json`.
 
@@ -360,6 +420,8 @@ The software shall persist a library as a single local file conforming to `schem
 
 ##### F-PER-003 Schema version
 
+`event driven` `draft`
+
 When the software writes a project or library file, the software shall record the current schema version.
 
 > *The version identifies which data model the file conforms to. Without it, the structure of a file can only be guessed at, and the software cannot know whether it is reading something it understands. Files are always written in the current version, so a model is migrated forward once rather than carried indefinitely.*
@@ -368,6 +430,8 @@ When the software writes a project or library file, the software shall record th
 
 ##### F-PER-004 Version migration
 
+`event driven` `draft`
+
 When the software opens a project or library file written by an earlier schema version, the software shall migrate it to the current schema version.
 
 > *A project holds conformity documentation that may be needed for as long as the product is on the market. A change to the data model cannot leave the user unable to open their own work.*
@@ -375,6 +439,8 @@ When the software opens a project or library file written by an earlier schema v
 ---
 
 ##### F-PER-005 Unsupported version
+
+`unwanted behaviour` `draft`
 
 If a project or library file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
@@ -388,6 +454,8 @@ If a project or library file records a schema version later than the software su
 
 ##### N-OPS-001 No user account
 
+`ubiquitous` `stable`
+
 The software shall not require an account or a sign-in.
 
 > *The tool stores nothing remotely and identifies no one, so there is nothing to sign in to. The user opens it and works.*
@@ -395,6 +463,8 @@ The software shall not require an account or a sign-in.
 ---
 
 ##### N-OPS-002 Self-contained
+
+`ubiquitous` `stable`
 
 The software shall load all of its resources on initial load, and shall fetch nothing further during use.
 
@@ -406,6 +476,8 @@ The software shall load all of its resources on initial load, and shall fetch no
 
 ##### N-PRV-001 Local processing
 
+`ubiquitous` `stable`
+
 The software shall perform all processing on the user's device.
 
 > *All computation happens in the browser, on the user's own device. Nothing is sent away to be processed, so the tool needs no server and the data being worked on stays where it already is.*
@@ -413,6 +485,8 @@ The software shall perform all processing on the user's device.
 ---
 
 ##### N-PRV-002 No data transmission
+
+`ubiquitous` `stable`
 
 The software shall not transmit user data to any external service.
 
@@ -422,6 +496,8 @@ The software shall not transmit user data to any external service.
 
 ##### N-PRV-003 No user tracking
 
+`ubiquitous` `stable`
+
 The software shall not track, profile, or collect analytics on the user.
 
 > *The software records nothing about who uses it or how. This is a property of the tool itself, separate from the ordinary request logs any web host keeps when serving a page.*
@@ -429,6 +505,8 @@ The software shall not track, profile, or collect analytics on the user.
 ---
 
 ##### N-PRV-004 On-device storage
+
+`ubiquitous` `stable`
 
 The software shall store all project data on the user's own device.
 
@@ -440,6 +518,8 @@ The software shall store all project data on the user's own device.
 
 ##### N-SEC-001 Safe parsing
 
+`ubiquitous` `stable`
+
 The software shall not execute code contained in imported data.
 
 > *A project file comes from wherever the user obtained it and cannot be assumed safe. It is parsed as data, never evaluated as code, so a crafted file cannot cause the tool to run instructions on the user's device.*
@@ -447,6 +527,8 @@ The software shall not execute code contained in imported data.
 ---
 
 ##### N-SEC-002 Safe rendering
+
+`ubiquitous` `stable`
 
 The software shall render user-provided content as text, not as markup.
 
@@ -458,6 +540,8 @@ The software shall render user-provided content as text, not as markup.
 
 ##### N-ACC-001 Standard conformance
 
+`ubiquitous` `stable`
+
 The software shall meet WCAG 2.2 Level AA [4].
 
 > *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal: a single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
@@ -466,6 +550,8 @@ The software shall meet WCAG 2.2 Level AA [4].
 
 ##### N-ACC-002 Colour independence
 
+`ubiquitous` `stable`
+
 The software shall distinguish entity types by shape, not by colour alone.
 
 > *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision; a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
@@ -473,6 +559,8 @@ The software shall distinguish entity types by shape, not by colour alone.
 ---
 
 ##### N-ACC-003 Keyboard operability
+
+`ubiquitous` `stable`
 
 The software shall be fully operable by keyboard.
 
@@ -484,6 +572,8 @@ The software shall be fully operable by keyboard.
 
 ##### N-CMP-001 Desktop viewport
 
+`ubiquitous` `draft`
+
 The software shall be operable on desktop-sized viewports.
 
 > *The software presents a multi-pane interface that requires the screen space of a desktop-sized viewport. The exact minimum is set during implementation, once the layout's real constraints are known. Behaviour on smaller viewports is specified in the functional requirements.*
@@ -491,6 +581,8 @@ The software shall be operable on desktop-sized viewports.
 ---
 
 ##### N-CMP-002 Browser support
+
+`ubiquitous` `stable`
 
 The software shall be compatible with evergreen major web browsers.
 
