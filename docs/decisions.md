@@ -93,8 +93,11 @@ A decision that changes is not edited. A new entry is added that states the upda
 
 Each decision is written using the template below.
 
----
+### 2.5 Template
 
+Each decision is written using the template below.
+
+```markdown
 ### D-NNN Decision title
 
 `YYYY-MM-DD` `tag`
@@ -102,6 +105,7 @@ Each decision is written using the template below.
 The decision, stated plainly.
 
 > *The rationale.*
+```
 
 ## 3. Decisions
 
