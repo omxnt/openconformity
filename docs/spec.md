@@ -47,9 +47,8 @@
         - [F-PER-001 Project persistence](#f-per-001-project-persistence)
         - [F-PER-002 Library persistence](#f-per-002-library-persistence)
         - [F-PER-003 Schema version](#f-per-003-schema-version)
-        - [F-PER-004 Backward compatibility](#f-per-004-backward-compatibility)
+        - [F-PER-004 Version migration](#f-per-004-version-migration)
         - [F-PER-005 Unsupported version](#f-per-005-unsupported-version)
-        - [F-PER-006 Version upgrade](#f-per-006-version-upgrade)
   - [3.4 Non-functional](#34-non-functional)
     - [3.4.1 Operation](#341-operation)
         - [N-OPS-001 No user account](#n-ops-001-no-user-account)
@@ -361,15 +360,15 @@ The software shall persist a library as a single local file conforming to `schem
 
 ##### F-PER-003 Schema version
 
-The software shall record the schema version in every file it writes.
+When the software writes a project or library file, the software shall record the current schema version.
 
-> *The version identifies which data model the file conforms to. Without it, the structure of a file can only be guessed at, and the software cannot know whether it is reading something it understands.*
+> *The version identifies which data model the file conforms to. Without it, the structure of a file can only be guessed at, and the software cannot know whether it is reading something it understands. Files are always written in the current version, so a model is migrated forward once rather than carried indefinitely.*
 
 ---
 
-##### F-PER-004 Backward compatibility
+##### F-PER-004 Version migration
 
-The software shall open files written by earlier schema versions.
+When the software opens a project or library file written by an earlier schema version, the software shall migrate it to the current schema version.
 
 > *A project holds conformity documentation that may be needed for as long as the product is on the market. A change to the data model cannot leave the user unable to open their own work.*
 
@@ -377,17 +376,9 @@ The software shall open files written by earlier schema versions.
 
 ##### F-PER-005 Unsupported version
 
-If a file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
+If a project or library file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
 > *A later version may hold data the software cannot represent. Opening the file would discard what it does not recognise, and saving would make that loss permanent. Refusing is the only response that does not risk the user's work.*
-
----
-
-##### F-PER-006 Version upgrade
-
-The software shall write files in the current schema version.
-
-> *A file opened from an earlier version is saved in the current one, so the model is migrated forward once rather than carried indefinitely. The software reads earlier versions but writes only the current one.*
 
 ### 3.4 Non-functional
 
