@@ -17,7 +17,7 @@
     - [3.1.1 Project](#311-project)
         - [C-PRJ-001 Project name](#c-prj-001-project-name)
         - [C-PRJ-002 Domain name](#c-prj-002-domain-name)
-        - [C-PRJ-003 Software licence](#c-prj-003-software-licence)
+        - [C-PRJ-003 Project licence](#c-prj-003-project-licence)
         - [C-PRJ-004 Funding model](#c-prj-004-funding-model)
         - [C-PRJ-005 Standards content](#c-prj-005-standards-content)
     - [3.1.2 Development](#312-development)
@@ -25,6 +25,7 @@
         - [C-DEV-002 Hosting platform](#c-dev-002-hosting-platform)
         - [C-DEV-003 Diagram source](#c-dev-003-diagram-source)
         - [C-DEV-004 Mark source](#c-dev-004-mark-source)
+        - [C-DEV-005 Software address](#c-dev-005-software-address)
     - [3.1.3 Technical](#313-technical)
         - [C-TEC-001 Technology stack](#c-tec-001-technology-stack)
         - [C-TEC-002 No dependencies](#c-tec-002-no-dependencies)
@@ -166,7 +167,7 @@ Requirement text.
 
 `ubiquitous` `stable`
 
-The software shall be named "openconformity".
+The project shall be named "openconformity".
 
 > *Short for "open-source conformity assessment", meaning free and open-source software for the process by which a product is shown to meet European product legislation.*
 
@@ -176,17 +177,17 @@ The software shall be named "openconformity".
 
 `ubiquitous` `stable`
 
-The software shall be served at [app.openconformity.org](https://app.openconformity.org).
+The project shall use the domain openconformity.org.
 
-> *The project domain is openconformity.org, where the name is the domain. The .org top-level domain signals a non-commercial, public-interest project rather than a commercial product. The software is served on its own subdomain, separate from the project site.*
+> *The domain is the name. The .org top-level domain signals a non-commercial, public-interest project rather than a commercial product.*
 
 ---
 
-##### C-PRJ-003 Software licence
+##### C-PRJ-003 Project licence
 
 `ubiquitous` `stable`
 
-The software shall be licensed under the EUPL-1.2.
+The project shall be licensed under the EUPL-1.2.
 
 > *A copyleft licence that keeps derivatives open, covers documents and diagrams as well as code, and holds up under EU law.*
 
@@ -206,7 +207,7 @@ The project shall not be supplied in the course of a commercial activity.
 
 `ubiquitous` `stable`
 
-The software shall not reproduce copyrighted content from harmonized standards.
+The project shall not reproduce copyrighted content from harmonized standards.
 
 > *Standards are sold by national standardization bodies and their content is protected. The harmonized standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that, including clause text, tables, figures, and Annex ZA mappings, is treated as protected unless established otherwise.*
 
@@ -240,7 +241,7 @@ The software shall be hosted on Cloudflare Pages.
 
 The diagrams shall be maintained in draw.io.
 
-> *draw.io is free, stores its source as open XML, and requires no account. The source lives in the repository as a .drawio file and exports to SVG for the site.*
+> *draw.io is free, stores its source as open XML, and requires no account. The source lives in the repository as a .drawio file and exports to SVG for use in the project.*
 
 ---
 
@@ -250,7 +251,17 @@ The diagrams shall be maintained in draw.io.
 
 The marks shall be maintained in Figma.
 
-> *Figma is a common design tool with a free tier. The source lives in the repository as a .fig file and exports to SVG, PNG, or JPEG for the site.*
+> *Figma is a common design tool with a free tier. The source lives in the repository as a .fig file and exports to SVG, PNG, or JPEG for use in the project.*
+
+---
+
+##### C-DEV-005 Software address
+
+`ubiquitous` `stable`
+
+The software shall be served at [app.openconformity.org](https://app.openconformity.org).
+
+> *The software is served on its own subdomain, separate from the project site at the root domain. The two are deployed independently, and the software is self-contained so that it can equally be served from anywhere else.*
 
 #### 3.1.3 Technical
 
