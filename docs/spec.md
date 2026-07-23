@@ -24,7 +24,7 @@
         - [C-DEV-001 Source repository](#c-dev-001-source-repository)
         - [C-DEV-002 Hosting platform](#c-dev-002-hosting-platform)
         - [C-DEV-003 Diagram source](#c-dev-003-diagram-source)
-        - [C-DEV-004 Mark source](#c-dev-004-mark-source)
+        - [C-DEV-004 Identity source](#c-dev-004-identity-source)
         - [C-DEV-005 Software address](#c-dev-005-software-address)
     - [3.1.3 Technical](#313-technical)
         - [C-TEC-001 Technology stack](#c-tec-001-technology-stack)
@@ -245,11 +245,11 @@ The diagrams shall be maintained in draw.io.
 
 ---
 
-##### C-DEV-004 Mark source
+##### C-DEV-004 Identity source
 
 `ubiquitous` `stable`
 
-The marks shall be maintained in Figma.
+The identity shall be maintained in Figma.
 
 > *Figma is a common design tool with a free tier. The source lives in the repository as a .fig file and exports to SVG, PNG, or JPEG for use in the project.*
 
