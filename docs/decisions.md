@@ -40,11 +40,14 @@
   - [D-026 No verdict colours](#d-026-no-verdict-colours)
   - [D-027 Type by shape](#d-027-type-by-shape)
   - [D-028 Wordmark and favicon identity](#d-028-wordmark-and-favicon-identity)
-  - [D-029 Standard content from OJEU](#d-029-standard-content-from-ojeu)
+  - [~~D-029 Standard content from OJEU~~](#d-029-standard-content-from-ojeu)
   - [D-030 Browser-based and server-less](#d-030-browser-based-and-server-less)
   - [D-031 Desktop only](#d-031-desktop-only)
   - [D-032 Referenced data model](#d-032-referenced-data-model)
-  - [D-033 Repository layout](#d-033-repository-layout)
+  - [~~D-033 Repository layout~~](#d-033-repository-layout)
+  - [D-034 Separate deployments](#d-034-separate-deployments)
+  - [D-035 Repository layout](#d-035-repository-layout)
+  - [D-036 Standards content](#d-036-standards-content)
 - [4. Open Topics](#4-open-topics)
 - [5. References](#5-references)
 
@@ -398,7 +401,7 @@ The brand is the wordmark "openconformity" and a favicon, and nothing else: no l
 
 ### D-029 Standard content from OJEU
 
-`2026-07-19` `legal`
+`2026-07-19` `legal` `superseded by D-036`
 
 The tool does not include or reproduce content from harmonized standards beyond what is published in the harmonized-standards lists in the Official Journal of the European Union. Those lists publish standard references and titles, which may be used. Clause text, tables, figures, and Annex ZA mappings are not published there and are not reproduced.
 
@@ -439,7 +442,7 @@ The data model is defined by a schema, versioned as its own artifact and referen
 
 ### D-033 Repository layout
 
-`2026-07-21` `repository`
+`2026-07-21` `repository` `superseded by D-035`
 
 The repository is organised by kind, with the site at the root and a directory for each kind of content. Assets are grouped by type, with the editable source beside the artefacts it exports.
 
@@ -453,6 +456,44 @@ The repository is organised by kind, with the site at the root and a directory f
     schema/         the data model, as one schema file per document type
 
 > *One copy of each artefact, referenced from everywhere and duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. Keeping an editable source beside its exports means the two are found and updated together rather than split across folders. Supersedes D-020, which covered assets only, and adds the schema directory holding the data model (D-032).*
+
+---
+
+### D-034 Separate deployments
+
+`2026-07-23` `architecture`
+
+The project site and the software are deployed separately, the site at openconformity.org and the software at app.openconformity.org. Each deployment is self-contained and carries its own copy of everything it serves.
+
+> *The site is a first impression and will grow to hold documentation; the software is the tool a user bookmarks and returns to. Separating them lets each change without touching the other, and keeps material that is neither, such as the design sources and the throwaway experiments, out of both. Self-containment is what makes the software copyable: nothing reaches outside its own directory, so it runs from any address or from a local folder. The cost is that each deployment carries its own copy of the typefaces and marks. Specified in spec.md C-DEV-005.*
+
+---
+
+### D-035 Repository layout
+
+`2026-07-23` `repository`
+
+The repository is organised by kind. Each deployable directory is self-contained, and the editable design sources sit apart from the artefacts they export.
+
+    app/            the software
+    site/           the project site
+    docs/           the specification, decisions, and design
+    schema/         the data model, as one schema file per document type
+    sources/        editable design sources
+    poc/            throwaway proofs of concept
+
+> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. This reverses the principle in D-020 and D-033, where one copy of each artefact was referenced from everywhere: a deployment root cannot reach above itself, so the typefaces and marks are duplicated rather than shared. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. Supersedes D-033.*
+
+---
+
+### D-036 Standards content
+
+`2026-07-23` `legal`
+
+The project does not reproduce copyrighted content from harmonized standards. The harmonized-standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that is treated as protected unless established otherwise.
+
+> *D-029 drew the boundary at what the OJEU publishes, which is a workable rule but not the actual constraint: the question is whether content is protected, and OJEU publication is only evidence of that. Stating the real constraint means a clear answer on a particular item, such as whether the Annex ZA correspondence tables attract protection, can relax what the project may use without rewriting the requirement. Until such an answer exists, everything beyond the OJEU lists is treated as protected. Supersedes D-029. Specified in spec.md C-PRJ-005.*
+
 
 ## 4. Open Topics
 
