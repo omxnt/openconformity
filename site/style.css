@@ -34,7 +34,6 @@
   --dark-text: #BFC6CB;
   --dark-link: #E2E6E9;
 
-
   --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -46,7 +45,6 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -159,7 +157,6 @@ h1 {
   transition: border-color 0.14s ease;
 }
 .btn-quiet:hover { border-bottom-color: var(--accent); }
-
 
 /* ---------- Screenshot ---------- */
 
@@ -428,7 +425,6 @@ footer a:focus-visible { outline-color: #FFFFFF; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   * { transition: none !important; }
   .cell:hover { transform: none; }
 }
