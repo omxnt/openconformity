@@ -46,8 +46,9 @@
   - [D-032 Referenced data model](#d-032-referenced-data-model)
   - [~~D-033 Repository layout~~](#d-033-repository-layout)
   - [D-034 Separate deployments](#d-034-separate-deployments)
-  - [D-035 Repository layout](#d-035-repository-layout)
+  - [~~D-035 Repository layout~~](#d-035-repository-layout)
   - [D-036 Standards content](#d-036-standards-content)
+  - [D-037 Repository layout](#d-037-repository-layout)
 - [4. Open Topics](#4-open-topics)
 - [5. References](#5-references)
 
@@ -471,7 +472,7 @@ The project site and the software are deployed separately, the site at openconfo
 
 ### D-035 Repository layout
 
-`2026-07-23` `repository`
+`2026-07-23` `repository` `superseded by D-037`
 
 The repository is organised by kind. Each deployable directory is self-contained, and the editable design sources sit apart from the artefacts they export.
 
@@ -493,6 +494,24 @@ The repository is organised by kind. Each deployable directory is self-contained
 The project does not reproduce copyrighted content from harmonized standards. The harmonized-standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that is treated as protected unless established otherwise.
 
 > *D-029 drew the boundary at what the OJEU publishes, which is a workable rule but not the actual constraint: the question is whether content is protected, and OJEU publication is only evidence of that. Stating the real constraint means a clear answer on a particular item, such as whether the Annex ZA correspondence tables attract protection, can relax what the project may use without rewriting the requirement. Until such an answer exists, everything beyond the OJEU lists is treated as protected. Supersedes D-029. Specified in spec.md C-PRJ-005.*
+
+
+---
+
+### D-037 Repository layout
+
+`2026-07-23` `repository`
+
+The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and throwaway work is kept in a sandbox that mirrors the deployables.
+
+    app/            the software
+    site/           the project site
+    docs/           the specification, decisions, and design
+    schema/         the data model, as one schema file per document type
+    sources/        editable design sources
+    sandbox/        throwaway work, mirroring the deployables
+
+> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the structure it experiments against, so sandbox/app holds prototypes of the software and sandbox/site holds design explorations for the site. Keeping it outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
 
 
 ## 4. Open Topics
