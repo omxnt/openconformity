@@ -176,9 +176,9 @@ The software shall be named "openconformity".
 
 `ubiquitous` `stable`
 
-The software shall be served at [openconformity.org](https://openconformity.org).
+The software shall be served at [app.openconformity.org](https://app.openconformity.org).
 
-> *The domain is the name. The .org top-level domain signals a non-commercial, public-interest project rather than a commercial product.*
+> *The project domain is openconformity.org, where the name is the domain. The .org top-level domain signals a non-commercial, public-interest project rather than a commercial product. The software is served on its own subdomain, separate from the project site.*
 
 ---
 
@@ -206,9 +206,9 @@ The project shall not be supplied in the course of a commercial activity.
 
 `ubiquitous` `stable`
 
-The software shall not reproduce content from harmonized standards beyond what is published in the Official Journal of the European Union.
+The software shall not reproduce copyrighted content from harmonized standards.
 
-> *Standards are sold by national standardization bodies. The tool is built only on public information: legislation, guidance, and the harmonized standards lists published in the OJEU. Those lists include standard references and titles, which the tool may therefore use; clause text, tables, figures, and Annex ZA mappings are not published there and are not reproduced.*
+> *Standards are sold by national standardization bodies and their content is protected. The harmonized standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that, including clause text, tables, figures, and Annex ZA mappings, is treated as protected unless established otherwise.*
 
 #### 3.1.2 Development
 
