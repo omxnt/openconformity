@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>openconformity — CE marking of machinery, built as a model</title>
+<meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
+<link rel="icon" type="image/svg+xml" href="assets/marks/favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="bar">
+    <a href="/" class="wordmark" aria-label="openconformity"></a>
+    <div class="nav">
+      <a href="#about">about</a>
+      <a href="#model">the model</a>
+      <a href="#status">status</a>
+      <a href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">source</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>CE marking of machinery,<br>built as a model.</h1>
+    <p class="lede">
+      A free, open-source tool for the Machinery Regulation (EU)&nbsp;2023/1230.
+      Build the conformity work once as a model of typed entities, and generate
+      the hazard lists, requirement specifications, and traceability from it.
+    </p>
+    <div class="actions">
+      <a class="btn" href="https://app.openconformity.org">Open the demo</a>
+      <a class="btn-quiet" href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">View the source</a>
+    </div>
+    <p class="note">In development. The demo shows the interface with fixed example content.</p>
+  </div>
+</header>
+
+<div class="wrap wrap-wide">
+  <div class="shot" role="img" aria-label="Placeholder showing the tool's three-pane layout: a navigator, an editor, and a relationship pane.">
+    <div class="shot-bar"><span class="shot-mark"></span></div>
+    <div class="shot-tools"><span></span><span></span><span></span><span class="gap"></span><span></span></div>
+    <div class="shot-body">
+      <div class="shot-pane shot-tree">
+        <i class="w70"></i><i class="w50 in1"></i><i class="w60 in2"></i>
+        <i class="w45 in2"></i><i class="w55 in1"></i><i class="w40 in2"></i>
+        <i class="w65 in2"></i><i class="w50 in1"></i>
+      </div>
+      <div class="shot-col">
+        <div class="shot-pane shot-form">
+          <i class="w30"></i><i class="w80 f"></i>
+          <i class="w30"></i><i class="w80 f"></i>
+          <i class="w30"></i><i class="w80 f tall"></i>
+        </div>
+        <div class="shot-pane shot-rel">
+          <i class="w100 h"></i><i class="w100"></i><i class="w100"></i><i class="w100"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="caption">The interface: a navigator, an editor, and the relationships of the selected entity.</p>
+</div>
+
+<main>
+
+<section id="about" class="wrap">
+  <h2>What it is</h2>
+  <p>
+    CE marking produces a technical file: a risk assessment, a list of applicable
+    essential requirements, the standards applied, the measures taken, and the
+    traceability between them. Done in documents, each of these is written and
+    maintained separately, and they drift apart.
+  </p>
+  <p>
+    openconformity treats the same work as a single model. Every hazard, requirement,
+    and measure exists exactly once, with typed relationships to the others. The
+    documents become views of that model rather than the model itself.
+  </p>
+  <p>
+    It runs entirely in the browser. There is no account, nothing to install, and no
+    server: the project is a single file on your own machine, and nothing you enter
+    leaves it.
+  </p>
+</section>
+
+<section id="model" class="wrap">
+  <h2>The model</h2>
+  <p>
+    Entities are typed, and so are the relationships between them. A relationship
+    carries meaning, which is what makes a chain like this readable in both
+    directions, and what lets a change at one end surface at the other.
+  </p>
+
+  <div class="trace">
+    <div class="tr"><span class="tid">SE-001</span><span class="tn">Packaging machine</span></div>
+    <div class="tv">decomposes into</div>
+    <div class="tr"><span class="tid">SE-002</span><span class="tn">Infeed unit</span></div>
+    <div class="tv">exhibits</div>
+    <div class="tr"><span class="tid">HZ-003</span><span class="tn">Crushing at the infeed rollers</span></div>
+    <div class="tv">mitigated by</div>
+    <div class="tr"><span class="tid">RRM-004</span><span class="tn">Fixed guard</span></div>
+  </div>
+
+  <p>
+    The entity types available, and which relationships may connect them, are fixed
+    by a metamodel built into the tool. It is what keeps a model consistent enough to
+    generate artefacts from.
+  </p>
+
+  <figure>
+    <a href="assets/images/meta.svg" target="_blank" rel="noopener">
+      <img src="assets/images/meta.svg" alt="The openconformity metamodel, showing entity types and the relationships between them." class="meta">
+    </a>
+    <figcaption>The metamodel: entity types and the relationships between them.</figcaption>
+  </figure>
+</section>
+
+<section id="status" class="wrap">
+  <h2>Status</h2>
+  <p>
+    In development, and not yet usable. The demo shows the interface with fixed
+    example content; the tool behind it is being built.
+  </p>
+  <p>
+    The work is public. The
+    <a href="https://github.com/omxnt/openconformity/blob/main/docs/spec.md" target="_blank" rel="noopener">requirements specification</a>,
+    the <a href="https://github.com/omxnt/openconformity/blob/main/docs/decisions.md" target="_blank" rel="noopener">decision log</a>,
+    and the source are all in the
+    <a href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">repository</a>.
+    Progress is posted on
+    <a href="https://www.linkedin.com/company/openconformity" target="_blank" rel="noopener">LinkedIn</a>.
+  </p>
+  <p class="disclaimer">
+    openconformity produces artefacts for the user to review and use. It does not
+    assert conformity. The manufacturer remains responsible for the conformity
+    assessment and for the compliance of the product.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="foot-links">
+      <a href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">github</a>
+      <a href="https://www.linkedin.com/company/openconformity" target="_blank" rel="noopener">linkedin</a>
+      <a href="mailto:info@openconformity.org">info@openconformity.org</a>
+    </div>
+    <small>EUPL-1.2 &middot; &copy; 2026 openconformity</small>
+  </div>
+</footer>
+
+</body>
+</html>
