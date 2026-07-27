@@ -502,16 +502,19 @@ The project does not reproduce copyrighted content from harmonized standards. Th
 
 `2026-07-23` `repository`
 
-The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and throwaway work is kept in a sandbox that mirrors the deployables.
+The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and throwaway work is kept in a sandbox outside the deployables.
 
     app/            the software
     site/           the project site
     docs/           the specification, decisions, and design
     schema/         the data model, as one schema file per document type
     sources/        editable design sources
-    sandbox/        throwaway work, mirroring the deployables
+    sandbox/        throwaway work
+      app/          iterations of the software
+      site/         iterations of the project site
+      poc/          the original proof of concept, frozen
 
-> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the structure it experiments against, so sandbox/app holds prototypes of the software and sandbox/site holds design explorations for the site. Keeping it outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
+> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the deployables for work in progress, so sandbox/app holds iterations of the software and sandbox/site holds explorations of the site. It also keeps the proof of concept the project started from, which is frozen as a record rather than iterated on, and so sits beside the two working areas rather than in one of them. Keeping the sandbox outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
 
 
 ## 4. Open Topics
