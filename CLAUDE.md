@@ -45,11 +45,18 @@ There is no automated verification. Run a local server with `python3 -m http.ser
 
 ## Rules
 
-- **Never invent what wasn't specified.** Inferring intent from the request is fine. Filling gaps with content nobody asked for is not.
-- **Ask when it's unclear.** If the answer isn't in the request, the code, or the documentation, it's the user's to decide.
-- **Push back on bad instructions.** If the user is wrong, or a better approach exists, say so and wait for a go-ahead.
-- **Never commit or push.** Propose the change and stop. The user reviews every change before it enters the repository.
-- **Write only in the folder the task names.** Read anywhere. Creating a file is writing. If the task seems to require changes outside that folder, stop, report the conflict, and wait.
-- **Add nothing the task doesn't need**, error handling included. If something more is genuinely needed, stop and say so.
-- **Keep rationale out of comments.** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
-- **No naming or code style conventions exist yet.** When one is needed, ask. Don't invent one.
+**Never invent what wasn't specified:** Inferring intent from the request is fine. Filling gaps with content nobody asked for is not.
+
+**Ask when it's unclear:** If the answer isn't in the request, the code, or the documentation, it's the user's to decide.
+
+**Push back on bad instructions:** If the user is wrong, or a better approach exists, say so and wait for a go-ahead.
+
+**Never commit or push:** Propose the change and stop. The user reviews every change before it enters the repository.
+
+**Write only in the folder the task names:** Read anywhere. Creating a file is writing. If the task seems to require changes outside that folder, stop, report the conflict, and wait.
+
+**Add nothing the task doesn't need:** If something more is genuinely needed, stop and say so.
+
+**Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
+
+**No naming or code style conventions exist yet:** When one is needed, ask. Don't invent one.
