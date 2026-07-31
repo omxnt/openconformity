@@ -1,17 +1,16 @@
 # Decisions
 
+This document records the decisions made for the project, what was chosen and why. It is kept so that a settled question is not reopened without cause. A decision that changes is not edited but superseded by a new entry.
+
 ## Table of Contents
 
-- [1. Introduction](#1-introduction)
-  - [1.1 Purpose](#11-purpose)
-  - [1.2 Scope](#12-scope)
-- [2. Conventions](#2-conventions)
-  - [2.1 Identifier](#21-identifier)
-  - [2.2 Tags](#22-tags)
-  - [2.3 Content](#23-content)
-  - [2.4 Supersession](#24-supersession)
-  - [2.5 Template](#25-template)
-- [3. Decisions](#3-decisions)
+- [1. Conventions](#1-conventions)
+  - [1.1 Identifier](#11-identifier)
+  - [1.2 Tags](#12-tags)
+  - [1.3 Content](#13-content)
+  - [1.4 Supersession](#14-supersession)
+  - [1.5 Template](#15-template)
+- [2. Decisions](#2-decisions)
   - [D-001 EUPL-1.2 licence](#d-001-eupl-12-licence)
   - [D-002 Non-commercial](#d-002-non-commercial)
   - [~~D-003 No standard content reproduced~~](#d-003-no-standard-content-reproduced)
@@ -33,7 +32,7 @@
   - [D-019 Atomic commits](#d-019-atomic-commits)
   - [~~D-020 Repository layout~~](#d-020-repository-layout)
   - [D-021 Throwaway prototypes](#d-021-throwaway-prototypes)
-  - [D-022 Document set](#d-022-document-set)
+  - [~~D-022 Document set~~](#d-022-document-set)
   - [D-023 "Shall" is spec.md only](#d-023-shall-is-specmd-only)
   - [D-024 Iterative build](#d-024-iterative-build)
   - [D-025 Specs state what not how](#d-025-specs-state-what-not-how)
@@ -49,30 +48,21 @@
   - [~~D-035 Repository layout~~](#d-035-repository-layout)
   - [D-036 Standards content](#d-036-standards-content)
   - [D-037 Repository layout](#d-037-repository-layout)
-- [4. Open Topics](#4-open-topics)
-- [5. References](#5-references)
+  - [D-038 Document per concern](#d-038-document-per-concern)
+  - [D-039 British spelling](#d-039-british-spelling)
+  - [D-040 Use cases as a document](#d-040-use-cases-as-a-document)
+- [3. Undecided](#3-undecided)
+- [4. References](#4-references)
 
-## 1. Introduction
+## 1. Conventions
 
-### 1.1 Purpose
-
-The purpose of this document is to record the decisions behind openconformity: what was chosen, and why. It is the reasoning that accompanies the design document and the specification, kept so that a settled question is not reopened without cause.
-
-### 1.2 Scope
-
-This decision log covers the decisions made for openconformity and their rationale, across all themes of the project: legal, product, architecture, repository, documentation, and graphical.
-
-This decision log does not restate the specification. The specification states what openconformity shall be and do; this log records why those choices were made.
-
-## 2. Conventions
-
-### 2.1 Identifier
+### 1.1 Identifier
 
 Each decision shall have a unique identifier of the form `D-NNN`, and decisions are ordered by number, grouped loosely by theme. Identifiers are append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited.
 
 *This log was consolidated on 2026-07-19 to reflect the project's current position, and entries before that date were renumbered. Append-only applies from that point.*
 
-### 2.2 Tags
+### 1.2 Tags
 
 Each entry carries one or more tags from the table below.
 
@@ -85,19 +75,15 @@ Each entry carries one or more tags from the table below.
 | `documentation` | How the project is documented: which documents exist and how they are written. |
 | `graphical` | The visual identity and interface profile: typefaces, colour, and marks. |
 
-### 2.3 Content
+### 1.3 Content
 
 An entry states what was decided and why. It does not repeat requirement text: where a decision resulted in a requirement, the entry gives the reasoning and refers to the requirement by its identifier.
 
-### 2.4 Supersession
+### 1.4 Supersession
 
 A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
 
-### 2.5 Template
-
-Each decision is written using the template below.
-
-### 2.5 Template
+### 1.5 Template
 
 Each decision is written using the template below.
 
@@ -111,7 +97,7 @@ The decision, stated plainly.
 > *The rationale.*
 ```
 
-## 3. Decisions
+## 2. Decisions
 
 ### D-001 EUPL-1.2 licence
 
@@ -332,7 +318,7 @@ The proof of concept is archived in `poc/`, frozen and unmaintained. The concept
 
 ### D-022 Document set
 
-`2026-07-19` `documentation`
+`2026-07-19` `documentation` `superseded by D-038`
 
 Three documents, each with one job. `design.md` describes what the product is and why. `spec.md` states what it shall be and do. `decisions.md` records what was chosen and why. `README.md` owns the links between them.
 
@@ -516,8 +502,40 @@ The repository is organised by kind. Each deployable directory is self-contained
 
 > *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the deployables for work in progress, so sandbox/app holds iterations of the software and sandbox/site holds explorations of the site. It also keeps the proof of concept the project started from, which is frozen as a record rather than iterated on, and so sits beside the two working areas rather than in one of them. Keeping the sandbox outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
 
+---
 
-## 4. Open Topics
+### D-038 Document per concern
+
+`2026-08-01` `documentation` `repository`
+
+One document per concern, created when the need arises. `design.md` is dissolved: `vision.md` carries the background, principles, and scope, `metamodel.md` the entity types and relationships, and `user-interface.md` the interface concept. `spec.md` is renamed `requirements.md`. Every document opens with its title, an overview in prose, and a table of contents, followed by numbered chapters. Files are named for their content, closed compounds written as the literature writes them (`metamodel.md`), multiword names hyphenated (`use-cases.md`), uppercase reserved for root meta-files. The design sources follow the same rule (`metamodel.drawio`, `visual-identity.fig`), and `sources/` holds editable originals that require a tool to edit and whose exports are consumed elsewhere. `README.md` owns the index; a document may point to another but never depends on or restates it.
+
+> *A single design document mixed content that changes weekly with content that changes yearly, so no diff was clean and the document never felt finished. Small documents of one concern iterate independently, give the metamodel its own history, and let a reader pull only what a task needs. Content-named files are understood without being opened, which the genre names spec and design were not. Supersedes D-022.*
+
+---
+
+### D-039 British spelling
+
+`2026-08-01` `documentation`
+
+All project text uses British spelling. The earlier informal convention of writing "harmonized" with a z is reversed: the word is written "harmonised" everywhere. Quoted material keeps its source spelling.
+
+> *One spelling convention with no exceptions is never relitigated. The European legal texts the project builds on use British spelling, so the project matches its source material.*
+
+---
+
+### D-040 Use cases as a document
+
+`2026-08-01` `documentation`
+
+Use cases complement the requirements in a document of their own, `use-cases.md`. A requirement states a capability, verifiable in isolation. A use case states a sequence, how a user reaches a goal. Neither names interface elements, which belong to the design.
+
+> *Requirements written at the level of user interaction would multiply into hundreds and constrain the implementation. The sequences live in use cases instead, keeping the requirements few and capability-shaped. Every system response in a use case should trace to a requirement, so writing the flows also surfaces the requirements that are missing.*
+
+
+## 3. Undecided
+
+The following questions are raised but not yet decided. Each stays here until it is settled and entered as a decision.
 
 | # | Question | Blocks |
 |---|---|---|
@@ -529,7 +547,7 @@ The repository is organised by kind. Each deployable directory is self-contained
 | 6 | Library scope: which item types are reusable across projects, beyond standards | Library implementation |
 | 7 | Whether the tool ships any default content, or the user populates everything | Library implementation |
 
-## 5. References
+## 4. References
 
 | No. | Reference | Link |
 |---|---|---|
