@@ -34,10 +34,14 @@ The project is named `openconformity`. It is a free, open-source, browser-based 
 
 | File | What it is | Read when |
 |---|---|---|
-| `docs/spec.md` | Requirements specification | Building or changing the software |
-| `docs/design.md` | Conceptual design description | Needing clarification on the concept |
-| `docs/decisions.md` | Project decision log and rationale | Proposing something undiscussed |
-| `schema/` | Data model specification | Working with entities or relationships |
+| `docs/about.md` | Background, principles, and scope | Needing context on the project |
+| `docs/requirements.md` | Requirements specification | Building or changing the software |
+| `docs/metamodel.md` | Entity types and relationships | Working with entities or relationships |
+| `docs/user-interface.md` | Layout and interaction concept | Working on the user interface |
+| `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
+| `docs/template.md` | Document form and structure | Writing or updating a document |
+| `schema/project.schema.json` | Project file specification | Working with the project schema file |
+| `schema/library.schema.json` | Library file specification | Working with the library schema file |
 
 ## Verification
 
@@ -59,4 +63,4 @@ There is no automated verification. Run a local server with `python3 -m http.ser
 
 - **Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
 
-- **Don't invent conventions:** None exist yet for naming or code style. When one is needed, ask.
+- **Don't invent conventions:** None exist yet for code style. When one is needed, ask.
