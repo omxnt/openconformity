@@ -1,26 +1,6 @@
 # Vision
 
-This document describes the background and reasoning behind the project, the principles it rests on, and its scope. It shapes the specification, design, and implementation of the software.
-
-## Table of Contents
-
-- [1. Background](#1-background)
-  - [1.1 Current Market](#11-current-market)
-  - [1.2 Systems Modelling](#12-systems-modelling)
-  - [1.3 Problem Statement](#13-problem-statement)
-- [2. Project Principles](#2-project-principles)
-  - [2.1 Open Source](#21-open-source)
-  - [2.2 Minimal Barriers](#22-minimal-barriers)
-  - [2.3 Privacy by Design](#23-privacy-by-design)
-  - [2.4 User-Owned Data](#24-user-owned-data)
-  - [2.5 Meaningful Output](#25-meaningful-output)
-  - [2.6 Avoid Conclusions](#26-avoid-conclusions)
-  - [2.7 Engineering Work](#27-engineering-work)
-- [3. Software Scope](#3-software-scope)
-  - [3.1 In Scope](#31-in-scope)
-  - [3.2 Out of Scope](#32-out-of-scope)
-  - [3.3 Non-Goals](#33-non-goals)
-- [4. References](#4-references)
+This document describes why the project exists, the principles it rests on, and the scope of the software. The background sets out the current market and the model-based approach the project is inspired by, the principles state the commitments the project makes, and the scope bounds what the software supports. This together shapes the specification, design, and implementation of the software.
 
 ## 1. Background
 
