@@ -537,15 +537,15 @@ Use cases complement the requirements in a document of their own, `use-cases.md`
 
 The following questions are raised but not yet decided. Each stays here until it is settled and entered as a decision.
 
-| # | Question | Blocks |
+| # | Question | Affects |
 |---|---|---|
-| 1 | Deleting a composition relationship: forbidden, or equivalent to deleting the owned entity? | design.md |
-| 2 | ID collisions on import: renumber, or scope IDs by source? | Library implementation |
-| 3 | Import granularity: whole standard, or clause by clause? | Library implementation |
-| 4 | Essential requirements that apply regardless of hazards: how do they enter the model? | Workflow |
-| 5 | Whether a base library of standard identities can be shipped | D-014 |
-| 6 | Library scope: which item types are reusable across projects, beyond standards | Library implementation |
-| 7 | Whether the tool ships any default content, or the user populates everything | Library implementation |
+| 1 | Deleting a composition relationship, forbidden or equivalent to deleting the owned entity | Metamodel |
+| 2 | Essential requirements that apply regardless of hazards, how they enter the model | Metamodel |
+| 3 | ID collisions on import, renumber or scope IDs by source | Library |
+| 4 | Import granularity, whole standard or clause by clause | Library |
+| 5 | Library scope, which item types are reusable across projects beyond standards | Library |
+| 6 | Whether a base library of standard identities can be shipped, which would supersede D-014 | Library |
+| 7 | Whether the software ships any default content, or the user populates everything | Library |
 
 ## 4. References
 
