@@ -2,7 +2,7 @@
 
 The openconformity project, short for open-source conformity assessment, is an initiative to develop a free, open-source tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230. The tool is browser-based and runs entirely client-side, with no installation or account required.
 
-*Personal hobby project maintained by [omxnt](https://github.com/omxnt), with no company and no commercial interests behind it. Updated when time allows.*
+*This is a personal hobby project maintained by [omxnt](https://github.com/omxnt), with no company and no commercial interests behind it. The project is updated when time allows.*
 
 ## Status
 
