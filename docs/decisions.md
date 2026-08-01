@@ -1,66 +1,13 @@
 # Decisions
 
-This document records the decisions made for the project, what was chosen and why. It is kept so that a settled question is not reopened without cause. A decision that changes is not edited but superseded by a new entry.
-
-## Table of Contents
-
-- [1. Conventions](#1-conventions)
-  - [1.1 Identifier](#11-identifier)
-  - [1.2 Tags](#12-tags)
-  - [1.3 Content](#13-content)
-  - [1.4 Supersession](#14-supersession)
-  - [1.5 Template](#15-template)
-- [2. Decisions](#2-decisions)
-  - [D-001 EUPL-1.2 licence](#d-001-eupl-12-licence)
-  - [D-002 Non-commercial](#d-002-non-commercial)
-  - [~~D-003 No standard content reproduced~~](#d-003-no-standard-content-reproduced)
-  - [D-004 Artefacts not assertions](#d-004-artefacts-not-assertions)
-  - [D-005 Machinery scope](#d-005-machinery-scope)
-  - [D-006 Hardcoded metamodel](#d-006-hardcoded-metamodel)
-  - [D-007 Risk Reduction Measure term](#d-007-risk-reduction-measure-term)
-  - [D-008 Direct entry to the tool](#d-008-direct-entry-to-the-tool)
-  - [D-009 Neighborhood graph view](#d-009-neighborhood-graph-view)
-  - [D-010 Vanilla web stack](#d-010-vanilla-web-stack)
-  - [D-011 Privacy by design](#d-011-privacy-by-design)
-  - [D-012 Single local file](#d-012-single-local-file)
-  - [D-013 Vendor the artifact](#d-013-vendor-the-artifact)
-  - [D-014 User-provided standards](#d-014-user-provided-standards)
-  - [D-015 Copy on import](#d-015-copy-on-import)
-  - [D-016 Reuse without relationships](#d-016-reuse-without-relationships)
-  - [D-017 Development server](#d-017-development-server)
-  - [D-018 Branch model](#d-018-branch-model)
-  - [D-019 Atomic commits](#d-019-atomic-commits)
-  - [~~D-020 Repository layout~~](#d-020-repository-layout)
-  - [D-021 Throwaway prototypes](#d-021-throwaway-prototypes)
-  - [~~D-022 Document set~~](#d-022-document-set)
-  - [D-023 "Shall" is spec.md only](#d-023-shall-is-specmd-only)
-  - [D-024 Iterative build](#d-024-iterative-build)
-  - [D-025 Specs state what not how](#d-025-specs-state-what-not-how)
-  - [D-026 No verdict colours](#d-026-no-verdict-colours)
-  - [D-027 Type by shape](#d-027-type-by-shape)
-  - [D-028 Wordmark and favicon identity](#d-028-wordmark-and-favicon-identity)
-  - [~~D-029 Standard content from OJEU~~](#d-029-standard-content-from-ojeu)
-  - [D-030 Browser-based and server-less](#d-030-browser-based-and-server-less)
-  - [D-031 Desktop only](#d-031-desktop-only)
-  - [D-032 Referenced data model](#d-032-referenced-data-model)
-  - [~~D-033 Repository layout~~](#d-033-repository-layout)
-  - [D-034 Separate deployments](#d-034-separate-deployments)
-  - [~~D-035 Repository layout~~](#d-035-repository-layout)
-  - [D-036 Standards content](#d-036-standards-content)
-  - [D-037 Repository layout](#d-037-repository-layout)
-  - [D-038 Document per concern](#d-038-document-per-concern)
-  - [D-039 British spelling](#d-039-british-spelling)
-  - [D-040 Use cases as a document](#d-040-use-cases-as-a-document)
-- [3. Undecided](#3-undecided)
-- [4. References](#4-references)
+This document records the decisions made for the project, what was chosen and why. The conventions define how an entry is written and identified, the decisions carry the reasoning behind each choice, and the undecided questions are those still open. A decision that changes is not edited but superseded by a new entry.
 
 ## 1. Conventions
 
 ### 1.1 Identifier
 
-Each decision shall have a unique identifier of the form `D-NNN`, and decisions are ordered by number, grouped loosely by theme. Identifiers are append-only: a decision is never renumbered, and one that changes is superseded by a new entry rather than edited.
+Each entry shall have a unique identifier, `D-NNN` for a decision and `U-NNN` for an undecided question. Entries are ordered by number, grouped loosely by theme. Identifiers are append-only, an entry is never renumbered, and a decision that changes is superseded by a new entry rather than edited. A question that is settled is removed, and its outcome recorded as a decision.
 
-*This log was consolidated on 2026-07-19 to reflect the project's current position, and entries before that date were renumbered. Append-only applies from that point.*
 
 ### 1.2 Tags
 
@@ -85,7 +32,7 @@ A decision that changes is not edited. A new entry is added that states the upda
 
 ### 1.5 Template
 
-Each decision is written using the template below.
+Each entry shall be written using the template below.
 
 ```markdown
 ### D-NNN Decision title
@@ -535,17 +482,75 @@ Use cases complement the requirements in a document of their own, `use-cases.md`
 
 ## 3. Undecided
 
-The following questions are raised but not yet decided. Each stays here until it is settled and entered as a decision.
+The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
 
-| # | Question | Affects |
-|---|---|---|
-| 1 | Deleting a composition relationship, forbidden or equivalent to deleting the owned entity | Metamodel |
-| 2 | Essential requirements that apply regardless of hazards, how they enter the model | Metamodel |
-| 3 | ID collisions on import, renumber or scope IDs by source | Library |
-| 4 | Import granularity, whole standard or clause by clause | Library |
-| 5 | Library scope, which item types are reusable across projects beyond standards | Library |
-| 6 | Whether a base library of standard identities can be shipped, which would supersede D-014 | Library |
-| 7 | Whether the software ships any default content, or the user populates everything | Library |
+### U-001 Composition deletion
+
+`2026-08-01` `product`
+
+Whether deleting a composition relationship is forbidden, or equivalent to deleting the owned entity.
+
+> *Affects the metamodel. Composition implies ownership, so removing the relationship leaves the owned entity without a parent unless the deletion cascades.*
+
+---
+
+### U-002 Hazard-independent essential requirements
+
+`2026-08-01` `product`
+
+How essential requirements that apply regardless of hazards enter the model.
+
+> *Affects the metamodel. Essential requirements normally enter through the hazards that trigger them, so those applying unconditionally have no path into the model as it stands.*
+
+---
+
+### U-003 Identifier collisions on import
+
+`2026-08-01` `product`
+
+Whether identifiers that collide on import are renumbered, or scoped by their source.
+
+> *Affects the library. Content imported from more than one source can carry the same identifier.*
+
+---
+
+### U-004 Import granularity
+
+`2026-08-01` `product`
+
+Whether a standard is imported whole, or clause by clause.
+
+> *Affects the library.*
+
+---
+
+### U-005 Library scope
+
+`2026-08-01` `product`
+
+Which item types are reusable across projects, beyond standards.
+
+> *Affects the library.*
+
+---
+
+### U-006 Base library
+
+`2026-08-01` `product` `legal`
+
+Whether a base library of standard identities can be shipped.
+
+> *Affects the library. Would supersede D-014.*
+
+---
+
+### U-007 Default content
+
+`2026-08-01` `product`
+
+Whether the software ships any default content, or the user populates everything.
+
+> *Affects the library.*
 
 ## 4. References
 
