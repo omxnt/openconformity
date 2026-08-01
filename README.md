@@ -6,11 +6,11 @@ The openconformity project, short for open-source conformity assessment, is an i
 
 ## Status
 
-In design phase, not yet usable.
+In design phase. The documentation is being written and the software is not yet built, apart from a preview that shows the intended interface with fixed example content.
 
 ## What it is
 
-The tool offers an approach to CE marking using concepts borrowed from the domain of Systems Engineering (SE). The CE marking work itself is modeled using entities with semantic relationships between them, where each entity carries its own attributes. The semantic relationships represent the connections between the different types of entities, defining how they interact and relate to each other.
+The tool offers an approach to CE marking using concepts borrowed from the domain of Systems Engineering (SE). The CE marking work itself is modelled using entities with semantic relationships between them, where each entity carries its own attributes. The semantic relationships represent the connections between the different types of entities, defining how they interact and relate to each other.
 
 Artefacts can be generated as views of the model, exported and intended as input to the engineering documents that the user assembles under their own quality system. The idea behind the tool is to aid the user in producing the meaningful artefacts of the CE marking work, rather than to generate reports.
 
@@ -18,16 +18,30 @@ Artefacts can be generated as views of the model, exported and intended as input
 
 Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. Projects are saved as a single local JSON file. Artefacts can be exported as CSV files.
 
+## Structure
+
+```
+openconformity/
+├── app/            the published software
+├── site/           the published project site
+├── docs/           the project documentation
+├── schema/         the data model schema files
+├── sources/        the sources in editable formats
+└── sandbox/        the non-published work-in-progress
+    ├── app/        iterations of the software
+    ├── site/       iterations of the project site
+    └── poc/        frozen original proof of concept
+```
+
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [design.md](docs/design.md) | What it is and why |
-| [spec.md](docs/spec.md) | What it shall be and do |
+| [about.md](docs/about.md) | Why it exists and what it is |
+| [requirements.md](docs/requirements.md) | What it shall be and do |
+| [metamodel.md](docs/metamodel.md) | What a model may contain |
+| [user-interface.md](docs/user-interface.md) | How the user works with it |
 | [decisions.md](docs/decisions.md) | What was chosen and why |
-| [meta.svg](assets/diagrams/meta.svg) | The model of the model |
-
-The design document and specification are both in progress.
 
 ## Disclaimer
 
@@ -43,5 +57,6 @@ Provided as-is, without warranty of any kind. Outputs may contain errors and sho
 
 ## Links
 
-* [openconformity.org](https://openconformity.org)
-* [LinkedIn](https://www.linkedin.com/company/openconformity)
+- [The project site](https://openconformity.org)
+- [The demo software](https://app.openconformity.org)
+- [Follow on LinkedIn](https://www.linkedin.com/company/openconformity)
