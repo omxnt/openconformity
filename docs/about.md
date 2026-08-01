@@ -1,6 +1,6 @@
-# Vision
+# About
 
-This document describes why the project exists, the principles it rests on, and the scope of the software. The background sets out the current market and the model-based approach the project is inspired by, the principles state the commitments the project makes, and the scope bounds what the software supports. This together shapes the specification, design, and implementation of the software.
+This document describes why the project exists, what the software is, the principles the project rests on, and the scope of the software. The background sets out the current market and the model-based approach the project is inspired by, the concept describes the software in brief, the principles state the commitments the project makes, and the scope bounds what the software supports. This together shapes the specification, design, and implementation of the software.
 
 ## 1. Background
 
@@ -26,41 +26,49 @@ Traditional document-centric CE marking implies that the same information is sta
 
 In a model-based approach, every entity is stated once, and the connections are expressed as semantic relationships. Views can then be exported for any purpose, such as a hazard list, a requirement specification, or a verification plan. All of these artefacts are generated from the same model, always consistent with each other, with the traceability between legislation, standards, hazards, measures, requirements, and verifications preserved automatically.
 
-## 2. Project Principles
+## 2. Concept
 
-The vision for the project is to provide a modelling environment for the engineering work related to CE marking of machinery in accordance with the Machinery Regulation (EU) 2023/1230. The vision rests on the following principles.
+The software is a modelling environment for CE marking of machinery, used directly in the browser. The user builds a model of their CE marking work, covering the machinery product and its structure, the legislation and standards it falls under, the hazards it exhibits, the measures that reduce the risks, the requirements that follow, and the activities that verify them. Everything in the model is an entity, described by its attributes and connected to other entities through typed semantic relationships.
 
-### 2.1 Open Source
+The modelling language is defined by a metamodel, built into the software, which encodes the domain knowledge of CE marking and governs which entities and relationships can exist. The model is built up entity by entity as the engineering work progresses, one model per machinery product.
+
+Every fact is stated once in the model. Artefacts such as hazard lists and requirement specifications are generated as views of the model, exportable for use in the user's own documentation. Content can be reused between projects, while the relationships are always re-established in the context of each machinery product.
+
+## 3. Principles
+
+The project rests on the following principles.
+
+### 3.1 Open Source
 
 The software is free to use, and its source code is open. Anyone can inspect how it works, verify its claims, contribute to it, or adapt it to their own needs. There is no commercial interest behind the project.
 
-### 2.2 Minimal Barriers
+### 3.2 Minimal Barriers
 
 The software runs entirely client-side, with no installation, no account, and no server required. The user opens the page and starts working.
 
-### 2.3 Privacy by Design
+### 3.3 Privacy by Design
 
 There is no server contact, no tracking, no analytics, and no data collection of any kind. All processing happens in the user's browser, and user data never leaves it.
 
-### 2.4 User-Owned Data
+### 3.4 User-Owned Data
 
 Projects are saved as local files, owned and controlled by the user. Data can be moved, backed up, or deleted at the user's sole discretion.
 
-### 2.5 Meaningful Output
+### 3.5 Meaningful Output
 
 The software generates raw engineering artefacts, such as applicable essential requirements, identified hazards, and requirements. These are exportable, intended as input to the engineering documents that the user assembles under their own quality system.
 
-### 2.6 Avoid Conclusions
+### 3.6 Avoid Conclusions
 
 The software never states any conclusion about the safety or conformity of the product, and does not generate reports. The responsibility for the CE marking remains with the manufacturer.
 
-### 2.7 Engineering Work
+### 3.7 Engineering Work
 
 The software treats CE marking as engineering work, requiring competence, judgement, and knowledge of the applicable legislation and standards. It provides structure rather than shortcuts, with no checklists or wizards that promise conformity without understanding. The software cannot replace competence, it only makes competent work traceable, consistent, and reusable.
 
-## 3. Software Scope
+## 4. Scope
 
-### 3.1 In Scope
+### 4.1 In Scope
 
 The scope of the software is to support CE marking of machinery products under the European product legislation of the New Legislative Framework (NLF).
 
@@ -78,15 +86,15 @@ The secondary scope of the software includes:
 - Restriction of Hazardous Substances Directive 2011/65/EU
 - Pressure Equipment Directive 2014/68/EU
 
-### 3.2 Out of Scope
+### 4.2 Out of Scope
 
 The software does not support CE marking of product types other than machinery, such as electrical equipment, medical devices, or standalone construction products, even where the same legislation would apply to them.
 
 The software does not support national legislation or national deviations, such as workplace or installation requirements under national law in the member states of the European Union.
 
-### 3.3 Non-Goals
+### 4.3 Non-Goals
 
-Following the project principles of [Meaningful Output (2.5)](#25-meaningful-output) and [Avoid Conclusions (2.6)](#26-avoid-conclusions), the software deliberately does **not**:
+Following the project principles of [Meaningful Output (3.5)](#35-meaningful-output) and [Avoid Conclusions (3.6)](#36-avoid-conclusions), the software deliberately does **not**:
 
 - generate the technical file or the EU Declaration of Conformity
 - indicate conformity, compliance, or approval in any form
@@ -95,7 +103,7 @@ Following the project principles of [Meaningful Output (2.5)](#25-meaningful-out
 
 Any content generated or proposed by the software is treated as a draft, pending the user's review. The non-goals are permanent design principles, not missing features, since they follow from the position that responsibility for the CE marking rests with the manufacturer and cannot be delegated to a tool.
 
-## 4. References
+## 5. References
 
 | No. | Reference | Link |
 |---|---|---|
