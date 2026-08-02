@@ -1,74 +1,175 @@
 # Metamodel
 
-The metamodel defines what a model may contain, the entity types, their attributes, and the allowed semantic relationships between them. It encodes the domain knowledge of CE marking of machinery and is the core of the software. This document transcribes the diagram maintained in [metamodel.drawio](../sources/metamodel.drawio), which is the editable original.
+This document defines the metamodel, the entity types a model may contain and the relationships allowed between them. It transcribes the diagram maintained in [metamodel.drawio](../sources/metamodel.drawio), which is the editable original.
 
-The metamodel is hardcoded in the software and versioned with it. A user-extensible metamodel is out of scope, since the value lies in a metamodel that is correct for the domain, not in generic modelling capability.
+## 1. Concept
 
-## 1. Entity Types
+A model describes the CE marking work for one machinery product. Everything in the model is an entity of a defined type, carrying its own attributes and connected to other entities through typed relationships. The metamodel defines those types and connections, and so what a model is able to express.
 
-The metamodel defines the following entity types, organised in four pillars.
+The metamodel encodes the domain knowledge of CE marking of machinery. It follows the structure of the work itself, where legislation defines requirements, hazards trigger them, measures reduce the risks, and requirements follow from the measures. The entity types name the things the work produces, and the relationships name the connections between them.
 
-| Pillar | Entity types |
+The metamodel is built into the software and versioned with it. A user-extensible metamodel is out of scope, since the value lies in a metamodel that is correct for the domain, not in generic modelling capability.
+
+## 2. Definition
+
+### 2.1 Diagram
+
+![The metamodel](metamodel.svg)
+
+### 2.2 Pillars
+
+| Pillar | Description |
 |---|---|
-| Legislative | European Legislation, European Standard, Conformity Assessment, Notified Body |
-| Requirements | Essential Requirement, Standard Requirement, System Requirement, Verification Activity |
-| Hazard Analysis | Single Hazard, Accident Scenario, Risk Reduction Measure, Safety Function |
-| Structure | System Element, System Actor, System Task, System Phase |
+| System Context | Defining the machinery and its operational context |
+| Legislative Framework | Identifying the applicable legislation and standards |
+| Requirements Definition | Deriving the requirements and verification activities |
+| Hazard Analysis | Identifying the hazards and reducing the risks |
 
-## 2. Semantic Relationships
+### 2.3 Entities
 
-Relationships are typed and directed, from a source entity type to a target entity type. Two kinds of relationships exist.
+| Prefix | Entity | Pillar |
+|---|---|---|
+| LEG | European Legislation | Legislative |
+| STD | European Standard | Legislative |
+| CAS | Conformity Assessment | Legislative |
+| NTB | Notified Body | Legislative |
+| ESR | Essential Requirement | Requirements |
+| STR | Standard Requirement | Requirements |
+| REQ | System Requirement | Requirements |
+| VER | Verification Activity | Requirements |
+| HAZ | Single Hazard | Hazard Analysis |
+| SCN | Accident Scenario | Hazard Analysis |
+| RRM | Risk Reduction Measure | Hazard Analysis |
+| SAF | Safety Function | Hazard Analysis |
+| ELM | System Element | Structure |
+| ACT | System Actor | Structure |
+| TSK | System Task | Structure |
+| PHS | System Phase | Structure |
 
-- **Association:** the entities are related. Both entities exist independently, and deleting one only removes the relationship.
+### 2.4 Relationships
 
-- **Composition:** the source entity owns the target entity as a part. The part cannot exist without its owner, and deleting the owner also deletes its parts.
-
-The metamodel defines the following relationships.
-
-| Relationship | Source | Target | Kind |
+| Source | Relationship | Target | Kind |
 |---|---|---|---|
-| defines | European Legislation | Essential Requirement | Composition |
-| defines | European Legislation | Conformity Assessment | Composition |
-| defines | European Standard | Standard Requirement | Composition |
-| involves | Conformity Assessment | Notified Body | Composition |
-| harmonised to | European Standard | European Legislation | Association |
-| subject to | System Element | European Legislation | Association |
-| subject to | System Element | European Standard | Association |
-| satisfies | Standard Requirement | Essential Requirement | Association |
-| derives from | System Requirement | Standard Requirement | Association |
-| derives from | System Requirement | Risk Reduction Measure | Association |
-| derives from | System Requirement | Safety Function | Association |
-| decomposes into | System Requirement | System Requirement | Composition |
-| decomposes into | Safety Function | Safety Function | Composition |
-| decomposes into | System Element | System Element | Composition |
-| allocated to | Essential Requirement | System Element | Association |
-| allocated to | Standard Requirement | System Element | Association |
-| allocated to | System Requirement | System Element | Association |
-| allocated to | Verification Activity | System Element | Association |
-| allocated to | Risk Reduction Measure | System Element | Association |
-| allocated to | Safety Function | System Element | Association |
-| verifies | Verification Activity | System Requirement | Association |
-| verifies | Verification Activity | Risk Reduction Measure | Association |
-| verifies | Verification Activity | Safety Function | Association |
-| implements | Risk Reduction Measure | Standard Requirement | Association |
-| realises | Safety Function | Risk Reduction Measure | Association |
-| mitigates | Risk Reduction Measure | Single Hazard | Association |
-| mitigates | Risk Reduction Measure | Accident Scenario | Association |
-| exhibits | System Element | Single Hazard | Composition |
-| triggers | Single Hazard | Essential Requirement | Association |
-| contributes to | Single Hazard | Accident Scenario | Association |
-| leads to | System Task | Accident Scenario | Association |
-| exposed in | System Actor | Accident Scenario | Association |
-| has | System Element | System Phase | Association |
-| has | System Element | System Actor | Association |
-| performs | System Actor | System Task | Association |
-| during | System Task | System Phase | Association |
+| LEG | defines | ESR | Composition |
+| LEG | defines | CAS | Composition |
+| STD | defines | STR | Composition |
+| CAS | involves | NTB | Composition |
+| STD | harmonised to | LEG | Association |
+| ELM | subject to | LEG | Association |
+| ELM | subject to | STD | Association |
+| STR | satisfies | ESR | Association |
+| REQ | derives from | STR | Association |
+| REQ | derives from | RRM | Association |
+| REQ | derives from | SAF | Association |
+| REQ | decomposes into | REQ | Composition |
+| SAF | decomposes into | SAF | Composition |
+| ELM | decomposes into | ELM | Composition |
+| ESR | allocated to | ELM | Association |
+| STR | allocated to | ELM | Association |
+| REQ | allocated to | ELM | Association |
+| VER | allocated to | ELM | Association |
+| RRM | allocated to | ELM | Association |
+| SAF | allocated to | ELM | Association |
+| VER | verifies | REQ | Association |
+| VER | verifies | RRM | Association |
+| VER | verifies | SAF | Association |
+| RRM | implements | STR | Association |
+| SAF | realises | RRM | Association |
+| RRM | mitigates | HAZ | Association |
+| RRM | mitigates | SCN | Association |
+| ELM | exhibits | HAZ | Composition |
+| HAZ | triggers | ESR | Association |
+| HAZ | contributes to | SCN | Association |
+| TSK | leads to | SCN | Association |
+| ACT | exposed in | SCN | Association |
+| ELM | has | PHS | Association |
+| ELM | has | ACT | Association |
+| ACT | performs | TSK | Association |
+| TSK | during | PHS | Association |
 
-The software enforces the metamodel. The user can only create relationships that the metamodel defines, and a relationship not present in the table above cannot exist in a model.
+### 2.5 Attributes
 
-The composition relationships have consequences for deletion. A Single Hazard belongs to exactly one System Element and is deleted with it, and the requirements of a legislation or standard are deleted together with the legislation or standard that defines them. The software warns the user before performing a deletion that cascades to owned entities.
+#### 2.5.1 European Legislation
 
-## 3. References
+*Not started yet.*
+
+#### 2.5.2 European Standard
+
+*Not started yet.*
+
+#### 2.5.3 Conformity Assessment
+
+*Not started yet.*
+
+#### 2.5.4 Notified Body
+
+*Not started yet.*
+
+#### 2.5.5 Essential Requirement
+
+*Not started yet.*
+
+#### 2.5.6 Standard Requirement
+
+*Not started yet.*
+
+#### 2.5.7 System Requirement
+
+*Not started yet.*
+
+#### 2.5.8 Verification Activity
+
+*Not started yet.*
+
+#### 2.5.9 Single Hazard
+
+*Not started yet.*
+
+#### 2.5.10 Accident Scenario
+
+*Not started yet.*
+
+#### 2.5.11 Risk Reduction Measure
+
+*Not started yet.*
+
+#### 2.5.12 Safety Function
+
+*Not started yet.*
+
+#### 2.5.12 System Element
+
+*Not started yet.*
+
+#### 2.5.12 System Actor
+
+*Not started yet.*
+
+#### 2.5.12 System Task
+
+*Not started yet.*
+
+#### 2.5.12 System Phase
+
+*Not started yet.*
+
+## 3. Semantics
+
+### 3.1 Enforcement
+
+The software enforces the metamodel. Only the entity types listed in 2.3 can be created, and only the relationships listed in 2.4 can be established between them. A relationship not present in that table cannot exist in a model.
+
+### 3.2 Deletion
+
+Deleting an entity removes it from the model together with the relationships it takes part in. Deleting an association removes the connection and leaves both entities in place.
+
+Composition carries ownership, so deleting the source entity also deletes the entities it owns. A Single Hazard belongs to exactly one System Element and is deleted with it, and the requirements defined by a legislation or a standard are deleted together with it. The software states which entities are affected before performing a deletion that cascades.
+
+### 3.3 Cardinality
+
+XXX
+
+## 4. References
 
 | No. | Reference | Link |
 |---|---|---|
