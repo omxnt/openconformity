@@ -12,7 +12,7 @@
  */
 
 import { ENTITY_TYPES, PILLARS, typesInPillar } from './metamodel.js';
-import { childFolders, decompositionChildren, decompositionParent, displayLabel, folderCount } from './model.js';
+import { childFolders, decompositionChildren, decompositionParent, labelOf, folderCount } from './model.js';
 import { clear, el, icon } from './dom.js';
 
 /**
@@ -28,10 +28,14 @@ import { clear, el, icon } from './dom.js';
  * @param {(selection: Selection) => void} context.onSelect
  * @param {(selection: Selection, x: number, y: number) => void} context.onContextMenu
  * @param {(selection: Selection) => void} context.onActivate  double click, or Enter
+ * @param {(source: Selection, target: Selection) => boolean} context.canDrop
+ * @param {(source: Selection, target: Selection) => void} context.onDrop
  */
 export function createNavigator(context) {
   const expanded = new Set(['root']);
   let filter = '';
+  /** @type {Selection|null} */
+  let dragging = null;
 
   for (const pillar of PILLARS) expanded.add(`pillar:${pillar.id}`);
 
@@ -74,7 +78,8 @@ export function createNavigator(context) {
     return node({
       key: `pillar:${pillar.id}`,
       selection: { kind: 'pillar', id: pillar.id },
-      iconId: 'i-folder',
+      iconId: pillar.icon,
+      pillar: pillar.id,
       label: pillar.name,
       className: 'pillar',
       current: selection,
@@ -96,6 +101,7 @@ export function createNavigator(context) {
       key: `type:${type.code}`,
       selection: { kind: 'type', id: type.code },
       iconId: 'i-folder',
+      pillar: type.pillar,
       label: type.plural,
       count: String(total),
       current: selection,
@@ -139,6 +145,7 @@ export function createNavigator(context) {
       key: `folder:${folder.id}`,
       selection: { kind: 'folder', id: folder.id },
       iconId: 'i-folder',
+      pillar: ENTITY_TYPES[folder.type].pillar,
       label: folder.name,
       count: String(folderCount(model, folder.id)),
       current: selection,
@@ -164,7 +171,8 @@ export function createNavigator(context) {
       selection: { kind: 'entity', id: entity.id },
       id: entity.id,
       iconId: ENTITY_TYPES[entity.type].icon,
-      label: displayLabel(entity),
+      pillar: ENTITY_TYPES[entity.type].pillar,
+      label: labelOf(entity),
       title: `${ENTITY_TYPES[entity.type].name} ${entity.id}`,
       current: selection,
       children,
@@ -181,6 +189,7 @@ export function createNavigator(context) {
    * @param {string} spec.label
    * @param {string} [spec.count]
    * @param {string} [spec.className]
+   * @param {string} [spec.pillar]
    * @param {string} [spec.title]
    * @param {HTMLElement[]} [spec.children]
    */
@@ -204,7 +213,7 @@ export function createNavigator(context) {
           })
         : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
     );
-    row.append(icon(spec.iconId));
+    row.append(icon(spec.iconId, spec.pillar));
     if (spec.id) row.append(el('span', { class: 'row-id', text: spec.id }));
     row.append(el('span', { class: `row-label${spec.className ? ` ${spec.className}` : ''}`, text: spec.label }));
     if (spec.count !== undefined) row.append(el('span', { class: 'row-count', text: spec.count }));
@@ -237,7 +246,83 @@ export function createNavigator(context) {
     if (hasChildren && open) {
       wrapper.append(el('div', { class: 'children', role: 'group' }, children));
     }
+    addDragAndDrop(wrapper, spec.selection);
     return wrapper;
+  }
+
+  /**
+   * Dragging moves an entity or a folder within its own kind. Near the top or
+   * the bottom of a row it drops alongside, which is how the order is changed;
+   * across the middle it drops inside. Whether either is allowed is asked of
+   * the model, so the tree accepts exactly what the model accepts.
+   * @param {HTMLElement} wrapper
+   * @param {Selection} selection
+   */
+  function addDragAndDrop(wrapper, selection) {
+    if (selection.kind === 'entity' || selection.kind === 'folder') {
+      wrapper.draggable = true;
+      wrapper.addEventListener('dragstart', (event) => {
+        event.stopPropagation();
+        dragging = selection;
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', `${selection.kind}:${selection.id}`);
+        wrapper.classList.add('dragging');
+      });
+      wrapper.addEventListener('dragend', () => {
+        dragging = null;
+        wrapper.classList.remove('dragging');
+        clearDropMarks();
+      });
+    }
+
+    if (selection.kind !== 'entity' && selection.kind !== 'folder' && selection.kind !== 'type') return;
+
+    wrapper.addEventListener('dragover', (event) => {
+      if (!dragging) return;
+      const position = positionWithin(event, wrapper, selection);
+      if (!context.canDrop(dragging, selection, position)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = 'move';
+      const mark = position === 'into' ? 'drop-target' : `drop-${position}`;
+      if (!wrapper.classList.contains(mark)) {
+        clearDropMarks();
+        wrapper.classList.add(mark);
+      }
+    });
+
+    wrapper.addEventListener('drop', (event) => {
+      if (!dragging) return;
+      const position = positionWithin(event, wrapper, selection);
+      if (!context.canDrop(dragging, selection, position)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const source = dragging;
+      dragging = null;
+      clearDropMarks();
+      context.onDrop(source, selection, position);
+    });
+  }
+
+  /**
+   * @param {DragEvent} event
+   * @param {HTMLElement} wrapper
+   * @param {Selection} selection
+   * @returns {'before'|'after'|'into'}
+   */
+  function positionWithin(event, wrapper, selection) {
+    if (selection.kind === 'type') return 'into';
+    const box = wrapper.querySelector(':scope > .row').getBoundingClientRect();
+    const offset = event.clientY - box.top;
+    if (offset < box.height * 0.3) return 'before';
+    if (offset > box.height * 0.7) return 'after';
+    return 'into';
+  }
+
+  function clearDropMarks() {
+    for (const marked of context.treeEl.querySelectorAll('.drop-target, .drop-before, .drop-after')) {
+      marked.classList.remove('drop-target', 'drop-before', 'drop-after');
+    }
   }
 
   /**
@@ -310,7 +395,7 @@ export function createNavigator(context) {
   function matchingKeys(model, query) {
     const found = new Set();
     for (const entity of model.entities.values()) {
-      const haystack = `${entity.id} ${displayLabel(entity)} ${ENTITY_TYPES[entity.type].name}`.toLowerCase();
+      const haystack = `${entity.id} ${labelOf(entity)} ${ENTITY_TYPES[entity.type].name}`.toLowerCase();
       if (haystack.includes(query)) found.add(`entity:${entity.id}`);
     }
     for (const folder of model.folders.values()) {

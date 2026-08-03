@@ -7,13 +7,15 @@ import { el } from './dom.js';
 
 let overlay = null;
 let lastFocused = null;
+let blocking = false;
 
 /**
  * @param {Object} spec
  * @param {string} spec.title
  * @param {Array<Node|string>} spec.content
- * @param {Array<{ label: string, primary?: boolean, action?: () => void }>} [spec.actions]
+ * @param {Array<{ label: string, primary?: boolean, danger?: boolean, action?: () => void }>} [spec.actions]
  * @param {boolean} [spec.wide]
+ * @param {boolean} [spec.blocking]  no close button, no Escape, no click away
  */
 export function openDialog(spec) {
   close();
@@ -26,9 +28,10 @@ export function openDialog(spec) {
     footer.append(
       el('button', {
         type: 'button',
-        class: `button${action.primary ? ' primary' : ''}`,
+        class: `button${action.primary ? ' primary' : ''}${action.danger ? ' danger' : ''}`,
         text: action.label,
         onclick: () => {
+          blocking = false;
           close();
           action.action?.();
         },
@@ -36,19 +39,22 @@ export function openDialog(spec) {
     );
   }
 
+  const head = el('div', { class: 'dialog-head' }, [el('span', { class: 'dialog-title', text: spec.title })]);
+  if (!spec.blocking) {
+    head.append(el('button', { type: 'button', class: 'dialog-close', text: '×', 'aria-label': 'Close', onclick: close }));
+  }
+
   const dialog = el('div', { class: `dialog${spec.wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-label': spec.title }, [
-    el('div', { class: 'dialog-head' }, [
-      el('span', { class: 'dialog-title', text: spec.title }),
-      el('button', { type: 'button', class: 'dialog-close', text: '×', 'aria-label': 'Close', onclick: close }),
-    ]),
+    head,
     body,
     footer,
   ]);
 
+  blocking = Boolean(spec.blocking);
   overlay = el('div', {
     class: 'overlay',
     onclick: (event) => {
-      if (event.target === overlay) close();
+      if (!blocking && event.target === overlay) close();
     },
   }, [dialog]);
 
@@ -58,9 +64,10 @@ export function openDialog(spec) {
 }
 
 export function close() {
-  if (!overlay) return;
+  if (!overlay || blocking) return;
   overlay.remove();
   overlay = null;
+  blocking = false;
   document.removeEventListener('keydown', onKeyDown);
   if (lastFocused instanceof HTMLElement) lastFocused.focus();
   lastFocused = null;
@@ -70,7 +77,7 @@ export function close() {
  * @param {KeyboardEvent} event
  */
 function onKeyDown(event) {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !blocking) {
     event.preventDefault();
     close();
     return;
@@ -145,4 +152,39 @@ export function promptDialog(spec) {
 
   input.focus();
   input.select();
+}
+
+/**
+ * A dialog with a single list to pick from, used to move an entity or folder.
+ * @param {Object} spec
+ * @param {string} spec.title
+ * @param {string} spec.label
+ * @param {Array<{ value: string, label: string }>} spec.options
+ * @param {string} spec.value
+ * @param {string} spec.confirmLabel
+ * @param {(value: string) => void} spec.onConfirm
+ */
+export function chooseDialog(spec) {
+  const select = el(
+    'select',
+    { class: 'input', id: 'choose-input', size: String(Math.min(Math.max(spec.options.length, 4), 12)) },
+    spec.options.map((option) => el('option', { value: option.value, text: option.label }))
+  );
+  select.value = spec.value;
+
+  openDialog({
+    title: spec.title,
+    content: [
+      el('div', { class: 'field field-tall' }, [
+        el('label', { class: 'field-label', for: 'choose-input', text: spec.label }),
+        select,
+      ]),
+    ],
+    actions: [
+      { label: 'Cancel' },
+      { label: spec.confirmLabel, primary: true, action: () => spec.onConfirm(select.value) },
+    ],
+  });
+
+  select.focus();
 }

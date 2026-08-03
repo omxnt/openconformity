@@ -6,16 +6,23 @@
  * the metamodel is enforced.
  */
 
-import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES, RELATIONSHIP_TYPE_IDS, compositionBetween } from './metamodel.js';
+import { ENTITY_TYPES, RELATIONSHIP_TYPES, compositionBetween } from './metamodel.js';
 import {
   addEntity,
   addFolder,
   addRelationship,
+  canMoveEntity,
+  canMoveFolder,
+  canPlaceBeside,
   createModel,
   deletionSet,
-  displayLabel,
+  labelOf,
   folderCount,
   fromJSON,
+  moveEntity,
+  moveFolder,
+  moveOrder,
+  placeBeside,
   removeEntity,
   removeFolder,
   renameFolder,
@@ -27,27 +34,28 @@ import { createEditor } from './editor.js';
 import { createRelationshipPane } from './relationships.js';
 import { createToolbar } from './toolbar.js';
 import { createMenuBar, openPopupMenu } from './menu.js';
-import { contextMenuItems, contextOf } from './actions.js';
-import { confirmDialog, notify, openDialog, promptDialog } from './dialog.js';
+import { canStep, contextMenuItems, contextOf, moveTargets } from './actions.js';
+import { chooseDialog, confirmDialog, notify, openDialog, promptDialog } from './dialog.js';
 import { el } from './dom.js';
 
 const state = {
   model: buildExampleModel(),
   /** @type {import('./navigator.js').Selection} */
   selection: { kind: 'entity', id: 'HAZ-001' },
+  /** Whether the project holds changes that are not in a file yet. */
+  unsaved: false,
 };
+
+/** Remembers that the demo notice has been read, on this device only. */
+const NOTICE_KEY = 'openconformity.demo.notice';
 
 const refs = {
   menubar: document.getElementById('menubar-menus'),
   dropdowns: document.getElementById('dropdown-layer'),
-  toolbarNew: document.getElementById('toolbar-new'),
-  toolbarEdit: document.getElementById('toolbar-edit'),
-  toolbarDelete: document.getElementById('toolbar-delete'),
   toolbarContext: document.getElementById('toolbar-context'),
   tree: document.getElementById('tree'),
   filter: document.getElementById('navigator-filter'),
   filterClear: document.getElementById('navigator-filter-clear'),
-  editorHead: document.getElementById('editor-head'),
   editorBody: document.getElementById('editor-body'),
   relationshipTabs: document.getElementById('relationship-tabs'),
   relationshipToolbar: document.getElementById('relationship-toolbar'),
@@ -75,15 +83,60 @@ const navigator = createNavigator({
   onContextMenu: (selection, x, y) => {
     openPopupMenu({ x, y, items: contextMenuItems(state.model, selection, handlers) });
   },
+  canDrop: (source, target, position) => dropCheck(source, target, position).ok,
+  onDrop: (source, target, position) => {
+    const result = dropApply(source, target, position);
+    if (!result.ok) {
+      notify('Move refused', result.reason ?? 'That move is not allowed.');
+      return;
+    }
+    state.unsaved = true;
+    setSelection(source);
+  },
 });
 
+/**
+ * Dropping across the middle of a row files the dragged thing inside it;
+ * dropping near the top or bottom edge puts it alongside, which is how the
+ * order is changed.
+ * @param {import('./navigator.js').Selection} source
+ * @param {import('./navigator.js').Selection} target
+ * @param {'before'|'after'|'into'} position
+ */
+function dropCheck(source, target, position) {
+  if (source.kind !== 'entity' && source.kind !== 'folder') {
+    return { ok: false, reason: 'Only entities and folders can be moved.' };
+  }
+  if (position !== 'into') {
+    if (target.kind !== 'entity' && target.kind !== 'folder') return { ok: false, reason: 'Nothing sits alongside that.' };
+    return canPlaceBeside(state.model, source, target);
+  }
+  if (target.kind !== 'type' && target.kind !== 'folder' && target.kind !== 'entity') {
+    return { ok: false, reason: 'Nothing can be filed there.' };
+  }
+  return source.kind === 'entity'
+    ? canMoveEntity(state.model, source.id, target)
+    : canMoveFolder(state.model, source.id, target);
+}
+
+/**
+ * @param {import('./navigator.js').Selection} source
+ * @param {import('./navigator.js').Selection} target
+ * @param {'before'|'after'|'into'} position
+ */
+function dropApply(source, target, position) {
+  if (position !== 'into') return placeBeside(state.model, source, target, position);
+  return source.kind === 'entity'
+    ? moveEntity(state.model, source.id, target)
+    : moveFolder(state.model, source.id, target);
+}
+
 const editor = createEditor({
-  headEl: refs.editorHead,
   bodyEl: refs.editorBody,
   getModel,
   getEntityId,
   onStateChange: () => toolbar.render(),
-  onSaved: () => renderAll(),
+  onSaved: changed,
 });
 
 const relationshipPane = createRelationshipPane({
@@ -93,7 +146,7 @@ const relationshipPane = createRelationshipPane({
   getModel,
   getEntityId,
   onSelect: (id) => select({ kind: 'entity', id }),
-  onChange: renderAll,
+  onChange: changed,
   onMessage: (message) => notify('Relationship refused', message),
 });
 
@@ -101,18 +154,31 @@ const relationshipPane = createRelationshipPane({
 const handlers = {
   createEntity,
   createFolder,
+  createRelated,
   edit: activateSelection,
+  moveOrder: stepSelection,
+  move: moveSelection,
   remove: removeSelection,
 };
 
 const toolbar = createToolbar({
-  newButtonEl: refs.toolbarNew,
-  editButtonEl: refs.toolbarEdit,
-  deleteButtonEl: refs.toolbarDelete,
+  buttons: {
+    new: document.getElementById('toolbar-new'),
+    newFolder: document.getElementById('toolbar-new-folder'),
+    related: document.getElementById('toolbar-related'),
+    edit: document.getElementById('toolbar-edit'),
+    delete: document.getElementById('toolbar-delete'),
+    up: document.getElementById('toolbar-up'),
+    down: document.getElementById('toolbar-down'),
+    save: document.getElementById('toolbar-save'),
+    unsaved: document.getElementById('toolbar-unsaved'),
+  },
   contextEl: refs.toolbarContext,
   getModel,
   getSelection,
   isEditing: () => editor.isEditing(),
+  isUnsaved: () => state.unsaved,
+  onSave: saveModel,
   handlers,
 });
 
@@ -123,33 +189,37 @@ createMenuBar({
     {
       label: 'File',
       items: [
-        { label: 'New model…', action: newModel },
-        { label: 'Open model…', action: () => refs.fileInput.click() },
-        { label: 'Save model', action: saveModel },
+        { label: 'New project…', action: newModel },
+        { label: 'Open project…', action: openProject },
+        { label: 'Save project', action: saveModel },
         { separator: true },
-        { label: 'Load example model', action: loadExample },
+        { label: 'Load example project', action: loadExample },
       ],
     },
     {
       label: 'Edit',
-      items: [
-        { label: 'Rename model…', action: renameModel },
-        { separator: true },
-        { label: 'Edit selection', action: activateSelection },
-        { label: 'Delete selection', shortcut: 'Del', action: removeSelection },
-      ],
+      items: [{ label: 'Rename project…', action: renameModel }],
     },
     {
       label: 'Help',
       items: [
-        { label: 'About this demo', action: showAbout },
-        { label: 'Metamodel', action: showMetamodel },
+        { label: 'Project site', action: () => openLink('https://openconformity.org') },
+        { label: 'Source on GitHub', action: () => openLink('https://github.com/omxnt/openconformity') },
+        { label: 'Follow on LinkedIn', action: () => openLink('https://www.linkedin.com/company/openconformity') },
+        { separator: true },
+        { label: 'Write an email', action: () => { window.location.href = 'mailto:info@openconformity.org'; } },
       ],
     },
   ],
 });
 
 // --- Rendering ---------------------------------------------------------
+
+/** Every change to the project goes through here, so nothing dirties silently. */
+function changed() {
+  state.unsaved = true;
+  renderAll();
+}
 
 function renderAll() {
   navigator.render();
@@ -160,6 +230,7 @@ function renderAll() {
 }
 
 function renderStatus() {
+  document.title = state.model.name;
   refs.statusName.textContent = state.model.name;
   refs.statusEntities.textContent = `${state.model.entities.size} entities`;
   refs.statusRelationships.textContent = `${state.model.relationships.size} relationships`;
@@ -196,7 +267,6 @@ function guardEdit(continuation) {
  */
 function setSelection(selection) {
   state.selection = selection;
-  relationshipPane.reset();
   navigator.reveal(selection);
   renderAll();
 }
@@ -234,11 +304,44 @@ function removeSelection() {
   else if (folderRecord) requestDeleteFolder(folderRecord);
 }
 
+/** The same moves that dragging offers, reachable without a pointer. */
+function moveSelection() {
+  const selection = state.selection;
+  const targets = moveTargets(state.model, selection);
+  if (targets.length === 0) return;
+  if (!guardEdit(moveSelection)) return;
+
+  chooseDialog({
+    title: 'Move to',
+    label: 'Destination',
+    options: targets.map((candidate, index) => ({
+      value: String(index),
+      label: `${'    '.repeat(candidate.depth)}${candidate.label}`,
+    })),
+    value: '0',
+    confirmLabel: 'Move',
+    onConfirm: (value) => {
+      const chosen = targets[Number(value)];
+      if (!chosen) return;
+      const result =
+        selection.kind === 'entity'
+          ? moveEntity(state.model, selection.id, chosen.target)
+          : moveFolder(state.model, selection.id, chosen.target);
+      if (!result.ok) {
+        notify('Move refused', result.reason ?? 'That move is not allowed.');
+        return;
+      }
+      state.unsaved = true;
+      setSelection(selection);
+    },
+  });
+}
+
 // --- Creation ----------------------------------------------------------
 
 /**
  * @param {string} code
- * @param {{owner?: string, folder?: string|null}} [options]
+ * @param {{owner?: string|null, folder?: string|null, after?: string|null}} [options]
  */
 function createEntity(code, options = {}) {
   if (!guardEdit(() => createEntity(code, options))) return;
@@ -253,13 +356,70 @@ function createEntity(code, options = {}) {
       navigator.expand(`entity:${owner.id}`);
     }
   }
+  // Made from an entity, it lands directly under the one it was made from.
+  if (options.after) placeBeside(state.model, { kind: 'entity', id: entity.id }, { kind: 'entity', id: options.after }, 'after');
 
   navigator.expand(`pillar:${ENTITY_TYPES[code].pillar}`);
   navigator.expand(`type:${code}`);
   if (options.folder) navigator.expand(`folder:${options.folder}`);
 
+  state.unsaved = true;
   select({ kind: 'entity', id: entity.id });
   editor.begin();
+}
+
+/**
+ * Make an entity the metamodel lets the selected one relate to, and the
+ * relationship with it, in one step.
+ * @param {string} relationshipTypeId
+ * @param {'outgoing'|'incoming'} direction
+ */
+function createRelated(relationshipTypeId, direction) {
+  if (!guardEdit(() => createRelated(relationshipTypeId, direction))) return;
+
+  const type = RELATIONSHIP_TYPES[relationshipTypeId];
+  const anchor = state.selection.kind === 'entity' ? state.model.entities.get(state.selection.id) : null;
+  if (!type || !anchor) return;
+
+  const code = direction === 'outgoing' ? type.target : type.source;
+  const entity = addEntity(state.model, code, {}, { folder: code === anchor.type ? anchor.folder : null });
+
+  const result =
+    direction === 'outgoing'
+      ? addRelationship(state.model, type.id, anchor.id, entity.id)
+      : addRelationship(state.model, type.id, entity.id, anchor.id);
+
+  if (!result.ok) {
+    removeEntity(state.model, entity.id);
+    notify('Relationship refused', result.reason ?? 'The relationship could not be created.');
+    return;
+  }
+
+  navigator.expand(`pillar:${ENTITY_TYPES[code].pillar}`);
+  navigator.expand(`type:${code}`);
+  navigator.expand(`entity:${anchor.id}`);
+  state.unsaved = true;
+  select({ kind: 'entity', id: entity.id });
+  editor.begin();
+}
+
+/**
+ * Step the selection one place up or down among the things it sits beside.
+ * @param {-1|1} delta
+ */
+function stepSelection(delta) {
+  const selection = state.selection;
+  if (selection.kind !== 'entity' && selection.kind !== 'folder') return;
+  if (!canStep(state.model, selection, delta)) return;
+  if (!guardEdit(() => stepSelection(delta))) return;
+
+  const result = moveOrder(state.model, selection, delta);
+  if (!result.ok) {
+    notify('Move refused', result.reason ?? 'That move is not allowed.');
+    return;
+  }
+  state.unsaved = true;
+  setSelection(selection);
 }
 
 /**
@@ -279,6 +439,7 @@ function createFolder(typeCode, parent) {
       navigator.expand(`pillar:${ENTITY_TYPES[typeCode].pillar}`);
       navigator.expand(`type:${typeCode}`);
       if (parent) navigator.expand(`folder:${parent}`);
+      state.unsaved = true;
       select({ kind: 'folder', id: folder.id });
     },
   });
@@ -293,7 +454,7 @@ function renameFolderDialog(folder) {
     confirmLabel: 'Rename',
     onConfirm: (name) => {
       renameFolder(state.model, folder.id, name);
-      renderAll();
+      changed();
     },
   });
 }
@@ -316,7 +477,7 @@ function requestDeleteEntity(id) {
     (relationship) => ids.has(relationship.source) || ids.has(relationship.target)
   ).length;
 
-  const content = [el('p', { text: `Delete ${entity.id}, ${displayLabel(entity)}?` })];
+  const content = [el('p', { text: `Delete ${entity.id}, ${labelOf(entity)}?` })];
 
   if (doomed.length > 1) {
     content.push(
@@ -325,7 +486,7 @@ function requestDeleteEntity(id) {
         'ul',
         { class: 'dialog-list' },
         doomed.slice(1).map((owned) =>
-          el('li', {}, [el('span', { class: 'mono', text: owned.id }), ` ${displayLabel(owned)} (${ENTITY_TYPES[owned.type].name})`])
+          el('li', {}, [el('span', { class: 'mono', text: owned.id }), ` ${labelOf(owned)} (${ENTITY_TYPES[owned.type].name})`])
         )
       )
     );
@@ -344,6 +505,7 @@ function requestDeleteEntity(id) {
     confirmLabel: 'Delete',
     onConfirm: () => {
       removeEntity(state.model, id);
+      state.unsaved = true;
       setSelection({ kind: 'type', id: entity.type });
     },
   });
@@ -370,6 +532,7 @@ function requestDeleteFolder(folder) {
     onConfirm: () => {
       const parent = folder.parent;
       removeFolder(state.model, folder.id);
+      state.unsaved = true;
       setSelection(parent ? { kind: 'folder', id: parent } : { kind: 'type', id: folder.type });
     },
   });
@@ -377,15 +540,41 @@ function requestDeleteFolder(folder) {
 
 // --- Model actions -----------------------------------------------------
 
+/**
+ * Anything that replaces the whole project asks first when there is work that
+ * is not in a file yet.
+ * @param {() => void} continuation
+ * @returns {boolean}
+ */
+function guardUnsaved(continuation) {
+  if (!state.unsaved) return true;
+  confirmDialog({
+    title: 'Discard unsaved changes?',
+    content: [
+      el('p', { text: `"${state.model.name}" has changes that have not been saved to a file.` }),
+      el('p', { class: 'muted', text: 'The project lives only in this tab until it is saved.' }),
+    ],
+    confirmLabel: 'Discard',
+    onConfirm: () => {
+      // Answered, so the continuation must not be asked the same thing again.
+      state.unsaved = false;
+      continuation();
+    },
+  });
+  return false;
+}
+
 function newModel() {
   if (!guardEdit(newModel)) return;
+  if (!guardUnsaved(newModel)) return;
   promptDialog({
-    title: 'New model',
-    label: 'Model name',
-    value: 'Untitled model',
+    title: 'New project',
+    label: 'Project name',
+    value: 'Untitled project',
     confirmLabel: 'Create',
     onConfirm: (name) => {
       state.model = createModel(name);
+      state.unsaved = false;
       setSelection({ kind: 'root', id: '' });
     },
   });
@@ -393,32 +582,42 @@ function newModel() {
 
 function renameModel() {
   promptDialog({
-    title: 'Rename model',
-    label: 'Model name',
+    title: 'Rename project',
+    label: 'Project name',
     value: state.model.name,
     confirmLabel: 'Rename',
     onConfirm: (name) => {
       state.model.name = name;
-      renderAll();
+      changed();
     },
   });
 }
 
 function loadExample() {
   if (!guardEdit(loadExample)) return;
+  if (!guardUnsaved(loadExample)) return;
   state.model = buildExampleModel();
+  state.unsaved = false;
   setSelection({ kind: 'entity', id: 'HAZ-001' });
+}
+
+function openProject() {
+  if (!guardEdit(openProject)) return;
+  if (!guardUnsaved(openProject)) return;
+  refs.fileInput.click();
 }
 
 function saveModel() {
   const text = JSON.stringify(toJSON(state.model), null, 2);
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  const filename = state.model.name.replace(/[^\w -]+/g, '').trim() || 'model';
+  const filename = state.model.name.replace(/[^\w -]+/g, '').trim() || 'project';
   const link = el('a', { href: url, download: `${filename}.json` });
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+  state.unsaved = false;
+  toolbar.render();
 }
 
 refs.fileInput.addEventListener('change', () => {
@@ -436,6 +635,7 @@ refs.fileInput.addEventListener('change', () => {
     }
     const { model, rejected } = fromJSON(data);
     state.model = model;
+    state.unsaved = false;
     setSelection({ kind: 'root', id: '' });
     if (rejected.length > 0) {
       openDialog({
@@ -452,62 +652,28 @@ refs.fileInput.addEventListener('change', () => {
 
 // --- Help --------------------------------------------------------------
 
-function showAbout() {
-  openDialog({
-    title: 'About this demo',
-    content: [
-      el('p', { text: 'A working demo of openconformity, a browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.' }),
-      el('p', { text: 'The metamodel is built in and enforced: only the entity types and relationships it defines can exist in a model. Attributes are not specified yet, so every entity carries the same minimal set for now.' }),
-      el('p', { text: 'Everything runs in the browser. Nothing is sent anywhere, and a model leaves the machine only when saved to a file.' }),
-    ],
-  });
+/** @param {string} url */
+function openLink(url) {
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function showMetamodel() {
-  const pillarName = (id) => PILLARS.find((pillar) => pillar.id === id)?.name ?? id;
-
   openDialog({
     wide: true,
     title: 'Metamodel',
     content: [
-      el('p', { text: 'The entity types a model may contain, and the relationships allowed between them.' }),
-      el('table', { class: 'table' }, [
-        el('thead', {}, [el('tr', {}, [el('th', { text: 'Prefix' }), el('th', { text: 'Entity' }), el('th', { text: 'Pillar' })])]),
-        el(
-          'tbody',
-          {},
-          Object.values(ENTITY_TYPES).map((type) =>
-            el('tr', {}, [
-              el('td', { class: 'mono', text: type.code }),
-              el('td', { text: type.name }),
-              el('td', { class: 'muted', text: pillarName(type.pillar) }),
-            ])
-          )
-        ),
-      ]),
-      el('table', { class: 'table' }, [
-        el('thead', {}, [
-          el('tr', {}, [el('th', { text: 'Source' }), el('th', { text: 'Relationship' }), el('th', { text: 'Target' }), el('th', { text: 'Kind' })]),
-        ]),
-        el(
-          'tbody',
-          {},
-          RELATIONSHIP_TYPE_IDS.map((id) => {
-            const type = RELATIONSHIP_TYPES[id];
-            return el('tr', {}, [
-              el('td', { class: 'mono', text: type.source }),
-              el('td', { text: type.label }),
-              el('td', { class: 'mono', text: type.target }),
-              el('td', { class: 'muted', text: type.kind === 'composition' ? 'Composition' : 'Association' }),
-            ]);
-          })
-        ),
-      ]),
+      el('img', {
+        class: 'metamodel-image',
+        src: 'assets/images/metamodel.svg',
+        alt: 'The metamodel: the entity types a model may contain and the relationships allowed between them',
+      }),
     ],
   });
 }
 
 // --- Chrome ------------------------------------------------------------
+
+document.getElementById('toolbar-metamodel').addEventListener('click', showMetamodel);
 
 refs.filterClear.addEventListener('click', () => {
   refs.filter.value = '';
@@ -516,9 +682,13 @@ refs.filterClear.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Delete' && refs.tree.contains(document.activeElement)) {
+  if (!refs.tree.contains(document.activeElement)) return;
+  if (event.key === 'Delete') {
     event.preventDefault();
     removeSelection();
+  } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+    event.preventDefault();
+    stepSelection(event.key === 'ArrowUp' ? -1 : 1);
   }
 });
 
@@ -578,5 +748,74 @@ function clamp(value, low, high) {
   return Math.min(Math.max(value, low), high);
 }
 
+/**
+ * Read once per device. The software is a demonstration, and someone arriving
+ * at it has to be told that plainly before they put work into it. Accepting
+ * takes a second answer, because a notice nobody reads protects nobody.
+ */
+function showDemoNotice() {
+  openDialog({
+    blocking: true,
+    title: 'Read this first',
+    content: [
+      el('div', { class: 'notice-important' }, [
+        el('span', { class: 'notice-tag', text: 'Important' }),
+        el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
+      ]),
+      el('p', { text: 'This is a demonstration of openconformity. It is not finished software.' }),
+      el('ul', { class: 'dialog-list' }, [
+        el('li', { text: 'It is guaranteed that the tool contains errors.' }),
+        el('li', { text: 'Many functions are still unfinished.' }),
+        el('li', { text: 'The file format will change.' }),
+        el('li', { text: 'A project saved here will not open in a later version.' }),
+        el('li', { text: 'Nothing here has been verified or validated.' }),
+        el('li', { text: 'Things will be wrong, and they will get in your way.' }),
+      ]),
+    ],
+    actions: [
+      { label: 'Leave', action: () => { window.location.href = 'https://openconformity.org'; } },
+      { label: 'I understand', primary: true, action: confirmNoticeRead },
+    ],
+  });
+}
+
+function confirmNoticeRead() {
+  openDialog({
+    blocking: true,
+    title: 'Honestly, though',
+    content: [
+      el('p', { text: 'Did you actually read that, or did you just click the button?' }),
+    ],
+    actions: [
+      { label: 'Let me read it again', action: showDemoNotice },
+      {
+        label: 'I read it',
+        primary: true,
+        action: () => {
+          try {
+            window.localStorage.setItem(NOTICE_KEY, 'read');
+          } catch {
+            // Storage can be unavailable; the notice simply shows again.
+          }
+        },
+      },
+    ],
+  });
+}
+
+window.addEventListener('beforeunload', (event) => {
+  if (!state.unsaved) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
+
 navigator.reveal(state.selection);
 renderAll();
+
+let noticeRead = false;
+try {
+  noticeRead = window.localStorage.getItem(NOTICE_KEY) === 'read';
+} catch {
+  // Storage can be unavailable; the notice simply shows.
+}
+if (!noticeRead) showDemoNotice();

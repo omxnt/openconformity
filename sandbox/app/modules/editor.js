@@ -2,21 +2,24 @@
  * The editor pane: the attributes of the selected entity.
  *
  * The pane opens read-only. Nothing is written to the model until the user
- * presses Edit, changes something, and presses Save, so an entity cannot be
- * altered by landing on it and touching the keyboard. Cancel drops the draft.
+ * starts editing from the toolbar, the Edit menu or the right-click menu,
+ * changes something, and presses Save, so an entity cannot be altered by
+ * landing on it and touching the keyboard. Cancel drops the draft.
  *
- * Which attributes exist comes from the metamodel. The folder is not an
- * attribute: it says where the entity is filed, not anything about the thing
- * itself, so it is shown apart from them.
+ * The pane does not repeat the name of what is being edited. The toolbar names
+ * the selection once, directly above, and the Name field holds it below.
+ *
+ * Which attributes exist comes from the metamodel, and only those are shown.
+ * Where an entity is filed is not one of them: that is a property of the tree,
+ * changed by dragging or by Move to….
  */
 
-import { ENTITY_TYPES, attributesFor } from './metamodel.js';
-import { childFolders, decompositionParent, displayLabel, setEntityFolder, updateEntity } from './model.js';
-import { clear, el, icon } from './dom.js';
+import { attributesFor, storedAttributesFor } from './metamodel.js';
+import { updateEntity } from './model.js';
+import { clear, el } from './dom.js';
 
 /**
  * @param {Object} context
- * @param {HTMLElement} context.headEl
  * @param {HTMLElement} context.bodyEl
  * @param {() => import('./model.js').Model} context.getModel
  * @param {() => string|null} context.getEntityId
@@ -25,7 +28,7 @@ import { clear, el, icon } from './dom.js';
  */
 export function createEditor(context) {
   let editing = false;
-  /** @type {{ attributes: Object<string, string>, folder: string|null } | null} */
+  /** @type {Object<string, string> | null} */
   let draft = null;
 
   function currentEntity() {
@@ -35,38 +38,22 @@ export function createEditor(context) {
 
   function render() {
     const entity = currentEntity();
-
-    clear(context.headEl);
     clear(context.bodyEl);
 
     if (!entity) {
       editing = false;
       draft = null;
-      context.headEl.append(el('span', { class: 'head-kind', text: 'No entity selected' }));
       context.bodyEl.append(el('p', { class: 'empty', text: 'Select an entity in the navigator to see its attributes.' }));
       return;
     }
 
-    const type = ENTITY_TYPES[entity.type];
-    context.headEl.append(
-      icon(type.icon),
-      el('span', { class: 'head-kind', text: type.name }),
-      el('span', { class: 'head-id', text: entity.id }),
-      el('span', { class: 'head-name', text: displayLabel(entity) })
-    );
-    if (editing) context.headEl.append(el('span', { class: 'head-state', text: 'Editing' }));
-
-    const values = editing && draft ? draft.attributes : entity.attributes;
+    const values = editing && draft ? draft : entity.attributes;
     const fields = el('div', { class: 'fields' });
 
     fields.append(field('Identifier', readonlyInput(entity.id, true)));
-
     for (const attribute of attributesFor(entity.type)) {
-      fields.append(field(attribute.label, control(attribute, values[attribute.key] ?? '')));
-    }
-
-    if (!decompositionParent(context.getModel(), entity.id)) {
-      fields.append(field('Folder', folderControl(entity)));
+      if (attribute.kind === 'risk') fields.append(riskField(attribute, values));
+      else fields.append(field(attribute.label, control(attribute, values[attribute.key] ?? '')));
     }
 
     context.bodyEl.append(fields, buttons());
@@ -100,9 +87,11 @@ export function createEditor(context) {
    * @param {string} value
    */
   function control(attribute, value) {
+    const rows = attribute.key === 'description' || attribute.key === 'requirement' ? '5' : '3';
+
     if (!editing) {
       if (attribute.kind === 'multiline') {
-        const area = el('textarea', { class: 'input readonly', rows: '6', readonly: true, tabindex: '-1' });
+        const area = el('textarea', { class: 'input readonly', rows, readonly: true, tabindex: '-1' });
         area.value = value;
         return area;
       }
@@ -110,13 +99,21 @@ export function createEditor(context) {
     }
 
     const commit = (event) => {
-      if (draft) draft.attributes[attribute.key] = event.target.value;
+      if (draft) draft[attribute.key] = event.target.value;
     };
 
     if (attribute.kind === 'multiline') {
-      const area = el('textarea', { class: 'input', rows: '6', oninput: commit });
+      const area = el('textarea', { class: 'input', rows, oninput: commit });
       area.value = value;
       return area;
+    }
+    if (attribute.kind === 'choice') {
+      const select = el('select', { class: 'input', onchange: commit }, [
+        el('option', { value: '', text: '—' }),
+        ...(attribute.values ?? []).map((choice) => el('option', { value: choice, text: choice })),
+      ]);
+      select.value = (attribute.values ?? []).includes(value) ? value : '';
+      return select;
     }
     const input = el('input', { class: `input${attribute.mono ? ' mono' : ''}`, type: 'text', oninput: commit });
     input.value = value;
@@ -124,53 +121,49 @@ export function createEditor(context) {
   }
 
   /**
-   * @param {import('./model.js').Entity} entity
+   * The risk rating before and after the risk reduction measures. What a rating
+   * is has not been specified, so this is a marked placeholder: it shows the
+   * movement either way, and takes whatever the user types.
+   * @param {import('./metamodel.js').Attribute} attribute
+   * @param {Object<string, string>} values
    */
-  function folderControl(entity) {
-    const model = context.getModel();
-    const selected = editing && draft ? draft.folder : entity.folder;
-
-    if (!editing) {
-      const folder = selected ? model.folders.get(selected) : null;
-      return readonlyInput(folder ? folderPath(model, folder) : `${ENTITY_TYPES[entity.type].plural} (no folder)`);
-    }
-
-    const select = el('select', { class: 'input', onchange: (event) => {
-      if (draft) draft.folder = event.target.value || null;
-    } }, [el('option', { value: '', text: `${ENTITY_TYPES[entity.type].plural} (no folder)` })]);
-
-    const walk = (parent, depth) => {
-      for (const folder of childFolders(model, entity.type, parent)) {
-        select.append(el('option', { value: folder.id, text: `${'  '.repeat(depth)}${folder.name}` }));
-        walk(folder.id, depth + 1);
+  function riskField(attribute, values) {
+    const step = (key, caption) => {
+      const holder = el('span', { class: 'risk-step' }, [el('span', { class: 'risk-step-label', text: caption })]);
+      if (editing) {
+        const input = el('input', {
+          class: 'input mono risk-input',
+          type: 'text',
+          'aria-label': `${caption} the risk reduction measures`,
+          oninput: (event) => {
+            if (draft) draft[key] = event.target.value;
+          },
+        });
+        input.value = values[key] ?? '';
+        holder.append(input);
+      } else {
+        holder.append(el('span', { class: 'risk-value', text: values[key] || '—' }));
       }
+      return holder;
     };
-    walk(null, 1);
 
-    select.value = selected ?? '';
-    return select;
+    return el('div', { class: 'field field-tall' }, [
+      el('span', { class: 'field-label', text: attribute.label }),
+      el('div', { class: 'placeholder' }, [
+        el('span', { class: 'placeholder-tag', text: 'Placeholder' }),
+        el('div', { class: 'risk-row' }, [
+          step(attribute.parts[0], 'Before'),
+          el('span', { class: 'risk-arrow', text: '→', 'aria-hidden': 'true' }),
+          step(attribute.parts[1], 'After'),
+        ]),
+        el('p', { class: 'placeholder-note', text: 'How a risk is rated is not specified yet.' }),
+      ]),
+    ]);
   }
 
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Folder} folder
-   */
-  function folderPath(model, folder) {
-    const parts = [folder.name];
-    let current = folder.parent ? model.folders.get(folder.parent) : null;
-    while (current) {
-      parts.unshift(current.name);
-      current = current.parent ? model.folders.get(current.parent) : null;
-    }
-    return `${ENTITY_TYPES[folder.type].plural} / ${parts.join(' / ')}`;
-  }
-
+  /** Only shown while editing: entering edit mode is a toolbar action. */
   function buttons() {
-    if (!editing) {
-      return el('div', { class: 'field-buttons' }, [
-        el('button', { type: 'button', class: 'button', text: 'Edit', onclick: begin }),
-      ]);
-    }
+    if (!editing) return el('span');
     return el('div', { class: 'field-buttons' }, [
       el('button', { type: 'button', class: 'button primary', text: 'Save', onclick: save }),
       el('button', { type: 'button', class: 'button', text: 'Cancel', onclick: cancel }),
@@ -183,7 +176,7 @@ export function createEditor(context) {
     const entity = currentEntity();
     if (!entity || editing) return;
     editing = true;
-    draft = { attributes: { ...entity.attributes }, folder: entity.folder };
+    draft = { ...entity.attributes };
     render();
     context.onStateChange();
     context.bodyEl.querySelector('.input:not(.readonly)')?.focus();
@@ -200,8 +193,7 @@ export function createEditor(context) {
   function save() {
     const entity = currentEntity();
     if (!editing || !entity || !draft) return;
-    updateEntity(context.getModel(), entity.id, draft.attributes);
-    setEntityFolder(context.getModel(), entity.id, draft.folder);
+    updateEntity(context.getModel(), entity.id, draft);
     editing = false;
     draft = null;
     context.onSaved();
@@ -212,8 +204,7 @@ export function createEditor(context) {
   function hasChanges() {
     const entity = currentEntity();
     if (!editing || !entity || !draft) return false;
-    if (draft.folder !== entity.folder) return true;
-    return attributesFor(entity.type).some((attribute) => draft.attributes[attribute.key] !== entity.attributes[attribute.key]);
+    return storedAttributesFor(entity.type).some((attribute) => draft[attribute.key] !== entity.attributes[attribute.key]);
   }
 
   return {

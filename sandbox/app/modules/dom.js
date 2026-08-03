@@ -65,12 +65,16 @@ function append(node, children) {
 }
 
 /**
- * An icon from the sprite defined in the document.
+ * An icon from the sprite defined in the document. Given a pillar, the glyph is
+ * drawn in that pillar's colour: the shape still carries the entity type, and
+ * the colour only says which pillar it belongs to. Nothing else changes, so a
+ * tinted icon takes no more room than a plain one.
  * @param {string} symbolId
+ * @param {string} [pillarId]
  * @returns {SVGElement}
  */
-export function icon(symbolId) {
-  return svg('svg', { class: 'icon', 'aria-hidden': 'true', focusable: 'false' }, [
+export function icon(symbolId, pillarId) {
+  return svg('svg', { class: `icon${pillarId ? ` pillar-${pillarId}` : ''}`, 'aria-hidden': 'true', focusable: 'false' }, [
     svg('use', { href: `#${symbolId}` }),
   ]);
 }

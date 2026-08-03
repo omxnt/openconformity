@@ -17,14 +17,31 @@
 }
 
 :root {
-  --field:  #FFFFFF;
-  --chrome: #E2E2E2;
-  --surface:#F6F6F6;
-  --border: #8B8B8B;
-  --rule:   #C6C6C6;
-  --ink:    #222222;
-  --muted:  #5E5E5E;
-  --accent: #00618E;
+  --field:  #FFFFFF;  /* an editable field */
+  --chrome: #E2E2E2;  /* the window, the toolbar, pane heads, locked fields */
+  --surface:#F6F6F6;  /* a pane's own background */
+  --border: #8B8B8B;  /* 3.4:1 on white, the minimum for a control boundary */
+  --rule:   #C6C6C6;  /* separators between rows and cells */
+  --ink:    #222222;  /* 12.6:1 on white */
+  --muted:  #5E5E5E;  /* 6.5:1 on white, 5.0:1 on chrome */
+  --off:    #9B9B9B;  /* disabled only: reads as unavailable, never as content */
+  /* The pillar colours of the metamodel diagram. Each pillar has two: the
+     diagram's own pale fill for a graph box, and a darkened version of the same
+     hue for a glyph in the tree, which the pale fill is far too light for. */
+  --pillar-context-pale:  #DAE8FC;
+  --pillar-context-line:  #6C8EBF;
+  --pillar-context-solid: #3C6193;
+  --pillar-legislative-pale:  #FFF2CC;
+  --pillar-legislative-line:  #D6B656;
+  --pillar-legislative-solid: #8A6D1F;
+  --pillar-risk-pale:  #D5E8D4;
+  --pillar-risk-line:  #82B366;
+  --pillar-risk-solid: #4A7A34;
+  --pillar-requirements-pale:  #F8CECC;
+  --pillar-requirements-line:  #B85450;
+  --pillar-requirements-solid: #9A3B37;
+
+  --accent: #00618E;  /* 6.8:1 against white text */
   --accent-dark: #004C70;
   --hover:  #D6E9F2;
   --row: 22px;
@@ -50,7 +67,22 @@ body {
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
 
-.icon { width: 16px; height: 16px; flex: none; fill: currentColor; }
+.icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The pillar shows as the colour of the glyph itself. */
+.icon.pillar-context { stroke: var(--pillar-context-solid); }
+.icon.pillar-legislative { stroke: var(--pillar-legislative-solid); }
+.icon.pillar-risk { stroke: var(--pillar-risk-solid); }
+.icon.pillar-requirements { stroke: var(--pillar-requirements-solid); }
 
 /* ---------- Menu bar ---------- */
 
@@ -69,9 +101,21 @@ body {
   width: 129px;
   height: 18px;
   flex: none;
-  background: #FFFFFF;
+  background: currentColor;
   -webkit-mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
   mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
+}
+
+.demo-chip {
+  flex: none;
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 1px 7px;
 }
 
 .menubar-menus { display: flex; }
@@ -130,10 +174,12 @@ body {
   white-space: nowrap;
 }
 .menu-entry:hover:not(:disabled) { background: var(--hover); }
-.menu-entry:disabled { color: var(--muted); cursor: default; }
+.menu-entry:disabled { color: var(--off); cursor: default; }
 .menu-entry-label { flex: 1; }
 .menu-entry-gap { width: 16px; flex: none; }
 .menu-entry .shortcut { color: var(--muted); font-size: 11px; padding-left: 20px; }
+.menu-entry.has-submenu .shortcut { padding-left: 12px; }
+.submenu-arrow { color: var(--muted); font-size: 10px; padding-left: 8px; }
 
 /* ---------- Toolbar ---------- */
 
@@ -149,20 +195,54 @@ body {
 }
 
 .tb-button {
-  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
   font: inherit;
   font-size: 12px;
   color: var(--ink);
   background: none;
   border: 1px solid transparent;
-  padding: 0 10px;
+  padding: 0 7px;
   cursor: pointer;
   white-space: nowrap;
 }
 .tb-button:hover:not(:disabled) { border-color: var(--border); background: var(--field); }
-.tb-button:disabled { color: var(--muted); cursor: default; }
-.tb-separator { width: 1px; height: 18px; background: var(--border); margin: 0 6px; }
-.tb-context { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tb-button:disabled { color: var(--off); cursor: default; }
+.tb-button .icon { stroke-width: 1.75; }
+.tb-separator { width: 1px; height: 18px; background: var(--border); margin: 0 6px; flex: none; }
+.tb-unsaved { display: flex; align-items: center; gap: 4px; }
+.tb-unsaved[hidden] { display: none; }
+.tb-save {
+  flex: none;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink);
+  background: var(--field);
+  border: 1px solid var(--border);
+  padding: 2px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tb-save::before { content: "●"; color: var(--accent); margin-right: 6px; font-size: 9px; vertical-align: 1px; }
+.tb-save:hover { background: var(--hover); }
+
+.tb-context {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin-left: auto;
+  padding-left: 16px;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tb-context .icon { color: var(--muted); }
+.tb-kind { color: var(--muted); font-size: 11px; }
+.tb-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); }
+.tb-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Workspace ---------- */
 
@@ -217,6 +297,8 @@ body {
 
 /* ---------- Buttons and inputs ---------- */
 
+.button.with-icon { display: inline-flex; align-items: center; gap: 6px; }
+
 .button {
   font: inherit;
   font-size: 12px;
@@ -228,11 +310,12 @@ body {
   white-space: nowrap;
 }
 .button:hover:not(:disabled) { background: var(--hover); }
-.button:disabled { color: var(--muted); background: var(--chrome); cursor: default; }
+.button:disabled { color: var(--off); background: var(--chrome); border-color: var(--rule); cursor: default; }
 .button.small { font-size: 11px; padding: 1px 8px; }
+.dialog-footer .button.danger { margin-right: auto; }
 .button.primary { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
 .button.primary:hover:not(:disabled) { background: var(--accent-dark); border-color: var(--accent-dark); }
-.button.primary:disabled { background: var(--chrome); border-color: var(--border); color: var(--muted); }
+.button.primary:disabled { background: var(--chrome); border-color: var(--rule); color: var(--off); }
 
 .link-button {
   font: inherit;
@@ -255,7 +338,7 @@ body {
   min-width: 0;
 }
 .input.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
-.input.readonly { background: var(--chrome); color: var(--muted); }
+.input.readonly { background: var(--chrome); color: var(--ink); }
 textarea.input { resize: vertical; line-height: 1.45; }
 select.input { padding: 2px 4px; }
 
@@ -309,6 +392,22 @@ select.input { padding: 2px 4px; }
 }
 .row:hover { background: var(--hover); }
 .node.selected > .row { background: var(--accent); color: #FFFFFF; }
+.node.selected > .row .icon { stroke: #FFFFFF; }
+
+.node.dragging { opacity: 0.45; }
+.node.drop-target > .row { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--hover); }
+.node.drop-before > .row, .node.drop-after > .row { position: relative; }
+.node.drop-before > .row::after,
+.node.drop-after > .row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.node.drop-before > .row::after { top: -1px; }
+.node.drop-after > .row::after { bottom: -1px; }
 .node.selected > .row .row-id,
 .node.selected > .row .row-count { color: #FFFFFF; opacity: 0.85; }
 
@@ -367,56 +466,96 @@ select.input { padding: 2px 4px; }
 .head-kind { font-size: 12px; color: var(--muted); }
 .head-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); }
 .head-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.head-state {
-  margin-left: auto;
-  flex: none;
-  font-size: 11px;
-  font-weight: 500;
-  color: #FFFFFF;
-  background: var(--accent);
-  padding: 1px 8px;
-}
-
 .editor-body { background: var(--surface); padding: 14px 16px; }
 
-.fields { display: flex; flex-direction: column; gap: 8px; max-width: 820px; }
+.fields { display: flex; flex-direction: column; gap: 8px; max-width: 850px; }
 .field { display: flex; align-items: center; gap: 12px; }
 .field-tall { align-items: flex-start; }
 .field-tall .field-label { padding-top: 3px; }
-.field-label { width: 150px; flex: none; text-align: right; color: var(--ink); }
+.field-label { width: 176px; flex: none; text-align: right; color: var(--ink); }
 .field .input { flex: 1; }
-.field-buttons { display: flex; gap: 8px; margin-top: 14px; padding-left: 162px; max-width: 820px; }
+.field-buttons { display: flex; gap: 8px; margin-top: 14px; padding-left: 188px; max-width: 850px; }
+
+/* Stands in for an attribute the specification has not settled. Dashed and
+   muted so it never reads as working content. */
+.placeholder {
+  flex: 1;
+  position: relative;
+  border: 1px dashed var(--border);
+  background: repeating-linear-gradient(135deg, transparent, transparent 7px, rgba(34, 34, 34, 0.03) 7px, rgba(34, 34, 34, 0.03) 14px);
+  padding: 10px 12px;
+}
+.placeholder-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border-left: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+  padding: 1px 7px;
+}
+.placeholder-note { margin-top: 8px; font-size: 11px; color: var(--muted); }
+
+.risk-row { display: flex; align-items: center; gap: 12px; }
+.risk-step { display: flex; align-items: center; gap: 8px; }
+.risk-step-label { font-size: 11px; color: var(--muted); }
+.risk-value {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  border: 1px solid var(--rule);
+  background: var(--field);
+  padding: 2px 10px;
+  min-width: 78px;
+  text-align: center;
+}
+.risk-input { width: 96px; }
+.risk-arrow { color: var(--muted); }
 
 /* ---------- Relationships ---------- */
 
 .pane-relationships { flex: none; height: 260px; }
 
-.tabs { display: flex; align-self: flex-end; }
-.tab {
-  font: inherit;
-  font-size: 11px;
-  padding: 2px 14px;
-  border: 1px solid var(--border);
-  border-bottom: none;
-  background: var(--chrome);
-  color: var(--muted);
-  cursor: pointer;
-  margin-bottom: -1px;
-}
-.tab.active { background: var(--field); color: var(--ink); font-weight: 500; }
-
+/* The tabs share a strip with the actions, and the open one joins the body
+   below it, so switching view reads as switching tab. */
 .pane-toolbar {
   flex: none;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--rule);
+  align-items: flex-end;
+  gap: 8px;
+  padding: 6px 8px 0;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--border);
 }
-.pane-toolbar .input { max-width: 260px; }
-.pane-toolbar .input.wide { max-width: 380px; }
+.toolbar-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; padding-bottom: 5px; }
+
+.tabs { display: flex; gap: 2px; }
+.tab {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 16px;
+  margin-bottom: -1px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-bottom-color: var(--border);
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab:hover { background: var(--hover); }
+.tab.active {
+  background: var(--field);
+  border-color: var(--border);
+  border-bottom-color: var(--field);
+  color: var(--ink);
+  font-weight: 500;
+}
 .toolbar-label { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.dialog .field-label { width: 132px; }
+.dialog .field .input { flex: 1; }
+.dialog-fixed { flex: 1; font-size: 13px; padding: 3px 0; }
 
 .table { border-collapse: collapse; width: 100%; }
 .table th {
@@ -444,23 +583,44 @@ select.input { padding: 2px 4px; }
 .table tbody tr.row-editing td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
 .table .shrink { width: 1%; white-space: nowrap; }
 .table td.mono { white-space: nowrap; }
-.table .arrow { margin-right: 4px; }
+.arrow { margin-right: 5px; }
 .table .input { width: 100%; }
 .cell-type { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .row-buttons { display: flex; gap: 4px; }
+
+/* A row action is the same glyph as the toolbar action it mirrors. */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 20px;
+  color: var(--muted);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.icon-button:hover { color: var(--ink); border-color: var(--border); background: var(--field); }
 
 /* ---------- Neighbourhood graph ---------- */
 
 .graph-wrap { padding: 12px; overflow: auto; }
 .graph { display: block; max-width: 100%; height: auto; }
 
+/* The box carries the pillar's pale fill, so the glyph inside stays plain:
+   colouring it too would say the same thing twice. */
 .graph-node rect { fill: var(--field); stroke: var(--border); stroke-width: 1; }
-.graph-node.centre rect { stroke: var(--accent); stroke-width: 2; fill: var(--surface); }
+.graph-node[data-pillar="context"] rect { fill: var(--pillar-context-pale); stroke: var(--pillar-context-line); }
+.graph-node[data-pillar="legislative"] rect { fill: var(--pillar-legislative-pale); stroke: var(--pillar-legislative-line); }
+.graph-node[data-pillar="risk"] rect { fill: var(--pillar-risk-pale); stroke: var(--pillar-risk-line); }
+.graph-node[data-pillar="requirements"] rect { fill: var(--pillar-requirements-pale); stroke: var(--pillar-requirements-line); }
+.graph-node.centre rect { stroke: var(--accent); stroke-width: 2.5; }
 .graph-node:not(.centre) { cursor: pointer; }
-.graph-node:not(.centre):hover rect { fill: var(--hover); }
+.graph-node:not(.centre):hover rect { stroke: var(--accent); stroke-width: 2; }
 .graph-node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
 .graph-node:focus { outline: none; }
 
+.node-icon { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .node-type { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; fill: var(--muted); }
 .node-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10px; fill: var(--muted); }
 .node-label { font-size: 12px; font-weight: 500; fill: var(--ink); }
@@ -496,7 +656,8 @@ select.input { padding: 2px 4px; }
   border: 1px solid var(--border);
   box-shadow: 0 8px 28px rgba(34, 34, 34, 0.28);
 }
-.dialog.wide { max-width: 860px; }
+.dialog.wide { max-width: 1180px; }
+.metamodel-image { display: block; width: 100%; height: auto; }
 
 .dialog-head {
   flex: none;
@@ -521,6 +682,25 @@ select.input { padding: 2px 4px; }
 .dialog-body { padding: 14px; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
 .dialog-body .table { margin-bottom: 4px; }
 .dialog-list { margin: 0 0 0 18px; display: flex; flex-direction: column; gap: 2px; }
+.notice-important {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid var(--accent);
+  padding: 10px 12px;
+  margin-bottom: 4px;
+}
+.notice-tag {
+  flex: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: var(--accent);
+  padding: 4px 10px;
+}
+.notice-headline { font-size: 16px; font-weight: 500; line-height: 1.3; }
 
 .dialog-footer {
   flex: none;
@@ -530,4 +710,48 @@ select.input { padding: 2px 4px; }
   padding: 10px 14px;
   background: var(--surface);
   border-top: 1px solid var(--rule);
+}
+
+/* ---------- Below the supported viewport ---------- */
+
+/* The multi-pane layout cannot function in less room than this, and a degraded
+   interface would misrepresent what the software does. The tool is replaced by
+   a notice rather than squeezed (F-APP-001). The threshold is the layout's own
+   constraint: the navigator, the editor's fields and the relationship graph
+   side by side. */
+.small-viewport { display: none; }
+
+@media (max-width: 959px), (max-height: 559px) {
+  body > .menubar,
+  body > .toolbar,
+  body > .workspace,
+  body > .statusbar,
+  body > .dropdown-layer,
+  body > .dropdown.open,
+  body > .overlay {
+    display: none;
+  }
+
+  .small-viewport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 24px;
+    background: var(--chrome);
+    overflow: auto;
+  }
+
+  .small-viewport-panel {
+    width: 100%;
+    max-width: 34rem;
+    background: var(--field);
+    border: 1px solid var(--border);
+    padding: 28px 30px;
+  }
+  /* The wordmark is a span, so it needs a box before its size applies. */
+  .small-viewport-panel .wordmark { display: block; color: var(--accent); margin-bottom: 22px; }
+  .small-viewport-panel h1 { font-size: 19px; font-weight: 500; line-height: 1.3; margin-bottom: 12px; }
+  .small-viewport-panel p { margin-bottom: 10px; color: var(--muted); }
+  .small-viewport-panel a { display: inline-block; margin-top: 8px; color: var(--accent); }
 }
