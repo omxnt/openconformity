@@ -188,7 +188,7 @@ function closeFrom(level) {
   }
 }
 
-export function closePopupMenu() {
+function closePopupMenu() {
   if (popups.length === 0) return;
   document.removeEventListener('pointerdown', onPointerDownOutside, true);
   closeFrom(0);

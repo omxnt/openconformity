@@ -634,18 +634,19 @@ refs.fileInput.addEventListener('change', () => {
       return;
     }
     const { model, rejected } = fromJSON(data);
-    state.model = model;
-    state.unsaved = false;
-    setSelection({ kind: 'root', id: '' });
     if (rejected.length > 0) {
       openDialog({
-        title: 'Opened with omissions',
+        title: 'Cannot open the file',
         content: [
-          el('p', { text: 'The file held content the metamodel does not define. It was left out.' }),
+          el('p', { text: 'The file holds content this software does not define. Nothing was loaded.' }),
           el('ul', { class: 'dialog-list' }, rejected.slice(0, 20).map((reason) => el('li', { text: reason }))),
         ],
       });
+      return;
     }
+    state.model = model;
+    state.unsaved = false;
+    setSelection({ kind: 'root', id: '' });
   };
   reader.readAsText(file);
 });
@@ -783,9 +784,7 @@ function confirmNoticeRead() {
   openDialog({
     blocking: true,
     title: 'Honestly, though',
-    content: [
-      el('p', { text: 'Did you actually read that, or did you just click the button?' }),
-    ],
+    content: [el('p', { text: 'Did you actually read that, or did you just click the button?' })],
     actions: [
       { label: 'Let me read it again', action: showDemoNotice },
       {

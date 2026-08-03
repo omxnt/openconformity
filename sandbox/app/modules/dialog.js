@@ -13,7 +13,7 @@ let blocking = false;
  * @param {Object} spec
  * @param {string} spec.title
  * @param {Array<Node|string>} spec.content
- * @param {Array<{ label: string, primary?: boolean, danger?: boolean, action?: () => void }>} [spec.actions]
+ * @param {Array<{ label: string, primary?: boolean, action?: () => void }>} [spec.actions]
  * @param {boolean} [spec.wide]
  * @param {boolean} [spec.blocking]  no close button, no Escape, no click away
  */
@@ -28,7 +28,7 @@ export function openDialog(spec) {
     footer.append(
       el('button', {
         type: 'button',
-        class: `button${action.primary ? ' primary' : ''}${action.danger ? ' danger' : ''}`,
+        class: `button${action.primary ? ' primary' : ''}`,
         text: action.label,
         onclick: () => {
           blocking = false;

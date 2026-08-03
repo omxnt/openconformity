@@ -62,7 +62,7 @@ export const PILLARS = [
 const TITLE = [{ key: 'title', label: 'Title', kind: 'text' }];
 
 /** What a type carries until its own attributes are specified. */
-export const ATTRIBUTES = [...TITLE, { key: 'description', label: 'Description', kind: 'multiline' }];
+const ATTRIBUTES = [...TITLE, { key: 'description', label: 'Description', kind: 'multiline' }];
 
 /**
  * The types whose attributes have been specified. Everything else falls back to
@@ -168,7 +168,7 @@ export const ENTITY_TYPES = {
 };
 
 /** Stable iteration order for the entity types. */
-export const ENTITY_TYPE_CODES = Object.keys(ENTITY_TYPES);
+const ENTITY_TYPE_CODES = Object.keys(ENTITY_TYPES);
 
 /** Section 2.4, in the order of the table. */
 const RELATIONSHIP_TABLE = [
@@ -219,7 +219,7 @@ for (const [source, label, target, kind] of RELATIONSHIP_TABLE) {
 }
 
 /** Stable iteration order for the relationship types. */
-export const RELATIONSHIP_TYPE_IDS = Object.keys(RELATIONSHIP_TYPES);
+const RELATIONSHIP_TYPE_IDS = Object.keys(RELATIONSHIP_TYPES);
 
 /**
  * The relationship types an entity of this type can be the source of.
@@ -245,7 +245,7 @@ export function relationshipsTo(code) {
  * @param {string} code
  * @returns {RelationshipType[]}
  */
-export function compositionsFrom(code) {
+function compositionsFrom(code) {
   return relationshipsFrom(code).filter((r) => r.kind === 'composition');
 }
 

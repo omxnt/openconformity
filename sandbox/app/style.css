@@ -273,7 +273,6 @@ body {
 }
 
 .pane-title { font-size: 11px; font-weight: 500; letter-spacing: 0.02em; }
-.pane-actions { display: flex; align-items: center; gap: 4px; position: relative; }
 .pane-body { flex: 1; min-height: 0; overflow: auto; }
 
 .splitter { flex: none; background: transparent; }
@@ -311,22 +310,9 @@ body {
 }
 .button:hover:not(:disabled) { background: var(--hover); }
 .button:disabled { color: var(--off); background: var(--chrome); border-color: var(--rule); cursor: default; }
-.button.small { font-size: 11px; padding: 1px 8px; }
-.dialog-footer .button.danger { margin-right: auto; }
 .button.primary { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
 .button.primary:hover:not(:disabled) { background: var(--accent-dark); border-color: var(--accent-dark); }
 .button.primary:disabled { background: var(--chrome); border-color: var(--rule); color: var(--off); }
-
-.link-button {
-  font: inherit;
-  font-size: 12px;
-  color: var(--accent);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-}
 
 .input {
   font: inherit;
@@ -453,19 +439,6 @@ select.input { padding: 2px 4px; }
 
 /* ---------- Editor ---------- */
 
-.entity-head {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 28px;
-  padding: 4px 14px;
-  background: var(--chrome);
-  border-bottom: 1px solid var(--border);
-}
-.head-kind { font-size: 12px; color: var(--muted); }
-.head-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; color: var(--muted); }
-.head-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .editor-body { background: var(--surface); padding: 14px 16px; }
 
 .fields { display: flex; flex-direction: column; gap: 8px; max-width: 850px; }
@@ -552,7 +525,6 @@ select.input { padding: 2px 4px; }
   color: var(--ink);
   font-weight: 500;
 }
-.toolbar-label { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .dialog .field-label { width: 132px; }
 .dialog .field .input { flex: 1; }
 .dialog-fixed { flex: 1; font-size: 13px; padding: 3px 0; }
@@ -578,15 +550,11 @@ select.input { padding: 2px 4px; }
 /* Only the entity's own name is long enough to want wrapping. */
 .table td.wrap { white-space: normal; }
 .table tbody tr:hover td { background: var(--hover); }
-.table tbody tr.row-editing td,
-.table tbody tr.row-editing:hover td { background: var(--surface); }
-.table tbody tr.row-editing td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
 .table .shrink { width: 1%; white-space: nowrap; }
 .table td.mono { white-space: nowrap; }
 .arrow { margin-right: 5px; }
 .table .input { width: 100%; }
 .cell-type { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.row-buttons { display: flex; gap: 4px; }
 
 /* A row action is the same glyph as the toolbar action it mirrors. */
 .icon-button {

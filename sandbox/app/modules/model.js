@@ -504,7 +504,7 @@ export function moveFolder(model, folderId, target) {
  * @param {string} targetId
  * @returns {{ ok: boolean, reason?: string }}
  */
-export function canRelate(model, relationshipTypeId, sourceId, targetId) {
+function canRelate(model, relationshipTypeId, sourceId, targetId) {
   const type = RELATIONSHIP_TYPES[relationshipTypeId];
   if (!type) return { ok: false, reason: 'The metamodel defines no such relationship.' };
 
@@ -635,7 +635,7 @@ export function availableRelationships(code) {
  * @param {string} entityId
  * @returns {Entity | null}
  */
-export function ownerOf(model, entityId) {
+function ownerOf(model, entityId) {
   for (const relationship of model.relationships.values()) {
     if (relationship.target !== entityId) continue;
     if (RELATIONSHIP_TYPES[relationship.type].kind !== 'composition') continue;
@@ -650,7 +650,7 @@ export function ownerOf(model, entityId) {
  * @param {string} entityId
  * @returns {Entity[]}
  */
-export function ownedBy(model, entityId) {
+function ownedBy(model, entityId) {
   const owned = [];
   for (const relationship of model.relationships.values()) {
     if (relationship.source !== entityId) continue;
@@ -776,10 +776,24 @@ export function toJSON(model) {
  * @returns {{ model: Model, rejected: string[] }}
  */
 export function fromJSON(data) {
-  const model = createModel(typeof data?.name === 'string' ? data.name : 'Untitled model');
+  const model = createModel(typeof data?.name === 'string' ? data.name : 'Untitled project');
   const rejected = [];
 
-  for (const raw of Array.isArray(data?.folders) ? data.folders : []) {
+  if (typeof data !== 'object' || data === null) {
+    return { model, rejected: ['The file does not hold a project.'] };
+  }
+  if (data.format !== 'openconformity-model') {
+    rejected.push('The file is not an openconformity project file.');
+  }
+  if (data.version !== 1) {
+    rejected.push(`The file records format version ${String(data.version)}; this software reads version 1.`);
+  }
+  for (const key of ['folders', 'entities', 'relationships']) {
+    if (!Array.isArray(data[key])) rejected.push(`The file holds no ${key} list.`);
+  }
+  if (rejected.length > 0) return { model, rejected };
+
+  for (const raw of data.folders) {
     if (typeof raw?.id !== 'string' || !ENTITY_TYPES[raw?.type]) {
       rejected.push(`Folder ${String(raw?.id)} has no valid entity type.`);
       continue;
@@ -792,7 +806,7 @@ export function fromJSON(data) {
     if (folder.parent && !model.folders.has(folder.parent)) folder.parent = null;
   }
 
-  for (const raw of Array.isArray(data?.entities) ? data.entities : []) {
+  for (const raw of data.entities) {
     if (typeof raw?.id !== 'string' || !ENTITY_TYPES[raw?.type]) {
       rejected.push(`Entity ${String(raw?.id)} has no valid type.`);
       continue;
@@ -816,7 +830,7 @@ export function fromJSON(data) {
     }
   }
 
-  for (const raw of Array.isArray(data?.relationships) ? data.relationships : []) {
+  for (const raw of data.relationships) {
     const result = addRelationship(model, raw?.type, raw?.source, raw?.target);
     if (!result.ok) {
       rejected.push(`Relationship ${String(raw?.source)} ${String(raw?.type)} ${String(raw?.target)}: ${result.reason}`);
