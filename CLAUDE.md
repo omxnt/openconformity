@@ -9,8 +9,6 @@ The project is named `openconformity`. It is a free, open-source, browser-based 
 - No build step, package manager, or server-side code
 - No external network requests at runtime
 - Third-party assets self-hosted and open-licensed
-- Runs from `file://`, so data loads as ES module imports
-- No `fetch()` of local files, browsers block it under that scheme
 
 ## Structure
 
@@ -45,7 +43,7 @@ The project is named `openconformity`. It is a free, open-source, browser-based 
 
 ## Verification
 
-There is no automated verification. Run a local server with `python3 -m http.server 8000` from the directory being tested, open the page, and check the browser console shows no errors or warnings. Then open the page directly via `file://` and confirm it still works, since `http://localhost` allows things that `file://` blocks.
+There is no automated verification. Run a local server with `python3 -m http.server 8000` from the directory being tested, open the page, and check the browser console shows no errors or warnings.
 
 ## Rules
 
