@@ -552,6 +552,14 @@ Whether the software ships any default content, or the user populates everything
 
 > *Affects the library.*
 
+### U-008 Pseudo entities
+
+`2026-08-03` `product`
+
+Whether the model may hold pseudo entities, of a single untyped kind, connected to typed entities through one informal relationship.
+
+> *Affects the metamodel. The software is a modelling environment rather than a method, so a scratch space for what the metamodel does not cover would let the user represent a process, a tool, or a note without leaving the model. The cost is a second layer that carries no semantics, drawn and named so that it cannot be mistaken for typed content. Nothing typed can depend on it, and it is not engineering content on export.*
+
 ## 4. References
 
 | No. | Reference | Link |
