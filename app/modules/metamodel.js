@@ -122,8 +122,8 @@ const SPECIFIED = {
  * @returns {Attribute[]}
  */
 export function attributesFor(code) {
-  if (!ENTITY_TYPES[code]) return [];
-  return SPECIFIED[code] ?? ATTRIBUTES;
+  if (!Object.hasOwn(ENTITY_TYPES, code)) return [];
+  return Object.hasOwn(SPECIFIED, code) ? SPECIFIED[code] : ATTRIBUTES;
 }
 
 /**

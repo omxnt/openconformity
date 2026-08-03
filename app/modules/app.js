@@ -542,8 +542,10 @@ function requestDeleteFolder(folder) {
 
 /**
  * Anything that replaces the whole project asks first when there is work that
- * is not in a file yet.
- * @param {() => void} continuation
+ * is not in a file yet. The continuation is re-entered with `discarded` set, so
+ * the question is asked once without the answer being written into the model.
+ * The work stays marked unsaved until something has actually replaced it.
+ * @param {(discarded: boolean) => void} continuation
  * @returns {boolean}
  */
 function guardUnsaved(continuation) {
@@ -555,18 +557,15 @@ function guardUnsaved(continuation) {
       el('p', { class: 'muted', text: 'The project lives only in this tab until it is saved.' }),
     ],
     confirmLabel: 'Discard',
-    onConfirm: () => {
-      // Answered, so the continuation must not be asked the same thing again.
-      state.unsaved = false;
-      continuation();
-    },
+    onConfirm: () => continuation(true),
   });
   return false;
 }
 
-function newModel() {
+/** @param {boolean} [discarded]  the unsaved-work question has been answered */
+function newModel(discarded) {
   if (!guardEdit(newModel)) return;
-  if (!guardUnsaved(newModel)) return;
+  if (!discarded && !guardUnsaved(newModel)) return;
   promptDialog({
     title: 'New project',
     label: 'Project name',
@@ -593,17 +592,19 @@ function renameModel() {
   });
 }
 
-function loadExample() {
+/** @param {boolean} [discarded]  the unsaved-work question has been answered */
+function loadExample(discarded) {
   if (!guardEdit(loadExample)) return;
-  if (!guardUnsaved(loadExample)) return;
+  if (!discarded && !guardUnsaved(loadExample)) return;
   state.model = buildExampleModel();
   state.unsaved = false;
   setSelection({ kind: 'entity', id: 'HAZ-001' });
 }
 
-function openProject() {
+/** @param {boolean} [discarded]  the unsaved-work question has been answered */
+function openProject(discarded) {
   if (!guardEdit(openProject)) return;
-  if (!guardUnsaved(openProject)) return;
+  if (!discarded && !guardUnsaved(openProject)) return;
   refs.fileInput.click();
 }
 
@@ -626,14 +627,17 @@ refs.fileInput.addEventListener('change', () => {
   const reader = new FileReader();
   reader.onload = () => {
     refs.fileInput.value = '';
-    let data;
+    let model;
+    let rejected;
+    // Reading the file covers both parsing it and building a model from it, so
+    // that a file which is valid JSON but not a project is refused out loud
+    // rather than throwing past the handler and doing nothing at all.
     try {
-      data = JSON.parse(String(reader.result));
+      ({ model, rejected } = fromJSON(JSON.parse(String(reader.result))));
     } catch {
-      notify('Cannot open the file', 'The file is not valid JSON.');
+      notify('Cannot open the file', 'The file could not be read as a project.');
       return;
     }
-    const { model, rejected } = fromJSON(data);
     if (rejected.length > 0) {
       openDialog({
         title: 'Cannot open the file',

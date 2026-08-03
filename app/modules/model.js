@@ -86,8 +86,8 @@ function nextEntityId(model, code) {
  * @returns {Entity}
  */
 export function addEntity(model, code, attributes = {}, options = {}) {
+  if (!Object.hasOwn(ENTITY_TYPES, code)) throw new Error(`No such entity type: ${code}`);
   const type = ENTITY_TYPES[code];
-  if (!type) throw new Error(`No such entity type: ${code}`);
 
   const entityId = options.id ?? nextEntityId(model, code);
   /** @type {Entity} */
@@ -405,9 +405,11 @@ export function canPlaceBeside(model, source, target) {
     if (one.type !== other.type) return { ok: false, reason: 'The two folders file different entity types.' };
     // Sitting beside the other folder means taking its parent, so refuse when
     // that parent is inside the folder being moved.
+    const seen = new Set();
     let walk = other.parent ? model.folders.get(other.parent) : null;
-    while (walk) {
+    while (walk && !seen.has(walk.id)) {
       if (walk.id === one.id) return { ok: false, reason: 'That would put the folder inside itself.' };
+      seen.add(walk.id);
       walk = walk.parent ? model.folders.get(walk.parent) : null;
     }
     return { ok: true };
@@ -469,9 +471,11 @@ export function canMoveFolder(model, folderId, target) {
     if (!parent) return { ok: false, reason: 'The folder is not in the model.' };
     if (parent.type !== folder.type) return { ok: false, reason: 'The two folders file different entity types.' };
     if (parent.id === folder.id) return { ok: false, reason: 'A folder cannot be moved into itself.' };
+    const seen = new Set();
     let walk = parent;
-    while (walk) {
+    while (walk && !seen.has(walk.id)) {
       if (walk.id === folder.id) return { ok: false, reason: 'That would put the folder inside itself.' };
+      seen.add(walk.id);
       walk = walk.parent ? model.folders.get(walk.parent) : null;
     }
     return folder.parent === parent.id ? { ok: false, reason: 'It is already there.' } : { ok: true };
@@ -505,8 +509,10 @@ export function moveFolder(model, folderId, target) {
  * @returns {{ ok: boolean, reason?: string }}
  */
 function canRelate(model, relationshipTypeId, sourceId, targetId) {
+  if (!Object.hasOwn(RELATIONSHIP_TYPES, relationshipTypeId)) {
+    return { ok: false, reason: 'The metamodel defines no such relationship.' };
+  }
   const type = RELATIONSHIP_TYPES[relationshipTypeId];
-  if (!type) return { ok: false, reason: 'The metamodel defines no such relationship.' };
 
   const source = model.entities.get(sourceId);
   const target = model.entities.get(targetId);
@@ -794,7 +800,7 @@ export function fromJSON(data) {
   if (rejected.length > 0) return { model, rejected };
 
   for (const raw of data.folders) {
-    if (typeof raw?.id !== 'string' || !ENTITY_TYPES[raw?.type]) {
+    if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
       rejected.push(`Folder ${String(raw?.id)} has no valid entity type.`);
       continue;
     }
@@ -805,9 +811,21 @@ export function fromJSON(data) {
   for (const folder of model.folders.values()) {
     if (folder.parent && !model.folders.has(folder.parent)) folder.parent = null;
   }
+  // A parent that points back into its own chain is refused rather than
+  // repaired: the tree is walked upwards in several places, and a folder that
+  // sits inside itself has no place the walk can end.
+  for (const folder of model.folders.values()) {
+    const seen = new Set();
+    let walk = folder;
+    while (walk && !seen.has(walk.id)) {
+      seen.add(walk.id);
+      walk = walk.parent ? model.folders.get(walk.parent) : null;
+    }
+    if (walk) rejected.push(`Folder ${folder.id} sits inside itself.`);
+  }
 
   for (const raw of data.entities) {
-    if (typeof raw?.id !== 'string' || !ENTITY_TYPES[raw?.type]) {
+    if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
       rejected.push(`Entity ${String(raw?.id)} has no valid type.`);
       continue;
     }

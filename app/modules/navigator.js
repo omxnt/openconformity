@@ -449,9 +449,11 @@ export function createNavigator(context) {
   function openFolderChain(model, typeCode, folderId) {
     expanded.add(`pillar:${ENTITY_TYPES[typeCode].pillar}`);
     expanded.add(`type:${typeCode}`);
+    const seen = new Set();
     let current = folderId ? model.folders.get(folderId) : null;
-    while (current) {
+    while (current && !seen.has(current.id)) {
       expanded.add(`folder:${current.id}`);
+      seen.add(current.id);
       current = current.parent ? model.folders.get(current.parent) : null;
     }
   }
