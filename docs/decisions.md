@@ -560,6 +560,16 @@ Whether the model may hold pseudo entities, of a single untyped kind, connected 
 
 > *Affects the metamodel. The software is a modelling environment rather than a method, so a scratch space for what the metamodel does not cover would let the user represent a process, a tool, or a note without leaving the model. The cost is a second layer that carries no semantics, drawn and named so that it cannot be mistaken for typed content. Nothing typed can depend on it, and it is not engineering content on export.*
 
+---
+
+### U-009 Freeform navigator
+
+`2026-08-03` `product`
+
+Whether the navigator is independent of the metamodel, so entities and folders can be placed anywhere in the tree, while the metamodel continues to govern which entities exist and how they may relate.
+
+> *Affects the metamodel and the interface. The tree would be filing rather than structure. A user could work with folders alone, or build full traceability, or organise a machine so that a subsystem folder holds its own elements, hazards, measures and requirements. Composition would inform the default in the deletion prompt rather than constrain creation or placement, so a hazard can exist before its element and a library import needs no owner. Templates would ship as project files to give a new project a starting structure. Exports that depend on relationships are unavailable to a user who does not create them, and an entity such as an essential requirement may be modelled once or once per subsystem, which the software reports rather than normalises.*
+
 ## 4. References
 
 | No. | Reference | Link |
