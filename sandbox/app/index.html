@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>openconformity</title>
+<link rel="icon" type="image/svg+xml" href="assets/marks/favicon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <!-- System Context -->
+    <symbol id="i-elm" viewBox="0 0 24 24"><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /></symbol>
+    <symbol id="i-act" viewBox="0 0 24 24"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /></symbol>
+    <symbol id="i-tsk" viewBox="0 0 24 24"><path d="M9.615 20h-2.615a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8" /><path d="M14 19l2 2l4 -4" /><path d="M9 8h4" /><path d="M9 12h2" /></symbol>
+    <symbol id="i-phs" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></symbol>
+    <symbol id="i-pillar-context" viewBox="0 0 24 24"><path d="M3 17a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2" /><path d="M15 17a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2" /><path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2l0 -2" /><path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1" /><path d="M12 9l0 3" /></symbol>
+    <!-- Legislative Framework -->
+    <symbol id="i-leg" viewBox="0 0 24 24"><path d="M19 4v16h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12" /><path d="M19 16h-12a2 2 0 0 0 -2 2" /><path d="M9 8h6" /></symbol>
+    <symbol id="i-std" viewBox="0 0 24 24"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></symbol>
+    <symbol id="i-cas" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M13 17.5v4.5l2 -1.5l2 1.5v-4.5" /><path d="M10 19h-5a2 2 0 0 1 -2 -2v-10c0 -1.1 .9 -2 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -1 1.73" /><path d="M6 9l12 0" /><path d="M6 12l3 0" /><path d="M6 15l2 0" /></symbol>
+    <symbol id="i-ntb" viewBox="0 0 24 24"><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></symbol>
+    <symbol id="i-pillar-legislative" viewBox="0 0 24 24"><path d="M7 20l10 0" /><path d="M6 6l6 -1l6 1" /><path d="M12 3l0 17" /><path d="M9 12l-3 -6l-3 6a3 3 0 0 0 6 0" /><path d="M21 12l-3 -6l-3 6a3 3 0 0 0 6 0" /></symbol>
+    <!-- Risk Assessment -->
+    <symbol id="i-haz" viewBox="0 0 24 24"><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" /><path d="M12 16h.01" /></symbol>
+    <symbol id="i-scn" viewBox="0 0 24 24"><path d="M21 17h-5.397a5 5 0 0 1 -4.096 -2.133l-.514 -.734a5 5 0 0 0 -4.096 -2.133h-3.897" /><path d="M21 7h-5.395a5 5 0 0 0 -4.098 2.135l-.51 .73a5 5 0 0 1 -4.097 2.135h-3.9" /><path d="M18 10l3 -3l-3 -3" /><path d="M18 20l3 -3l-3 -3" /></symbol>
+    <symbol id="i-rrm" viewBox="0 0 24 24"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /></symbol>
+    <symbol id="i-saf" viewBox="0 0 24 24"><path d="M5 6a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v12a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1l0 -12" /><path d="M9 9h6v6h-6l0 -6" /><path d="M3 10h2" /><path d="M3 14h2" /><path d="M10 3v2" /><path d="M14 3v2" /><path d="M21 10h-2" /><path d="M21 14h-2" /><path d="M14 21v-2" /><path d="M10 21v-2" /></symbol>
+    <symbol id="i-pillar-risk" viewBox="0 0 24 24"><path d="M21 12h-8a1 1 0 1 0 -1 1v8a9 9 0 0 0 9 -9" /><path d="M16 9a5 5 0 1 0 -7 7" /><path d="M20.486 9a9 9 0 1 0 -11.482 11.495" /></symbol>
+    <!-- Requirements Definition -->
+    <symbol id="i-esr" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M11.8 16.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138" /></symbol>
+    <symbol id="i-str" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M11 14h1v4h1" /><path d="M12 11h.01" /></symbol>
+    <symbol id="i-req" viewBox="0 0 24 24"><path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 10.5v1.5" /><path d="M12 16v1.5" /><path d="M15.031 12.25l-1.299 .75" /><path d="M10.268 15l-1.3 .75" /><path d="M15 15.803l-1.285 -.773" /><path d="M10.285 12.97l-1.285 -.773" /><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /></symbol>
+    <symbol id="i-ver" viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /><path d="M9 15l2 2l4 -4" /></symbol>
+    <symbol id="i-pillar-requirements" viewBox="0 0 24 24"><path d="M15 3v4a1 1 0 0 0 1 1h4" /><path d="M18 17h-7a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h4l5 5v7a2 2 0 0 1 -2 2" /><path d="M16 17v2a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h2" /></symbol>
+    <!-- Miscellaneous -->
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></symbol>
+    <symbol id="i-project" viewBox="0 0 24 24"><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -9" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></symbol>
+    <!-- Toolbar -->
+    <symbol id="i-new-entity" viewBox="0 0 24 24"><path d="M9 12h6" /><path d="M12 9v6" /><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14" /></symbol>
+    <symbol id="i-new-folder" viewBox="0 0 24 24"><path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" /><path d="M16 19h6" /><path d="M19 16v6" /></symbol>
+    <symbol id="i-new-related" viewBox="0 0 24 24"><path d="M9 15l6 -6" /><path d="M11 6l.463 -.536a5 5 0 0 1 7.072 0a4.993 4.993 0 0 1 -.001 7.072" /><path d="M12.603 18.534a5.07 5.07 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" /><path d="M16 19h6" /><path d="M19 16v6" /></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" /><path d="M16 5l3 3" /></symbol>
+    <symbol id="i-delete" viewBox="0 0 24 24"><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></symbol>
+    <symbol id="i-move-up" viewBox="0 0 24 24"><path d="M12 5l0 14" /><path d="M18 11l-6 -6" /><path d="M6 11l6 -6" /></symbol>
+    <symbol id="i-move-down" viewBox="0 0 24 24"><path d="M12 5l0 14" /><path d="M18 13l-6 6" /><path d="M6 13l6 6" /></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14l-4 -4l4 -4" /><path d="M5 10h11a4 4 0 1 1 0 8h-1" /></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l4 -4l-4 -4" /><path d="M19 10h-11a4 4 0 1 0 0 8h1" /></symbol>
+    <symbol id="i-metamodel" viewBox="0 0 24 24"><path d="M5 2h5v4h-5l0 -4" /><path d="M15 10h5v4h-5l0 -4" /><path d="M5 18h5v4h-5l0 -4" /><path d="M5 10h5v4h-5l0 -4" /><path d="M10 12h5" /><path d="M7.5 6v4" /><path d="M7.5 14v4" /></symbol>
+  </defs>
+</svg>
+
+<header class="menubar">
+  <span class="wordmark" role="img" aria-label="openconformity"></span>
+  <nav class="menubar-menus" id="menubar-menus" aria-label="Main"></nav>
+  <span class="demo-chip">Demo</span>
+</header>
+
+<div class="dropdown-layer" id="dropdown-layer"></div>
+
+<div class="toolbar">
+  <button type="button" class="tb-button" id="toolbar-new" title="New entity" aria-label="New entity"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-new-entity"/></svg></button>
+  <button type="button" class="tb-button" id="toolbar-new-folder" title="New folder" aria-label="New folder"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-new-folder"/></svg></button>
+  <button type="button" class="tb-button" id="toolbar-related" aria-haspopup="true" aria-expanded="false" title="New related entity" aria-label="New related entity"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-new-related"/></svg></button>
+  <span class="tb-separator"></span>
+  <button type="button" class="tb-button" id="toolbar-edit" title="Edit" aria-label="Edit"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-edit"/></svg></button>
+  <button type="button" class="tb-button" id="toolbar-delete" title="Delete" aria-label="Delete"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-delete"/></svg></button>
+  <span class="tb-separator"></span>
+  <button type="button" class="tb-button" id="toolbar-up" title="Move up" aria-label="Move up"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-move-up"/></svg></button>
+  <button type="button" class="tb-button" id="toolbar-down" title="Move down" aria-label="Move down"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-move-down"/></svg></button>
+  <span class="tb-separator"></span>
+  <button type="button" class="tb-button" id="toolbar-undo" title="Undo" aria-label="Undo"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-undo"/></svg></button>
+  <button type="button" class="tb-button" id="toolbar-redo" title="Redo" aria-label="Redo"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-redo"/></svg></button>
+  <span class="tb-separator"></span>
+  <button type="button" class="tb-button" id="toolbar-metamodel" title="Metamodel" aria-label="Metamodel"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-metamodel"/></svg></button>
+  <span class="tb-unsaved" id="toolbar-unsaved" hidden>
+    <span class="tb-separator"></span>
+    <button type="button" class="tb-save" id="toolbar-save">Unsaved changes (click here to save)</button>
+  </span>
+  <span class="tb-context" id="toolbar-context"></span>
+</div>
+
+<main class="workspace" id="workspace">
+
+  <div class="column" id="navigator-column">
+    <section class="pane" aria-label="Navigator">
+      <div class="pane-head">
+        <h1 class="pane-title">Navigator</h1>
+      </div>
+      <div class="pane-filter">
+        <input type="search" id="navigator-filter" placeholder="Filter" autocomplete="off" aria-label="Filter the model">
+        <button type="button" id="navigator-filter-clear" class="filter-clear" aria-label="Clear the filter">×</button>
+      </div>
+      <div class="pane-body">
+        <div class="tree" id="tree" role="tree" aria-label="Model"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="splitter splitter-vertical" id="splitter-vertical" role="separator" aria-orientation="vertical" aria-label="Resize the navigator" tabindex="0"></div>
+
+  <div class="column column-main">
+
+    <section class="pane" aria-label="Editor">
+      <div class="pane-head">
+        <h1 class="pane-title">Editor</h1>
+      </div>
+      <div class="pane-body editor-body" id="editor-body"></div>
+    </section>
+
+    <div class="splitter splitter-horizontal" id="splitter-horizontal" role="separator" aria-orientation="horizontal" aria-label="Resize the relationship pane" tabindex="0"></div>
+
+    <section class="pane pane-relationships" id="relationship-pane" aria-label="Relationships">
+      <div class="pane-head">
+        <h1 class="pane-title">Relationships</h1>
+      </div>
+      <div class="pane-toolbar">
+        <div class="tabs" id="relationship-tabs"></div>
+        <div class="toolbar-actions" id="relationship-toolbar"></div>
+      </div>
+      <div class="pane-body" id="relationship-body"></div>
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="statusbar">
+  <span id="status-name"></span>
+  <span id="status-entities"></span>
+  <span id="status-relationships"></span>
+</footer>
+
+<div class="small-viewport">
+  <div class="small-viewport-panel">
+    <span class="wordmark" role="img" aria-label="openconformity"></span>
+    <h1>A desktop-sized screen is required</h1>
+    <p>openconformity puts a navigator, an editor and a relationship view side by side. That needs more room than this screen has.</p>
+    <p>Open it in a desktop or laptop browser, on a window at least 960 by 560 pixels.</p>
+    <a href="https://openconformity.org">openconformity.org</a>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept="application/json,.json" hidden>
+
+<script type="module" src="modules/app.js"></script>
+
+</body>
+</html>
