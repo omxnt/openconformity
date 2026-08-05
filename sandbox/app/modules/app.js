@@ -6,7 +6,7 @@
  * the metamodel is enforced.
  */
 
-import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
+import { RELATIONSHIP_TYPES } from './metamodel.js';
 import {
   addEntity,
   addFolder,
@@ -33,7 +33,7 @@ import { createToolbar } from './toolbar.js';
 import { createMenuBar, openPopupMenu } from './menu.js';
 import { createHistory } from './history.js';
 import { canStep, contextMenuItems, contextOf, moveTargets } from './actions.js';
-import { chooseDialog, confirmDialog, notify, openDialog, promptDialog } from './dialog.js';
+import { chooseDialog, confirmDialog, notify, openDialog, promptDialog, toast } from './dialog.js';
 import { el } from './dom.js';
 
 const state = {
@@ -48,6 +48,8 @@ const history = createHistory(state.model, state.selection);
 
 /** Remembers that the demo notice has been read, on this device only. */
 const NOTICE_KEY = 'openconformity.demo.notice';
+/** Remembers the chosen theme, on this device only. */
+const THEME_KEY = 'openconformity.theme';
 
 const refs = {
   menubar: document.getElementById('menubar-menus'),
@@ -57,7 +59,7 @@ const refs = {
   filter: document.getElementById('navigator-filter'),
   filterClear: document.getElementById('navigator-filter-clear'),
   editorBody: document.getElementById('editor-body'),
-  relationshipTabs: document.getElementById('relationship-tabs'),
+  relationshipViews: document.getElementById('relationship-views'),
   relationshipToolbar: document.getElementById('relationship-toolbar'),
   relationshipBody: document.getElementById('relationship-body'),
   statusName: document.getElementById('status-name'),
@@ -67,6 +69,8 @@ const refs = {
   workspace: document.getElementById('workspace'),
   navigatorColumn: document.getElementById('navigator-column'),
   relationshipPane: document.getElementById('relationship-pane'),
+  relationshipPanel: document.getElementById('relationship-panel'),
+  themeToggle: document.getElementById('toolbar-theme'),
 };
 
 const getModel = () => state.model;
@@ -102,7 +106,7 @@ const navigator = createNavigator({
   onDrop: (source, target, position) => {
     const result = dropApply(source, target, position);
     if (!result.ok) {
-      notify('Move refused', result.reason ?? 'That move is not allowed.');
+      toast('Move refused', result.reason ?? 'That move is not allowed.');
       return;
     }
     commit(source);
@@ -147,14 +151,16 @@ const editor = createEditor({
 });
 
 const relationshipPane = createRelationshipPane({
-  tabsEl: refs.relationshipTabs,
+  viewsEl: refs.relationshipViews,
   bodyEl: refs.relationshipBody,
   toolbarEl: refs.relationshipToolbar,
+  panelEl: refs.relationshipPanel,
   getModel,
   getEntityId,
   onSelect: (id) => select({ kind: 'entity', id }),
   onChange: changed,
-  onMessage: (message) => notify('Relationship refused', message),
+  onMessage: (message) => toast('Relationship refused', message),
+  setPicker: (spec) => navigator.setPicker(spec),
 });
 
 /** @type {import('./actions.js').Handlers} */
@@ -266,6 +272,31 @@ function startFresh(selection) {
 }
 
 /**
+ * Nothing that would throw away an unsaved edit happens without asking. The
+ * continuation is what runs once the user has answered.
+ * @param {() => void} continuation
+ * @returns {boolean}  whether the caller may carry on now
+ */
+function guardEdit(continuation) {
+  if (!editor.isEditing()) return true;
+  if (!editor.hasChanges()) {
+    editor.cancel();
+    return true;
+  }
+  confirmDialog({
+    title: 'Discard changes?',
+    content: [el('p', { text: 'The entity being edited has changes that have not been saved.' })],
+    confirmLabel: 'Discard',
+    danger: true,
+    onConfirm: () => {
+      editor.cancel();
+      continuation();
+    },
+  });
+  return false;
+}
+
+/**
  * Step the model back or forward. What is restored is a copy, so the history
  * itself is never handed to the rest of the software to mutate.
  * @param {'undo'|'redo'} direction
@@ -307,30 +338,6 @@ function renderStatus() {
   refs.statusName.textContent = state.model.name;
   refs.statusEntities.textContent = `${state.model.entities.size} entities`;
   refs.statusRelationships.textContent = `${state.model.relationships.size} relationships`;
-}
-
-/**
- * Nothing that would throw away an unsaved edit happens without asking. The
- * continuation is what runs once the user has answered.
- * @param {() => void} continuation
- * @returns {boolean}  whether the caller may carry on now
- */
-function guardEdit(continuation) {
-  if (!editor.isEditing()) return true;
-  if (!editor.hasChanges()) {
-    editor.cancel();
-    return true;
-  }
-  confirmDialog({
-    title: 'Discard changes?',
-    content: [el('p', { text: 'The entity being edited has changes that have not been saved.' })],
-    confirmLabel: 'Discard',
-    onConfirm: () => {
-      editor.cancel();
-      continuation();
-    },
-  });
-  return false;
 }
 
 /**
@@ -398,7 +405,7 @@ function moveSelection() {
       if (!chosen) return;
       const result = moveNode(state.model, selection.id, chosen.target);
       if (!result.ok) {
-        notify('Move refused', result.reason ?? 'That move is not allowed.');
+        toast('Move refused', result.reason ?? 'That move is not allowed.');
         return;
       }
       commit(selection);
@@ -450,7 +457,7 @@ function createRelated(relationshipTypeId, direction) {
 
   if (!result.ok) {
     removeEntity(state.model, entity.id);
-    notify('Relationship refused', result.reason ?? 'The relationship could not be created.');
+    toast('Relationship refused', result.reason ?? 'The relationship could not be created.');
     return;
   }
 
@@ -471,7 +478,7 @@ function stepSelection(delta) {
 
   const result = moveOrder(state.model, selection, delta);
   if (!result.ok) {
-    notify('Move refused', result.reason ?? 'That move is not allowed.');
+    toast('Move refused', result.reason ?? 'That move is not allowed.');
     return;
   }
   commit(selection);
@@ -544,6 +551,7 @@ function requestDeleteEntity(id) {
         : null,
     ].filter(Boolean),
     confirmLabel: 'Delete',
+    danger: true,
     onConfirm: () => {
       removeEntity(state.model, id);
       commit(entity.parent ? selectionFor(entity.parent) : { kind: 'root', id: '' });
@@ -569,6 +577,7 @@ function requestDeleteFolder(folder) {
       }),
     ],
     confirmLabel: 'Delete folder',
+    danger: true,
     onConfirm: () => {
       const parent = folder.parent;
       removeFolder(state.model, folder.id);
@@ -596,6 +605,7 @@ function guardUnsaved(continuation) {
       el('p', { class: 'muted', text: 'The project lives only in this tab until it is saved.' }),
     ],
     confirmLabel: 'Discard',
+    danger: true,
     onConfirm: () => continuation(true),
   });
   return false;
@@ -715,6 +725,30 @@ function showMetamodel() {
 // --- Chrome ------------------------------------------------------------
 
 document.getElementById('toolbar-metamodel').addEventListener('click', showMetamodel);
+
+/**
+ * The theme was set on the root element before the stylesheet loaded; from
+ * here on the toggle owns it. The button offers the theme it would switch to.
+ */
+function reflectTheme() {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  const offer = dark ? 'Switch to the light theme' : 'Switch to the dark theme';
+  refs.themeToggle.title = offer;
+  refs.themeToggle.setAttribute('aria-label', offer);
+}
+
+refs.themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try {
+    window.localStorage.setItem(THEME_KEY, next);
+  } catch {
+    // Storage can be unavailable; the choice then lasts for this tab only.
+  }
+  reflectTheme();
+});
+
+reflectTheme();
 
 refs.filterClear.addEventListener('click', () => {
   refs.filter.value = '';

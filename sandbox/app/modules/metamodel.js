@@ -38,6 +38,7 @@
  * @property {string} source  entity type code
  * @property {string} label
  * @property {string} target  entity type code
+ * @property {'composition'|'association'} kind
  */
 
 /**
@@ -47,10 +48,10 @@
  * different order; this is the newer naming.
  */
 export const PILLARS = [
-  { id: 'context', name: 'System Context', icon: 'i-pillar-context' },
-  { id: 'legislative', name: 'Legislative Framework', icon: 'i-pillar-legislative' },
-  { id: 'risk', name: 'Risk Assessment', icon: 'i-pillar-risk' },
-  { id: 'requirements', name: 'Requirements Definition', icon: 'i-pillar-requirements' },
+  { id: 'context', name: 'System Context' },
+  { id: 'legislative', name: 'Legislative Framework' },
+  { id: 'risk', name: 'Risk Assessment' },
+  { id: 'requirements', name: 'Requirements Definition' },
 ];
 
 /**
@@ -171,54 +172,55 @@ const ENTITY_TYPE_CODES = Object.keys(ENTITY_TYPES);
 
 /**
  * Section 2.4, in the order of the table. A relationship is a directed link
- * from one entity type to another, named by its label. It carries no further
- * classification: what it means is what the label says.
+ * from one entity type to another, named by its label and classed as an
+ * association or a composition. The kind is carried for display; deletion
+ * treats every relationship alike while U-009 stands.
  */
 const RELATIONSHIP_TABLE = [
-  ['LEG', 'defines', 'ESR'],
-  ['LEG', 'defines', 'CAS'],
-  ['STD', 'defines', 'STR'],
-  ['CAS', 'involves', 'NTB'],
-  ['STD', 'harmonised to', 'LEG'],
-  ['ELM', 'subject to', 'LEG'],
-  ['ELM', 'subject to', 'STD'],
-  ['STR', 'satisfies', 'ESR'],
-  ['REQ', 'derives from', 'STR'],
-  ['REQ', 'derives from', 'RRM'],
-  ['REQ', 'derives from', 'SAF'],
-  ['REQ', 'decomposes into', 'REQ'],
-  ['SAF', 'decomposes into', 'SAF'],
-  ['ELM', 'decomposes into', 'ELM'],
-  ['ESR', 'allocated to', 'ELM'],
-  ['STR', 'allocated to', 'ELM'],
-  ['REQ', 'allocated to', 'ELM'],
-  ['VER', 'allocated to', 'ELM'],
-  ['RRM', 'allocated to', 'ELM'],
-  ['SAF', 'allocated to', 'ELM'],
-  ['VER', 'verifies', 'REQ'],
-  ['VER', 'verifies', 'RRM'],
-  ['VER', 'verifies', 'SAF'],
-  ['RRM', 'implements', 'STR'],
-  ['SAF', 'realises', 'RRM'],
-  ['RRM', 'mitigates', 'HAZ'],
-  ['RRM', 'mitigates', 'SCN'],
-  ['ELM', 'exhibits', 'HAZ'],
-  ['HAZ', 'triggers', 'ESR'],
-  ['HAZ', 'contributes to', 'SCN'],
-  ['TSK', 'leads to', 'SCN'],
-  ['ACT', 'exposed in', 'SCN'],
-  ['ELM', 'has', 'PHS'],
-  ['ELM', 'has', 'ACT'],
-  ['ACT', 'performs', 'TSK'],
-  ['TSK', 'during', 'PHS'],
+  ['LEG', 'defines', 'ESR', 'composition'],
+  ['LEG', 'defines', 'CAS', 'composition'],
+  ['STD', 'defines', 'STR', 'composition'],
+  ['CAS', 'involves', 'NTB', 'composition'],
+  ['STD', 'harmonised to', 'LEG', 'association'],
+  ['ELM', 'subject to', 'LEG', 'association'],
+  ['ELM', 'subject to', 'STD', 'association'],
+  ['STR', 'satisfies', 'ESR', 'association'],
+  ['REQ', 'derives from', 'STR', 'association'],
+  ['REQ', 'derives from', 'RRM', 'association'],
+  ['REQ', 'derives from', 'SAF', 'association'],
+  ['REQ', 'decomposes into', 'REQ', 'composition'],
+  ['SAF', 'decomposes into', 'SAF', 'composition'],
+  ['ELM', 'decomposes into', 'ELM', 'composition'],
+  ['ESR', 'allocated to', 'ELM', 'association'],
+  ['STR', 'allocated to', 'ELM', 'association'],
+  ['REQ', 'allocated to', 'ELM', 'association'],
+  ['VER', 'allocated to', 'ELM', 'association'],
+  ['RRM', 'allocated to', 'ELM', 'association'],
+  ['SAF', 'allocated to', 'ELM', 'association'],
+  ['VER', 'verifies', 'REQ', 'association'],
+  ['VER', 'verifies', 'RRM', 'association'],
+  ['VER', 'verifies', 'SAF', 'association'],
+  ['RRM', 'implements', 'STR', 'association'],
+  ['SAF', 'realises', 'RRM', 'association'],
+  ['RRM', 'mitigates', 'HAZ', 'association'],
+  ['RRM', 'mitigates', 'SCN', 'association'],
+  ['ELM', 'exhibits', 'HAZ', 'composition'],
+  ['HAZ', 'triggers', 'ESR', 'association'],
+  ['HAZ', 'contributes to', 'SCN', 'association'],
+  ['TSK', 'leads to', 'SCN', 'association'],
+  ['ACT', 'exposed in', 'SCN', 'association'],
+  ['ELM', 'has', 'PHS', 'association'],
+  ['ELM', 'has', 'ACT', 'association'],
+  ['ACT', 'performs', 'TSK', 'association'],
+  ['TSK', 'during', 'PHS', 'association'],
 ];
 
 /** @type {Object<string, RelationshipType>} */
 export const RELATIONSHIP_TYPES = {};
 
-for (const [source, label, target] of RELATIONSHIP_TABLE) {
+for (const [source, label, target, kind] of RELATIONSHIP_TABLE) {
   const id = `${source}-${label.replace(/ /g, '-')}-${target}`.toLowerCase();
-  RELATIONSHIP_TYPES[id] = { id, source, label, target };
+  RELATIONSHIP_TYPES[id] = { id, source, label, target, kind };
 }
 
 /** Stable iteration order for the relationship types. */

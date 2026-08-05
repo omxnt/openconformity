@@ -65,10 +65,9 @@ function append(node, children) {
 }
 
 /**
- * An icon from the sprite defined in the document. Given a pillar, the glyph is
- * drawn in that pillar's colour: the shape still carries the entity type, and
- * the colour only says which pillar it belongs to. Nothing else changes, so a
- * tinted icon takes no more room than a plain one.
+ * An icon from the sprite defined in the document. A pillar adds a class the
+ * stylesheet fills with that pillar's hue, a speed aid over the shapes, which
+ * remain the carrier of entity type (D-027, N-ACC-002).
  * @param {string} symbolId
  * @param {string} [pillarId]
  * @returns {SVGElement}

@@ -33,6 +33,15 @@ export function createNavigator(context) {
   let filter = '';
   /** @type {Selection|null} */
   let dragging = null;
+  /**
+   * While set, the tree is a picker rather than a navigator: clicking a valid
+   * entity hands it over instead of selecting it, everything else is inert,
+   * and only expanding, collapsing and filtering still work, so a target can
+   * be reached wherever it is filed. `pickedIds` are the rows handed over so
+   * far, drawn as taken; handing one over again lets go of it.
+   * @type {{ validIds: Set<string>, pickedIds?: Set<string>, onPick: (id: string) => void } | null}
+   */
+  let picker = null;
 
   context.filterEl.addEventListener('input', () => {
     filter = context.filterEl.value.trim().toLowerCase();
@@ -54,7 +63,8 @@ export function createNavigator(context) {
         iconId: 'i-project',
         label: model.name,
         current: selection,
-        children: contentsOf(model, null, matches, selection),
+        depth: 0,
+        children: contentsOf(model, null, matches, selection, 1),
       })
     );
   }
@@ -66,14 +76,15 @@ export function createNavigator(context) {
    * @param {string|null} parentId
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth  how far to indent the rows at this level
    */
-  function contentsOf(model, parentId, matches, selection) {
+  function contentsOf(model, parentId, matches, selection, depth) {
     const folders = childFolders(model, parentId)
-      .map((folder) => folderNode(model, folder, matches, selection))
+      .map((folder) => folderNode(model, folder, matches, selection, depth))
       .filter(Boolean);
 
     const entities = childEntities(model, parentId)
-      .map((entity) => entityNode(model, entity, matches, selection))
+      .map((entity) => entityNode(model, entity, matches, selection, depth))
       .filter(Boolean);
 
     return [...folders, ...entities];
@@ -84,9 +95,10 @@ export function createNavigator(context) {
    * @param {import('./model.js').Folder} folder
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth
    */
-  function folderNode(model, folder, matches, selection) {
-    const children = contentsOf(model, folder.id, matches, selection);
+  function folderNode(model, folder, matches, selection, depth) {
+    const children = contentsOf(model, folder.id, matches, selection, depth + 1);
     if (matches && children.length === 0 && !matches.has(`folder:${folder.id}`)) return null;
     return node({
       key: `folder:${folder.id}`,
@@ -95,6 +107,7 @@ export function createNavigator(context) {
       label: folder.name,
       count: String(contentCount(model, folder.id)),
       current: selection,
+      depth,
       children,
     });
   }
@@ -106,9 +119,10 @@ export function createNavigator(context) {
    * @param {import('./model.js').Entity} entity
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth
    */
-  function entityNode(model, entity, matches, selection) {
-    const children = contentsOf(model, entity.id, matches, selection);
+  function entityNode(model, entity, matches, selection, depth) {
+    const children = contentsOf(model, entity.id, matches, selection, depth + 1);
     if (matches && children.length === 0 && !matches.has(`entity:${entity.id}`)) return null;
     return node({
       key: `entity:${entity.id}`,
@@ -119,6 +133,7 @@ export function createNavigator(context) {
       label: labelOf(entity),
       title: `${ENTITY_TYPES[entity.type].name} ${entity.id}`,
       current: selection,
+      depth,
       children,
     });
   }
@@ -135,6 +150,7 @@ export function createNavigator(context) {
    * @param {string} [spec.className]
    * @param {string} [spec.pillar]
    * @param {string} [spec.title]
+   * @param {number} spec.depth
    * @param {HTMLElement[]} [spec.children]
    */
   function node(spec) {
@@ -142,19 +158,23 @@ export function createNavigator(context) {
     const hasChildren = children.length > 0;
     const open = hasChildren && (filter !== '' || expanded.has(spec.key));
     const selected = spec.current.kind === spec.selection.kind && spec.current.id === spec.selection.id;
+    const pickable = Boolean(picker && spec.selection.kind === 'entity' && picker.validIds.has(spec.selection.id));
+    const picked = pickable && Boolean(picker.pickedIds?.has(spec.selection.id));
+    const pickClass = picker ? (pickable ? ` pickable${picked ? ' picked' : ''}` : ' pick-dim') : '';
 
-    const row = el('div', { class: 'row', title: spec.title });
+    // The stylesheet turns the depth into the row's left padding, so a row runs
+    // the full width of the pane whatever level it sits at.
+    const row = el('div', { class: `row${pickClass}`, title: spec.title, style: `--depth:${spec.depth}` });
     row.append(
       hasChildren
         ? el('span', {
             class: 'twisty',
-            text: open ? '−' : '+',
             'aria-hidden': 'true',
             onclick: (event) => {
               event.stopPropagation();
               toggle(spec.key);
             },
-          })
+          }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')])
         : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
     );
     row.append(icon(spec.iconId, spec.pillar));
@@ -172,19 +192,25 @@ export function createNavigator(context) {
       'aria-selected': String(selected),
       onclick: (event) => {
         event.stopPropagation();
+        if (picker) {
+          if (pickable) picker.onPick(spec.selection.id);
+          return;
+        }
         context.onSelect(spec.selection);
       },
       ondblclick: (event) => {
         event.stopPropagation();
+        if (picker) return;
         context.onActivate(spec.selection);
       },
       oncontextmenu: (event) => {
         event.preventDefault();
         event.stopPropagation();
+        if (picker) return;
         context.onSelect(spec.selection);
         context.onContextMenu(spec.selection, event.clientX, event.clientY);
       },
-      onkeydown: (event) => onKeyDown(event, spec, hasChildren, open),
+      onkeydown: (event) => onKeyDown(event, spec, hasChildren, open, pickable),
     }, [row]);
 
     if (hasChildren && open) {
@@ -203,6 +229,7 @@ export function createNavigator(context) {
    * @param {Selection} selection
    */
   function addDragAndDrop(wrapper, selection) {
+    if (picker) return;
     if (selection.kind === 'entity' || selection.kind === 'folder') {
       wrapper.draggable = true;
       wrapper.addEventListener('dragstart', (event) => {
@@ -299,8 +326,9 @@ export function createNavigator(context) {
    * @param {{key: string, selection: Selection}} spec
    * @param {boolean} hasChildren
    * @param {boolean} open
+   * @param {boolean} pickable
    */
-  function onKeyDown(event, spec, hasChildren, open) {
+  function onKeyDown(event, spec, hasChildren, open, pickable) {
     const keys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' ', 'ContextMenu'];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
@@ -320,8 +348,11 @@ export function createNavigator(context) {
       if (hasChildren && open) toggle(spec.key);
       else focusNode(visible[here]?.parentElement?.closest('.node'));
     } else if (event.key === 'ContextMenu') {
+      if (picker) return;
       const box = visible[here]?.getBoundingClientRect();
       context.onContextMenu(spec.selection, box?.left ?? 0, box ? box.top + 22 : 0);
+    } else if (picker) {
+      if (pickable) picker.onPick(spec.selection.id);
     } else {
       context.onActivate(spec.selection);
     }
@@ -369,6 +400,24 @@ export function createNavigator(context) {
     /** Open a branch without changing the selection. */
     expand(key) {
       expanded.add(key);
+    },
+
+    /**
+     * Turn the tree into a picker, or back into a navigator with null. Every
+     * branch holding a pickable entity is opened, so nothing on offer is
+     * hidden inside a collapsed level.
+     * @param {{ validIds: Set<string>, onPick: (id: string) => void } | null} spec
+     */
+    setPicker(spec) {
+      picker = spec;
+      if (spec) {
+        const model = context.getModel();
+        for (const id of spec.validIds) {
+          const target = nodeOf(model, id);
+          if (target) openParentChain(model, target.parent);
+        }
+      }
+      render();
     },
 
     focusSelected() {

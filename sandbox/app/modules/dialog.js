@@ -1,9 +1,13 @@
 /**
- * Modal dialogs: the confirmations and notices the software needs, and
- * nothing more.
+ * Modal dialogs and toasts.
+ *
+ * A dialog is for a question that must be answered before anything else
+ * happens, a toast for a remark that requires nothing: it sits in the corner
+ * and leaves by itself. Deletions confirm with a Carbon danger dialog, whose
+ * red is the destructive-action colour and never a verdict (D-026).
  */
 
-import { el } from './dom.js';
+import { el, icon } from './dom.js';
 
 let overlay = null;
 let lastFocused = null;
@@ -13,7 +17,7 @@ let blocking = false;
  * @param {Object} spec
  * @param {string} spec.title
  * @param {Array<Node|string>} spec.content
- * @param {Array<{ label: string, primary?: boolean, action?: () => void }>} [spec.actions]
+ * @param {Array<{ label: string, primary?: boolean, danger?: boolean, action?: () => void }>} [spec.actions]
  * @param {boolean} [spec.wide]
  * @param {boolean} [spec.blocking]  no close button, no Escape, no click away
  */
@@ -28,7 +32,7 @@ export function openDialog(spec) {
     footer.append(
       el('button', {
         type: 'button',
-        class: `button${action.primary ? ' primary' : ''}`,
+        class: `button${action.primary ? ' primary' : ''}${action.danger ? ' danger' : ''}`,
         text: action.label,
         onclick: () => {
           blocking = false;
@@ -41,7 +45,7 @@ export function openDialog(spec) {
 
   const head = el('div', { class: 'dialog-head' }, [el('span', { class: 'dialog-title', text: spec.title })]);
   if (!spec.blocking) {
-    head.append(el('button', { type: 'button', class: 'dialog-close', text: '×', 'aria-label': 'Close', onclick: close }));
+    head.append(el('button', { type: 'button', class: 'dialog-close', 'aria-label': 'Close', onclick: close }, [icon('i-close')]));
   }
 
   const dialog = el('div', { class: `dialog${spec.wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-label': spec.title }, [
@@ -105,11 +109,51 @@ export function notify(title, message) {
   openDialog({ title, content: [el('p', { text: message })] });
 }
 
+/** How long a toast stands before leaving on its own. */
+const TOAST_MS = 6000;
+
+/**
+ * A passing remark: a Carbon toast in the corner, closed by itself or by
+ * hand. Used for refusals, which change nothing and need no answer.
+ * @param {string} title
+ * @param {string} message
+ */
+export function toast(title, message) {
+  const region = document.getElementById('toasts');
+  if (!region) return;
+
+  const glyph = icon('i-information');
+  glyph.classList.add('toast-icon');
+  const item = el('div', { class: 'toast', role: 'status' }, [
+    glyph,
+    el('div', { class: 'toast-content' }, [
+      el('p', { class: 'toast-title', text: title }),
+      el('p', { class: 'toast-body', text: message }),
+    ]),
+  ]);
+
+  const timer = setTimeout(() => item.remove(), TOAST_MS);
+  item.append(
+    el('button', {
+      type: 'button',
+      class: 'toast-close',
+      'aria-label': 'Close',
+      onclick: () => {
+        clearTimeout(timer);
+        item.remove();
+      },
+    }, [icon('i-close')])
+  );
+
+  region.append(item);
+}
+
 /**
  * @param {Object} spec
  * @param {string} spec.title
  * @param {Array<Node|string>} spec.content
  * @param {string} spec.confirmLabel
+ * @param {boolean} [spec.danger]  the confirmation destroys something
  * @param {() => void} spec.onConfirm
  */
 export function confirmDialog(spec) {
@@ -118,7 +162,7 @@ export function confirmDialog(spec) {
     content: spec.content,
     actions: [
       { label: 'Cancel' },
-      { label: spec.confirmLabel, primary: true, action: spec.onConfirm },
+      { label: spec.confirmLabel, primary: !spec.danger, danger: spec.danger, action: spec.onConfirm },
     ],
   });
 }
@@ -133,7 +177,18 @@ export function confirmDialog(spec) {
  * @param {(value: string) => void} spec.onConfirm
  */
 export function promptDialog(spec) {
-  const input = el('input', { class: 'input', type: 'text', id: 'prompt-input' });
+  const confirm = () => spec.onConfirm(input.value.trim() || spec.value);
+  const input = el('input', {
+    class: 'input',
+    type: 'text',
+    id: 'prompt-input',
+    onkeydown: (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      close();
+      confirm();
+    },
+  });
   input.value = spec.value;
 
   openDialog({
@@ -146,7 +201,7 @@ export function promptDialog(spec) {
     ],
     actions: [
       { label: 'Cancel' },
-      { label: spec.confirmLabel, primary: true, action: () => spec.onConfirm(input.value.trim() || spec.value) },
+      { label: spec.confirmLabel, primary: true, action: confirm },
     ],
   });
 

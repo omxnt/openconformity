@@ -1,14 +1,14 @@
 /**
- * The toolbar above the navigator and the editor.
+ * The toolbar above the navigator, and the selection head above the editor.
  *
  * New folder acts on one press, since where the cursor is says everything
  * about where the folder goes. New opens the entity types, because filing no
  * longer says which type is wanted and there is nothing to default to. Related
  * opens the entities the metamodel lets the selection relate to.
- * Every action here is also in the right-click menu and in the Edit menu.
+ * Every action here is also in the right-click menu.
  *
  * Undo and redo stand apart from the rest: they act on the project as a whole
- * rather than on what the cursor is standing on.
+ * rather than on what the cursor is standing on, so they live in the shell.
  */
 
 import { canStep, contextOf, createHere, describe, entityTypeMenuItems, relatedMenuItems } from './actions.js';

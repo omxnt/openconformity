@@ -1,14 +1,17 @@
 /**
- * The relationship pane: the relationships of the selected entity, as a list
- * or as a graph of its closest neighbours.
+ * The relationship pane: the relationships of the selected entity, as a graph
+ * of its closest neighbours or as a list. The two are one content in two
+ * presentations, so a Carbon content switcher stands where tabs stood.
  *
  * Everything here is anchored on the entity the user is standing on. Adding a
- * relationship starts from its direction — out of this entity, or into it —
- * and only then offers the relationship types the metamodel defines for that
- * type in that direction, and then only the entities the model will accept.
+ * relationship is two choices: the relationship form the metamodel allows for
+ * this entity type, chosen in a side panel, and then the entity at the other
+ * end, picked straight from the navigator — the panel overlays only the right
+ * edge, so the tree stays visible and becomes the picker. Both offers are
+ * generated from the metamodel and the model, so a combination that is not
+ * allowed is never offered, and a row the model refuses cannot be picked.
  *
- * A row is not deleted in one click. It is opened for editing first, and
- * delete sits inside that, beside save and cancel.
+ * A relationship is deleted from its row, behind a confirmation.
  */
 
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
@@ -21,34 +24,48 @@ import {
   removeRelationship,
 } from './model.js';
 import { clear, el, icon, svg, truncate } from './dom.js';
-import { confirmDialog, openDialog } from './dialog.js';
+import { confirmDialog } from './dialog.js';
 
-const NODE_WIDTH = 196;
-const NODE_HEIGHT = 48;
-const ROW_GAP = 14;
-const COLUMN_GAP = 118;
-const MARGIN = 20;
+// The box holds three lines of Carbon type at a 16px gutter, so its size and
+// the gaps around it come from the spacing scale rather than being trimmed to
+// fit a smaller face.
+const NODE_WIDTH = 224;
+const NODE_HEIGHT = 64;
+const ROW_GAP = 16;
+const COLUMN_GAP = 120;
+const MARGIN = 16;
 const MAX_PER_SIDE = 7;
 
 /**
  * @param {Object} context
- * @param {HTMLElement} context.tabsEl
+ * @param {HTMLElement} context.viewsEl
  * @param {HTMLElement} context.bodyEl
  * @param {HTMLElement} context.toolbarEl
+ * @param {HTMLElement} context.panelEl
  * @param {() => import('./model.js').Model} context.getModel
  * @param {() => string|null} context.getEntityId
  * @param {(id: string) => void} context.onSelect
  * @param {() => void} context.onChange
  * @param {(message: string) => void} context.onMessage
+ * @param {(spec: { validIds: Set<string>, onPick: (id: string) => void } | null) => void} context.setPicker
  */
 export function createRelationshipPane(context) {
   let view = 'graph';
+  let panelOpen = false;
+
+  // Escape leaves the pick, unless a dialog is open and owns the key.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !panelOpen) return;
+    if (document.querySelector('.overlay')) return;
+    event.preventDefault();
+    closePanel();
+  });
 
   for (const name of ['graph', 'list']) {
-    context.tabsEl.append(
+    context.viewsEl.append(
       el('button', {
         type: 'button',
-        class: 'tab',
+        class: 'switcher-option',
         'data-view': name,
         text: name === 'list' ? 'List' : 'Graph',
         onclick: () => {
@@ -60,20 +77,29 @@ export function createRelationshipPane(context) {
   }
 
   function render() {
+    // Whatever redrew this pane has moved the ground under an open pick — an
+    // undo, a deletion, a load — so the pick does not survive it.
+    closePanel();
+
     const model = context.getModel();
     const entityId = context.getEntityId();
     const entity = entityId ? model.entities.get(entityId) : null;
 
-    for (const tab of context.tabsEl.querySelectorAll('.tab')) {
-      tab.classList.toggle('active', tab.dataset.view === view);
-      tab.setAttribute('aria-pressed', String(tab.dataset.view === view));
+    for (const option of context.viewsEl.querySelectorAll('.switcher-option')) {
+      option.classList.toggle('selected', option.dataset.view === view);
+      option.setAttribute('aria-pressed', String(option.dataset.view === view));
     }
 
     clear(context.toolbarEl);
     clear(context.bodyEl);
 
     if (!entity) {
-      context.bodyEl.append(el('p', { class: 'empty', text: 'No entity selected.' }));
+      context.bodyEl.append(
+        el('div', { class: 'empty-state' }, [
+          el('p', { class: 'empty-state-title', text: 'Nothing selected' }),
+          el('p', { class: 'empty-state-body', text: 'Select an entity to see its relationships.' }),
+        ])
+      );
       return;
     }
 
@@ -87,108 +113,216 @@ export function createRelationshipPane(context) {
   /** @param {import('./model.js').Entity} entity */
   function renderToolbar(entity) {
     context.toolbarEl.append(
-      el('button', { type: 'button', class: 'button with-icon', onclick: () => openAddRelationshipDialog(entity) }, [
-        icon('i-new-related'),
-        el('span', { text: 'Add relationship' }),
+      el('button', {
+        type: 'button',
+        class: 'ghost-button',
+        title: 'Add relationship',
+        'aria-label': 'Add relationship',
+        onclick: () => openAddRelationshipPanel(entity),
+      }, [icon('i-add-relationship')])
+    );
+  }
+
+  /** The two views say the same thing when there is nothing to show. */
+  /** @param {import('./model.js').Entity} entity */
+  function renderEmpty(entity) {
+    context.bodyEl.append(
+      el('div', { class: 'empty-state' }, [
+        el('p', { class: 'empty-state-title', text: 'No relationships' }),
+        el('p', { class: 'empty-state-body', text: `${entity.id} is not related to anything yet.` }),
+        el('button', { type: 'button', class: 'button with-icon', onclick: () => openAddRelationshipPanel(entity) }, [
+          icon('i-add-relationship'),
+          el('span', { text: 'Add relationship' }),
+        ]),
       ])
     );
   }
 
   /**
-   * A relationship is a triple, so the dialog asks for it one part at a time,
-   * each choice narrowing the next: the direction, then the relationship the
-   * metamodel allows in that direction, then the entity type it can reach,
-   * then the entity itself. Every list is generated from the metamodel, so a
-   * combination it does not define is never offered.
+   * A relationship is a triple with this entity at one end. The side panel
+   * asks for the relationship form — direction, label and far type in one
+   * row — and the entities at the far end are then picked from the
+   * navigator, which stays visible beside the panel: rows the model would
+   * refuse are dimmed, rows it would accept offer themselves. Several can be
+   * picked in one go, since one measure often mitigates several hazards, and
+   * a picked row is let go again by clicking it once more or from the list
+   * in the panel. Done makes every picked relationship at once; Cancel and
+   * Escape make none. The offers come from the metamodel and the model, so a
+   * combination that is not allowed is never offered, and completion still
+   * runs through addRelationship for every pick.
    *
    * @param {import('./model.js').Entity} entity
    */
-  function openAddRelationshipDialog(entity) {
+  function openAddRelationshipPanel(entity) {
+    closePanel();
     const model = context.getModel();
     const options = availableRelationships(entity.type);
-    const far = (option) => (option.direction === 'outgoing' ? option.type.target : option.type.source);
+    const panel = context.panelEl;
+    /** The targets picked so far, in the order they were picked. */
+    const picked = new Set();
+    /** The live picker handed to the tree, for re-rendering after a change. */
+    let currentSpec = null;
 
-    const directionSelect = el('select', { class: 'input', id: 'relationship-direction' }, [
-      el('option', { value: 'outgoing', text: 'Outgoing' }),
-      el('option', { value: 'incoming', text: 'Incoming' }),
-    ]);
-    const labelSelect = el('select', { class: 'input', id: 'relationship-label' });
-    const typeSelect = el('select', { class: 'input', id: 'relationship-type' });
-    const entitySelect = el('select', { class: 'input', id: 'relationship-entity' });
-    const addButton = () => document.querySelector('.dialog-footer .button.primary');
+    // The directions carry the table's own names; the form says the rest.
+    const group = (heading, direction) => {
+      const members = options.filter((option) => option.direction === direction);
+      if (members.length === 0) return null;
+      return el('optgroup', { label: heading }, members.map((option) =>
+        el('option', {
+          value: `${direction}:${option.type.id}`,
+          text:
+            direction === 'outgoing'
+              ? `${option.type.label} → ${ENTITY_TYPES[option.type.target].name}`
+              : `${ENTITY_TYPES[option.type.source].name} → ${option.type.label}`,
+        })
+      ));
+    };
 
-    const inDirection = () => options.filter((option) => option.direction === directionSelect.value);
-    const matching = () => inDirection().filter((option) => option.type.label === labelSelect.value);
-    const chosen = () => matching().find((option) => far(option) === typeSelect.value);
+    const formSelect = el('select', { class: 'input', id: 'relationship-form' }, [
+      group('Outgoing', 'outgoing'),
+      group('Incoming', 'incoming'),
+    ].filter(Boolean));
+    const status = el('p', { class: 'pick-status', role: 'status' });
+    const note = el('p', { class: 'side-panel-note' });
+    const pickedSection = el('div', { class: 'picked-list' });
+    const doneButton = el('button', { type: 'button', class: 'button primary', text: 'Done', disabled: true, onclick: completePicks });
 
-    function refreshLabels() {
-      clear(labelSelect);
-      for (const label of [...new Set(inDirection().map((option) => option.type.label))]) {
-        labelSelect.append(el('option', { value: label, text: label }));
-      }
-      refreshTypes();
+    function chosen() {
+      const separator = formSelect.value.indexOf(':');
+      const direction = formSelect.value.slice(0, separator);
+      const type = RELATIONSHIP_TYPES[formSelect.value.slice(separator + 1)];
+      return type ? { direction, type } : null;
     }
 
-    function refreshTypes() {
-      clear(typeSelect);
-      for (const option of matching()) {
-        typeSelect.append(el('option', { value: far(option), text: ENTITY_TYPES[far(option)].name }));
-      }
-      refreshEntities();
-    }
-
-    function refreshEntities() {
+    /**
+     * The chosen form decides what the tree offers, so changing it starts
+     * the picking over. The relationship label is used as the metamodel
+     * writes it, between the two ends it joins; "each" keeps the sentence
+     * true however many are picked.
+     */
+    function refresh() {
+      picked.clear();
+      currentSpec = null;
       const option = chosen();
-      const candidates = option ? candidatesFor(model, option.type.id, entity.id, directionSelect.value) : [];
-      clear(entitySelect);
-      for (const candidate of candidates) {
-        entitySelect.append(el('option', { value: candidate.id, text: `${candidate.id}  ${labelOf(candidate)}` }));
+      if (!option) {
+        status.textContent = '';
+        note.textContent = '';
+        context.setPicker(null);
+        renderPicked();
+        return;
       }
-      const none = candidates.length === 0;
-      if (none) entitySelect.append(el('option', { value: '', text: 'No entity available' }));
-      entitySelect.disabled = none;
-      const button = addButton();
-      if (button) button.disabled = none;
+      const far = ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source];
+      const candidates = candidatesFor(model, option.type.id, entity.id, option.direction);
+
+      if (candidates.length === 0) {
+        status.textContent = `No ${far.name} can take this relationship.`;
+        note.textContent = 'New related entity creates the entity and the relationship together.';
+        context.setPicker({ validIds: new Set(), pickedIds: picked, onPick: () => {} });
+        renderPicked();
+        return;
+      }
+
+      status.textContent =
+        option.direction === 'outgoing'
+          ? `Select ${far.plural} in the navigator — ${entity.id} ${option.type.label} each.`
+          : `Select ${far.plural} in the navigator — each ${option.type.label} ${entity.id}.`;
+      note.textContent = `${candidates.length} ${candidates.length === 1 ? 'row offers itself' : 'rows offer themselves'}; the rest are dimmed. Picking again lets go.`;
+      currentSpec = {
+        validIds: new Set(candidates.map((candidate) => candidate.id)),
+        pickedIds: picked,
+        onPick: (id) => {
+          if (picked.has(id)) picked.delete(id);
+          else picked.add(id);
+          renderPicked();
+          context.setPicker(currentSpec);
+        },
+      };
+      context.setPicker(currentSpec);
+      renderPicked();
     }
 
-    directionSelect.addEventListener('change', refreshLabels);
-    labelSelect.addEventListener('change', refreshTypes);
-    typeSelect.addEventListener('change', refreshEntities);
-    refreshLabels();
+    /** What has been picked so far, each letting go of itself. */
+    function renderPicked() {
+      clear(pickedSection);
+      pickedSection.append(el('p', { class: 'field-label', text: `Selected (${picked.size})` }));
+      for (const id of picked) {
+        const target = model.entities.get(id);
+        if (!target) continue;
+        pickedSection.append(
+          el('div', { class: 'picked-row' }, [
+            el('span', { class: 'mono', text: id }),
+            el('span', { class: 'picked-label', text: labelOf(target) }),
+            el('button', {
+              type: 'button',
+              class: 'icon-button neutral',
+              title: 'Deselect',
+              'aria-label': `Deselect ${id}`,
+              onclick: () => {
+                picked.delete(id);
+                renderPicked();
+                if (currentSpec) context.setPicker(currentSpec);
+              },
+            }, [icon('i-close')]),
+          ])
+        );
+      }
+      doneButton.disabled = picked.size === 0;
+    }
 
-    openDialog({
-      title: 'Add relationship',
-      content: [
+    /**
+     * Done makes every picked relationship, as one step for undo. The model
+     * checks each on the way in, so the tree can never hand over something
+     * the metamodel refuses.
+     */
+    function completePicks() {
+      const option = chosen();
+      if (!option || picked.size === 0) return;
+      const failures = [];
+      for (const id of picked) {
+        const result =
+          option.direction === 'outgoing'
+            ? addRelationship(model, option.type.id, entity.id, id)
+            : addRelationship(model, option.type.id, id, entity.id);
+        if (!result.ok) failures.push(result.reason ?? 'The relationship was refused.');
+      }
+      const succeeded = picked.size - failures.length;
+      closePanel();
+      if (failures.length > 0) context.onMessage(`${failures.length} of the picked relationships were refused. ${failures[0]}`);
+      if (succeeded > 0) context.onChange();
+    }
+
+    formSelect.addEventListener('change', refresh);
+
+    clear(panel);
+    panel.append(
+      el('div', { class: 'side-panel-head' }, [
+        el('span', { class: 'side-panel-title', text: 'Add relationship' }),
+        el('button', { type: 'button', class: 'side-panel-close', 'aria-label': 'Cancel', onclick: closePanel }, [icon('i-close')]),
+      ]),
+      el('div', { class: 'side-panel-body' }, [
         dialogRow('Entity', el('span', { class: 'dialog-fixed', text: `${entity.id}  ${labelOf(entity)}` })),
-        dialogRow('Direction', directionSelect),
-        dialogRow('Relationship', labelSelect),
-        dialogRow('Entity type', typeSelect),
-        dialogRow('Entity', entitySelect),
-      ],
-      actions: [
-        { label: 'Cancel' },
-        {
-          label: 'Add',
-          primary: true,
-          action: () => {
-            const option = chosen();
-            const other = entitySelect.value;
-            if (!option || !other) return;
-            const result =
-              directionSelect.value === 'outgoing'
-                ? addRelationship(model, option.type.id, entity.id, other)
-                : addRelationship(model, option.type.id, other, entity.id);
-            if (!result.ok) {
-              context.onMessage(result.reason ?? 'The relationship was refused.');
-              return;
-            }
-            context.onChange();
-          },
-        },
-      ],
-    });
-    refreshEntities();
-    directionSelect.focus();
+        dialogRow('Relationship', formSelect),
+        status,
+        note,
+        pickedSection,
+      ]),
+      el('div', { class: 'side-panel-footer' }, [
+        el('button', { type: 'button', class: 'button', text: 'Cancel', onclick: closePanel }),
+        doneButton,
+      ])
+    );
+    panel.hidden = false;
+    panelOpen = true;
+    refresh();
+    formSelect.focus();
+  }
+
+  function closePanel() {
+    if (!panelOpen) return;
+    panelOpen = false;
+    context.setPicker(null);
+    context.panelEl.hidden = true;
+    clear(context.panelEl);
   }
 
   /**
@@ -216,6 +350,7 @@ export function createRelationshipPane(context) {
         el('p', { class: 'muted', text: 'Both entities stay in the model.' }),
       ],
       confirmLabel: 'Delete',
+      danger: true,
       onConfirm: () => {
         removeRelationship(model, relationship.id);
         context.onChange();
@@ -243,7 +378,7 @@ export function createRelationshipPane(context) {
   function renderList(model, entity) {
     const { outgoing, incoming } = relationshipsOf(model, entity.id);
     if (outgoing.length === 0 && incoming.length === 0) {
-      context.bodyEl.append(el('p', { class: 'empty', text: 'This entity has no relationships yet.' }));
+      renderEmpty(entity);
       return;
     }
 
@@ -321,7 +456,7 @@ export function createRelationshipPane(context) {
   function renderGraph(model, entity) {
     const { outgoing, incoming } = relationshipsOf(model, entity.id);
     if (outgoing.length === 0 && incoming.length === 0) {
-      context.bodyEl.append(el('p', { class: 'empty', text: 'This entity has no relationships yet.' }));
+      renderEmpty(entity);
       return;
     }
 
@@ -330,7 +465,7 @@ export function createRelationshipPane(context) {
     const step = NODE_HEIGHT + ROW_GAP;
     const lanes = Math.max(left.length, right.length, 1);
     const overflow = incoming.length > left.length || outgoing.length > right.length;
-    const height = lanes * step - ROW_GAP + MARGIN * 2 + (overflow ? 18 : 0);
+    const height = lanes * step - ROW_GAP + MARGIN * 2 + (overflow ? 24 : 0);
     const width = MARGIN * 2 + NODE_WIDTH * 3 + COLUMN_GAP * 2;
 
     const centreX = MARGIN + NODE_WIDTH + COLUMN_GAP;
@@ -385,6 +520,8 @@ export function createRelationshipPane(context) {
   }
 
   /**
+   * Composition is drawn solid and association dashed, so the kind is read
+   * from the line itself rather than from colour (N-ACC-002).
    * @param {number} x1
    * @param {number} y1
    * @param {number} x2
@@ -392,7 +529,7 @@ export function createRelationshipPane(context) {
    * @param {import('./metamodel.js').RelationshipType} type
    */
   function edge(x1, y1, x2, y2, type) {
-    return svg('g', { class: 'edge' }, [
+    return svg('g', { class: `edge${type.kind === 'composition' ? ' composition' : ''}` }, [
       svg('line', { x1, y1, x2, y2, 'marker-end': 'url(#graph-arrow)' }),
       svg('text', { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6, class: 'edge-label', text: type.label }),
     ]);
@@ -415,10 +552,10 @@ export function createRelationshipPane(context) {
       'aria-label': isCentre ? null : `Select ${entity.id}, ${labelOf(entity)}`,
     }, [
       svg('rect', { width: NODE_WIDTH, height: NODE_HEIGHT }),
-      svg('use', { href: `#${type.icon}`, x: 10, y: 6, width: 16, height: 16, class: 'node-icon' }),
-      svg('text', { x: 32, y: 18, class: 'node-type', text: type.name }),
-      svg('text', { x: 10, y: 33, class: 'node-id', text: entity.id }),
-      svg('text', { x: 10, y: 45, class: 'node-label', text: truncate(labelOf(entity), 27) }),
+      svg('use', { href: `#${type.icon}`, x: 16, y: 12, width: 16, height: 16, class: 'node-icon' }),
+      svg('text', { x: 40, y: 24, class: 'node-type', text: type.name }),
+      svg('text', { x: 16, y: 42, class: 'node-id', text: entity.id }),
+      svg('text', { x: 16, y: 58, class: 'node-label', text: truncate(labelOf(entity), 27) }),
       svg('title', { text: `${type.name} ${entity.id} — ${labelOf(entity)}` }),
     ]);
 

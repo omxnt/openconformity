@@ -43,7 +43,15 @@ export function createEditor(context) {
     if (!entity) {
       editing = false;
       draft = null;
-      context.bodyEl.append(el('p', { class: 'empty', text: 'Select an entity in the navigator to see its attributes.' }));
+      context.bodyEl.append(
+        el('div', { class: 'empty-state' }, [
+          el('p', { class: 'empty-state-title', text: 'Nothing selected' }),
+          el('p', {
+            class: 'empty-state-body',
+            text: 'Select an entity in the navigator to see its attributes here.',
+          }),
+        ])
+      );
       return;
     }
 
@@ -95,7 +103,7 @@ export function createEditor(context) {
         area.value = value;
         return area;
       }
-      return readonlyInput(value, attribute.mono);
+      return readonlyInput(value);
     }
 
     const commit = (event) => {
@@ -115,7 +123,7 @@ export function createEditor(context) {
       select.value = (attribute.values ?? []).includes(value) ? value : '';
       return select;
     }
-    const input = el('input', { class: `input${attribute.mono ? ' mono' : ''}`, type: 'text', oninput: commit });
+    const input = el('input', { class: 'input', type: 'text', oninput: commit });
     input.value = value;
     return input;
   }

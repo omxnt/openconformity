@@ -181,10 +181,10 @@ export function contextMenuItems(model, selection, handlers) {
     iconId: 'i-new-entity',
     submenu: entityTypeMenuItems(model, selection, handlers),
   });
-  items.push({ label: 'New folder', iconId: 'i-new-folder', action: () => handlers.createFolder(here.parent) });
   if (related.length > 0) {
     items.push({ label: 'New related', iconId: 'i-new-related', submenu: related });
   }
+  items.push({ label: 'New folder', iconId: 'i-new-folder', action: () => handlers.createFolder(here.parent) });
 
   if (entity || folderRecord) {
     items.push({ separator: true });
