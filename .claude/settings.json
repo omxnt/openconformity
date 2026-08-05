@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(sandbox/**)",
+      "Write(sandbox/**)"
+    ],
+    "deny": [
+      "Edit(/app/**)",
+      "Write(/app/**)",
+      "Edit(/site/**)",
+      "Write(/site/**)",
+      "Edit(/docs/**)",
+      "Write(/docs/**)",
+      "Edit(/schema/**)",
+      "Write(/schema/**)",
+      "Edit(/sources/**)",
+      "Write(/sources/**)",
+      "Edit(/.git/**)",
+      "Write(/.git/**)",
+      "Edit(/.claude/**)",
+      "Write(/.claude/**)",
+      "Edit(/CLAUDE.md)",
+      "Write(/CLAUDE.md)",
+      "Edit(/README.md)",
+      "Write(/README.md)",
+      "Edit(/LICENSE)",
+      "Write(/LICENSE)",
+      "Edit(/.gitignore)",
+      "Write(/.gitignore)"
+    ],
+    "defaultMode": "default"
+  }
+}
