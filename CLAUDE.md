@@ -10,6 +10,12 @@ The project is named `openconformity`. It is a free, open-source, browser-based 
 - No external network requests at runtime
 - Third-party assets self-hosted and open-licensed
 
+## Design
+
+The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, and component patterns. Token values are copied into the CSS. The Carbon packages are not used.
+
+IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbon Icons is the icon set. Both are vendored as files, nothing is imported or fetched.
+
 ## Structure
 
     app/            the published software
@@ -47,18 +53,18 @@ There is no automated verification. Run a local server with `python3 -m http.ser
 
 ## Rules
 
-- **Never invent what wasn't specified:** Inferring intent from the request is fine. Filling gaps with content nobody asked for is not.
-
-- **Ask when it's unclear:** If the answer isn't in the request, the code, or the documentation, it's the user's to decide.
-
-- **Push back on bad instructions:** If the user is wrong, or a better approach exists, say so and wait for a go-ahead.
-
 - **Never commit or push:** Propose the change and stop. The user reviews every change before it enters the repository.
 
 - **Write only in the folder the task names:** Creating files counts as writing. Stop and ask before changing anything outside.
 
+- **Never invent domain content:** Inferring intent from the request is fine. Filling gaps with hazards, requirements, standards content, or calculations nobody asked for is not.
+
+- **Push back on bad instructions:** If the user is wrong, or a better approach exists, say so and wait for a go-ahead.
+
+- **Ask when it's unclear:** If the answer isn't in the request, the code, or the documentation, it's the user's to decide.
+
 - **Add nothing the task doesn't need:** If something more is genuinely needed, stop and say so.
 
-- **Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
-
 - **Don't invent conventions:** None exist yet for code style. When one is needed, ask.
+
+- **Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
