@@ -325,7 +325,7 @@ Entity type is distinguished by icon, not by colour. The interface is monochrome
 
 ### D-028 Wordmark and favicon identity
 
-`2026-07-19` `graphical`
+`2026-07-19` `graphical` `superseded by D-041`
 
 The brand is the wordmark "openconformity" and a favicon, and nothing else: no logo, no symbol, no monogram. The favicon is a square in the accent colour. The full graphical profile — typefaces, accent, and marks — is specified in spec.md.
 
@@ -453,7 +453,7 @@ The repository is organised by kind. Each deployable directory is self-contained
 
 ### D-038 Document per concern
 
-`2026-08-01` `documentation` `repository`
+`2026-08-01` `documentation` `repository` `superseded by D-042`
 
 One document per concern, created when the need arises. `design.md` is dissolved, `about.md` carries the background, concept, principles, and scope, `metamodel.md` the entity types and relationships, and `user-interface.md` the interface concept. `spec.md` is renamed `requirements.md`. Every document opens with its title and an overview in prose, followed by numbered chapters, with references last. There is no table of contents, the outline in GitHub and the editor serves that purpose. The form is kept as `template.md`. Files are named for their content, closed compounds written as the literature writes them (`metamodel.md`), multiword names hyphenated (`use-cases.md`), uppercase reserved for root meta-files. The design sources follow the same rule (`metamodel.drawio`, `visual-identity.fig`), and `sources/` holds editable originals that require a tool to edit and whose exports are consumed elsewhere. `README.md` owns the index. A document may point to another but never depends on or restates it.
 
@@ -473,12 +473,32 @@ All project text uses British spelling. The earlier informal convention of writi
 
 ### D-040 Use cases as a document
 
-`2026-08-01` `documentation`
+`2026-08-01` `documentation` `superseded by D-042`
 
 Use cases complement the requirements in a document of their own, `use-cases.md`. A requirement states a capability, verifiable in isolation. A use case states a sequence, how a user reaches a goal. Neither names interface elements, which belong to the design.
 
 > *Requirements written at the level of user interaction would multiply into hundreds and constrain the implementation. The sequences live in use cases instead, keeping the requirements few and capability-shaped. Every system response in a use case should trace to a requirement, so writing the flows also surfaces the requirements that are missing.*
 
+
+---
+
+### D-041 Design system
+
+`2026-08-06` `graphical`
+
+The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, component patterns, and icon set. Token values are copied into the CSS and the Carbon packages are not used. The identity is a symbol, a wordmark, and a favicon, rendered in black or white according to their background, with no accent colour.
+
+> *The interface had been built decision by decision, and the result was flat and inconsistent in ways that were slow to fix one control at a time. A design system removes a class of decisions and gives a coherence that would otherwise be arrived at unevenly. Carbon is built for dense professional software, is open-licensed, can be self-hosted, and its typeface was already in use. Copying the tokens rather than the packages keeps the no-dependency stack intact. Supersedes D-028.*
+
+---
+
+### D-042 Fewer documents
+
+`2026-08-06` `documentation`
+
+The document set is `about.md`, `requirements.md`, `metamodel.md`, and `decisions.md`, with `template.md` giving the form the prose documents follow. `user-interface.md` is removed and what it described is stated as requirements. `use-cases.md` is not written. `metamodel.md` becomes a Mermaid diagram in place of a prose document and its exported image, and does not follow the template.
+
+> *Writing everything as prose before building forced repeated iteration of documents that the code states more accurately. What survives is what nothing else can carry: requirements are verifiable, the metamodel is the model, and the log holds the reasoning. Interface behaviour became requirements rather than description, since a requirement is checkable where prose is not. A Mermaid diagram is text in the document, so it cannot drift from a source it is exported from. Supersedes D-038 and D-040.*
 
 ## 3. Undecided
 
