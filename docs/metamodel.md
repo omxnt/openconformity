@@ -62,4 +62,14 @@ ELM -->|has| PHS
 ELM -->|has| ACT
 ACT -->|performs| TSK
 TSK -->|during| PHS
+
+classDef legislativeFramework fill:#d4bbff,stroke:#6929c4,color:#161616
+classDef requirementsDefinition fill:#9ef0f0,stroke:#005d5d,color:#161616
+classDef riskAssessment fill:#ffb3b8,stroke:#a2191f,color:#161616
+classDef systemStructure fill:#a6c8ff,stroke:#0043ce,color:#161616
+
+class LEG,HST,OST,CAS,NTB legislativeFramework
+class ESR,HSR,OSR,REQ,VER requirementsDefinition
+class HAZ,SCN,RRM,SAF riskAssessment
+class ELM,ACT,TSK,PHS systemStructure
 ```
