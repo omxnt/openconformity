@@ -296,7 +296,7 @@ export function createRelationshipPane(context) {
     clear(panel);
     panel.append(
       el('div', { class: 'side-panel-head' }, [
-        el('span', { class: 'side-panel-title', text: 'Add relationship' }),
+        el('h2', { class: 'side-panel-title', text: 'Add relationship' }),
         el('button', { type: 'button', class: 'side-panel-close', 'aria-label': 'Cancel', onclick: closePanel }, [icon('i-close')]),
       ]),
       el('div', { class: 'side-panel-body' }, [
@@ -338,18 +338,18 @@ export function createRelationshipPane(context) {
     const target = model.entities.get(relationship.target);
 
     confirmDialog({
-      title: 'Delete relationship',
+      title: 'Remove relationship',
       content: [
         el('p', {}, [
-          'Delete ',
+          'Remove ',
           el('span', { class: 'mono', text: source?.id ?? relationship.source }),
           ` ${type.label} `,
           el('span', { class: 'mono', text: target?.id ?? relationship.target }),
           '?',
         ]),
-        el('p', { class: 'muted', text: 'Both entities stay in the model.' }),
+        el('p', { class: 'muted', text: 'Both entities stay in the model. Only the connection between them goes.' }),
       ],
-      confirmLabel: 'Delete',
+      confirmLabel: 'Remove',
       danger: true,
       onConfirm: () => {
         removeRelationship(model, relationship.id);
@@ -415,7 +415,19 @@ export function createRelationshipPane(context) {
     const type = RELATIONSHIP_TYPES[relationship.type];
     const other = model.entities.get(otherId);
     if (!other) return el('tr');
-    return el('tr', { onclick: () => context.onSelect(other.id) }, [
+    // The row selects what it names, so it has to be reachable by keyboard as
+    // well as by pointer; without this the list view offers an action the
+    // graph view offers and nothing else can reach (WCAG 2.1.1).
+    return el('tr', {
+      tabindex: '0',
+      'aria-label': `Select ${other.id}, ${labelOf(other)}`,
+      onclick: () => context.onSelect(other.id),
+      onkeydown: (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        context.onSelect(other.id);
+      },
+    }, [
       el('td', { class: 'muted' }, [
         el('span', { class: 'arrow', text: direction === 'outgoing' ? '→' : '←', 'aria-hidden': 'true' }),
         el('span', { text: direction }),
@@ -428,13 +440,13 @@ export function createRelationshipPane(context) {
         el('button', {
           type: 'button',
           class: 'icon-button',
-          title: 'Delete relationship',
-          'aria-label': `Delete the ${type.label} relationship with ${other.id}`,
+          title: 'Remove relationship',
+          'aria-label': `Remove the ${type.label} relationship with ${other.id}`,
           onclick: (event) => {
             event.stopPropagation();
             requestDeleteRelationship(entity, relationship, other);
           },
-        }, [icon('i-delete')]),
+        }, [icon('i-remove-relationship')]),
       ]),
     ]);
   }
@@ -442,7 +454,7 @@ export function createRelationshipPane(context) {
   /** @param {import('./model.js').Entity} entity */
   function typeCell(entity) {
     const type = ENTITY_TYPES[entity.type];
-    return el('td', {}, [el('span', { class: 'cell-type' }, [icon(type.icon, type.pillar), el('span', { text: type.name })])]);
+    return el('td', {}, [el('span', { class: 'cell-type' }, [icon(type.icon), el('span', { text: type.name })])]);
   }
 
   // --- Graph view ------------------------------------------------------
@@ -496,7 +508,7 @@ export function createRelationshipPane(context) {
       if (!other) return;
       const y = laneY(left.length, index);
       canvas.append(edge(MARGIN + NODE_WIDTH, y + NODE_HEIGHT / 2, centreX, centreY + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type]));
-      canvas.append(graphNode(other, MARGIN, y, false));
+      canvas.append(graphNode(other, MARGIN, y, false, { entity, relationship }));
     });
 
     right.forEach((relationship, index) => {
@@ -504,7 +516,7 @@ export function createRelationshipPane(context) {
       if (!other) return;
       const y = laneY(right.length, index);
       canvas.append(edge(centreX + NODE_WIDTH, centreY + NODE_HEIGHT / 2, rightX, y + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type]));
-      canvas.append(graphNode(other, rightX, y, false));
+      canvas.append(graphNode(other, rightX, y, false, { entity, relationship }));
     });
 
     canvas.append(graphNode(entity, centreX, centreY, true));
@@ -540,12 +552,14 @@ export function createRelationshipPane(context) {
    * @param {number} x
    * @param {number} y
    * @param {boolean} isCentre
+   * @param {{ entity: import('./model.js').Entity, relationship: import('./model.js').Relationship }} [edgeTo]
+   *   the centre entity and the relationship that puts this box on the
+   *   canvas, which is what the box's remove control acts on
    */
-  function graphNode(entity, x, y, isCentre) {
+  function graphNode(entity, x, y, isCentre, edgeTo) {
     const type = ENTITY_TYPES[entity.type];
     const group = svg('g', {
       class: `graph-node${isCentre ? ' centre' : ''}`,
-      'data-pillar': type.pillar,
       transform: `translate(${x},${y})`,
       tabindex: isCentre ? null : '0',
       role: isCentre ? null : 'button',
@@ -567,9 +581,76 @@ export function createRelationshipPane(context) {
           context.onSelect(entity.id);
         }
       });
+      if (edgeTo) group.append(removeControl(edgeTo.entity, edgeTo.relationship, entity));
     }
     return group;
   }
 
-  return { render };
+  /**
+   * The control that takes a box off the canvas by removing the relationship
+   * that put it there. It is drawn as an unlink rather than a bin, and says
+   * so on hover, because a bin sitting on an entity box would read as
+   * deleting the entity. It stands on every box rather than appearing on
+   * hover, so what can be removed is visible without hunting for it.
+   *
+   * @param {import('./model.js').Entity} anchor  the entity at the centre
+   * @param {import('./model.js').Relationship} relationship
+   * @param {import('./model.js').Entity} other
+   */
+  function removeControl(anchor, relationship, other) {
+    const type = RELATIONSHIP_TYPES[relationship.type];
+    const remove = (event) => {
+      // The box beneath is a button of its own, and it selects.
+      event.stopPropagation();
+      requestDeleteRelationship(anchor, relationship, other);
+    };
+
+    const control = svg('g', {
+      class: 'node-remove',
+      transform: `translate(${NODE_WIDTH - 28},4)`,
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `Remove the ${type.label} relationship with ${other.id}`,
+    }, [
+      // A 24px square, which is the smallest target WCAG 2.2 allows (2.5.8).
+      svg('rect', { class: 'node-remove-hit', width: 24, height: 24 }),
+      svg('use', { href: '#i-remove-relationship', x: 4, y: 4, width: 16, height: 16, class: 'node-remove-icon' }),
+      svg('title', { text: 'Remove relationship' }),
+    ]);
+
+    control.addEventListener('click', remove);
+    control.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      remove(event);
+    });
+    return control;
+  }
+
+  return {
+    render,
+
+    /** Which of the two presentations is on, for the View menu. */
+    view: () => view,
+
+    /** @param {'graph'|'list'} name */
+    setView(name) {
+      if (name !== view) {
+        view = name;
+        render();
+      }
+    },
+
+    /**
+     * Start adding a relationship on the selected entity, which is what the
+     * Edit menu and the right-click menu reach. The pane's own button calls
+     * the same thing with the entity it is already standing on.
+     */
+    beginAdd() {
+      const model = context.getModel();
+      const id = context.getEntityId();
+      const entity = id ? model.entities.get(id) : null;
+      if (entity) openAddRelationshipPanel(entity);
+    },
+  };
 }

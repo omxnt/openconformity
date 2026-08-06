@@ -63,20 +63,13 @@
   --button-secondary:        #393939;  /* $button-secondary, gray-80 */
   --button-secondary-hover:  #4C4C4C;  /* $button-secondary-hover */
   --button-secondary-active: #6F6F6F;  /* $button-secondary-active, gray-60 */
+  --danger-text: #DA1E28;  /* $text-error, red-60 */
 
   /* The high-contrast surface the content switcher selects with. */
   --inverse:      #393939;  /* $background-inverse, gray-80 */
   --text-inverse: #FFFFFF;  /* $text-inverse */
 
   --overlay: rgba(22, 22, 22, 0.5);  /* $overlay */
-
-  /* Carbon core palette, one hue per pillar, at the most saturated step that
-     still stands on white. Blue is left to the interactive colour, red and
-     green to nothing (D-026). */
-  --pillar-context:      #8A3FFC;  /* purple-60 */
-  --pillar-legislative:  #1192E8;  /* cyan-50 */
-  --pillar-risk:         #009D9A;  /* teal-50 */
-  --pillar-requirements: #EE538B;  /* magenta-50 */
 
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23161616'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
 }
@@ -119,18 +112,12 @@
   --button-secondary:        #6F6F6F;  /* g100 $button-secondary, gray-60 */
   --button-secondary-hover:  #606060;  /* g100 $button-secondary-hover */
   --button-secondary-active: #393939;  /* g100 $button-secondary-active, gray-80 */
+  --danger-text: #FF8389;  /* g100 $text-error, red-40 */
 
   --inverse:      #F4F4F4;  /* g100 $background-inverse, gray-10 */
   --text-inverse: #161616;  /* g100 $text-inverse, gray-100 */
 
   --overlay: rgba(0, 0, 0, 0.65);  /* g100 $overlay */
-
-  /* Carbon core palette, the same four hues at the 40 step, which is where
-     they carry evenly on gray-100. */
-  --pillar-context:      #BE95FF;  /* purple-40 */
-  --pillar-legislative:  #33B1FF;  /* cyan-40 */
-  --pillar-risk:         #08BDBA;  /* teal-40 */
-  --pillar-requirements: #FF7EB6;  /* magenta-40 */
 
   --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23f4f4f4'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
 }
@@ -348,6 +335,11 @@ body {
 .menu-entry:active:not(:disabled) { background: var(--active); }
 .menu-entry:disabled { color: var(--disabled); cursor: not-allowed; }
 .menu-entry:disabled .icon { fill: var(--disabled); }
+/* Carbon's danger menu item: the one entry in a menu that destroys
+   something says so before it is chosen, not only in the dialog after. */
+.menu-entry.danger:not(:disabled) { color: var(--danger-text); }
+.menu-entry.danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
+.menu-entry.danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
 .menu-entry-label { flex: 1; }
 .menu-entry-gap { width: 16px; flex: none; }  /* $spacing-05 */
 .menu-entry .shortcut {
@@ -393,6 +385,10 @@ body {
 }
 .pane-head-views { padding-left: 4px; }  /* $spacing-02 */
 .pane-head-actions { display: flex; align-items: center; margin-left: auto; }
+/* The head centres its contents, which would override the button's own
+   stretch and leave it as tall as its icon. Held at 32 so the target keeps
+   the WCAG 2.2 minimum (2.5.8). */
+.pane-head-actions .ghost-button { height: 32px; }  /* $spacing-07 */
 .pane-body { flex: 1; min-height: 0; overflow: auto; }
 
 .pane-toolbar {
@@ -489,18 +485,15 @@ body {
 .button.danger:active:not(:disabled) { background: var(--danger-active); }
 .button.danger:disabled { background: var(--button-disabled); color: var(--on-color-disabled); }
 
-/* An action in a pane head or an empty state is a Carbon ghost button: the
-   link colour on nothing. */
-.pane-head-actions .button,
+/* The one action inside an empty state is a Carbon ghost button: the link
+   colour on nothing. Pane heads carry icon-only ghost buttons instead. */
 .empty-state .button {
   color: var(--link);
   background: none;
   border-color: transparent;
   padding: 0 12px;          /* $spacing-04 */
 }
-.pane-head-actions .button:hover:not(:disabled),
 .empty-state .button:hover:not(:disabled) { background: var(--hover); }
-.pane-head-actions .button:active:not(:disabled),
 .empty-state .button:active:not(:disabled) { background: var(--active); }
 
 /* A row action inside a table. */
@@ -617,6 +610,7 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 }
 .search-clear:hover { background: var(--hover); }
 .search-clear:active { background: var(--active); }
+.search-clear[hidden] { display: none; }
 
 /* ---------- Navigator tree ---------- */
 
@@ -673,14 +667,17 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 .row-label { overflow: hidden; text-overflow: ellipsis; }
 .row-count { font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); flex: none; }
 
+/* The chevron is drawn at 16px but hit at 24, which is the WCAG 2.2 minimum
+   target (2.5.8). It is its own target inside the row, so it has to carry the
+   minimum on its own; the row's own 24px height gives the rest. */
 .twisty {
-  width: 16px; height: 16px; flex: none;
+  width: 24px; height: 24px; flex: none;  /* $spacing-06 */
   display: inline-flex; align-items: center; justify-content: center;
   color: var(--text);
   cursor: pointer;
   user-select: none;
 }
-.twisty-gap { width: 16px; flex: none; }  /* $spacing-05 */
+.twisty-gap { width: 24px; flex: none; }  /* $spacing-06 */
 .children { display: block; }
 
 /* While a relationship end is being picked, the tree is the picker: rows the
@@ -791,6 +788,7 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 }
 .table td.wrap { white-space: normal; }
 .table tbody tr { cursor: pointer; }
+.table tbody tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .table tbody tr:hover td { background: var(--hover); }
 .table .shrink { width: 1%; white-space: nowrap; padding: 0 8px; }
 .table td.mono { white-space: nowrap; }
@@ -803,13 +801,26 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 .graph-wrap { padding: 16px; overflow: auto; }  /* $spacing-05 */
 .graph { display: block; max-width: 100%; height: auto; }
 
-.graph-node rect { fill: var(--layer); stroke: var(--border-subtle); stroke-width: 1; }
-.graph-node.centre rect { fill: var(--background); stroke: var(--accent); stroke-width: 2; }
+/* The box's own rect only: the remove control carries a rect of its own, and
+   these rules would otherwise paint it as a second box. */
+.graph-node > rect { fill: var(--layer); stroke: var(--border-subtle); stroke-width: 1; }
+.graph-node.centre > rect { fill: var(--background); stroke: var(--accent); stroke-width: 2; }
 .graph-node:not(.centre) { cursor: pointer; }
-.graph-node:not(.centre) rect { transition: fill var(--motion-fast) var(--motion-standard); }
-.graph-node:not(.centre):hover rect { fill: var(--hover); stroke: var(--border-strong); }
-.graph-node:focus-visible rect { stroke: var(--focus); stroke-width: 2; }
+.graph-node:not(.centre) > rect { transition: fill var(--motion-fast) var(--motion-standard); }
+.graph-node:not(.centre):hover > rect { fill: var(--hover); stroke: var(--border-strong); }
+.graph-node:focus-visible > rect { stroke: var(--focus); stroke-width: 2; }
 .graph-node:focus { outline: none; }
+
+/* Removing a relationship from the graph. Neutral until pointed at, then the
+   danger fill, which is how the same action looks in the list. */
+.node-remove { cursor: pointer; }
+.node-remove:focus { outline: none; }
+.node-remove-hit { fill: transparent; transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove-icon { fill: var(--text-second); transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove:hover .node-remove-hit { fill: var(--danger); }
+.node-remove:hover .node-remove-icon { fill: var(--text-on-color); }
+.node-remove:active .node-remove-hit { fill: var(--danger-active); }
+.node-remove:focus-visible .node-remove-hit { stroke: var(--focus); stroke-width: 2; }
 
 .node-icon { fill: var(--text-second); }
 .node-type { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }   /* $label-01 */
@@ -848,9 +859,9 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
   border: 1px solid var(--border-subtle);
 }
 .dialog.wide { max-width: 1184px; }
-.metamodel-image { display: block; width: 100%; height: auto; }
 /* The diagram is drawn in dark strokes; on the dark theme it sits on a white
    plate rather than being redrawn. */
+.metamodel-image { display: block; width: 100%; height: auto; }
 :root[data-theme="dark"] .metamodel-image { background: #FFFFFF; }
 
 .dialog-head {
@@ -860,7 +871,7 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
   justify-content: space-between;
   padding: 16px 0 16px 16px;  /* $spacing-05 */
 }
-.dialog-title { font-size: 20px; line-height: 1.4; }  /* $heading-03, 28px */
+.dialog-title { font-size: 20px; line-height: 1.4; font-weight: 400; }  /* $heading-03, 28px */
 .dialog-close {
   flex: none;
   display: inline-flex;
@@ -1025,23 +1036,6 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 }
 .toast-close:hover { background: var(--hover); }
 .toast-close:active { background: var(--active); }
-
-/* ---------- Pillar colour ---------- */
-
-/* Entity icons carry their pillar's hue as a speed aid over the shapes, which
-   remain the carrier (D-027, N-ACC-002). The hues come from the Carbon core
-   palette — purple, cyan, teal, magenta, one per pillar — at steps chosen to
-   tell apart at 16px; none of them is a semantic or status colour. Folders,
-   the project, and every action icon stay neutral. These rules sit last so
-   they win the ties against the neutral icon fills above. */
-.icon.pillar-context,
-[data-pillar="context"] .node-icon { fill: var(--pillar-context); }
-.icon.pillar-legislative,
-[data-pillar="legislative"] .node-icon { fill: var(--pillar-legislative); }
-.icon.pillar-risk,
-[data-pillar="risk"] .node-icon { fill: var(--pillar-risk); }
-.icon.pillar-requirements,
-[data-pillar="requirements"] .node-icon { fill: var(--pillar-requirements); }
 
 /* ---------- Below the supported viewport ---------- */
 

@@ -85,11 +85,15 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-new-entity` | `add` | 32 | `add.svg` |
 | `i-new-folder` | `folder--add` | 32 | `folder--add.svg` |
 | `i-new-related` | `add--child-node` | 32 | `add--child-node.svg` |
-| `i-add-relationship` | `link` | 32 | `link.svg` |
+| `i-add-relationship` | `create-link` | 32 | `create-link.svg` |
+| `i-remove-relationship` | `unlink` | 32 | `unlink.svg` |
 | `i-edit` | `edit` | 32 | `edit.svg` |
+| `i-new-project` | `document--add` | 32 | `document--add.svg` |
+| `i-open-project` | `folder--open` | 32 | `folder--open.svg` |
 | `i-delete` | `trash-can` | 32 | `trash-can.svg` |
 | `i-move-up` | `arrow--up` | 16 | `arrow--up.svg` |
 | `i-move-down` | `arrow--down` | 16 | `arrow--down.svg` |
+| `i-move-to` | `move` | 32 | `move.svg` |
 | `i-undo` | `undo` | 32 | `undo.svg` |
 | `i-redo` | `redo` | 32 | `redo.svg` |
 | `i-metamodel` | `model--alt` | 32 | `model--alt.svg` |
@@ -107,3 +111,7 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-information` | `information` | 16 | `information.svg` |
 | `i-theme-light` | `light` | 16 | `light.svg` |
 | `i-theme-dark` | `asleep` | 16 | `asleep.svg` |
+| `i-launch` | `launch` | 16 | `launch.svg` |
+| `i-email` | `email` | 32 | `email.svg` |
+| `i-view-graph` | `chart--relationship` | 32 | `chart--relationship.svg` |
+| `i-view-list` | `list` | 32 | `list.svg` |

@@ -515,13 +515,23 @@ export function candidatesFor(model, relationshipTypeId, entityId, direction, ke
 /**
  * The relationship types available from the relationship pane of an entity of
  * this type, in both directions.
+ *
+ * Ordered by the entity type at the far end, since that is what the user is
+ * looking for: the same list is read in the New related entity menu, where
+ * the far type is the label, and in the panel that adds a relationship. The
+ * relationship's own name breaks a tie, so a type reachable two ways is
+ * listed once for each in a settled order.
+ *
  * @param {string} code
  * @returns {Array<{ direction: 'outgoing'|'incoming', type: import('./metamodel.js').RelationshipType }>}
  */
 export function availableRelationships(code) {
+  const far = (option) => ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source].name;
+  const byFarType = (one, other) => far(one).localeCompare(far(other)) || one.type.label.localeCompare(other.type.label);
+
   return [
-    ...relationshipsFrom(code).map((type) => ({ direction: /** @type {const} */ ('outgoing'), type })),
-    ...relationshipsTo(code).map((type) => ({ direction: /** @type {const} */ ('incoming'), type })),
+    ...relationshipsFrom(code).map((type) => ({ direction: /** @type {const} */ ('outgoing'), type })).sort(byFarType),
+    ...relationshipsTo(code).map((type) => ({ direction: /** @type {const} */ ('incoming'), type })).sort(byFarType),
   ];
 }
 

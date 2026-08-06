@@ -1,6 +1,11 @@
 /**
  * The toolbar above the navigator, and the selection head above the editor.
  *
+ * The navigator's toolbar holds what the tree owns: what exists, and where it
+ * sits. Making an entity, making a folder, ordering them and deleting them are
+ * all changes to the tree, so they stand together above it. The editor's head
+ * holds the one action on the content it shows, which is Edit.
+ *
  * New folder acts on one press, since where the cursor is says everything
  * about where the folder goes. New opens the entity types, because filing no
  * longer says which type is wanted and there is nothing to default to. Related
@@ -67,11 +72,16 @@ export function createToolbar(context) {
     buttons.new.disabled = false;
     buttons.newFolder.disabled = false;
     buttons.related.disabled = !entity;
+    // Both actions name what they act on, since they stand over one thing at a
+    // time and the label is all a tooltip gives.
     buttons.edit.disabled = !editable || context.isEditing();
     const editLabel = folderRecord ? 'Rename folder' : 'Edit attributes';
     buttons.edit.title = editLabel;
     buttons.edit.setAttribute('aria-label', editLabel);
     buttons.delete.disabled = !editable;
+    const deleteLabel = folderRecord ? 'Delete folder' : 'Delete entity';
+    buttons.delete.title = deleteLabel;
+    buttons.delete.setAttribute('aria-label', deleteLabel);
     buttons.up.disabled = !canStep(model, selection, -1);
     buttons.down.disabled = !canStep(model, selection, 1);
 
@@ -88,7 +98,7 @@ export function createToolbar(context) {
     const where = describe(model, selection);
     clear(context.contextEl);
     context.contextEl.append(
-      icon(where.iconId, where.pillar),
+      icon(where.iconId),
       el('span', { class: 'tb-kind', text: where.kind }),
       where.id ? el('span', { class: 'tb-id', text: where.id }) : el('span'),
       el('span', { class: 'tb-name', text: where.label })

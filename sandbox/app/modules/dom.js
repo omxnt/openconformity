@@ -65,15 +65,14 @@ function append(node, children) {
 }
 
 /**
- * An icon from the sprite defined in the document. A pillar adds a class the
- * stylesheet fills with that pillar's hue, a speed aid over the shapes, which
- * remain the carrier of entity type (D-027, N-ACC-002).
+ * An icon from the sprite defined in the document. Icons take the colour of
+ * whatever they sit in: entity type is carried by the shape and by nothing
+ * else (D-027, N-ACC-002).
  * @param {string} symbolId
- * @param {string} [pillarId]
  * @returns {SVGElement}
  */
-export function icon(symbolId, pillarId) {
-  return svg('svg', { class: `icon${pillarId ? ` pillar-${pillarId}` : ''}`, 'aria-hidden': 'true', focusable: 'false' }, [
+export function icon(symbolId) {
+  return svg('svg', { class: 'icon', 'aria-hidden': 'true', focusable: 'false' }, [
     svg('use', { href: `#${symbolId}` }),
   ]);
 }

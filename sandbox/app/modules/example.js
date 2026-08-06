@@ -8,62 +8,146 @@
  * and a topic, nothing more.
  */
 
-import { PILLARS, typesInPillar } from './metamodel.js';
 import { addEntity, addFolder, addRelationship, createModel } from './model.js';
 
 /**
- * The starting arrangement: a folder per pillar, and inside it a folder per
- * entity type. Filing is free, so this is one way to lay the work out rather
- * than a rule the software enforces — nothing stops a user dragging a hazard
- * into the requirements folder, or refiling the whole machine by subsystem.
- *
- * The folders are built from the metamodel rather than listed, so a new entity
- * type gets a folder without this file being touched.
- * @param {import('./model.js').Model} model
- * @returns {Object<string, string>}  entity type code to folder id
+ * The folders the example is filed into, each named with the folder that holds
+ * it. Four at the top, following the work: what the machine is, what the law
+ * asks of it, what can go wrong, and what is required and checked as a result.
+ * @type {Array<[string, string|null]>}
  */
-function buildFolders(model) {
-  /** @type {Object<string, string>} */
-  const typeFolder = {};
-  for (const pillar of PILLARS) {
-    const holder = addFolder(model, pillar.name, null);
-    for (const type of typesInPillar(pillar.id)) {
-      typeFolder[type.code] = addFolder(model, type.plural, holder.id).id;
-    }
-  }
-  return typeFolder;
-}
+const FOLDERS = [
+  ['System', null],
+  ['Elements', 'System'],
+  ['Actors', 'System'],
+  ['Tasks', 'System'],
+  ['Phases', 'System'],
 
-/**
- * Groups the user has made inside a type folder, to show that the arrangement
- * goes deeper than the metamodel does.
- * @type {Array<[string, string]>}  the type folder it sits in, and its name
- */
-const GROUPS = [
-  ['HAZ', 'Mechanical'],
-  ['HAZ', 'Electrical'],
-  ['HAZ', 'Thermal'],
+  ['Legislation and standards', null],
+  ['Legislation', 'Legislation and standards'],
+  ['Standards', 'Legislation and standards'],
+  ['Conformity assessment', 'Legislation and standards'],
 
-  ['ESR', 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR', 'EMC Directive 2014/30/EU'],
+  ['Risk assessment', null],
+  ['Accident scenarios', 'Risk assessment'],
+  ['Risk reduction measures', 'Risk assessment'],
+  ['Safety functions', 'Risk assessment'],
 
-  ['STR', 'EN ISO 12100'],
-  ['STR', 'EN ISO 13849-1'],
-  ['STR', 'EN ISO 14119'],
-  ['STR', 'EN 60204-1'],
+  ['Requirements and verification', null],
+  ['System requirements', 'Requirements and verification'],
+  ['Verification activities', 'Requirements and verification'],
 ];
 
-/** @type {Array<[string, string, Object<string, string>, string?]>} */
+/**
+ * Where each entity is filed: a folder by name, or another entity by
+ * identifier. Filing is free and means nothing to the metamodel, so none of
+ * this is enforced — but an entity filed under another is filed there because
+ * the two are bound in the model, which is how a user would keep it. The
+ * requirements a legislation defines sit under that legislation, the
+ * requirements a standard defines under that standard, the hazards an element
+ * exhibits under that element, and anything that decomposes into something
+ * sits under what it came from.
+ * @type {Object<string, string>}
+ */
+const FILING = {
+  // The machine, part by part, each part holding the hazards it exhibits.
+  'ELM-001': 'Elements',
+  'ELM-002': 'ELM-001',
+  'ELM-003': 'ELM-002',
+  'ELM-004': 'ELM-002',
+  'ELM-005': 'ELM-001',
+  'ELM-006': 'ELM-001',
+  'ELM-007': 'ELM-006',
+  'ELM-008': 'ELM-001',
+  'HAZ-001': 'ELM-005',
+  'HAZ-002': 'ELM-005',
+  'HAZ-003': 'ELM-002',
+  'HAZ-004': 'ELM-008',
+  'HAZ-005': 'ELM-008',
+  'HAZ-006': 'ELM-005',
+
+  // Who uses the machine, what they do, and when.
+  'ACT-001': 'Actors',
+  'ACT-002': 'Actors',
+  'ACT-003': 'Actors',
+  'TSK-001': 'Tasks',
+  'TSK-002': 'Tasks',
+  'TSK-003': 'Tasks',
+  'TSK-004': 'Tasks',
+  'PHS-001': 'Phases',
+  'PHS-002': 'Phases',
+  'PHS-003': 'Phases',
+  'PHS-004': 'Phases',
+
+  // The law, holding the essential requirements it defines.
+  'LEG-001': 'Legislation',
+  'LEG-002': 'Legislation',
+  'ESR-001': 'LEG-001',
+  'ESR-002': 'LEG-001',
+  'ESR-003': 'LEG-001',
+  'ESR-004': 'LEG-001',
+  'ESR-005': 'LEG-001',
+  'ESR-006': 'LEG-002',
+  'ESR-007': 'LEG-002',
+
+  // Each standard, holding the requirements it defines.
+  'STD-001': 'Standards',
+  'STD-002': 'Standards',
+  'STD-003': 'Standards',
+  'STD-004': 'Standards',
+  'STR-001': 'STD-001',
+  'STR-002': 'STD-001',
+  'STR-003': 'STD-002',
+  'STR-004': 'STD-002',
+  'STR-005': 'STD-003',
+  'STR-006': 'STD-003',
+  'STR-007': 'STD-004',
+  'STR-008': 'STD-004',
+
+  // The assessment, holding the body it involves.
+  'CAS-001': 'Conformity assessment',
+  'CAS-002': 'Conformity assessment',
+  'NTB-001': 'CAS-002',
+
+  // What can go wrong, and what is done about it.
+  'SCN-001': 'Accident scenarios',
+  'SCN-002': 'Accident scenarios',
+  'SCN-003': 'Accident scenarios',
+  'SCN-004': 'Accident scenarios',
+  'RRM-001': 'Risk reduction measures',
+  'RRM-002': 'Risk reduction measures',
+  'RRM-003': 'Risk reduction measures',
+  'RRM-004': 'Risk reduction measures',
+  'RRM-005': 'Risk reduction measures',
+  'RRM-006': 'Risk reduction measures',
+  'SAF-001': 'Safety functions',
+  'SAF-002': 'Safety functions',
+  'SAF-003': 'SAF-002',
+  'SAF-004': 'SAF-002',
+
+  // What the machine must do, and what shows that it does.
+  'REQ-001': 'System requirements',
+  'REQ-002': 'REQ-001',
+  'REQ-003': 'REQ-001',
+  'REQ-004': 'System requirements',
+  'REQ-005': 'System requirements',
+  'VER-001': 'Verification activities',
+  'VER-002': 'Verification activities',
+  'VER-003': 'Verification activities',
+  'VER-004': 'Verification activities',
+};
+
+/** @type {Array<[string, string, Object<string, string>]>} */
 const ENTITIES = [
   // --- System Context ---------------------------------------------------
   ['ELM-001', 'ELM', { title: 'Machine', description: 'The machinery placed on the market.' }],
-  ['ELM-002', 'ELM', { title: 'Control System', description: 'Controls the machine and evaluates the safety inputs.' }, 'ELM-001'],
-  ['ELM-003', 'ELM', { title: 'Safety Controller', description: 'Safety-related part of the control system.' }, 'ELM-002'],
-  ['ELM-004', 'ELM', { title: 'Emergency Stop Device', description: 'Mushroom-head device at the operating position.' }, 'ELM-002'],
-  ['ELM-005', 'ELM', { title: 'Drive Unit', description: 'Motor and gearbox driving the moving parts.' }, 'ELM-001'],
-  ['ELM-006', 'ELM', { title: 'Guarding', description: 'Fixed panels enclosing the drive area, with one access door.' }, 'ELM-001'],
-  ['ELM-007', 'ELM', { title: 'Interlock Switch', description: 'Coded interlocking device on the guard door.' }, 'ELM-006'],
-  ['ELM-008', 'ELM', { title: 'Electrical Cabinet', description: 'Houses the supply, the drives and the control gear.' }, 'ELM-001'],
+  ['ELM-002', 'ELM', { title: 'Control System', description: 'Controls the machine and evaluates the safety inputs.' }],
+  ['ELM-003', 'ELM', { title: 'Safety Controller', description: 'Safety-related part of the control system.' }],
+  ['ELM-004', 'ELM', { title: 'Emergency Stop Device', description: 'Mushroom-head device at the operating position.' }],
+  ['ELM-005', 'ELM', { title: 'Drive Unit', description: 'Motor and gearbox driving the moving parts.' }],
+  ['ELM-006', 'ELM', { title: 'Guarding', description: 'Fixed panels enclosing the drive area, with one access door.' }],
+  ['ELM-007', 'ELM', { title: 'Interlock Switch', description: 'Coded interlocking device on the guard door.' }],
+  ['ELM-008', 'ELM', { title: 'Electrical Cabinet', description: 'Houses the supply, the drives and the control gear.' }],
 
   ['ACT-001', 'ACT', { title: 'Operator', description: 'Runs the machine and clears jams.' }],
   ['ACT-002', 'ACT', { title: 'Maintenance Technician', description: 'Services the machine with the guards open.' }],
@@ -94,12 +178,12 @@ const ENTITIES = [
   ['NTB-001', 'NTB', { title: 'Notified Body', description: 'Placeholder. No real body is named in this example.' }],
 
   // --- Risk Assessment --------------------------------------------------
-  ['HAZ-001', 'HAZ', { title: 'Moving Parts', group: 'Mechanical', description: 'Rotating and translating parts in the drive area.' }, 'Mechanical'],
-  ['HAZ-002', 'HAZ', { title: 'Stored Energy', group: 'Mechanical', description: 'Energy held in the drive after the supply is removed.' }, 'Mechanical'],
-  ['HAZ-003', 'HAZ', { title: 'Unexpected Start-up', group: 'Mechanical', description: 'The machine starts while someone is inside the guarding.' }, 'Mechanical'],
-  ['HAZ-004', 'HAZ', { title: 'Live Parts', group: 'Electrical', description: 'Terminals that stay live when the main switch is off.' }, 'Electrical'],
-  ['HAZ-005', 'HAZ', { title: 'Short Circuit', group: 'Electrical', description: 'A fault current in the electrical equipment.' }, 'Electrical'],
-  ['HAZ-006', 'HAZ', { title: 'Hot Surface', group: 'Thermal', description: 'Surfaces of the drive that stay hot after a run.' }, 'Thermal'],
+  ['HAZ-001', 'HAZ', { title: 'Moving Parts', group: 'Mechanical', description: 'Rotating and translating parts in the drive area.' }],
+  ['HAZ-002', 'HAZ', { title: 'Stored Energy', group: 'Mechanical', description: 'Energy held in the drive after the supply is removed.' }],
+  ['HAZ-003', 'HAZ', { title: 'Unexpected Start-up', group: 'Mechanical', description: 'The machine starts while someone is inside the guarding.' }],
+  ['HAZ-004', 'HAZ', { title: 'Live Parts', group: 'Electrical', description: 'Terminals that stay live when the main switch is off.' }],
+  ['HAZ-005', 'HAZ', { title: 'Short Circuit', group: 'Electrical', description: 'A fault current in the electrical equipment.' }],
+  ['HAZ-006', 'HAZ', { title: 'Hot Surface', group: 'Thermal', description: 'Surfaces of the drive that stay hot after a run.' }],
 
   ['SCN-001', 'SCN', {
     title: 'Contact with Moving Parts',
@@ -171,7 +255,7 @@ const ENTITIES = [
     triggeringEvent: 'Guard door leaves the closed position',
     reaction: 'Both channels signal open',
     safeState: 'Guard reported open',
-  }, 'SAF-002'],
+  }],
   ['SAF-004', 'SAF', {
     title: 'Safe Torque Off',
     performanceLevel: 'PL d',
@@ -180,25 +264,25 @@ const ENTITIES = [
     triggeringEvent: 'Stop demanded by the safety controller',
     reaction: 'Drive enable removed on both channels',
     safeState: 'No torque at the drives',
-  }, 'SAF-002'],
+  }],
 
   // --- Requirements Definition -----------------------------------------
-  ['ESR-001', 'ESR', { title: '1.2.4.3 Emergency Stop', description: 'Machinery shall be fitted with an emergency stop device.' }, 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR-002', 'ESR', { title: '1.3.7 Moving Parts', description: 'Moving parts shall prevent contact, or be guarded.' }, 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR-003', 'ESR', { title: '1.4.2 Guards', description: 'Guards shall be robust, held in place and hard to defeat.' }, 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR-004', 'ESR', { title: '1.5.1 Electricity', description: 'Electrically powered machinery shall prevent electrical hazards.' }, 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR-005', 'ESR', { title: '1.6.3 Isolation of Energy Sources', description: 'Machinery shall provide a means to isolate its energy sources.' }, 'Machinery Regulation (EU) 2023/1230'],
-  ['ESR-006', 'ESR', { title: 'Annex I 1.1 Protection Requirements', description: 'Equipment shall not generate disturbance above the intended level.' }, 'EMC Directive 2014/30/EU'],
-  ['ESR-007', 'ESR', { title: 'Annex I 1.2 Immunity', description: 'Equipment shall work as intended in the presence of disturbance.' }, 'EMC Directive 2014/30/EU'],
+  ['ESR-001', 'ESR', { title: '1.2.4.3 Emergency Stop', description: 'Machinery shall be fitted with an emergency stop device.' }],
+  ['ESR-002', 'ESR', { title: '1.3.7 Moving Parts', description: 'Moving parts shall prevent contact, or be guarded.' }],
+  ['ESR-003', 'ESR', { title: '1.4.2 Guards', description: 'Guards shall be robust, held in place and hard to defeat.' }],
+  ['ESR-004', 'ESR', { title: '1.5.1 Electricity', description: 'Electrically powered machinery shall prevent electrical hazards.' }],
+  ['ESR-005', 'ESR', { title: '1.6.3 Isolation of Energy Sources', description: 'Machinery shall provide a means to isolate its energy sources.' }],
+  ['ESR-006', 'ESR', { title: 'Annex I 1.1 Protection Requirements', description: 'Equipment shall not generate disturbance above the intended level.' }],
+  ['ESR-007', 'ESR', { title: 'Annex I 1.2 Immunity', description: 'Equipment shall work as intended in the presence of disturbance.' }],
 
-  ['STR-001', 'STR', { title: '5.4 Risk Estimation', description: 'How severity, exposure and avoidance combine into a risk.' }, 'EN ISO 12100'],
-  ['STR-002', 'STR', { title: '6.2 Inherently Safe Design', description: 'Measures that remove a hazard by design rather than by guarding.' }, 'EN ISO 12100'],
-  ['STR-003', 'STR', { title: '4.5 Required Performance Level', description: 'How the performance level required of a function is determined.' }, 'EN ISO 13849-1'],
-  ['STR-004', 'STR', { title: '6.2 Category Requirements', description: 'What the designated architecture has to achieve.' }, 'EN ISO 13849-1'],
-  ['STR-005', 'STR', { title: '5 Interlock Selection', description: 'How an interlocking device is chosen for a guard.' }, 'EN ISO 14119'],
-  ['STR-006', 'STR', { title: '7 Prevention of Defeat', description: 'How defeat with a spare actuator is prevented.' }, 'EN ISO 14119'],
-  ['STR-007', 'STR', { title: '9.2 Stop Categories', description: 'The stop categories, and when each one applies.' }, 'EN 60204-1'],
-  ['STR-008', 'STR', { title: '5.3 Supply Disconnecting Device', description: 'The device that isolates the electrical supply.' }, 'EN 60204-1'],
+  ['STR-001', 'STR', { title: '5.4 Risk Estimation', description: 'How severity, exposure and avoidance combine into a risk.' }],
+  ['STR-002', 'STR', { title: '6.2 Inherently Safe Design', description: 'Measures that remove a hazard by design rather than by guarding.' }],
+  ['STR-003', 'STR', { title: '4.5 Required Performance Level', description: 'How the performance level required of a function is determined.' }],
+  ['STR-004', 'STR', { title: '6.2 Category Requirements', description: 'What the designated architecture has to achieve.' }],
+  ['STR-005', 'STR', { title: '5 Interlock Selection', description: 'How an interlocking device is chosen for a guard.' }],
+  ['STR-006', 'STR', { title: '7 Prevention of Defeat', description: 'How defeat with a spare actuator is prevented.' }],
+  ['STR-007', 'STR', { title: '9.2 Stop Categories', description: 'The stop categories, and when each one applies.' }],
+  ['STR-008', 'STR', { title: '5.3 Supply Disconnecting Device', description: 'The device that isolates the electrical supply.' }],
 
   ['REQ-001', 'REQ', {
     title: 'Access Protection',
@@ -211,13 +295,13 @@ const ENTITIES = [
     requirement: 'The machine shall retain fixed guards with fasteners that stay attached to the guard.',
     rationale: 'Loose fasteners are why a guard is left off after maintenance.',
     type: 'Form',
-  }, 'REQ-001'],
+  }],
   ['REQ-003', 'REQ', {
     title: 'Guard Interlocking',
     requirement: 'While the drives can move, the machine shall keep the guard door locked closed.',
     rationale: 'The drives overrun after a stop command.',
     type: 'Function/Performance',
-  }, 'REQ-001'],
+  }],
   ['REQ-004', 'REQ', {
     title: 'Emergency Stop Devices',
     requirement: 'The machine shall provide an emergency stop device at each operating position.',
@@ -434,15 +518,25 @@ const RELATIONSHIPS = [
 export function buildExampleModel() {
   const model = createModel('Example machine');
 
-  const typeFolder = buildFolders(model);
-  const groupFolder = new Map(
-    GROUPS.map(([code, name]) => [name, addFolder(model, name, typeFolder[code]).id])
-  );
+  /** @type {Map<string, string>} */
+  const folderId = new Map();
+  for (const [name, within] of FOLDERS) {
+    const holder = within === null ? null : folderId.get(within);
+    if (within !== null && holder === undefined) {
+      throw new Error(`Example model: "${name}" is filed in "${within}", which is not a folder above it.`);
+    }
+    folderId.set(name, addFolder(model, name, holder ?? null).id);
+  }
 
-  // A row says where it goes: the name of a group, or the entity it sits
-  // inside. Saying nothing files it in the folder for its own type.
-  for (const [id, code, attributes, where] of ENTITIES) {
-    const parent = where ? groupFolder.get(where) ?? where : typeFolder[code];
+  // Filing names a folder or an entity already in the model. An entity that
+  // holds another is always created first, so a name that resolves to neither
+  // is a mistake in the table rather than something to file at the top.
+  for (const [id, code, attributes] of ENTITIES) {
+    const where = FILING[id];
+    const parent = folderId.get(where) ?? (model.entities.has(where) ? where : null);
+    if (!parent) {
+      throw new Error(`Example model: ${id} is filed under "${where}", which is neither a folder nor an entity above it.`);
+    }
     addEntity(model, code, attributes, { id, parent });
     const number = Number.parseInt(id.split('-')[1], 10);
     model.counters[code] = Math.max(model.counters[code] ?? 0, number);

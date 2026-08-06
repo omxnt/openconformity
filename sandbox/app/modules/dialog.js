@@ -43,12 +43,17 @@ export function openDialog(spec) {
     );
   }
 
-  const head = el('div', { class: 'dialog-head' }, [el('span', { class: 'dialog-title', text: spec.title })]);
+  // Carbon's modal names itself by pointing at its own heading, and the
+  // heading is a heading: it is the title of the thing on screen, so a reader
+  // moving by headings should land on it.
+  const head = el('div', { class: 'dialog-head' }, [
+    el('h2', { class: 'dialog-title', id: 'dialog-title', text: spec.title }),
+  ]);
   if (!spec.blocking) {
     head.append(el('button', { type: 'button', class: 'dialog-close', 'aria-label': 'Close', onclick: close }, [icon('i-close')]));
   }
 
-  const dialog = el('div', { class: `dialog${spec.wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-label': spec.title }, [
+  const dialog = el('div', { class: `dialog${spec.wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' }, [
     head,
     body,
     footer,
@@ -174,14 +179,23 @@ export function confirmDialog(spec) {
  * @param {string} spec.label
  * @param {string} spec.value
  * @param {string} spec.confirmLabel
+ * @param {(value: string) => string} [spec.describe]  helper text, kept in
+ *   step with what is typed, so the consequence of the name is visible before
+ *   the button is pressed
  * @param {(value: string) => void} spec.onConfirm
  */
 export function promptDialog(spec) {
-  const confirm = () => spec.onConfirm(input.value.trim() || spec.value);
+  const settled = () => input.value.trim() || spec.value;
+  const confirm = () => spec.onConfirm(settled());
+  const note = spec.describe ? el('p', { class: 'dialog-note', text: spec.describe(spec.value) }) : null;
+
   const input = el('input', {
     class: 'input',
     type: 'text',
     id: 'prompt-input',
+    oninput: () => {
+      if (note) note.textContent = spec.describe(settled());
+    },
     onkeydown: (event) => {
       if (event.key !== 'Enter') return;
       event.preventDefault();
@@ -197,7 +211,8 @@ export function promptDialog(spec) {
       el('div', { class: 'field' }, [
         el('label', { class: 'field-label', for: 'prompt-input', text: spec.label }),
         input,
-      ]),
+        note,
+      ].filter(Boolean)),
     ],
     actions: [
       { label: 'Cancel' },

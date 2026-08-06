@@ -13,10 +13,10 @@ import { clear, el, icon } from './dom.js';
  * @property {string} [label]
  * @property {string} [heading]    a non-selectable section title
  * @property {string} [iconId]
- * @property {string} [pillar]   colour the icon as a tile for this pillar
  * @property {string} [shortcut]
  * @property {boolean} [separator]
  * @property {boolean} [disabled]
+ * @property {boolean} [danger]   destroys something, and is coloured for it
  * @property {string} [title]     why an item is greyed out, on hover
  * @property {MenuItem[]} [submenu]
  * @property {() => void} [action]
@@ -212,7 +212,7 @@ function buildItems(items, close, level = 0) {
     const hasSubmenu = Array.isArray(item.submenu) && item.submenu.length > 0;
     const entry = el('button', {
       type: 'button',
-      class: `menu-entry${hasSubmenu ? ' has-submenu' : ''}`,
+      class: `menu-entry${hasSubmenu ? ' has-submenu' : ''}${item.danger ? ' danger' : ''}`,
       role: 'menuitem',
       disabled: item.disabled,
       title: item.title,
@@ -227,7 +227,7 @@ function buildItems(items, close, level = 0) {
         item.action?.();
       },
     }, [
-      item.iconId ? icon(item.iconId, item.pillar) : el('span', { class: 'menu-entry-gap' }),
+      item.iconId ? icon(item.iconId) : el('span', { class: 'menu-entry-gap' }),
       el('span', { class: 'menu-entry-label', text: item.label }),
       item.shortcut ? el('span', { class: 'shortcut', text: item.shortcut }) : null,
       hasSubmenu ? el('span', { class: 'submenu-arrow', text: '▸', 'aria-hidden': 'true' }) : null,

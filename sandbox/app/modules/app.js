@@ -32,7 +32,7 @@ import { createRelationshipPane } from './relationships.js';
 import { createToolbar } from './toolbar.js';
 import { createMenuBar, openPopupMenu } from './menu.js';
 import { createHistory } from './history.js';
-import { canStep, contextMenuItems, contextOf, moveTargets } from './actions.js';
+import { canStep, contextMenuItems, contextOf, moveTargets, selectionActionItems } from './actions.js';
 import { chooseDialog, confirmDialog, notify, openDialog, promptDialog, toast } from './dialog.js';
 import { el } from './dom.js';
 
@@ -146,6 +146,7 @@ const editor = createEditor({
   bodyEl: refs.editorBody,
   getModel,
   getEntityId,
+  getSelection,
   onStateChange: () => toolbar.render(),
   onSaved: changed,
 });
@@ -168,6 +169,7 @@ const handlers = {
   createEntity,
   createFolder,
   createRelated,
+  addRelationship: () => relationshipPane.beginAdd(),
   edit: activateSelection,
   moveOrder: stepSelection,
   move: moveSelection,
@@ -207,30 +209,62 @@ createMenuBar({
     {
       label: 'File',
       items: [
-        { label: 'New project…', action: newModel },
-        { label: 'Open project…', action: openProject },
-        { label: 'Save project', action: saveModel },
+        { label: 'New project…', iconId: 'i-new-project', action: newModel },
+        { label: 'Open project…', iconId: 'i-open-project', action: openProject },
+        { label: 'Save project…', iconId: 'i-save', action: saveModel },
         { separator: true },
-        { label: 'Load example project', action: loadExample },
+        { label: 'Load example project', iconId: 'i-project', action: loadExample },
       ],
     },
     {
+      // Everything that changes the model, whether or not it has a button.
+      // The middle of it is the same list the right-click menu is built from,
+      // so the two cannot drift apart; around it stand the actions that reach
+      // the project as a whole rather than the selection.
       label: 'Edit',
       items: () => [
-        { label: 'Undo', disabled: !history.canUndo(), action: () => step('undo') },
-        { label: 'Redo', disabled: !history.canRedo(), action: () => step('redo') },
+        { label: 'Undo', iconId: 'i-undo', disabled: !history.canUndo(), action: () => step('undo') },
+        { label: 'Redo', iconId: 'i-redo', disabled: !history.canRedo(), action: () => step('redo') },
         { separator: true },
-        { label: 'Rename project…', action: renameModel },
+        ...selectionActionItems(state.model, state.selection, handlers),
+        { separator: true },
+        { label: 'Rename project…', iconId: 'i-edit', action: renameModel },
+      ],
+    },
+    {
+      label: 'View',
+      items: () => [
+        {
+          label: 'Relationships as graph',
+          iconId: 'i-view-graph',
+          disabled: relationshipPane.view() === 'graph',
+          action: () => relationshipPane.setView('graph'),
+        },
+        {
+          label: 'Relationships as list',
+          iconId: 'i-view-list',
+          disabled: relationshipPane.view() === 'list',
+          action: () => relationshipPane.setView('list'),
+        },
+        { separator: true },
+        {
+          label: isDark() ? 'Light theme' : 'Dark theme',
+          iconId: isDark() ? 'i-theme-light' : 'i-theme-dark',
+          action: toggleTheme,
+        },
       ],
     },
     {
       label: 'Help',
       items: [
-        { label: 'Project site', action: () => openLink('https://openconformity.org') },
-        { label: 'Source on GitHub', action: () => openLink('https://github.com/omxnt/openconformity') },
-        { label: 'Follow on LinkedIn', action: () => openLink('https://www.linkedin.com/company/openconformity') },
+        { label: 'About this demo', iconId: 'i-information', action: showAbout },
+        { label: 'Metamodel', iconId: 'i-metamodel', action: showMetamodel },
         { separator: true },
-        { label: 'Write an email', action: () => { window.location.href = 'mailto:info@openconformity.org'; } },
+        { label: 'Project site', iconId: 'i-launch', action: () => openLink('https://openconformity.org') },
+        { label: 'Source on GitHub', iconId: 'i-launch', action: () => openLink('https://github.com/omxnt/openconformity') },
+        { label: 'Follow on LinkedIn', iconId: 'i-launch', action: () => openLink('https://www.linkedin.com/company/openconformity') },
+        { separator: true },
+        { label: 'Write an email', iconId: 'i-email', action: () => { window.location.href = 'mailto:info@openconformity.org'; } },
       ],
     },
   ],
@@ -655,17 +689,54 @@ function openProject(discarded) {
   refs.fileInput.click();
 }
 
+/**
+ * The name a project is written under, which is its own name with the
+ * characters a file name cannot carry taken out.
+ * @param {string} name
+ */
+function filenameFor(name) {
+  return `${name.replace(/[^\w -]+/g, '').trim() || 'project'}.json`;
+}
+
+/**
+ * Saving asks for the name first. Every save is a download rather than a
+ * write back to the file the project came from — the browser gives no handle
+ * on that file — so there is no silent "save to where it came from" to offer,
+ * and a save that named itself would land work in the downloads folder under
+ * a name the user never chose. One dialog, pre-filled and confirmed with
+ * Enter, is also where the project is renamed, so the name of the work and
+ * the name of the file cannot drift apart.
+ */
 function saveModel() {
+  if (!guardEdit(saveModel)) return;
+  promptDialog({
+    title: 'Save project',
+    label: 'Project name',
+    value: state.model.name,
+    describe: (name) => `Saved to your downloads as ${filenameFor(name)}`,
+    confirmLabel: 'Save',
+    onConfirm: (name) => {
+      if (name !== state.model.name) {
+        state.model.name = name;
+        commit();
+      }
+      writeFile();
+    },
+  });
+}
+
+function writeFile() {
   const text = JSON.stringify(toJSON(state.model), null, 2);
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  const filename = state.model.name.replace(/[^\w -]+/g, '').trim() || 'project';
-  const link = el('a', { href: url, download: `${filename}.json` });
+  const filename = filenameFor(state.model.name);
+  const link = el('a', { href: url, download: filename });
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
   state.unsaved = false;
   toolbar.render();
+  toast('Project saved', `Written to your downloads as ${filename}.`);
 }
 
 refs.fileInput.addEventListener('change', () => {
@@ -730,15 +801,18 @@ document.getElementById('toolbar-metamodel').addEventListener('click', showMetam
  * The theme was set on the root element before the stylesheet loaded; from
  * here on the toggle owns it. The button offers the theme it would switch to.
  */
+function isDark() {
+  return document.documentElement.dataset.theme === 'dark';
+}
+
 function reflectTheme() {
-  const dark = document.documentElement.dataset.theme === 'dark';
-  const offer = dark ? 'Switch to the light theme' : 'Switch to the dark theme';
+  const offer = isDark() ? 'Switch to the light theme' : 'Switch to the dark theme';
   refs.themeToggle.title = offer;
   refs.themeToggle.setAttribute('aria-label', offer);
 }
 
-refs.themeToggle.addEventListener('click', () => {
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   try {
     window.localStorage.setItem(THEME_KEY, next);
@@ -746,15 +820,34 @@ refs.themeToggle.addEventListener('click', () => {
     // Storage can be unavailable; the choice then lasts for this tab only.
   }
   reflectTheme();
-});
+}
+
+refs.themeToggle.addEventListener('click', toggleTheme);
 
 reflectTheme();
 
-refs.filterClear.addEventListener('click', () => {
+/**
+ * The clear action exists only while there is something to clear. An X on an
+ * empty field is a target that does nothing, and beside a pane it reads as
+ * "close this pane" rather than "empty this box".
+ */
+function clearFilter() {
   refs.filter.value = '';
   refs.filter.dispatchEvent(new Event('input'));
   refs.filter.focus();
+}
+
+refs.filter.addEventListener('input', () => {
+  refs.filterClear.hidden = refs.filter.value === '';
 });
+
+refs.filter.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || refs.filter.value === '') return;
+  event.preventDefault();
+  clearFilter();
+});
+
+refs.filterClear.addEventListener('click', clearFilter);
 
 document.addEventListener('keydown', (event) => {
   if (!refs.tree.contains(document.activeElement)) return;
@@ -778,8 +871,10 @@ function setUpSplitter(splitter, orientation) {
   if (!splitter) return;
   const vertical = orientation === 'vertical';
 
+  // The narrowest the navigator goes is what its toolbar needs: eight buttons
+  // and three dividers, which is 283px.
   const apply = (value) => {
-    if (vertical) refs.navigatorColumn.style.width = `${clamp(value, 220, 620)}px`;
+    if (vertical) refs.navigatorColumn.style.width = `${clamp(value, 288, 620)}px`;
     else refs.relationshipPane.style.height = `${clamp(value, 120, refs.workspace.getBoundingClientRect().height - 180)}px`;
   };
 
@@ -824,6 +919,31 @@ function clamp(value, low, high) {
 }
 
 /**
+ * What the notice says. The same words are shown on the first visit, where
+ * they have to be answered, and from Help afterwards, where they do not: a
+ * warning that can only ever be seen once is a warning the user cannot go
+ * back and check.
+ */
+function noticeContent() {
+  return [
+    el('div', { class: 'notice-important' }, [
+      el('span', { class: 'notice-tag', text: 'Important' }),
+      el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
+    ]),
+    el('p', { text: 'This is a demonstration of openconformity. It is not finished software.' }),
+    el('ul', { class: 'dialog-list' }, [
+      el('li', { text: 'It is guaranteed that the tool contains errors.' }),
+      el('li', { text: 'Many functions are still unfinished.' }),
+      el('li', { text: 'It is rebuilt continuously, and changes without warning.' }),
+      el('li', { text: 'The file format will change.' }),
+      el('li', { text: 'A project saved here will not open in a later version.' }),
+      el('li', { text: 'Nothing here has been verified or validated.' }),
+      el('li', { text: 'Things will be wrong, and they will get in your way.' }),
+    ]),
+  ];
+}
+
+/**
  * Read once per device. The software is a demonstration, and someone arriving
  * at it has to be told that plainly before they put work into it. Accepting
  * takes a second answer, because a notice nobody reads protects nobody.
@@ -832,25 +952,20 @@ function showDemoNotice() {
   openDialog({
     blocking: true,
     title: 'Read this first',
-    content: [
-      el('div', { class: 'notice-important' }, [
-        el('span', { class: 'notice-tag', text: 'Important' }),
-        el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
-      ]),
-      el('p', { text: 'This is a demonstration of openconformity. It is not finished software.' }),
-      el('ul', { class: 'dialog-list' }, [
-        el('li', { text: 'It is guaranteed that the tool contains errors.' }),
-        el('li', { text: 'Many functions are still unfinished.' }),
-        el('li', { text: 'The file format will change.' }),
-        el('li', { text: 'A project saved here will not open in a later version.' }),
-        el('li', { text: 'Nothing here has been verified or validated.' }),
-        el('li', { text: 'Things will be wrong, and they will get in your way.' }),
-      ]),
-    ],
+    content: noticeContent(),
     actions: [
       { label: 'Leave', action: () => { window.location.href = 'https://openconformity.org'; } },
       { label: 'I understand', primary: true, action: confirmNoticeRead },
     ],
+  });
+}
+
+/** The same notice, asked for rather than imposed, so it takes no answer. */
+function showAbout() {
+  openDialog({
+    title: 'About this demo',
+    content: noticeContent(),
+    actions: [{ label: 'Close', primary: true }],
   });
 }
 

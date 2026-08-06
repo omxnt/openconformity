@@ -129,7 +129,6 @@ export function createNavigator(context) {
       selection: { kind: 'entity', id: entity.id },
       id: entity.id,
       iconId: ENTITY_TYPES[entity.type].icon,
-      pillar: ENTITY_TYPES[entity.type].pillar,
       label: labelOf(entity),
       title: `${ENTITY_TYPES[entity.type].name} ${entity.id}`,
       current: selection,
@@ -148,7 +147,6 @@ export function createNavigator(context) {
    * @param {string} spec.label
    * @param {string} [spec.count]
    * @param {string} [spec.className]
-   * @param {string} [spec.pillar]
    * @param {string} [spec.title]
    * @param {number} spec.depth
    * @param {HTMLElement[]} [spec.children]
@@ -177,7 +175,7 @@ export function createNavigator(context) {
           }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')])
         : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
     );
-    row.append(icon(spec.iconId, spec.pillar));
+    row.append(icon(spec.iconId));
     if (spec.id) row.append(el('span', { class: 'row-id', text: spec.id }));
     row.append(el('span', { class: `row-label${spec.className ? ` ${spec.className}` : ''}`, text: spec.label }));
     if (spec.count !== undefined) row.append(el('span', { class: 'row-count', text: spec.count }));

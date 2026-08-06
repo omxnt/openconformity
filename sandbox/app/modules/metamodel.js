@@ -24,11 +24,14 @@
  */
 
 /**
+ * A type is its name and its icon. Nothing groups the types above that: the
+ * shape is what tells one from another (D-027, N-ACC-002), and the software
+ * has no level between the model and the entity for a grouping to belong to.
+ *
  * @typedef {Object} EntityType
  * @property {string} code    the prefix, and the key of this entry
  * @property {string} name
  * @property {string} plural
- * @property {string} pillar
  * @property {string} icon    id of the symbol in the document's sprite
  */
 
@@ -40,19 +43,6 @@
  * @property {string} target  entity type code
  * @property {'composition'|'association'} kind
  */
-
-/**
- * Section 2.2, in the order the work runs: the machine, then the law it must
- * meet, then the risks it carries, then the requirements those produce. The
- * document names the third pillar "Hazard Analysis" and lists the pillars in a
- * different order; this is the newer naming.
- */
-export const PILLARS = [
-  { id: 'context', name: 'System Context' },
-  { id: 'legislative', name: 'Legislative Framework' },
-  { id: 'risk', name: 'Risk Assessment' },
-  { id: 'requirements', name: 'Requirements Definition' },
-];
 
 /**
  * The title every entity carries. The identifier is generated and read-only,
@@ -142,29 +132,30 @@ export function storedAttributesFor(code) {
 }
 
 /**
- * Section 2.3, ordered by pillar and then by the order of the table.
+ * Section 2.3, in the order the work runs: the machine, then the law it must
+ * meet, then the risks it carries, then the requirements those produce.
  * @type {Object<string, EntityType>}
  */
 export const ENTITY_TYPES = {
-  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', pillar: 'context', icon: 'i-elm' },
-  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', pillar: 'context', icon: 'i-act' },
-  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', pillar: 'context', icon: 'i-tsk' },
-  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', pillar: 'context', icon: 'i-phs' },
+  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', icon: 'i-elm' },
+  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', icon: 'i-act' },
+  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', icon: 'i-tsk' },
+  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', icon: 'i-phs' },
 
-  LEG: { code: 'LEG', name: 'European Legislation', plural: 'European Legislation', pillar: 'legislative', icon: 'i-leg' },
-  STD: { code: 'STD', name: 'European Standard', plural: 'European Standards', pillar: 'legislative', icon: 'i-std' },
-  CAS: { code: 'CAS', name: 'Conformity Assessment', plural: 'Conformity Assessments', pillar: 'legislative', icon: 'i-cas' },
-  NTB: { code: 'NTB', name: 'Notified Body', plural: 'Notified Bodies', pillar: 'legislative', icon: 'i-ntb' },
+  LEG: { code: 'LEG', name: 'European Legislation', plural: 'European Legislation', icon: 'i-leg' },
+  STD: { code: 'STD', name: 'European Standard', plural: 'European Standards', icon: 'i-std' },
+  CAS: { code: 'CAS', name: 'Conformity Assessment', plural: 'Conformity Assessments', icon: 'i-cas' },
+  NTB: { code: 'NTB', name: 'Notified Body', plural: 'Notified Bodies', icon: 'i-ntb' },
 
-  HAZ: { code: 'HAZ', name: 'Single Hazard', plural: 'Single Hazards', pillar: 'risk', icon: 'i-haz' },
-  SCN: { code: 'SCN', name: 'Accident Scenario', plural: 'Accident Scenarios', pillar: 'risk', icon: 'i-scn' },
-  RRM: { code: 'RRM', name: 'Risk Reduction Measure', plural: 'Risk Reduction Measures', pillar: 'risk', icon: 'i-rrm' },
-  SAF: { code: 'SAF', name: 'Safety Function', plural: 'Safety Functions', pillar: 'risk', icon: 'i-saf' },
+  HAZ: { code: 'HAZ', name: 'Single Hazard', plural: 'Single Hazards', icon: 'i-haz' },
+  SCN: { code: 'SCN', name: 'Accident Scenario', plural: 'Accident Scenarios', icon: 'i-scn' },
+  RRM: { code: 'RRM', name: 'Risk Reduction Measure', plural: 'Risk Reduction Measures', icon: 'i-rrm' },
+  SAF: { code: 'SAF', name: 'Safety Function', plural: 'Safety Functions', icon: 'i-saf' },
 
-  ESR: { code: 'ESR', name: 'Essential Requirement', plural: 'Essential Requirements', pillar: 'requirements', icon: 'i-esr' },
-  STR: { code: 'STR', name: 'Standard Requirement', plural: 'Standard Requirements', pillar: 'requirements', icon: 'i-str' },
-  REQ: { code: 'REQ', name: 'System Requirement', plural: 'System Requirements', pillar: 'requirements', icon: 'i-req' },
-  VER: { code: 'VER', name: 'Verification Activity', plural: 'Verification Activities', pillar: 'requirements', icon: 'i-ver' },
+  ESR: { code: 'ESR', name: 'Essential Requirement', plural: 'Essential Requirements', icon: 'i-esr' },
+  STR: { code: 'STR', name: 'Standard Requirement', plural: 'Standard Requirements', icon: 'i-str' },
+  REQ: { code: 'REQ', name: 'System Requirement', plural: 'System Requirements', icon: 'i-req' },
+  VER: { code: 'VER', name: 'Verification Activity', plural: 'Verification Activities', icon: 'i-ver' },
 };
 
 /** Stable iteration order for the entity types. */
@@ -246,9 +237,9 @@ export function relationshipsTo(code) {
 
 
 /**
- * @param {string} pillarId
+ * Every entity type a model may hold, in the order above.
  * @returns {EntityType[]}
  */
-export function typesInPillar(pillarId) {
-  return ENTITY_TYPE_CODES.map((c) => ENTITY_TYPES[c]).filter((t) => t.pillar === pillarId);
+export function entityTypes() {
+  return ENTITY_TYPE_CODES.map((code) => ENTITY_TYPES[code]);
 }

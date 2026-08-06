@@ -17,7 +17,7 @@
  * choice, so the first two ask nothing of it.
  */
 
-import { ENTITY_TYPES, PILLARS, typesInPillar } from './metamodel.js';
+import { ENTITY_TYPES, entityTypes } from './metamodel.js';
 import {
   availableRelationships,
   canMoveNode,
@@ -34,6 +34,7 @@ import {
  * @property {(code: string, options?: {parent?: string|null}) => void} createEntity
  * @property {(parent: string|null) => void} createFolder
  * @property {(relationshipTypeId: string, direction: 'outgoing'|'incoming') => void} createRelated
+ * @property {() => void} addRelationship
  * @property {() => void} edit
  * @property {(delta: -1|1) => void} moveOrder
  * @property {() => void} move
@@ -65,7 +66,7 @@ export function describe(model, selection) {
   const { entity, folderRecord } = contextOf(model, selection);
   if (entity) {
     const type = ENTITY_TYPES[entity.type];
-    return { iconId: type.icon, pillar: type.pillar, kind: type.name, id: entity.id, label: labelOf(entity) };
+    return { iconId: type.icon, kind: type.name, id: entity.id, label: labelOf(entity) };
   }
   if (folderRecord) return { iconId: 'i-folder', kind: 'Folder', id: '', label: folderRecord.name };
   return { iconId: 'i-project', kind: 'Project', id: '', label: model.name };
@@ -113,7 +114,6 @@ export function relatedMenuItems(model, selection, handlers) {
       items.push({
         label: other.name,
         iconId: other.icon,
-        pillar: other.pillar,
         shortcut: type.label,
         action: () => handlers.createRelated(type.id, direction),
       });
@@ -124,8 +124,11 @@ export function relatedMenuItems(model, selection, handlers) {
 
 /**
  * Which entity to make. Nothing about where the cursor is narrows this any
- * more, so it is every type the metamodel defines. The pillars are headings
- * that keep sixteen types readable; they are not places in the tree.
+ * more, so it is every type the metamodel defines. They are not grouped: the
+ * software has no level between the model and the entity, so a heading here
+ * would name something that exists nowhere else. Sixteen ungrouped names are
+ * found by reading, so they are in the order a reader expects to find them
+ * in rather than the order the metamodel happens to list them.
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
@@ -133,20 +136,14 @@ export function relatedMenuItems(model, selection, handlers) {
  */
 export function entityTypeMenuItems(model, selection, handlers) {
   const here = createHere(model, selection);
-  const items = [];
-  for (const pillar of PILLARS) {
-    items.push({ heading: pillar.name });
-    for (const type of typesInPillar(pillar.id)) {
-      items.push({
-        label: type.name,
-        iconId: type.icon,
-        pillar: type.pillar,
-        shortcut: type.code,
-        action: () => handlers.createEntity(type.code, here),
-      });
-    }
-  }
-  return items;
+  return entityTypes()
+    .sort((one, other) => one.name.localeCompare(other.name))
+    .map((type) => ({
+      label: type.name,
+      iconId: type.icon,
+      shortcut: type.code,
+      action: () => handlers.createEntity(type.code, here),
+    }));
 }
 
 /**
@@ -163,14 +160,21 @@ export function canStep(model, selection, delta) {
 }
 
 /**
- * The right-click menu. It carries the same actions as the toolbar and the
- * menu bar, so nothing is reachable from only one of the three.
+ * Every action that acts on what the cursor is standing on, in one list. The
+ * Edit menu and the right-click menu are both built from it, so an action
+ * cannot appear in one and be forgotten in the other, and the toolbars carry
+ * the subset used often enough to deserve a button.
+ *
+ * What does not belong here is anything that acts on the project as a whole:
+ * undo, redo and renaming the project are added by the Edit menu around this
+ * list, and are not offered on a right click, which asks about one thing.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
  * @returns {import('./menu.js').MenuItem[]}
  */
-export function contextMenuItems(model, selection, handlers) {
+export function selectionActionItems(model, selection, handlers) {
   const items = [];
   const { entity, folderRecord } = contextOf(model, selection);
   const here = createHere(model, selection);
@@ -182,9 +186,16 @@ export function contextMenuItems(model, selection, handlers) {
     submenu: entityTypeMenuItems(model, selection, handlers),
   });
   if (related.length > 0) {
-    items.push({ label: 'New related', iconId: 'i-new-related', submenu: related });
+    items.push({ label: 'New related entity', iconId: 'i-new-related', submenu: related });
   }
   items.push({ label: 'New folder', iconId: 'i-new-folder', action: () => handlers.createFolder(here.parent) });
+
+  // Relating an entity to one that already exists is a different act from
+  // making a new one, so it stands apart from the three above it.
+  if (entity) {
+    items.push({ separator: true });
+    items.push({ label: 'Add relationship', iconId: 'i-add-relationship', action: handlers.addRelationship });
+  }
 
   if (entity || folderRecord) {
     items.push({ separator: true });
@@ -194,14 +205,27 @@ export function contextMenuItems(model, selection, handlers) {
     const destinations = moveTargets(model, selection);
     items.push({
       label: 'Move to…',
+      iconId: 'i-move-to',
       disabled: destinations.length === 0,
       title: destinations.length === 0 ? 'There is nowhere else to file it.' : undefined,
       action: handlers.move,
     });
     items.push({ separator: true });
-    items.push({ label: entity ? 'Delete entity' : 'Delete folder', iconId: 'i-delete', shortcut: 'Del', action: handlers.remove });
+    items.push({ label: entity ? 'Delete entity' : 'Delete folder', iconId: 'i-delete', danger: true, shortcut: 'Del', action: handlers.remove });
   }
   return items;
+}
+
+/**
+ * The right-click menu: everything that applies to the thing under the
+ * pointer, and nothing that does not.
+ * @param {import('./model.js').Model} model
+ * @param {Selection} selection
+ * @param {Handlers} handlers
+ * @returns {import('./menu.js').MenuItem[]}
+ */
+export function contextMenuItems(model, selection, handlers) {
+  return selectionActionItems(model, selection, handlers);
 }
 
 /**
