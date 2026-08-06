@@ -63,13 +63,13 @@ ELM -->|has| ACT
 ACT -->|performs| TSK
 TSK -->|during| PHS
 
-classDef legislativeFramework fill:#d4bbff,stroke:#6929c4,color:#161616
-classDef requirementsDefinition fill:#9ef0f0,stroke:#005d5d,color:#161616
-classDef riskAssessment fill:#ffb3b8,stroke:#a2191f,color:#161616
-classDef systemStructure fill:#a6c8ff,stroke:#0043ce,color:#161616
+classDef legislativeFramework fill:#8A3FFC,stroke:#491D8B,color:#FFFFFF
+classDef requirementsDefinition fill:#007D79,stroke:#004144,color:#FFFFFF
+classDef riskAssessment fill:#8E6A00,stroke:#684E00,color:#FFFFFF
+classDef systemContext fill:#9F1853,stroke:#740937,color:#FFFFFF
 
 class LEG,HST,OST,CAS,NTB legislativeFramework
 class ESR,HSR,OSR,REQ,VER requirementsDefinition
 class HAZ,SCN,RRM,SAF riskAssessment
-class ELM,ACT,TSK,PHS systemStructure
+class ELM,ACT,TSK,PHS systemContext
 ```
