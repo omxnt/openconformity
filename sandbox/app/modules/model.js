@@ -51,6 +51,7 @@ import {
  * @property {Map<string, Entity>} entities
  * @property {Map<string, Relationship>} relationships
  * @property {Map<string, Folder>} folders
+ * @property {Set<string>} relationshipKeys  one key per triple, for the duplicate check
  * @property {Object<string, number>} counters
  * @property {number} relationshipCounter
  * @property {number} folderCounter
@@ -66,6 +67,7 @@ export function createModel(name) {
     entities: new Map(),
     relationships: new Map(),
     folders: new Map(),
+    relationshipKeys: new Set(),
     counters: {},
     relationshipCounter: 0,
     folderCounter: 0,
@@ -242,17 +244,33 @@ function isAncestor(model, possibleAncestorId, nodeId) {
 }
 
 /**
+ * The entities filed anywhere beneath each node, counted in one pass: every
+ * entity adds one to each node above it. Walking upwards is guarded, as in
+ * isAncestor.
+ * @param {Model} model
+ * @returns {Map<string, number>}
+ */
+export function contentCounts(model) {
+  const counts = new Map();
+  for (const entity of model.entities.values()) {
+    const seen = new Set();
+    let current = nodeOf(model, entity.parent);
+    while (current && !seen.has(current.id)) {
+      counts.set(current.id, (counts.get(current.id) ?? 0) + 1);
+      seen.add(current.id);
+      current = nodeOf(model, current.parent);
+    }
+  }
+  return counts;
+}
+
+/**
  * @param {Model} model
  * @param {string} nodeId
  * @returns {number}  the entities filed anywhere beneath this node
  */
 export function contentCount(model, nodeId) {
-  let count = 0;
-  for (const child of [...childFolders(model, nodeId), ...childEntities(model, nodeId)]) {
-    if (model.entities.has(child.id)) count += 1;
-    count += contentCount(model, child.id);
-  }
-  return count;
+  return contentCounts(model).get(nodeId) ?? 0;
 }
 
 // --- Moving ------------------------------------------------------------
@@ -296,7 +314,12 @@ export function canMoveNode(model, nodeId, target) {
 export function moveNode(model, nodeId, target) {
   const check = canMoveNode(model, nodeId, target);
   if (!check.ok) return check;
-  nodeOf(model, nodeId).parent = target.kind === 'root' ? null : target.id;
+  const node = nodeOf(model, nodeId);
+  node.parent = target.kind === 'root' ? null : target.id;
+  // Filed last among its kind there, so where it lands is predictable.
+  const map = model.folders.has(nodeId) ? model.folders : model.entities;
+  map.delete(nodeId);
+  map.set(nodeId, node);
   return { ok: true };
 }
 
@@ -367,7 +390,6 @@ export function moveOrder(model, what, delta) {
  * @returns {{ ok: boolean, reason?: string }}
  */
 export function canPlaceBeside(model, source, target) {
-  if (source.kind !== target.kind) return { ok: false, reason: 'A folder and an entity do not sit alongside one another.' };
   if (source.id === target.id) return { ok: false, reason: 'It is already there.' };
 
   const one = nodeOf(model, source.id);
@@ -393,11 +415,36 @@ export function placeBeside(model, source, target, position) {
   if (!check.ok) return check;
 
   nodeOf(model, source.id).parent = nodeOf(model, target.id).parent;
-  reorderMap(source.kind === 'folder' ? model.folders : model.entities, source.id, target.id, position);
+  const map = source.kind === 'folder' ? model.folders : model.entities;
+  if (source.kind === target.kind) {
+    reorderMap(map, source.id, target.id, position);
+    return { ok: true };
+  }
+
+  // Across kinds there is no shared order: folders draw above entities. An
+  // entity dropped beside a folder goes first among the entities there, and a
+  // folder dropped beside an entity goes last among the folders, which is the
+  // closest either can sit to where it was dropped.
+  const siblings = siblingsOf(model, source.id).filter((sibling) => sibling.id !== source.id);
+  if (siblings.length > 0) {
+    if (source.kind === 'entity') reorderMap(map, source.id, siblings[0].id, 'before');
+    else reorderMap(map, source.id, siblings[siblings.length - 1].id, 'after');
+  }
   return { ok: true };
 }
 
 // --- Relationships -----------------------------------------------------
+
+/**
+ * The key a triple is indexed under in `relationshipKeys`.
+ * @param {string} type
+ * @param {string} source
+ * @param {string} target
+ * @returns {string}
+ */
+function relationshipKey(type, source, target) {
+  return JSON.stringify([type, source, target]);
+}
 
 /**
  * Whether a relationship can be created, and why not when it cannot. The
@@ -427,10 +474,8 @@ function canRelate(model, relationshipTypeId, sourceId, targetId) {
 
   if (sourceId === targetId) return { ok: false, reason: 'An entity cannot be related to itself.' };
 
-  for (const relationship of model.relationships.values()) {
-    if (relationship.type === relationshipTypeId && relationship.source === sourceId && relationship.target === targetId) {
-      return { ok: false, reason: 'The relationship already exists.' };
-    }
+  if (model.relationshipKeys.has(relationshipKey(relationshipTypeId, sourceId, targetId))) {
+    return { ok: false, reason: 'The relationship already exists.' };
   }
 
   return { ok: true };
@@ -441,18 +486,18 @@ function canRelate(model, relationshipTypeId, sourceId, targetId) {
  * @param {string} relationshipTypeId
  * @param {string} sourceId
  * @param {string} targetId
- * @param {string} [id]  only supplied when loading an existing model
  * @returns {{ ok: boolean, reason?: string, relationship?: Relationship }}
  */
-export function addRelationship(model, relationshipTypeId, sourceId, targetId, id) {
+export function addRelationship(model, relationshipTypeId, sourceId, targetId) {
   const check = canRelate(model, relationshipTypeId, sourceId, targetId);
   if (!check.ok) return check;
 
   model.relationshipCounter += 1;
-  const relationshipId = id ?? `R-${model.relationshipCounter}`;
+  const relationshipId = `R-${model.relationshipCounter}`;
   /** @type {Relationship} */
   const relationship = { id: relationshipId, type: relationshipTypeId, source: sourceId, target: targetId };
   model.relationships.set(relationshipId, relationship);
+  model.relationshipKeys.add(relationshipKey(relationshipTypeId, sourceId, targetId));
   return { ok: true, relationship };
 }
 
@@ -462,7 +507,10 @@ export function addRelationship(model, relationshipTypeId, sourceId, targetId, i
  * @param {string} relationshipId
  */
 export function removeRelationship(model, relationshipId) {
+  const relationship = model.relationships.get(relationshipId);
+  if (!relationship) return;
   model.relationships.delete(relationshipId);
+  model.relationshipKeys.delete(relationshipKey(relationship.type, relationship.source, relationship.target));
 }
 
 /**
@@ -553,7 +601,7 @@ export function removeEntity(model, entityId) {
 
   for (const [relationshipId, relationship] of model.relationships) {
     if (relationship.source === entityId || relationship.target === entityId) {
-      model.relationships.delete(relationshipId);
+      removeRelationship(model, relationshipId);
     }
   }
   reparentChildren(model, entityId, entity.parent);
@@ -582,6 +630,9 @@ export function toJSON(model) {
     relationships: [...model.relationships.values()].map((relationship) => ({ ...relationship })),
   };
 }
+
+/** The highest number a counter is restored from when a file is read. */
+const COUNTER_LIMIT = 2 ** 40;
 
 /**
  * Rebuild a model from parsed JSON. Data is treated as untrusted: entities of
@@ -613,9 +664,15 @@ export function fromJSON(data) {
       rejected.push(`Folder ${String(raw?.id)} has no identifier.`);
       continue;
     }
+    if (model.folders.has(raw.id)) {
+      rejected.push(`Folder ${raw.id} appears more than once.`);
+      continue;
+    }
     addFolder(model, String(raw.name ?? 'Folder'), typeof raw.parent === 'string' ? raw.parent : null, raw.id);
     const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number)) model.folderCounter = Math.max(model.folderCounter, number);
+    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
+      model.folderCounter = Math.max(model.folderCounter, number);
+    }
   }
   for (const raw of data.entities) {
     if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
@@ -624,6 +681,10 @@ export function fromJSON(data) {
     }
     if (model.entities.has(raw.id)) {
       rejected.push(`Entity ${raw.id} appears more than once.`);
+      continue;
+    }
+    if (model.folders.has(raw.id)) {
+      rejected.push(`${raw.id} names both a folder and an entity.`);
       continue;
     }
     /** @type {Object<string, string>} */
@@ -638,7 +699,7 @@ export function fromJSON(data) {
     });
 
     const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number)) {
+    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
       model.counters[raw.type] = Math.max(model.counters[raw.type] ?? 0, number);
     }
   }

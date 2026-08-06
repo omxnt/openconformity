@@ -66,8 +66,6 @@
   --link:       #0F62FE;  /* $link-primary, blue-60 */
   --link-hover: #0043CE;  /* $link-primary-hover, blue-70 */
   --support-info: #0043CE;  /* $support-info, blue-70 */
-  --tag-bg:   #D0E2FF;  /* $tag-background-blue, $highlight, blue-20 */
-  --tag-text: #0043CE;  /* $tag-color-blue, blue-70 */
 
   --button-disabled: #C6C6C6;  /* $button-disabled, gray-30 */
   --on-color-disabled: #8D8D8D;  /* $text-on-color-disabled, gray-50 */
@@ -122,8 +120,6 @@
   --link:       #78A9FF;  /* g100 $link-primary, blue-40 */
   --link-hover: #A6C8FF;  /* g100 $link-primary-hover, blue-30 */
   --support-info: #4589FF;  /* g100 $support-info, blue-50 */
-  --tag-bg:   #0043CE;  /* g100 $tag-background-blue, blue-70 */
-  --tag-text: #D0E2FF;  /* g100 $tag-color-blue, blue-20 */
 
   --button-disabled: #525252;  /* g100 $button-disabled, gray-70 */
   --on-color-disabled: #8D8D8D;  /* g100 $text-on-color-disabled, gray-50 */
@@ -191,7 +187,6 @@ body {
   letter-spacing: 0.32px;
 }
 .muted { color: var(--text-second); }
-.empty { padding: 16px; color: var(--text-second); }  /* $spacing-05 */
 
 /* Carbon focus: a 2px $focus ring, inset so it never enlarges a control. */
 :focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
@@ -213,8 +208,8 @@ body {
    The selector names the element as well as the class so that it outweighs the
    neutral fills those four places set, wherever those rules sit in this file,
    while a disabled menu entry still outweighs it in turn. */
-svg.icon[data-pillar="systemStructure"],
-use.node-icon[data-pillar="systemStructure"] { fill: var(--pillar-system); }
+svg.icon[data-pillar="systemContext"],
+use.node-icon[data-pillar="systemContext"] { fill: var(--pillar-system); }
 svg.icon[data-pillar="legislativeFramework"],
 use.node-icon[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
 svg.icon[data-pillar="riskAssessment"],
@@ -420,11 +415,10 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
   border-bottom: 1px solid var(--border-subtle);
 }
 .pane-head-views { padding-left: 4px; }  /* $spacing-02 */
-.pane-head-actions { display: flex; align-items: center; margin-left: auto; }
-/* The head centres its contents, which would override the button's own
-   stretch and leave it as tall as its icon. Held at 32 so the target keeps
-   the WCAG 2.2 minimum (2.5.8). */
-.pane-head-actions .ghost-button { height: 32px; }  /* $spacing-07 */
+/* The actions stretch to the head's height rather than centring in it, so
+   their buttons fill it and the head stays at 32px: its bottom rule then
+   runs level with the navigator toolbar's across the gutter. */
+.pane-head-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
 .pane-body { flex: 1; min-height: 0; overflow: auto; }
 
 .pane-toolbar {
@@ -929,26 +923,6 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
   color: var(--text-helper);
 }
 
-/* Carbon inline notification, informational. */
-.notice-important {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;                    /* $spacing-05 */
-  background: var(--layer);     /* $notification-background-info */
-  border-left: 3px solid var(--support-info);
-  padding: 16px;                /* $spacing-05 */
-}
-.notice-tag {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 18px;             /* Carbon tag sm */
-  padding: 0 8px;           /* $spacing-03 */
-  font-size: 12px;          /* $label-01 */
-  letter-spacing: 0.32px;
-  color: var(--tag-text);
-  background: var(--tag-bg);
-}
 .notice-headline { font-size: 16px; line-height: 1.375; font-weight: 600; }  /* $heading-compact-02, 22px */
 
 /* Carbon modal footer: the buttons run the full width, parted by a 1px gap. */
@@ -1083,6 +1057,7 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
   body > .dropdown-layer,
   body > .dropdown.open,
   body > .toasts,
+  body > .side-panel,
   body > .overlay {
     display: none;
   }

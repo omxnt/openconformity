@@ -29,7 +29,6 @@ import { clear, el, icon } from './dom.js';
  * @param {HTMLElement} context.barEl
  * @param {HTMLElement} context.layerEl
  * @param {Array<{ label: string, items: MenuItem[] | (() => MenuItem[]) }>} context.menus
- * @param {() => void} [context.onOpen]
  */
 export function createMenuBar(context) {
   /** @type {HTMLElement|null} */
@@ -98,7 +97,6 @@ export function createMenuBar(context) {
    * @param {HTMLElement} dropdown
    */
   function show(button, dropdown, fill) {
-    context.onOpen?.();
     fill();
     const box = button.getBoundingClientRect();
     dropdown.style.left = `${box.left}px`;
@@ -114,8 +112,6 @@ export function createMenuBar(context) {
     for (const button of context.barEl.querySelectorAll('.menubar-item')) button.setAttribute('aria-expanded', 'false');
     open = null;
   }
-
-  return { closeAll };
 }
 
 /** Open popup panels, outermost first. A submenu is the next one along. */

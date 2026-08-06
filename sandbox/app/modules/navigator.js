@@ -9,7 +9,7 @@
  */
 
 import { ENTITY_TYPES } from './metamodel.js';
-import { childEntities, childFolders, contentCount, labelOf, nodeOf } from './model.js';
+import { childEntities, childFolders, contentCounts, labelOf, nodeOf } from './model.js';
 import { clear, el, icon } from './dom.js';
 
 /**
@@ -31,6 +31,8 @@ import { clear, el, icon } from './dom.js';
 export function createNavigator(context) {
   const expanded = new Set(['root']);
   let filter = '';
+  /** The per-node entity counts, taken once per render. @type {Map<string, number>} */
+  let counts = new Map();
   /** @type {Selection|null} */
   let dragging = null;
   /**
@@ -54,6 +56,7 @@ export function createNavigator(context) {
     const model = context.getModel();
     const selection = context.getSelection();
     const matches = filter ? matchingKeys(model, filter) : null;
+    counts = contentCounts(model);
 
     clear(context.treeEl);
     context.treeEl.append(
@@ -105,7 +108,7 @@ export function createNavigator(context) {
       selection: { kind: 'folder', id: folder.id },
       iconId: 'i-folder',
       label: folder.name,
-      count: String(contentCount(model, folder.id)),
+      count: String(counts.get(folder.id) ?? 0),
       current: selection,
       depth,
       children,

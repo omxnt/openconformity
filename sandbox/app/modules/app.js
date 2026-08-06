@@ -772,6 +772,10 @@ refs.fileInput.addEventListener('change', () => {
     state.model = model;
     startFresh({ kind: 'root', id: '' });
   };
+  reader.onerror = () => {
+    refs.fileInput.value = '';
+    notify('Cannot open the file', 'The file could not be read.');
+  };
   reader.readAsText(file);
 });
 
@@ -926,19 +930,12 @@ function clamp(value, low, high) {
  */
 function noticeContent() {
   return [
-    el('div', { class: 'notice-important' }, [
-      el('span', { class: 'notice-tag', text: 'Important' }),
-      el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
-    ]),
-    el('p', { text: 'This is a demonstration of openconformity. It is not finished software.' }),
+    el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
+    el('p', { text: 'This is a demonstration of software under construction. Nothing in it has been verified or validated, and responsibility for a CE marking always rests with the manufacturer.' }),
     el('ul', { class: 'dialog-list' }, [
-      el('li', { text: 'It is guaranteed that the tool contains errors.' }),
-      el('li', { text: 'Many functions are still unfinished.' }),
+      el('li', { text: 'It is guaranteed to contain errors, and many functions are unfinished.' }),
       el('li', { text: 'It is rebuilt continuously, and changes without warning.' }),
-      el('li', { text: 'The file format will change.' }),
-      el('li', { text: 'A project saved here will not open in a later version.' }),
-      el('li', { text: 'Nothing here has been verified or validated.' }),
-      el('li', { text: 'Things will be wrong, and they will get in your way.' }),
+      el('li', { text: 'The file format will change: a project saved here will not open in a later version.' }),
     ]),
   ];
 }
@@ -1000,10 +997,21 @@ window.addEventListener('beforeunload', (event) => {
 navigator.reveal(state.selection);
 renderAll();
 
-let noticeRead = false;
-try {
-  noticeRead = window.localStorage.getItem(NOTICE_KEY) === 'read';
-} catch {
-  // Storage can be unavailable; the notice simply shows.
+/** Whether the notice has been read on this device. */
+function noticeRead() {
+  try {
+    return window.localStorage.getItem(NOTICE_KEY) === 'read';
+  } catch {
+    // Storage can be unavailable; the notice then simply shows.
+    return false;
+  }
 }
-if (!noticeRead) showDemoNotice();
+
+if (!noticeRead()) showDemoNotice();
+
+// Leaving from the notice and coming back can restore the page from the
+// browser's cache without running the load path again, so the notice is
+// asked for once more on restore.
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && !noticeRead()) showDemoNotice();
+});

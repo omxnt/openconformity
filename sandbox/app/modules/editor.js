@@ -226,7 +226,6 @@ export function createEditor(context) {
     render,
     begin,
     cancel,
-    save,
     hasChanges,
     isEditing: () => editing,
   };

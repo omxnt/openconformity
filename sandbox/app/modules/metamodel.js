@@ -50,7 +50,7 @@
  * @type {Object<string, string>}
  */
 const PILLARS = {
-  systemStructure: 'System Structure',
+  systemContext: 'System Context',
   legislativeFramework: 'Legislative Framework',
   riskAssessment: 'Risk Assessment',
   requirementsDefinition: 'Requirements Definition',
@@ -159,10 +159,10 @@ export function storedAttributesFor(code) {
  * @type {Object<string, EntityType>}
  */
 export const ENTITY_TYPES = {
-  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', pillar: 'systemStructure', icon: 'i-elm' },
-  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', pillar: 'systemStructure', icon: 'i-act' },
-  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', pillar: 'systemStructure', icon: 'i-tsk' },
-  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', pillar: 'systemStructure', icon: 'i-phs' },
+  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', pillar: 'systemContext', icon: 'i-elm' },
+  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', pillar: 'systemContext', icon: 'i-act' },
+  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', pillar: 'systemContext', icon: 'i-tsk' },
+  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', pillar: 'systemContext', icon: 'i-phs' },
 
   LEG: { code: 'LEG', name: 'European Legislation', plural: 'European Legislation', pillar: 'legislativeFramework', icon: 'i-leg' },
   HST: { code: 'HST', name: 'Harmonised Standard', plural: 'Harmonised Standards', pillar: 'legislativeFramework', icon: 'i-hst' },

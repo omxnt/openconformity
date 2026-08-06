@@ -71,7 +71,7 @@ export function openDialog(spec) {
   footer.querySelector('button')?.focus();
 }
 
-export function close() {
+function close() {
   if (!overlay || blocking) return;
   overlay.remove();
   overlay = null;
