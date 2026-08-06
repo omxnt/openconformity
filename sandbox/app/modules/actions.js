@@ -17,7 +17,7 @@
  * choice, so the first two ask nothing of it.
  */
 
-import { ENTITY_TYPES, entityTypes } from './metamodel.js';
+import { ENTITY_TYPES, entityTypesByPillar } from './metamodel.js';
 import {
   availableRelationships,
   canMoveNode,
@@ -66,7 +66,7 @@ export function describe(model, selection) {
   const { entity, folderRecord } = contextOf(model, selection);
   if (entity) {
     const type = ENTITY_TYPES[entity.type];
-    return { iconId: type.icon, kind: type.name, id: entity.id, label: labelOf(entity) };
+    return { iconId: type.icon, pillar: type.pillar, kind: type.name, id: entity.id, label: labelOf(entity) };
   }
   if (folderRecord) return { iconId: 'i-folder', kind: 'Folder', id: '', label: folderRecord.name };
   return { iconId: 'i-project', kind: 'Project', id: '', label: model.name };
@@ -93,6 +93,12 @@ export function createHere(model, selection) {
 /**
  * The entities the metamodel lets the selected one relate to, in either
  * direction, each creating the entity and the relationship together.
+ *
+ * The two directions are headed the way the relationship list names them, so
+ * the same word means the same thing wherever a relationship is read or made.
+ * Neither heading repeats which entity it is relative to: the tree and the bar
+ * above the editor both name that already.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
@@ -105,7 +111,7 @@ export function relatedMenuItems(model, selection, handlers) {
   const items = [];
   const options = availableRelationships(entity.type);
 
-  for (const [heading, direction] of [[`From ${entity.id}`, 'outgoing'], [`Into ${entity.id}`, 'incoming']]) {
+  for (const [heading, direction] of [['Outgoing', 'outgoing'], ['Incoming', 'incoming']]) {
     const group = options.filter((option) => option.direction === direction);
     if (group.length === 0) continue;
     items.push({ heading });
@@ -114,6 +120,7 @@ export function relatedMenuItems(model, selection, handlers) {
       items.push({
         label: other.name,
         iconId: other.icon,
+        pillar: other.pillar,
         shortcut: type.label,
         action: () => handlers.createRelated(type.id, direction),
       });
@@ -124,11 +131,14 @@ export function relatedMenuItems(model, selection, handlers) {
 
 /**
  * Which entity to make. Nothing about where the cursor is narrows this any
- * more, so it is every type the metamodel defines. They are not grouped: the
- * software has no level between the model and the entity, so a heading here
- * would name something that exists nowhere else. Sixteen ungrouped names are
- * found by reading, so they are in the order a reader expects to find them
- * in rather than the order the metamodel happens to list them.
+ * more, so it is every type the metamodel defines, under the pillar headings
+ * the diagram groups them by. Eighteen names in one alphabetical run are read
+ * end to end; four short groups are scanned, and a user who knows they want a
+ * hazard finds it under Risk Assessment without reading the rest.
+ *
+ * The heading names a group in the diagram, not a level in the model: nothing
+ * is filed by it, and no entity carries it.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
@@ -136,14 +146,20 @@ export function relatedMenuItems(model, selection, handlers) {
  */
 export function entityTypeMenuItems(model, selection, handlers) {
   const here = createHere(model, selection);
-  return entityTypes()
-    .sort((one, other) => one.name.localeCompare(other.name))
-    .map((type) => ({
-      label: type.name,
-      iconId: type.icon,
-      shortcut: type.code,
-      action: () => handlers.createEntity(type.code, here),
-    }));
+  const items = [];
+  for (const group of entityTypesByPillar()) {
+    items.push({ heading: group.pillar });
+    for (const type of group.types) {
+      items.push({
+        label: type.name,
+        iconId: type.icon,
+        pillar: type.pillar,
+        shortcut: type.code,
+        action: () => handlers.createEntity(type.code, here),
+      });
+    }
+  }
+  return items;
 }
 
 /**

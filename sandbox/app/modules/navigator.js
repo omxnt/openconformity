@@ -124,13 +124,15 @@ export function createNavigator(context) {
   function entityNode(model, entity, matches, selection, depth) {
     const children = contentsOf(model, entity.id, matches, selection, depth + 1);
     if (matches && children.length === 0 && !matches.has(`entity:${entity.id}`)) return null;
+    const type = ENTITY_TYPES[entity.type];
     return node({
       key: `entity:${entity.id}`,
       selection: { kind: 'entity', id: entity.id },
       id: entity.id,
-      iconId: ENTITY_TYPES[entity.type].icon,
+      iconId: type.icon,
+      pillar: type.pillar,
       label: labelOf(entity),
-      title: `${ENTITY_TYPES[entity.type].name} ${entity.id}`,
+      title: `${type.name} ${entity.id}`,
       current: selection,
       depth,
       children,
@@ -144,6 +146,8 @@ export function createNavigator(context) {
    * @param {Selection} spec.current
    * @param {string} [spec.id]
    * @param {string} spec.iconId
+   * @param {string} [spec.pillar]  set on an entity row, so the icon is
+   *   coloured by the pillar its type belongs to
    * @param {string} spec.label
    * @param {string} [spec.count]
    * @param {string} [spec.className]
@@ -175,7 +179,7 @@ export function createNavigator(context) {
           }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')])
         : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
     );
-    row.append(icon(spec.iconId));
+    row.append(icon(spec.iconId, spec.pillar));
     if (spec.id) row.append(el('span', { class: 'row-id', text: spec.id }));
     row.append(el('span', { class: `row-label${spec.className ? ` ${spec.className}` : ''}`, text: spec.label }));
     if (spec.count !== undefined) row.append(el('span', { class: 'row-count', text: spec.count }));

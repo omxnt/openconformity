@@ -65,14 +65,21 @@ function append(node, children) {
 }
 
 /**
- * An icon from the sprite defined in the document. Icons take the colour of
- * whatever they sit in: entity type is carried by the shape and by nothing
- * else (D-027, N-ACC-002).
+ * An icon from the sprite defined in the document. An icon takes the colour of
+ * whatever it sits in unless it is given a pillar, which the stylesheet turns
+ * into that pillar's colour.
+ *
+ * The shape is still what says which type an icon is: all eighteen have
+ * distinct silhouettes, and four colours cannot tell eighteen things apart
+ * (D-027, N-ACC-002). The colour groups them, so a pillar is found by
+ * scanning rather than by reading every row.
+ *
  * @param {string} symbolId
+ * @param {string} [pillar]  entity type pillar key, for an entity type icon
  * @returns {SVGElement}
  */
-export function icon(symbolId) {
-  return svg('svg', { class: 'icon', 'aria-hidden': 'true', focusable: 'false' }, [
+export function icon(symbolId, pillar) {
+  return svg('svg', { class: 'icon', 'data-pillar': pillar ?? null, 'aria-hidden': 'true', focusable: 'false' }, [
     svg('use', { href: `#${symbolId}` }),
   ]);
 }

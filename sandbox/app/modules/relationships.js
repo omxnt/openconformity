@@ -156,14 +156,26 @@ export function createRelationshipPane(context) {
   function openAddRelationshipPanel(entity) {
     closePanel();
     const model = context.getModel();
-    const options = availableRelationships(entity.type);
+    // Only the forms something in the model can take. A form the metamodel
+    // allows but nothing can answer is a choice that leads to an empty tree,
+    // so it is not offered here. Making the entity at the far end is what New
+    // related entity is for, and that offers every form the metamodel allows
+    // whether or not anything exists to take it yet.
+    const options = availableRelationships(entity.type).filter(
+      (option) => candidatesFor(model, option.type.id, entity.id, option.direction).length > 0
+    );
     const panel = context.panelEl;
     /** The targets picked so far, in the order they were picked. */
     const picked = new Set();
     /** The live picker handed to the tree, for re-rendering after a change. */
     let currentSpec = null;
 
-    // The directions carry the table's own names; the form says the rest.
+    // The directions are headed the way the list below names them and the New
+    // related entity menu heads them, so the same word means the same thing
+    // wherever a relationship is read or made. Neither heading repeats which
+    // entity it is relative to: the tree and the bar above the editor both
+    // name that already, and the row above this one names it again. The form
+    // says the rest.
     const group = (heading, direction) => {
       const members = options.filter((option) => option.direction === direction);
       if (members.length === 0) return null;
@@ -204,23 +216,17 @@ export function createRelationshipPane(context) {
       picked.clear();
       currentSpec = null;
       const option = chosen();
+      // Nothing was offered, so nothing can be chosen: every form the
+      // metamodel allows this entity has no entity in the model to take it.
       if (!option) {
-        status.textContent = '';
-        note.textContent = '';
+        status.textContent = `Nothing in the model can take a relationship with ${entity.id} yet.`;
+        note.textContent = 'New related entity creates the entity and the relationship together.';
         context.setPicker(null);
         renderPicked();
         return;
       }
       const far = ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source];
       const candidates = candidatesFor(model, option.type.id, entity.id, option.direction);
-
-      if (candidates.length === 0) {
-        status.textContent = `No ${far.name} can take this relationship.`;
-        note.textContent = 'New related entity creates the entity and the relationship together.';
-        context.setPicker({ validIds: new Set(), pickedIds: picked, onPick: () => {} });
-        renderPicked();
-        return;
-      }
 
       status.textContent =
         option.direction === 'outgoing'
@@ -299,13 +305,15 @@ export function createRelationshipPane(context) {
         el('h2', { class: 'side-panel-title', text: 'Add relationship' }),
         el('button', { type: 'button', class: 'side-panel-close', 'aria-label': 'Cancel', onclick: closePanel }, [icon('i-close')]),
       ]),
+      // With nothing to offer there is no form to choose and nothing to pick,
+      // so the panel carries the entity and the reason and stops there.
       el('div', { class: 'side-panel-body' }, [
         dialogRow('Entity', el('span', { class: 'dialog-fixed', text: `${entity.id}  ${labelOf(entity)}` })),
-        dialogRow('Relationship', formSelect),
+        options.length > 0 ? dialogRow('Relationship', formSelect) : null,
         status,
         note,
-        pickedSection,
-      ]),
+        options.length > 0 ? pickedSection : null,
+      ].filter(Boolean)),
       el('div', { class: 'side-panel-footer' }, [
         el('button', { type: 'button', class: 'button', text: 'Cancel', onclick: closePanel }),
         doneButton,
@@ -314,7 +322,8 @@ export function createRelationshipPane(context) {
     panel.hidden = false;
     panelOpen = true;
     refresh();
-    formSelect.focus();
+    if (options.length > 0) formSelect.focus();
+    else panel.querySelector('.side-panel-close')?.focus();
   }
 
   function closePanel() {
@@ -454,7 +463,7 @@ export function createRelationshipPane(context) {
   /** @param {import('./model.js').Entity} entity */
   function typeCell(entity) {
     const type = ENTITY_TYPES[entity.type];
-    return el('td', {}, [el('span', { class: 'cell-type' }, [icon(type.icon), el('span', { text: type.name })])]);
+    return el('td', {}, [el('span', { class: 'cell-type' }, [icon(type.icon, type.pillar), el('span', { text: type.name })])]);
   }
 
   // --- Graph view ------------------------------------------------------
@@ -532,8 +541,8 @@ export function createRelationshipPane(context) {
   }
 
   /**
-   * Composition is drawn solid and association dashed, so the kind is read
-   * from the line itself rather than from colour (N-ACC-002).
+   * Every relationship is drawn the same line. The metamodel tells one from
+   * another by its label, which the edge carries, and by nothing else.
    * @param {number} x1
    * @param {number} y1
    * @param {number} x2
@@ -541,7 +550,7 @@ export function createRelationshipPane(context) {
    * @param {import('./metamodel.js').RelationshipType} type
    */
   function edge(x1, y1, x2, y2, type) {
-    return svg('g', { class: `edge${type.kind === 'composition' ? ' composition' : ''}` }, [
+    return svg('g', { class: 'edge' }, [
       svg('line', { x1, y1, x2, y2, 'marker-end': 'url(#graph-arrow)' }),
       svg('text', { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6, class: 'edge-label', text: type.label }),
     ]);
@@ -566,7 +575,7 @@ export function createRelationshipPane(context) {
       'aria-label': isCentre ? null : `Select ${entity.id}, ${labelOf(entity)}`,
     }, [
       svg('rect', { width: NODE_WIDTH, height: NODE_HEIGHT }),
-      svg('use', { href: `#${type.icon}`, x: 16, y: 12, width: 16, height: 16, class: 'node-icon' }),
+      svg('use', { href: `#${type.icon}`, x: 16, y: 12, width: 16, height: 16, class: 'node-icon', 'data-pillar': type.pillar }),
       svg('text', { x: 40, y: 24, class: 'node-type', text: type.name }),
       svg('text', { x: 16, y: 42, class: 'node-id', text: entity.id }),
       svg('text', { x: 16, y: 58, class: 'node-label', text: truncate(labelOf(entity), 27) }),

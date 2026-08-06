@@ -1,7 +1,8 @@
 /**
  * The metamodel: the entity types a model may contain and the relationships
- * allowed between them. Transcribed from docs/metamodel.md sections 2.2, 2.3
- * and 2.4.
+ * allowed between them. Transcribed from the diagram in docs/metamodel.md,
+ * which is the authoritative definition: the node identifiers there are the
+ * type codes here, and each arrow is one entry in the relationship table.
  *
  * Attributes are not specified there. For now every entity type carries the
  * same minimal set, so that attributes can be added per type later without
@@ -24,16 +25,36 @@
  */
 
 /**
- * A type is its name and its icon. Nothing groups the types above that: the
- * shape is what tells one from another (D-027, N-ACC-002), and the software
- * has no level between the model and the entity for a grouping to belong to.
+ * A type is its name, its icon, and the pillar the diagram groups it under.
+ * The pillar is a grouping and nothing more: the software has no level between
+ * the model and the entity, so nothing is ever filed by it and no entity
+ * carries it into a file. It heads a list of types where one is being chosen,
+ * and it colours the type's icon.
+ *
+ * Which type an icon is stays a matter of shape. Eighteen types have eighteen
+ * distinct silhouettes and four colours cannot tell eighteen things apart, so
+ * the colour groups rather than identifies, and a reader who cannot see it
+ * loses nothing but the speed of finding a pillar (D-027, N-ACC-002).
  *
  * @typedef {Object} EntityType
  * @property {string} code    the prefix, and the key of this entry
  * @property {string} name
  * @property {string} plural
+ * @property {string} pillar  key into PILLARS
  * @property {string} icon    id of the symbol in the document's sprite
  */
+
+/**
+ * The four groups the diagram's classDef statements put the types into, named
+ * as the diagram names them.
+ * @type {Object<string, string>}
+ */
+const PILLARS = {
+  systemStructure: 'System Structure',
+  legislativeFramework: 'Legislative Framework',
+  riskAssessment: 'Risk Assessment',
+  requirementsDefinition: 'Requirements Definition',
+};
 
 /**
  * @typedef {Object} RelationshipType
@@ -41,7 +62,6 @@
  * @property {string} source  entity type code
  * @property {string} label
  * @property {string} target  entity type code
- * @property {'composition'|'association'} kind
  */
 
 /**
@@ -132,86 +152,96 @@ export function storedAttributesFor(code) {
 }
 
 /**
- * Section 2.3, in the order the work runs: the machine, then the law it must
- * meet, then the risks it carries, then the requirements those produce.
+ * The eighteen types the diagram names, in the order the work runs: the
+ * machine, then the law it must meet, then the risks it carries, then the
+ * requirements those produce. A pillar's types sit together, so this order is
+ * the order of the pillars as well as of the types within them.
  * @type {Object<string, EntityType>}
  */
 export const ENTITY_TYPES = {
-  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', icon: 'i-elm' },
-  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', icon: 'i-act' },
-  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', icon: 'i-tsk' },
-  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', icon: 'i-phs' },
+  ELM: { code: 'ELM', name: 'System Element', plural: 'System Elements', pillar: 'systemStructure', icon: 'i-elm' },
+  ACT: { code: 'ACT', name: 'System Actor', plural: 'System Actors', pillar: 'systemStructure', icon: 'i-act' },
+  TSK: { code: 'TSK', name: 'System Task', plural: 'System Tasks', pillar: 'systemStructure', icon: 'i-tsk' },
+  PHS: { code: 'PHS', name: 'System Phase', plural: 'System Phases', pillar: 'systemStructure', icon: 'i-phs' },
 
-  LEG: { code: 'LEG', name: 'European Legislation', plural: 'European Legislation', icon: 'i-leg' },
-  STD: { code: 'STD', name: 'European Standard', plural: 'European Standards', icon: 'i-std' },
-  CAS: { code: 'CAS', name: 'Conformity Assessment', plural: 'Conformity Assessments', icon: 'i-cas' },
-  NTB: { code: 'NTB', name: 'Notified Body', plural: 'Notified Bodies', icon: 'i-ntb' },
+  LEG: { code: 'LEG', name: 'European Legislation', plural: 'European Legislation', pillar: 'legislativeFramework', icon: 'i-leg' },
+  HST: { code: 'HST', name: 'Harmonised Standard', plural: 'Harmonised Standards', pillar: 'legislativeFramework', icon: 'i-hst' },
+  OST: { code: 'OST', name: 'Other Standard', plural: 'Other Standards', pillar: 'legislativeFramework', icon: 'i-ost' },
+  CAS: { code: 'CAS', name: 'Conformity Assessment', plural: 'Conformity Assessments', pillar: 'legislativeFramework', icon: 'i-cas' },
+  NTB: { code: 'NTB', name: 'Notified Body', plural: 'Notified Bodies', pillar: 'legislativeFramework', icon: 'i-ntb' },
 
-  HAZ: { code: 'HAZ', name: 'Single Hazard', plural: 'Single Hazards', icon: 'i-haz' },
-  SCN: { code: 'SCN', name: 'Accident Scenario', plural: 'Accident Scenarios', icon: 'i-scn' },
-  RRM: { code: 'RRM', name: 'Risk Reduction Measure', plural: 'Risk Reduction Measures', icon: 'i-rrm' },
-  SAF: { code: 'SAF', name: 'Safety Function', plural: 'Safety Functions', icon: 'i-saf' },
+  HAZ: { code: 'HAZ', name: 'Single Hazard', plural: 'Single Hazards', pillar: 'riskAssessment', icon: 'i-haz' },
+  SCN: { code: 'SCN', name: 'Accident Scenario', plural: 'Accident Scenarios', pillar: 'riskAssessment', icon: 'i-scn' },
+  RRM: { code: 'RRM', name: 'Risk Reduction Measure', plural: 'Risk Reduction Measures', pillar: 'riskAssessment', icon: 'i-rrm' },
+  SAF: { code: 'SAF', name: 'Safety Function', plural: 'Safety Functions', pillar: 'riskAssessment', icon: 'i-saf' },
 
-  ESR: { code: 'ESR', name: 'Essential Requirement', plural: 'Essential Requirements', icon: 'i-esr' },
-  STR: { code: 'STR', name: 'Standard Requirement', plural: 'Standard Requirements', icon: 'i-str' },
-  REQ: { code: 'REQ', name: 'System Requirement', plural: 'System Requirements', icon: 'i-req' },
-  VER: { code: 'VER', name: 'Verification Activity', plural: 'Verification Activities', icon: 'i-ver' },
+  ESR: { code: 'ESR', name: 'Essential Requirement', plural: 'Essential Requirements', pillar: 'requirementsDefinition', icon: 'i-esr' },
+  HSR: { code: 'HSR', name: 'Harmonised Requirement', plural: 'Harmonised Requirements', pillar: 'requirementsDefinition', icon: 'i-hsr' },
+  OSR: { code: 'OSR', name: 'Other Requirement', plural: 'Other Requirements', pillar: 'requirementsDefinition', icon: 'i-osr' },
+  REQ: { code: 'REQ', name: 'System Requirement', plural: 'System Requirements', pillar: 'requirementsDefinition', icon: 'i-req' },
+  VER: { code: 'VER', name: 'Verification Activity', plural: 'Verification Activities', pillar: 'requirementsDefinition', icon: 'i-ver' },
 };
 
 /** Stable iteration order for the entity types. */
 const ENTITY_TYPE_CODES = Object.keys(ENTITY_TYPES);
 
 /**
- * Section 2.4, in the order of the table. A relationship is a directed link
- * from one entity type to another, named by its label and classed as an
- * association or a composition. The kind is carried for display; deletion
- * treats every relationship alike while U-009 stands.
+ * The forty-two arrows of the diagram, in the order it draws them. A
+ * relationship is a directed link from one entity type to another, named by
+ * its label. The diagram draws every arrow alike, so nothing here tells one
+ * form of link from another and every relationship is treated the same way.
  */
 const RELATIONSHIP_TABLE = [
-  ['LEG', 'defines', 'ESR', 'composition'],
-  ['LEG', 'defines', 'CAS', 'composition'],
-  ['STD', 'defines', 'STR', 'composition'],
-  ['CAS', 'involves', 'NTB', 'composition'],
-  ['STD', 'harmonised to', 'LEG', 'association'],
-  ['ELM', 'subject to', 'LEG', 'association'],
-  ['ELM', 'subject to', 'STD', 'association'],
-  ['STR', 'satisfies', 'ESR', 'association'],
-  ['REQ', 'derives from', 'STR', 'association'],
-  ['REQ', 'derives from', 'RRM', 'association'],
-  ['REQ', 'derives from', 'SAF', 'association'],
-  ['REQ', 'decomposes into', 'REQ', 'composition'],
-  ['SAF', 'decomposes into', 'SAF', 'composition'],
-  ['ELM', 'decomposes into', 'ELM', 'composition'],
-  ['ESR', 'allocated to', 'ELM', 'association'],
-  ['STR', 'allocated to', 'ELM', 'association'],
-  ['REQ', 'allocated to', 'ELM', 'association'],
-  ['VER', 'allocated to', 'ELM', 'association'],
-  ['RRM', 'allocated to', 'ELM', 'association'],
-  ['SAF', 'allocated to', 'ELM', 'association'],
-  ['VER', 'verifies', 'REQ', 'association'],
-  ['VER', 'verifies', 'RRM', 'association'],
-  ['VER', 'verifies', 'SAF', 'association'],
-  ['RRM', 'implements', 'STR', 'association'],
-  ['SAF', 'realises', 'RRM', 'association'],
-  ['RRM', 'mitigates', 'HAZ', 'association'],
-  ['RRM', 'mitigates', 'SCN', 'association'],
-  ['ELM', 'exhibits', 'HAZ', 'composition'],
-  ['HAZ', 'triggers', 'ESR', 'association'],
-  ['HAZ', 'contributes to', 'SCN', 'association'],
-  ['TSK', 'leads to', 'SCN', 'association'],
-  ['ACT', 'exposed in', 'SCN', 'association'],
-  ['ELM', 'has', 'PHS', 'association'],
-  ['ELM', 'has', 'ACT', 'association'],
-  ['ACT', 'performs', 'TSK', 'association'],
-  ['TSK', 'during', 'PHS', 'association'],
+  ['LEG', 'defines', 'ESR'],
+  ['LEG', 'defines', 'CAS'],
+  ['HST', 'defines', 'HSR'],
+  ['OST', 'defines', 'OSR'],
+  ['CAS', 'involves', 'NTB'],
+  ['HST', 'harmonised to', 'LEG'],
+  ['ELM', 'subject to', 'LEG'],
+  ['ELM', 'subject to', 'HST'],
+  ['ELM', 'subject to', 'OST'],
+  ['HSR', 'satisfies', 'ESR'],
+  ['OSR', 'supports', 'ESR'],
+  ['REQ', 'derives from', 'HSR'],
+  ['REQ', 'derives from', 'OSR'],
+  ['REQ', 'derives from', 'RRM'],
+  ['REQ', 'derives from', 'SAF'],
+  ['REQ', 'decomposes into', 'REQ'],
+  ['SAF', 'decomposes into', 'SAF'],
+  ['ELM', 'decomposes into', 'ELM'],
+  ['ESR', 'allocated to', 'ELM'],
+  ['HSR', 'allocated to', 'ELM'],
+  ['OSR', 'allocated to', 'ELM'],
+  ['REQ', 'allocated to', 'ELM'],
+  ['VER', 'allocated to', 'ELM'],
+  ['RRM', 'allocated to', 'ELM'],
+  ['SAF', 'allocated to', 'ELM'],
+  ['VER', 'verifies', 'REQ'],
+  ['VER', 'verifies', 'RRM'],
+  ['VER', 'verifies', 'SAF'],
+  ['RRM', 'implements', 'HSR'],
+  ['RRM', 'implements', 'OSR'],
+  ['SAF', 'realises', 'RRM'],
+  ['RRM', 'mitigates', 'HAZ'],
+  ['RRM', 'mitigates', 'SCN'],
+  ['ELM', 'exhibits', 'HAZ'],
+  ['HAZ', 'triggers', 'ESR'],
+  ['HAZ', 'contributes to', 'SCN'],
+  ['TSK', 'leads to', 'SCN'],
+  ['ACT', 'exposed in', 'SCN'],
+  ['ELM', 'has', 'PHS'],
+  ['ELM', 'has', 'ACT'],
+  ['ACT', 'performs', 'TSK'],
+  ['TSK', 'during', 'PHS'],
 ];
 
 /** @type {Object<string, RelationshipType>} */
 export const RELATIONSHIP_TYPES = {};
 
-for (const [source, label, target, kind] of RELATIONSHIP_TABLE) {
+for (const [source, label, target] of RELATIONSHIP_TABLE) {
   const id = `${source}-${label.replace(/ /g, '-')}-${target}`.toLowerCase();
-  RELATIONSHIP_TYPES[id] = { id, source, label, target, kind };
+  RELATIONSHIP_TYPES[id] = { id, source, label, target };
 }
 
 /** Stable iteration order for the relationship types. */
@@ -240,6 +270,23 @@ export function relationshipsTo(code) {
  * Every entity type a model may hold, in the order above.
  * @returns {EntityType[]}
  */
-export function entityTypes() {
+function entityTypes() {
   return ENTITY_TYPE_CODES.map((code) => ENTITY_TYPES[code]);
+}
+
+/**
+ * The same types under their pillar headings. The grouping is read off the
+ * order above rather than declared twice, so a type moved between pillars
+ * moves in one place.
+ * @returns {Array<{ pillar: string, types: EntityType[] }>}
+ */
+export function entityTypesByPillar() {
+  const groups = [];
+  for (const type of entityTypes()) {
+    const pillar = PILLARS[type.pillar];
+    const last = groups[groups.length - 1];
+    if (last && last.pillar === pillar) last.types.push(type);
+    else groups.push({ pillar, types: [type] });
+  }
+  return groups;
 }

@@ -49,6 +49,17 @@
   --hover:  #E8E8E8;  /* $background-hover, $layer-hover-01, $field-hover-01 */
   --active: #C6C6C6;  /* $background-active, $layer-active-01, gray-30 */
 
+  /* Pillar colour on entity type icons. Yellow is Carbon's warning hue, which
+     is what a hazard already looks like to a machinery safety engineer; the
+     other three are chosen to hold their own beside it under every colour
+     vision. None of them is the interactive blue, so an entity never reads as
+     something to click. On white, yellow has to be taken at its 60 step: the
+     warning yellow itself carries no contrast against a white ground. */
+  --pillar-system:       #9F1853;  /* magenta-70 */
+  --pillar-legislative:  #8A3FFC;  /* purple-60 */
+  --pillar-risk:         #8E6A00;  /* yellow-60 */
+  --pillar-requirements: #007D79;  /* teal-60 */
+
   /* Interactive */
   --accent:     #0F62FE;  /* $interactive, $border-interactive, blue-60 */
   --focus:      #0F62FE;  /* $focus, blue-60 */
@@ -97,6 +108,13 @@
   /* States on gray-100 and gray-90 */
   --hover:  #353535;  /* g100 $background-hover, $layer-hover-01 */
   --active: #525252;  /* g100 $background-active, $layer-active-01, gray-70 */
+
+  /* Pillar colour, taken lighter on a dark ground. Risk is Carbon's
+     $support-warning here, the warning-triangle yellow itself. */
+  --pillar-system:       #EE5396;  /* g100 magenta-50 */
+  --pillar-legislative:  #A56EFF;  /* g100 purple-50 */
+  --pillar-risk:         #F1C21B;  /* g100 yellow-30, $support-warning */
+  --pillar-requirements: #3DDBD9;  /* g100 teal-30 */
 
   /* Interactive */
   --accent:     #4589FF;  /* g100 $interactive, $border-interactive, blue-50 */
@@ -185,6 +203,24 @@ body {
   flex: none;
   fill: currentColor;
 }
+
+/* An entity type icon is coloured by its pillar wherever it is drawn: the
+   tree, the bar above the editor, the relationship list and the relationship
+   graph. Everything else — folders, the project, and every toolbar, menu and
+   interface icon — stays the colour of what it sits in, so the colour means
+   "this is an entity of that pillar" and nothing else.
+
+   The selector names the element as well as the class so that it outweighs the
+   neutral fills those four places set, wherever those rules sit in this file,
+   while a disabled menu entry still outweighs it in turn. */
+svg.icon[data-pillar="systemStructure"],
+use.node-icon[data-pillar="systemStructure"] { fill: var(--pillar-system); }
+svg.icon[data-pillar="legislativeFramework"],
+use.node-icon[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
+svg.icon[data-pillar="riskAssessment"],
+use.node-icon[data-pillar="riskAssessment"] { fill: var(--pillar-risk); }
+svg.icon[data-pillar="requirementsDefinition"],
+use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-requirements); }
 
 /* Where nothing is yet: what this place holds, and the way to put the first
    thing in it. Carbon's empty state, at productive scale. */
@@ -827,10 +863,9 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 .node-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }  /* $code-01 */
 .node-label { font-size: 14px; letter-spacing: 0.16px; font-weight: 600; fill: var(--text); }  /* $heading-compact-01 */
 
-/* Composition is drawn solid and association dashed, so the kind is carried by
-   the line itself rather than by colour (N-ACC-002). */
-.edge line { stroke: var(--border-strong); stroke-width: 1; stroke-dasharray: 4 3; }
-.edge.composition line { stroke-dasharray: none; stroke-width: 1.5; }
+/* One line for every relationship. The metamodel draws no distinction between
+   them, so neither does the graph; the label on the edge is what names it. */
+.edge line { stroke: var(--border-strong); stroke-width: 1; }
 .arrow-head { fill: var(--border-strong); }
 .edge-label { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); text-anchor: middle; }
 .graph-more { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }
@@ -858,11 +893,6 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
   background: var(--background);
   border: 1px solid var(--border-subtle);
 }
-.dialog.wide { max-width: 1184px; }
-/* The diagram is drawn in dark strokes; on the dark theme it sits on a white
-   plate rather than being redrawn. */
-.metamodel-image { display: block; width: 100%; height: auto; }
-:root[data-theme="dark"] .metamodel-image { background: #FFFFFF; }
 
 .dialog-head {
   flex: none;

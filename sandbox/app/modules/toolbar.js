@@ -98,7 +98,7 @@ export function createToolbar(context) {
     const where = describe(model, selection);
     clear(context.contextEl);
     context.contextEl.append(
-      icon(where.iconId),
+      icon(where.iconId, where.pillar),
       el('span', { class: 'tb-kind', text: where.kind }),
       where.id ? el('span', { class: 'tb-id', text: where.id }) : el('span'),
       el('span', { class: 'tb-name', text: where.label })

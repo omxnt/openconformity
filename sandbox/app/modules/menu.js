@@ -13,6 +13,8 @@ import { clear, el, icon } from './dom.js';
  * @property {string} [label]
  * @property {string} [heading]    a non-selectable section title
  * @property {string} [iconId]
+ * @property {string} [pillar]     set where the icon names an entity type, so
+ *   it is drawn in that pillar's colour as it is everywhere else
  * @property {string} [shortcut]
  * @property {boolean} [separator]
  * @property {boolean} [disabled]
@@ -227,7 +229,7 @@ function buildItems(items, close, level = 0) {
         item.action?.();
       },
     }, [
-      item.iconId ? icon(item.iconId) : el('span', { class: 'menu-entry-gap' }),
+      item.iconId ? icon(item.iconId, item.pillar) : el('span', { class: 'menu-entry-gap' }),
       el('span', { class: 'menu-entry-label', text: item.label }),
       item.shortcut ? el('span', { class: 'shortcut', text: item.shortcut }) : null,
       hasSubmenu ? el('span', { class: 'submenu-arrow', text: '▸', 'aria-hidden': 'true' }) : null,

@@ -255,11 +255,13 @@ createMenuBar({
       ],
     },
     {
+      // Everything below the first separator leaves the software, so it all
+      // carries the launch icon, the Metamodel among them.
       label: 'Help',
       items: [
         { label: 'About this demo', iconId: 'i-information', action: showAbout },
-        { label: 'Metamodel', iconId: 'i-metamodel', action: showMetamodel },
         { separator: true },
+        { label: 'Metamodel', iconId: 'i-launch', action: openMetamodel },
         { label: 'Project site', iconId: 'i-launch', action: () => openLink('https://openconformity.org') },
         { label: 'Source on GitHub', iconId: 'i-launch', action: () => openLink('https://github.com/omxnt/openconformity') },
         { label: 'Follow on LinkedIn', iconId: 'i-launch', action: () => openLink('https://www.linkedin.com/company/openconformity') },
@@ -554,9 +556,10 @@ function renameFolderDialog(folder) {
 // --- Deletion ----------------------------------------------------------
 
 /**
- * A deletion reaches one entity and no further. With no composition there is no
- * ownership to follow, so nothing else is removed: whatever is filed inside it
- * moves up to where it sat, and the entities it is related to are untouched.
+ * A deletion reaches one entity and no further. No relationship in the
+ * metamodel makes one entity the owner of another, so there is no ownership to
+ * follow and nothing else is removed: whatever is filed inside it moves up to
+ * where it sat, and the entities it is related to are untouched.
  * @param {string} id
  */
 function requestDeleteEntity(id) {
@@ -779,23 +782,20 @@ function openLink(url) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function showMetamodel() {
-  openDialog({
-    wide: true,
-    title: 'Metamodel',
-    content: [
-      el('img', {
-        class: 'metamodel-image',
-        src: 'assets/images/metamodel.svg',
-        alt: 'The metamodel: the entity types a model may contain and the relationships allowed between them',
-      }),
-    ],
-  });
+/**
+ * The diagram in the project documentation is the authoritative definition of
+ * the metamodel and changes with it. The software points at it rather than
+ * carrying a copy, which can only fall behind what the software implements.
+ */
+const METAMODEL_URL = 'https://github.com/omxnt/openconformity/blob/main/docs/metamodel.md';
+
+function openMetamodel() {
+  openLink(METAMODEL_URL);
 }
 
 // --- Chrome ------------------------------------------------------------
 
-document.getElementById('toolbar-metamodel').addEventListener('click', showMetamodel);
+document.getElementById('toolbar-metamodel').addEventListener('click', openMetamodel);
 
 /**
  * The theme was set on the root element before the stylesheet loaded; from

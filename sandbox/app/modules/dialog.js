@@ -18,7 +18,6 @@ let blocking = false;
  * @param {string} spec.title
  * @param {Array<Node|string>} spec.content
  * @param {Array<{ label: string, primary?: boolean, danger?: boolean, action?: () => void }>} [spec.actions]
- * @param {boolean} [spec.wide]
  * @param {boolean} [spec.blocking]  no close button, no Escape, no click away
  */
 export function openDialog(spec) {
@@ -53,7 +52,7 @@ export function openDialog(spec) {
     head.append(el('button', { type: 'button', class: 'dialog-close', 'aria-label': 'Close', onclick: close }, [icon('i-close')]));
   }
 
-  const dialog = el('div', { class: `dialog${spec.wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' }, [
+  const dialog = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' }, [
     head,
     body,
     footer,

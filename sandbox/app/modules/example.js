@@ -1,41 +1,48 @@
 /**
  * A hardcoded example model: a generic machine, kept deliberately terse. It
- * exercises every entity type in metamodel 2.3 and every relationship in 2.4,
- * so the demo shows what the metamodel can express.
+ * exercises every entity type and every relationship the metamodel defines, so
+ * the demo shows what the metamodel can express.
  *
  * The content is illustrative and holds no engineering judgement. No text from
- * any standard is reproduced: the standard requirements carry a clause number
- * and a topic, nothing more.
+ * any standard is reproduced: the requirements taken from a standard carry a
+ * clause number and a topic, nothing more. The standard that is not harmonised
+ * is a placeholder, named the way the notified body is: no real standard is
+ * identified as one that carries no presumption of conformity.
  */
 
 import { addEntity, addFolder, addRelationship, createModel } from './model.js';
 
 /**
  * The folders the example is filed into, each named with the folder that holds
- * it. Four at the top, following the work: what the machine is, what the law
- * asks of it, what can go wrong, and what is required and checked as a result.
+ * it. Four at the top, following the work: what the law asks, what the machine
+ * is and what it carries, what can go wrong and what is done about it, and what
+ * is required and checked as a result. The law stands first because it is what
+ * the work answers to and the only part of it the manufacturer does not choose.
+ *
+ * The standards are split the way the metamodel splits them, so which of the
+ * two a standard is can be read from the tree without opening it.
  * @type {Array<[string, string|null]>}
  */
 const FOLDERS = [
-  ['System', null],
-  ['Elements', 'System'],
-  ['Actors', 'System'],
-  ['Tasks', 'System'],
-  ['Phases', 'System'],
-
   ['Legislation and standards', null],
-  ['Legislation', 'Legislation and standards'],
-  ['Standards', 'Legislation and standards'],
+  ['European legislation', 'Legislation and standards'],
   ['Conformity assessment', 'Legislation and standards'],
+  ['Harmonised standards', 'Legislation and standards'],
+  ['Other standards', 'Legislation and standards'],
 
-  ['Risk assessment', null],
-  ['Accident scenarios', 'Risk assessment'],
-  ['Risk reduction measures', 'Risk assessment'],
-  ['Safety functions', 'Risk assessment'],
+  ['System and hazards', null],
+  ['Elements', 'System and hazards'],
+  ['Actors', 'System and hazards'],
+  ['Phases', 'System and hazards'],
 
-  ['Requirements and verification', null],
-  ['System requirements', 'Requirements and verification'],
-  ['Verification activities', 'Requirements and verification'],
+  ['Risks and mitigations', null],
+  ['Accident scenarios', 'Risks and mitigations'],
+  ['Risk reduction measures', 'Risks and mitigations'],
+  ['Safety functions', 'Risks and mitigations'],
+
+  ['Requirements definition', null],
+  ['System requirements', 'Requirements definition'],
+  ['Verification activities', 'Requirements definition'],
 ];
 
 /**
@@ -45,8 +52,13 @@ const FOLDERS = [
  * the two are bound in the model, which is how a user would keep it. The
  * requirements a legislation defines sit under that legislation, the
  * requirements a standard defines under that standard, the hazards an element
- * exhibits under that element, and anything that decomposes into something
- * sits under what it came from.
+ * exhibits under that element, the tasks performed in a phase under that phase,
+ * and anything that decomposes into something sits under what it came from.
+ *
+ * A task sits under its phase rather than in a folder of its own because every
+ * task here runs in exactly one phase. A task carried out in two would have to
+ * be filed under one of them, or in a folder beside them, since a thing sits in
+ * one place in the tree while the model relates it to as many as it likes.
  * @type {Object<string, string>}
  */
 const FILING = {
@@ -66,22 +78,23 @@ const FILING = {
   'HAZ-005': 'ELM-008',
   'HAZ-006': 'ELM-005',
 
-  // Who uses the machine, what they do, and when.
+  // Who uses the machine, and the life of the machine they do it in, each
+  // phase holding the tasks carried out during it.
   'ACT-001': 'Actors',
   'ACT-002': 'Actors',
   'ACT-003': 'Actors',
-  'TSK-001': 'Tasks',
-  'TSK-002': 'Tasks',
-  'TSK-003': 'Tasks',
-  'TSK-004': 'Tasks',
   'PHS-001': 'Phases',
   'PHS-002': 'Phases',
   'PHS-003': 'Phases',
   'PHS-004': 'Phases',
+  'TSK-001': 'PHS-002',
+  'TSK-002': 'PHS-002',
+  'TSK-003': 'PHS-003',
+  'TSK-004': 'PHS-003',
 
   // The law, holding the essential requirements it defines.
-  'LEG-001': 'Legislation',
-  'LEG-002': 'Legislation',
+  'LEG-001': 'European legislation',
+  'LEG-002': 'European legislation',
   'ESR-001': 'LEG-001',
   'ESR-002': 'LEG-001',
   'ESR-003': 'LEG-001',
@@ -90,24 +103,27 @@ const FILING = {
   'ESR-006': 'LEG-002',
   'ESR-007': 'LEG-002',
 
-  // Each standard, holding the requirements it defines.
-  'STD-001': 'Standards',
-  'STD-002': 'Standards',
-  'STD-003': 'Standards',
-  'STD-004': 'Standards',
-  'STR-001': 'STD-001',
-  'STR-002': 'STD-001',
-  'STR-003': 'STD-002',
-  'STR-004': 'STD-002',
-  'STR-005': 'STD-003',
-  'STR-006': 'STD-003',
-  'STR-007': 'STD-004',
-  'STR-008': 'STD-004',
-
   // The assessment, holding the body it involves.
   'CAS-001': 'Conformity assessment',
   'CAS-002': 'Conformity assessment',
   'NTB-001': 'CAS-002',
+
+  // Each standard, holding the requirements it defines.
+  'HST-001': 'Harmonised standards',
+  'HST-002': 'Harmonised standards',
+  'HST-003': 'Harmonised standards',
+  'HST-004': 'Harmonised standards',
+  'HSR-001': 'HST-001',
+  'HSR-002': 'HST-001',
+  'HSR-003': 'HST-002',
+  'HSR-004': 'HST-002',
+  'HSR-005': 'HST-003',
+  'HSR-006': 'HST-003',
+  'HSR-007': 'HST-004',
+  'HSR-008': 'HST-004',
+
+  'OST-001': 'Other standards',
+  'OSR-001': 'OST-001',
 
   // What can go wrong, and what is done about it.
   'SCN-001': 'Accident scenarios',
@@ -153,24 +169,28 @@ const ENTITIES = [
   ['ACT-002', 'ACT', { title: 'Maintenance Technician', description: 'Services the machine with the guards open.' }],
   ['ACT-003', 'ACT', { title: 'Cleaner', description: 'Cleans the machine after a production run.' }],
 
-  ['TSK-001', 'TSK', { title: 'Load Material', description: 'Material is fed into the machine.' }],
-  ['TSK-002', 'TSK', { title: 'Clear Jam', description: 'A blockage in the product path is freed by hand.' }],
-  ['TSK-003', 'TSK', { title: 'Replace Part', description: 'A worn part is exchanged inside the guarding.' }],
-  ['TSK-004', 'TSK', { title: 'Clean Machine', description: 'Residue is removed from the product path.' }],
-
+  // The phases stand before the tasks, since each task is filed under the
+  // phase it runs in and a holder is always created first.
   ['PHS-001', 'PHS', { title: 'Installation', description: 'The machine is put in place and connected.' }],
   ['PHS-002', 'PHS', { title: 'Operation', description: 'The machine runs the production programme.' }],
   ['PHS-003', 'PHS', { title: 'Maintenance', description: 'Planned service and repair.' }],
   ['PHS-004', 'PHS', { title: 'Decommissioning', description: 'The machine is taken out of service.' }],
 
+  ['TSK-001', 'TSK', { title: 'Load Material', description: 'Material is fed into the machine.' }],
+  ['TSK-002', 'TSK', { title: 'Clear Jam', description: 'A blockage in the product path is freed by hand.' }],
+  ['TSK-003', 'TSK', { title: 'Replace Part', description: 'A worn part is exchanged inside the guarding.' }],
+  ['TSK-004', 'TSK', { title: 'Clean Machine', description: 'Residue is removed from the product path.' }],
+
   // --- Legislative Framework -------------------------------------------
   ['LEG-001', 'LEG', { title: 'Machinery Regulation (EU) 2023/1230', description: 'Applies to the machine as placed on the market.' }],
   ['LEG-002', 'LEG', { title: 'EMC Directive 2014/30/EU', description: 'Applies to the electrical equipment of the machine.' }],
 
-  ['STD-001', 'STD', { title: 'EN ISO 12100 Safety of machinery — General principles for design', description: 'Type A standard. The framework for the risk assessment.' }],
-  ['STD-002', 'STD', { title: 'EN ISO 13849-1 Safety-related parts of control systems', description: 'Type B standard. Applied to the safety functions.' }],
-  ['STD-003', 'STD', { title: 'EN ISO 14119 Interlocking devices associated with guards', description: 'Type B standard. Applied to the guard interlock.' }],
-  ['STD-004', 'STD', { title: 'EN 60204-1 Electrical equipment of machines', description: 'Type B standard. Applied to the electrical equipment.' }],
+  ['HST-001', 'HST', { title: 'EN ISO 12100 Safety of machinery — General principles for design', description: 'Type A standard. The framework for the risk assessment.' }],
+  ['HST-002', 'HST', { title: 'EN ISO 13849-1 Safety-related parts of control systems', description: 'Type B standard. Applied to the safety functions.' }],
+  ['HST-003', 'HST', { title: 'EN ISO 14119 Interlocking devices associated with guards', description: 'Type B standard. Applied to the guard interlock.' }],
+  ['HST-004', 'HST', { title: 'EN 60204-1 Electrical equipment of machines', description: 'Type B standard. Applied to the electrical equipment.' }],
+
+  ['OST-001', 'OST', { title: 'Other Standard', description: 'Placeholder. A standard applied to the machine that is not harmonised to the legislation, so it carries no presumption of conformity. No real standard is named in this example.' }],
 
   ['CAS-001', 'CAS', { title: 'Internal Control', description: 'Assessed by the manufacturer, without a notified body.' }],
   ['CAS-002', 'CAS', { title: 'EU Type-Examination', description: 'Assessed by a notified body for the safety component.' }],
@@ -275,14 +295,16 @@ const ENTITIES = [
   ['ESR-006', 'ESR', { title: 'Annex I 1.1 Protection Requirements', description: 'Equipment shall not generate disturbance above the intended level.' }],
   ['ESR-007', 'ESR', { title: 'Annex I 1.2 Immunity', description: 'Equipment shall work as intended in the presence of disturbance.' }],
 
-  ['STR-001', 'STR', { title: '5.4 Risk Estimation', description: 'How severity, exposure and avoidance combine into a risk.' }],
-  ['STR-002', 'STR', { title: '6.2 Inherently Safe Design', description: 'Measures that remove a hazard by design rather than by guarding.' }],
-  ['STR-003', 'STR', { title: '4.5 Required Performance Level', description: 'How the performance level required of a function is determined.' }],
-  ['STR-004', 'STR', { title: '6.2 Category Requirements', description: 'What the designated architecture has to achieve.' }],
-  ['STR-005', 'STR', { title: '5 Interlock Selection', description: 'How an interlocking device is chosen for a guard.' }],
-  ['STR-006', 'STR', { title: '7 Prevention of Defeat', description: 'How defeat with a spare actuator is prevented.' }],
-  ['STR-007', 'STR', { title: '9.2 Stop Categories', description: 'The stop categories, and when each one applies.' }],
-  ['STR-008', 'STR', { title: '5.3 Supply Disconnecting Device', description: 'The device that isolates the electrical supply.' }],
+  ['HSR-001', 'HSR', { title: '5.4 Risk Estimation', description: 'How severity, exposure and avoidance combine into a risk.' }],
+  ['HSR-002', 'HSR', { title: '6.2 Inherently Safe Design', description: 'Measures that remove a hazard by design rather than by guarding.' }],
+  ['HSR-003', 'HSR', { title: '4.5 Required Performance Level', description: 'How the performance level required of a function is determined.' }],
+  ['HSR-004', 'HSR', { title: '6.2 Category Requirements', description: 'What the designated architecture has to achieve.' }],
+  ['HSR-005', 'HSR', { title: '5 Interlock Selection', description: 'How an interlocking device is chosen for a guard.' }],
+  ['HSR-006', 'HSR', { title: '7 Prevention of Defeat', description: 'How defeat with a spare actuator is prevented.' }],
+  ['HSR-007', 'HSR', { title: '9.2 Stop Categories', description: 'The stop categories, and when each one applies.' }],
+  ['HSR-008', 'HSR', { title: '5.3 Supply Disconnecting Device', description: 'The device that isolates the electrical supply.' }],
+
+  ['OSR-001', 'OSR', { title: 'Other Requirement', description: 'Placeholder. A requirement of the standard above. It supports an essential requirement rather than satisfying one, because the standard it comes from is not harmonised.' }],
 
   ['REQ-001', 'REQ', {
     title: 'Access Protection',
@@ -373,10 +395,11 @@ const RELATIONSHIPS = [
   // Legislative Framework
   ['ELM-001', 'elm-subject-to-leg', 'LEG-001'],
   ['ELM-001', 'elm-subject-to-leg', 'LEG-002'],
-  ['ELM-001', 'elm-subject-to-std', 'STD-001'],
-  ['ELM-002', 'elm-subject-to-std', 'STD-002'],
-  ['ELM-007', 'elm-subject-to-std', 'STD-003'],
-  ['ELM-008', 'elm-subject-to-std', 'STD-004'],
+  ['ELM-001', 'elm-subject-to-hst', 'HST-001'],
+  ['ELM-002', 'elm-subject-to-hst', 'HST-002'],
+  ['ELM-007', 'elm-subject-to-hst', 'HST-003'],
+  ['ELM-008', 'elm-subject-to-hst', 'HST-004'],
+  ['ELM-002', 'elm-subject-to-ost', 'OST-001'],
 
   ['LEG-001', 'leg-defines-esr', 'ESR-001'],
   ['LEG-001', 'leg-defines-esr', 'ESR-002'],
@@ -389,19 +412,21 @@ const RELATIONSHIPS = [
   ['LEG-001', 'leg-defines-cas', 'CAS-002'],
   ['CAS-002', 'cas-involves-ntb', 'NTB-001'],
 
-  ['STD-001', 'std-harmonised-to-leg', 'LEG-001'],
-  ['STD-002', 'std-harmonised-to-leg', 'LEG-001'],
-  ['STD-003', 'std-harmonised-to-leg', 'LEG-001'],
-  ['STD-004', 'std-harmonised-to-leg', 'LEG-001'],
+  ['HST-001', 'hst-harmonised-to-leg', 'LEG-001'],
+  ['HST-002', 'hst-harmonised-to-leg', 'LEG-001'],
+  ['HST-003', 'hst-harmonised-to-leg', 'LEG-001'],
+  ['HST-004', 'hst-harmonised-to-leg', 'LEG-001'],
 
-  ['STD-001', 'std-defines-str', 'STR-001'],
-  ['STD-001', 'std-defines-str', 'STR-002'],
-  ['STD-002', 'std-defines-str', 'STR-003'],
-  ['STD-002', 'std-defines-str', 'STR-004'],
-  ['STD-003', 'std-defines-str', 'STR-005'],
-  ['STD-003', 'std-defines-str', 'STR-006'],
-  ['STD-004', 'std-defines-str', 'STR-007'],
-  ['STD-004', 'std-defines-str', 'STR-008'],
+  ['HST-001', 'hst-defines-hsr', 'HSR-001'],
+  ['HST-001', 'hst-defines-hsr', 'HSR-002'],
+  ['HST-002', 'hst-defines-hsr', 'HSR-003'],
+  ['HST-002', 'hst-defines-hsr', 'HSR-004'],
+  ['HST-003', 'hst-defines-hsr', 'HSR-005'],
+  ['HST-003', 'hst-defines-hsr', 'HSR-006'],
+  ['HST-004', 'hst-defines-hsr', 'HSR-007'],
+  ['HST-004', 'hst-defines-hsr', 'HSR-008'],
+
+  ['OST-001', 'ost-defines-osr', 'OSR-001'],
 
   // Risk Assessment
   ['ELM-005', 'elm-exhibits-haz', 'HAZ-001'],
@@ -445,9 +470,10 @@ const RELATIONSHIPS = [
   ['RRM-004', 'rrm-mitigates-scn', 'SCN-003'],
   ['RRM-006', 'rrm-mitigates-scn', 'SCN-004'],
 
-  ['RRM-002', 'rrm-implements-str', 'STR-005'],
-  ['RRM-002', 'rrm-implements-str', 'STR-006'],
-  ['RRM-003', 'rrm-implements-str', 'STR-007'],
+  ['RRM-002', 'rrm-implements-hsr', 'HSR-005'],
+  ['RRM-002', 'rrm-implements-hsr', 'HSR-006'],
+  ['RRM-003', 'rrm-implements-hsr', 'HSR-007'],
+  ['RRM-003', 'rrm-implements-osr', 'OSR-001'],
 
   ['SAF-002', 'saf-decomposes-into-saf', 'SAF-003'],
   ['SAF-002', 'saf-decomposes-into-saf', 'SAF-004'],
@@ -464,25 +490,29 @@ const RELATIONSHIPS = [
   ['SAF-004', 'saf-allocated-to-elm', 'ELM-005'],
 
   // Requirements Definition
-  ['STR-002', 'str-satisfies-esr', 'ESR-002'],
-  ['STR-003', 'str-satisfies-esr', 'ESR-002'],
-  ['STR-005', 'str-satisfies-esr', 'ESR-003'],
-  ['STR-006', 'str-satisfies-esr', 'ESR-003'],
-  ['STR-007', 'str-satisfies-esr', 'ESR-001'],
-  ['STR-008', 'str-satisfies-esr', 'ESR-005'],
+  ['HSR-002', 'hsr-satisfies-esr', 'ESR-002'],
+  ['HSR-003', 'hsr-satisfies-esr', 'ESR-002'],
+  ['HSR-005', 'hsr-satisfies-esr', 'ESR-003'],
+  ['HSR-006', 'hsr-satisfies-esr', 'ESR-003'],
+  ['HSR-007', 'hsr-satisfies-esr', 'ESR-001'],
+  ['HSR-008', 'hsr-satisfies-esr', 'ESR-005'],
+
+  ['OSR-001', 'osr-supports-esr', 'ESR-001'],
 
   ['ESR-002', 'esr-allocated-to-elm', 'ELM-005'],
   ['ESR-003', 'esr-allocated-to-elm', 'ELM-006'],
   ['ESR-004', 'esr-allocated-to-elm', 'ELM-008'],
   ['ESR-006', 'esr-allocated-to-elm', 'ELM-002'],
-  ['STR-005', 'str-allocated-to-elm', 'ELM-007'],
-  ['STR-003', 'str-allocated-to-elm', 'ELM-003'],
+  ['HSR-005', 'hsr-allocated-to-elm', 'ELM-007'],
+  ['HSR-003', 'hsr-allocated-to-elm', 'ELM-003'],
+  ['OSR-001', 'osr-allocated-to-elm', 'ELM-003'],
 
   ['REQ-001', 'req-decomposes-into-req', 'REQ-002'],
   ['REQ-001', 'req-decomposes-into-req', 'REQ-003'],
-  ['REQ-003', 'req-derives-from-str', 'STR-005'],
-  ['REQ-003', 'req-derives-from-str', 'STR-006'],
-  ['REQ-004', 'req-derives-from-str', 'STR-007'],
+  ['REQ-003', 'req-derives-from-hsr', 'HSR-005'],
+  ['REQ-003', 'req-derives-from-hsr', 'HSR-006'],
+  ['REQ-004', 'req-derives-from-hsr', 'HSR-007'],
+  ['REQ-004', 'req-derives-from-osr', 'OSR-001'],
   ['REQ-002', 'req-derives-from-rrm', 'RRM-001'],
   ['REQ-004', 'req-derives-from-rrm', 'RRM-003'],
   ['REQ-005', 'req-derives-from-rrm', 'RRM-004'],

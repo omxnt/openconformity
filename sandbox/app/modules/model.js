@@ -457,7 +457,7 @@ export function addRelationship(model, relationshipTypeId, sourceId, targetId, i
 }
 
 /**
- * Removing a relationship leaves both entities in place (metamodel 3.2).
+ * Removing a relationship leaves both entities in place.
  * @param {Model} model
  * @param {string} relationshipId
  */
@@ -539,9 +539,10 @@ export function availableRelationships(code) {
 
 /**
  * Deleting an entity removes it and every relationship that touches it. The
- * entities at the other end are left alone: with no composition there is no
- * ownership, so a deletion never reaches past the one entity. Whatever was
- * filed inside it moves up to where it sat, exactly as for a folder.
+ * entities at the other end are left alone: no relationship in the metamodel
+ * makes one entity the owner of another, so a deletion never reaches past the
+ * one entity. Whatever was filed inside it moves up to where it sat, exactly as
+ * for a folder.
  * @param {Model} model
  * @param {string} entityId
  * @returns {Entity | null}  the entity that was removed
