@@ -7,8 +7,15 @@
  *
  * Folders are the one thing here that the metamodel says nothing about. They
  * carry no meaning and take part in no relationship: they exist so the user can
- * group entities of one type in the navigator, the way a filing cabinet groups
- * paper. They are kept apart from the entities for that reason.
+ * group things in the navigator, the way a filing cabinet groups paper. They
+ * are kept apart from the entities for that reason.
+ *
+ * Filing is free. Every folder and entity carries a `parent`, which is the
+ * folder or entity it sits inside, or null for the top of the tree. Anything
+ * nests inside anything, to any depth, and the only arrangement refused is one
+ * that would put something inside itself. Where a thing sits says nothing about
+ * what it is or what it is related to: the metamodel decides which entities can
+ * exist and which relationships are allowed, and nothing else.
  */
 
 import {
@@ -16,7 +23,6 @@ import {
   RELATIONSHIP_TYPES,
   relationshipsFrom,
   relationshipsTo,
-  selfComposition,
   storedAttributesFor,
 } from './metamodel.js';
 
@@ -24,7 +30,7 @@ import {
  * @typedef {Object} Entity
  * @property {string} id
  * @property {string} type       entity type code
- * @property {string|null} folder  the folder it is filed in, if any
+ * @property {string|null} parent  the folder or entity it sits in, if any
  * @property {Object<string, string>} attributes
  *
  * @typedef {Object} Relationship
@@ -36,14 +42,16 @@ import {
  * @typedef {Object} Folder
  * @property {string} id
  * @property {string} name
- * @property {string} type       the entity type this folder files
- * @property {string|null} parent  the folder it sits in, if any
+ * @property {string|null} parent  the folder or entity it sits in, if any
+ *
+ * A `Node` below means either of the two: the things the tree files.
  *
  * @typedef {Object} Model
  * @property {string} name
  * @property {Map<string, Entity>} entities
  * @property {Map<string, Relationship>} relationships
  * @property {Map<string, Folder>} folders
+ * @property {Set<string>} relationshipKeys  one key per triple, for the duplicate check
  * @property {Object<string, number>} counters
  * @property {number} relationshipCounter
  * @property {number} folderCounter
@@ -59,6 +67,7 @@ export function createModel(name) {
     entities: new Map(),
     relationships: new Map(),
     folders: new Map(),
+    relationshipKeys: new Set(),
     counters: {},
     relationshipCounter: 0,
     folderCounter: 0,
@@ -81,7 +90,7 @@ function nextEntityId(model, code) {
  * @param {string} code
  * @param {Object<string, string>} [attributes]
  * @param {Object} [options]
- * @param {string|null} [options.folder]
+ * @param {string|null} [options.parent]
  * @param {string} [options.id]  only supplied when loading an existing model
  * @returns {Entity}
  */
@@ -91,7 +100,7 @@ export function addEntity(model, code, attributes = {}, options = {}) {
 
   const entityId = options.id ?? nextEntityId(model, code);
   /** @type {Entity} */
-  const entity = { id: entityId, type: code, folder: options.folder ?? null, attributes: {} };
+  const entity = { id: entityId, type: code, parent: options.parent ?? null, attributes: {} };
   for (const attribute of storedAttributesFor(code)) {
     entity.attributes[attribute.key] = attributes[attribute.key] ?? '';
   }
@@ -130,17 +139,16 @@ export function labelOf(entity) {
 
 /**
  * @param {Model} model
- * @param {string} typeCode
  * @param {string} name
  * @param {string|null} [parent]
  * @param {string} [id]
  * @returns {Folder}
  */
-export function addFolder(model, typeCode, name, parent = null, id) {
+export function addFolder(model, name, parent = null, id) {
   model.folderCounter += 1;
   const folderId = id ?? `F-${model.folderCounter}`;
   /** @type {Folder} */
-  const folder = { id: folderId, name: name || 'New folder', type: typeCode, parent };
+  const folder = { id: folderId, name: name || 'New folder', parent };
   model.folders.set(folderId, folder);
   return folder;
 }
@@ -164,151 +172,155 @@ export function renameFolder(model, folderId, name) {
 export function removeFolder(model, folderId) {
   const folder = model.folders.get(folderId);
   if (!folder) return;
-  for (const other of model.folders.values()) {
-    if (other.parent === folderId) other.parent = folder.parent;
-  }
-  for (const entity of model.entities.values()) {
-    if (entity.folder === folderId) entity.folder = folder.parent;
-  }
+  reparentChildren(model, folderId, folder.parent);
   model.folders.delete(folderId);
 }
 
 /**
+ * Move everything filed inside a node up to where that node sat, which is what
+ * deleting it does to its contents.
  * @param {Model} model
- * @param {string} typeCode
- * @param {string|null} parent
- * @returns {Folder[]}
+ * @param {string} nodeId
+ * @param {string|null} to
  */
-export function childFolders(model, typeCode, parent) {
-  return [...model.folders.values()].filter((folder) => folder.type === typeCode && folder.parent === parent);
+function reparentChildren(model, nodeId, to) {
+  for (const folder of model.folders.values()) {
+    if (folder.parent === nodeId) folder.parent = to;
+  }
+  for (const entity of model.entities.values()) {
+    if (entity.parent === nodeId) entity.parent = to;
+  }
+}
+
+// --- The tree ----------------------------------------------------------
+
+/**
+ * The folder or entity with this identifier. The two are kept in separate maps
+ * but file the same way, so the tree reaches them through one lookup.
+ * @param {Model} model
+ * @param {string|null} id
+ * @returns {Folder|Entity|null}
+ */
+export function nodeOf(model, id) {
+  if (!id) return null;
+  return model.folders.get(id) ?? model.entities.get(id) ?? null;
 }
 
 /**
  * @param {Model} model
- * @param {string} folderId
- * @returns {number}  entities filed in this folder and in the folders under it
+ * @param {string|null} parent
+ * @returns {Folder[]}
  */
-export function folderCount(model, folderId) {
-  const folder = model.folders.get(folderId);
-  if (!folder) return 0;
-  let count = [...model.entities.values()].filter((entity) => entity.folder === folderId).length;
-  for (const child of childFolders(model, folder.type, folderId)) count += folderCount(model, child.id);
-  return count;
+export function childFolders(model, parent) {
+  return [...model.folders.values()].filter((folder) => folder.parent === parent);
+}
+
+/**
+ * @param {Model} model
+ * @param {string|null} parent
+ * @returns {Entity[]}
+ */
+export function childEntities(model, parent) {
+  return [...model.entities.values()].filter((entity) => entity.parent === parent);
+}
+
+/**
+ * Whether one node sits anywhere above another. Walking upwards is guarded, so
+ * a cycle that reached the model some other way cannot hang this.
+ * @param {Model} model
+ * @param {string} possibleAncestorId
+ * @param {string} nodeId
+ * @returns {boolean}
+ */
+function isAncestor(model, possibleAncestorId, nodeId) {
+  const seen = new Set();
+  let current = nodeOf(model, nodeId);
+  while (current && !seen.has(current.id)) {
+    if (current.id === possibleAncestorId) return true;
+    seen.add(current.id);
+    current = nodeOf(model, current.parent);
+  }
+  return false;
+}
+
+/**
+ * The entities filed anywhere beneath each node, counted in one pass: every
+ * entity adds one to each node above it. Walking upwards is guarded, as in
+ * isAncestor.
+ * @param {Model} model
+ * @returns {Map<string, number>}
+ */
+export function contentCounts(model) {
+  const counts = new Map();
+  for (const entity of model.entities.values()) {
+    const seen = new Set();
+    let current = nodeOf(model, entity.parent);
+    while (current && !seen.has(current.id)) {
+      counts.set(current.id, (counts.get(current.id) ?? 0) + 1);
+      seen.add(current.id);
+      current = nodeOf(model, current.parent);
+    }
+  }
+  return counts;
+}
+
+/**
+ * @param {Model} model
+ * @param {string} nodeId
+ * @returns {number}  the entities filed anywhere beneath this node
+ */
+export function contentCount(model, nodeId) {
+  return contentCounts(model).get(nodeId) ?? 0;
 }
 
 // --- Moving ------------------------------------------------------------
 
 /**
- * @typedef {{ kind: 'type'|'folder'|'entity', id: string }} MoveTarget
+ * Where something can be filed: inside a folder, inside an entity, or at the
+ * top of the tree.
+ * @typedef {{ kind: 'root'|'folder'|'entity', id: string }} MoveTarget
  */
 
 /**
- * Whether an entity can be moved somewhere, and why not when it cannot.
- *
- * An entity moves within its own kind: between the folders that file its type,
- * and under another entity of its type where the metamodel gives that type a
- * decomposition. It never moves into another type, so a System Element cannot
- * be dropped into a Single Hazard.
+ * Whether a folder or an entity can be filed somewhere, and why not when it
+ * cannot. Filing is free and a folder and an entity hold things alike, so the
+ * only moves refused are one that changes nothing and one that would put
+ * something inside itself.
  *
  * @param {Model} model
- * @param {string} entityId
+ * @param {string} nodeId
  * @param {MoveTarget} target
  * @returns {{ ok: boolean, reason?: string }}
  */
-export function canMoveEntity(model, entityId, target) {
-  const entity = model.entities.get(entityId);
-  if (!entity) return { ok: false, reason: 'The entity is not in the model.' };
-  const type = ENTITY_TYPES[entity.type];
+export function canMoveNode(model, nodeId, target) {
+  const node = nodeOf(model, nodeId);
+  if (!node) return { ok: false, reason: 'It is not in the model.' };
 
-  if (target.kind === 'type') {
-    if (target.id !== entity.type) {
-      return { ok: false, reason: `A ${type.name} is filed with the ${type.plural}.` };
-    }
-    return entity.folder === null && !decompositionParent(model, entityId)
-      ? { ok: false, reason: 'It is already there.' }
-      : { ok: true };
+  const to = target.kind === 'root' ? null : target.id;
+  if (to !== null && !nodeOf(model, to)) return { ok: false, reason: 'That is not in the model.' };
+  if (to === nodeId) return { ok: false, reason: 'Nothing can be filed inside itself.' };
+  if (to !== null && isAncestor(model, nodeId, to)) {
+    return { ok: false, reason: 'That would put it inside itself.' };
   }
-
-  if (target.kind === 'folder') {
-    const folder = model.folders.get(target.id);
-    if (!folder) return { ok: false, reason: 'The folder is not in the model.' };
-    if (folder.type !== entity.type) {
-      return { ok: false, reason: `That folder files ${ENTITY_TYPES[folder.type].plural}, not ${type.plural}.` };
-    }
-    return entity.folder === folder.id && !decompositionParent(model, entityId)
-      ? { ok: false, reason: 'It is already there.' }
-      : { ok: true };
-  }
-
-  if (target.kind === 'entity') {
-    const parent = model.entities.get(target.id);
-    if (!parent) return { ok: false, reason: 'The entity is not in the model.' };
-    if (parent.id === entity.id) return { ok: false, reason: 'An entity cannot be moved into itself.' };
-    if (parent.type !== entity.type) {
-      return { ok: false, reason: `The metamodel gives no composition from ${ENTITY_TYPES[parent.type].name} to ${type.name}.` };
-    }
-    if (!selfComposition(entity.type)) {
-      return { ok: false, reason: `${type.plural} do not decompose into one another.` };
-    }
-    if (isDescendant(model, parent.id, entity.id)) {
-      return { ok: false, reason: 'That would put the entity inside itself.' };
-    }
-    return decompositionParent(model, entityId)?.id === parent.id
-      ? { ok: false, reason: 'It is already there.' }
-      : { ok: true };
-  }
-
-  return { ok: false, reason: 'Nothing can be filed there.' };
+  return node.parent === to ? { ok: false, reason: 'It is already there.' } : { ok: true };
 }
 
 /**
  * @param {Model} model
- * @param {string} entityId
+ * @param {string} nodeId
  * @param {MoveTarget} target
  * @returns {{ ok: boolean, reason?: string }}
  */
-export function moveEntity(model, entityId, target) {
-  const check = canMoveEntity(model, entityId, target);
+export function moveNode(model, nodeId, target) {
+  const check = canMoveNode(model, nodeId, target);
   if (!check.ok) return check;
-
-  if (target.kind === 'entity') {
-    attachEntity(model, entityId, target.id, model.entities.get(target.id).folder);
-  } else {
-    attachEntity(model, entityId, null, target.kind === 'folder' ? target.id : null);
-  }
+  const node = nodeOf(model, nodeId);
+  node.parent = target.kind === 'root' ? null : target.id;
+  // Filed last among its kind there, so where it lands is predictable.
+  const map = model.folders.has(nodeId) ? model.folders : model.entities;
+  map.delete(nodeId);
+  map.set(nodeId, node);
   return { ok: true };
-}
-
-/**
- * Hang an entity under a decomposition parent, or under none, and file it in a
- * folder. Rewiring the parent means rewriting the composition that carried the
- * old ownership, which is the only relationship a move ever touches.
- * @param {Model} model
- * @param {string} entityId
- * @param {string|null} parentId
- * @param {string|null} folderId
- */
-function attachEntity(model, entityId, parentId, folderId) {
-  const entity = model.entities.get(entityId);
-  if (!entity) return;
-  const current = decompositionParent(model, entityId);
-
-  if ((current?.id ?? null) !== parentId) {
-    if (current) {
-      for (const [relationshipId, relationship] of model.relationships) {
-        if (
-          relationship.target === entityId &&
-          relationship.source === current.id &&
-          RELATIONSHIP_TYPES[relationship.type].kind === 'composition'
-        ) {
-          model.relationships.delete(relationshipId);
-        }
-      }
-    }
-    const composition = parentId ? selfComposition(entity.type) : null;
-    if (composition) addRelationship(model, composition.id, parentId, entityId);
-  }
-  entity.folder = folderId;
 }
 
 // --- Order -------------------------------------------------------------
@@ -335,33 +347,17 @@ function reorderMap(map, movingId, referenceId, position) {
 }
 
 /**
- * The entities that sit alongside this one: same type, same folder, same
- * decomposition parent, in the order they are drawn.
+ * The things that sit alongside this one: filed in the same place and of the
+ * same kind, in the order they are drawn. Folders are drawn above entities, so
+ * the two are ordered separately.
  * @param {Model} model
- * @param {string} entityId
- * @returns {Entity[]}
+ * @param {string} nodeId
+ * @returns {Array<Folder|Entity>}
  */
-export function siblingsOf(model, entityId) {
-  const entity = model.entities.get(entityId);
-  if (!entity) return [];
-  const parent = decompositionParent(model, entityId)?.id ?? null;
-  return [...model.entities.values()].filter(
-    (other) =>
-      other.type === entity.type &&
-      other.folder === entity.folder &&
-      (decompositionParent(model, other.id)?.id ?? null) === parent
-  );
-}
-
-/**
- * @param {Model} model
- * @param {string} folderId
- * @returns {Folder[]}
- */
-export function folderSiblingsOf(model, folderId) {
-  const folder = model.folders.get(folderId);
-  if (!folder) return [];
-  return [...model.folders.values()].filter((other) => other.type === folder.type && other.parent === folder.parent);
+export function siblingsOf(model, nodeId) {
+  const node = nodeOf(model, nodeId);
+  if (!node) return [];
+  return model.folders.has(nodeId) ? childFolders(model, node.parent) : childEntities(model, node.parent);
 }
 
 /**
@@ -373,9 +369,8 @@ export function folderSiblingsOf(model, folderId) {
  * @returns {{ ok: boolean, reason?: string }}
  */
 export function moveOrder(model, what, delta) {
-  const isEntity = what.kind === 'entity';
-  const map = isEntity ? model.entities : model.folders;
-  const siblings = isEntity ? siblingsOf(model, what.id) : folderSiblingsOf(model, what.id);
+  const map = what.kind === 'entity' ? model.entities : model.folders;
+  const siblings = siblingsOf(model, what.id);
   const index = siblings.findIndex((item) => item.id === what.id);
   if (index < 0) return { ok: false, reason: 'It is not in the model.' };
 
@@ -395,35 +390,15 @@ export function moveOrder(model, what, delta) {
  * @returns {{ ok: boolean, reason?: string }}
  */
 export function canPlaceBeside(model, source, target) {
-  if (source.kind !== target.kind) return { ok: false, reason: 'A folder and an entity do not sit alongside one another.' };
   if (source.id === target.id) return { ok: false, reason: 'It is already there.' };
 
-  if (source.kind === 'folder') {
-    const one = model.folders.get(source.id);
-    const other = model.folders.get(target.id);
-    if (!one || !other) return { ok: false, reason: 'The folder is not in the model.' };
-    if (one.type !== other.type) return { ok: false, reason: 'The two folders file different entity types.' };
-    // Sitting beside the other folder means taking its parent, so refuse when
-    // that parent is inside the folder being moved.
-    const seen = new Set();
-    let walk = other.parent ? model.folders.get(other.parent) : null;
-    while (walk && !seen.has(walk.id)) {
-      if (walk.id === one.id) return { ok: false, reason: 'That would put the folder inside itself.' };
-      seen.add(walk.id);
-      walk = walk.parent ? model.folders.get(walk.parent) : null;
-    }
-    return { ok: true };
-  }
-
-  const one = model.entities.get(source.id);
-  const other = model.entities.get(target.id);
-  if (!one || !other) return { ok: false, reason: 'The entity is not in the model.' };
-  if (one.type !== other.type) {
-    return { ok: false, reason: `A ${ENTITY_TYPES[one.type].name} does not sit alongside a ${ENTITY_TYPES[other.type].name}.` };
-  }
-  const parent = decompositionParent(model, target.id);
-  if (parent && (parent.id === one.id || isDescendant(model, parent.id, one.id))) {
-    return { ok: false, reason: 'That would put the entity inside itself.' };
+  const one = nodeOf(model, source.id);
+  const other = nodeOf(model, target.id);
+  if (!one || !other) return { ok: false, reason: 'It is not in the model.' };
+  // Sitting beside the other one means taking its parent, so refuse when that
+  // parent is inside the thing being moved.
+  if (other.parent && isAncestor(model, source.id, other.parent)) {
+    return { ok: false, reason: 'That would put it inside itself.' };
   }
   return { ok: true };
 }
@@ -439,65 +414,37 @@ export function placeBeside(model, source, target, position) {
   const check = canPlaceBeside(model, source, target);
   if (!check.ok) return check;
 
-  if (source.kind === 'folder') {
-    model.folders.get(source.id).parent = model.folders.get(target.id).parent;
-    reorderMap(model.folders, source.id, target.id, position);
+  nodeOf(model, source.id).parent = nodeOf(model, target.id).parent;
+  const map = source.kind === 'folder' ? model.folders : model.entities;
+  if (source.kind === target.kind) {
+    reorderMap(map, source.id, target.id, position);
     return { ok: true };
   }
 
-  const other = model.entities.get(target.id);
-  attachEntity(model, source.id, decompositionParent(model, target.id)?.id ?? null, other.folder);
-  reorderMap(model.entities, source.id, target.id, position);
-  return { ok: true };
-}
-
-/**
- * @param {Model} model
- * @param {string} folderId
- * @param {MoveTarget} target
- * @returns {{ ok: boolean, reason?: string }}
- */
-export function canMoveFolder(model, folderId, target) {
-  const folder = model.folders.get(folderId);
-  if (!folder) return { ok: false, reason: 'The folder is not in the model.' };
-
-  if (target.kind === 'type') {
-    if (target.id !== folder.type) return { ok: false, reason: `That folder files ${ENTITY_TYPES[folder.type].plural}.` };
-    return folder.parent === null ? { ok: false, reason: 'It is already there.' } : { ok: true };
+  // Across kinds there is no shared order: folders draw above entities. An
+  // entity dropped beside a folder goes first among the entities there, and a
+  // folder dropped beside an entity goes last among the folders, which is the
+  // closest either can sit to where it was dropped.
+  const siblings = siblingsOf(model, source.id).filter((sibling) => sibling.id !== source.id);
+  if (siblings.length > 0) {
+    if (source.kind === 'entity') reorderMap(map, source.id, siblings[0].id, 'before');
+    else reorderMap(map, source.id, siblings[siblings.length - 1].id, 'after');
   }
-
-  if (target.kind === 'folder') {
-    const parent = model.folders.get(target.id);
-    if (!parent) return { ok: false, reason: 'The folder is not in the model.' };
-    if (parent.type !== folder.type) return { ok: false, reason: 'The two folders file different entity types.' };
-    if (parent.id === folder.id) return { ok: false, reason: 'A folder cannot be moved into itself.' };
-    const seen = new Set();
-    let walk = parent;
-    while (walk && !seen.has(walk.id)) {
-      if (walk.id === folder.id) return { ok: false, reason: 'That would put the folder inside itself.' };
-      seen.add(walk.id);
-      walk = walk.parent ? model.folders.get(walk.parent) : null;
-    }
-    return folder.parent === parent.id ? { ok: false, reason: 'It is already there.' } : { ok: true };
-  }
-
-  return { ok: false, reason: 'A folder cannot be filed there.' };
-}
-
-/**
- * @param {Model} model
- * @param {string} folderId
- * @param {MoveTarget} target
- * @returns {{ ok: boolean, reason?: string }}
- */
-export function moveFolder(model, folderId, target) {
-  const check = canMoveFolder(model, folderId, target);
-  if (!check.ok) return check;
-  model.folders.get(folderId).parent = target.kind === 'folder' ? target.id : null;
   return { ok: true };
 }
 
 // --- Relationships -----------------------------------------------------
+
+/**
+ * The key a triple is indexed under in `relationshipKeys`.
+ * @param {string} type
+ * @param {string} source
+ * @param {string} target
+ * @returns {string}
+ */
+function relationshipKey(type, source, target) {
+  return JSON.stringify([type, source, target]);
+}
 
 /**
  * Whether a relationship can be created, and why not when it cannot. The
@@ -527,18 +474,8 @@ function canRelate(model, relationshipTypeId, sourceId, targetId) {
 
   if (sourceId === targetId) return { ok: false, reason: 'An entity cannot be related to itself.' };
 
-  for (const relationship of model.relationships.values()) {
-    if (relationship.type === relationshipTypeId && relationship.source === sourceId && relationship.target === targetId) {
-      return { ok: false, reason: 'The relationship already exists.' };
-    }
-  }
-
-  if (type.kind === 'composition') {
-    const owner = ownerOf(model, targetId);
-    if (owner) return { ok: false, reason: `${targetId} is already owned by ${owner.id}.` };
-    if (isDescendant(model, sourceId, targetId)) {
-      return { ok: false, reason: 'A composition cannot form a cycle.' };
-    }
+  if (model.relationshipKeys.has(relationshipKey(relationshipTypeId, sourceId, targetId))) {
+    return { ok: false, reason: 'The relationship already exists.' };
   }
 
   return { ok: true };
@@ -549,28 +486,31 @@ function canRelate(model, relationshipTypeId, sourceId, targetId) {
  * @param {string} relationshipTypeId
  * @param {string} sourceId
  * @param {string} targetId
- * @param {string} [id]  only supplied when loading an existing model
  * @returns {{ ok: boolean, reason?: string, relationship?: Relationship }}
  */
-export function addRelationship(model, relationshipTypeId, sourceId, targetId, id) {
+export function addRelationship(model, relationshipTypeId, sourceId, targetId) {
   const check = canRelate(model, relationshipTypeId, sourceId, targetId);
   if (!check.ok) return check;
 
   model.relationshipCounter += 1;
-  const relationshipId = id ?? `R-${model.relationshipCounter}`;
+  const relationshipId = `R-${model.relationshipCounter}`;
   /** @type {Relationship} */
   const relationship = { id: relationshipId, type: relationshipTypeId, source: sourceId, target: targetId };
   model.relationships.set(relationshipId, relationship);
+  model.relationshipKeys.add(relationshipKey(relationshipTypeId, sourceId, targetId));
   return { ok: true, relationship };
 }
 
 /**
- * Removing a relationship leaves both entities in place (metamodel 3.2).
+ * Removing a relationship leaves both entities in place.
  * @param {Model} model
  * @param {string} relationshipId
  */
 export function removeRelationship(model, relationshipId) {
+  const relationship = model.relationships.get(relationshipId);
+  if (!relationship) return;
   model.relationships.delete(relationshipId);
+  model.relationshipKeys.delete(relationshipKey(relationship.type, relationship.source, relationship.target));
 }
 
 /**
@@ -623,133 +563,50 @@ export function candidatesFor(model, relationshipTypeId, entityId, direction, ke
 /**
  * The relationship types available from the relationship pane of an entity of
  * this type, in both directions.
+ *
+ * Ordered by the entity type at the far end, since that is what the user is
+ * looking for: the same list is read in the New related entity menu, where
+ * the far type is the label, and in the panel that adds a relationship. The
+ * relationship's own name breaks a tie, so a type reachable two ways is
+ * listed once for each in a settled order.
+ *
  * @param {string} code
  * @returns {Array<{ direction: 'outgoing'|'incoming', type: import('./metamodel.js').RelationshipType }>}
  */
 export function availableRelationships(code) {
+  const far = (option) => ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source].name;
+  const byFarType = (one, other) => far(one).localeCompare(far(other)) || one.type.label.localeCompare(other.type.label);
+
   return [
-    ...relationshipsFrom(code).map((type) => ({ direction: /** @type {const} */ ('outgoing'), type })),
-    ...relationshipsTo(code).map((type) => ({ direction: /** @type {const} */ ('incoming'), type })),
+    ...relationshipsFrom(code).map((type) => ({ direction: /** @type {const} */ ('outgoing'), type })).sort(byFarType),
+    ...relationshipsTo(code).map((type) => ({ direction: /** @type {const} */ ('incoming'), type })).sort(byFarType),
   ];
-}
-
-// --- Composition -------------------------------------------------------
-
-/**
- * The entity that owns this one through any composition, if any.
- * @param {Model} model
- * @param {string} entityId
- * @returns {Entity | null}
- */
-function ownerOf(model, entityId) {
-  for (const relationship of model.relationships.values()) {
-    if (relationship.target !== entityId) continue;
-    if (RELATIONSHIP_TYPES[relationship.type].kind !== 'composition') continue;
-    return model.entities.get(relationship.source) ?? null;
-  }
-  return null;
-}
-
-/**
- * The entities this one owns through any composition.
- * @param {Model} model
- * @param {string} entityId
- * @returns {Entity[]}
- */
-function ownedBy(model, entityId) {
-  const owned = [];
-  for (const relationship of model.relationships.values()) {
-    if (relationship.source !== entityId) continue;
-    if (RELATIONSHIP_TYPES[relationship.type].kind !== 'composition') continue;
-    const entity = model.entities.get(relationship.target);
-    if (entity) owned.push(entity);
-  }
-  return owned;
-}
-
-/**
- * The owner through a composition of a type with itself, which is the only
- * ownership the navigator nests by. A hazard is owned by an element, but it is
- * not a kind of element, so it is filed with the hazards rather than drawn
- * inside the element.
- * @param {Model} model
- * @param {string} entityId
- * @returns {Entity | null}
- */
-export function decompositionParent(model, entityId) {
-  const entity = model.entities.get(entityId);
-  const owner = entity ? ownerOf(model, entityId) : null;
-  return owner && owner.type === entity.type ? owner : null;
-}
-
-/**
- * @param {Model} model
- * @param {string} entityId
- * @returns {Entity[]}
- */
-export function decompositionChildren(model, entityId) {
-  const entity = model.entities.get(entityId);
-  if (!entity) return [];
-  return ownedBy(model, entityId).filter((owned) => owned.type === entity.type);
-}
-
-/**
- * @param {Model} model
- * @param {string} entityId
- * @param {string} possibleAncestorId
- * @returns {boolean}
- */
-function isDescendant(model, entityId, possibleAncestorId) {
-  let current = ownerOf(model, entityId);
-  const seen = new Set();
-  while (current && !seen.has(current.id)) {
-    if (current.id === possibleAncestorId) return true;
-    seen.add(current.id);
-    current = ownerOf(model, current.id);
-  }
-  return false;
 }
 
 // --- Deletion ----------------------------------------------------------
 
 /**
- * The entities a deletion would remove: the entity itself and, since
- * composition carries ownership, everything it owns (metamodel 3.2).
+ * Deleting an entity removes it and every relationship that touches it. The
+ * entities at the other end are left alone: no relationship in the metamodel
+ * makes one entity the owner of another, so a deletion never reaches past the
+ * one entity. Whatever was filed inside it moves up to where it sat, exactly as
+ * for a folder.
  * @param {Model} model
  * @param {string} entityId
- * @returns {Entity[]}
- */
-export function deletionSet(model, entityId) {
-  const collected = [];
-  const seen = new Set();
-  const walk = (id) => {
-    if (seen.has(id)) return;
-    seen.add(id);
-    const entity = model.entities.get(id);
-    if (!entity) return;
-    collected.push(entity);
-    for (const owned of ownedBy(model, id)) walk(owned.id);
-  };
-  walk(entityId);
-  return collected;
-}
-
-/**
- * @param {Model} model
- * @param {string} entityId
- * @returns {Entity[]}  the entities that were removed
+ * @returns {Entity | null}  the entity that was removed
  */
 export function removeEntity(model, entityId) {
-  const doomed = deletionSet(model, entityId);
-  const ids = new Set(doomed.map((entity) => entity.id));
+  const entity = model.entities.get(entityId);
+  if (!entity) return null;
 
   for (const [relationshipId, relationship] of model.relationships) {
-    if (ids.has(relationship.source) || ids.has(relationship.target)) {
-      model.relationships.delete(relationshipId);
+    if (relationship.source === entityId || relationship.target === entityId) {
+      removeRelationship(model, relationshipId);
     }
   }
-  for (const id of ids) model.entities.delete(id);
-  return doomed;
+  reparentChildren(model, entityId, entity.parent);
+  model.entities.delete(entityId);
+  return entity;
 }
 
 // --- Serialisation -----------------------------------------------------
@@ -767,12 +624,15 @@ export function toJSON(model) {
     entities: [...model.entities.values()].map((entity) => ({
       id: entity.id,
       type: entity.type,
-      folder: entity.folder,
+      parent: entity.parent,
       attributes: { ...entity.attributes },
     })),
     relationships: [...model.relationships.values()].map((relationship) => ({ ...relationship })),
   };
 }
+
+/** The highest number a counter is restored from when a file is read. */
+const COUNTER_LIMIT = 2 ** 40;
 
 /**
  * Rebuild a model from parsed JSON. Data is treated as untrusted: entities of
@@ -800,30 +660,20 @@ export function fromJSON(data) {
   if (rejected.length > 0) return { model, rejected };
 
   for (const raw of data.folders) {
-    if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
-      rejected.push(`Folder ${String(raw?.id)} has no valid entity type.`);
+    if (typeof raw?.id !== 'string') {
+      rejected.push(`Folder ${String(raw?.id)} has no identifier.`);
       continue;
     }
-    addFolder(model, raw.type, String(raw.name ?? 'Folder'), typeof raw.parent === 'string' ? raw.parent : null, raw.id);
-    const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number)) model.folderCounter = Math.max(model.folderCounter, number);
-  }
-  for (const folder of model.folders.values()) {
-    if (folder.parent && !model.folders.has(folder.parent)) folder.parent = null;
-  }
-  // A parent that points back into its own chain is refused rather than
-  // repaired: the tree is walked upwards in several places, and a folder that
-  // sits inside itself has no place the walk can end.
-  for (const folder of model.folders.values()) {
-    const seen = new Set();
-    let walk = folder;
-    while (walk && !seen.has(walk.id)) {
-      seen.add(walk.id);
-      walk = walk.parent ? model.folders.get(walk.parent) : null;
+    if (model.folders.has(raw.id)) {
+      rejected.push(`Folder ${raw.id} appears more than once.`);
+      continue;
     }
-    if (walk) rejected.push(`Folder ${folder.id} sits inside itself.`);
+    addFolder(model, String(raw.name ?? 'Folder'), typeof raw.parent === 'string' ? raw.parent : null, raw.id);
+    const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
+    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
+      model.folderCounter = Math.max(model.folderCounter, number);
+    }
   }
-
   for (const raw of data.entities) {
     if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
       rejected.push(`Entity ${String(raw?.id)} has no valid type.`);
@@ -833,18 +683,38 @@ export function fromJSON(data) {
       rejected.push(`Entity ${raw.id} appears more than once.`);
       continue;
     }
+    if (model.folders.has(raw.id)) {
+      rejected.push(`${raw.id} names both a folder and an entity.`);
+      continue;
+    }
     /** @type {Object<string, string>} */
     const attributes = {};
     for (const attribute of storedAttributesFor(raw.type)) {
       const value = raw.attributes?.[attribute.key];
       attributes[attribute.key] = typeof value === 'string' ? value : '';
     }
-    const folder = typeof raw.folder === 'string' && model.folders.get(raw.folder)?.type === raw.type ? raw.folder : null;
-    addEntity(model, raw.type, attributes, { id: raw.id, folder });
+    addEntity(model, raw.type, attributes, {
+      id: raw.id,
+      parent: typeof raw.parent === 'string' ? raw.parent : null,
+    });
 
     const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number)) {
+    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
       model.counters[raw.type] = Math.max(model.counters[raw.type] ?? 0, number);
+    }
+  }
+
+  // Parents are settled once both kinds are loaded, since either can hold the
+  // other. A parent that is not in the model is dropped; one that points back
+  // into its own chain is refused rather than repaired, because the tree is
+  // walked upwards in several places and such a node has nowhere for a walk to
+  // end.
+  for (const node of [...model.folders.values(), ...model.entities.values()]) {
+    if (node.parent && !nodeOf(model, node.parent)) node.parent = null;
+  }
+  for (const node of [...model.folders.values(), ...model.entities.values()]) {
+    if (isAncestor(model, node.id, node.parent)) {
+      rejected.push(`${node.id} sits inside itself.`);
     }
   }
 

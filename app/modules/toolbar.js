@@ -1,14 +1,22 @@
 /**
- * The toolbar above the navigator and the editor.
+ * The toolbar above the navigator, and the selection head above the editor.
  *
- * New and New folder act on one press: what they make is decided by where the
- * user is standing, not by a menu. Related opens the entities the metamodel
- * lets the selection relate to, since that is a choice rather than a default.
- * Every action here is also in the right-click menu and in the Edit menu.
+ * The navigator's toolbar holds what the tree owns: what exists, and where it
+ * sits. Making an entity, making a folder, ordering them and deleting them are
+ * all changes to the tree, so they stand together above it. The editor's head
+ * holds the one action on the content it shows, which is Edit.
+ *
+ * New folder acts on one press, since where the cursor is says everything
+ * about where the folder goes. New opens the entity types, because filing no
+ * longer says which type is wanted and there is nothing to default to. Related
+ * opens the entities the metamodel lets the selection relate to.
+ * Every action here is also in the right-click menu.
+ *
+ * Undo and redo stand apart from the rest: they act on the project as a whole
+ * rather than on what the cursor is standing on, so they live in the shell.
  */
 
-import { ENTITY_TYPES } from './metamodel.js';
-import { canStep, contextOf, createHere, describe, folderHere, pillarMenuItems, relatedMenuItems } from './actions.js';
+import { canStep, contextOf, createHere, describe, entityTypeMenuItems, relatedMenuItems } from './actions.js';
 import { openPopupMenu } from './menu.js';
 import { clear, el, icon } from './dom.js';
 
@@ -21,30 +29,24 @@ import { clear, el, icon } from './dom.js';
  * @param {() => boolean} context.isEditing
  * @param {() => boolean} context.isUnsaved
  * @param {() => void} context.onSave
+ * @param {() => void} context.onUndo
+ * @param {() => void} context.onRedo
+ * @param {() => {back: number, forward: number}} context.historyDepth
  * @param {import('./actions.js').Handlers} context.handlers
  */
 export function createToolbar(context) {
   const { buttons, handlers } = context;
 
   buttons.new.addEventListener('click', (event) => {
-    const model = context.getModel();
-    const selection = context.getSelection();
-    const here = createHere(model, selection);
-    if (here) {
-      handlers.createEntity(here.typeCode, here);
-      return;
-    }
-    // A pillar holds four types, so there is nothing to default to.
-    const choices = pillarMenuItems(model, selection, handlers);
-    if (choices.length > 0) {
-      event.stopPropagation();
-      openPopupMenu({ anchor: buttons.new, items: choices });
-    }
+    event.stopPropagation();
+    openPopupMenu({
+      anchor: buttons.new,
+      items: entityTypeMenuItems(context.getModel(), context.getSelection(), handlers),
+    });
   });
 
   buttons.newFolder.addEventListener('click', () => {
-    const folder = folderHere(context.getModel(), context.getSelection());
-    if (folder) handlers.createFolder(folder.typeCode, folder.parent);
+    handlers.createFolder(createHere(context.getModel(), context.getSelection()).parent);
   });
 
   buttons.related.addEventListener('click', (event) => {
@@ -53,6 +55,8 @@ export function createToolbar(context) {
   });
 
   buttons.save.addEventListener('click', () => context.onSave());
+  buttons.undo.addEventListener('click', () => context.onUndo());
+  buttons.redo.addEventListener('click', () => context.onRedo());
   buttons.edit.addEventListener('click', () => handlers.edit());
   buttons.delete.addEventListener('click', () => handlers.remove());
   buttons.up.addEventListener('click', () => handlers.moveOrder(-1));
@@ -62,23 +66,32 @@ export function createToolbar(context) {
     const model = context.getModel();
     const selection = context.getSelection();
     const { entity, folderRecord } = contextOf(model, selection);
-    const here = createHere(model, selection);
-    const folder = folderHere(model, selection);
     const editable = Boolean(entity || folderRecord);
 
-    buttons.new.disabled = !here && pillarMenuItems(model, selection, handlers).length === 0;
-    const newLabel = here ? `New ${ENTITY_TYPES[here.typeCode].name}` : 'New entity';
-    buttons.new.title = newLabel;
-    buttons.new.setAttribute('aria-label', newLabel);
-    buttons.newFolder.disabled = !folder;
+    // Both can always be made: there is nowhere in the tree they do not belong.
+    buttons.new.disabled = false;
+    buttons.newFolder.disabled = false;
     buttons.related.disabled = !entity;
+    // Both actions name what they act on, since they stand over one thing at a
+    // time and the label is all a tooltip gives.
     buttons.edit.disabled = !editable || context.isEditing();
     const editLabel = folderRecord ? 'Rename folder' : 'Edit attributes';
     buttons.edit.title = editLabel;
     buttons.edit.setAttribute('aria-label', editLabel);
     buttons.delete.disabled = !editable;
+    const deleteLabel = folderRecord ? 'Delete folder' : 'Delete entity';
+    buttons.delete.title = deleteLabel;
+    buttons.delete.setAttribute('aria-label', deleteLabel);
     buttons.up.disabled = !canStep(model, selection, -1);
     buttons.down.disabled = !canStep(model, selection, 1);
+
+    // The count says how far the arrow reaches, which is the one thing a user
+    // cannot see from a greyed-out button alone.
+    const { back, forward } = context.historyDepth();
+    buttons.undo.disabled = back === 0;
+    buttons.redo.disabled = forward === 0;
+    buttons.undo.title = back === 0 ? 'Nothing to undo' : `Undo (${back} ${back === 1 ? 'step' : 'steps'})`;
+    buttons.redo.title = forward === 0 ? 'Nothing to redo' : `Redo (${forward} ${forward === 1 ? 'step' : 'steps'})`;
 
     buttons.unsaved.hidden = !context.isUnsaved();
 

@@ -4,27 +4,26 @@
  * and the toolbar, the menu bar and the right-click menu are all built from it,
  * so the three offer the same thing.
  *
- * Creating is split three ways, because the two kinds of "new" answer different
+ * Creating is split three ways, because the kinds of "new" answer different
  * questions:
  *
- *   New              another entity of the type the level holds, filed here
- *   New folder       a folder to group them in
+ *   New              an entity of a type the user picks, filed where the
+ *                    cursor is
+ *   New folder       a folder to group things in, made where the cursor is
  *   New related      an entity the metamodel lets this one relate to, and the
  *                    relationship with it
  *
- * A System Element decomposing into another System Element is a composition, so
- * it belongs to the third, not the first.
+ * Only the third consults the metamodel. Where a thing is filed is the user's
+ * choice, so the first two ask nothing of it.
  */
 
-import { ENTITY_TYPES, PILLARS, selfComposition, typesInPillar } from './metamodel.js';
+import { ENTITY_TYPES, entityTypesByPillar } from './metamodel.js';
 import {
   availableRelationships,
-  canMoveEntity,
-  canMoveFolder,
+  canMoveNode,
+  childEntities,
   childFolders,
-  decompositionParent,
   labelOf,
-  folderSiblingsOf,
   siblingsOf,
 } from './model.js';
 
@@ -32,9 +31,10 @@ import {
  * @typedef {import('./navigator.js').Selection} Selection
  *
  * @typedef {Object} Handlers
- * @property {(code: string, options?: {owner?: string|null, folder?: string|null, after?: string|null}) => void} createEntity
- * @property {(typeCode: string, parent: string|null) => void} createFolder
+ * @property {(code: string, options?: {parent?: string|null}) => void} createEntity
+ * @property {(parent: string|null) => void} createFolder
  * @property {(relationshipTypeId: string, direction: 'outgoing'|'incoming') => void} createRelated
+ * @property {() => void} addRelationship
  * @property {() => void} edit
  * @property {(delta: -1|1) => void} moveOrder
  * @property {() => void} move
@@ -48,16 +48,13 @@ import {
 export function contextOf(model, selection) {
   if (selection.kind === 'entity') {
     const entity = model.entities.get(selection.id) ?? null;
-    return { typeCode: entity?.type ?? null, folder: entity?.folder ?? null, entity, folderRecord: null };
+    return { parent: entity?.parent ?? null, entity, folderRecord: null };
   }
   if (selection.kind === 'folder') {
     const folder = model.folders.get(selection.id) ?? null;
-    return { typeCode: folder?.type ?? null, folder: folder?.id ?? null, entity: null, folderRecord: folder };
+    return { parent: folder?.id ?? null, entity: null, folderRecord: folder };
   }
-  if (selection.kind === 'type') {
-    return { typeCode: selection.id, folder: null, entity: null, folderRecord: null };
-  }
-  return { typeCode: null, folder: null, entity: null, folderRecord: null };
+  return { parent: null, entity: null, folderRecord: null };
 }
 
 /**
@@ -72,61 +69,36 @@ export function describe(model, selection) {
     return { iconId: type.icon, pillar: type.pillar, kind: type.name, id: entity.id, label: labelOf(entity) };
   }
   if (folderRecord) return { iconId: 'i-folder', kind: 'Folder', id: '', label: folderRecord.name };
-  if (selection.kind === 'type') return { iconId: 'i-folder', kind: 'Entity type', id: '', label: ENTITY_TYPES[selection.id].plural };
-  if (selection.kind === 'pillar') {
-    const pillar = PILLARS.find((candidate) => candidate.id === selection.id);
-    return { iconId: pillar?.icon ?? 'i-folder', pillar: pillar?.id, kind: 'Pillar', id: '', label: pillar?.name ?? '' };
-  }
   return { iconId: 'i-project', kind: 'Project', id: '', label: model.name };
 }
 
 /**
- * What a single press of New makes here, or null when the level holds no
- * entities of its own.
- *
- * Standing on an entity, it goes inside: where the metamodel gives the type a
- * decomposition, the new one hangs off the selected entity. Types that do not
- * decompose have no inside, so there it lands alongside instead.
+ * Where something new is filed: inside whatever the cursor is standing on. A
+ * folder and an entity both hold things, so both take it inside them; on the
+ * project it goes at the top of the tree. An entity and a folder go to the same
+ * place, so there is one answer for both. There is nowhere it cannot go, so
+ * this never refuses.
  *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
- * @returns {{ typeCode: string, folder: string|null, owner: string|null, after: string|null } | null}
+ * @returns {{ parent: string|null }}
  */
 export function createHere(model, selection) {
   const { entity, folderRecord } = contextOf(model, selection);
-  if (entity) {
-    if (selfComposition(entity.type)) {
-      return { typeCode: entity.type, folder: entity.folder, owner: entity.id, after: null };
-    }
-    return {
-      typeCode: entity.type,
-      folder: entity.folder,
-      owner: decompositionParent(model, entity.id)?.id ?? null,
-      after: entity.id,
-    };
-  }
-  if (folderRecord) return { typeCode: folderRecord.type, folder: folderRecord.id, owner: null, after: null };
-  if (selection.kind === 'type') return { typeCode: selection.id, folder: null, owner: null, after: null };
-  return null;
-}
-
-/**
- * Where a new folder would go, or null when folders do not belong here.
- * @param {import('./model.js').Model} model
- * @param {Selection} selection
- * @returns {{ typeCode: string, parent: string|null } | null}
- */
-export function folderHere(model, selection) {
-  const { entity, folderRecord } = contextOf(model, selection);
-  if (entity) return { typeCode: entity.type, parent: entity.folder };
-  if (folderRecord) return { typeCode: folderRecord.type, parent: folderRecord.id };
-  if (selection.kind === 'type') return { typeCode: selection.id, parent: null };
-  return null;
+  if (entity) return { parent: entity.id };
+  if (folderRecord) return { parent: folderRecord.id };
+  return { parent: null };
 }
 
 /**
  * The entities the metamodel lets the selected one relate to, in either
  * direction, each creating the entity and the relationship together.
+ *
+ * The two directions are headed the way the relationship list names them, so
+ * the same word means the same thing wherever a relationship is read or made.
+ * Neither heading repeats which entity it is relative to: the tree and the bar
+ * above the editor both name that already.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
@@ -139,7 +111,7 @@ export function relatedMenuItems(model, selection, handlers) {
   const items = [];
   const options = availableRelationships(entity.type);
 
-  for (const [heading, direction] of [[`From ${entity.id}`, 'outgoing'], [`Into ${entity.id}`, 'incoming']]) {
+  for (const [heading, direction] of [['Outgoing', 'outgoing'], ['Incoming', 'incoming']]) {
     const group = options.filter((option) => option.direction === direction);
     if (group.length === 0) continue;
     items.push({ heading });
@@ -158,22 +130,36 @@ export function relatedMenuItems(model, selection, handlers) {
 }
 
 /**
- * The pillar level holds four entity types rather than one, so New there asks
- * which before it makes anything.
+ * Which entity to make. Nothing about where the cursor is narrows this any
+ * more, so it is every type the metamodel defines, under the pillar headings
+ * the diagram groups them by. Eighteen names in one alphabetical run are read
+ * end to end; four short groups are scanned, and a user who knows they want a
+ * hazard finds it under Risk Assessment without reading the rest.
+ *
+ * The heading names a group in the diagram, not a level in the model: nothing
+ * is filed by it, and no entity carries it.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
  * @returns {import('./menu.js').MenuItem[]}
  */
-export function pillarMenuItems(model, selection, handlers) {
-  if (selection.kind !== 'pillar') return [];
-  return typesInPillar(selection.id).map((type) => ({
-    label: type.name,
-    iconId: type.icon,
-    pillar: type.pillar,
-    shortcut: type.code,
-    action: () => handlers.createEntity(type.code),
-  }));
+export function entityTypeMenuItems(model, selection, handlers) {
+  const here = createHere(model, selection);
+  const items = [];
+  for (const group of entityTypesByPillar()) {
+    items.push({ heading: group.pillar });
+    for (const type of group.types) {
+      items.push({
+        label: type.name,
+        iconId: type.icon,
+        pillar: type.pillar,
+        shortcut: type.code,
+        action: () => handlers.createEntity(type.code, here),
+      });
+    }
+  }
+  return items;
 }
 
 /**
@@ -184,44 +170,47 @@ export function pillarMenuItems(model, selection, handlers) {
  */
 export function canStep(model, selection, delta) {
   if (selection.kind !== 'entity' && selection.kind !== 'folder') return false;
-  const siblings = selection.kind === 'entity' ? siblingsOf(model, selection.id) : folderSiblingsOf(model, selection.id);
+  const siblings = siblingsOf(model, selection.id);
   const index = siblings.findIndex((item) => item.id === selection.id);
   return index >= 0 && Boolean(siblings[index + delta]);
 }
 
 /**
- * The right-click menu. It carries the same actions as the toolbar and the
- * menu bar, so nothing is reachable from only one of the three.
+ * Every action that acts on what the cursor is standing on, in one list. The
+ * Edit menu and the right-click menu are both built from it, so an action
+ * cannot appear in one and be forgotten in the other, and the toolbars carry
+ * the subset used often enough to deserve a button.
+ *
+ * What does not belong here is anything that acts on the project as a whole:
+ * undo, redo and renaming the project are added by the Edit menu around this
+ * list, and are not offered on a right click, which asks about one thing.
+ *
  * @param {import('./model.js').Model} model
  * @param {Selection} selection
  * @param {Handlers} handlers
  * @returns {import('./menu.js').MenuItem[]}
  */
-export function contextMenuItems(model, selection, handlers) {
+export function selectionActionItems(model, selection, handlers) {
   const items = [];
   const { entity, folderRecord } = contextOf(model, selection);
   const here = createHere(model, selection);
-  const folder = folderHere(model, selection);
   const related = relatedMenuItems(model, selection, handlers);
-  const pillar = pillarMenuItems(model, selection, handlers);
 
-  if (here) {
-    const type = ENTITY_TYPES[here.typeCode];
-    items.push({
-      label: 'New entity',
-      iconId: 'i-new-entity',
-      title: `New ${type.name}`,
-      action: () => handlers.createEntity(here.typeCode, here),
-    });
-  }
-  if (pillar.length > 0) {
-    items.push({ heading: 'New entity' }, ...pillar);
-  }
-  if (folder) {
-    items.push({ label: 'New folder', iconId: 'i-new-folder', action: () => handlers.createFolder(folder.typeCode, folder.parent) });
-  }
+  items.push({
+    label: 'New entity',
+    iconId: 'i-new-entity',
+    submenu: entityTypeMenuItems(model, selection, handlers),
+  });
   if (related.length > 0) {
-    items.push({ label: 'New related', iconId: 'i-new-related', submenu: related });
+    items.push({ label: 'New related entity', iconId: 'i-new-related', submenu: related });
+  }
+  items.push({ label: 'New folder', iconId: 'i-new-folder', action: () => handlers.createFolder(here.parent) });
+
+  // Relating an entity to one that already exists is a different act from
+  // making a new one, so it stands apart from the three above it.
+  if (entity) {
+    items.push({ separator: true });
+    items.push({ label: 'Add relationship', iconId: 'i-add-relationship', action: handlers.addRelationship });
   }
 
   if (entity || folderRecord) {
@@ -232,14 +221,27 @@ export function contextMenuItems(model, selection, handlers) {
     const destinations = moveTargets(model, selection);
     items.push({
       label: 'Move to…',
+      iconId: 'i-move-to',
       disabled: destinations.length === 0,
-      title: destinations.length === 0 ? `There is no other folder for ${ENTITY_TYPES[entity?.type ?? folderRecord.type].plural}.` : undefined,
+      title: destinations.length === 0 ? 'There is nowhere else to file it.' : undefined,
       action: handlers.move,
     });
     items.push({ separator: true });
-    items.push({ label: entity ? 'Delete entity' : 'Delete folder', iconId: 'i-delete', shortcut: 'Del', action: handlers.remove });
+    items.push({ label: entity ? 'Delete entity' : 'Delete folder', iconId: 'i-delete', danger: true, shortcut: 'Del', action: handlers.remove });
   }
   return items;
+}
+
+/**
+ * The right-click menu: everything that applies to the thing under the
+ * pointer, and nothing that does not.
+ * @param {import('./model.js').Model} model
+ * @param {Selection} selection
+ * @param {Handlers} handlers
+ * @returns {import('./menu.js').MenuItem[]}
+ */
+export function contextMenuItems(model, selection, handlers) {
+  return selectionActionItems(model, selection, handlers);
 }
 
 /**
@@ -251,21 +253,26 @@ export function contextMenuItems(model, selection, handlers) {
  */
 export function moveTargets(model, selection) {
   const { entity, folderRecord } = contextOf(model, selection);
-  const typeCode = entity?.type ?? folderRecord?.type;
-  if (!typeCode) return [];
+  if (!entity && !folderRecord) return [];
 
   const targets = [];
   const offer = (target, label, depth) => {
-    const check = entity ? canMoveEntity(model, entity.id, target) : canMoveFolder(model, folderRecord.id, target);
+    const check = canMoveNode(model, entity ? entity.id : folderRecord.id, target);
     if (check.ok) targets.push({ target, label, depth });
   };
 
-  offer({ kind: 'type', id: typeCode }, ENTITY_TYPES[typeCode].plural, 0);
+  offer({ kind: 'root', id: '' }, model.name, 0);
 
+  // An entity holds things as a folder does, so both are offered as places to
+  // file into, in the order the tree draws them.
   const walk = (parent, depth) => {
-    for (const folder of childFolders(model, typeCode, parent)) {
+    for (const folder of childFolders(model, parent)) {
       offer({ kind: 'folder', id: folder.id }, folder.name, depth);
       walk(folder.id, depth + 1);
+    }
+    for (const each of childEntities(model, parent)) {
+      offer({ kind: 'entity', id: each.id }, `${each.id}  ${labelOf(each)}`, depth);
+      walk(each.id, depth + 1);
     }
   };
   walk(null, 1);

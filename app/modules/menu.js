@@ -13,10 +13,12 @@ import { clear, el, icon } from './dom.js';
  * @property {string} [label]
  * @property {string} [heading]    a non-selectable section title
  * @property {string} [iconId]
- * @property {string} [pillar]   colour the icon as a tile for this pillar
+ * @property {string} [pillar]     set where the icon names an entity type, so
+ *   it is drawn in that pillar's colour as it is everywhere else
  * @property {string} [shortcut]
  * @property {boolean} [separator]
  * @property {boolean} [disabled]
+ * @property {boolean} [danger]   destroys something, and is coloured for it
  * @property {string} [title]     why an item is greyed out, on hover
  * @property {MenuItem[]} [submenu]
  * @property {() => void} [action]
@@ -27,7 +29,6 @@ import { clear, el, icon } from './dom.js';
  * @param {HTMLElement} context.barEl
  * @param {HTMLElement} context.layerEl
  * @param {Array<{ label: string, items: MenuItem[] | (() => MenuItem[]) }>} context.menus
- * @param {() => void} [context.onOpen]
  */
 export function createMenuBar(context) {
   /** @type {HTMLElement|null} */
@@ -96,7 +97,6 @@ export function createMenuBar(context) {
    * @param {HTMLElement} dropdown
    */
   function show(button, dropdown, fill) {
-    context.onOpen?.();
     fill();
     const box = button.getBoundingClientRect();
     dropdown.style.left = `${box.left}px`;
@@ -112,8 +112,6 @@ export function createMenuBar(context) {
     for (const button of context.barEl.querySelectorAll('.menubar-item')) button.setAttribute('aria-expanded', 'false');
     open = null;
   }
-
-  return { closeAll };
 }
 
 /** Open popup panels, outermost first. A submenu is the next one along. */
@@ -212,7 +210,7 @@ function buildItems(items, close, level = 0) {
     const hasSubmenu = Array.isArray(item.submenu) && item.submenu.length > 0;
     const entry = el('button', {
       type: 'button',
-      class: `menu-entry${hasSubmenu ? ' has-submenu' : ''}`,
+      class: `menu-entry${hasSubmenu ? ' has-submenu' : ''}${item.danger ? ' danger' : ''}`,
       role: 'menuitem',
       disabled: item.disabled,
       title: item.title,

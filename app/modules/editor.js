@@ -23,6 +23,7 @@ import { clear, el } from './dom.js';
  * @param {HTMLElement} context.bodyEl
  * @param {() => import('./model.js').Model} context.getModel
  * @param {() => string|null} context.getEntityId
+ * @param {() => import('./navigator.js').Selection} context.getSelection
  * @param {() => void} context.onStateChange  editing started or stopped
  * @param {() => void} context.onSaved
  */
@@ -43,7 +44,21 @@ export function createEditor(context) {
     if (!entity) {
       editing = false;
       draft = null;
-      context.bodyEl.append(el('p', { class: 'empty', text: 'Select an entity in the navigator to see its attributes.' }));
+      // A folder and the project are selectable but hold no attributes, so the
+      // pane says which of the two it is rather than claiming nothing is
+      // selected while the bar above names something.
+      const kind = context.getSelection().kind;
+      const empty = {
+        folder: ['Folder', 'A folder groups things in the navigator and carries no attributes of its own. Rename it from the bar above.'],
+        root: ['Project', 'The project holds the model. Select an entity in the navigator to see its attributes here.'],
+      }[kind] ?? ['Nothing selected', 'Select an entity in the navigator to see its attributes here.'];
+
+      context.bodyEl.append(
+        el('div', { class: 'empty-state' }, [
+          el('p', { class: 'empty-state-title', text: empty[0] }),
+          el('p', { class: 'empty-state-body', text: empty[1] }),
+        ])
+      );
       return;
     }
 
@@ -95,7 +110,7 @@ export function createEditor(context) {
         area.value = value;
         return area;
       }
-      return readonlyInput(value, attribute.mono);
+      return readonlyInput(value);
     }
 
     const commit = (event) => {
@@ -115,7 +130,7 @@ export function createEditor(context) {
       select.value = (attribute.values ?? []).includes(value) ? value : '';
       return select;
     }
-    const input = el('input', { class: `input${attribute.mono ? ' mono' : ''}`, type: 'text', oninput: commit });
+    const input = el('input', { class: 'input', type: 'text', oninput: commit });
     input.value = value;
     return input;
   }
@@ -211,7 +226,6 @@ export function createEditor(context) {
     render,
     begin,
     cancel,
-    save,
     hasChanges,
     isEditing: () => editing,
   };

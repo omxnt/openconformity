@@ -6,21 +6,18 @@
  * the metamodel is enforced.
  */
 
-import { ENTITY_TYPES, RELATIONSHIP_TYPES, compositionBetween } from './metamodel.js';
+import { RELATIONSHIP_TYPES } from './metamodel.js';
 import {
   addEntity,
   addFolder,
   addRelationship,
-  canMoveEntity,
-  canMoveFolder,
+  canMoveNode,
   canPlaceBeside,
   createModel,
-  deletionSet,
   labelOf,
-  folderCount,
+  contentCount,
   fromJSON,
-  moveEntity,
-  moveFolder,
+  moveNode,
   moveOrder,
   placeBeside,
   removeEntity,
@@ -34,8 +31,9 @@ import { createEditor } from './editor.js';
 import { createRelationshipPane } from './relationships.js';
 import { createToolbar } from './toolbar.js';
 import { createMenuBar, openPopupMenu } from './menu.js';
-import { canStep, contextMenuItems, contextOf, moveTargets } from './actions.js';
-import { chooseDialog, confirmDialog, notify, openDialog, promptDialog } from './dialog.js';
+import { createHistory } from './history.js';
+import { canStep, contextMenuItems, contextOf, moveTargets, selectionActionItems } from './actions.js';
+import { chooseDialog, confirmDialog, notify, openDialog, promptDialog, toast } from './dialog.js';
 import { el } from './dom.js';
 
 const state = {
@@ -46,8 +44,12 @@ const state = {
   unsaved: false,
 };
 
+const history = createHistory(state.model, state.selection);
+
 /** Remembers that the demo notice has been read, on this device only. */
 const NOTICE_KEY = 'openconformity.demo.notice';
+/** Remembers the chosen theme, on this device only. */
+const THEME_KEY = 'openconformity.theme';
 
 const refs = {
   menubar: document.getElementById('menubar-menus'),
@@ -57,7 +59,7 @@ const refs = {
   filter: document.getElementById('navigator-filter'),
   filterClear: document.getElementById('navigator-filter-clear'),
   editorBody: document.getElementById('editor-body'),
-  relationshipTabs: document.getElementById('relationship-tabs'),
+  relationshipViews: document.getElementById('relationship-views'),
   relationshipToolbar: document.getElementById('relationship-toolbar'),
   relationshipBody: document.getElementById('relationship-body'),
   statusName: document.getElementById('status-name'),
@@ -67,11 +69,28 @@ const refs = {
   workspace: document.getElementById('workspace'),
   navigatorColumn: document.getElementById('navigator-column'),
   relationshipPane: document.getElementById('relationship-pane'),
+  relationshipPanel: document.getElementById('relationship-panel'),
+  themeToggle: document.getElementById('toolbar-theme'),
 };
 
 const getModel = () => state.model;
 const getSelection = () => state.selection;
 const getEntityId = () => (state.selection.kind === 'entity' ? state.selection.id : null);
+
+/**
+ * A parent is a folder or an entity, and the tree keys the two differently.
+ * @param {string} id
+ * @returns {import('./navigator.js').Selection}
+ */
+function selectionFor(id) {
+  return { kind: state.model.folders.has(id) ? 'folder' : 'entity', id };
+}
+
+/** @param {string} id */
+function expandKeyFor(id) {
+  const { kind } = selectionFor(id);
+  return `${kind}:${id}`;
+}
 
 const navigator = createNavigator({
   treeEl: refs.tree,
@@ -87,11 +106,10 @@ const navigator = createNavigator({
   onDrop: (source, target, position) => {
     const result = dropApply(source, target, position);
     if (!result.ok) {
-      notify('Move refused', result.reason ?? 'That move is not allowed.');
+      toast('Move refused', result.reason ?? 'That move is not allowed.');
       return;
     }
-    state.unsaved = true;
-    setSelection(source);
+    commit(source);
   },
 });
 
@@ -111,12 +129,7 @@ function dropCheck(source, target, position) {
     if (target.kind !== 'entity' && target.kind !== 'folder') return { ok: false, reason: 'Nothing sits alongside that.' };
     return canPlaceBeside(state.model, source, target);
   }
-  if (target.kind !== 'type' && target.kind !== 'folder' && target.kind !== 'entity') {
-    return { ok: false, reason: 'Nothing can be filed there.' };
-  }
-  return source.kind === 'entity'
-    ? canMoveEntity(state.model, source.id, target)
-    : canMoveFolder(state.model, source.id, target);
+  return canMoveNode(state.model, source.id, target);
 }
 
 /**
@@ -126,28 +139,29 @@ function dropCheck(source, target, position) {
  */
 function dropApply(source, target, position) {
   if (position !== 'into') return placeBeside(state.model, source, target, position);
-  return source.kind === 'entity'
-    ? moveEntity(state.model, source.id, target)
-    : moveFolder(state.model, source.id, target);
+  return moveNode(state.model, source.id, target);
 }
 
 const editor = createEditor({
   bodyEl: refs.editorBody,
   getModel,
   getEntityId,
+  getSelection,
   onStateChange: () => toolbar.render(),
   onSaved: changed,
 });
 
 const relationshipPane = createRelationshipPane({
-  tabsEl: refs.relationshipTabs,
+  viewsEl: refs.relationshipViews,
   bodyEl: refs.relationshipBody,
   toolbarEl: refs.relationshipToolbar,
+  panelEl: refs.relationshipPanel,
   getModel,
   getEntityId,
   onSelect: (id) => select({ kind: 'entity', id }),
   onChange: changed,
-  onMessage: (message) => notify('Relationship refused', message),
+  onMessage: (message) => toast('Relationship refused', message),
+  setPicker: (spec) => navigator.setPicker(spec),
 });
 
 /** @type {import('./actions.js').Handlers} */
@@ -155,6 +169,7 @@ const handlers = {
   createEntity,
   createFolder,
   createRelated,
+  addRelationship: () => relationshipPane.beginAdd(),
   edit: activateSelection,
   moveOrder: stepSelection,
   move: moveSelection,
@@ -170,6 +185,8 @@ const toolbar = createToolbar({
     delete: document.getElementById('toolbar-delete'),
     up: document.getElementById('toolbar-up'),
     down: document.getElementById('toolbar-down'),
+    undo: document.getElementById('toolbar-undo'),
+    redo: document.getElementById('toolbar-redo'),
     save: document.getElementById('toolbar-save'),
     unsaved: document.getElementById('toolbar-unsaved'),
   },
@@ -179,6 +196,9 @@ const toolbar = createToolbar({
   isEditing: () => editor.isEditing(),
   isUnsaved: () => state.unsaved,
   onSave: saveModel,
+  onUndo: () => step('undo'),
+  onRedo: () => step('redo'),
+  historyDepth: () => history.depth(),
   handlers,
 });
 
@@ -189,25 +209,64 @@ createMenuBar({
     {
       label: 'File',
       items: [
-        { label: 'New project…', action: newModel },
-        { label: 'Open project…', action: openProject },
-        { label: 'Save project', action: saveModel },
+        { label: 'New project…', iconId: 'i-new-project', action: newModel },
+        { label: 'Open project…', iconId: 'i-open-project', action: openProject },
+        { label: 'Save project…', iconId: 'i-save', action: saveModel },
         { separator: true },
-        { label: 'Load example project', action: loadExample },
+        { label: 'Load example project', iconId: 'i-project', action: loadExample },
       ],
     },
     {
+      // Everything that changes the model, whether or not it has a button.
+      // The middle of it is the same list the right-click menu is built from,
+      // so the two cannot drift apart; around it stand the actions that reach
+      // the project as a whole rather than the selection.
       label: 'Edit',
-      items: [{ label: 'Rename project…', action: renameModel }],
+      items: () => [
+        { label: 'Undo', iconId: 'i-undo', disabled: !history.canUndo(), action: () => step('undo') },
+        { label: 'Redo', iconId: 'i-redo', disabled: !history.canRedo(), action: () => step('redo') },
+        { separator: true },
+        ...selectionActionItems(state.model, state.selection, handlers),
+        { separator: true },
+        { label: 'Rename project…', iconId: 'i-edit', action: renameModel },
+      ],
     },
     {
+      label: 'View',
+      items: () => [
+        {
+          label: 'Relationships as graph',
+          iconId: 'i-view-graph',
+          disabled: relationshipPane.view() === 'graph',
+          action: () => relationshipPane.setView('graph'),
+        },
+        {
+          label: 'Relationships as list',
+          iconId: 'i-view-list',
+          disabled: relationshipPane.view() === 'list',
+          action: () => relationshipPane.setView('list'),
+        },
+        { separator: true },
+        {
+          label: isDark() ? 'Light theme' : 'Dark theme',
+          iconId: isDark() ? 'i-theme-light' : 'i-theme-dark',
+          action: toggleTheme,
+        },
+      ],
+    },
+    {
+      // Everything below the first separator leaves the software, so it all
+      // carries the launch icon, the Metamodel among them.
       label: 'Help',
       items: [
-        { label: 'Project site', action: () => openLink('https://openconformity.org') },
-        { label: 'Source on GitHub', action: () => openLink('https://github.com/omxnt/openconformity') },
-        { label: 'Follow on LinkedIn', action: () => openLink('https://www.linkedin.com/company/openconformity') },
+        { label: 'About this demo', iconId: 'i-information', action: showAbout },
         { separator: true },
-        { label: 'Write an email', action: () => { window.location.href = 'mailto:info@openconformity.org'; } },
+        { label: 'Metamodel', iconId: 'i-launch', action: openMetamodel },
+        { label: 'Project site', iconId: 'i-launch', action: () => openLink('https://openconformity.org') },
+        { label: 'Source on GitHub', iconId: 'i-launch', action: () => openLink('https://github.com/omxnt/openconformity') },
+        { label: 'Follow on LinkedIn', iconId: 'i-launch', action: () => openLink('https://www.linkedin.com/company/openconformity') },
+        { separator: true },
+        { label: 'Write an email', iconId: 'i-email', action: () => { window.location.href = 'mailto:info@openconformity.org'; } },
       ],
     },
   ],
@@ -215,25 +274,37 @@ createMenuBar({
 
 // --- Rendering ---------------------------------------------------------
 
-/** Every change to the project goes through here, so nothing dirties silently. */
-function changed() {
+/**
+ * Every change to the project goes through here, so nothing dirties silently
+ * and nothing changes without the history seeing it. The selection is taken
+ * after the change, since that is where undo should put the user back.
+ * @param {import('./navigator.js').Selection} [selection]  where to stand now
+ */
+function commit(selection) {
+  if (selection) {
+    state.selection = selection;
+    navigator.reveal(selection);
+  }
   state.unsaved = true;
+  history.record(state.model, state.selection);
   renderAll();
 }
 
-function renderAll() {
-  navigator.render();
-  editor.render();
-  relationshipPane.render();
-  toolbar.render();
-  renderStatus();
+/** Every change to the project goes through here, so nothing dirties silently. */
+function changed() {
+  commit();
 }
 
-function renderStatus() {
-  document.title = state.model.name;
-  refs.statusName.textContent = state.model.name;
-  refs.statusEntities.textContent = `${state.model.entities.size} entities`;
-  refs.statusRelationships.textContent = `${state.model.relationships.size} relationships`;
+/**
+ * A project that has just replaced the one before it. Nothing that came earlier
+ * belongs to it, so the history starts again rather than letting undo walk back
+ * into a project the user has closed.
+ * @param {import('./navigator.js').Selection} selection
+ */
+function startFresh(selection) {
+  state.unsaved = false;
+  history.reset(state.model, selection);
+  setSelection(selection);
 }
 
 /**
@@ -252,12 +323,57 @@ function guardEdit(continuation) {
     title: 'Discard changes?',
     content: [el('p', { text: 'The entity being edited has changes that have not been saved.' })],
     confirmLabel: 'Discard',
+    danger: true,
     onConfirm: () => {
       editor.cancel();
       continuation();
     },
   });
   return false;
+}
+
+/**
+ * Step the model back or forward. What is restored is a copy, so the history
+ * itself is never handed to the rest of the software to mutate.
+ * @param {'undo'|'redo'} direction
+ */
+function step(direction) {
+  if (!guardEdit(() => step(direction))) return;
+  const entry = direction === 'undo' ? history.undo() : history.redo();
+  if (!entry) return;
+
+  state.model = entry.model;
+  // The project no longer matches the file either way round: stepping back to
+  // what was saved is not something this tracks.
+  state.unsaved = true;
+  setSelection(surviving(entry.selection));
+}
+
+/**
+ * Where to stand after a step. The remembered place is usually still there,
+ * but undoing past the creation of the thing the user was standing on is not.
+ * @param {import('./navigator.js').Selection} selection
+ * @returns {import('./navigator.js').Selection}
+ */
+function surviving(selection) {
+  if (selection.kind === 'entity' && state.model.entities.has(selection.id)) return selection;
+  if (selection.kind === 'folder' && state.model.folders.has(selection.id)) return selection;
+  return { kind: 'root', id: '' };
+}
+
+function renderAll() {
+  navigator.render();
+  editor.render();
+  relationshipPane.render();
+  toolbar.render();
+  renderStatus();
+}
+
+function renderStatus() {
+  document.title = state.model.name;
+  refs.statusName.textContent = state.model.name;
+  refs.statusEntities.textContent = `${state.model.entities.size} entities`;
+  refs.statusRelationships.textContent = `${state.model.relationships.size} relationships`;
 }
 
 /**
@@ -323,16 +439,12 @@ function moveSelection() {
     onConfirm: (value) => {
       const chosen = targets[Number(value)];
       if (!chosen) return;
-      const result =
-        selection.kind === 'entity'
-          ? moveEntity(state.model, selection.id, chosen.target)
-          : moveFolder(state.model, selection.id, chosen.target);
+      const result = moveNode(state.model, selection.id, chosen.target);
       if (!result.ok) {
-        notify('Move refused', result.reason ?? 'That move is not allowed.');
+        toast('Move refused', result.reason ?? 'That move is not allowed.');
         return;
       }
-      state.unsaved = true;
-      setSelection(selection);
+      commit(selection);
     },
   });
 }
@@ -340,31 +452,19 @@ function moveSelection() {
 // --- Creation ----------------------------------------------------------
 
 /**
+ * The entity is filed inside whatever the cursor is standing on, and nowhere
+ * else. No relationship is made for it: what it relates to is a separate
+ * decision, taken in the relationship pane.
  * @param {string} code
- * @param {{owner?: string|null, folder?: string|null, after?: string|null}} [options]
+ * @param {{parent?: string|null}} [options]
  */
 function createEntity(code, options = {}) {
   if (!guardEdit(() => createEntity(code, options))) return;
 
-  const entity = addEntity(state.model, code, {}, { folder: options.folder ?? null });
+  const entity = addEntity(state.model, code, {}, { parent: options.parent ?? null });
+  if (options.parent) navigator.expand(expandKeyFor(options.parent));
 
-  if (options.owner) {
-    const owner = state.model.entities.get(options.owner);
-    const composition = owner ? compositionBetween(owner.type, code) : null;
-    if (composition) {
-      addRelationship(state.model, composition.id, owner.id, entity.id);
-      navigator.expand(`entity:${owner.id}`);
-    }
-  }
-  // Made from an entity, it lands directly under the one it was made from.
-  if (options.after) placeBeside(state.model, { kind: 'entity', id: entity.id }, { kind: 'entity', id: options.after }, 'after');
-
-  navigator.expand(`pillar:${ENTITY_TYPES[code].pillar}`);
-  navigator.expand(`type:${code}`);
-  if (options.folder) navigator.expand(`folder:${options.folder}`);
-
-  state.unsaved = true;
-  select({ kind: 'entity', id: entity.id });
+  commit({ kind: 'entity', id: entity.id });
   editor.begin();
 }
 
@@ -382,7 +482,9 @@ function createRelated(relationshipTypeId, direction) {
   if (!type || !anchor) return;
 
   const code = direction === 'outgoing' ? type.target : type.source;
-  const entity = addEntity(state.model, code, {}, { folder: code === anchor.type ? anchor.folder : null });
+  // The relationship is the point of this; the filing just follows the anchor,
+  // which is the one place the user is already looking.
+  const entity = addEntity(state.model, code, {}, { parent: anchor.parent });
 
   const result =
     direction === 'outgoing'
@@ -391,15 +493,12 @@ function createRelated(relationshipTypeId, direction) {
 
   if (!result.ok) {
     removeEntity(state.model, entity.id);
-    notify('Relationship refused', result.reason ?? 'The relationship could not be created.');
+    toast('Relationship refused', result.reason ?? 'The relationship could not be created.');
     return;
   }
 
-  navigator.expand(`pillar:${ENTITY_TYPES[code].pillar}`);
-  navigator.expand(`type:${code}`);
-  navigator.expand(`entity:${anchor.id}`);
-  state.unsaved = true;
-  select({ kind: 'entity', id: entity.id });
+  if (anchor.parent) navigator.expand(expandKeyFor(anchor.parent));
+  commit({ kind: 'entity', id: entity.id });
   editor.begin();
 }
 
@@ -415,19 +514,17 @@ function stepSelection(delta) {
 
   const result = moveOrder(state.model, selection, delta);
   if (!result.ok) {
-    notify('Move refused', result.reason ?? 'That move is not allowed.');
+    toast('Move refused', result.reason ?? 'That move is not allowed.');
     return;
   }
-  state.unsaved = true;
-  setSelection(selection);
+  commit(selection);
 }
 
 /**
- * @param {string} typeCode
  * @param {string|null} parent
  */
-function createFolder(typeCode, parent) {
-  if (!guardEdit(() => createFolder(typeCode, parent))) return;
+function createFolder(parent) {
+  if (!guardEdit(() => createFolder(parent))) return;
 
   promptDialog({
     title: 'New folder',
@@ -435,12 +532,9 @@ function createFolder(typeCode, parent) {
     value: 'New folder',
     confirmLabel: 'Create',
     onConfirm: (name) => {
-      const folder = addFolder(state.model, typeCode, name, parent);
-      navigator.expand(`pillar:${ENTITY_TYPES[typeCode].pillar}`);
-      navigator.expand(`type:${typeCode}`);
-      if (parent) navigator.expand(`folder:${parent}`);
-      state.unsaved = true;
-      select({ kind: 'folder', id: folder.id });
+      const folder = addFolder(state.model, name, parent);
+      if (parent) navigator.expand(expandKeyFor(parent));
+      commit({ kind: 'folder', id: folder.id });
     },
   });
 }
@@ -462,8 +556,10 @@ function renameFolderDialog(folder) {
 // --- Deletion ----------------------------------------------------------
 
 /**
- * Composition carries ownership, so a deletion can reach further than the
- * entity selected. The affected entities are named before anything is removed.
+ * A deletion reaches one entity and no further. No relationship in the
+ * metamodel makes one entity the owner of another, so there is no ownership to
+ * follow and nothing else is removed: whatever is filed inside it moves up to
+ * where it sat, and the entities it is related to are untouched.
  * @param {string} id
  */
 function requestDeleteEntity(id) {
@@ -471,42 +567,31 @@ function requestDeleteEntity(id) {
 
   const entity = state.model.entities.get(id);
   if (!entity) return;
-  const doomed = deletionSet(state.model, id);
-  const ids = new Set(doomed.map((d) => d.id));
-  const relationshipCount = [...state.model.relationships.values()].filter(
-    (relationship) => ids.has(relationship.source) || ids.has(relationship.target)
+  const held = contentCount(state.model, id);
+  const related = [...state.model.relationships.values()].filter(
+    (relationship) => relationship.source === id || relationship.target === id
   ).length;
-
-  const content = [el('p', { text: `Delete ${entity.id}, ${labelOf(entity)}?` })];
-
-  if (doomed.length > 1) {
-    content.push(
-      el('p', { text: 'It owns the entities below through a composition, so they are deleted with it.' }),
-      el(
-        'ul',
-        { class: 'dialog-list' },
-        doomed.slice(1).map((owned) =>
-          el('li', {}, [el('span', { class: 'mono', text: owned.id }), ` ${labelOf(owned)} (${ENTITY_TYPES[owned.type].name})`])
-        )
-      )
-    );
-  }
-
-  content.push(
-    el('p', {
-      class: 'muted',
-      text: `${doomed.length} ${doomed.length === 1 ? 'entity' : 'entities'} and ${relationshipCount} ${relationshipCount === 1 ? 'relationship' : 'relationships'} will be removed. The entities at the other end of an association are not affected.`,
-    })
-  );
 
   confirmDialog({
     title: 'Delete entity',
-    content,
+    content: [
+      el('p', { text: `Delete ${entity.id}, ${labelOf(entity)}?` }),
+      el('p', {
+        class: 'muted',
+        text: `${related} ${related === 1 ? 'relationship is' : 'relationships are'} removed with it. The entities at the other end stay in the model.`,
+      }),
+      held > 0
+        ? el('p', {
+            class: 'muted',
+            text: `${held} ${held === 1 ? 'entity is' : 'entities are'} filed inside it. ${held === 1 ? 'It moves' : 'They move'} up to where this one sits. No other entity is deleted.`,
+          })
+        : null,
+    ].filter(Boolean),
     confirmLabel: 'Delete',
+    danger: true,
     onConfirm: () => {
       removeEntity(state.model, id);
-      state.unsaved = true;
-      setSelection({ kind: 'type', id: entity.type });
+      commit(entity.parent ? selectionFor(entity.parent) : { kind: 'root', id: '' });
     },
   });
 }
@@ -515,7 +600,7 @@ function requestDeleteEntity(id) {
 function requestDeleteFolder(folder) {
   if (!guardEdit(() => requestDeleteFolder(folder))) return;
 
-  const held = folderCount(state.model, folder.id);
+  const held = contentCount(state.model, folder.id);
   confirmDialog({
     title: 'Delete folder',
     content: [
@@ -529,11 +614,11 @@ function requestDeleteFolder(folder) {
       }),
     ],
     confirmLabel: 'Delete folder',
+    danger: true,
     onConfirm: () => {
       const parent = folder.parent;
       removeFolder(state.model, folder.id);
-      state.unsaved = true;
-      setSelection(parent ? { kind: 'folder', id: parent } : { kind: 'type', id: folder.type });
+      commit(parent ? selectionFor(parent) : { kind: 'root', id: '' });
     },
   });
 }
@@ -557,6 +642,7 @@ function guardUnsaved(continuation) {
       el('p', { class: 'muted', text: 'The project lives only in this tab until it is saved.' }),
     ],
     confirmLabel: 'Discard',
+    danger: true,
     onConfirm: () => continuation(true),
   });
   return false;
@@ -573,8 +659,7 @@ function newModel(discarded) {
     confirmLabel: 'Create',
     onConfirm: (name) => {
       state.model = createModel(name);
-      state.unsaved = false;
-      setSelection({ kind: 'root', id: '' });
+      startFresh({ kind: 'root', id: '' });
     },
   });
 }
@@ -597,8 +682,7 @@ function loadExample(discarded) {
   if (!guardEdit(loadExample)) return;
   if (!discarded && !guardUnsaved(loadExample)) return;
   state.model = buildExampleModel();
-  state.unsaved = false;
-  setSelection({ kind: 'entity', id: 'HAZ-001' });
+  startFresh({ kind: 'entity', id: 'HAZ-001' });
 }
 
 /** @param {boolean} [discarded]  the unsaved-work question has been answered */
@@ -608,17 +692,54 @@ function openProject(discarded) {
   refs.fileInput.click();
 }
 
+/**
+ * The name a project is written under, which is its own name with the
+ * characters a file name cannot carry taken out.
+ * @param {string} name
+ */
+function filenameFor(name) {
+  return `${name.replace(/[^\w -]+/g, '').trim() || 'project'}.json`;
+}
+
+/**
+ * Saving asks for the name first. Every save is a download rather than a
+ * write back to the file the project came from — the browser gives no handle
+ * on that file — so there is no silent "save to where it came from" to offer,
+ * and a save that named itself would land work in the downloads folder under
+ * a name the user never chose. One dialog, pre-filled and confirmed with
+ * Enter, is also where the project is renamed, so the name of the work and
+ * the name of the file cannot drift apart.
+ */
 function saveModel() {
+  if (!guardEdit(saveModel)) return;
+  promptDialog({
+    title: 'Save project',
+    label: 'Project name',
+    value: state.model.name,
+    describe: (name) => `Saved to your downloads as ${filenameFor(name)}`,
+    confirmLabel: 'Save',
+    onConfirm: (name) => {
+      if (name !== state.model.name) {
+        state.model.name = name;
+        commit();
+      }
+      writeFile();
+    },
+  });
+}
+
+function writeFile() {
   const text = JSON.stringify(toJSON(state.model), null, 2);
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-  const filename = state.model.name.replace(/[^\w -]+/g, '').trim() || 'project';
-  const link = el('a', { href: url, download: `${filename}.json` });
+  const filename = filenameFor(state.model.name);
+  const link = el('a', { href: url, download: filename });
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
   state.unsaved = false;
   toolbar.render();
+  toast('Project saved', `Written to your downloads as ${filename}.`);
 }
 
 refs.fileInput.addEventListener('change', () => {
@@ -649,8 +770,11 @@ refs.fileInput.addEventListener('change', () => {
       return;
     }
     state.model = model;
-    state.unsaved = false;
-    setSelection({ kind: 'root', id: '' });
+    startFresh({ kind: 'root', id: '' });
+  };
+  reader.onerror = () => {
+    refs.fileInput.value = '';
+    notify('Cannot open the file', 'The file could not be read.');
   };
   reader.readAsText(file);
 });
@@ -662,29 +786,72 @@ function openLink(url) {
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
-function showMetamodel() {
-  openDialog({
-    wide: true,
-    title: 'Metamodel',
-    content: [
-      el('img', {
-        class: 'metamodel-image',
-        src: 'assets/images/metamodel.svg',
-        alt: 'The metamodel: the entity types a model may contain and the relationships allowed between them',
-      }),
-    ],
-  });
+/**
+ * The diagram in the project documentation is the authoritative definition of
+ * the metamodel and changes with it. The software points at it rather than
+ * carrying a copy, which can only fall behind what the software implements.
+ */
+const METAMODEL_URL = 'https://github.com/omxnt/openconformity/blob/main/docs/metamodel.md';
+
+function openMetamodel() {
+  openLink(METAMODEL_URL);
 }
 
 // --- Chrome ------------------------------------------------------------
 
-document.getElementById('toolbar-metamodel').addEventListener('click', showMetamodel);
+document.getElementById('toolbar-metamodel').addEventListener('click', openMetamodel);
 
-refs.filterClear.addEventListener('click', () => {
+/**
+ * The theme was set on the root element before the stylesheet loaded; from
+ * here on the toggle owns it. The button offers the theme it would switch to.
+ */
+function isDark() {
+  return document.documentElement.dataset.theme === 'dark';
+}
+
+function reflectTheme() {
+  const offer = isDark() ? 'Switch to the light theme' : 'Switch to the dark theme';
+  refs.themeToggle.title = offer;
+  refs.themeToggle.setAttribute('aria-label', offer);
+}
+
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try {
+    window.localStorage.setItem(THEME_KEY, next);
+  } catch {
+    // Storage can be unavailable; the choice then lasts for this tab only.
+  }
+  reflectTheme();
+}
+
+refs.themeToggle.addEventListener('click', toggleTheme);
+
+reflectTheme();
+
+/**
+ * The clear action exists only while there is something to clear. An X on an
+ * empty field is a target that does nothing, and beside a pane it reads as
+ * "close this pane" rather than "empty this box".
+ */
+function clearFilter() {
   refs.filter.value = '';
   refs.filter.dispatchEvent(new Event('input'));
   refs.filter.focus();
+}
+
+refs.filter.addEventListener('input', () => {
+  refs.filterClear.hidden = refs.filter.value === '';
 });
+
+refs.filter.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || refs.filter.value === '') return;
+  event.preventDefault();
+  clearFilter();
+});
+
+refs.filterClear.addEventListener('click', clearFilter);
 
 document.addEventListener('keydown', (event) => {
   if (!refs.tree.contains(document.activeElement)) return;
@@ -708,8 +875,10 @@ function setUpSplitter(splitter, orientation) {
   if (!splitter) return;
   const vertical = orientation === 'vertical';
 
+  // The narrowest the navigator goes is what its toolbar needs: eight buttons
+  // and three dividers, which is 283px.
   const apply = (value) => {
-    if (vertical) refs.navigatorColumn.style.width = `${clamp(value, 220, 620)}px`;
+    if (vertical) refs.navigatorColumn.style.width = `${clamp(value, 288, 620)}px`;
     else refs.relationshipPane.style.height = `${clamp(value, 120, refs.workspace.getBoundingClientRect().height - 180)}px`;
   };
 
@@ -754,6 +923,24 @@ function clamp(value, low, high) {
 }
 
 /**
+ * What the notice says. The same words are shown on the first visit, where
+ * they have to be answered, and from Help afterwards, where they do not: a
+ * warning that can only ever be seen once is a warning the user cannot go
+ * back and check.
+ */
+function noticeContent() {
+  return [
+    el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
+    el('p', { text: 'This is a demonstration of software under construction. Nothing in it has been verified or validated, and responsibility for a CE marking always rests with the manufacturer.' }),
+    el('ul', { class: 'dialog-list' }, [
+      el('li', { text: 'It is guaranteed to contain errors, and many functions are unfinished.' }),
+      el('li', { text: 'It is rebuilt continuously, and changes without warning.' }),
+      el('li', { text: 'The file format will change: a project saved here will not open in a later version.' }),
+    ]),
+  ];
+}
+
+/**
  * Read once per device. The software is a demonstration, and someone arriving
  * at it has to be told that plainly before they put work into it. Accepting
  * takes a second answer, because a notice nobody reads protects nobody.
@@ -762,25 +949,20 @@ function showDemoNotice() {
   openDialog({
     blocking: true,
     title: 'Read this first',
-    content: [
-      el('div', { class: 'notice-important' }, [
-        el('span', { class: 'notice-tag', text: 'Important' }),
-        el('p', { class: 'notice-headline', text: 'Do not use this for real CE marking!' }),
-      ]),
-      el('p', { text: 'This is a demonstration of openconformity. It is not finished software.' }),
-      el('ul', { class: 'dialog-list' }, [
-        el('li', { text: 'It is guaranteed that the tool contains errors.' }),
-        el('li', { text: 'Many functions are still unfinished.' }),
-        el('li', { text: 'The file format will change.' }),
-        el('li', { text: 'A project saved here will not open in a later version.' }),
-        el('li', { text: 'Nothing here has been verified or validated.' }),
-        el('li', { text: 'Things will be wrong, and they will get in your way.' }),
-      ]),
-    ],
+    content: noticeContent(),
     actions: [
       { label: 'Leave', action: () => { window.location.href = 'https://openconformity.org'; } },
       { label: 'I understand', primary: true, action: confirmNoticeRead },
     ],
+  });
+}
+
+/** The same notice, asked for rather than imposed, so it takes no answer. */
+function showAbout() {
+  openDialog({
+    title: 'About this demo',
+    content: noticeContent(),
+    actions: [{ label: 'Close', primary: true }],
   });
 }
 
@@ -815,10 +997,21 @@ window.addEventListener('beforeunload', (event) => {
 navigator.reveal(state.selection);
 renderAll();
 
-let noticeRead = false;
-try {
-  noticeRead = window.localStorage.getItem(NOTICE_KEY) === 'read';
-} catch {
-  // Storage can be unavailable; the notice simply shows.
+/** Whether the notice has been read on this device. */
+function noticeRead() {
+  try {
+    return window.localStorage.getItem(NOTICE_KEY) === 'read';
+  } catch {
+    // Storage can be unavailable; the notice then simply shows.
+    return false;
+  }
 }
-if (!noticeRead) showDemoNotice();
+
+if (!noticeRead()) showDemoNotice();
+
+// Leaving from the notice and coming back can restore the page from the
+// browser's cache without running the load path again, so the notice is
+// asked for once more on restore.
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && !noticeRead()) showDemoNotice();
+});

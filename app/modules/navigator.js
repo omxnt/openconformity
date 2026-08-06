@@ -1,22 +1,19 @@
 /**
  * The navigator pane: the model as a tree.
  *
- * Below the four pillars sits a folder per entity type, and every entity is
- * filed under the folder for its own type. The user can add folders inside
- * those to group entities further; folders carry no meaning in the metamodel.
- *
- * The one nesting the tree does show is decomposition, where an entity owns
- * others of its own type. A hazard is owned by an element, but a hazard is not
- * a kind of element, so it is filed with the hazards and the ownership is read
- * in the relationship pane instead.
+ * The tree is filing and nothing else. Folders and entities both hold folders
+ * and entities, at any depth, in whatever arrangement the user makes. No level
+ * is dictated by the metamodel, so where a thing sits says nothing about what
+ * it is. What an entity is, and what it is related to, is read from its icon
+ * and from the relationship pane.
  */
 
-import { ENTITY_TYPES, PILLARS, typesInPillar } from './metamodel.js';
-import { childFolders, decompositionChildren, decompositionParent, labelOf, folderCount } from './model.js';
+import { ENTITY_TYPES } from './metamodel.js';
+import { childEntities, childFolders, contentCounts, labelOf, nodeOf } from './model.js';
 import { clear, el, icon } from './dom.js';
 
 /**
- * @typedef {{ kind: 'root'|'pillar'|'type'|'folder'|'entity', id: string }} Selection
+ * @typedef {{ kind: 'root'|'folder'|'entity', id: string }} Selection
  */
 
 /**
@@ -34,10 +31,19 @@ import { clear, el, icon } from './dom.js';
 export function createNavigator(context) {
   const expanded = new Set(['root']);
   let filter = '';
+  /** The per-node entity counts, taken once per render. @type {Map<string, number>} */
+  let counts = new Map();
   /** @type {Selection|null} */
   let dragging = null;
-
-  for (const pillar of PILLARS) expanded.add(`pillar:${pillar.id}`);
+  /**
+   * While set, the tree is a picker rather than a navigator: clicking a valid
+   * entity hands it over instead of selecting it, everything else is inert,
+   * and only expanding, collapsing and filtering still work, so a target can
+   * be reached wherever it is filed. `pickedIds` are the rows handed over so
+   * far, drawn as taken; handing one over again lets go of it.
+   * @type {{ validIds: Set<string>, pickedIds?: Set<string>, onPick: (id: string) => void } | null}
+   */
+  let picker = null;
 
   context.filterEl.addEventListener('input', () => {
     filter = context.filterEl.value.trim().toLowerCase();
@@ -50,6 +56,7 @@ export function createNavigator(context) {
     const model = context.getModel();
     const selection = context.getSelection();
     const matches = filter ? matchingKeys(model, filter) : null;
+    counts = contentCounts(model);
 
     clear(context.treeEl);
     context.treeEl.append(
@@ -59,74 +66,28 @@ export function createNavigator(context) {
         iconId: 'i-project',
         label: model.name,
         current: selection,
-        children: PILLARS.map((pillar) => pillarNode(model, pillar, matches, selection)).filter(Boolean),
+        depth: 0,
+        children: contentsOf(model, null, matches, selection, 1),
       })
     );
   }
 
   /**
+   * What sits directly inside a folder or an entity, or at the top of the tree
+   * when the parent is null: folders first, then the entities filed there.
    * @param {import('./model.js').Model} model
-   * @param {{id: string, name: string}} pillar
+   * @param {string|null} parentId
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth  how far to indent the rows at this level
    */
-  function pillarNode(model, pillar, matches, selection) {
-    const children = typesInPillar(pillar.id)
-      .map((type) => typeNode(model, type, matches, selection))
-      .filter(Boolean);
-    if (matches && children.length === 0) return null;
-    return node({
-      key: `pillar:${pillar.id}`,
-      selection: { kind: 'pillar', id: pillar.id },
-      iconId: pillar.icon,
-      pillar: pillar.id,
-      label: pillar.name,
-      className: 'pillar',
-      current: selection,
-      children,
-    });
-  }
-
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {import('./metamodel.js').EntityType} type
-   * @param {Set<string>|null} matches
-   * @param {Selection} selection
-   */
-  function typeNode(model, type, matches, selection) {
-    const total = [...model.entities.values()].filter((entity) => entity.type === type.code).length;
-    const children = contentsOf(model, type.code, null, matches, selection);
-    if (matches && children.length === 0) return null;
-    return node({
-      key: `type:${type.code}`,
-      selection: { kind: 'type', id: type.code },
-      iconId: 'i-folder',
-      pillar: type.pillar,
-      label: type.plural,
-      count: String(total),
-      current: selection,
-      children,
-    });
-  }
-
-  /**
-   * The folders and entities that sit directly inside a type folder or a user
-   * folder: subfolders first, then the entities filed there.
-   * @param {import('./model.js').Model} model
-   * @param {string} typeCode
-   * @param {string|null} folderId
-   * @param {Set<string>|null} matches
-   * @param {Selection} selection
-   */
-  function contentsOf(model, typeCode, folderId, matches, selection) {
-    const folders = childFolders(model, typeCode, folderId)
-      .map((folder) => folderNode(model, folder, matches, selection))
+  function contentsOf(model, parentId, matches, selection, depth) {
+    const folders = childFolders(model, parentId)
+      .map((folder) => folderNode(model, folder, matches, selection, depth))
       .filter(Boolean);
 
-    const entities = [...model.entities.values()]
-      .filter((entity) => entity.type === typeCode && entity.folder === folderId)
-      .filter((entity) => !decompositionParent(model, entity.id))
-      .map((entity) => entityNode(model, entity, matches, selection))
+    const entities = childEntities(model, parentId)
+      .map((entity) => entityNode(model, entity, matches, selection, depth))
       .filter(Boolean);
 
     return [...folders, ...entities];
@@ -137,44 +98,46 @@ export function createNavigator(context) {
    * @param {import('./model.js').Folder} folder
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth
    */
-  function folderNode(model, folder, matches, selection) {
-    const children = contentsOf(model, folder.type, folder.id, matches, selection);
+  function folderNode(model, folder, matches, selection, depth) {
+    const children = contentsOf(model, folder.id, matches, selection, depth + 1);
     if (matches && children.length === 0 && !matches.has(`folder:${folder.id}`)) return null;
     return node({
       key: `folder:${folder.id}`,
       selection: { kind: 'folder', id: folder.id },
       iconId: 'i-folder',
-      pillar: ENTITY_TYPES[folder.type].pillar,
       label: folder.name,
-      count: String(folderCount(model, folder.id)),
+      count: String(counts.get(folder.id) ?? 0),
       current: selection,
+      depth,
       children,
     });
   }
 
   /**
+   * An entity holds things the same way a folder does, so it is drawn the same
+   * way: what is filed inside it hangs below it.
    * @param {import('./model.js').Model} model
    * @param {import('./model.js').Entity} entity
    * @param {Set<string>|null} matches
    * @param {Selection} selection
+   * @param {number} depth
    */
-  function entityNode(model, entity, matches, selection) {
-    const children = decompositionChildren(model, entity.id)
-      .map((child) => entityNode(model, child, matches, selection))
-      .filter(Boolean);
-
-    if (matches && !matches.has(`entity:${entity.id}`) && children.length === 0) return null;
-
+  function entityNode(model, entity, matches, selection, depth) {
+    const children = contentsOf(model, entity.id, matches, selection, depth + 1);
+    if (matches && children.length === 0 && !matches.has(`entity:${entity.id}`)) return null;
+    const type = ENTITY_TYPES[entity.type];
     return node({
       key: `entity:${entity.id}`,
       selection: { kind: 'entity', id: entity.id },
       id: entity.id,
-      iconId: ENTITY_TYPES[entity.type].icon,
-      pillar: ENTITY_TYPES[entity.type].pillar,
+      iconId: type.icon,
+      pillar: type.pillar,
       label: labelOf(entity),
-      title: `${ENTITY_TYPES[entity.type].name} ${entity.id}`,
+      title: `${type.name} ${entity.id}`,
       current: selection,
+      depth,
       children,
     });
   }
@@ -186,11 +149,13 @@ export function createNavigator(context) {
    * @param {Selection} spec.current
    * @param {string} [spec.id]
    * @param {string} spec.iconId
+   * @param {string} [spec.pillar]  set on an entity row, so the icon is
+   *   coloured by the pillar its type belongs to
    * @param {string} spec.label
    * @param {string} [spec.count]
    * @param {string} [spec.className]
-   * @param {string} [spec.pillar]
    * @param {string} [spec.title]
+   * @param {number} spec.depth
    * @param {HTMLElement[]} [spec.children]
    */
   function node(spec) {
@@ -198,19 +163,23 @@ export function createNavigator(context) {
     const hasChildren = children.length > 0;
     const open = hasChildren && (filter !== '' || expanded.has(spec.key));
     const selected = spec.current.kind === spec.selection.kind && spec.current.id === spec.selection.id;
+    const pickable = Boolean(picker && spec.selection.kind === 'entity' && picker.validIds.has(spec.selection.id));
+    const picked = pickable && Boolean(picker.pickedIds?.has(spec.selection.id));
+    const pickClass = picker ? (pickable ? ` pickable${picked ? ' picked' : ''}` : ' pick-dim') : '';
 
-    const row = el('div', { class: 'row', title: spec.title });
+    // The stylesheet turns the depth into the row's left padding, so a row runs
+    // the full width of the pane whatever level it sits at.
+    const row = el('div', { class: `row${pickClass}`, title: spec.title, style: `--depth:${spec.depth}` });
     row.append(
       hasChildren
         ? el('span', {
             class: 'twisty',
-            text: open ? '−' : '+',
             'aria-hidden': 'true',
             onclick: (event) => {
               event.stopPropagation();
               toggle(spec.key);
             },
-          })
+          }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')])
         : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
     );
     row.append(icon(spec.iconId, spec.pillar));
@@ -228,19 +197,25 @@ export function createNavigator(context) {
       'aria-selected': String(selected),
       onclick: (event) => {
         event.stopPropagation();
+        if (picker) {
+          if (pickable) picker.onPick(spec.selection.id);
+          return;
+        }
         context.onSelect(spec.selection);
       },
       ondblclick: (event) => {
         event.stopPropagation();
+        if (picker) return;
         context.onActivate(spec.selection);
       },
       oncontextmenu: (event) => {
         event.preventDefault();
         event.stopPropagation();
+        if (picker) return;
         context.onSelect(spec.selection);
         context.onContextMenu(spec.selection, event.clientX, event.clientY);
       },
-      onkeydown: (event) => onKeyDown(event, spec, hasChildren, open),
+      onkeydown: (event) => onKeyDown(event, spec, hasChildren, open, pickable),
     }, [row]);
 
     if (hasChildren && open) {
@@ -251,14 +226,15 @@ export function createNavigator(context) {
   }
 
   /**
-   * Dragging moves an entity or a folder within its own kind. Near the top or
-   * the bottom of a row it drops alongside, which is how the order is changed;
-   * across the middle it drops inside. Whether either is allowed is asked of
-   * the model, so the tree accepts exactly what the model accepts.
+   * Anything can be dragged anywhere. Near the top or the bottom of a row it
+   * drops alongside, which is how the order is changed; across the middle of a
+   * folder it drops inside. Whether either is allowed is asked of the model, so
+   * the tree accepts exactly what the model accepts.
    * @param {HTMLElement} wrapper
    * @param {Selection} selection
    */
   function addDragAndDrop(wrapper, selection) {
+    if (picker) return;
     if (selection.kind === 'entity' || selection.kind === 'folder') {
       wrapper.draggable = true;
       wrapper.addEventListener('dragstart', (event) => {
@@ -275,14 +251,18 @@ export function createNavigator(context) {
       });
     }
 
-    if (selection.kind !== 'entity' && selection.kind !== 'folder' && selection.kind !== 'type') return;
-
+    // A row that refuses still stops the event. Every row sits inside its
+    // parent's, so letting a refusal through would hand the drop to a row the
+    // pointer was never over, and the thing would land somewhere else entirely.
     wrapper.addEventListener('dragover', (event) => {
       if (!dragging) return;
-      const position = positionWithin(event, wrapper, selection);
-      if (!context.canDrop(dragging, selection, position)) return;
-      event.preventDefault();
       event.stopPropagation();
+      const position = positionWithin(event, wrapper, selection);
+      if (!context.canDrop(dragging, selection, position)) {
+        clearDropMarks();
+        return;
+      }
+      event.preventDefault();
       event.dataTransfer.dropEffect = 'move';
       const mark = position === 'into' ? 'drop-target' : `drop-${position}`;
       if (!wrapper.classList.contains(mark)) {
@@ -293,10 +273,10 @@ export function createNavigator(context) {
 
     wrapper.addEventListener('drop', (event) => {
       if (!dragging) return;
+      event.stopPropagation();
       const position = positionWithin(event, wrapper, selection);
       if (!context.canDrop(dragging, selection, position)) return;
       event.preventDefault();
-      event.stopPropagation();
       const source = dragging;
       dragging = null;
       clearDropMarks();
@@ -311,7 +291,9 @@ export function createNavigator(context) {
    * @returns {'before'|'after'|'into'}
    */
   function positionWithin(event, wrapper, selection) {
-    if (selection.kind === 'type') return 'into';
+    // The top of the tree only takes things inside it. A folder and an entity
+    // both take things inside or alongside, so both read the same three bands.
+    if (selection.kind === 'root') return 'into';
     const box = wrapper.querySelector(':scope > .row').getBoundingClientRect();
     const offset = event.clientY - box.top;
     if (offset < box.height * 0.3) return 'before';
@@ -349,8 +331,9 @@ export function createNavigator(context) {
    * @param {{key: string, selection: Selection}} spec
    * @param {boolean} hasChildren
    * @param {boolean} open
+   * @param {boolean} pickable
    */
-  function onKeyDown(event, spec, hasChildren, open) {
+  function onKeyDown(event, spec, hasChildren, open, pickable) {
     const keys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' ', 'ContextMenu'];
     if (!keys.includes(event.key)) return;
     event.preventDefault();
@@ -370,8 +353,11 @@ export function createNavigator(context) {
       if (hasChildren && open) toggle(spec.key);
       else focusNode(visible[here]?.parentElement?.closest('.node'));
     } else if (event.key === 'ContextMenu') {
+      if (picker) return;
       const box = visible[here]?.getBoundingClientRect();
       context.onContextMenu(spec.selection, box?.left ?? 0, box ? box.top + 22 : 0);
+    } else if (picker) {
+      if (pickable) picker.onPick(spec.selection.id);
     } else {
       context.onActivate(spec.selection);
     }
@@ -412,27 +398,31 @@ export function createNavigator(context) {
     /** Open the branch that holds a selection, so it is always visible. */
     reveal(selection) {
       const model = context.getModel();
-      if (selection.kind === 'entity') {
-        let entity = model.entities.get(selection.id);
-        if (!entity) return;
-        let parent = decompositionParent(model, entity.id);
-        while (parent) {
-          expanded.add(`entity:${parent.id}`);
-          entity = parent;
-          parent = decompositionParent(model, parent.id);
-        }
-        openFolderChain(model, entity.type, entity.folder);
-      } else if (selection.kind === 'folder') {
-        const folder = model.folders.get(selection.id);
-        if (folder) openFolderChain(model, folder.type, folder.parent);
-      } else if (selection.kind === 'type') {
-        expanded.add(`pillar:${ENTITY_TYPES[selection.id].pillar}`);
-      }
+      const node = nodeOf(model, selection.id);
+      if (node) openParentChain(model, node.parent);
     },
 
     /** Open a branch without changing the selection. */
     expand(key) {
       expanded.add(key);
+    },
+
+    /**
+     * Turn the tree into a picker, or back into a navigator with null. Every
+     * branch holding a pickable entity is opened, so nothing on offer is
+     * hidden inside a collapsed level.
+     * @param {{ validIds: Set<string>, onPick: (id: string) => void } | null} spec
+     */
+    setPicker(spec) {
+      picker = spec;
+      if (spec) {
+        const model = context.getModel();
+        for (const id of spec.validIds) {
+          const target = nodeOf(model, id);
+          if (target) openParentChain(model, target.parent);
+        }
+      }
+      render();
     },
 
     focusSelected() {
@@ -442,19 +432,18 @@ export function createNavigator(context) {
   };
 
   /**
+   * Open every branch above a node. Either kind can be a parent, so the walk
+   * looks in both maps.
    * @param {import('./model.js').Model} model
-   * @param {string} typeCode
-   * @param {string|null} folderId
+   * @param {string|null} parentId
    */
-  function openFolderChain(model, typeCode, folderId) {
-    expanded.add(`pillar:${ENTITY_TYPES[typeCode].pillar}`);
-    expanded.add(`type:${typeCode}`);
+  function openParentChain(model, parentId) {
     const seen = new Set();
-    let current = folderId ? model.folders.get(folderId) : null;
+    let current = nodeOf(model, parentId);
     while (current && !seen.has(current.id)) {
-      expanded.add(`folder:${current.id}`);
+      expanded.add(`${model.folders.has(current.id) ? 'folder' : 'entity'}:${current.id}`);
       seen.add(current.id);
-      current = current.parent ? model.folders.get(current.parent) : null;
+      current = nodeOf(model, current.parent);
     }
   }
 }
