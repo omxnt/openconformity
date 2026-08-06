@@ -253,43 +253,21 @@ The software shall consist of static files only, with no server-side code.
 
 ## 3. Graphical
 
-### 3.1 System
+### 3.1 Identity
 
 ---
 
-#### G-SYS-001 Prose typeface
+#### G-IDN-001 Symbol
 
 `ubiquitous` `stable`
 
-The software shall render prose text in IBM Plex Sans.
+The symbol shall be an isometric cube.
 
-> *A humanist sans keeps prose legible at interface sizes. It is open-licensed and can be self-hosted.*
-
----
-
-#### G-SYS-002 Data typeface
-
-`ubiquitous` `stable`
-
-The software shall render identifiers and data values in IBM Plex Mono.
-
-> *A monospace face marks machine-referenceable content, such as identifiers, clauses, and values, as distinct from prose at a glance.*
+> *A cube is the simplest form of a system element, which is where every model begins. It stands alone where the name does not fit.*
 
 ---
 
-#### G-SYS-003 Accent colour
-
-`ubiquitous` `stable`
-
-The software shall use `#00618E` as its single accent colour.
-
-> *A single accent marks the interactive layer and keeps the interface minimal. This blue is neutral and holds a comfortable contrast margin as text on a light canvas and as a boundary on any surface, so it works throughout the software and carries to the wider identity.*
-
-### 3.2 Marks
-
----
-
-#### G-MRK-001 Wordmark
+#### G-IDN-002 Wordmark
 
 `ubiquitous` `stable`
 
@@ -299,13 +277,92 @@ The wordmark shall be "openconformity" in the prose typeface.
 
 ---
 
-#### G-MRK-002 Favicon
+#### G-IDN-003 Favicon
 
 `ubiquitous` `stable`
 
-The favicon shall be a square filled with the accent colour.
+The favicon shall be the symbol.
 
-> *A favicon is too small to render the wordmark legibly. A filled accent square is unmistakable at 16 pixels and reduces the identity to its simplest form: the name and one colour.*
+> *A favicon is too small to render the wordmark legibly. The symbol alone is unmistakable at 16 pixels and keeps the mark consistent wherever it appears.*
+
+---
+
+#### G-IDN-004 Colour
+
+`ubiquitous` `stable`
+
+The colour of a mark shall be black or white according to its background.
+
+> *One shape and no colour reproduces anywhere, at any size, in print or on screen, with nothing to match or maintain.*
+
+### 3.2 System
+
+---
+
+#### G-SYS-001 Design system
+
+`ubiquitous` `stable`
+
+The software shall follow the IBM Carbon Design System, its colour tokens, spacing scale, type scale, and component patterns.
+
+> *A design system removes a class of decisions and gives the interface a consistency that would otherwise be arrived at slowly and unevenly. Carbon is built for dense professional software, is open-licensed, and can be self-hosted.*
+
+---
+
+#### G-SYS-002 Prose typeface
+
+`ubiquitous` `stable`
+
+The software shall render prose text in IBM Plex Sans.
+
+> *A humanist sans keeps prose legible at interface sizes. It is the typeface of the design system, is open-licensed, and can be self-hosted.*
+
+---
+
+#### G-SYS-003 Data typeface
+
+`ubiquitous` `stable`
+
+The software shall render identifiers and data values in IBM Plex Mono.
+
+> *A monospace face marks machine-referenceable content, such as identifiers, clauses, and values, as distinct from prose at a glance.*
+
+---
+
+#### G-SYS-004 Iconography
+
+`ubiquitous` `stable`
+
+The software shall use Carbon Icons for its iconography.
+
+> *The icon set belongs to the same design system as the typeface and the tokens, so the interface reads as one thing. Its coverage is wide enough for the entity types, and it is open-licensed and self-hosted.*
+
+---
+
+#### G-SYS-005 Pane layout
+
+`ubiquitous` `stable`
+
+The software shall present the panes arranged as below.
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Shell bar                                              │
+├───────────────────┬─────────────────────────────────────┤
+│  Navigator pane   │  Editor pane                        │
+│                   │                                     │
+│  Tree of          │  Attributes of the                  │
+│  the model        │  selected entity                    │
+│                   │                                     │
+│                   ├─────────────────────────────────────┤
+│                   │  Relationship pane                  │
+│                   │                                     │
+│                   │  Relationships of the               │
+│                   │  selected entity                    │
+└───────────────────┴─────────────────────────────────────┘
+```
+
+> *The layout separates the concerns of the work: navigating the model, editing the selected entity, and working with its relationships. Each pane acts on what the navigator has selected, so the tree stays visible at full height while the editor and relationships share the column beside it.*
 
 ## 4. Functional
 
@@ -320,6 +377,106 @@ The favicon shall be a square filled with the accent colour.
 If the viewport is smaller than the supported viewport, then the software shall display a notice that a desktop-sized screen is required.
 
 > *Below the supported viewport the multi-pane interface cannot function. A notice is honest about the limitation, where a degraded interface would misrepresent what the software can do.*
+
+---
+
+#### F-APP-002 Direct entry
+
+`ubiquitous` `draft`
+
+The software shall present the workspace on entry, without a homepage, wizard, or project setup prompt.
+
+> *The software is the destination, not a page in front of it. A first visit opens an empty project ready for the first entity, and information about the project is available from within the software rather than ahead of it.*
+
+---
+
+#### F-APP-003 Working state
+
+`event driven` `draft`
+
+When the software is opened, it shall restore the working state of the previous session.
+
+> *The user returns to what they left. Losing the open project and the selection on every visit would make the software unusable for work that spans more than one sitting.*
+
+---
+
+#### F-APP-004 Model tree
+
+`ubiquitous` `draft`
+
+The software shall present the model as a tree in the navigator pane.
+
+> *A tree is how the user navigates and selects. Everything else in the interface acts on what is selected there, so the model needs one visible structure to select from.*
+
+---
+
+#### F-APP-005 Entity attributes
+
+`event driven` `draft`
+
+When an entity is selected, the software shall present its attributes in the editor pane.
+
+> *The attributes are the content of an entity. Presenting them on selection is what makes the tree a way into the model rather than a list of names.*
+
+---
+
+#### F-APP-006 Entity relationships
+
+`event driven` `draft`
+
+When an entity is selected, the software shall present its relationships in the relationship pane.
+
+> *The relationships are what distinguish a model from a set of documents. Showing them beside the attributes keeps the connections visible while the entity is worked on.*
+
+---
+
+#### F-APP-007 Entity creation
+
+`ubiquitous` `draft`
+
+The software shall only permit the creation of entity types defined by the metamodel.
+
+> *The metamodel encodes the domain. Allowing an entity type it does not define would let a model express something the domain does not have.*
+
+---
+
+#### F-APP-008 Relationship creation
+
+`ubiquitous` `draft`
+
+The software shall only permit the creation of relationships defined by the metamodel.
+
+> *A relationship not present in the metamodel has no meaning in the domain. Enforcing this on creation is what makes a model structurally sound by construction rather than by review.*
+
+---
+
+#### F-APP-009 Entity deletion
+
+`event driven` `draft`
+
+When an entity is deleted, the software shall remove the relationships it takes part in.
+
+> *A relationship cannot exist without both of its entities. Leaving one behind would produce a connection to nothing.*
+
+---
+
+#### F-APP-010 Relationship deletion
+
+`event driven` `draft`
+
+When a relationship is deleted, the software shall not delete the entities it relates.
+
+> *Removing a connection says nothing about the things connected. Both entities were identified independently and remain part of the model.*
+
+---
+
+#### F-APP-011 Edit confirmation
+
+`ubiquitous` `draft`
+
+The software shall not apply changes to an entity's attributes until the user confirms them.
+
+> *An entity is read far more often than it is edited. Requiring confirmation means the model cannot be changed by a stray keystroke while reading.*
 
 ### 4.2 Persistence
 
