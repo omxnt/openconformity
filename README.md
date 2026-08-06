@@ -38,10 +38,9 @@ openconformity/
 | Document | Contents |
 |---|---|
 | [about.md](docs/about.md) | Why it exists and what it is |
-| [requirements.md](docs/requirements.md) | What it shall be and do |
-| [metamodel.md](docs/metamodel.md) | What a model may contain |
-| [user-interface.md](docs/user-interface.md) | How the user works with it |
 | [decisions.md](docs/decisions.md) | What was chosen and why |
+| [metamodel.md](docs/metamodel.md) | What a model may contain |
+| [requirements.md](docs/requirements.md) | What it shall be and do |
 
 ## Disclaimer
 
