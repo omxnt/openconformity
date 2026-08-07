@@ -315,7 +315,7 @@ No colour in the interface means pass or fail. Green and red as status are exclu
 
 ### D-027 Type by shape
 
-`2026-07-19` `graphical`
+`2026-07-19` `graphical` `superseded by D-043`
 
 Entity type is distinguished by icon, not by colour. The interface is monochrome plus a single accent, specified in spec.md.
 
@@ -499,6 +499,16 @@ The interface follows the IBM Carbon Design System, its colour tokens, spacing s
 The document set is `about.md`, `requirements.md`, `metamodel.md`, and `decisions.md`, with `template.md` giving the form the prose documents follow. `user-interface.md` is removed and what it described is stated as requirements. `use-cases.md` is not written. `metamodel.md` becomes a Mermaid diagram in place of a prose document and its exported image, and does not follow the template.
 
 > *Writing everything as prose before building forced repeated iteration of documents that the code states more accurately. What survives is what nothing else can carry: requirements are verifiable, the metamodel is the model, and the log holds the reasoning. Interface behaviour became requirements rather than description, since a requirement is checkable where prose is not. A Mermaid diagram is text in the document, so it cannot drift from a source it is exported from. Supersedes D-038 and D-040.*
+
+---
+
+### D-043 Colour by pillar
+
+`2026-08-07` `graphical`
+
+Entity type icons carry a colour by pillar, from Carbon's palette, with one value per theme. Shape remains the carrier of meaning, since each entity type has its own silhouette, and colour groups rather than identifies.
+
+> *An earlier palette was built and removed because shape did not need it. What changed is the count: eighteen entity types are more than a tree can be scanned by shape alone, and four colours group them into areas of the work before any icon is read. The hues were chosen by searching every combination of three Carbon hues plus yellow across the usable steps, requiring three to one contrast against every row state and scoring by the smallest perceptual distance between any two pillars under normal vision and simulated protanopia, deuteranopia and tritanopia. Purple, magenta, teal and yellow won by a wide margin, with no pair falling below a distance of fifteen. Under protanopia the system context colour sits close to the neutral icon grey, which was accepted in exchange for keeping the pillars apart from each other. Nobody who cannot see the colour loses information, only the speed of finding a pillar. Supersedes D-027.*
 
 ## 3. Undecided
 
