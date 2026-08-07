@@ -257,17 +257,7 @@ The software shall consist of static files only, with no server-side code.
 
 ---
 
-#### G-IDN-001 Symbol
-
-`ubiquitous` `stable`
-
-The symbol shall be an isometric cube.
-
-> *A cube is the simplest form of a system element, which is where every model begins. It stands alone where the name does not fit.*
-
----
-
-#### G-IDN-002 Wordmark
+#### G-IDN-001 Wordmark
 
 `ubiquitous` `stable`
 
@@ -277,23 +267,23 @@ The wordmark shall be "openconformity" in the prose typeface.
 
 ---
 
-#### G-IDN-003 Favicon
+#### G-IDN-002 Favicon
 
 `ubiquitous` `stable`
 
-The favicon shall be the symbol.
+The favicon shall be an isometric cube of three shaded faces.
 
-> *A favicon is too small to render the wordmark legibly. The symbol alone is unmistakable at 16 pixels and keeps the mark consistent wherever it appears.*
+> *A favicon is too small to render the wordmark legibly. A cube is the simplest form of a system element, which is where every model begins, and shading the faces distinguishes them where an outline would not.*
 
 ---
 
-#### G-IDN-004 Colour
+#### G-IDN-003 Colour
 
 `ubiquitous` `stable`
 
-The colour of a mark shall be black or white according to its background.
+The wordmark and the favicon shall be monochrome, and shall invert according to their background.
 
-> *One shape and no colour reproduces anywhere, at any size, in print or on screen, with nothing to match or maintain.*
+> *One shape and no hue reproduces anywhere, at any size, in print or on screen, with nothing to match or maintain.*
 
 ### 3.2 System
 
