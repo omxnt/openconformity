@@ -213,28 +213,6 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
   row-gap: 16px;          /* $spacing-05 */
 }
 
-/* Symbol and wordmark together in the header. The symbol is a drawn mark in
-   three fixed colours rather than one shape to fill, so it is an image and not
-   a mask, and it stands the same in either theme. Its box is a Carbon icon
-   size, and the cube's ink fills 90% of that, which lands it at about the
-   wordmark's own height beside it. */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;  /* $spacing-04 */
-  flex: none;
-  color: var(--shell-text);
-  text-decoration: none;
-}
-.brand:hover { color: var(--shell-text); text-decoration: none; }
-
-.symbol {
-  display: block;
-  width: 24px;   /* Carbon icon size 24, $spacing-06 */
-  height: 24px;
-  flex: none;
-}
-
 /* The mark is a mask filled with the text colour of whatever it sits on, so it
    is Carbon's white on the g100 shell and on the g100 footer.
 
@@ -603,20 +581,28 @@ footer {
 }
 .foot-col a:hover { color: var(--shell-text); text-decoration: underline; }
 
+/* One line now, so it is a line of text rather than a row with two ends to
+   push apart. */
 .foot-base {
   border-top: 1px solid var(--shell-border);
   padding-top: 24px;    /* $spacing-06 */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;            /* $spacing-06 */
-  flex-wrap: wrap;
   font-size: 12px;      /* $label-01 */
   line-height: 1.33333;
   letter-spacing: 0.32px;
   color: var(--shell-text-helper);
 }
+/* The parent already sets the size the small print wants; without this the
+   element would take it down a step again. */
 .foot-base small { font-size: 12px; }
+
+/* The one link set inside a sentence on this page. It is underlined and stays
+   underlined: it sits in a run of text the same hue, so a change of brightness
+   alone would be the only thing marking it. */
+.foot-base a {
+  color: var(--shell-text);
+  text-decoration: underline;
+}
+.foot-base a:hover { color: var(--shell-text); }
 
 /* ---------- Focus ---------- */
 
@@ -648,7 +634,7 @@ footer :focus-visible { outline-color: var(--shell-focus); }
     row-gap: 0;
     column-gap: var(--grid-gutter);
   }
-  .brand { align-self: center; }
+  .wordmark { align-self: center; }
   .bar-end { margin-inline-start: 0; }
 
   /* Two cards to a row: four of the eight columns each, landing on the grid. */

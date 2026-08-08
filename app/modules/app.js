@@ -343,7 +343,7 @@ createMenuBar({
       // carries the launch icon, the Metamodel among them.
       label: 'Help',
       items: [
-        { label: 'About this demo', iconId: 'i-information', action: showAbout },
+        { label: 'About', iconId: 'i-information', action: showAbout },
         { separator: true },
         { label: 'Metamodel', iconId: 'i-launch', action: openMetamodel },
         { label: 'Project site', iconId: 'i-launch', action: () => openLink('https://openconformity.org') },
@@ -893,6 +893,7 @@ function openMetamodel() {
 // --- Chrome ------------------------------------------------------------
 
 document.getElementById('toolbar-metamodel').addEventListener('click', openMetamodel);
+document.getElementById('shell-demo').addEventListener('click', showNotice);
 
 /**
  * The theme was set on the root element before the stylesheet loaded; from
@@ -1050,11 +1051,46 @@ function showDemoNotice() {
   });
 }
 
-/** The same notice, asked for rather than imposed, so it takes no answer. */
-function showAbout() {
+/**
+ * The same notice, asked for rather than imposed. Nothing is being consented to
+ * this time, so it does not block and it takes no answer beyond closing.
+ */
+function showNotice() {
   openDialog({
-    title: 'About this demo',
+    title: 'This is a demonstration',
     content: noticeContent(),
+    actions: [{ label: 'Close', primary: true }],
+  });
+}
+
+/**
+ * What the software is, who holds it and under what terms, and what of other
+ * people's work it carries.
+ *
+ * The EUPL asks that a Work communicated electronically name its Licensor and
+ * its licence and make that licence reachable. Every licence named here is one
+ * the deployment carries, so all four are reachable from the software itself
+ * rather than from wherever it was fetched.
+ */
+function showAbout() {
+  const licence = (href, text) => el('a', { href, target: '_blank', rel: 'noopener', text });
+  openDialog({
+    title: 'About',
+    content: [
+      el('p', { class: 'notice-headline', text: 'openconformity' }),
+      el('p', { text: 'This project is an initiative to develop a free, open-source, browser-based tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230, with no commercial interests behind it.' }),
+      el('p', {}, [
+        '\u00A9 2026 omxnt, licensed under the ',
+        licence('LICENSE.txt', 'EUPL-1.2'),
+        '.',
+      ]),
+      el('p', {}, [licence('https://github.com/omxnt/openconformity', 'Source on GitHub')]),
+      el('p', { text: 'Third-party assets, vendored with the software:' }),
+      el('ul', { class: 'dialog-list' }, [
+        el('li', {}, ['IBM Plex, under the ', licence('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1'), '.']),
+        el('li', {}, ['Carbon Icons, under the ', licence('assets/icons/LICENSE.txt', 'Apache License 2.0'), '.']),
+      ]),
+    ],
     actions: [{ label: 'Close', primary: true }],
   });
 }

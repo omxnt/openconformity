@@ -87,9 +87,7 @@
 <header class="shell">
   <!-- Leaving the workbench, so the guard is on the click rather than only on
        the browser's own unload prompt. -->
-  <a class="brand" id="shell-brand" href="https://openconformity.org" aria-label="openconformity, the project site">
-    <img class="symbol" src="assets/marks/favicon.svg" width="512" height="512" alt="">
-  </a>
+  <a class="wordmark" id="shell-brand" href="https://openconformity.org" aria-label="openconformity, the project site"></a>
   <nav class="shell-nav" id="menubar-menus" aria-label="Main"></nav>
   <div class="shell-actions">
     <span class="shell-unsaved" id="toolbar-unsaved" hidden>
@@ -108,7 +106,8 @@
       <svg class="icon theme-icon-moon" aria-hidden="true" focusable="false"><use href="#i-theme-dark"/></svg>
       <svg class="icon theme-icon-sun" aria-hidden="true" focusable="false"><use href="#i-theme-light"/></svg>
     </button>
-    <span class="tag">Demo</span>
+    <!-- The label says what the software is; pressing it says what that means. -->
+    <button type="button" class="tag" id="shell-demo" title="What this demonstration is">Demo</button>
   </div>
 </header>
 

@@ -158,6 +158,7 @@
   --shell-link:     #78A9FF;  /* g100 $link-primary, blue-40 */
   --shell-tag-bg:   #0043CE;  /* g100 $tag-background-blue, blue-70 */
   --shell-tag-text: #D0E2FF;  /* g100 $tag-color-blue, blue-20 */
+  --shell-tag-hover: #0053FF;  /* g100 $tag-hover-blue */
 
   --motion-fast: 70ms;  /* $duration-fast-01 */
   --motion-standard: cubic-bezier(0.2, 0, 0.38, 0.9);  /* $motion-standard-productive */
@@ -231,6 +232,7 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
   display: flex;
   align-items: center;
   height: 48px;   /* Carbon UI Shell header, $spacing-09 */
+  padding-left: 16px;  /* $spacing-05 */
   color: var(--shell-text);
   background: var(--shell);
   border-bottom: 1px solid var(--shell-border);
@@ -240,50 +242,24 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
 .shell :focus-visible { outline-color: var(--shell-focus); }
 
 /* The mark is a mask filled with the text colour of whatever it sits on, so it
-   is Carbon's white on the g100 shell and the theme's text colour elsewhere.
+   is Carbon's white on the g100 shell and the theme's text colour on the
+   small-viewport panel. In the shell it stands at the leading edge and is the
+   link to the project site; it stays still under the pointer, being the
+   identity rather than a control.
 
    Its height is the measure; the width follows from the mark's own proportions
    rather than being set beside them. A box wider than the mark would not make
    it bigger, because the mask is contained: it would fit the height, sit in the
    middle of the box and leave the rest as dead space, which is what pushed it
-   off the shell's 16px edge while the mark was 831 wide and the box 129. One
-   ratio to change if the mark is drawn again. */
-/* Carbon's shell brand: a square at the leading edge the height of the bar,
-   with the symbol centred in it and the menus starting where it ends. It is the
-   same geometry as the actions at the other end of the bar, so the shell is
-   bounded by a square at each edge rather than by a mark floating inside a
-   padded one.
-
-   The symbol is a drawn mark in three fixed colours rather than one shape to
-   fill, so it is an image and not a mask, and it reads the same on the g100 bar
-   in either theme. */
-.brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: stretch;
-  width: 48px;  /* Carbon UI Shell header, $spacing-09 */
-  flex: none;
-  color: inherit;
-}
-/* The square takes the geometry of an action but not its states: it is the
-   identity rather than a control, and the one thing in the bar that leaves the
-   workspace. It stays still under the pointer. */
-.symbol {
-  display: block;
-  width: 24px;   /* Carbon icon size 24, $spacing-06 */
-  height: 24px;
-  flex: none;
-}
-
-/* Still the mark on the small-viewport panel, where the name is wanted and
-   there is room for it. */
+   off the shell's edge while the mark was 831 wide and the box 129. One ratio
+   to change if the mark is drawn again. */
 .wordmark {
   display: block;
   color: inherit;
   height: 18px;
   aspect-ratio: 681 / 114;  /* the mark's own */
   flex: none;
+  margin-right: 24px;  /* $spacing-06 */
   background: currentColor;
   -webkit-mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
   mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
@@ -341,7 +317,8 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
 :root[data-theme="light"] .theme-icon-sun { display: none; }
 :root[data-theme="dark"] .theme-icon-moon { display: none; }
 
-/* Carbon Tag, blue. */
+/* Carbon Tag, blue, in its operational form: the label names what the software
+   is, and pressing it opens the notice that says what that means. */
 .tag {
   flex: none;
   display: inline-flex;
@@ -349,11 +326,16 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
   height: 24px;             /* Carbon tag md, $spacing-06 */
   margin: 0 16px;           /* $spacing-05 */
   padding: 0 8px;           /* $spacing-03 */
+  font-family: inherit;
   font-size: 12px;          /* $label-01 */
   letter-spacing: 0.32px;
   color: var(--shell-tag-text);
   background: var(--shell-tag-bg);
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
 }
+.tag:hover { background: var(--shell-tag-hover); }
 
 /* ---------- Menus ---------- */
 
@@ -961,6 +943,12 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
 }
 
 .notice-headline { font-size: 16px; line-height: 1.375; font-weight: 600; }  /* $heading-compact-02, 22px */
+
+/* The dialogs are the one place the software sets prose, and so the one place
+   it carries a link. Carbon's link: the colour marks it, a rule appears on
+   hover. */
+.dialog a { color: var(--link); }
+.dialog a:hover { color: var(--link-hover); text-decoration: underline; }
 
 /* Carbon modal footer: the buttons run the full width, parted by a 1px gap. */
 .dialog-footer { flex: none; display: flex; gap: 1px; }
