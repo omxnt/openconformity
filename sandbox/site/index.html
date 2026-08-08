@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open-source tool for CE marking of machinery | openconformity</title>
+<meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
+<link rel="canonical" href="https://openconformity.org/">
+<link rel="icon" type="image/svg+xml" href="assets/marks/favicon.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://openconformity.org/">
+<meta property="og:title" content="Open-source tool for CE marking of machinery">
+<meta property="og:description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
+<!-- A card is drawn on whatever ground the service rendering it uses, and most
+     of them are light, so the light shot is the one that travels. -->
+<meta property="og:image" content="https://openconformity.org/assets/images/app-light.png">
+
+<!-- The theme is set before the stylesheet loads, so the first paint is
+     already in the right one. Stored choice first, system preference else.
+     The key is the software's, so a visitor who has chosen a theme in the
+     tool arrives here in it. -->
+<script>
+  document.documentElement.dataset.theme = (function () {
+    try {
+      var stored = localStorage.getItem('openconformity.theme');
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch (error) { /* Storage can be unavailable; fall through. */ }
+    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  })();
+</script>
+
+<link rel="preload" href="assets/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/IBMPlexSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="theme.js"></script>
+</head>
+<body>
+
+<!-- IBM Carbon icons, Apache-2.0. See assets/icons/ORIGIN.md. -->
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <symbol id="i-scales" viewBox="0 0 32 32"><path d="M20,16a5,5,0,0,0,10,0,1,1,0,0,0-.1055-.4473L25.896,7.5562a.8913.8913,0,0,0-.0454-.0816A1,1,0,0,0,25,7H18.8218A3.0155,3.0155,0,0,0,17,5.1841V2H15V5.1841A3.0155,3.0155,0,0,0,13.1782,7H7a1,1,0,0,0-.8945.5527l-4,8A1,1,0,0,0,2,16a5,5,0,0,0,10,0,1,1,0,0,0-.1055-.4473L8.6182,9h4.56A3.0147,3.0147,0,0,0,15,10.8154V28H6v2H26V28H17V10.8159A3.0155,3.0155,0,0,0,18.8218,9h4.56l-3.2763,6.5527A1,1,0,0,0,20,16ZM7,19a2.9958,2.9958,0,0,1-2.8152-2h5.63A2.9956,2.9956,0,0,1,7,19Zm2.3821-4H4.6179L7,10.2363ZM16,9a1,1,0,1,1,1-1A1.0009,1.0009,0,0,1,16,9Zm9,10a2.9958,2.9958,0,0,1-2.8152-2h5.63A2.9956,2.9956,0,0,1,25,19Zm0-8.7637L27.3821,15H22.6179Z"/></symbol>  <!-- scales -->
+    <symbol id="i-security" viewBox="0 0 32 32"><path d="M14 16.59 11.41 14 10 15.41 14 19.41 22 11.41 20.59 10 14 16.59z"/><path d="M16,30,9.8242,26.7071A10.9818,10.9818,0,0,1,4,17V4A2.0021,2.0021,0,0,1,6,2H26a2.0021,2.0021,0,0,1,2,2V17a10.9818,10.9818,0,0,1-5.8242,9.7071ZM6,4V17a8.9852,8.9852,0,0,0,4.7656,7.9423L16,27.7333l5.2344-2.791A8.9852,8.9852,0,0,0,26,17V4Z"/></symbol>  <!-- security -->
+    <symbol id="i-launch" viewBox="0 0 16 16"><path d="M13,14H3c-0.6,0-1-0.4-1-1V3c0-0.6,0.4-1,1-1h5v1H3v10h10V8h1v5C14,13.6,13.6,14,13,14z"/><path d="M10 1 10 2 13.3 2 9 6.3 9.7 7 14 2.7 14 6 15 6 15 1z"/></symbol>  <!-- launch -->
+    <symbol id="i-error-outline" viewBox="0 0 16 16"><path d="M8,1C4.1,1,1,4.1,1,8s3.1,7,7,7s7-3.1,7-7S11.9,1,8,1z M8,14c-3.3,0-6-2.7-6-6s2.7-6,6-6s6,2.7,6,6S11.3,14,8,14z"/><path d="M7.4 3.6H8.5V12.4H7.4z" transform="rotate(-45 8 8)"/></symbol>  <!-- error--outline -->
+    <symbol id="i-chart-relationship" viewBox="0 0 32 32"><path d="M26,6a3.9963,3.9963,0,0,0-3.8579,3H17.9305A7.9964,7.9964,0,1,0,9,17.9307v4.2114a4,4,0,1,0,2,0V17.9307a7.951,7.951,0,0,0,3.8976-1.6192l3.6693,3.67A3.9529,3.9529,0,0,0,18,22a4,4,0,1,0,4-4,3.9521,3.9521,0,0,0-2.019.5669l-3.6694-3.6694A7.9493,7.9493,0,0,0,17.9305,11h4.2116A3.9934,3.9934,0,1,0,26,6ZM12,26a2,2,0,1,1-2-2A2.0023,2.0023,0,0,1,12,26ZM10,16a6,6,0,1,1,6-6A6.0066,6.0066,0,0,1,10,16Zm14,6a2,2,0,1,1-2-2A2.0023,2.0023,0,0,1,24,22Zm2-10a2,2,0,1,1,2-2A2.0023,2.0023,0,0,1,26,12Z"/></symbol>  <!-- chart--relationship -->
+    <symbol id="i-catalog" viewBox="0 0 32 32"><path d="M26,2H8A2,2,0,0,0,6,4V8H4v2H6v5H4v2H6v5H4v2H6v4a2,2,0,0,0,2,2H26a2,2,0,0,0,2-2V4A2,2,0,0,0,26,2Zm0,26H8V24h2V22H8V17h2V15H8V10h2V8H8V4H26Z"/><path d="M14 8H22V10H14z"/><path d="M14 15H22V17H14z"/><path d="M14 22H22V24H14z"/></symbol>  <!-- catalog -->
+    <symbol id="i-theme-light" viewBox="0 0 16 16"><path d="M7.5 1H8.5V3.5H7.5z"/><path d="M10.8 3.4H13.3V4.4H10.8z" transform="rotate(-45 12.041 3.923)"/><path d="M12.5 7.5H15V8.5H12.5z"/><path d="M11.6 10.8H12.6V13.3H11.6z" transform="rotate(-45 12.075 12.04)"/><path d="M7.5 12.5H8.5V15H7.5z"/><path d="M2.7 11.6H5.2V12.6H2.7z" transform="rotate(-45 3.96 12.078)"/><path d="M1 7.5H3.5V8.5H1z"/><path d="M3.4 2.7H4.4V5.2H3.4z" transform="rotate(-45 3.925 3.961)"/><path d="M8,6c1.1,0,2,0.9,2,2s-0.9,2-2,2S6,9.1,6,8S6.9,6,8,6 M8,5C6.3,5,5,6.3,5,8s1.3,3,3,3s3-1.3,3-3S9.7,5,8,5z"/></symbol>  <!-- light -->
+    <symbol id="i-theme-dark" viewBox="0 0 16 16"><path d="M7.2,2.3c-1,4.4,1.7,8.7,6.1,9.8c0.1,0,0.1,0,0.2,0c-1.1,1.2-2.7,1.8-4.3,1.8c-0.1,0-0.2,0-0.2,0C5.6,13.8,3,11,3.2,7.7	C3.2,5.3,4.8,3.1,7.2,2.3 M8,1L8,1C4.1,1.6,1.5,5.3,2.1,9.1c0.6,3.3,3.4,5.8,6.8,5.9c0.1,0,0.2,0,0.3,0c2.3,0,4.4-1.1,5.8-3	c0.2-0.2,0.1-0.6-0.1-0.7c-0.1-0.1-0.2-0.1-0.3-0.1c-3.9-0.3-6.7-3.8-6.4-7.6C8.3,3,8.4,2.4,8.6,1.8c0.1-0.3,0-0.6-0.3-0.7	C8.1,1,8.1,1,8,1z"/></symbol>  <!-- asleep -->
+  </defs>
+</svg>
+
+<nav class="topbar">
+  <div class="bar">
+    <a href="./" class="brand" aria-label="openconformity">
+      <img class="symbol" src="assets/marks/favicon.svg" width="512" height="512" alt="">
+      <span class="wordmark"></span>
+    </a>
+    <div class="bar-end">
+      <div class="nav">
+        <a href="https://app.openconformity.org" target="_blank" rel="noopener">
+          Demo
+          <svg class="icon ext" aria-hidden="true" focusable="false"><use href="#i-launch"/></svg>
+        </a>
+        <a href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">
+          GitHub
+          <svg class="icon ext" aria-hidden="true" focusable="false"><use href="#i-launch"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/company/openconformity" target="_blank" rel="noopener">
+          LinkedIn
+          <svg class="icon ext" aria-hidden="true" focusable="false"><use href="#i-launch"/></svg>
+        </a>
+      </div>
+      <!-- Shows the theme it switches to, not the one that is on. -->
+      <button type="button" class="shell-action" id="theme-toggle">
+        <svg class="icon theme-icon-moon" aria-hidden="true" focusable="false"><use href="#i-theme-dark"/></svg>
+        <svg class="icon theme-icon-sun" aria-hidden="true" focusable="false"><use href="#i-theme-light"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+
+    <h1>A free, open-source tool for CE marking of machinery</h1>
+
+    <div class="hero-grid">
+
+      <div class="hero-text">
+        <p class="lede">
+          CE marking has many inherent relationships. The essential requirements,
+          the harmonised standards, the identified hazards, and the risk reduction
+          measures all trace to one another in different ways. This project
+          attempts to develop a tool that holds all of this together as
+          one shared model, from which the engineering
+          artefacts can be exported.
+        </p>
+        <p class="note">The tool is currently in development.</p>
+        <div class="actions">
+          <a class="btn" href="https://app.openconformity.org" target="_blank" rel="noopener">Open the demo</a>
+          <a class="btn-quiet" href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">View the source</a>
+        </div>
+      </div>
+
+      <!-- The shot follows the theme. The source's own query answers for the
+           system setting, which is also what the page falls back to when no
+           choice has been stored; once the toggle owns the theme, theme.js
+           forces that query to match always or never. Only one of the two
+           files is ever fetched, which is why this is a picture rather than
+           two images taking turns at being hidden. -->
+      <div class="hero-shot">
+        <picture>
+          <source data-dark srcset="assets/images/app-dark.png" media="(prefers-color-scheme: dark)">
+          <img class="shot" src="assets/images/app-light.png" width="1600" height="1057" fetchpriority="high" alt="The openconformity interface: a navigator on the left, an editor and a relationship pane on the right.">
+        </picture>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <div class="wrap">
+    <h2>Project principles</h2>
+    <div class="sheet">
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-scales"/></svg>
+        <h3>Free and open-source</h3>
+        <p>EUPL-1.2 licensed, with no commercial interest behind the project.</p>
+      </div>
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-security"/></svg>
+        <h3>Your data stays yours</h3>
+        <p>No account and no server, so each project is saved as a local file on your machine.</p>
+      </div>
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-launch"/></svg>
+        <h3>Runs in your browser</h3>
+        <p>Nothing to install or maintain, just open the page and start working.</p>
+      </div>
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-error-outline"/></svg>
+        <h3>Draws no conclusions</h3>
+        <p>No box ticking, and no statement on the safety or compliance of the machine.</p>
+      </div>
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-chart-relationship"/></svg>
+        <h3>Traceable and reusable</h3>
+        <p>An entity is created once and related to the others, never repeated.</p>
+      </div>
+
+      <div class="cell">
+        <svg class="ci" aria-hidden="true" focusable="false"><use href="#i-catalog"/></svg>
+        <h3>Engineering artefacts</h3>
+        <p>Export the results, intended as input to whatever process you already have.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="model">
+  <div class="wrap">
+    <h2>One shared model</h2>
+
+    <div class="model-top">
+
+      <div class="model-text">
+        <p>
+          A metamodel is a model of a model. Where a model describes one machine,
+          the metamodel describes what any model may contain. Hardcoded into the
+          tool, it defines which entities exist and how they may be related to one
+          another. The relationships form chains that can be followed in either
+          direction, from a system element down to a risk reduction measure, or
+          from that measure back to the system element.
+        </p>
+      </div>
+
+      <!-- A shot of the same graph in the software, taken from the example
+           project with HAZ-001 selected. It swaps with the theme exactly as the
+           hero shot does, and for the same reason: only one file is fetched. -->
+      <div class="model-ex">
+        <picture>
+          <source data-dark srcset="assets/images/graph-dark.png" media="(prefers-color-scheme: dark)">
+          <img class="graph-shot" src="assets/images/graph-light.png" width="1850" height="504" loading="lazy" decoding="async" alt="The relationship pane in the software, showing the Single Hazard HAZ-001 Moving Parts at the centre of its neighbourhood: the System Element that exhibits it and the two Risk Reduction Measures that mitigate it on the left, the Accident Scenario it contributes to and the Essential Requirement it triggers on the right.">
+        </picture>
+      </div>
+
+    </div>
+
+    <figure class="model-fig">
+      <a href="assets/images/metamodel-light.png" data-dark-href="assets/images/metamodel-dark.png" target="_blank" rel="noopener">
+        <picture>
+          <source data-dark srcset="assets/images/metamodel-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="assets/images/metamodel-light.png" loading="lazy" decoding="async" width="7723" height="1572" alt="The openconformity metamodel, showing entity types and the relationships between them." class="meta">
+        </picture>
+      </a>
+    </figure>
+
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>How it will work</h2>
+    <div class="topics">
+
+      <details class="topic" name="workflow" open>
+        <summary><span class="tnum">01</span><span class="tt">Building the product structure</span></summary>
+        <div class="td">
+          <p>The machine is decomposed into a hierarchical set of system elements. The whole life cycle is defined as system phases, with system tasks associated with every phase. The system actors, such as operators or technicians, are related to each of the tasks. Every entity carries the attributes needed to define the machine fully.</p>
+          <div class="rl"><b>System Element</b><i>decomposes into</i><b>System Element</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">02</span><span class="tt">Scoping the applicable legislation</span></summary>
+        <div class="td">
+          <p>The directives and regulations that apply to the machinery are recorded. A machine may be subject only to the Machinery Regulation, or also to the Electromagnetic Compatibility Directive and others. The scoped legislation is then used to select the essential requirements that apply.</p>
+          <div class="rl"><b>European Legislation</b><i>defines</i><b>Essential Requirement</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">03</span><span class="tt">Identifying the single hazards</span></summary>
+        <div class="td">
+          <p>Considering the system elements, the single hazards are identified. Moving parts, live circuits, pressurised equipment, or ejected parts, each related to the system element that exhibits it.</p>
+          <div class="rl"><b>System Element</b><i>exhibits</i><b>Single Hazard</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">04</span><span class="tt">Analysing the accident scenarios</span></summary>
+        <div class="td">
+          <p>A short circuit can lead to both fire and electric shock. One hazard can lead to several accident scenarios, and one accident scenario can arise from several hazards. Both are modelled through relationships, rather than rewritten for every scenario.</p>
+          <div class="rl"><b>Single Hazard</b><i>contributes to</i><b>Accident Scenario</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">05</span><span class="tt">Selecting the essential requirements</span></summary>
+        <div class="td">
+          <p>Based on the identified hazards, the essential requirements in the applicable legislation are selected. Which requirements apply depends on the hazards the machinery exhibits.</p>
+          <div class="rl"><b>Single Hazard</b><i>triggers</i><b>Essential Requirement</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">06</span><span class="tt">Applying the harmonised standards</span></summary>
+        <div class="td">
+          <p>As part of the strategy for presumption of conformity, a harmonised standard is applied. The requirements in the standard satisfy the essential requirements in the corresponding legislation. Mapping a standard requirement to an essential requirement records the presumption of conformity.</p>
+          <div class="rl"><b>Standard Requirement</b><i>satisfies</i><b>Essential Requirement</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">07</span><span class="tt">Drafting the risk reduction measures</span></summary>
+        <div class="td">
+          <p>A risk reduction measure is described conceptually, covering one or several hazards or accident scenarios. The standard requirements are related to each measure, for traceability and to make full use of the standard. A measure may require a safety function, which is derived alongside it.</p>
+          <div class="rl"><b>Risk Reduction Measure</b><i>mitigates</i><b>Accident Scenario</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">08</span><span class="tt">Deriving the system requirements</span></summary>
+        <div class="td">
+          <p>Somewhere it needs to be stated how the machine shall be built. The system requirements are derived as shall-statements, each describing a function or quality the machine needs to fulfil. Each requirement is related to the verification activities that will show it has been met.</p>
+          <div class="rl"><b>System Requirement</b><i>derives from</i><b>Risk Reduction Measure</b></div>
+        </div>
+      </details>
+
+      <details class="topic" name="workflow">
+        <summary><span class="tnum">09</span><span class="tt">Exporting the engineering artefacts</span></summary>
+        <div class="td">
+          <p>When the engineering work has been done, the artefacts can be exported. An artefact may be a requirement specification, a hazard list, or a list of essential requirements with their mapping to the standard requirements. These views are exported as the result of the work, ready to import into whatever process or tool the user has.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+
+    <div class="foot-top">
+      <div class="foot-brand">
+        <span class="foot-mark" aria-hidden="true"></span>
+        <p>
+          This project is an initiative to develop a free, open-source,
+          browser-based tool for CE marking of machinery according to the
+          Machinery Regulation (EU) 2023/1230, with no commercial interests.
+        </p>
+      </div>
+
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h3>The project</h3>
+          <a href="https://github.com/omxnt/openconformity" target="_blank" rel="noopener">Source on GitHub</a>
+          <a href="https://www.linkedin.com/company/openconformity" target="_blank" rel="noopener">Follow on LinkedIn</a>
+          <a href="mailto:info@openconformity.org">info@openconformity.org</a>
+        </div>
+        <div class="foot-col">
+          <h3>The documents</h3>
+          <a href="https://github.com/omxnt/openconformity/blob/main/docs/about.md" target="_blank" rel="noopener">about.md</a>
+          <a href="https://github.com/omxnt/openconformity/blob/main/docs/requirements.md" target="_blank" rel="noopener">requirements.md</a>
+          <a href="https://github.com/omxnt/openconformity/blob/main/docs/decisions.md" target="_blank" rel="noopener">decisions.md</a>
+        </div>
+        <div class="foot-col">
+          <h3>The tool</h3>
+          <a href="https://app.openconformity.org" target="_blank" rel="noopener">Open the demo</a>
+          <a href="assets/images/metamodel-light.png" data-dark-href="assets/images/metamodel-dark.png" target="_blank" rel="noopener">Open the metamodel</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-base">
+      <span>Licensed under the EUPL-1.2.</span>
+      <small>&copy; 2026 omxnt</small>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>

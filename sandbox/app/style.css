@@ -1,0 +1,1124 @@
+/* openconformity — working demo */
+
+/* Every colour, size, space and duration below is an IBM Carbon Design System
+   token, copied in by value. The token name follows each one. The page carries
+   one of two Carbon themes, White or Gray 100, chosen by data-theme on the
+   root element. Where Carbon defines a state as an alpha mix, the nearest
+   solid gray is used, as the committed White values already did. */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("assets/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("assets/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+/* ---------- Themes ---------- */
+
+/* Carbon White. Also the fallback, should the theme never be set. */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Layers */
+  --background:   #FFFFFF;  /* $background, $layer-02 */
+  --layer:        #F4F4F4;  /* $layer-01, $field-01, gray-10 */
+  --layer-accent: #E0E0E0;  /* $layer-accent-01, $layer-selected-01, gray-20 */
+
+  /* Borders */
+  --border-subtle: #C6C6C6;  /* $border-subtle-01, gray-30 */
+  --border-strong: #8D8D8D;  /* $border-strong-01, gray-50 */
+
+  /* Text and icons */
+  --text:         #161616;  /* $text-primary, $icon-primary, gray-100 */
+  --text-second:  #525252;  /* $text-secondary, $icon-secondary, gray-70 */
+  --text-helper:  #6F6F6F;  /* $text-helper, gray-60 */
+  --text-place:   #A8A8A8;  /* $text-placeholder, gray-40 */
+  --disabled:     rgba(22, 22, 22, 0.25);  /* $text-disabled, $icon-disabled */
+
+  /* States on white and gray-10 */
+  --hover:  #E8E8E8;  /* $background-hover, $layer-hover-01, $field-hover-01 */
+  --active: #C6C6C6;  /* $background-active, $layer-active-01, gray-30 */
+
+  /* Pillar colour on entity type icons. Yellow is Carbon's warning hue, which
+     is what a hazard already looks like to a machinery safety engineer; the
+     other three are chosen to hold their own beside it under every colour
+     vision. None of them is the interactive blue, so an entity never reads as
+     something to click. On white, yellow has to be taken at its 60 step: the
+     warning yellow itself carries no contrast against a white ground. */
+  --pillar-system:       #9F1853;  /* magenta-70 */
+  --pillar-legislative:  #8A3FFC;  /* purple-60 */
+  --pillar-risk:         #8E6A00;  /* yellow-60 */
+  --pillar-requirements: #007D79;  /* teal-60 */
+
+  /* Interactive */
+  --accent:     #0F62FE;  /* $interactive, $border-interactive, blue-60 */
+  --focus:      #0F62FE;  /* $focus, blue-60 */
+  --link:       #0F62FE;  /* $link-primary, blue-60 */
+  --link-hover: #0043CE;  /* $link-primary-hover, blue-70 */
+  --support-info: #0043CE;  /* $support-info, blue-70 */
+
+  --button-disabled: #C6C6C6;  /* $button-disabled, gray-30 */
+  --on-color-disabled: #8D8D8D;  /* $text-on-color-disabled, gray-50 */
+  --button-secondary:        #393939;  /* $button-secondary, gray-80 */
+  --button-secondary-hover:  #4C4C4C;  /* $button-secondary-hover */
+  --button-secondary-active: #6F6F6F;  /* $button-secondary-active, gray-60 */
+  --danger-text: #DA1E28;  /* $text-error, red-60 */
+
+  /* The high-contrast surface the content switcher selects with. */
+  --inverse:      #393939;  /* $background-inverse, gray-80 */
+  --text-inverse: #FFFFFF;  /* $text-inverse */
+
+  --overlay: rgba(22, 22, 22, 0.5);  /* $overlay */
+
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23161616'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
+}
+
+/* Carbon Gray 100. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Layers */
+  --background:   #161616;  /* g100 $background, gray-100 */
+  --layer:        #262626;  /* g100 $layer-01, $field-01, gray-90 */
+  --layer-accent: #393939;  /* g100 $layer-accent-01, $layer-selected-01, gray-80 */
+
+  /* Borders */
+  --border-subtle: #393939;  /* g100 $border-subtle-01, gray-80 */
+  --border-strong: #6F6F6F;  /* g100 $border-strong-01, gray-60 */
+
+  /* Text and icons */
+  --text:         #F4F4F4;  /* g100 $text-primary, $icon-primary, gray-10 */
+  --text-second:  #C6C6C6;  /* g100 $text-secondary, gray-30 */
+  --text-helper:  #A8A8A8;  /* g100 $text-helper, gray-40 */
+  --text-place:   #6F6F6F;  /* g100 $text-placeholder, gray-60 */
+  --disabled:     rgba(244, 244, 244, 0.25);  /* g100 $text-disabled */
+
+  /* States on gray-100 and gray-90 */
+  --hover:  #353535;  /* g100 $background-hover, $layer-hover-01 */
+  --active: #525252;  /* g100 $background-active, $layer-active-01, gray-70 */
+
+  /* Pillar colour, taken lighter on a dark ground. Risk is Carbon's
+     $support-warning here, the warning-triangle yellow itself. */
+  --pillar-system:       #EE5396;  /* g100 magenta-50 */
+  --pillar-legislative:  #A56EFF;  /* g100 purple-50 */
+  --pillar-risk:         #F1C21B;  /* g100 yellow-30, $support-warning */
+  --pillar-requirements: #3DDBD9;  /* g100 teal-30 */
+
+  /* Interactive */
+  --accent:     #4589FF;  /* g100 $interactive, $border-interactive, blue-50 */
+  --focus:      #FFFFFF;  /* g100 $focus */
+  --link:       #78A9FF;  /* g100 $link-primary, blue-40 */
+  --link-hover: #A6C8FF;  /* g100 $link-primary-hover, blue-30 */
+  --support-info: #4589FF;  /* g100 $support-info, blue-50 */
+
+  --button-disabled: #525252;  /* g100 $button-disabled, gray-70 */
+  --on-color-disabled: #8D8D8D;  /* g100 $text-on-color-disabled, gray-50 */
+  --button-secondary:        #6F6F6F;  /* g100 $button-secondary, gray-60 */
+  --button-secondary-hover:  #606060;  /* g100 $button-secondary-hover */
+  --button-secondary-active: #393939;  /* g100 $button-secondary-active, gray-80 */
+  --danger-text: #FF8389;  /* g100 $text-error, red-40 */
+
+  --inverse:      #F4F4F4;  /* g100 $background-inverse, gray-10 */
+  --text-inverse: #161616;  /* g100 $text-inverse, gray-100 */
+
+  --overlay: rgba(0, 0, 0, 0.65);  /* g100 $overlay */
+
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23f4f4f4'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
+}
+
+:root {
+  /* The Carbon button palette holds across themes. */
+  --button-primary:        #0F62FE;  /* $button-primary, blue-60 */
+  --button-primary-hover:  #0043CE;  /* blue-70 */
+  --button-primary-active: #002D9C;  /* blue-80 */
+  --danger:        #DA1E28;  /* $button-danger-primary, $support-error, red-60 */
+  --danger-hover:  #A2191F;  /* red-70 */
+  --danger-active: #750E13;  /* $button-danger-active, red-80 */
+  --text-on-color: #FFFFFF;  /* $text-on-color, $icon-on-color */
+
+  /* UI Shell. Carbon themes the shell g100 whatever theme the page carries. */
+  --shell:          #161616;  /* g100 $background, gray-100 */
+  --shell-hover:    #353535;  /* g100 $background-hover, gray-90 */
+  --shell-active:   #525252;  /* g100 $background-active, gray-70 */
+  --shell-selected: #393939;  /* g100 $background-selected, gray-80 */
+  --shell-border:   #393939;  /* g100 $border-subtle-00, gray-80 */
+  --shell-text:     #F4F4F4;  /* g100 $text-primary, $icon-primary, gray-10 */
+  --shell-disabled: rgba(244, 244, 244, 0.25);  /* g100 $text-disabled */
+  --shell-focus:    #FFFFFF;  /* g100 $focus */
+  --shell-link:     #78A9FF;  /* g100 $link-primary, blue-40 */
+  --shell-tag-bg:   #0043CE;  /* g100 $tag-background-blue, blue-70 */
+  --shell-tag-text: #D0E2FF;  /* g100 $tag-color-blue, blue-20 */
+
+  --motion-fast: 70ms;  /* $duration-fast-01 */
+  --motion-standard: cubic-bezier(0.2, 0, 0.38, 0.9);  /* $motion-standard-productive */
+
+  --row: 24px;     /* $spacing-06, Carbon TreeView xs node */
+  --indent: 16px;  /* $spacing-05, Carbon TreeView indent per level */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: "IBM Plex Sans", Tahoma, sans-serif;
+  font-size: 14px;          /* $body-compact-01 */
+  line-height: 1.28572;     /* $body-compact-01, 18px */
+  letter-spacing: 0.16px;   /* $body-compact-01 */
+  color: var(--text);
+  background: var(--layer);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;          /* $code-01 */
+  letter-spacing: 0.32px;
+}
+.muted { color: var(--text-second); }
+
+/* Carbon focus: a 2px $focus ring, inset so it never enlarges a control. */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* Carbon icons are filled, not stroked. */
+.icon {
+  width: 16px;   /* Carbon icon size 16 */
+  height: 16px;
+  flex: none;
+  fill: currentColor;
+}
+
+/* An entity type icon is coloured by its pillar wherever it is drawn: the
+   tree, the bar above the editor, the relationship list and the relationship
+   graph. Everything else — folders, the project, and every toolbar, menu and
+   interface icon — stays the colour of what it sits in, so the colour means
+   "this is an entity of that pillar" and nothing else.
+
+   The selector names the element as well as the class so that it outweighs the
+   neutral fills those four places set, wherever those rules sit in this file,
+   while a disabled menu entry still outweighs it in turn. */
+svg.icon[data-pillar="systemContext"],
+use.node-icon[data-pillar="systemContext"] { fill: var(--pillar-system); }
+svg.icon[data-pillar="legislativeFramework"],
+use.node-icon[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
+svg.icon[data-pillar="riskAssessment"],
+use.node-icon[data-pillar="riskAssessment"] { fill: var(--pillar-risk); }
+svg.icon[data-pillar="requirementsDefinition"],
+use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-requirements); }
+
+/* Where nothing is yet: what this place holds, and the way to put the first
+   thing in it. Carbon's empty state, at productive scale. */
+.empty-state { padding: 16px; max-width: 36rem; }  /* $spacing-05 */
+.empty-state-title { font-weight: 600; }  /* $heading-compact-01 */
+.empty-state-body { margin-top: 4px; color: var(--text-second); }  /* $spacing-02 */
+.empty-state .button { margin-top: 16px; }  /* $spacing-05 */
+
+/* ---------- Shell ---------- */
+
+.shell {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 48px;   /* Carbon UI Shell header, $spacing-09 */
+  color: var(--shell-text);
+  background: var(--shell);
+  border-bottom: 1px solid var(--shell-border);
+}
+
+/* On g100 the focus ring is white; the blue one is unreadable there. */
+.shell :focus-visible { outline-color: var(--shell-focus); }
+
+/* The mark is a mask filled with the text colour of whatever it sits on, so it
+   is Carbon's white on the g100 shell and the theme's text colour elsewhere.
+
+   Its height is the measure; the width follows from the mark's own proportions
+   rather than being set beside them. A box wider than the mark would not make
+   it bigger, because the mask is contained: it would fit the height, sit in the
+   middle of the box and leave the rest as dead space, which is what pushed it
+   off the shell's 16px edge while the mark was 831 wide and the box 129. One
+   ratio to change if the mark is drawn again. */
+/* Carbon's shell brand: a square at the leading edge the height of the bar,
+   with the symbol centred in it and the menus starting where it ends. It is the
+   same geometry as the actions at the other end of the bar, so the shell is
+   bounded by a square at each edge rather than by a mark floating inside a
+   padded one.
+
+   The symbol is a drawn mark in three fixed colours rather than one shape to
+   fill, so it is an image and not a mask, and it reads the same on the g100 bar
+   in either theme. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 48px;  /* Carbon UI Shell header, $spacing-09 */
+  flex: none;
+  color: inherit;
+}
+/* The square takes the geometry of an action but not its states: it is the
+   identity rather than a control, and the one thing in the bar that leaves the
+   workspace. It stays still under the pointer. */
+.symbol {
+  display: block;
+  width: 24px;   /* Carbon icon size 24, $spacing-06 */
+  height: 24px;
+  flex: none;
+}
+
+/* Still the mark on the small-viewport panel, where the name is wanted and
+   there is room for it. */
+.wordmark {
+  display: block;
+  color: inherit;
+  height: 18px;
+  aspect-ratio: 681 / 114;  /* the mark's own */
+  flex: none;
+  background: currentColor;
+  -webkit-mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
+  mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
+}
+
+.shell-nav { display: flex; align-self: stretch; }
+
+.menubar-item {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  font: inherit;            /* $body-compact-01 */
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0 16px;          /* $spacing-05 */
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.menubar-item:hover { background: var(--shell-hover); }
+.menubar-item[aria-expanded="true"] { background: var(--shell-selected); }
+
+.shell-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
+
+/* Carbon shell actions are square and fill the header. */
+.shell-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 48px;              /* $spacing-09 */
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.shell-action:hover:not(:disabled) { background: var(--shell-hover); }
+.shell-action:active:not(:disabled) { background: var(--shell-active); }
+.shell-action:disabled { color: var(--shell-disabled); cursor: not-allowed; }
+
+.shell-action-wide {
+  width: auto;
+  gap: 8px;                 /* $spacing-03 */
+  padding: 0 16px;          /* $spacing-05 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--shell-link);
+  white-space: nowrap;
+}
+.shell-unsaved[hidden] { display: none; }
+
+/* The toggle offers the theme it would switch to. */
+:root[data-theme="light"] .theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* Carbon Tag, blue. */
+.tag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;             /* Carbon tag md, $spacing-06 */
+  margin: 0 16px;           /* $spacing-05 */
+  padding: 0 8px;           /* $spacing-03 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--shell-tag-text);
+  background: var(--shell-tag-bg);
+}
+
+/* ---------- Menus ---------- */
+
+.dropdown-layer { position: absolute; top: 0; left: 0; z-index: 50; }
+
+/* Carbon puts a shadow under a menu. The brief rules shadows out, so the
+   boundary is a $border-subtle-01 rule instead. */
+.dropdown {
+  display: none;
+  position: fixed;
+  min-width: 224px;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 4px 0;           /* $spacing-02 */
+  background: var(--background);  /* $layer-02 */
+  border: 1px solid var(--border-subtle);
+}
+.dropdown.open { display: block; }
+.dropdown.popup { z-index: 60; }
+.dropdown-separator { height: 1px; background: var(--border-subtle); margin: 4px 0; }  /* $spacing-02 */
+
+.menu-heading {
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-helper);  /* $text-helper */
+  padding: 8px 16px 4px;    /* $spacing-03, $spacing-05, $spacing-02 */
+}
+
+/* Carbon menu item: 32px, 16px gutters, the fill carrying the state. */
+.menu-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  width: 100%;
+  min-height: 32px;         /* Carbon menu item sm, $spacing-07 */
+  font: inherit;            /* $body-compact-01 */
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0 16px;          /* $spacing-05 */
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.menu-entry:hover:not(:disabled) { background: var(--hover); }
+.menu-entry:active:not(:disabled) { background: var(--active); }
+.menu-entry:disabled { color: var(--disabled); cursor: not-allowed; }
+.menu-entry:disabled .icon { fill: var(--disabled); }
+/* Carbon's danger menu item: the one entry in a menu that destroys
+   something says so before it is chosen, not only in the dialog after. */
+.menu-entry.danger:not(:disabled) { color: var(--danger-text); }
+.menu-entry.danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
+.menu-entry.danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
+.menu-entry-label { flex: 1; }
+.menu-entry-gap { width: 16px; flex: none; }  /* $spacing-05 */
+.menu-entry .shortcut {
+  color: var(--text-second);
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  padding-left: 32px;       /* $spacing-07 */
+}
+.menu-entry.has-submenu .shortcut { padding-left: 16px; }  /* $spacing-05 */
+.submenu-arrow { color: var(--text-second); font-size: 12px; padding-left: 8px; }
+
+/* ---------- Workspace ---------- */
+
+/* No pane borders and no outer padding: the gutters are the only separation,
+   which is one rule's worth of pixels rather than four. */
+.workspace { flex: 1; display: flex; min-height: 0; background: var(--layer); }
+.column { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+#navigator-column { width: 320px; flex: none; }
+.column-main { flex: 1; }
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  background: var(--background);
+}
+
+/* The relationship pane holds the height the splitter gives it. With flex it
+   would share the column evenly and silently swallow any height set on it,
+   which is what made the splitter drag do nothing. */
+.pane-relationships { flex: none; height: 320px; min-height: 120px; }
+
+.pane-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  min-height: 32px;         /* $spacing-07 */
+  padding: 0 0 0 16px;      /* $spacing-05 */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.pane-head-views { padding-left: 4px; }  /* $spacing-02 */
+/* The actions stretch to the head's height rather than centring in it, so
+   their buttons fill it and the head stays at 32px: its bottom rule then
+   runs level with the navigator toolbar's across the gutter. */
+.pane-head-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
+.pane-body { flex: 1; min-height: 0; overflow: auto; }
+
+.pane-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 32px;             /* $spacing-07 */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.toolbar-divider { width: 1px; height: 16px; margin: 0 4px; background: var(--border-subtle); flex: none; }
+
+/* The selection, named once, at the head of the pane that edits it. */
+.selection { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; }
+.selection .icon { fill: var(--text-second); }
+.tb-kind { color: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }  /* $label-01 */
+.tb-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }  /* $code-01 */
+.tb-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }  /* $heading-compact-01 */
+
+.splitter {
+  flex: none;
+  background: var(--layer);
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.splitter-vertical { width: 4px; cursor: col-resize; align-self: stretch; }  /* $spacing-02 */
+.splitter-horizontal { height: 4px; cursor: row-resize; }  /* $spacing-02 */
+.splitter:hover, .splitter.dragging, .splitter:focus-visible { background: var(--accent); }
+
+.statusbar {
+  flex: none;
+  height: 24px;             /* $spacing-06 */
+  background: var(--layer);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 16px;                /* $spacing-05 */
+  padding: 0 16px;          /* $spacing-05 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+}
+
+/* ---------- Buttons ---------- */
+
+/* Carbon ghost: no boundary, the fill alone carrying hover and pressed. */
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 32px;              /* Carbon icon button sm, $spacing-07 */
+  flex: none;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard),
+              color var(--motion-fast) var(--motion-standard);
+}
+.ghost-button:hover:not(:disabled) { background: var(--hover); }
+.ghost-button:active:not(:disabled) { background: var(--active); }
+.ghost-button:disabled { color: var(--disabled); cursor: not-allowed; }
+/* Carbon danger ghost: neutral until pointed at, then unmistakable. */
+.ghost-button-danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
+.ghost-button-danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
+
+/* Carbon secondary. Primary is the accent; secondary is a gray beside it. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;             /* Carbon button sm */
+  font: inherit;            /* $body-compact-01 */
+  color: var(--text-on-color);
+  background: var(--button-secondary);
+  border: 1px solid transparent;
+  padding: 0 16px;          /* $spacing-05 */
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.button.with-icon { gap: 8px; }  /* $spacing-03 */
+.button:hover:not(:disabled) { background: var(--button-secondary-hover); }
+.button:active:not(:disabled) { background: var(--button-secondary-active); }
+.button:disabled { background: var(--button-disabled); color: var(--on-color-disabled); cursor: not-allowed; }
+.button.primary { background: var(--button-primary); }
+.button.primary:hover:not(:disabled) { background: var(--button-primary-hover); }
+.button.primary:active:not(:disabled) { background: var(--button-primary-active); }
+.button.primary:disabled { background: var(--button-disabled); color: var(--on-color-disabled); }
+/* Carbon danger: the one red button, held for deletion. */
+.button.danger { background: var(--danger); }
+.button.danger:hover:not(:disabled) { background: var(--danger-hover); }
+.button.danger:active:not(:disabled) { background: var(--danger-active); }
+.button.danger:disabled { background: var(--button-disabled); color: var(--on-color-disabled); }
+
+/* The one action inside an empty state is a Carbon ghost button: the link
+   colour on nothing. Pane heads carry icon-only ghost buttons instead. */
+.empty-state .button {
+  color: var(--link);
+  background: none;
+  border-color: transparent;
+  padding: 0 12px;          /* $spacing-04 */
+}
+.empty-state .button:hover:not(:disabled) { background: var(--hover); }
+.empty-state .button:active:not(:disabled) { background: var(--active); }
+
+/* A row action inside a table. */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;              /* $spacing-06 */
+  height: 24px;
+  color: var(--text-second);  /* $icon-secondary */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard),
+              color var(--motion-fast) var(--motion-standard);
+}
+.icon-button:hover { background: var(--danger); color: var(--text-on-color); }
+.icon-button:active { background: var(--danger-active); color: var(--text-on-color); }
+/* Letting go of a pending pick destroys nothing, so it does not go red. */
+.icon-button.neutral:hover { background: var(--hover); color: var(--text); }
+.icon-button.neutral:active { background: var(--active); color: var(--text); }
+
+/* ---------- Form fields ---------- */
+
+/* Carbon form: the label sits above its field, the field is a $field-01 well
+   with a single $border-strong-01 rule under it, and focus is the 2px $focus
+   ring. The fields write straight to the model, so every one is live; only
+   the identifier is read-only, and it drops the well to say so. */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;           /* $spacing-05, $spacing-07 */
+  max-width: 1024px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }  /* $spacing-02 */
+.field-tall { grid-column: 1 / -1; }
+
+.field-label {
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+}
+
+.input {
+  width: 100%;
+  height: 32px;             /* Carbon text input sm */
+  font: inherit;            /* $body-compact-01 */
+  color: var(--text);
+  background: var(--layer);       /* $field-01 */
+  border: none;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 0 16px;          /* $spacing-05 */
+  min-width: 0;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.input:hover:not(.readonly) { background: var(--hover); }  /* $field-hover-01 */
+.input:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
+.input::placeholder { color: var(--text-place); }
+.input.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; }
+.input.readonly {
+  background: none;
+  border-bottom-color: var(--border-subtle);
+  cursor: default;
+}
+.input.readonly:focus { outline: none; }
+textarea.input { height: auto; resize: vertical; padding: 8px 16px; line-height: 1.42857; }  /* $spacing-03; $body-01, 20px */
+
+/* Carbon Select: the field, plus Carbon's own chevron on the right. */
+select.input {
+  appearance: none;
+  padding-right: 40px;      /* $spacing-08 */
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 16px center;  /* $spacing-05 */
+  background-size: 16px 16px;
+}
+select.input[size] { appearance: auto; background-image: none; height: auto; padding: 0; }
+
+/* Carbon Search: the glyph inside the field, the clear action at its end. */
+.search {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 32px;             /* Carbon search sm */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.search-icon { position: absolute; left: 12px; fill: var(--text); pointer-events: none; }  /* $spacing-04 */
+.search-input {
+  width: 100%;
+  height: 100%;
+  font: inherit;            /* $body-compact-01 */
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0 32px 0 36px;   /* $spacing-07; the glyph's 12px plus its 16px plus 8px */
+}
+.search-input::placeholder { color: var(--text-place); }
+.search-input::-webkit-search-cancel-button { display: none; }
+.search-clear {
+  position: absolute;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.search-clear:hover { background: var(--hover); }
+.search-clear:active { background: var(--active); }
+.search-clear[hidden] { display: none; }
+
+/* ---------- Navigator tree ---------- */
+
+/* Carbon TreeView: chevron disclosure, 16px of indent per level, and no
+   connector lines. Depth is padding on the row, so a selected row and its
+   3px $border-interactive marker span the full width at any depth. */
+.tree { padding: 0; width: max-content; min-width: 100%; }
+
+.node:focus { outline: none; }
+.node:focus-visible > .row { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: var(--row);
+  padding-right: 16px;      /* $spacing-05 */
+  padding-left: calc(16px + var(--depth, 0) * var(--indent));
+  white-space: nowrap;
+  cursor: default;
+  position: relative;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.row:hover { background: var(--hover); }  /* $layer-hover-01 */
+
+.node.selected > .row {
+  background: var(--layer-accent);  /* $layer-selected-01 */
+  box-shadow: inset 3px 0 0 var(--accent);  /* $border-interactive */
+  font-weight: 600;  /* Carbon TreeView active node, $heading-compact-01 */
+}
+.node.selected > .row:hover { background: var(--active); }
+
+.node.dragging { opacity: 0.45; }
+.node.drop-target > .row { outline: 2px solid var(--accent); outline-offset: -2px; }
+.node.drop-before > .row::after,
+.node.drop-after > .row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.node.drop-before > .row::after { top: 0; }
+.node.drop-after > .row::after { bottom: 0; }
+
+.row-id {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;          /* $code-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+  flex: none;
+}
+.row-label { overflow: hidden; text-overflow: ellipsis; }
+.row-count { font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); flex: none; }
+
+/* The chevron is drawn at 16px but hit at 24, which is the WCAG 2.2 minimum
+   target (2.5.8). It is its own target inside the row, so it has to carry the
+   minimum on its own; the row's own 24px height gives the rest. */
+.twisty {
+  width: 24px; height: 24px; flex: none;  /* $spacing-06 */
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.twisty-gap { width: 24px; flex: none; }  /* $spacing-06 */
+.children { display: block; }
+
+/* While a relationship end is being picked, the tree is the picker: rows the
+   metamodel refuses recede, rows it accepts offer themselves. Expanding and
+   filtering keep working, so a target can be reached wherever it is filed. */
+.row.pick-dim { opacity: 0.3; }
+.row.pick-dim:hover { background: none; }
+.row.pickable { cursor: pointer; }
+.row.pickable:hover {
+  background: var(--hover);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.row.pickable.picked {
+  background: var(--layer-accent);  /* $layer-selected-01 */
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* ---------- Editor ---------- */
+
+.editor-body { background: var(--background); padding: 16px; }  /* $spacing-05 */
+
+/* An attribute the specification has not settled. Carbon says this with a tag
+   and helper text, not with a box of its own. */
+.placeholder { display: flex; flex-direction: column; gap: 8px; }  /* $spacing-03 */
+.placeholder-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;             /* Carbon tag sm */
+  padding: 0 8px;           /* $spacing-03 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+  background: var(--layer-accent);  /* $tag-background-gray */
+}
+.placeholder-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  line-height: 1.33334;
+  color: var(--text-helper);
+}
+
+.risk-row { display: flex; align-items: center; gap: 16px; }  /* $spacing-05 */
+.risk-step { display: flex; align-items: center; gap: 8px; }  /* $spacing-03 */
+.risk-step-label { font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }
+.risk-value {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;          /* $code-01 */
+  letter-spacing: 0.32px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 16px;          /* $spacing-05 */
+  min-width: 96px;          /* $spacing-12 */
+}
+.risk-input { width: 96px; }  /* $spacing-12 */
+.risk-arrow { color: var(--text-second); }
+
+.field-buttons { display: flex; gap: 1px; margin-top: 24px; }  /* $spacing-06 */
+
+/* ---------- Content switcher ---------- */
+
+/* Carbon content switcher: one set of views of the same thing, the chosen one
+   carried on the inverse surface. */
+.switcher { display: flex; align-self: center; }
+.switcher-option {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;             /* $spacing-06, to sit inside the 32px head */
+  font: inherit;            /* $body-compact-01 */
+  padding: 0 12px;          /* $spacing-04 */
+  background: none;
+  border: none;
+  color: var(--text-second);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard),
+              color var(--motion-fast) var(--motion-standard);
+}
+.switcher-option:hover:not(.selected) { background: var(--hover); color: var(--text); }
+.switcher-option.selected { background: var(--inverse); color: var(--text-inverse); }
+
+/* ---------- Data table ---------- */
+
+/* Carbon DataTable, xs rows: a $layer-accent-01 head, rows parted by a single
+   $border-subtle-01 rule, and no vertical rules at all. */
+.table { border-collapse: collapse; width: 100%; }
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  font-weight: 600;         /* $heading-compact-01, the same 14px as the cells */
+  height: 24px;             /* Carbon data table xs */
+  padding: 0 16px;          /* $spacing-05 */
+  background: var(--layer-accent);
+  white-space: nowrap;
+}
+.table td {
+  height: 24px;             /* Carbon data table xs */
+  padding: 0 16px;          /* $spacing-05 */
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.table td.wrap { white-space: normal; }
+.table tbody tr { cursor: pointer; }
+.table tbody tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.table tbody tr:hover td { background: var(--hover); }
+.table .shrink { width: 1%; white-space: nowrap; padding: 0 8px; }
+.table td.mono { white-space: nowrap; }
+.arrow { margin-right: 8px; color: var(--text-second); }  /* $spacing-03 */
+.cell-type { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.cell-type .icon { fill: var(--text-second); }
+
+/* ---------- Neighbourhood graph ---------- */
+
+.graph-wrap { padding: 16px; overflow: auto; }  /* $spacing-05 */
+.graph { display: block; max-width: 100%; height: auto; }
+
+/* The box's own rect only: the remove control carries a rect of its own, and
+   these rules would otherwise paint it as a second box. */
+.graph-node > rect { fill: var(--layer); stroke: var(--border-subtle); stroke-width: 1; }
+.graph-node.centre > rect { fill: var(--background); stroke: var(--accent); stroke-width: 2; }
+.graph-node:not(.centre) { cursor: pointer; }
+.graph-node:not(.centre) > rect { transition: fill var(--motion-fast) var(--motion-standard); }
+.graph-node:not(.centre):hover > rect { fill: var(--hover); stroke: var(--border-strong); }
+.graph-node:focus-visible > rect { stroke: var(--focus); stroke-width: 2; }
+.graph-node:focus { outline: none; }
+
+/* Removing a relationship from the graph. Neutral until pointed at, then the
+   danger fill, which is how the same action looks in the list. */
+.node-remove { cursor: pointer; }
+.node-remove:focus { outline: none; }
+.node-remove-hit { fill: transparent; transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove-icon { fill: var(--text-second); transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove:hover .node-remove-hit { fill: var(--danger); }
+.node-remove:hover .node-remove-icon { fill: var(--text-on-color); }
+.node-remove:active .node-remove-hit { fill: var(--danger-active); }
+.node-remove:focus-visible .node-remove-hit { stroke: var(--focus); stroke-width: 2; }
+
+.node-icon { fill: var(--text-second); }
+.node-type { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }   /* $label-01 */
+.node-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }  /* $code-01 */
+.node-label { font-size: 14px; letter-spacing: 0.16px; font-weight: 600; fill: var(--text); }  /* $heading-compact-01 */
+
+/* One line for every relationship. The metamodel draws no distinction between
+   them, so neither does the graph; the label on the edge is what names it. */
+.edge line { stroke: var(--border-strong); stroke-width: 1; }
+.arrow-head { fill: var(--border-strong); }
+.edge-label { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); text-anchor: middle; }
+.graph-more { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }
+
+/* ---------- Dialogs ---------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;  /* $spacing-07 */
+}
+
+/* Carbon modal, with the shadow the brief rules out replaced by a rule. */
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  max-height: 100%;
+  background: var(--background);
+  border: 1px solid var(--border-subtle);
+}
+
+.dialog-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 0 16px 16px;  /* $spacing-05 */
+}
+.dialog-title { font-size: 20px; line-height: 1.4; font-weight: 400; }  /* $heading-03, 28px */
+.dialog-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;      /* Carbon modal close, $spacing-09 */
+  height: 48px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.dialog-close:hover { background: var(--hover); }
+.dialog-close:active { background: var(--active); }
+
+.dialog-body { padding: 0 16px 24px; overflow: auto; display: flex; flex-direction: column; gap: 16px; }  /* $spacing-05, $spacing-06 */
+.dialog-body .field-label { color: var(--text-second); }
+.dialog-fixed { display: flex; align-items: center; min-height: 32px; }
+.dialog-list { margin: 0 0 0 16px; display: flex; flex-direction: column; gap: 4px; }  /* $spacing-05, $spacing-02 */
+.dialog-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  line-height: 1.33334;
+  color: var(--text-helper);
+}
+
+.notice-headline { font-size: 16px; line-height: 1.375; font-weight: 600; }  /* $heading-compact-02, 22px */
+
+/* Carbon modal footer: the buttons run the full width, parted by a 1px gap. */
+.dialog-footer { flex: none; display: flex; gap: 1px; }
+.dialog-footer .button { flex: 1; height: 64px; justify-content: flex-start; padding: 0 16px; }  /* Carbon modal button, $spacing-10 */
+
+/* ---------- Side panel ---------- */
+
+/* Carbon side panel, small. It overlays the right edge only, without an
+   overlay behind it, because the navigator has to stay visible and clickable:
+   the tree is where the pick is made. */
+.side-panel {
+  position: fixed;
+  top: 48px;                /* below the shell */
+  right: 0;
+  bottom: 24px;             /* above the status bar */
+  z-index: 40;
+  width: 320px;             /* Carbon side panel sm */
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  border-left: 1px solid var(--border-subtle);
+}
+.side-panel[hidden] { display: none; }
+
+.side-panel-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 0 16px 16px;  /* $spacing-05 */
+}
+.side-panel-title { font-size: 16px; line-height: 1.375; font-weight: 600; }  /* $heading-compact-02, 22px */
+.side-panel-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  margin-right: 8px;        /* $spacing-03 */
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.side-panel-close:hover { background: var(--hover); }
+.side-panel-close:active { background: var(--active); }
+
+.side-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 16px;          /* $spacing-05 */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;                /* $spacing-05 */
+}
+.pick-status { font-weight: 600; }  /* $heading-compact-01 */
+.side-panel-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  line-height: 1.33334;
+  color: var(--text-helper);
+}
+
+/* The targets picked so far, each row letting go of itself. The class stays
+   clear of the tree's `picked` row state. */
+.picked-list { display: flex; flex-direction: column; gap: 4px; }  /* $spacing-02 */
+.picked-row { display: flex; align-items: center; gap: 8px; min-height: 24px; }  /* $spacing-03, $spacing-06 */
+.picked-row .picked-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Carbon side panel action: one full-width button at the foot. */
+.side-panel-footer { flex: none; display: flex; gap: 1px; }
+.side-panel-footer .button { flex: 1; height: 48px; justify-content: flex-start; padding: 0 16px; }  /* $spacing-09 */
+
+/* ---------- Toasts ---------- */
+
+/* Carbon toast notification, low contrast: told in the corner, gone by
+   itself. Held for refusals, which change nothing and need no answer. */
+.toasts {
+  position: fixed;
+  top: 56px;                /* the shell, plus $spacing-03 */
+  right: 8px;               /* $spacing-03 */
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                 /* $spacing-03 */
+  width: 288px;             /* Carbon toast width */
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  background: var(--layer);       /* $notification-background-info */
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--support-info);
+}
+.toast-icon { flex: none; margin: 16px 0 0 12px; fill: var(--support-info); }  /* $spacing-05, $spacing-04 */
+.toast-content { flex: 1; padding: 12px 8px 12px 12px; min-width: 0; }  /* $spacing-04, $spacing-03 */
+.toast-title { font-weight: 600; }  /* $heading-compact-01 */
+.toast-body { margin-top: 2px; color: var(--text-second); }
+.toast-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.toast-close:hover { background: var(--hover); }
+.toast-close:active { background: var(--active); }
+
+/* ---------- Below the supported viewport ---------- */
+
+/* The multi-pane layout cannot function in less room than this, and a degraded
+   interface would misrepresent what the software does. The tool is replaced by
+   a notice rather than squeezed (F-APP-001). The threshold is the layout's own
+   constraint: the navigator, the editor's fields and the relationship graph
+   side by side. */
+.small-viewport { display: none; }
+
+@media (max-width: 959px), (max-height: 559px) {
+  body > .shell,
+  body > .workspace,
+  body > .statusbar,
+  body > .dropdown-layer,
+  body > .dropdown.open,
+  body > .toasts,
+  body > .side-panel,
+  body > .overlay {
+    display: none;
+  }
+
+  .small-viewport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 24px;  /* $spacing-06 */
+    background: var(--layer);
+    overflow: auto;
+  }
+
+  .small-viewport-panel {
+    width: 100%;
+    max-width: 34rem;
+    background: var(--background);
+    border: 1px solid var(--border-subtle);
+    padding: 32px;  /* $spacing-07 */
+  }
+  .small-viewport-panel .wordmark { margin: 0 0 24px; }  /* $spacing-06 */
+  .small-viewport-panel h1 { font-size: 20px; line-height: 1.4; font-weight: 400; margin-bottom: 16px; }  /* $heading-03, 28px; $spacing-05 */
+  .small-viewport-panel p { margin-bottom: 8px; line-height: 1.42857; color: var(--text-second); }  /* $spacing-03; $body-01, 20px */
+  .small-viewport-panel a { display: inline-block; margin-top: 16px; color: var(--link); }  /* $link-primary */
+  .small-viewport-panel a:hover { color: var(--link-hover); text-decoration: underline; }
+}
