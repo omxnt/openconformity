@@ -261,9 +261,17 @@ The software shall consist of static files only, with no server-side code.
 
 `ubiquitous` `stable`
 
-The wordmark shall be "openconformity" in the prose typeface.
+The wordmark shall be "openconformity" set as below.
 
-> *The name is the identity. A wordmark renders identically in a title bar, a document, and plain text, with no separate logo to design or maintain.*
+| Property | Value |
+|---|---|
+| Typeface | Saira Condensed |
+| Weight | SemiBold, 600 |
+| Case | Lower |
+| Letter spacing | 1% |
+| Colour | `#161616` |
+
+> *The name is the identity. A condensed face keeps a fourteen-character name legible where it has little room, and a weight above regular holds its presence at that width.*
 
 ---
 
@@ -271,19 +279,15 @@ The wordmark shall be "openconformity" in the prose typeface.
 
 `ubiquitous` `stable`
 
-The favicon shall be an isometric cube of three shaded faces.
+The favicon shall be an isometric cube of three separated faces, coloured as below.
 
-> *A favicon is too small to render the wordmark legibly. A cube is the simplest form of a system element, which is where every model begins, and shading the faces distinguishes them where an outline would not.*
+| Face | Colour |
+|---|---|
+| Top | `#4589FF` |
+| Right | `#8A3FFC` |
+| Left | `#007D79` |
 
----
-
-#### G-IDN-003 Colour
-
-`ubiquitous` `stable`
-
-The wordmark and the favicon shall be monochrome, and shall invert according to their background.
-
-> *One shape and no hue reproduces anywhere, at any size, in print or on screen, with nothing to match or maintain.*
+> *A favicon is too small to render the wordmark legibly, and a cube is the simplest form of a system element. The hues distinguish the faces at that size, and read against both a light and a dark background.*
 
 ### 3.2 System
 
