@@ -213,12 +213,38 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
   row-gap: 16px;          /* $spacing-05 */
 }
 
+/* Symbol and wordmark together in the header. The symbol is a drawn mark in
+   three fixed colours rather than one shape to fill, so it is an image and not
+   a mask, and it stands the same in either theme. Its box is a Carbon icon
+   size, and the cube's ink fills 90% of that, which lands it at about the
+   wordmark's own height beside it. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;  /* $spacing-04 */
+  flex: none;
+  color: var(--shell-text);
+  text-decoration: none;
+}
+.brand:hover { color: var(--shell-text); text-decoration: none; }
+
+.symbol {
+  display: block;
+  width: 24px;   /* Carbon icon size 24, $spacing-06 */
+  height: 24px;
+  flex: none;
+}
+
 /* The mark is a mask filled with the text colour of whatever it sits on, so it
-   is Carbon's white on the g100 shell and on the g100 footer. */
+   is Carbon's white on the g100 shell and on the g100 footer.
+
+   Its height is the measure; the width follows from the mark's own proportions.
+   A box wider than the mark does not make it bigger, because the mask is
+   contained: it fits the height and leaves the remainder as dead space. */
 .wordmark {
   display: block;
-  width: 158px;
   height: 21px;
+  aspect-ratio: 681 / 114;  /* the mark's own */
   flex: none;
   color: var(--shell-text);
   background: currentColor;
@@ -547,8 +573,8 @@ footer {
 
 .foot-mark {
   display: block;
-  width: 152px;
   height: 20px;
+  aspect-ratio: 681 / 114;  /* the mark's own */
   color: var(--shell-text);
   background: currentColor;
   -webkit-mask: url("assets/marks/wordmark.svg") no-repeat left / contain;
@@ -622,7 +648,7 @@ footer :focus-visible { outline-color: var(--shell-focus); }
     row-gap: 0;
     column-gap: var(--grid-gutter);
   }
-  .wordmark { align-self: center; }
+  .brand { align-self: center; }
   .bar-end { margin-inline-start: 0; }
 
   /* Two cards to a row: four of the eight columns each, landing on the grid. */

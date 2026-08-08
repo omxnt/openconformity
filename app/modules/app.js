@@ -36,13 +36,97 @@ import { canStep, contextMenuItems, contextOf, moveTargets, selectionActionItems
 import { chooseDialog, confirmDialog, notify, openDialog, promptDialog, toast } from './dialog.js';
 import { el } from './dom.js';
 
+/** Keeps the project between visits, on this device only. */
+const PROJECT_KEY = 'openconformity.project';
+
+/**
+ * The project as it was left, or nothing if this is a first visit, the browser
+ * refuses storage, or what is there cannot be read as a project. A stored copy
+ * that will not parse is dropped rather than argued with: it is a cache, not
+ * the user's file, and the example is a better place to land than an error.
+ * @returns {{ model: import('./model.js').Model,
+ *             selection: import('./navigator.js').Selection,
+ *             unsaved: boolean } | null}
+ */
+function restore() {
+  let raw;
+  try {
+    raw = window.localStorage.getItem(PROJECT_KEY);
+  } catch {
+    return null;  // Storage can be unavailable; this visit simply keeps nothing.
+  }
+  if (!raw) return null;
+  try {
+    const stored = JSON.parse(raw);
+    const { model, rejected } = fromJSON(stored.project);
+    if (rejected.length > 0) throw new Error('not a project');
+    return {
+      model,
+      selection: stored.selection ?? { kind: 'root', id: '' },
+      unsaved: !stored.savedToFile,
+    };
+  } catch {
+    try {
+      window.localStorage.removeItem(PROJECT_KEY);
+    } catch { /* Nothing to drop. */ }
+    return null;
+  }
+}
+
+const restored = restore();
+
 const state = {
-  model: buildExampleModel(),
+  model: restored?.model ?? buildExampleModel(),
   /** @type {import('./navigator.js').Selection} */
-  selection: { kind: 'entity', id: 'HAZ-001' },
+  selection: restored?.selection ?? { kind: 'entity', id: 'HAZ-001' },
   /** Whether the project holds changes that are not in a file yet. */
-  unsaved: false,
+  unsaved: restored?.unsaved ?? false,
 };
+
+/**
+ * Whether the project last failed to fit in the browser's store. While this is
+ * true nothing is being kept, so leaving the tab does lose the work, and the
+ * warnings that would otherwise be wrong become right again.
+ */
+let autosaveFailed = false;
+
+/**
+ * Keeps the project where the next visit will find it. Called from every place
+ * the model or the saved-ness of it changes, so the copy in the browser is
+ * never older than what is on screen.
+ *
+ * A project can outgrow the store, which is a few megabytes and shared with
+ * every other page on the origin. When the write is refused the older copy is
+ * removed rather than left behind: restoring it later would hand back work the
+ * user had already moved past, silently. From then on the file is the only
+ * place the project lives, and the software says so once.
+ */
+function persist() {
+  try {
+    window.localStorage.setItem(PROJECT_KEY, JSON.stringify({
+      savedToFile: !state.unsaved,
+      selection: state.selection,
+      project: toJSON(state.model),
+    }));
+    if (autosaveFailed) {
+      autosaveFailed = false;
+      toast('Autosave working again', 'The project is small enough to keep in this browser once more.');
+    }
+  } catch {
+    try {
+      window.localStorage.removeItem(PROJECT_KEY);
+    } catch { /* Nothing to drop. */ }
+    if (!autosaveFailed) {
+      autosaveFailed = true;
+      notify(
+        'Too large to keep in this browser',
+        'This project has outgrown the space the browser gives a page, so it is '
+        + 'no longer being kept between visits. Save it to a file to keep it. '
+        + 'Everything else works as before.'
+      );
+    }
+  }
+}
 
 const history = createHistory(state.model, state.selection);
 
@@ -287,6 +371,7 @@ function commit(selection) {
   }
   state.unsaved = true;
   history.record(state.model, state.selection);
+  persist();
   renderAll();
 }
 
@@ -304,6 +389,7 @@ function changed() {
 function startFresh(selection) {
   state.unsaved = false;
   history.reset(state.model, selection);
+  persist();
   setSelection(selection);
 }
 
@@ -346,6 +432,7 @@ function step(direction) {
   // The project no longer matches the file either way round: stepping back to
   // what was saved is not something this tracks.
   state.unsaved = true;
+  persist();
   setSelection(surviving(entry.selection));
 }
 
@@ -738,6 +825,7 @@ function writeFile() {
   link.remove();
   URL.revokeObjectURL(url);
   state.unsaved = false;
+  persist();
   toolbar.render();
   toast('Project saved', `Written to your downloads as ${filename}.`);
 }
@@ -787,14 +875,19 @@ function openLink(url) {
 }
 
 /**
- * The diagram in the project documentation is the authoritative definition of
- * the metamodel and changes with it. The software points at it rather than
- * carrying a copy, which can only fall behind what the software implements.
+ * The metamodel diagram, exported for each theme and carried with the software
+ * so it opens without a network and in the colours the user is already in.
+ *
+ * The copy is the cost: the authoritative definition is the diagram in the
+ * project documentation, and an export carried here can fall behind what the
+ * software implements. It has to be re-exported whenever the metamodel changes.
  */
-const METAMODEL_URL = 'https://github.com/omxnt/openconformity/blob/main/docs/metamodel.md';
+function metamodelDiagram() {
+  return isDark() ? 'assets/images/metamodel-dark.png' : 'assets/images/metamodel-light.png';
+}
 
 function openMetamodel() {
-  openLink(METAMODEL_URL);
+  openLink(metamodelDiagram());
 }
 
 // --- Chrome ------------------------------------------------------------
@@ -988,10 +1081,47 @@ function confirmNoticeRead() {
   });
 }
 
+/**
+ * The browser's own prompt is kept for the one case where leaving still costs
+ * something: a project too large to be kept, which lives in this tab and
+ * nowhere else. While the project is being kept, closing the tab loses nothing
+ * and a prompt saying otherwise would be a lie the user learns to dismiss.
+ */
 window.addEventListener('beforeunload', (event) => {
-  if (!state.unsaved) return;
+  if (!state.unsaved || !autosaveFailed) return;
   event.preventDefault();
   event.returnValue = '';
+});
+
+/**
+ * The mark is a link to the project site, and a mark is something people click
+ * without meaning to go anywhere. It asks first whenever there is work that is
+ * not in a file, and what it says depends on whether that work is being kept:
+ * coming back to it is not the same promise as losing it.
+ *
+ * Only a plain click is caught. A modified click opens a tab of its own and
+ * leaves the work where it is, so there is nothing to ask about.
+ */
+document.getElementById('shell-brand').addEventListener('click', (event) => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!state.unsaved) return;
+  event.preventDefault();
+  const url = event.currentTarget.href;
+  confirmDialog({
+    title: 'Leave for the project site?',
+    content: autosaveFailed
+      ? [
+        el('p', { text: `"${state.model.name}" has changes that are not in a file.` }),
+        el('p', { class: 'muted', text: 'This project is too large to be kept in the browser, so leaving now loses them.' }),
+      ]
+      : [
+        el('p', { text: `"${state.model.name}" has changes that are not in a file.` }),
+        el('p', { class: 'muted', text: 'They are kept in this browser and will be here when you come back.' }),
+      ],
+    confirmLabel: 'Leave',
+    danger: autosaveFailed,
+    onConfirm: () => { window.location.href = url; },
+  });
 });
 
 navigator.reveal(state.selection);

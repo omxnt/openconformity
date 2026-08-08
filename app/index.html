@@ -85,7 +85,11 @@
      that change how the application itself presents. Editing actions, undo
      and redo among them, live with the model in the workspace below. -->
 <header class="shell">
-  <span class="wordmark" role="img" aria-label="openconformity"></span>
+  <!-- Leaving the workbench, so the guard is on the click rather than only on
+       the browser's own unload prompt. -->
+  <a class="brand" id="shell-brand" href="https://openconformity.org" aria-label="openconformity, the project site">
+    <img class="symbol" src="assets/marks/favicon.svg" width="512" height="512" alt="">
+  </a>
   <nav class="shell-nav" id="menubar-menus" aria-label="Main"></nav>
   <div class="shell-actions">
     <span class="shell-unsaved" id="toolbar-unsaved" hidden>

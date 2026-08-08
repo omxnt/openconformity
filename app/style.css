@@ -231,7 +231,6 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
   display: flex;
   align-items: center;
   height: 48px;   /* Carbon UI Shell header, $spacing-09 */
-  padding-left: 16px;  /* $spacing-05 */
   color: var(--shell-text);
   background: var(--shell);
   border-bottom: 1px solid var(--shell-border);
@@ -241,12 +240,50 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
 .shell :focus-visible { outline-color: var(--shell-focus); }
 
 /* The mark is a mask filled with the text colour of whatever it sits on, so it
-   is Carbon's white on the g100 shell and the theme's text colour elsewhere. */
-.wordmark {
-  width: 129px;
-  height: 18px;
+   is Carbon's white on the g100 shell and the theme's text colour elsewhere.
+
+   Its height is the measure; the width follows from the mark's own proportions
+   rather than being set beside them. A box wider than the mark would not make
+   it bigger, because the mask is contained: it would fit the height, sit in the
+   middle of the box and leave the rest as dead space, which is what pushed it
+   off the shell's 16px edge while the mark was 831 wide and the box 129. One
+   ratio to change if the mark is drawn again. */
+/* Carbon's shell brand: a square at the leading edge the height of the bar,
+   with the symbol centred in it and the menus starting where it ends. It is the
+   same geometry as the actions at the other end of the bar, so the shell is
+   bounded by a square at each edge rather than by a mark floating inside a
+   padded one.
+
+   The symbol is a drawn mark in three fixed colours rather than one shape to
+   fill, so it is an image and not a mask, and it reads the same on the g100 bar
+   in either theme. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 48px;  /* Carbon UI Shell header, $spacing-09 */
   flex: none;
-  margin-right: 24px;  /* $spacing-06 */
+  color: inherit;
+}
+/* The square takes the geometry of an action but not its states: it is the
+   identity rather than a control, and the one thing in the bar that leaves the
+   workspace. It stays still under the pointer. */
+.symbol {
+  display: block;
+  width: 24px;   /* Carbon icon size 24, $spacing-06 */
+  height: 24px;
+  flex: none;
+}
+
+/* Still the mark on the small-viewport panel, where the name is wanted and
+   there is room for it. */
+.wordmark {
+  display: block;
+  color: inherit;
+  height: 18px;
+  aspect-ratio: 681 / 114;  /* the mark's own */
+  flex: none;
   background: currentColor;
   -webkit-mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
   mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
@@ -1079,8 +1116,7 @@ select.input[size] { appearance: auto; background-image: none; height: auto; pad
     border: 1px solid var(--border-subtle);
     padding: 32px;  /* $spacing-07 */
   }
-  /* The wordmark is a span, so it needs a box before its size applies. */
-  .small-viewport-panel .wordmark { display: block; margin: 0 0 24px; }  /* $spacing-06 */
+  .small-viewport-panel .wordmark { margin: 0 0 24px; }  /* $spacing-06 */
   .small-viewport-panel h1 { font-size: 20px; line-height: 1.4; font-weight: 400; margin-bottom: 16px; }  /* $heading-03, 28px; $spacing-05 */
   .small-viewport-panel p { margin-bottom: 8px; line-height: 1.42857; color: var(--text-second); }  /* $spacing-03; $body-01, 20px */
   .small-viewport-panel a { display: inline-block; margin-top: 16px; color: var(--link); }  /* $link-primary */
