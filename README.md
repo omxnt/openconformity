@@ -48,7 +48,7 @@ Provided as-is, without warranty of any kind. Outputs may contain errors and sho
 
 ## License
 
-© 2026 omxnt. Licensed under the [EUPL-1.2](LICENSE).
+© 2026 omxnt, licensed under the [EUPL-1.2](LICENSE).
 
 ## Contact
 
