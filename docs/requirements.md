@@ -93,7 +93,7 @@ The project shall be named "openconformity".
 
 `ubiquitous` `stable`
 
-The project shall use the domain openconformity.org.
+The project shall use the domain `openconformity.org`.
 
 > *The domain is the name. The .org top-level domain signals a non-commercial, public-interest project rather than a commercial product.*
 
@@ -103,7 +103,7 @@ The project shall use the domain openconformity.org.
 
 `ubiquitous` `stable`
 
-The project shall be licensed under the EUPL-1.2.
+The project shall be licensed under the `EUPL-1.2`.
 
 > *A copyleft licence that keeps derivatives open, covers documents and diagrams as well as code, and holds up under EU law.*
 
@@ -151,13 +151,13 @@ The software shall be hosted on Cloudflare Pages.
 
 ---
 
-#### C-DEV-003 Diagram source
+#### C-DEV-003 Metamodel source
 
 `ubiquitous` `stable`
 
-The diagrams shall be maintained in draw.io.
+The metamodel shall be maintained as Mermaid text in `docs/metamodel.md`.
 
-> *draw.io is free, stores its source as open XML, and requires no account. The source lives in the repository as a .drawio file and exports to SVG for use in the project.*
+> *Mermaid is a text format: the diagram in the document is its own source, renders wherever the document is read, and cannot drift from an exported image. Being text, it constrains no tool; any editor serves, and the repository diff shows every change to the model.*
 
 ---
 
@@ -175,7 +175,7 @@ The identity shall be maintained in Figma.
 
 `ubiquitous` `stable`
 
-The software shall be served at [app.openconformity.org](https://app.openconformity.org).
+The software shall be served at `app.openconformity.org`.
 
 > *The software is served on its own subdomain, separate from the project site at the root domain. The two are deployed independently, and the software is self-contained so that it can equally be served from anywhere else.*
 
@@ -382,9 +382,11 @@ The software shall present the workspace on entry, without a homepage, wizard, o
 
 > *The software is the destination, not a page in front of it. A first visit opens an empty project ready for the first entity, and information about the project is available from within the software rather than ahead of it.*
 
+### 4.2 Session
+
 ---
 
-#### F-APP-003 Working state
+#### F-SES-001 Working state
 
 `event driven` `draft`
 
@@ -394,7 +396,19 @@ When the software is opened, it shall restore the working state of the previous 
 
 ---
 
-#### F-APP-004 Model tree
+#### F-SES-002 Model retention
+
+`event driven` `draft`
+
+When the model changes, the software shall persist the change in browser storage.
+
+> *Work survives closing the software without a save, as a drawing survives closing draw.io. Browser storage is retained at the browser's and the user's discretion, and is cleared with site data; the saved project file remains the durable record. Persisting on change, rather than on close, means a crash loses nothing either.*
+
+### 4.3 Workspace
+
+---
+
+#### F-WSP-001 Model tree
 
 `ubiquitous` `draft`
 
@@ -404,7 +418,7 @@ The software shall present the model as a tree in the navigator pane.
 
 ---
 
-#### F-APP-005 Entity attributes
+#### F-WSP-002 Entity attributes
 
 `event driven` `draft`
 
@@ -414,7 +428,7 @@ When an entity is selected, the software shall present its attributes in the edi
 
 ---
 
-#### F-APP-006 Entity relationships
+#### F-WSP-003 Entity relationships
 
 `event driven` `draft`
 
@@ -422,29 +436,41 @@ When an entity is selected, the software shall present its relationships in the 
 
 > *The relationships are what distinguish a model from a set of documents. Showing them beside the attributes keeps the connections visible while the entity is worked on.*
 
+### 4.4 Model
+
 ---
 
-#### F-APP-007 Entity creation
+#### F-MOD-001 Entity creation
 
 `ubiquitous` `draft`
 
-The software shall only permit the creation of entity types defined by the metamodel.
+The software shall only permit the creation of entity types defined by the metamodel in `docs/metamodel.md`.
 
-> *The metamodel encodes the domain. Allowing an entity type it does not define would let a model express something the domain does not have.*
+> *The metamodel encodes the domain. Allowing an entity type it does not define would let a model express something the domain does not have. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
 ---
 
-#### F-APP-008 Relationship creation
+#### F-MOD-002 Relationship creation
 
 `ubiquitous` `draft`
 
-The software shall only permit the creation of relationships defined by the metamodel.
+The software shall only permit the creation of relationships defined by the metamodel in `docs/metamodel.md`.
 
-> *A relationship not present in the metamodel has no meaning in the domain. Enforcing this on creation is what makes a model structurally sound by construction rather than by review.*
+> *A relationship not present in the metamodel has no meaning in the domain. Enforcing this on creation is what makes a model structurally sound by construction rather than by review. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
 ---
 
-#### F-APP-009 Entity deletion
+#### F-MOD-003 Edit confirmation
+
+`ubiquitous` `draft`
+
+The software shall not apply changes to an entity's attributes until the user confirms them.
+
+> *An entity is read far more often than it is edited. Requiring confirmation means the model cannot be changed by a stray keystroke while reading.*
+
+---
+
+#### F-MOD-004 Entity deletion
 
 `event driven` `draft`
 
@@ -454,25 +480,37 @@ When an entity is deleted, the software shall remove the relationships it takes 
 
 ---
 
-#### F-APP-010 Relationship deletion
+#### F-MOD-005 Composition deletion
 
 `event driven` `draft`
 
-When a relationship is deleted, the software shall not delete the entities it relates.
+When an entity that owns entities through composition is deleted, the software shall delete the owned entities.
 
-> *Removing a connection says nothing about the things connected. Both entities were identified independently and remain part of the model.*
+> *Composition is ownership: an owned entity is part of its owner, as an essential requirement is part of its legislation, and a part does not outlive its whole. Deleting the owner and keeping the parts would leave content whose source is gone. Relationships of other kinds do not cascade; deleting their entities severs only the relationship.*
 
 ---
 
-#### F-APP-011 Edit confirmation
+#### F-MOD-006 Cascade confirmation
+
+`event driven` `draft`
+
+When a deletion would cascade to owned entities, the software shall require confirmation stating the entities that will be deleted.
+
+> *A cascading deletion is the most destructive action in the software, and its full extent is not visible from the entity being deleted. Stating what will go, before it goes, makes the consequence a decision rather than a surprise.*
+
+### 4.5 Views
+
+---
+
+#### F-VIE-001 Model views
 
 `ubiquitous` `draft`
 
-The software shall not apply changes to an entity's attributes until the user confirms them.
+The software shall generate exportable views of the model.
 
-> *An entity is read far more often than it is edited. Requiring confirmation means the model cannot be changed by a stray keystroke while reading.*
+> *Views are the output of the modelling work: artefacts such as a hazard list or a requirement specification, generated from the model rather than authored beside it. Which views exist and what each contains is specified as the views are built; this requirement states the capability they decompose from.*
 
-### 4.2 Persistence
+### 4.6 Persistence
 
 ---
 
@@ -523,6 +561,16 @@ When the software opens a project or library file written by an earlier schema v
 If a project or library file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
 > *A later version may hold data the software cannot represent. Opening the file would discard what it does not recognise, and saving would make that loss permanent. Refusing is the only response that does not risk the user's work.*
+
+---
+
+#### F-PER-006 Invalid file
+
+`unwanted behaviour` `draft`
+
+If a project or library file does not conform to its schema, then the software shall not open it, and shall state that the file is invalid.
+
+> *A file that fails validation cannot be trusted to mean what it appears to mean. Opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery.*
 
 ## 5. Non-functional
 
