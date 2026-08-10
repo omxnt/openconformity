@@ -15,7 +15,7 @@ class CAS["Conformity Assessment"]:::legislativeFramework
 class NTB["Notified Body"]:::legislativeFramework
 class ESR["Essential Requirement"]:::requirementsDefinition
 class HSR["Harmonised Requirement"]:::requirementsDefinition
-class SPR["Specification Requirement"]:::requirementsDefinition
+class OSR["Other Requirement"]:::requirementsDefinition
 class REQ["System Requirement"]:::requirementsDefinition
 class VER["System Verification"]:::requirementsDefinition
 class HAZ["Single Hazard"]:::riskAssessment
@@ -30,7 +30,7 @@ class PHS["System Phase"]:::systemContext
 %% Composition
 LEG *-- ESR : contains
 HST *-- HSR : contains
-OSP *-- SPR : contains
+OSP *-- OSR : contains
 REQ *-- REQ : decomposes into
 SAF *-- SAF : decomposes into
 ELM *-- ELM : decomposes into
@@ -42,21 +42,21 @@ ELM ..> LEG : subject to
 ELM ..> HST : applies
 ELM ..> OSP : applies
 HSR ..> ESR : covers
-SPR ..> ESR : supports
+OSR ..> ESR : supports
 ESR ..> HAZ : triggered by
 REQ ..> HSR : derives from
-REQ ..> SPR : derives from
+REQ ..> OSR : derives from
 REQ ..> PRM : expresses
 REQ ..> SAF : expresses
 ELM ..> ESR : satisfies
 ELM ..> HSR : satisfies
-ELM ..> SPR : satisfies
+ELM ..> OSR : satisfies
 ELM ..> REQ : satisfies
 PRM ..> HSR : implements
-PRM ..> SPR : implements
+PRM ..> OSR : implements
 VER ..> ESR : verifies
 VER ..> HSR : verifies
-VER ..> SPR : verifies
+VER ..> OSR : verifies
 VER ..> REQ : verifies
 PRM ..> ELM : allocated to
 SAF ..> ELM : allocated to
