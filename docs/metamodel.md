@@ -44,6 +44,7 @@ ELM ..> OSP : applies
 HSR ..> ESR : covers
 OSR ..> ESR : supports
 ESR ..> HAZ : triggered by
+REQ ..> ESR : derives from
 REQ ..> HSR : derives from
 REQ ..> OSR : derives from
 REQ ..> PRM : expresses
