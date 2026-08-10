@@ -366,7 +366,7 @@ The software shall present the panes arranged as below.
 
 #### F-APP-001 Small-viewport notice
 
-`unwanted behaviour` `draft`
+`unwanted behaviour` `stable`
 
 If the viewport is smaller than the supported viewport, then the software shall display a notice that a desktop-sized screen is required.
 
@@ -376,7 +376,7 @@ If the viewport is smaller than the supported viewport, then the software shall 
 
 #### F-APP-002 Direct entry
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall present the workspace on entry, without a homepage, wizard, or project setup prompt.
 
@@ -388,7 +388,7 @@ The software shall present the workspace on entry, without a homepage, wizard, o
 
 #### F-SES-001 Working state
 
-`event driven` `draft`
+`event driven` `stable`
 
 When the software is opened, it shall restore the working state of the previous session.
 
@@ -398,7 +398,7 @@ When the software is opened, it shall restore the working state of the previous 
 
 #### F-SES-002 Model retention
 
-`event driven` `draft`
+`event driven` `stable`
 
 When the model changes, the software shall persist the change in browser storage.
 
@@ -410,17 +410,17 @@ When the model changes, the software shall persist the change in browser storage
 
 #### F-WSP-001 Model tree
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall present the model as a tree in the navigator pane.
 
-> *A tree is how the user navigates and selects. Everything else in the interface acts on what is selected there, so the model needs one visible structure to select from.*
+> *A tree is how the user navigates and selects. Everything else in the interface acts on what is selected there, so the model needs one visible structure to select from. The tree presents the user's filing of the model (F-WSP-004), not its structure.*
 
 ---
 
 #### F-WSP-002 Entity attributes
 
-`event driven` `draft`
+`event driven` `stable`
 
 When an entity is selected, the software shall present its attributes in the editor pane.
 
@@ -430,11 +430,41 @@ When an entity is selected, the software shall present its attributes in the edi
 
 #### F-WSP-003 Entity relationships
 
-`event driven` `draft`
+`event driven` `stable`
 
 When an entity is selected, the software shall present its relationships in the relationship pane.
 
 > *The relationships are what distinguish a model from a set of documents. Showing them beside the attributes keeps the connections visible while the entity is worked on.*
+
+---
+
+#### F-WSP-004 Free filing
+
+`ubiquitous` `stable`
+
+The software shall permit an entity to be filed at any position in the navigator tree, regardless of its type and relationships.
+
+> *The tree is the user's filing of the model, not its structure. The metamodel governs which entities exist and how they may relate; where they are placed is organisation, and two users may file the same model differently, one by machine structure and one by legislation. Any placement rule derived from the metamodel would forbid one of them.*
+
+---
+
+#### F-WSP-005 Neutral filing
+
+`ubiquitous` `stable`
+
+The software shall not create, modify, or require relationships based on an entity's position in the tree.
+
+> *Relationships are engineering judgments, made deliberately in the relationship pane. Inferring them from placement would manufacture judgments nobody made, and requiring them for placement would turn filing into modelling. Placement carries no meaning; the relationships carry all of it.*
+
+---
+
+#### F-WSP-006 Folder creation
+
+`ubiquitous` `stable`
+
+The software shall permit the creation of folders at any position in the navigator tree.
+
+> *Folders are filing, not model content: they hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model. Deleting a folder removes filing, never the entities filed in it.*
 
 ### 4.4 Model
 
@@ -442,7 +472,7 @@ When an entity is selected, the software shall present its relationships in the 
 
 #### F-MOD-001 Entity creation
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall only permit the creation of entity types defined by the metamodel in `docs/metamodel.md`.
 
@@ -452,7 +482,7 @@ The software shall only permit the creation of entity types defined by the metam
 
 #### F-MOD-002 Relationship creation
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall only permit the creation of relationships defined by the metamodel in `docs/metamodel.md`.
 
@@ -462,7 +492,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 #### F-MOD-003 Edit confirmation
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall not apply changes to an entity's attributes until the user confirms them.
 
@@ -472,7 +502,7 @@ The software shall not apply changes to an entity's attributes until the user co
 
 #### F-MOD-004 Entity deletion
 
-`event driven` `draft`
+`event driven` `stable`
 
 When an entity is deleted, the software shall remove the relationships it takes part in.
 
@@ -482,7 +512,7 @@ When an entity is deleted, the software shall remove the relationships it takes 
 
 #### F-MOD-005 Composition deletion
 
-`event driven` `draft`
+`event driven` `stable`
 
 When an entity that owns entities through composition is deleted, the software shall delete the owned entities.
 
@@ -492,11 +522,31 @@ When an entity that owns entities through composition is deleted, the software s
 
 #### F-MOD-006 Cascade confirmation
 
-`event driven` `draft`
+`event driven` `stable`
 
 When a deletion would cascade to owned entities, the software shall require confirmation stating the entities that will be deleted.
 
 > *A cascading deletion is the most destructive action in the software, and its full extent is not visible from the entity being deleted. Stating what will go, before it goes, makes the consequence a decision rather than a surprise.*
+
+---
+
+#### F-MOD-007 Undo action
+
+`event driven` `stable`
+
+When undo is invoked, the software shall revert the most recent model change.
+
+> *A modelling session is a stream of small changes, and any of them can be a mistake. Undo makes every change recoverable, including a cascading deletion: the confirmation warns before the loss, undo forgives after it. A change is the same unit the software persists, a confirmed edit, a creation, or a deletion.*
+
+---
+
+#### F-MOD-008 Redo action
+
+`event driven` `stable`
+
+When redo is invoked, the software shall reapply the most recently undone model change.
+
+> *Undo is exploratory: stepping back to look is only safe if stepping forward again is possible. Redo makes undo itself mistake-proof.*
 
 ### 4.5 Views
 
@@ -516,7 +566,7 @@ The software shall generate exportable views of the model.
 
 #### F-PER-001 Project persistence
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall persist a project as a single local file conforming to `schema/project.schema.json`.
 
@@ -536,7 +586,7 @@ The software shall persist a library as a single local file conforming to `schem
 
 #### F-PER-003 Schema version
 
-`event driven` `draft`
+`event driven` `stable`
 
 When the software writes a project or library file, the software shall record the current schema version.
 
@@ -546,7 +596,7 @@ When the software writes a project or library file, the software shall record th
 
 #### F-PER-004 Version migration
 
-`event driven` `draft`
+`event driven` `stable`
 
 When the software opens a project or library file written by an earlier schema version, the software shall migrate it to the current schema version.
 
@@ -556,7 +606,7 @@ When the software opens a project or library file written by an earlier schema v
 
 #### F-PER-005 Unsupported version
 
-`unwanted behaviour` `draft`
+`unwanted behaviour` `stable`
 
 If a project or library file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
@@ -566,7 +616,7 @@ If a project or library file records a schema version later than the software su
 
 #### F-PER-006 Invalid file
 
-`unwanted behaviour` `draft`
+`unwanted behaviour` `stable`
 
 If a project or library file does not conform to its schema, then the software shall not open it, and shall state that the file is invalid.
 
