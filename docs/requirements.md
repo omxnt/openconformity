@@ -574,41 +574,51 @@ The software shall persist a project as a single local file conforming to `schem
 
 ---
 
-#### F-PER-002 Schema version
+#### F-PER-002 Library persistence
+
+`ubiquitous` `draft`
+
+The software shall persist a library as a single local file conforming to `schema/library.schema.json`.
+
+> *A library holds reusable items the user saves independently of any project, to apply across projects. Held as a single local file the user owns and controls, it is imported from into projects. The schema is the authoritative definition of a valid library file.*
+
+---
+
+#### F-PER-003 Schema version
 
 `event driven` `stable`
 
-When the software writes a project file, the software shall record the current schema version.
+When the software writes a project or library file, the software shall record the current schema version.
 
 > *The version identifies which data model the file conforms to. Without it, the structure of a file can only be guessed at, and the software cannot know whether it is reading something it understands. Files are always written in the current version, so a model is migrated forward once rather than carried indefinitely.*
 
 ---
 
-#### F-PER-003 Version migration
+#### F-PER-004 Version migration
 
 `event driven` `stable`
 
-When the software opens a project file written by an earlier schema version, the software shall migrate it to the current schema version.
+When the software opens a project or library file written by an earlier schema version, the software shall migrate it to the current schema version.
 
 > *A project holds conformity documentation that may be needed for as long as the product is on the market. A change to the data model cannot leave the user unable to open their own work.*
 
 ---
 
-#### F-PER-004 Unsupported version
+#### F-PER-005 Unsupported version
 
 `unwanted behaviour` `stable`
 
-If a project file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
+If a project or library file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
 > *A later version may hold data the software cannot represent. Opening the file would discard what it does not recognise, and saving would make that loss permanent. Refusing is the only response that does not risk the user's work.*
 
 ---
 
-#### F-PER-005 Invalid file
+#### F-PER-006 Invalid file
 
 `unwanted behaviour` `stable`
 
-If a project file does not conform to its schema, then the software shall not open it, and shall state that the file is invalid.
+If a project or library file does not conform to its schema, then the software shall not open it, and shall state that the file is invalid.
 
 > *A file that fails validation cannot be trusted to mean what it appears to mean. Opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery.*
 
@@ -738,7 +748,7 @@ The software shall be fully operable by keyboard.
 
 #### N-CMP-001 Desktop viewport
 
-`ubiquitous` `stable`
+`ubiquitous` `draft`
 
 The software shall be operable on desktop-sized viewports.
 
