@@ -618,9 +618,19 @@ If a project or library file records a schema version later than the software su
 
 `unwanted behaviour` `stable`
 
-If a project or library file does not conform to its schema, then the software shall not open it, and shall state that the file is invalid.
+If a project or library file is not valid, then the software shall not open it, and shall state that the file is invalid.
 
-> *A file that fails validation cannot be trusted to mean what it appears to mean. Opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery.*
+> *A file is valid when it conforms to its schema and satisfies the constraints the schema cannot express: identifiers unique, references resolving, and no cycles in ownership or filing. A file that fails either cannot be trusted to mean what it appears to mean. Opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery.*
+
+---
+
+#### F-PER-007 Version increment
+
+`ubiquitous` `stable`
+
+The schema version shall be incremented whenever a change to the data model would make a file written by the previous version invalid.
+
+> *Migration keys on the version. If the model changes without the version changing, two incompatible files claim the same version and the software cannot tell which it is reading. The condition is breaking change rather than any change, so an addition that older files satisfy needs no increment.*
 
 ## 5. Non-functional
 
