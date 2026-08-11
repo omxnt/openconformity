@@ -748,7 +748,7 @@ The software shall be fully operable by keyboard.
 
 #### N-CMP-001 Desktop viewport
 
-`ubiquitous` `draft`
+`ubiquitous` `stable`
 
 The software shall be operable on desktop-sized viewports.
 
