@@ -26,6 +26,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
     sandbox/        the non-published work-in-progress
       app/          iterations of the software
       site/         iterations of the project site
+      demo/         frozen demonstration prototype
       poc/          frozen original proof of concept
 
 ## Publishing
@@ -41,10 +42,10 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | `docs/about.md` | Background, principles, and scope | Needing context on the project |
 | `docs/requirements.md` | Requirements specification | Building or changing the software |
 | `docs/metamodel.md` | Entity types and relationships | Working with entities or relationships |
+| `docs/attributes.md` | Attributes per entity type | Working with entity attributes |
 | `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
 | `docs/template.md` | Document form and structure | Writing or updating a document |
 | `schema/project.schema.json` | Project file specification | Working with the project schema file |
-| `schema/library.schema.json` | Library file specification | Working with the library schema file |
 
 ## Verification
 
