@@ -30,6 +30,7 @@ openconformity/
 └── sandbox/        the non-published work-in-progress
     ├── app/        iterations of the software
     ├── site/       iterations of the project site
+    ├── demo/       frozen demonstration prototype
     └── poc/        frozen original proof of concept
 ```
 
@@ -39,8 +40,9 @@ openconformity/
 |---|---|
 | [about.md](docs/about.md) | Why it exists and what it is |
 | [decisions.md](docs/decisions.md) | What was chosen and why |
-| [metamodel.md](docs/metamodel.md) | What a model may contain |
 | [requirements.md](docs/requirements.md) | What it shall be and do |
+| [metamodel.md](docs/metamodel.md) | What a model may contain |
+| [attributes.md](docs/attributes.md) | What each entity type carries |
 
 ## Disclaimer
 
