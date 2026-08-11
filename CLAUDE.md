@@ -46,6 +46,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
 | `docs/template.md` | Document form and structure | Writing or updating a document |
 | `schema/project.schema.json` | Project file specification | Working with the project schema file |
+| `schema/library.schema.json` | Library file specification | Working with the library schema file |
 
 ## Verification
 
