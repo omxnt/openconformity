@@ -13,7 +13,7 @@
       "const": 1
     },
     "name": {
-      "description": "The project's name.",
+      "description": "The project's name. May be empty: a project exists before it is named.",
       "type": "string"
     },
     "counters": {
