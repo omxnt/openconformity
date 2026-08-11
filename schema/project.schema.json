@@ -1,5 +1,211 @@
 {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "openconformity project",
-  "description": "Data model for a project. Placeholder: to be developed.",
-  "type": "object"
+  "description": "A project: a model of one product's CE marking, held as a single file. The folders, parents, and order are the user's filing of the entities in the navigator tree. A file is valid when it conforms to this schema and satisfies the constraints the schema cannot express:\n- Identifiers are unique across folders and entities.\n- An entity's identifier begins with its own type code.\n- Every counter exceeds every issued number of its kind in the file.\n- Every non-null parent names a folder or an entity in the file.\n- Filing has no cycle: nothing sits inside itself, directly or through what holds it.\n- No two folders or entities sharing a parent share an order.\n- Every relationship's source and target name entities in the file, of the entity types its type identifier names, source first, target last.\n- No two relationships share type, source, and target.\n- An entity is the target of at most one composition relationship (the contains and decomposes-into types).\n- Composition has no cycle: no entity owns itself, directly or through what it owns.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "description": "Marks the file as an openconformity project.",
+      "const": "openconformity-project"
+    },
+    "schemaVersion": {
+      "description": "The schema version the file conforms to.",
+      "const": 1
+    },
+    "name": {
+      "description": "The project's name.",
+      "type": "string"
+    },
+    "counters": {
+      "description": "The next identifier number to issue, per entity type code and F for folders.",
+      "type": "object",
+      "properties": {
+        "LEG": { "$ref": "#/$defs/counter" },
+        "HST": { "$ref": "#/$defs/counter" },
+        "OSP": { "$ref": "#/$defs/counter" },
+        "CAS": { "$ref": "#/$defs/counter" },
+        "NTB": { "$ref": "#/$defs/counter" },
+        "ESR": { "$ref": "#/$defs/counter" },
+        "HSR": { "$ref": "#/$defs/counter" },
+        "OSR": { "$ref": "#/$defs/counter" },
+        "REQ": { "$ref": "#/$defs/counter" },
+        "VER": { "$ref": "#/$defs/counter" },
+        "HAZ": { "$ref": "#/$defs/counter" },
+        "SCN": { "$ref": "#/$defs/counter" },
+        "PRM": { "$ref": "#/$defs/counter" },
+        "SAF": { "$ref": "#/$defs/counter" },
+        "ELM": { "$ref": "#/$defs/counter" },
+        "ACT": { "$ref": "#/$defs/counter" },
+        "TSK": { "$ref": "#/$defs/counter" },
+        "PHS": { "$ref": "#/$defs/counter" },
+        "F": { "$ref": "#/$defs/counter" }
+      },
+      "required": ["LEG", "HST", "OSP", "CAS", "NTB", "ESR", "HSR", "OSR", "REQ", "VER", "HAZ", "SCN", "PRM", "SAF", "ELM", "ACT", "TSK", "PHS", "F"],
+      "additionalProperties": false
+    },
+    "folders": {
+      "description": "The folders of the navigator tree.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/folder" }
+    },
+    "entities": {
+      "description": "The entities of the model.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "relationships": {
+      "description": "The relationships between entities.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/relationship" }
+    }
+  },
+  "required": ["format", "schemaVersion", "name", "counters", "folders", "entities", "relationships"],
+  "additionalProperties": false,
+  "$defs": {
+    "entityId": {
+      "description": "An entity identifier: the type code, a hyphen, and a number.",
+      "type": "string",
+      "pattern": "^(LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}$"
+    },
+    "counter": {
+      "description": "The next number to issue for one identifier kind.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "order": {
+      "description": "The position among all folders and entities sharing the same parent, sorted ascending across both kinds. Array order carries no meaning.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "parent": {
+      "description": "The identifier of the folder or entity this one is filed in, or null at the top of the tree.",
+      "type": ["string", "null"],
+      "pattern": "^((LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}|F-[0-9]+)$"
+    },
+    "folder": {
+      "description": "A folder of the navigator tree.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The folder identifier: F, a hyphen, and a number.",
+          "type": "string",
+          "pattern": "^F-[0-9]+$"
+        },
+        "name": {
+          "description": "The folder's name.",
+          "type": "string",
+          "minLength": 1
+        },
+        "parent": { "$ref": "#/$defs/parent" },
+        "order": { "$ref": "#/$defs/order" }
+      },
+      "required": ["id", "name", "parent", "order"],
+      "additionalProperties": false
+    },
+    "entity": {
+      "description": "An entity of the model.",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/entityId" },
+        "type": {
+          "description": "The entity type code.",
+          "enum": [
+            "LEG",
+            "HST",
+            "OSP",
+            "CAS",
+            "NTB",
+            "ESR",
+            "HSR",
+            "OSR",
+            "REQ",
+            "VER",
+            "HAZ",
+            "SCN",
+            "PRM",
+            "SAF",
+            "ELM",
+            "ACT",
+            "TSK",
+            "PHS"
+          ]
+        },
+        "parent": { "$ref": "#/$defs/parent" },
+        "order": { "$ref": "#/$defs/order" },
+        "attributes": {
+          "description": "The entity's attribute values, keyed by attribute.",
+          "type": "object",
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "required": ["id", "type", "parent", "order", "attributes"],
+      "additionalProperties": false
+    },
+    "relationship": {
+      "description": "A relationship between two entities.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The relationship type.",
+          "enum": [
+            "leg-contains-esr",
+            "hst-contains-hsr",
+            "osp-contains-osr",
+            "req-decomposes-into-req",
+            "saf-decomposes-into-saf",
+            "elm-decomposes-into-elm",
+            "hst-harmonised-under-leg",
+            "cas-conducted-under-leg",
+            "elm-subject-to-leg",
+            "elm-applies-hst",
+            "elm-applies-osp",
+            "hsr-covers-esr",
+            "osr-supports-esr",
+            "esr-triggered-by-haz",
+            "req-derives-from-esr",
+            "req-derives-from-hsr",
+            "req-derives-from-osr",
+            "req-expresses-prm",
+            "req-expresses-saf",
+            "elm-satisfies-esr",
+            "elm-satisfies-hsr",
+            "elm-satisfies-osr",
+            "elm-satisfies-req",
+            "prm-implements-hsr",
+            "prm-implements-osr",
+            "ver-verifies-esr",
+            "ver-verifies-hsr",
+            "ver-verifies-osr",
+            "ver-verifies-req",
+            "prm-allocated-to-elm",
+            "saf-allocated-to-elm",
+            "saf-realises-prm",
+            "ntb-performs-cas",
+            "cas-assesses-elm",
+            "elm-exhibits-haz",
+            "haz-contributes-to-scn",
+            "tsk-gives-rise-to-scn",
+            "act-exposed-in-scn",
+            "prm-eliminates-haz",
+            "prm-reduces-risk-of-scn",
+            "elm-undergoes-phs",
+            "act-interacts-with-elm",
+            "act-performs-tsk",
+            "tsk-occurs-during-phs"
+          ]
+        },
+        "source": {
+          "description": "The entity the relationship goes from.",
+          "$ref": "#/$defs/entityId"
+        },
+        "target": {
+          "description": "The entity the relationship goes to.",
+          "$ref": "#/$defs/entityId"
+        }
+      },
+      "required": ["type", "source", "target"],
+      "additionalProperties": false
+    }
+  }
 }

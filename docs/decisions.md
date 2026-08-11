@@ -399,6 +399,66 @@ The document set is `about.md`, `requirements.md`, `metamodel.md`, `attributes.m
 
 > *Attributes are what an entity type carries, and the metamodel as a diagram has nowhere to state them, so they are a document of their own beside it. Supersedes D-042.*
 
+---
+
+### D-051 Append-only identifiers
+
+`2026-08-11` `architecture`
+
+An identifier number, once issued, is never reissued. The project file carries one counter per identifier kind, holding the next number to issue, and the generator reads the counter rather than deriving it from the numbers present in the file.
+
+> *Settled with the first project file schema. A conformity record is referenced for as long as the product is on the market, and a number that returned on a different entity would make every earlier reference to it ambiguous. Deriving the next number from the highest present reissues the numbers of deleted entities, so the counters are persisted instead. The requirements keep their own identifiers by the same convention (requirements.md 1.4).*
+
+---
+
+### D-052 Version increments on any written change
+
+`2026-08-11` `architecture`
+
+The schema version is incremented on any change to what the software writes, not only on a breaking one. F-PER-007 states the floor, not the practice.
+
+> *Settled with the first project file schema, whose validation is strict: a field the schema does not name makes a file invalid. An addition without an increment would leave older software refusing a newer file as invalid (F-PER-006) rather than as newer (F-PER-005), misstating the problem to exactly the user who needs it stated. Incrementing on every written change keeps the version the single truthful answer to which software can read a file.*
+
+---
+
+### D-053 Sibling order
+
+`2026-08-11` `product` `architecture`
+
+Every folder and entity carries an integer order. Things filed in the same place sort ascending on it, folders and entities together, and the order of the file's arrays carries no meaning. Two siblings sharing an order make the file invalid.
+
+> *Settled with the first project file schema. Free filing (F-WSP-004) lets an entity sit above a folder, which ordering by array position cannot represent while folders and entities are held in separate arrays: one kind would always group above the other. A single mixed array was rejected because telling a folder from an entity in one list needs a keyword outside the validator's small set. Ties are invalid because a tied file has two readings, and a file must mean what it appears to mean (F-PER-006).*
+
+---
+
+### D-054 Single-owner composition
+
+`2026-08-11` `product`
+
+An entity is owned through composition by at most one entity, ownership forms no cycle, and both rules are enforced when a file is opened. Whether an entity has an owner at all remains optional (D-044).
+
+> *Settled with the first project file schema. Composition is exclusive ownership, as the class diagram draws it: a part of two wholes would go with whichever is deleted first, and a cycle would leave a cascading deletion (F-MOD-005) with nowhere to end. Enforcing both on load keeps a hand-edited file from loading a structure the software cannot reason about (F-PER-006).*
+
+---
+
+### D-055 Product identification in the model
+
+`2026-08-11` `product`
+
+The identification of the product, its manufacturer, designation, and the like, is carried as attributes of the machine's root System Element. The file's top level holds the project name and no further metadata.
+
+> *Settled with the first project file schema. What identifies the product is content of the model, read by the views that need it, not a property of the file around the model; two places stating the same facts would disagree eventually. The attributes themselves follow when attributes.md specifies them.*
+
+---
+
+### D-056 No provenance on import
+
+`2026-08-11` `architecture`
+
+Content imported from a library is copied without any record of where it came from. The project file carries no provenance fields, and will not gain them.
+
+> *Settled with the first project file schema. Extends D-015 and D-016: imported content arrives as ordinary entities, indistinguishable from those created in place. A closed project stands on what it states, and a provenance field would be a reference back to a library the project must not depend on (D-015). Ruling it out now keeps the question from returning as a schema change (D-052).*
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
