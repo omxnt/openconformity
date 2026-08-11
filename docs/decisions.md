@@ -4,12 +4,16 @@ This document records the decisions made for the project, what was chosen and wh
 
 ## 1. Conventions
 
-### 1.1 Identifier
+### 1.1 Precedence
+
+The requirements and the metamodel govern. This log records the reasoning behind what was chosen and never overrides them. Where an entry disagrees with a requirement or the metamodel, the entry is out of date.
+
+### 1.2 Identifier
 
 Each entry shall have a unique identifier, `D-NNN` for a decision and `U-NNN` for an undecided question. Entries are ordered by number, grouped loosely by theme. Identifiers are append-only, an entry is never renumbered, and a decision that changes is superseded by a new entry rather than edited. A question that is settled is removed, and its outcome recorded as a decision.
 
 
-### 1.2 Tags
+### 1.3 Tags
 
 Each entry carries one or more tags from the table below.
 
@@ -22,15 +26,15 @@ Each entry carries one or more tags from the table below.
 | `documentation` | How the project is documented: which documents exist and how they are written. |
 | `graphical` | The visual identity and interface profile: typefaces, colour, and marks. |
 
-### 1.3 Content
+### 1.4 Content
 
 An entry states what was decided and why. It does not repeat requirement text: where a decision resulted in a requirement, the entry gives the reasoning and refers to the requirement by its identifier.
 
-### 1.4 Supersession
+### 1.5 Supersession
 
 A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
 
-### 1.5 Template
+### 1.6 Template
 
 Each entry shall be written using the template below.
 
@@ -66,16 +70,6 @@ No sales, no donations, no sponsorship, no paid support.
 
 ---
 
-### D-003 No standard content reproduced
-
-`2026-07-14` `legal` `superseded by D-029`
-
-The tool does not include or reproduce copyrighted content from harmonized standards: no clause text, no clause titles, no Annex ZA mappings.
-
-> *Standards are sold by national standardization bodies. The knowledge the tool is built on is limited to what is public: legislation, guidance, and the published lists of harmonized standards.*
-
----
-
 ### D-004 Artefacts not assertions
 
 `2026-07-14` `product`
@@ -103,16 +97,6 @@ Primary scope is CE marking of machinery under the Machinery Regulation (EU) 202
 The metamodel is built into the tool and versioned with it. Users cannot extend or modify it.
 
 > *The value is a metamodel correct for the domain, not generic modeling capability. A user-extensible metamodel makes every model different and traceability between them meaningless. Generic modeling tools already exist.*
-
----
-
-### D-007 Risk Reduction Measure term
-
-`2026-07-15` `product`
-
-The canonical term is Risk Reduction Measure (RRM), not Protective Measure.
-
-> *Chosen with knowledge of ISO 12100, which uses "protective measure" formally. "Risk reduction measure" is more widely used in industry and more self-explanatory to readers without ISO fluency.*
 
 ---
 
@@ -236,23 +220,6 @@ One commit, one logical change, with the project working after each.
 
 ---
 
-### D-020 Repository layout
-
-`2026-07-19` `repository` `superseded by D-033`
-
-Assets are grouped by kind, with the editable source beside its exports. One Figma file per mark set and one draw.io file per diagram set, each exporting the artefacts the site consumes.
-
-```
-assets/
-  fonts/        vendored typefaces, with licence and origin
-  marks/        marks.fig, and the wordmark, favicon, and square it exports
-  diagrams/     diagrams.drawio, and the SVG it exports
-```
-
-> *One copy of each artifact, referenced from everywhere, duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. The extension distinguishes source from export, so the two live together rather than split across folders. Supersedes an earlier masters-in-`docs`, exports-in-`assets` split, which fragmented each asset across two locations.*
-
----
-
 ### D-021 Throwaway prototypes
 
 `2026-07-16` `repository`
@@ -260,36 +227,6 @@ assets/
 The proof of concept is archived in `poc/`, frozen and unmaintained. The concept mockup in `app/` demonstrates layout with fixed content, and its logic is discarded when the specification drives the real implementation. Neither is a basis for the implementation.
 
 > *Both proved the concept works and earned the project its design phase. But both were built through exploratory AI-assisted coding, and building on them would mean inheriting decisions nobody made.*
-
----
-
-### D-022 Document set
-
-`2026-07-19` `documentation` `superseded by D-038`
-
-Three documents, each with one job. `design.md` describes what the product is and why. `spec.md` states what it shall be and do. `decisions.md` records what was chosen and why. `README.md` owns the links between them.
-
-> *Values are specified in spec.md, the design document carries the concept, and this log carries the reasoning. No document restates another. The README owns the links and points down; nothing links up or sideways, so a rename breaks one thing rather than four.*
-
----
-
-### D-023 "Shall" is spec.md only
-
-`2026-07-16` `documentation`
-
-Requirements language is reserved for the specification. design.md is written in present-tense declarative, describing the tool as designed.
-
-> *The exclusivity is what gives "shall" its force. If design.md contained requirements, no reader could tell which sentences bind and which describe.*
-
----
-
-### D-024 Iterative build
-
-`2026-07-17` `documentation`
-
-design.md is the stable why and what. spec.md grows in build order, not in one pass. The exception is the data model, which is specified before code.
-
-> *Everything depends on the data model, and changing it later means rewriting the tool, so it is specified first. Beyond that, specifying only the slice being built keeps the specification honest: it describes what exists or is about to, not a guess at the whole tool.*
 
 ---
 
@@ -310,6 +247,282 @@ A specification states what must be true of the tool, not how to implement it or
 No colour in the interface means pass or fail. Green and red as status are excluded.
 
 > *D-004 expressed chromatically: the tool never states a conclusion about conformity, so its interface must not either. Green reads as conformant and red as failing, to precisely the audience the tool is built for.*
+
+---
+
+### D-030 Browser-based and server-less
+
+`2026-07-21` `architecture`
+
+Running in a web browser and consisting of static files with no server-side code are technical constraints, not operational qualities. Browser-based moved from the non-functional Operation group to C-TEC in spec.md, and a no-server-side-code constraint was added alongside it.
+
+> *Browser-based is a property of what the software is built as, verified against the build rather than by using the running tool, which places it with the technical constraints as the root the stack, build, and dependency constraints follow from. No server-side code is the constraint that makes the privacy and operation qualities structurally guaranteed rather than promised: with nothing executing on the host, there is nowhere for user data to be received, processed, or stored remotely. Specified in spec.md C-TEC-006 and C-TEC-007.*
+
+---
+
+### D-031 Desktop only
+
+`2026-07-21` `product`
+
+The tool targets desktop-sized viewports and is not supported on mobile. Below the supported viewport it shows a notice that a desktop-sized screen is required, rather than a degraded interface.
+
+> *The multi-pane interface, the navigator, editor, and relationship views side by side, needs the screen space of a desktop viewport to function. Optimising for touch and small screens is scope the project does not carry. The exact minimum viewport is set during implementation once the layout's real constraints are known. Specified in spec.md N-CMP-001; the notice behaviour is a functional requirement, added when the functional requirements are written.*
+
+---
+
+### D-034 Separate deployments
+
+`2026-07-23` `architecture`
+
+The project site and the software are deployed separately, the site at openconformity.org and the software at app.openconformity.org. Each deployment is self-contained and carries its own copy of everything it serves.
+
+> *The site is a first impression and will grow to hold documentation; the software is the tool a user bookmarks and returns to. Separating them lets each change without touching the other, and keeps material that is neither, such as the design sources and the throwaway experiments, out of both. Self-containment is what makes the software copyable: nothing reaches outside its own directory, so it runs from any address or from a local folder. The cost is that each deployment carries its own copy of the typefaces and marks. Specified in spec.md C-DEV-005.*
+
+---
+
+### D-036 Standards content
+
+`2026-07-23` `legal`
+
+The project does not reproduce copyrighted content from harmonized standards. The harmonized-standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that is treated as protected unless established otherwise.
+
+> *D-029 drew the boundary at what the OJEU publishes, which is a workable rule but not the actual constraint: the question is whether content is protected, and OJEU publication is only evidence of that. Stating the real constraint means a clear answer on a particular item, such as whether the Annex ZA correspondence tables attract protection, can relax what the project may use without rewriting the requirement. Until such an answer exists, everything beyond the OJEU lists is treated as protected. Supersedes D-029. Specified in spec.md C-PRJ-005.*
+
+
+---
+
+### D-039 British spelling
+
+`2026-08-01` `documentation`
+
+All project text uses British spelling. The earlier informal convention of writing "harmonized" with a z is reversed: the word is written "harmonised" everywhere. Quoted material keeps its source spelling.
+
+> *One spelling convention with no exceptions is never relitigated. The European legal texts the project builds on use British spelling, so the project matches its source material.*
+
+---
+
+### D-041 Design system
+
+`2026-08-06` `graphical`
+
+The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, component patterns, and icon set. Token values are copied into the CSS and the Carbon packages are not used. The identity is a symbol, a wordmark, and a favicon, rendered in black or white according to their background, with no accent colour.
+
+> *The interface had been built decision by decision, and the result was flat and inconsistent in ways that were slow to fix one control at a time. A design system removes a class of decisions and gives a coherence that would otherwise be arrived at unevenly. Carbon is built for dense professional software, is open-licensed, can be self-hosted, and its typeface was already in use. Copying the tokens rather than the packages keeps the no-dependency stack intact. Supersedes D-028.*
+
+---
+
+### D-043 Colour by pillar
+
+`2026-08-07` `graphical`
+
+Entity type icons carry a colour by pillar, from Carbon's palette, with one value per theme. Shape remains the carrier of meaning, since each entity type has its own silhouette, and colour groups rather than identifies.
+
+> *An earlier palette was built and removed because shape did not need it. What changed is the count: eighteen entity types are more than a tree can be scanned by shape alone, and four colours group them into areas of the work before any icon is read. The hues were chosen by searching every combination of three Carbon hues plus yellow across the usable steps, requiring three to one contrast against every row state and scoring by the smallest perceptual distance between any two pillars under normal vision and simulated protanopia, deuteranopia and tritanopia. Purple, magenta, teal and yellow won by a wide margin, with no pair falling below a distance of fifteen. Under protanopia the system context colour sits close to the neutral icon grey, which was accepted in exchange for keeping the pillars apart from each other. Nobody who cannot see the colour loses information, only the speed of finding a pillar. Supersedes D-027.*
+
+---
+
+### D-044 Freeform navigator
+
+`2026-08-11` `product`
+
+The navigator is independent of the metamodel. Entities and folders are placed anywhere in the tree, and placement carries no meaning: it neither creates nor requires a relationship. The metamodel continues to govern which entities exist and how they may relate.
+
+> *The tree is filing rather than structure. A user can work with folders alone, build full traceability, or organise a machine so that a subsystem folder holds its own elements, hazards, measures and requirements. Composition governs deletion rather than placement, so a hazard can exist before its element and imported content needs no owner. Exports that depend on relationships are unavailable to a user who does not create them, which is a consequence rather than a fault. Settles U-009.*
+
+---
+
+### D-045 Requirement types
+
+`2026-08-11` `product`
+
+The metamodel distinguishes Essential Requirement, Harmonised Requirement, Other Requirement, and System Requirement, and a system requirement may derive from an essential requirement directly.
+
+> *An essential requirement that applies because the machinery exists rather than because of a hazard, such as instructions or the marking plate, has no measure and no standard clause behind it. Deriving a system requirement straight from the essential requirement gives it a path into the model. Settles U-002.*
+---
+
+### D-046 Protective Measure term
+
+`2026-08-11` `product`
+
+The canonical term is Protective Measure (PRM), as the metamodel defines it.
+
+> *ISO 12100 and the Machinery Regulation both use "protective measure", and the Regulation is law. Matching the legislation matters more than matching industry habit, and a reader who knows the term from the Regulation finds it where they expect. Supersedes D-007.*
+
+---
+
+### D-047 Requirements language
+
+`2026-08-11` `documentation`
+
+Requirements language is reserved for `requirements.md`. No other document uses "shall".
+
+> *The exclusivity is what gives "shall" its force. If another document contained requirements, no reader could tell which sentences bind and which describe. Supersedes D-023 and D-024, which named documents that no longer exist.*
+
+---
+
+### D-048 Authority
+
+`2026-08-11` `documentation`
+
+`requirements.md` and `metamodel.md` govern. The schema transcribes the metamodel and is the form a file takes, not the definition of the model. This log records reasoning and overrides nothing.
+
+> *An earlier entry made the schema authoritative over a design document that has since been removed. With the metamodel now stated as a diagram rather than described in prose, the metamodel is the definition and the schema follows it, so a disagreement between them is a defect in the schema. Supersedes D-032.*
+
+---
+
+### D-049 Repository layout
+
+`2026-08-11` `repository`
+
+The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and work in progress is kept in a sandbox outside the deployables.
+
+    app/            the published software
+    site/           the published project site
+    docs/           the project documentation
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    sandbox/        the non-published work-in-progress
+      app/          iterations of the software
+      site/         iterations of the project site
+      demo/         frozen demonstration prototype
+      poc/          frozen original proof of concept
+
+> *Separate deployments (D-034) mean each served directory must hold everything it serves. The sandbox mirrors the deployables for work in progress and keeps the frozen versions the project has passed through, so each remains readable beside the work that replaced it. Keeping the sandbox outside the deployable directories is what stops unfinished work being published. Supersedes D-037.*
+
+---
+
+### D-050 Document set
+
+`2026-08-11` `documentation`
+
+The document set is `about.md`, `requirements.md`, `metamodel.md`, `attributes.md`, and `decisions.md`, with `template.md` giving the form the prose documents follow. `metamodel.md` is a class diagram and does not follow the template.
+
+> *Attributes are what an entity type carries, and the metamodel as a diagram has nowhere to state them, so they are a document of their own beside it. Supersedes D-042.*
+
+## 3. Undecided
+
+The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
+
+### U-005 Library
+
+`2026-08-01` `product`
+
+How a library works and what it holds: which item types are reusable across projects, and how importing from a library into a project behaves.
+
+> *Affects the library. F-PER-002 establishes that a library is a file of its own, distinct from a project, but not what it contains or how content crosses from one into a project.*
+
+---
+
+## 4. Superseded
+
+Entries replaced by a later decision, kept as a record of what was chosen and when.
+
+---
+
+### D-023 "Shall" is spec.md only
+
+`2026-07-16` `documentation` `superseded by D-047`
+
+Requirements language is reserved for the specification. design.md is written in present-tense declarative, describing the tool as designed.
+
+> *The exclusivity is what gives "shall" its force. If design.md contained requirements, no reader could tell which sentences bind and which describe.*
+
+---
+
+### D-024 Iterative build
+
+`2026-07-17` `documentation` `superseded by D-047`
+
+design.md is the stable why and what. spec.md grows in build order, not in one pass. The exception is the data model, which is specified before code.
+
+> *Everything depends on the data model, and changing it later means rewriting the tool, so it is specified first. Beyond that, specifying only the slice being built keeps the specification honest: it describes what exists or is about to, not a guess at the whole tool.*
+
+---
+
+### D-032 Referenced data model
+
+`2026-07-21` `architecture` `documentation` `superseded by D-048`
+
+The data model is defined by a schema, versioned as its own artifact and referenced by spec.md. The schema is the authoritative definition. design.md explains the model as readable context but binds nothing; where design.md and the schema disagree, the schema is truth and design.md is corrected to match. spec.md states a stable conformance requirement and does not restate the model's structure.
+
+> *The metamodel is expected to iterate heavily through building and testing, so the model cannot live in spec.md without churning the specification. Separating the stable commitment from the volatile definition lets each change at its own rate: spec.md commits that projects conform to the data model and stays put, while the schema and design.md iterate until the model freezes at a first version. The schema is machine-readable and enforceable; design.md is the red thread a reader follows to understand the whole. Follows D-024, which specifies the data model before code, and keeps to D-022 by giving each document one job: spec.md requires, the schema defines, design.md explains.*
+
+---
+
+### D-037 Repository layout
+
+`2026-07-23` `repository` `superseded by D-049`
+
+The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and throwaway work is kept in a sandbox outside the deployables.
+
+    app/            the software
+    site/           the project site
+    docs/           the specification, decisions, and design
+    schema/         the data model, as one schema file per document type
+    sources/        editable design sources
+    sandbox/        throwaway work
+      app/          iterations of the software
+      site/         iterations of the project site
+      poc/          the original proof of concept, frozen
+
+> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the deployables for work in progress, so sandbox/app holds iterations of the software and sandbox/site holds explorations of the site. It also keeps the proof of concept the project started from, which is frozen as a record rather than iterated on, and so sits beside the two working areas rather than in one of them. Keeping the sandbox outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
+
+---
+
+### D-042 Fewer documents
+
+`2026-08-06` `documentation` `superseded by D-050`
+
+The document set is `about.md`, `requirements.md`, `metamodel.md`, and `decisions.md`, with `template.md` giving the form the prose documents follow. `user-interface.md` is removed and what it described is stated as requirements. `use-cases.md` is not written. `metamodel.md` becomes a Mermaid diagram in place of a prose document and its exported image, and does not follow the template.
+
+> *Writing everything as prose before building forced repeated iteration of documents that the code states more accurately. What survives is what nothing else can carry: requirements are verifiable, the metamodel is the model, and the log holds the reasoning. Interface behaviour became requirements rather than description, since a requirement is checkable where prose is not. A Mermaid diagram is text in the document, so it cannot drift from a source it is exported from. Supersedes D-038 and D-040.*
+
+---
+
+### D-007 Risk Reduction Measure term
+
+`2026-07-15` `product` `superseded by D-046`
+
+The canonical term is Risk Reduction Measure (RRM), not Protective Measure.
+
+> *Chosen with knowledge of ISO 12100, which uses "protective measure" formally. "Risk reduction measure" is more widely used in industry and more self-explanatory to readers without ISO fluency.*
+
+---
+
+### D-003 No standard content reproduced
+
+`2026-07-14` `legal` `superseded by D-029`
+
+The tool does not include or reproduce copyrighted content from harmonized standards: no clause text, no clause titles, no Annex ZA mappings.
+
+> *Standards are sold by national standardization bodies. The knowledge the tool is built on is limited to what is public: legislation, guidance, and the published lists of harmonized standards.*
+
+---
+
+### D-020 Repository layout
+
+`2026-07-19` `repository` `superseded by D-033`
+
+Assets are grouped by kind, with the editable source beside its exports. One Figma file per mark set and one draw.io file per diagram set, each exporting the artefacts the site consumes.
+
+```
+assets/
+  fonts/        vendored typefaces, with licence and origin
+  marks/        marks.fig, and the wordmark, favicon, and square it exports
+  diagrams/     diagrams.drawio, and the SVG it exports
+```
+
+> *One copy of each artifact, referenced from everywhere, duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. The extension distinguishes source from export, so the two live together rather than split across folders. Supersedes an earlier masters-in-`docs`, exports-in-`assets` split, which fragmented each asset across two locations.*
+
+---
+
+### D-022 Document set
+
+`2026-07-19` `documentation` `superseded by D-038`
+
+Three documents, each with one job. `design.md` describes what the product is and why. `spec.md` states what it shall be and do. `decisions.md` records what was chosen and why. `README.md` owns the links between them.
+
+> *Values are specified in spec.md, the design document carries the concept, and this log carries the reasoning. No document restates another. The README owns the links and points down; nothing links up or sideways, so a rename breaks one thing rather than four.*
 
 ---
 
@@ -343,37 +556,6 @@ The tool does not include or reproduce content from harmonized standards beyond 
 
 ---
 
-### D-030 Browser-based and server-less
-
-`2026-07-21` `architecture`
-
-Running in a web browser and consisting of static files with no server-side code are technical constraints, not operational qualities. Browser-based moved from the non-functional Operation group to C-TEC in spec.md, and a no-server-side-code constraint was added alongside it.
-
-> *Browser-based is a property of what the software is built as, verified against the build rather than by using the running tool, which places it with the technical constraints as the root the stack, build, and dependency constraints follow from. No server-side code is the constraint that makes the privacy and operation qualities structurally guaranteed rather than promised: with nothing executing on the host, there is nowhere for user data to be received, processed, or stored remotely. Specified in spec.md C-TEC-006 and C-TEC-007.*
-
----
-
-### D-031 Desktop only
-
-`2026-07-21` `product`
-
-The tool targets desktop-sized viewports and is not supported on mobile. Below the supported viewport it shows a notice that a desktop-sized screen is required, rather than a degraded interface.
-
-> *The multi-pane interface, the navigator, editor, and relationship views side by side, needs the screen space of a desktop viewport to function. Optimising for touch and small screens is scope the project does not carry. The exact minimum viewport is set during implementation once the layout's real constraints are known. Specified in spec.md N-CMP-001; the notice behaviour is a functional requirement, added when the functional requirements are written.*
-
----
-
-### D-032 Referenced data model
-
-`2026-07-21` `architecture` `documentation`
-
-The data model is defined by a schema, versioned as its own artifact and referenced by spec.md. The schema is the authoritative definition. design.md explains the model as readable context but binds nothing; where design.md and the schema disagree, the schema is truth and design.md is corrected to match. spec.md states a stable conformance requirement and does not restate the model's structure.
-
-> *The metamodel is expected to iterate heavily through building and testing, so the model cannot live in spec.md without churning the specification. Separating the stable commitment from the volatile definition lets each change at its own rate: spec.md commits that projects conform to the data model and stays put, while the schema and design.md iterate until the model freezes at a first version. The schema is machine-readable and enforceable; design.md is the red thread a reader follows to understand the whole. Follows D-024, which specifies the data model before code, and keeps to D-022 by giving each document one job: spec.md requires, the schema defines, design.md explains.*
-
-
----
-
 ### D-033 Repository layout
 
 `2026-07-21` `repository` `superseded by D-035`
@@ -390,16 +572,6 @@ The repository is organised by kind, with the site at the root and a directory f
     schema/         the data model, as one schema file per document type
 
 > *One copy of each artefact, referenced from everywhere and duplicated nowhere. In a repository with no build step, nothing keeps copies in sync except the maintainer's memory. Keeping an editable source beside its exports means the two are found and updated together rather than split across folders. Supersedes D-020, which covered assets only, and adds the schema directory holding the data model (D-032).*
-
----
-
-### D-034 Separate deployments
-
-`2026-07-23` `architecture`
-
-The project site and the software are deployed separately, the site at openconformity.org and the software at app.openconformity.org. Each deployment is self-contained and carries its own copy of everything it serves.
-
-> *The site is a first impression and will grow to hold documentation; the software is the tool a user bookmarks and returns to. Separating them lets each change without touching the other, and keeps material that is neither, such as the design sources and the throwaway experiments, out of both. Self-containment is what makes the software copyable: nothing reaches outside its own directory, so it runs from any address or from a local folder. The cost is that each deployment carries its own copy of the typefaces and marks. Specified in spec.md C-DEV-005.*
 
 ---
 
@@ -420,37 +592,6 @@ The repository is organised by kind. Each deployable directory is self-contained
 
 ---
 
-### D-036 Standards content
-
-`2026-07-23` `legal`
-
-The project does not reproduce copyrighted content from harmonized standards. The harmonized-standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that is treated as protected unless established otherwise.
-
-> *D-029 drew the boundary at what the OJEU publishes, which is a workable rule but not the actual constraint: the question is whether content is protected, and OJEU publication is only evidence of that. Stating the real constraint means a clear answer on a particular item, such as whether the Annex ZA correspondence tables attract protection, can relax what the project may use without rewriting the requirement. Until such an answer exists, everything beyond the OJEU lists is treated as protected. Supersedes D-029. Specified in spec.md C-PRJ-005.*
-
-
----
-
-### D-037 Repository layout
-
-`2026-07-23` `repository`
-
-The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and throwaway work is kept in a sandbox outside the deployables.
-
-    app/            the software
-    site/           the project site
-    docs/           the specification, decisions, and design
-    schema/         the data model, as one schema file per document type
-    sources/        editable design sources
-    sandbox/        throwaway work
-      app/          iterations of the software
-      site/         iterations of the project site
-      poc/          the original proof of concept, frozen
-
-> *Separate deployments (D-034) mean each served directory must hold everything it serves, so app/ and site/ each carry their own assets. What remains in sources/ is the material nothing serves, the editable originals from which the exports are produced. The sandbox mirrors the deployables for work in progress, so sandbox/app holds iterations of the software and sandbox/site holds explorations of the site. It also keeps the proof of concept the project started from, which is frozen as a record rather than iterated on, and so sits beside the two working areas rather than in one of them. Keeping the sandbox outside the deployable directories is what stops throwaway work being published: anything inside site/ is served the moment it is pushed. Supersedes D-035.*
-
----
-
 ### D-038 Document per concern
 
 `2026-08-01` `documentation` `repository` `superseded by D-042`
@@ -458,16 +599,6 @@ The repository is organised by kind. Each deployable directory is self-contained
 One document per concern, created when the need arises. `design.md` is dissolved, `about.md` carries the background, concept, principles, and scope, `metamodel.md` the entity types and relationships, and `user-interface.md` the interface concept. `spec.md` is renamed `requirements.md`. Every document opens with its title and an overview in prose, followed by numbered chapters, with references last. There is no table of contents, the outline in GitHub and the editor serves that purpose. The form is kept as `template.md`. Files are named for their content, closed compounds written as the literature writes them (`metamodel.md`), multiword names hyphenated (`use-cases.md`), uppercase reserved for root meta-files. The design sources follow the same rule (`metamodel.drawio`, `visual-identity.fig`), and `sources/` holds editable originals that require a tool to edit and whose exports are consumed elsewhere. `README.md` owns the index. A document may point to another but never depends on or restates it.
 
 > *A single design document mixed content that changes weekly with content that changes yearly, so no diff was clean and the document never felt finished. Small documents of one concern iterate independently, give the metamodel its own history, and let a reader pull only what a task needs. Content-named files are understood without being opened, which the genre names spec and design were not. Supersedes D-022.*
-
----
-
-### D-039 British spelling
-
-`2026-08-01` `documentation`
-
-All project text uses British spelling. The earlier informal convention of writing "harmonized" with a z is reversed: the word is written "harmonised" everywhere. Quoted material keeps its source spelling.
-
-> *One spelling convention with no exceptions is never relitigated. The European legal texts the project builds on use British spelling, so the project matches its source material.*
 
 ---
 
@@ -479,128 +610,7 @@ Use cases complement the requirements in a document of their own, `use-cases.md`
 
 > *Requirements written at the level of user interaction would multiply into hundreds and constrain the implementation. The sequences live in use cases instead, keeping the requirements few and capability-shaped. Every system response in a use case should trace to a requirement, so writing the flows also surfaces the requirements that are missing.*
 
-
----
-
-### D-041 Design system
-
-`2026-08-06` `graphical`
-
-The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, component patterns, and icon set. Token values are copied into the CSS and the Carbon packages are not used. The identity is a symbol, a wordmark, and a favicon, rendered in black or white according to their background, with no accent colour.
-
-> *The interface had been built decision by decision, and the result was flat and inconsistent in ways that were slow to fix one control at a time. A design system removes a class of decisions and gives a coherence that would otherwise be arrived at unevenly. Carbon is built for dense professional software, is open-licensed, can be self-hosted, and its typeface was already in use. Copying the tokens rather than the packages keeps the no-dependency stack intact. Supersedes D-028.*
-
----
-
-### D-042 Fewer documents
-
-`2026-08-06` `documentation`
-
-The document set is `about.md`, `requirements.md`, `metamodel.md`, and `decisions.md`, with `template.md` giving the form the prose documents follow. `user-interface.md` is removed and what it described is stated as requirements. `use-cases.md` is not written. `metamodel.md` becomes a Mermaid diagram in place of a prose document and its exported image, and does not follow the template.
-
-> *Writing everything as prose before building forced repeated iteration of documents that the code states more accurately. What survives is what nothing else can carry: requirements are verifiable, the metamodel is the model, and the log holds the reasoning. Interface behaviour became requirements rather than description, since a requirement is checkable where prose is not. A Mermaid diagram is text in the document, so it cannot drift from a source it is exported from. Supersedes D-038 and D-040.*
-
----
-
-### D-043 Colour by pillar
-
-`2026-08-07` `graphical`
-
-Entity type icons carry a colour by pillar, from Carbon's palette, with one value per theme. Shape remains the carrier of meaning, since each entity type has its own silhouette, and colour groups rather than identifies.
-
-> *An earlier palette was built and removed because shape did not need it. What changed is the count: eighteen entity types are more than a tree can be scanned by shape alone, and four colours group them into areas of the work before any icon is read. The hues were chosen by searching every combination of three Carbon hues plus yellow across the usable steps, requiring three to one contrast against every row state and scoring by the smallest perceptual distance between any two pillars under normal vision and simulated protanopia, deuteranopia and tritanopia. Purple, magenta, teal and yellow won by a wide margin, with no pair falling below a distance of fifteen. Under protanopia the system context colour sits close to the neutral icon grey, which was accepted in exchange for keeping the pillars apart from each other. Nobody who cannot see the colour loses information, only the speed of finding a pillar. Supersedes D-027.*
-
-## 3. Undecided
-
-The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
-
-### U-001 Composition deletion
-
-`2026-08-01` `product`
-
-Whether deleting a composition relationship is forbidden, or equivalent to deleting the owned entity.
-
-> *Affects the metamodel. Composition implies ownership, so removing the relationship leaves the owned entity without a parent unless the deletion cascades.*
-
----
-
-### U-002 Hazard-independent essential requirements
-
-`2026-08-01` `product`
-
-How essential requirements that apply regardless of hazards enter the model.
-
-> *Affects the metamodel. Essential requirements normally enter through the hazards that trigger them, so those applying unconditionally have no path into the model as it stands.*
-
----
-
-### U-003 Identifier collisions on import
-
-`2026-08-01` `product`
-
-Whether identifiers that collide on import are renumbered, or scoped by their source.
-
-> *Affects the library. Content imported from more than one source can carry the same identifier.*
-
----
-
-### U-004 Import granularity
-
-`2026-08-01` `product`
-
-Whether a standard is imported whole, or clause by clause.
-
-> *Affects the library.*
-
----
-
-### U-005 Library scope
-
-`2026-08-01` `product`
-
-Which item types are reusable across projects, beyond standards.
-
-> *Affects the library.*
-
----
-
-### U-006 Base library
-
-`2026-08-01` `product` `legal`
-
-Whether a base library of standard identities can be shipped.
-
-> *Affects the library. Would supersede D-014.*
-
----
-
-### U-007 Default content
-
-`2026-08-01` `product`
-
-Whether the software ships any default content, or the user populates everything.
-
-> *Affects the library.*
-
-### U-008 Pseudo entities
-
-`2026-08-03` `product`
-
-Whether the model may hold pseudo entities, of a single untyped kind, connected to typed entities through one informal relationship.
-
-> *Affects the metamodel. The software is a modelling environment rather than a method, so a scratch space for what the metamodel does not cover would let the user represent a process, a tool, or a note without leaving the model. The cost is a second layer that carries no semantics, drawn and named so that it cannot be mistaken for typed content. Nothing typed can depend on it, and it is not engineering content on export.*
-
----
-
-### U-009 Freeform navigator
-
-`2026-08-03` `product`
-
-Whether the navigator is independent of the metamodel, so entities and folders can be placed anywhere in the tree, while the metamodel continues to govern which entities exist and how they may relate.
-
-> *Affects the metamodel and the interface. The tree would be filing rather than structure. A user could work with folders alone, or build full traceability, or organise a machine so that a subsystem folder holds its own elements, hazards, measures and requirements. Composition would inform the default in the deletion prompt rather than constrain creation or placement, so a hazard can exist before its element and a library import needs no owner. Templates would ship as project files to give a new project a starting structure. Exports that depend on relationships are unavailable to a user who does not create them, and an entity such as an essential requirement may be modelled once or once per subsystem, which the software reports rather than normalises.*
-
-## 4. References
+## 5. References
 
 | No. | Reference | Link |
 |---|---|---|

@@ -35,6 +35,17 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
     site/       →   openconformity.org
     sandbox/    →   non-published
 
+## Precedence
+
+| # | Document | Authority | On disagreement |
+|---|---|---|---|
+| 1 | `docs/requirements.md` | Governs what the software does | The requirements are right |
+| 2 | `docs/metamodel.md` | Governs what a model contains | The metamodel is right |
+| 3 | `docs/attributes.md` | Derived from the metamodel | The attributes are wrong |
+| 4 | `schema/project.schema.json` | Derived from the metamodel | The schema is wrong |
+| 5 | `schema/library.schema.json` | Derived from the metamodel | The schema is wrong |
+| 6 | `docs/decisions.md` | Reasoning behind the choices | The entry is out of date |
+
 ## Documents
 
 | File | What it is | Read when |
