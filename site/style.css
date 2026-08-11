@@ -222,7 +222,7 @@ a:hover { color: var(--link-hover); text-decoration: underline; }
 .wordmark {
   display: block;
   height: 21px;
-  aspect-ratio: 681 / 114;  /* the mark's own */
+  aspect-ratio: 869 / 109;  /* the mark's own */
   flex: none;
   color: var(--shell-text);
   background: currentColor;
@@ -552,7 +552,7 @@ footer {
 .foot-mark {
   display: block;
   height: 20px;
-  aspect-ratio: 681 / 114;  /* the mark's own */
+  aspect-ratio: 869 / 109;  /* the mark's own */
   color: var(--shell-text);
   background: currentColor;
   -webkit-mask: url("assets/marks/wordmark.svg") no-repeat left / contain;

@@ -257,7 +257,7 @@ use.node-icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-require
   display: block;
   color: inherit;
   height: 18px;
-  aspect-ratio: 681 / 114;  /* the mark's own */
+  aspect-ratio: 869 / 109;  /* the mark's own */
   flex: none;
   margin-right: 24px;  /* $spacing-06 */
   background: currentColor;

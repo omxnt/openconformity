@@ -265,13 +265,13 @@ The wordmark shall be "openconformity" set as below.
 
 | Property | Value |
 |---|---|
-| Typeface | Saira Condensed |
-| Weight | SemiBold, 600 |
+| Typeface | Bai Jamjuree |
+| Weight | Medium, 500 |
 | Case | Lower |
-| Letter spacing | 1% |
+| Letter spacing | 0% |
 | Colour | `#161616` |
 
-> *The name is the identity. A condensed face keeps a fourteen-character name legible where it has little room, and a weight above regular holds its presence at that width.*
+> *The name is the identity. A square sans reads as engineering without being cold, and a weight above regular gives the mark presence at the size it appears in the shell.*
 
 ---
 
