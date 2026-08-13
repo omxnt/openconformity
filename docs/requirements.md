@@ -279,15 +279,9 @@ The wordmark shall be "openconformity" set as below.
 
 `ubiquitous` `stable`
 
-The favicon shall be an isometric cube of three separated faces, coloured as below.
+The favicon shall be an isometric cube cut out of a filled circle, rendered dark on a light background and light on a dark one.
 
-| Face | Colour |
-|---|---|
-| Top | `#4589FF` |
-| Right | `#8A3FFC` |
-| Left | `#007D79` |
-
-> *A favicon is too small to render the wordmark legibly, and a cube is the simplest form of a system element. The hues distinguish the faces at that size, and read against both a light and a dark background.*
+> *A favicon is too small to render the wordmark legibly, and a cube is the simplest form of a system element. Cutting rather than drawing it makes the mark one shape in one colour, so it inverts cleanly and what shows through is whatever it sits on.*
 
 ### 3.2 System
 
