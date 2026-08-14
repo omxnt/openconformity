@@ -484,7 +484,17 @@ The software shall only permit the creation of relationships defined by the meta
 
 ---
 
-#### F-MOD-003 Edit confirmation
+#### F-MOD-003 Attribute definition
+
+`ubiquitous` `stable`
+
+The software shall only present and edit the attributes defined for the entity's type in `docs/attributes.md`.
+
+> *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form; which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
+
+---
+
+#### F-MOD-004 Edit confirmation
 
 `ubiquitous` `stable`
 
@@ -494,7 +504,7 @@ The software shall not apply changes to an entity's attributes until the user co
 
 ---
 
-#### F-MOD-004 Entity deletion
+#### F-MOD-005 Entity deletion
 
 `event driven` `stable`
 
@@ -504,7 +514,7 @@ When an entity is deleted, the software shall remove the relationships it takes 
 
 ---
 
-#### F-MOD-005 Composition deletion
+#### F-MOD-006 Composition deletion
 
 `event driven` `stable`
 
@@ -514,7 +524,7 @@ When an entity that owns entities through composition is deleted, the software s
 
 ---
 
-#### F-MOD-006 Cascade confirmation
+#### F-MOD-007 Cascade confirmation
 
 `event driven` `stable`
 
@@ -524,7 +534,7 @@ When a deletion would cascade to owned entities, the software shall require conf
 
 ---
 
-#### F-MOD-007 Undo action
+#### F-MOD-008 Undo action
 
 `event driven` `stable`
 
@@ -534,7 +544,7 @@ When undo is invoked, the software shall revert the most recent model change.
 
 ---
 
-#### F-MOD-008 Redo action
+#### F-MOD-009 Redo action
 
 `event driven` `stable`
 
@@ -618,13 +628,33 @@ If a project or library file is not valid, then the software shall not open it, 
 
 ---
 
-#### F-PER-007 Version increment
+#### F-PER-007 Content preservation
 
 `ubiquitous` `stable`
 
-The schema version shall be incremented whenever a change to the data model would make a file written by the previous version invalid.
+The software shall preserve file content it does not recognise, unchanged, when a file is opened and saved.
 
-> *Migration keys on the version. If the model changes without the version changing, two incompatible files claim the same version and the software cannot tell which it is reading. The condition is breaking change rather than any change, so an addition that older files satisfy needs no increment.*
+> *Attribute keys written under one version of the definitions may not be presented by another. Preserving them keeps the user's data intact across definition changes: unrendered content is carried, never dropped, and the saved file loses nothing the opened file held.*
+
+---
+
+#### F-PER-008 Version increment
+
+`ubiquitous` `stable`
+
+The schema version shall be incremented with any change to the files the software writes.
+
+> *Under strict validation, older software refuses any structure it does not know. Incrementing on every written change makes it refuse such files as newer (F-PER-005) rather than misreporting them as invalid (F-PER-006): the version is a statement about the file's producer, not only about compatibility. Increments are free; a wrong error message is not.*
+
+---
+
+#### F-PER-009 Migration notice
+
+`event driven` `draft`
+
+When opening a file requires a migration that preserves content as legacy or leaves content unplaced, the software shall state what was preserved and what needs the user's attention.
+
+> *Mechanical migrations change form and pass silently. A migration that retires a method or cannot relocate content mechanically changes what the file means to its reader; stating it makes the change a known fact rather than a discovery. Content is never converted into new meaning: it is preserved as written, and re-judging it is the user's work.*
 
 ## 5. Non-functional
 
