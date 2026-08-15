@@ -622,19 +622,19 @@ If a project or library file records a schema version later than the software su
 
 `unwanted behaviour` `stable`
 
-If a project or library file is not valid, then the software shall not open it, and shall state that the file is invalid.
+If a project or library file is not valid against the schema of the version it records, then the software shall not open it, and shall state that the file is invalid.
 
-> *A file is valid when it conforms to its schema and satisfies the constraints the schema cannot express: identifiers unique, references resolving, and no cycles in ownership or filing. A file that fails either cannot be trusted to mean what it appears to mean. Opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery.*
+> *A file is valid when it conforms to the schema of its recorded version and satisfies the constraints the schema cannot express: identifiers unique, references resolving, and no cycles in ownership or filing. Validity is judged against the file's own version, not the current one, so an older file is not invalid merely for being older; it is validated as its producer wrote it, then migrated (F-PER-004). A file that fails cannot be trusted to mean what it appears to mean: opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery. On opening, the checks run in order: version newer than supported, refuse (F-PER-005); invalid against its recorded schema, refuse (F-PER-006); older version, migrate (F-PER-004).*
 
 ---
 
-#### F-PER-007 Content preservation
+#### F-PER-007 Migration preservation
 
-`ubiquitous` `stable`
+`event driven` `stable`
 
-The software shall preserve file content it does not recognise, unchanged, when a file is opened and saved.
+When the software migrates a file, the software shall carry all content of the source file into the migrated file, preserved as written.
 
-> *Attribute keys written under one version of the definitions may not be presented by another. Preserving them keeps the user's data intact across definition changes: unrendered content is carried, never dropped, and the saved file loses nothing the opened file held.*
+> *Migration changes form, never meaning. Content that has no place in the current schema is preserved as legacy rather than dropped, and is never split across or mapped into attributes that would give it a meaning its author did not state; re-judging preserved content is the user's work, and the migration notice (F-PER-009) makes it visible. Within a known version, unrecognised structure cannot occur: strict validation (F-PER-006) and the version increment rule (F-PER-008) guarantee that anything the software does not know announces itself as newer. Attribute content within a version is covered by F-PER-010.*
 
 ---
 
@@ -642,19 +642,29 @@ The software shall preserve file content it does not recognise, unchanged, when 
 
 `ubiquitous` `stable`
 
-The schema version shall be incremented with any change to the files the software writes.
+The schema version shall be incremented with any change to the structure of the files the software writes.
 
-> *Under strict validation, older software refuses any structure it does not know. Incrementing on every written change makes it refuse such files as newer (F-PER-005) rather than misreporting them as invalid (F-PER-006): the version is a statement about the file's producer, not only about compatibility. Increments are free; a wrong error message is not.*
+> *Under strict validation, older software refuses any structure it does not know. Incrementing on every structural change makes it refuse such files as newer (F-PER-005) rather than misreporting them as invalid (F-PER-006): the version is a statement about the file's producer, not only about compatibility. Increments are free; a wrong error message is not. Attribute content is validated loosely within a version (F-PER-010), so its definitions iterate without an increment; the version speaks for structure alone.*
 
 ---
 
 #### F-PER-009 Migration notice
 
-`event driven` `draft`
+`event driven` `stable`
 
 When opening a file requires a migration that preserves content as legacy or leaves content unplaced, the software shall state what was preserved and what needs the user's attention.
 
 > *Mechanical migrations change form and pass silently. A migration that retires a method or cannot relocate content mechanically changes what the file means to its reader; stating it makes the change a known fact rather than a discovery. Content is never converted into new meaning: it is preserved as written, and re-judging it is the user's work.*
+
+---
+
+#### F-PER-010 Attribute preservation
+
+`ubiquitous` `stable`
+
+The software shall preserve attribute content it does not present, unchanged, when a file is opened and saved.
+
+> *Attributes are validated loosely within a schema version, and their definitions iterate without a version change. A key written under one revision of the definitions may not be presented by another; preserving it keeps the user's content intact until a definition presents it again or a migration places it. Unpresented content is carried, never dropped.*
 
 ## 5. Non-functional
 
