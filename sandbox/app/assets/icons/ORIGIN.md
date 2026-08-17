@@ -28,3 +28,4 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-warning` | `warning--alt` | 16 | `warning--alt.svg` |
 | `i-chevron-right` | `chevron--right` | 16 | `chevron--right.svg` |
 | `i-chevron-down` | `chevron--down` | 16 | `chevron--down.svg` |
+| `i-save` | `save` | 16 | `save.svg` |

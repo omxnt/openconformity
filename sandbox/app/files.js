@@ -99,6 +99,23 @@ export function serialise(model) {
   return `${JSON.stringify(toFileObject(model), null, 2)}\n`;
 }
 
+/**
+ * The default filename a project saves under: the project name slugified —
+ * lowercased, marks stripped, runs of anything else a single dash — and
+ * `untitled.json` when no name survives that.
+ * @param {string} name
+ * @returns {string}
+ */
+export function filenameFor(name) {
+  const slug = name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `${slug || 'untitled'}.json`;
+}
+
 // --- Reading -----------------------------------------------------------
 
 /**

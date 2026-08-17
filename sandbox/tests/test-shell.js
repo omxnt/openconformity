@@ -53,4 +53,18 @@ ok(PERSIST_DETAIL.includes('Save the project'), 'and points at the file as the d
   }
 }
 
+// --- The file surface stays on the baseline ----------------------------
+
+{
+  const page = readFile('../app/index.html');
+  ok(page.includes('id="file-input"') && page.includes('accept=".json'), 'a .json file input is the way in');
+  for (const module of ['flows.js', 'files.js', 'shell.js', 'app.js', 'store.js']) {
+    const source = readFile(`../app/${module}`);
+    ok(
+      !source.includes('showOpenFilePicker') && !source.includes('showSaveFilePicker'),
+      `${module} uses no File System Access API`
+    );
+  }
+}
+
 summary('test-shell');

@@ -151,6 +151,7 @@
   --shell-text:     #F4F4F4;  /* g100 $text-primary, $icon-primary, gray-10 */
   --shell-disabled: rgba(244, 244, 244, 0.25);  /* g100 $text-disabled */
   --shell-focus:    #FFFFFF;  /* g100 $focus */
+  --shell-link:     #78A9FF;  /* g100 $link-primary, blue-40 */
 
   --motion-fast: 70ms;  /* $duration-fast-01 */
   --motion-standard: cubic-bezier(0.2, 0, 0.38, 0.9);  /* $motion-standard-productive */
@@ -218,6 +219,23 @@ body {
   mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
 }
 
+.shell-nav { display: flex; align-self: stretch; margin-left: 8px; }  /* $spacing-03 */
+
+.menubar-item {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  font: inherit;            /* $body-compact-01 */
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0 16px;          /* $spacing-05 */
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.menubar-item:hover { background: var(--shell-hover); }
+.menubar-item[aria-expanded="true"] { background: var(--shell-selected); }
+
 .shell-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
 
 /* Carbon shell actions are square and fill the header. */
@@ -238,6 +256,16 @@ body {
 .shell-action:active:not(:disabled) { background: var(--shell-active); }
 .shell-action[aria-expanded="true"] { background: var(--shell-selected); }
 .shell-action:disabled { color: var(--shell-disabled); cursor: not-allowed; }
+
+.shell-action-wide {
+  width: auto;
+  gap: 8px;                 /* $spacing-03 */
+  padding: 0 16px;          /* $spacing-05 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--shell-link);
+  white-space: nowrap;
+}
 
 /* ---------- Notices ---------- */
 

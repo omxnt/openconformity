@@ -50,14 +50,26 @@ function fakeStorage() {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['new-entity', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'delete', 'undo', 'redo'],
+    ['new-project', 'open', 'save', 'new-entity', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
-  ok(actions.every((action) => action.toolbar || action.context), 'every action appears on some surface');
+  ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
+  deepEqual(
+    actions.filter((action) => action.menubar).map((action) => action.id),
+    ['new-project', 'open', 'save'],
+    'the Project menu offers the file actions and nothing else'
+  );
+  ok(
+    actions.filter((action) => action.menubar).every((action) => !action.toolbar && !action.context),
+    'and the file actions appear nowhere else'
+  );
 
   deepEqual(
     enabled(),
     {
+      'new-project': true,
+      open: true,
+      save: true,
       'new-entity': true,
       'new-folder': true,
       relate: false,
@@ -68,7 +80,7 @@ function fakeStorage() {
       undo: false,
       redo: false,
     },
-    'an empty project offers creation and nothing else'
+    'an empty project offers creation, the file surface, and nothing else'
   );
 
   store.commit((model) => addEntity(model, 'ELM'));

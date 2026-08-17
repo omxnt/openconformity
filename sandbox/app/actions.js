@@ -40,8 +40,9 @@ export function canMoveDown(model, id) {
  * @property {string} id
  * @property {string} label
  * @property {string} group     toolbar groups; a divider separates them
- * @property {boolean} toolbar  whether the toolbar offers it
+ * @property {boolean} toolbar  whether the navigator toolbar offers it
  * @property {boolean} context  whether the context menu offers it
+ * @property {boolean} [menubar]  whether the shell's Project menu offers it
  * @property {boolean} [menu]   whether running it opens a menu
  * @property {boolean} [danger]
  * @property {() => boolean} enabled
@@ -58,6 +59,36 @@ export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
 
   return [
+    {
+      id: 'new-project',
+      label: 'New project',
+      group: 'project',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => true,
+      run: () => flows.newProject(),
+    },
+    {
+      id: 'open',
+      label: 'Open…',
+      group: 'project',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => true,
+      run: () => flows.openProjectFlow(),
+    },
+    {
+      id: 'save',
+      label: 'Save',
+      group: 'project',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => true,
+      run: () => flows.saveProject(),
+    },
     {
       id: 'new-entity',
       label: 'New',

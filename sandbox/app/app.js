@@ -18,7 +18,6 @@ const store = createStore({ storage: window.localStorage });
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
 store.subscribe(() => overlay.closeMenus());
 
-createShell({ store, overlay });
 const dialogs = createDialogs({ overlay });
 const editor = createEditor({
   store,
@@ -27,8 +26,16 @@ const editor = createEditor({
   onSave: (id, values) => flows.saveEdit(id, values),
   onRename: () => flows.renameSelection(),
 });
-const flows = createFlows({ store, overlay, dialogs, editor, getActions: () => actions });
+const flows = createFlows({
+  store,
+  overlay,
+  dialogs,
+  editor,
+  getActions: () => actions,
+  fileInput: document.getElementById('file-input'),
+});
 const actions = createActions({ store, flows });
+createShell({ store, overlay, actions });
 createNavigator({
   store,
   container: document.getElementById('navigator-body'),

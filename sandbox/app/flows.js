@@ -11,6 +11,7 @@
  */
 
 import {
+  createModel,
   addEntity,
   addFolder,
   removeEntity,
@@ -27,6 +28,7 @@ import {
   canRelate,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, relationshipsFrom, relationshipsTo } from './metamodel.js';
+import { serialise, openProject, filenameFor } from './files.js';
 import { openMenu } from './menu.js';
 import { el } from './dom.js';
 
@@ -72,8 +74,9 @@ function designated(entity) {
  * @param {ReturnType<import('./dialog.js').createDialogs>} context.dialogs
  * @param {ReturnType<import('./editor.js').createEditor>} context.editor
  * @param {() => Array<import('./actions.js').Action>} context.getActions
+ * @param {HTMLInputElement} context.fileInput
  */
-export function createFlows({ store, overlay, dialogs, editor, getActions }) {
+export function createFlows({ store, overlay, dialogs, editor, getActions, fileInput }) {
   /**
    * The draft guard: true when it is safe to go on.
    * @returns {Promise<boolean>}
@@ -338,6 +341,105 @@ export function createFlows({ store, overlay, dialogs, editor, getActions }) {
     store.commit((model) => unrelate(model, relationship.type, relationship.source, relationship.target));
   }
 
+  /**
+   * The question asked before unsaved work would be replaced.
+   * @param {string} confirmLabel
+   * @returns {Promise<boolean>}
+   */
+  async function confirmDiscardProject(confirmLabel) {
+    if (!store.dirty()) return true;
+    return dialogs.confirm({
+      title: 'Unsaved changes',
+      message: 'This project has changes that are not saved to a file. Replacing it loses them.',
+      confirmLabel,
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+  }
+
+  /** Start over on an empty project, the questions first. */
+  async function newProject() {
+    if (!(await confirmDiscard())) return;
+    if (!(await confirmDiscardProject('Discard and start over'))) return;
+    editor.endEdit();
+    store.replaceProject(createModel());
+  }
+
+  /**
+   * @returns {Promise<File|null>} the file the user picked, or null
+   */
+  function pickFile() {
+    return new Promise((resolve) => {
+      fileInput.onchange = () => {
+        const file = fileInput.files[0] ?? null;
+        fileInput.value = '';
+        resolve(file);
+      };
+      fileInput.oncancel = () => resolve(null);
+      fileInput.click();
+    });
+  }
+
+  /**
+   * @param {import('./files.js').LoadResult} result
+   */
+  async function presentRefusal(result) {
+    const body = result.problems?.length
+      ? el('ul', { className: 'doomed-list' }, result.problems.map((problem) => el('li', { text: problem })))
+      : null;
+    await dialogs.open({
+      title: result.code === 'newer' ? 'Written by a newer version' : 'Not a valid project file',
+      message: result.statement,
+      body,
+      actions: [{ label: 'Close', value: null, kind: 'secondary' }],
+    });
+  }
+
+  /**
+   * Open a project file: the questions, the picker, the gates, and — when
+   * a migration preserved content or left it unplaced — the statement of
+   * what needs the user's attention.
+   */
+  async function openProjectFlow() {
+    if (!(await confirmDiscard())) return;
+    if (!(await confirmDiscardProject('Discard and open'))) return;
+
+    const file = await pickFile();
+    if (file === null) return;
+    const result = openProject(await file.text());
+    if (!result.ok) {
+      await presentRefusal(result);
+      return;
+    }
+
+    editor.endEdit();
+    store.replaceProject(result.model);
+    if (result.notices.length > 0) {
+      await dialogs.open({
+        title: 'The file was migrated',
+        message: 'Opening this file changed its form. What follows was preserved as written and needs your attention:',
+        body: el('ul', { className: 'doomed-list' }, result.notices.map((notice) => el('li', { text: notice }))),
+        actions: [{ label: 'Close', value: null, kind: 'secondary' }],
+      });
+    }
+  }
+
+  /**
+   * Save the project as a downloaded file, named after the project, and
+   * point the saved state at what was written.
+   */
+  function saveProject() {
+    const text = serialise(store.model());
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = el('a', { attributes: { href: url, download: filenameFor(store.model().name) } });
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+    store.markSaved();
+  }
+
   async function undo() {
     if (!store.canUndo()) return;
     if (!(await confirmDiscard())) return;
@@ -368,6 +470,9 @@ export function createFlows({ store, overlay, dialogs, editor, getActions }) {
     relateSelection,
     completeRelate,
     removeRelationship,
+    newProject,
+    openProjectFlow,
+    saveProject,
     undo,
     redo,
   };

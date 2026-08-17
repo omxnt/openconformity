@@ -1,7 +1,8 @@
 /**
- * The shell chrome: the theme, the shell bar's theme menu, the session
- * notices, and the pane splitters. It reads the store and touches no model
- * content.
+ * The shell chrome: the theme, the shell bar's Project menu and theme
+ * menu, the unsaved indicator, the session notices, and the pane
+ * splitters. It reads the store, draws its menu from the one action list,
+ * and touches no model content.
  */
 
 import { openMenu } from './menu.js';
@@ -39,11 +40,14 @@ export const PERSIST_DETAIL =
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
+ * @param {Array<import('./actions.js').Action>} [context.actions]
  * @param {Document} [context.root]
  */
-export function createShell({ store, overlay, root = document }) {
+export function createShell({ store, overlay, actions = [], root = document }) {
   const themeButton = root.getElementById('shell-theme');
   const themeIcon = root.getElementById('shell-theme-icon');
+  const projectButton = root.getElementById('shell-project');
+  const unsavedButton = root.getElementById('shell-unsaved');
   const notices = root.getElementById('notices');
   const workspace = root.getElementById('workspace');
   const navigatorPane = root.getElementById('pane-navigator');
@@ -85,6 +89,38 @@ export function createShell({ store, overlay, root = document }) {
       },
     });
   });
+
+  // --- The Project menu and the unsaved indicator ----------------------
+
+  /** @type {import('./overlay.js').Entry|null} */
+  let projectMenu = null;
+
+  projectButton.addEventListener('click', () => {
+    if (projectMenu) {
+      overlay.close(projectMenu);
+      return;
+    }
+    projectMenu = openMenu({
+      overlay,
+      label: 'Project',
+      anchor: projectButton,
+      items: actions
+        .filter((action) => action.menubar)
+        .map((action) => ({
+          label: action.label,
+          disabled: !action.enabled(),
+          onPick: () => action.run({ anchor: projectButton }),
+        })),
+      onClose: () => {
+        projectMenu = null;
+      },
+    });
+  });
+
+  const saveAction = actions.find((action) => action.id === 'save');
+  if (saveAction) {
+    unsavedButton.addEventListener('click', () => saveAction.run({ anchor: unsavedButton }));
+  }
 
   // --- Notices ---------------------------------------------------------
 
@@ -212,6 +248,7 @@ export function createShell({ store, overlay, root = document }) {
   function render() {
     applyTheme();
     renderNotices();
+    unsavedButton.hidden = !store.dirty();
   }
 
   store.subscribe(render);

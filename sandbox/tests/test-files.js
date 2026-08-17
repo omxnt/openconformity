@@ -5,7 +5,7 @@
  * from this directory.
  */
 
-import { SCHEMA_VERSION, toFileObject, serialise, openProject, loadProject } from '../app/files.js';
+import { SCHEMA_VERSION, toFileObject, serialise, openProject, loadProject, filenameFor } from '../app/files.js';
 import { createModel, addEntity, addFolder, updateEntity, relate, file, nodeOf, childrenOf } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -104,6 +104,17 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(loadProject({ format: 'openconformity-project', schemaVersion: '2' }).code, 'invalid', 'a version held as text is invalid, not newer');
   equal(loadProject({ format: 'openconformity-project', schemaVersion: 0 }).code, 'invalid', 'version 0 has no transcription');
   equal(loadProject({ format: 'openconformity-project', schemaVersion: 999 }).code, 'newer', 'any later version refuses as newer');
+}
+
+// --- The filename ------------------------------------------------------
+
+{
+  equal(filenameFor(''), 'untitled.json', 'an unnamed project saves as untitled');
+  equal(filenameFor('Mixer Line 2'), 'mixer-line-2.json', 'the name slugifies: lowercased, spaces to dashes');
+  equal(filenameFor('  Blandare — Åsa/Örebro  '), 'blandare-asa-orebro.json', 'marks strip and runs of anything else become one dash');
+  equal(filenameFor('$$$'), 'untitled.json', 'a name nothing survives of saves as untitled');
+  equal(filenameFor('A --- B'), 'a-b.json', 'dashes never run');
+  equal(filenameFor('café'), 'cafe.json', 'diacritics fold to their letters');
 }
 
 // --- The blob path -----------------------------------------------------

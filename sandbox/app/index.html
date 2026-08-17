@@ -31,6 +31,7 @@
     <symbol id="i-warning" viewBox="0 0 16 16"><path d="M14.5,14h-13c-0.2,0-0.3-0.1-0.4-0.2c-0.1-0.2-0.1-0.3,0-0.5l6.5-12C7.7,1,8,0.9,8.2,1.1c0.1,0,0.2,0.1,0.2,0.2l6.5,12 c0.1,0.2,0.1,0.3,0,0.5C14.9,13.9,14.7,14,14.5,14z M2.3,13h11.3L8,2.5L2.3,13z"/><path d="M7.5 6H8.5V9.5H7.5z"/><path d="M8,10.8c-0.4,0-0.8,0.3-0.8,0.8s0.3,0.8,0.8,0.8c0.4,0,0.8-0.3,0.8-0.8S8.4,10.8,8,10.8z"/></symbol>
     <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"/></symbol>
     <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 16 16"><path d="M13.9,4.6l-2.5-2.5C11.3,2.1,11.1,2,11,2H3C2.4,2,2,2.4,2,3v10c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1V5 C14,4.9,13.9,4.7,13.9,4.6z M6,3h4v2H6V3z M10,13H6V9h4V13z M11,13V9c0-0.6-0.4-1-1-1H6C5.4,8,5,8.4,5,9v4H3V3h2v2c0,0.6,0.4,1,1,1 h4c0.6,0,1-0.4,1-1V3.2l2,2V13H11z"/></symbol>
   </defs>
 </svg>
 
@@ -39,12 +40,21 @@
      theme the page carries. -->
 <header class="shell-bar">
   <span class="wordmark" role="img" aria-label="openconformity"></span>
+  <nav class="shell-nav" aria-label="Main">
+    <button type="button" class="menubar-item" id="shell-project" aria-haspopup="menu" aria-expanded="false">Project</button>
+  </nav>
   <div class="shell-actions">
+    <button type="button" class="shell-action shell-action-wide" id="shell-unsaved" hidden>
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>
+      <span>Unsaved changes</span>
+    </button>
     <button type="button" class="shell-action" id="shell-theme" aria-haspopup="menu" aria-expanded="false" title="Theme" aria-label="Theme">
       <svg class="icon" aria-hidden="true" focusable="false"><use id="shell-theme-icon" href="#i-theme-light"/></svg>
     </button>
   </div>
 </header>
+
+<input type="file" id="file-input" accept=".json,application/json" hidden>
 
 <!-- Passing statements about the session: a restore that failed, a persist
      that is failing. They inform and block nothing. -->
