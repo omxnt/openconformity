@@ -9,8 +9,8 @@ import { createDialogs } from './dialog.js';
 import { createEditor } from './editor.js';
 import { createNavigator } from './navigator.js';
 import { createRelationshipsView } from './relationships-view.js';
-import { createFlows, relationshipOptions } from './flows.js';
-import { nodeOf } from './model.js';
+import { createFlows } from './flows.js';
+import { createActions } from './actions.js';
 
 const store = createStore({ storage: window.localStorage });
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
@@ -20,41 +20,24 @@ createShell({ store, overlay });
 const dialogs = createDialogs({ overlay });
 const editor = createEditor({
   store,
-  container: document.getElementById('editor-body'),
+  head: document.getElementById('editor-head'),
+  body: document.getElementById('editor-body'),
   onSave: (id, values) => flows.saveEdit(id, values),
+  onRename: () => flows.renameSelection(),
 });
-const flows = createFlows({ store, overlay, dialogs, editor });
+const flows = createFlows({ store, overlay, dialogs, editor, getActions: () => actions });
+const actions = createActions({ store, flows });
 createNavigator({
   store,
   container: document.getElementById('navigator-body'),
+  toolbar: document.getElementById('navigator-toolbar'),
+  actions,
   onSelect: (id) => flows.selectNode(id),
   onFile: (id, parentId) => flows.fileNode(id, parentId),
+  onPlace: (id, targetId, position) => flows.placeNode(id, targetId, position),
+  onContextMenu: (id, at) => flows.openContextMenu(id, at),
 });
 createRelationshipsView({ store, container: document.getElementById('relationships-body') });
-
-const newButton = document.getElementById('toolbar-new');
-const relateButton = document.getElementById('toolbar-relate');
-const deleteButton = document.getElementById('toolbar-delete');
-const undoButton = document.getElementById('toolbar-undo');
-const redoButton = document.getElementById('toolbar-redo');
-
-newButton.addEventListener('click', () => flows.toggleCreateMenu(newButton));
-relateButton.addEventListener('click', () => flows.relateSelection());
-deleteButton.addEventListener('click', () => flows.deleteSelection());
-undoButton.addEventListener('click', () => flows.undo());
-redoButton.addEventListener('click', () => flows.redo());
-
-function syncToolbar() {
-  const node = nodeOf(store.model(), store.selection());
-  const entitySelected = node !== null && node.kind === 'entity';
-  relateButton.disabled =
-    !entitySelected || relationshipOptions(store.model(), store.selection()).length === 0;
-  deleteButton.disabled = !entitySelected;
-  undoButton.disabled = !store.canUndo();
-  redoButton.disabled = !store.canRedo();
-}
-store.subscribe(syncToolbar);
-syncToolbar();
 
 document.addEventListener('keydown', (event) => {
   const target = event.target;

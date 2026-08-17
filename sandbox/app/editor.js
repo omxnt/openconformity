@@ -1,7 +1,9 @@
 /**
  * The editor: the attributes of the selection, view-only until Edit, and
- * applied on Save. The pane renders only the attributes the definitions
- * carry for the type; content under any other key is never shown and never
+ * applied on Save. The pane's header is its working surface — the
+ * selection's designation and the mode's actions — and hides when nothing
+ * is selected. The pane renders only the attributes the definitions carry
+ * for the type; content under any other key is never shown and never
  * touched. A draft lives only here and only until Save or Cancel: the
  * flows ask the confirm/discard question before anything would destroy
  * one, and a render never rebuilds over an open draft.
@@ -30,10 +32,12 @@ export function draftChanged(definitions, attributes, values) {
 /**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
- * @param {HTMLElement} context.container
+ * @param {HTMLElement} context.head
+ * @param {HTMLElement} context.body
  * @param {(id: string, values: Object<string, string>) => boolean} context.onSave
+ * @param {() => void} context.onRename
  */
-export function createEditor({ store, container, onSave }) {
+export function createEditor({ store, head, body, onSave, onRename }) {
   /** @type {'view'|'edit'} */
   let mode = 'view';
   /** @type {string|null} the entity the open draft belongs to */
@@ -42,20 +46,30 @@ export function createEditor({ store, container, onSave }) {
   function fieldValues() {
     /** @type {Object<string, string>} */
     const values = {};
-    for (const control of container.querySelectorAll('[data-key]')) {
+    for (const control of body.querySelectorAll('[data-key]')) {
       values[control.dataset.key] = control.value;
     }
     return values;
   }
 
-  function subhead(node, actions) {
-    const parts = [el('span', { className: 'mono designation', text: node.id })];
-    const title = (node.attributes.title ?? '').trim();
-    if (title) parts.push(el('span', { className: 'subhead-title', text: title }));
-    return el('div', { className: 'editor-subhead' }, [
-      el('div', { className: 'editor-subhead-name' }, parts),
-      el('div', { className: 'editor-subhead-actions' }, actions),
-    ]);
+  function renderHead(node, actions) {
+    head.hidden = false;
+    const parts = [];
+    if (node.kind === 'entity') {
+      parts.push(el('span', { className: 'mono designation', text: node.id }));
+      const title = (node.attributes.title ?? '').trim();
+      if (title) parts.push(el('span', { className: 'subhead-title', text: title }));
+    } else {
+      parts.push(el('span', { className: 'subhead-title', text: node.name }));
+    }
+    head.appendChild(el('div', { className: 'pane-head-name' }, parts));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
+  }
+
+  function headButton(label, onPick) {
+    const button = el('button', { className: 'ghost-button', text: label, attributes: { type: 'button' } });
+    button.addEventListener('click', onPick);
+    return button;
   }
 
   function control(definition, value) {
@@ -92,36 +106,38 @@ export function createEditor({ store, container, onSave }) {
   }
 
   function renderView(node) {
-    const edit = el('button', { className: 'ghost-button', text: 'Edit', attributes: { type: 'button' } });
-    edit.addEventListener('click', beginEdit);
-    container.appendChild(subhead(node, [edit]));
-
+    renderHead(node, [headButton('Edit', beginEdit)]);
     for (const definition of attributesFor(node.type)) {
       const value = node.attributes[definition.key];
-      container.appendChild(
+      body.appendChild(
         el('div', { className: 'field' }, [
           el('div', { className: 'field-label', text: definition.name }),
           value === undefined || value === ''
             ? el('div', { className: 'field-value field-empty', text: '–' })
-            : el('div', { className: `field-value${definition.kind === 'multiline' ? ' multiline' : ''}`, text: value }),
+            : el('div', {
+                className: `field-value${definition.kind === 'multiline' ? ' multiline' : ''}`,
+                text: value,
+              }),
         ])
       );
     }
   }
 
   function renderEdit(node) {
-    const save = el('button', { className: 'ghost-button', text: 'Save', attributes: { type: 'button' } });
-    save.addEventListener('click', () => {
-      if (onSave(editingId, fieldValues()) !== false) endEdit();
-    });
-    const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
-    cancel.addEventListener('click', endEdit);
-    container.appendChild(subhead(node, [save, cancel]));
-
+    renderHead(node, [
+      headButton('Save', () => {
+        if (onSave(editingId, fieldValues()) !== false) endEdit();
+      }),
+      headButton('Cancel', endEdit),
+    ]);
     for (const definition of attributesFor(node.type)) {
-      container.appendChild(
+      body.appendChild(
         el('div', { className: 'field' }, [
-          el('label', { className: 'field-label', text: definition.name, attributes: { for: `field-${definition.key}` } }),
+          el('label', {
+            className: 'field-label',
+            text: definition.name,
+            attributes: { for: `field-${definition.key}` },
+          }),
           control(definition, node.attributes[definition.key] ?? ''),
         ])
       );
@@ -138,16 +154,16 @@ export function createEditor({ store, container, onSave }) {
       editingId = null;
     }
 
-    container.textContent = '';
+    head.textContent = '';
+    body.textContent = '';
     if (!node) {
-      container.appendChild(el('p', { className: 'pane-empty', text: 'Nothing selected.' }));
+      head.hidden = true;
+      body.appendChild(el('p', { className: 'pane-empty', text: 'Nothing selected.' }));
       return;
     }
     if (node.kind === 'folder') {
-      container.appendChild(el('div', { className: 'editor-subhead' }, [
-        el('div', { className: 'editor-subhead-name' }, [el('span', { className: 'subhead-title', text: node.name })]),
-      ]));
-      container.appendChild(el('p', { className: 'pane-empty', text: 'A folder carries a name and nothing else.' }));
+      renderHead(node, [headButton('Rename…', onRename)]);
+      body.appendChild(el('p', { className: 'pane-empty', text: 'A folder carries a name and nothing else.' }));
       return;
     }
     renderView(node);
@@ -159,9 +175,10 @@ export function createEditor({ store, container, onSave }) {
     if (!node || node.kind !== 'entity') return;
     mode = 'edit';
     editingId = id;
-    container.textContent = '';
+    head.textContent = '';
+    body.textContent = '';
     renderEdit(node);
-    container.querySelector('[data-key]')?.focus();
+    body.querySelector('[data-key]')?.focus();
   }
 
   function endEdit() {

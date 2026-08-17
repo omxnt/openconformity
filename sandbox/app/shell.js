@@ -4,6 +4,8 @@
  * content.
  */
 
+import { openMenu } from './menu.js';
+
 /**
  * The theme in effect: the stored choice when one is set, else the system
  * preference. White is the fallback.
@@ -63,55 +65,25 @@ export function createShell({ store, overlay, root = document }) {
   /** @type {import('./overlay.js').Entry|null} */
   let themeMenu = null;
 
-  function openThemeMenu() {
-    const menu = root.createElement('div');
-    menu.className = 'dropdown';
-    menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', 'Theme');
-
-    for (const { value, label } of THEME_MENU) {
-      const item = root.createElement('button');
-      item.type = 'button';
-      item.className = 'menu-entry';
-      item.setAttribute('role', 'menuitemradio');
-      item.setAttribute('aria-checked', String(store.theme() === value));
-      item.textContent = label;
-      item.addEventListener('click', () => {
-        store.setTheme(value);
-        overlay.close(themeMenu);
-      });
-      menu.appendChild(item);
+  themeButton.addEventListener('click', () => {
+    if (themeMenu) {
+      overlay.close(themeMenu);
+      return;
     }
-
-    menu.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-      event.preventDefault();
-      const items = [...menu.querySelectorAll('.menu-entry')];
-      const from = items.indexOf(root.activeElement);
-      const to = (from + (event.key === 'ArrowDown' ? 1 : items.length - 1) + items.length) % items.length;
-      items[to].focus();
-    });
-
-    const at = themeButton.getBoundingClientRect();
-    menu.style.top = `${at.bottom}px`;
-    menu.style.right = `${root.documentElement.clientWidth - at.right}px`;
-
-    themeMenu = overlay.open({
-      kind: 'menu',
-      element: menu,
-      opener: themeButton,
-      onClose() {
+    themeMenu = openMenu({
+      overlay,
+      label: 'Theme',
+      anchor: themeButton,
+      align: 'end',
+      items: THEME_MENU.map(({ value, label }) => ({
+        label,
+        checked: store.theme() === value,
+        onPick: () => store.setTheme(value),
+      })),
+      onClose: () => {
         themeMenu = null;
-        themeButton.setAttribute('aria-expanded', 'false');
       },
     });
-    themeButton.setAttribute('aria-expanded', 'true');
-    (menu.querySelector('[aria-checked="true"]') ?? menu.firstChild).focus();
-  }
-
-  themeButton.addEventListener('click', () => {
-    if (themeMenu) overlay.close(themeMenu);
-    else openThemeMenu();
   });
 
   // --- Notices ---------------------------------------------------------

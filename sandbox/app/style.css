@@ -308,21 +308,28 @@ body {
 .pane-editor { flex: 1 1 auto; min-height: 120px; }
 .pane-relationships { flex: 0 0 var(--relationships-height, 280px); min-height: 120px; }
 
+/* A pane header is a working surface: the selection it acts for on the
+   left, the actions on the right. A pane with no working header has none. */
 .pane-head {
   flex: none;
   display: flex;
   align-items: center;
+  gap: 16px;                /* $spacing-05 */
   height: 40px;             /* $spacing-08 */
-  padding: 0 16px;          /* $spacing-05 */
+  padding: 0 8px 0 16px;    /* $spacing-03, $spacing-05 */
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.pane-title {
-  font-size: 14px;          /* $heading-compact-01 */
-  font-weight: 600;
-  line-height: 1.28572;
-  letter-spacing: 0.16px;
+.pane-head-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
+.subhead-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pane-head-actions { display: flex; gap: 2px; }
 
 .pane-body { flex: 1; overflow: auto; }
 
@@ -342,6 +349,13 @@ body {
   border-bottom: 1px solid var(--border-subtle);
 }
 .toolbar-spacer { flex: 1; }
+.toolbar-divider {
+  width: 1px;
+  height: 16px;
+  flex: none;
+  background: var(--border-subtle);
+  margin: 0 4px;            /* $spacing-02 */
+}
 
 .ghost-button {
   display: inline-flex;
@@ -379,6 +393,8 @@ body {
 .tree-row:hover { background: var(--hover); }
 .tree-row.selected { background: var(--layer-accent); }
 .tree-row.drop-target { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tree-row.drop-before { box-shadow: inset 0 2px 0 var(--accent); }
+.tree-row.drop-after { box-shadow: inset 0 -2px 0 var(--accent); }
 
 .twisty {
   display: inline-flex;
@@ -395,24 +411,6 @@ body {
 .rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Editor ---------- */
-
-.editor-subhead {
-  display: flex;
-  align-items: center;
-  gap: 16px;                /* $spacing-05 */
-  padding: 8px 8px 8px 16px;  /* $spacing-03, $spacing-05 */
-  border-bottom: 1px solid var(--border-subtle);
-}
-.editor-subhead-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-.subhead-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.editor-subhead-actions { display: flex; gap: 2px; }
 
 .field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
 .field:last-child { padding-bottom: 16px; }
@@ -591,6 +589,18 @@ select.field-input {
 .menu-entry:active:not(:disabled) { background: var(--active); }
 .menu-entry:disabled { color: var(--disabled); cursor: not-allowed; }
 .menu-entry[aria-checked="true"] { background: var(--layer-accent); font-weight: 600; }
+/* Carbon's danger menu item: the entry that destroys something says so
+   before it is chosen. */
+.menu-entry.danger:not(:disabled) { color: var(--danger-text); }
+.menu-entry.danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
+.menu-entry.danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
+
+.menu-heading {
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-helper);
+  padding: 8px 16px 4px;    /* $spacing-03, $spacing-05, $spacing-02 */
+}
 
 /* ---------- Small viewport ---------- */
 

@@ -53,15 +53,7 @@
 <main class="workspace" id="workspace">
 
   <section class="pane pane-navigator" id="pane-navigator" aria-label="Navigator">
-    <div class="pane-head"><h2 class="pane-title">Navigator</h2></div>
-    <div class="pane-toolbar">
-      <button type="button" class="ghost-button" id="toolbar-new" aria-haspopup="menu" aria-expanded="false">New</button>
-      <button type="button" class="ghost-button" id="toolbar-relate">Relate…</button>
-      <button type="button" class="ghost-button ghost-danger" id="toolbar-delete">Delete</button>
-      <span class="toolbar-spacer"></span>
-      <button type="button" class="ghost-button" id="toolbar-undo">Undo</button>
-      <button type="button" class="ghost-button" id="toolbar-redo">Redo</button>
-    </div>
+    <div class="pane-toolbar" id="navigator-toolbar"></div>
     <div class="pane-body" id="navigator-body"></div>
   </section>
 
@@ -70,14 +62,13 @@
   <div class="column" id="workspace-column">
 
     <section class="pane pane-editor" id="pane-editor" aria-label="Editor">
-      <div class="pane-head"><h2 class="pane-title">Editor</h2></div>
+      <div class="pane-head" id="editor-head" hidden></div>
       <div class="pane-body" id="editor-body"></div>
     </section>
 
     <div class="splitter splitter-horizontal" id="splitter-column" role="separator" aria-orientation="horizontal" aria-label="Resize the relationship pane" tabindex="0"></div>
 
     <section class="pane pane-relationships" id="pane-relationships" aria-label="Relationships">
-      <div class="pane-head"><h2 class="pane-title">Relationships</h2></div>
       <div class="pane-body" id="relationships-body"></div>
     </section>
 

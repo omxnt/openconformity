@@ -43,4 +43,14 @@ ok(RESTORATION_DETAIL.includes('set aside'), 'and that a copy of the stored blob
 ok(PERSIST_NOTICE.includes('not being stored'), 'the persist notice states changes are not being stored');
 ok(PERSIST_DETAIL.includes('Save the project'), 'and points at the file as the durable copy');
 
+// --- Pane headers are working surfaces or nothing ----------------------
+
+{
+  const page = readFile('../app/index.html');
+  ok(!page.includes('pane-title'), 'no pane header only names its pane');
+  for (const pane of ['Navigator', 'Editor', 'Relationships']) {
+    ok(page.includes(`aria-label="${pane}"`), `the ${pane} pane stays an ARIA landmark`);
+  }
+}
+
 summary('test-shell');

@@ -17,23 +17,26 @@ export function createDialogs({ overlay }) {
    * @param {string} spec.title
    * @param {string} [spec.message]
    * @param {HTMLElement} [spec.body]
-   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger' }>} spec.actions
+   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean }>} spec.actions
+   * @param {HTMLElement} [spec.initialFocus]
    * @returns {Promise<any>}
    */
-  function open({ title, message, body, actions }) {
+  function open({ title, message, body, actions, initialFocus }) {
     return new Promise((resolve) => {
       let result = null;
+      let defaultButton = null;
 
-      const buttons = actions.map(({ label, value, kind = 'secondary' }) => {
+      const buttons = actions.map((action) => {
         const button = el('button', {
-          className: `dialog-button button-${kind}`,
-          text: label,
+          className: `dialog-button button-${action.kind ?? 'secondary'}`,
+          text: action.label,
           attributes: { type: 'button' },
         });
         button.addEventListener('click', () => {
-          result = value;
+          result = action.value;
           overlay.close(entry);
         });
+        if (action.default) defaultButton = button;
         return button;
       });
 
@@ -56,6 +59,11 @@ export function createDialogs({ overlay }) {
       });
 
       backdrop.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && event.target instanceof HTMLInputElement && defaultButton) {
+          event.preventDefault();
+          defaultButton.click();
+          return;
+        }
         if (event.key !== 'Tab') return;
         const focusable = [...card.querySelectorAll('button, input, select, textarea')].filter(
           (control) => !control.disabled
@@ -81,8 +89,40 @@ export function createDialogs({ overlay }) {
 
       const primary = buttons[buttons.length - 1];
       const safe = primary && primary.classList.contains('button-danger') ? buttons[0] : primary;
-      (safe ?? card).focus();
+      (initialFocus ?? safe ?? card).focus();
     });
+  }
+
+  /**
+   * A one-field question: resolves the entered text, or null when it is
+   * cancelled or dismissed. Enter answers with the field.
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} spec.label
+   * @param {string} [spec.value]
+   * @param {string} [spec.confirmLabel]
+   * @returns {Promise<string|null>}
+   */
+  async function prompt({ title, label, value = '', confirmLabel = 'Save' }) {
+    const input = el('input', {
+      className: 'field-input',
+      attributes: { type: 'text', id: 'prompt-field' },
+    });
+    input.value = value;
+    const body = el('div', { className: 'field' }, [
+      el('label', { className: 'field-label', text: label, attributes: { for: 'prompt-field' } }),
+      input,
+    ]);
+    const answer = await open({
+      title,
+      body,
+      actions: [
+        { label: 'Cancel', value: null, kind: 'secondary' },
+        { label: confirmLabel, value: 'confirmed', kind: 'primary', default: true },
+      ],
+      initialFocus: input,
+    });
+    return answer === 'confirmed' ? input.value : null;
   }
 
   /**
@@ -109,5 +149,5 @@ export function createDialogs({ overlay }) {
     return value === true;
   }
 
-  return { open, confirm };
+  return { open, confirm, prompt };
 }

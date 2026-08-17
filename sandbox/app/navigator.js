@@ -1,16 +1,18 @@
 /**
- * The navigator: the model as a tree of what is filed where. The tree
- * presents the user's filing, folders and entities interleaved in sibling
- * order, and labels an entity by its designation then its title — the
- * designation alone when untitled. The pane owns its transient state:
- * scroll and focus survive the full re-render.
+ * The navigator: the model as a tree of what is filed where, under its
+ * toolbar. The tree presents the user's filing, folders and entities
+ * interleaved in sibling order, and labels an entity by its designation
+ * then its title — the designation alone when untitled. The pane owns its
+ * transient state: scroll and focus survive the full re-render.
  *
- * The tree asks the model the same question a drop answers: a row is a
- * drop target exactly when `canFile` allows the move. Selection goes
- * through the flows, so a selection change never bypasses the draft guard.
+ * The toolbar draws from the one action list, and the tree asks the model
+ * the same questions a drop answers: the middle of a row files into it
+ * when `canFile` allows, its edges place beside it when `canPlaceBeside`
+ * allows. Selection goes through the flows, so a selection change never
+ * bypasses the draft guard.
  */
 
-import { childrenOf, nodeOf, canFile } from './model.js';
+import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
 import { el, icon } from './dom.js';
 
 /**
@@ -56,15 +58,75 @@ export function labelParts(node) {
 }
 
 /**
+ * The drop a pointer position over a row asks for: the edges place
+ * beside, the middle files into.
+ * @param {number} ratio  the pointer's height within the row, 0 at the top
+ * @returns {'before'|'into'|'after'}
+ */
+export function dropZone(ratio) {
+  if (ratio < 0.25) return 'before';
+  if (ratio > 0.75) return 'after';
+  return 'into';
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.container
+ * @param {HTMLElement} context.toolbar
+ * @param {Array<import('./actions.js').Action>} context.actions
  * @param {(id: string) => void} context.onSelect
  * @param {(id: string, parentId: string|null) => void} context.onFile
+ * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
+ * @param {(id: string|null, at: { x: number, y: number }) => void} context.onContextMenu
  */
-export function createNavigator({ store, container, onSelect, onFile }) {
+export function createNavigator({ store, container, toolbar, actions, onSelect, onFile, onPlace, onContextMenu }) {
   /** The id being dragged; dataTransfer is unreadable during dragover. */
   let draggedId = null;
+
+  // --- The toolbar, drawn once from the action list --------------------
+
+  /** @type {Map<import('./actions.js').Action, HTMLButtonElement>} */
+  const toolbarButtons = new Map();
+  {
+    let lastGroup = null;
+    for (const action of actions.filter((offered) => offered.toolbar)) {
+      if (lastGroup !== null && action.group !== lastGroup) {
+        toolbar.appendChild(
+          action.group === 'history'
+            ? el('span', { className: 'toolbar-spacer' })
+            : el('span', { className: 'toolbar-divider' })
+        );
+      }
+      lastGroup = action.group;
+
+      const attributes = { type: 'button', 'data-action': action.id };
+      if (action.menu) {
+        attributes['aria-haspopup'] = 'menu';
+        attributes['aria-expanded'] = 'false';
+      }
+      const button = el('button', {
+        className: `ghost-button${action.danger ? ' ghost-danger' : ''}`,
+        text: action.label,
+        attributes,
+      });
+      button.addEventListener('click', () => action.run({ anchor: button }));
+      toolbar.appendChild(button);
+      toolbarButtons.set(action, button);
+    }
+  }
+
+  function syncToolbar() {
+    for (const [action, button] of toolbarButtons) {
+      button.disabled = !action.enabled();
+    }
+  }
+
+  // --- The tree --------------------------------------------------------
+
+  function clearDropMarks(rowElement) {
+    rowElement.classList.remove('drop-target', 'drop-before', 'drop-after');
+  }
 
   function renderRow(row) {
     const selected = row.id === store.selection();
@@ -100,6 +162,10 @@ export function createNavigator({ store, container, onSelect, onFile }) {
     }
 
     rowElement.addEventListener('click', () => onSelect(row.id));
+    rowElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      onContextMenu(row.id, { x: event.clientX, y: event.clientY });
+    });
 
     rowElement.addEventListener('dragstart', (event) => {
       draggedId = row.id;
@@ -110,17 +176,29 @@ export function createNavigator({ store, container, onSelect, onFile }) {
       draggedId = null;
     });
     rowElement.addEventListener('dragover', (event) => {
-      if (draggedId === null || !canFile(store.model(), draggedId, row.id).ok) return;
+      if (draggedId === null) return;
+      const rect = rowElement.getBoundingClientRect();
+      const zone = dropZone((event.clientY - rect.top) / rect.height);
+      const allowed =
+        zone === 'into'
+          ? canFile(store.model(), draggedId, row.id).ok
+          : canPlaceBeside(store.model(), draggedId, row.id).ok;
+      clearDropMarks(rowElement);
+      if (!allowed) return;
       event.preventDefault();
       event.stopPropagation();
-      rowElement.classList.add('drop-target');
+      rowElement.classList.add(zone === 'into' ? 'drop-target' : zone === 'before' ? 'drop-before' : 'drop-after');
     });
-    rowElement.addEventListener('dragleave', () => rowElement.classList.remove('drop-target'));
+    rowElement.addEventListener('dragleave', () => clearDropMarks(rowElement));
     rowElement.addEventListener('drop', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      rowElement.classList.remove('drop-target');
-      if (draggedId !== null) onFile(draggedId, row.id);
+      clearDropMarks(rowElement);
+      if (draggedId === null) return;
+      const rect = rowElement.getBoundingClientRect();
+      const zone = dropZone((event.clientY - rect.top) / rect.height);
+      if (zone === 'into') onFile(draggedId, row.id);
+      else onPlace(draggedId, row.id, zone);
     });
 
     return rowElement;
@@ -139,9 +217,12 @@ export function createNavigator({ store, container, onSelect, onFile }) {
 
     container.scrollTop = scroll;
     if (hadFocus) container.querySelector('.tree-row.selected')?.focus();
+
+    syncToolbar();
   }
 
-  // The space below the rows files to the top of the tree.
+  // The space below the rows files to the top of the tree, and the
+  // background context menu acts there too.
   container.addEventListener('dragover', (event) => {
     if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
     event.preventDefault();
@@ -149,6 +230,11 @@ export function createNavigator({ store, container, onSelect, onFile }) {
   container.addEventListener('drop', (event) => {
     event.preventDefault();
     if (draggedId !== null) onFile(draggedId, null);
+  });
+  container.addEventListener('contextmenu', (event) => {
+    if (event.target !== container && event.target.closest('.tree-row')) return;
+    event.preventDefault();
+    onContextMenu(null, { x: event.clientX, y: event.clientY });
   });
 
   container.addEventListener('keydown', (event) => {
@@ -159,8 +245,8 @@ export function createNavigator({ store, container, onSelect, onFile }) {
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      const next = rows[index + 1] ?? rows[0];
-      if (index < 0 || rows[index + 1]) onSelect(next.id);
+      if (index < 0) onSelect(rows[0].id);
+      else if (rows[index + 1]) onSelect(rows[index + 1].id);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       if (index > 0) onSelect(rows[index - 1].id);

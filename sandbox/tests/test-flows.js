@@ -6,6 +6,7 @@
  */
 
 import { relationshipOptions } from '../app/flows.js';
+import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/metamodel.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -98,6 +99,26 @@ function offered(model, subjectId) {
     !third.some((option) => option.candidates.includes('ELM-002')),
     'the already-owned element is never a candidate target'
   );
+}
+
+// --- The full surface --------------------------------------------------
+
+{
+  const model = createModel();
+  for (const code of Object.keys(ENTITY_TYPES)) {
+    addEntity(model, code);
+    addEntity(model, code);
+  }
+  for (const code of Object.keys(ENTITY_TYPES)) {
+    deepEqual(
+      relationshipOptions(model, `${code}-001`).map((option) => `${option.type.id}:${option.direction}`),
+      [
+        ...relationshipsFrom(code).map((type) => `${type.id}:outgoing`),
+        ...relationshipsTo(code).map((type) => `${type.id}:incoming`),
+      ],
+      `with candidates of every type in the model, ${code} is offered its full relationship surface`
+    );
+  }
 }
 
 summary('test-flows');

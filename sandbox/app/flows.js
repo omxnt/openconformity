@@ -1,26 +1,32 @@
 /**
- * The flows: create, select, relate, file, delete, undo, redo. Each one
- * asks its questions as straight-line awaited code — the draft guard is
- * one awaited if — and then makes one commit through the store. Nothing
- * here writes to the model directly.
+ * The flows: create, select, relate, file, arrange, delete, undo, redo.
+ * Each one asks its questions as straight-line awaited code — the draft
+ * guard is one awaited if — and then makes one commit through the store.
+ * Nothing here writes to the model directly.
  *
  * The draft guard runs before anything that would destroy an open draft:
  * a selection change, a deletion of the edited entity, an undo or redo, a
- * creation. Relating and filing leave the selection and the draft where
- * they stand, so they run unguarded.
+ * creation. Relating, filing, arranging, and renaming leave the selection
+ * and the draft where they stand, so they run unguarded.
  */
 
 import {
   addEntity,
+  addFolder,
   removeEntity,
+  removeFolder,
+  renameFolder,
   updateEntity,
   deletionOf,
   relate,
   file,
+  placeBeside,
+  childrenOf,
   nodeOf,
   canRelate,
 } from './model.js';
-import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
+import { ENTITY_TYPES, PILLARS, relationshipsFrom, relationshipsTo } from './metamodel.js';
+import { openMenu } from './menu.js';
 import { el } from './dom.js';
 
 /**
@@ -64,8 +70,9 @@ function designated(entity) {
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {ReturnType<import('./dialog.js').createDialogs>} context.dialogs
  * @param {ReturnType<import('./editor.js').createEditor>} context.editor
+ * @param {() => Array<import('./actions.js').Action>} context.getActions
  */
-export function createFlows({ store, overlay, dialogs, editor }) {
+export function createFlows({ store, overlay, dialogs, editor, getActions }) {
   /**
    * The draft guard: true when it is safe to go on.
    * @returns {Promise<boolean>}
@@ -97,66 +104,99 @@ export function createFlows({ store, overlay, dialogs, editor }) {
     editor.beginEdit();
   }
 
+  /**
+   * Create a folder, named in a dialog, filed like an entity. A blank
+   * name creates nothing.
+   */
+  async function createFolder() {
+    if (!(await confirmDiscard())) return;
+    editor.endEdit();
+    const name = (await dialogs.prompt({ title: 'New folder', label: 'Name', confirmLabel: 'Create' }))?.trim();
+    if (!name) return;
+    const parent = store.selection();
+    const outcome = store.commit((model) => addFolder(model, name, { parent }));
+    if (!outcome.ok) return;
+    if (parent !== null) store.setExpanded(parent, true);
+    store.select(outcome.folder.id);
+  }
+
+  /** Rename the selected folder. A blank or unchanged name changes nothing. */
+  async function renameSelection() {
+    const node = nodeOf(store.model(), store.selection());
+    if (!node || node.kind !== 'folder') return;
+    const name = (
+      await dialogs.prompt({ title: 'Rename folder', label: 'Name', value: node.name, confirmLabel: 'Rename' })
+    )?.trim();
+    if (!name || name === node.name) return;
+    store.commit((model) => renameFolder(model, node.id, name));
+  }
+
   /** @type {import('./overlay.js').Entry|null} */
   let createMenu = null;
 
   /**
-   * The creation offer, generated from the metamodel.
-   * @param {HTMLElement} anchor
+   * The creation offer, generated from the metamodel, grouped by pillar.
+   * @param {{ anchor?: HTMLElement, at?: { x: number, y: number } }} [invocation]
    */
-  function toggleCreateMenu(anchor) {
+  function toggleCreateMenu(invocation = {}) {
     if (createMenu) {
       overlay.close(createMenu);
       return;
     }
-    const menu = el('div', { className: 'dropdown', attributes: { role: 'menu', 'aria-label': 'New entity' } });
-    for (const type of Object.values(ENTITY_TYPES)) {
-      const item = el('button', {
-        className: 'menu-entry',
-        text: type.name,
-        attributes: { type: 'button', role: 'menuitem' },
-      });
-      item.addEventListener('click', () => {
-        overlay.close(createMenu);
-        createEntity(type.code);
-      });
-      menu.appendChild(item);
-    }
-    menu.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-      event.preventDefault();
-      const items = [...menu.querySelectorAll('.menu-entry')];
-      const from = items.indexOf(document.activeElement);
-      const to = (from + (event.key === 'ArrowDown' ? 1 : items.length - 1) + items.length) % items.length;
-      items[to].focus();
-    });
-
-    const at = anchor.getBoundingClientRect();
-    menu.style.top = `${at.bottom}px`;
-    menu.style.left = `${at.left}px`;
-
-    createMenu = overlay.open({
-      kind: 'menu',
-      element: menu,
-      opener: anchor,
-      onClose() {
+    createMenu = openMenu({
+      overlay,
+      label: 'New entity',
+      anchor: invocation.anchor ?? null,
+      at: invocation.at ?? null,
+      items: Object.values(ENTITY_TYPES).map((type) => ({
+        label: type.name,
+        group: PILLARS[type.pillar],
+        onPick: () => createEntity(type.code),
+      })),
+      onClose: () => {
         createMenu = null;
-        anchor.setAttribute('aria-expanded', 'false');
       },
     });
-    anchor.setAttribute('aria-expanded', 'true');
-    menu.querySelector('.menu-entry').focus();
   }
 
   /**
    * Select a node, the draft guard first.
    * @param {string} id
+   * @returns {Promise<boolean>} whether the selection landed
    */
   async function selectNode(id) {
-    if (store.selection() === id) return;
-    if (!(await confirmDiscard())) return;
+    if (store.selection() === id) return true;
+    if (!(await confirmDiscard())) return false;
     editor.endEdit();
     store.select(id);
+    return true;
+  }
+
+  /**
+   * The context menu: the same action list the toolbar draws from, at the
+   * pointer. Opening it on a node selects the node first, guarded.
+   * @param {string|null} id
+   * @param {{ x: number, y: number }} at
+   */
+  async function openContextMenu(id, at) {
+    if (store.selection() !== id) {
+      if (!(await confirmDiscard())) return;
+      editor.endEdit();
+      store.select(id);
+    }
+    openMenu({
+      overlay,
+      label: 'Actions',
+      at,
+      items: getActions()
+        .filter((action) => action.context)
+        .map((action) => ({
+          label: action.label,
+          danger: action.danger,
+          disabled: !action.enabled(),
+          onPick: () => action.run({ at }),
+        })),
+    });
   }
 
   /**
@@ -170,6 +210,38 @@ export function createFlows({ store, overlay, dialogs, editor }) {
   }
 
   /**
+   * Place a node directly before or after another, adopting its parent.
+   * @param {string} id
+   * @param {string} targetId
+   * @param {'before'|'after'} position
+   */
+  function placeNode(id, targetId, position) {
+    store.commit((model) => placeBeside(model, id, targetId, position));
+  }
+
+  /** Change places with the sibling above. */
+  function moveUp() {
+    const id = store.selection();
+    const node = nodeOf(store.model(), id);
+    if (!node) return;
+    const siblings = childrenOf(store.model(), node.parent);
+    const index = siblings.findIndex((sibling) => sibling.id === id);
+    if (index <= 0) return;
+    store.commit((model) => placeBeside(model, id, siblings[index - 1].id, 'before'));
+  }
+
+  /** Change places with the sibling below. */
+  function moveDown() {
+    const id = store.selection();
+    const node = nodeOf(store.model(), id);
+    if (!node) return;
+    const siblings = childrenOf(store.model(), node.parent);
+    const index = siblings.findIndex((sibling) => sibling.id === id);
+    if (index < 0 || index >= siblings.length - 1) return;
+    store.commit((model) => placeBeside(model, id, siblings[index + 1].id, 'after'));
+  }
+
+  /**
    * Apply a confirmed draft.
    * @param {string} id
    * @param {Object<string, string>} values
@@ -180,16 +252,22 @@ export function createFlows({ store, overlay, dialogs, editor }) {
   }
 
   /**
-   * Delete the selected entity. A deletion that cascades states the
-   * entities that will go, before it goes; one that removes a single
-   * entity proceeds, and undo forgives.
+   * Delete the selection. A folder deletion removes filing, never
+   * entities, and proceeds without a question. An entity deletion that
+   * cascades states the entities that will go, before it goes; one that
+   * removes a single entity proceeds, and undo forgives.
    */
   async function deleteSelection() {
     const id = store.selection();
     const node = nodeOf(store.model(), id);
-    if (!node || node.kind !== 'entity') return;
-    if (!(await confirmDiscard())) return;
+    if (!node) return;
 
+    if (node.kind === 'folder') {
+      store.commit((model) => removeFolder(model, id));
+      return;
+    }
+
+    if (!(await confirmDiscard())) return;
     const doomed = deletionOf(store.model(), id);
     if (doomed.length > 1) {
       const list = el(
@@ -286,9 +364,15 @@ export function createFlows({ store, overlay, dialogs, editor }) {
 
   return {
     createEntity,
+    createFolder,
+    renameSelection,
     toggleCreateMenu,
     selectNode,
+    openContextMenu,
     fileNode,
+    placeNode,
+    moveUp,
+    moveDown,
     saveEdit,
     deleteSelection,
     relateSelection,
