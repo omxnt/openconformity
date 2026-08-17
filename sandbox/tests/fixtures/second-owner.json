@@ -1,0 +1,22 @@
+{
+  "format": "openconformity-project",
+  "schemaVersion": 1,
+  "name": "",
+  "counters": {
+    "LEG": 3, "HST": 1, "OSP": 1, "CAS": 1, "NTB": 1,
+    "ESR": 2, "HSR": 1, "OSR": 1, "REQ": 1, "VER": 1,
+    "HAZ": 1, "SCN": 1, "PRM": 1, "SAF": 1,
+    "ELM": 1, "ACT": 1, "TSK": 1, "PHS": 1,
+    "F": 1
+  },
+  "folders": [],
+  "entities": [
+    { "id": "LEG-001", "type": "LEG", "parent": null, "order": 0, "attributes": {} },
+    { "id": "LEG-002", "type": "LEG", "parent": null, "order": 1, "attributes": {} },
+    { "id": "ESR-001", "type": "ESR", "parent": null, "order": 2, "attributes": {} }
+  ],
+  "relationships": [
+    { "type": "leg-contains-esr", "source": "LEG-001", "target": "ESR-001" },
+    { "type": "leg-contains-esr", "source": "LEG-002", "target": "ESR-001" }
+  ]
+}

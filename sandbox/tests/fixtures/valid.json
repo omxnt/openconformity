@@ -1,0 +1,30 @@
+{
+  "format": "openconformity-project",
+  "schemaVersion": 1,
+  "name": "Fixture project",
+  "counters": {
+    "LEG": 2, "HST": 1, "OSP": 1, "CAS": 1, "NTB": 1,
+    "ESR": 3, "HSR": 1, "OSR": 1, "REQ": 1, "VER": 1,
+    "HAZ": 2, "SCN": 1, "PRM": 1, "SAF": 1,
+    "ELM": 4, "ACT": 1, "TSK": 1, "PHS": 1,
+    "F": 3
+  },
+  "folders": [
+    { "id": "F-2", "name": "Risks", "parent": null, "order": 5 },
+    { "id": "F-1", "name": "Machine", "parent": null, "order": 0 }
+  ],
+  "entities": [
+    { "id": "ELM-001", "type": "ELM", "parent": "F-1", "order": 0, "attributes": { "title": "Assembly" } },
+    { "id": "ELM-002", "type": "ELM", "parent": "ELM-001", "order": 3, "attributes": {} },
+    { "id": "ELM-003", "type": "ELM", "parent": "ELM-001", "order": 1, "attributes": { "legacy": "kept as written" } },
+    { "id": "HAZ-001", "type": "HAZ", "parent": "F-2", "order": 0, "attributes": { "title": "Hazard A" } },
+    { "id": "LEG-001", "type": "LEG", "parent": null, "order": 2, "attributes": { "title": "Legislation A" } },
+    { "id": "ESR-002", "type": "ESR", "parent": "LEG-001", "order": 0, "attributes": {} }
+  ],
+  "relationships": [
+    { "type": "elm-decomposes-into-elm", "source": "ELM-001", "target": "ELM-002" },
+    { "type": "elm-decomposes-into-elm", "source": "ELM-001", "target": "ELM-003" },
+    { "type": "elm-exhibits-haz", "source": "ELM-001", "target": "HAZ-001" },
+    { "type": "leg-contains-esr", "source": "LEG-001", "target": "ESR-002" }
+  ]
+}

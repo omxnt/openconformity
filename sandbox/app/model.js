@@ -554,3 +554,16 @@ export function removeFolder(model, folderId) {
   model.nodes.delete(folderId);
   return { ok: true };
 }
+
+// --- Loading -----------------------------------------------------------
+
+/**
+ * Install the counters a file records, replacing the issued state. The
+ * loader's final step: a file's counters are authoritative, and may exceed
+ * the next unissued number where undone creations left holes.
+ * @param {Model} model
+ * @param {Object<string, number>} counters
+ */
+export function restoreCounters(model, counters) {
+  model.counters = { ...counters };
+}

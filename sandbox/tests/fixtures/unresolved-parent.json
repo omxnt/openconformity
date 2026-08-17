@@ -1,0 +1,17 @@
+{
+  "format": "openconformity-project",
+  "schemaVersion": 1,
+  "name": "",
+  "counters": {
+    "LEG": 1, "HST": 1, "OSP": 1, "CAS": 1, "NTB": 1,
+    "ESR": 1, "HSR": 1, "OSR": 1, "REQ": 1, "VER": 1,
+    "HAZ": 1, "SCN": 1, "PRM": 1, "SAF": 1,
+    "ELM": 2, "ACT": 1, "TSK": 1, "PHS": 1,
+    "F": 1
+  },
+  "folders": [],
+  "entities": [
+    { "id": "ELM-001", "type": "ELM", "parent": "F-9", "order": 0, "attributes": {} }
+  ],
+  "relationships": []
+}

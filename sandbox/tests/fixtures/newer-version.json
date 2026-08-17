@@ -1,0 +1,11 @@
+{
+  "format": "openconformity-project",
+  "schemaVersion": 2,
+  "name": "From a later version",
+  "views": [
+    { "id": "VIEW-001", "kind": "hazard-list" }
+  ],
+  "entities": [
+    { "id": "ELM-001", "role": "part" }
+  ]
+}
