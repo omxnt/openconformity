@@ -12,6 +12,12 @@
  * restore seeds the pointer at the initial entry, a dirty one seeds it
  * unreachable.
  *
+ * Picker mode is a third kind of state: the subject, the chosen form, and
+ * the picked identifiers of an add-relationship workflow in progress. It
+ * survives commits, is never persisted, and never enters history. A
+ * change that removes a picked entity clears that pick; one that removes
+ * the subject closes the workflow.
+ *
  * The blob is a cache of the open project, holding the same file shape the
  * serialisation writes, and it passes the same loader on the way back. A
  * blob that fails to load is set aside rather than deleted: at failure
@@ -60,6 +66,8 @@ export function createStore({ storage }) {
   /** @type {'fresh'|'restored'|'failed'} */
   let restoration = 'fresh';
   let persistFailed = false;
+  /** @type {{ subject: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null, picks: string[] }|null} */
+  let picker = null;
   const listeners = new Set();
 
   function notify() {
@@ -110,6 +118,19 @@ export function createStore({ storage }) {
   function repairSelection(trail) {
     if (selection === null || model.nodes.has(selection)) return;
     selection = trail.find((id) => model.nodes.has(id)) ?? null;
+  }
+
+  /**
+   * A change that removes a picked entity clears that pick; one that
+   * removes the subject closes the workflow.
+   */
+  function repairPicker() {
+    if (picker === null) return;
+    if (!model.nodes.has(picker.subject)) {
+      picker = null;
+      return;
+    }
+    picker.picks = picker.picks.filter((id) => model.nodes.has(id));
   }
 
   // --- Restoring the previous session ---------------------------------
@@ -187,6 +208,7 @@ export function createStore({ storage }) {
       }
       history.record(model);
       repairSelection(trail);
+      repairPicker();
       persist();
       notify();
       return outcome;
@@ -210,6 +232,7 @@ export function createStore({ storage }) {
       const trail = ancestorsOf(selection);
       model = history.undo(model);
       repairSelection(trail);
+      repairPicker();
       persist();
       notify();
       return true;
@@ -221,6 +244,7 @@ export function createStore({ storage }) {
       const trail = ancestorsOf(selection);
       model = history.redo(model);
       repairSelection(trail);
+      repairPicker();
       persist();
       notify();
       return true;
@@ -238,7 +262,56 @@ export function createStore({ storage }) {
       savedSequence = history.sequence();
       selection = null;
       expanded = new Set();
+      picker = null;
       persist();
+      notify();
+    },
+
+    // --- Picker mode ----------------------------------------------------
+
+    /** The workflow in progress, or null. The picks ride as a copy. */
+    picker: () =>
+      picker === null ? null : { subject: picker.subject, form: picker.form, picks: [...picker.picks] },
+
+    /**
+     * Start an add-relationship workflow pinned to this entity.
+     * @param {string} subjectId
+     */
+    beginPicking(subjectId) {
+      const subject = nodeOf(model, subjectId);
+      if (!subject || subject.kind !== 'entity') return;
+      picker = { subject: subjectId, form: null, picks: [] };
+      notify();
+    },
+
+    /**
+     * Choose the relationship form. Changing it drops the picks: they
+     * belong to a form.
+     * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
+     */
+    setPickerForm(form) {
+      if (picker === null) return;
+      picker.form = form;
+      picker.picks = [];
+      notify();
+    },
+
+    /**
+     * Pick an entity, or unpick it.
+     * @param {string} id
+     */
+    togglePick(id) {
+      if (picker === null || picker.form === null) return;
+      const at = picker.picks.indexOf(id);
+      if (at >= 0) picker.picks.splice(at, 1);
+      else picker.picks.push(id);
+      notify();
+    },
+
+    /** Close the workflow. */
+    endPicking() {
+      if (picker === null) return;
+      picker = null;
       notify();
     },
 

@@ -8,7 +8,7 @@
 import './shim.js';
 import { createStore } from '../app/store.js';
 import { openProject, serialise } from '../app/files.js';
-import { addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/model.js';
+import { createModel, addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const PROJECT_KEY = 'openconformity.project';
@@ -276,6 +276,99 @@ function blobIn(storage) {
   equal(store.isExpanded('ELM-001'), false, 'no branches expanded');
   equal(store.theme(), 'g100', 'and the theme untouched');
   equal(blobIn(storage).project.name, 'Fixture project', 'the replacement is persisted');
+}
+
+// --- Picker mode -------------------------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addFolder(model, 'Zone'));
+
+  equal(store.picker(), null, 'no workflow is in progress at first');
+  store.beginPicking('ELM-9');
+  equal(store.picker(), null, 'picking cannot begin on what is not in the model');
+  store.beginPicking('F-1');
+  equal(store.picker(), null, 'nor on a folder');
+
+  store.beginPicking('ELM-001');
+  deepEqual(store.picker(), { subject: 'ELM-001', form: null, picks: [] }, 'picking begins pinned to its subject');
+  store.togglePick('HAZ-001');
+  deepEqual(store.picker().picks, [], 'no pick lands before a form is chosen');
+
+  store.setPickerForm({ typeId: 'elm-exhibits-haz', direction: 'outgoing' });
+  store.togglePick('HAZ-001');
+  store.togglePick('HAZ-002');
+  deepEqual(store.picker().picks, ['HAZ-001', 'HAZ-002'], 'picks accumulate');
+  store.togglePick('HAZ-001');
+  deepEqual(store.picker().picks, ['HAZ-002'], 'and toggle back off');
+
+  const copy = store.picker();
+  copy.picks.push('HAZ-009');
+  deepEqual(store.picker().picks, ['HAZ-002'], 'the picks ride out as a copy');
+
+  store.commit((model) => addEntity(model, 'SCN'));
+  deepEqual(store.picker().picks, ['HAZ-002'], 'the mode survives commits');
+
+  store.commit((model) => removeEntity(model, 'HAZ-002'));
+  ok(store.picker() !== null, 'a commit that removes a picked entity leaves the workflow open');
+  deepEqual(store.picker().picks, [], 'and clears that pick');
+
+  store.togglePick('HAZ-001');
+  store.setPickerForm({ typeId: 'elm-decomposes-into-elm', direction: 'outgoing' });
+  deepEqual(store.picker().picks, [], 'changing the form drops the picks: they belong to a form');
+
+  store.commit((model) => removeEntity(model, 'ELM-001'));
+  equal(store.picker(), null, 'a commit that removes the subject closes the workflow');
+  store.undo();
+  equal(store.picker(), null, 'and undoing the deletion does not reopen it');
+
+  store.endPicking();
+  equal(store.picker(), null, 'ending a closed workflow is nothing');
+}
+
+// --- Picker repair under undo and redo ---------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.beginPicking('ELM-001');
+  store.setPickerForm({ typeId: 'elm-exhibits-haz', direction: 'outgoing' });
+  store.togglePick('HAZ-001');
+
+  store.undo();
+  ok(store.picker() !== null, 'an undo that removes a picked entity leaves the workflow open');
+  deepEqual(store.picker().picks, [], 'and clears that pick');
+  store.redo();
+  deepEqual(store.picker().picks, [], 'a cleared pick stays cleared: redo does not re-pick');
+
+  store.undo();
+  store.undo();
+  equal(store.picker(), null, 'an undo that removes the subject closes the workflow');
+}
+
+// --- Picker mode is never persisted ------------------------------------
+
+{
+  const storage = fakeStorage();
+  const store = createStore({ storage });
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.beginPicking('ELM-001');
+  store.commit((model) => addEntity(model, 'HAZ'));
+  deepEqual(
+    Object.keys(blobIn(storage).session),
+    ['selection', 'expanded', 'dirty'],
+    'the blob carries session state and no picker'
+  );
+
+  const second = createStore({ storage });
+  equal(second.picker(), null, 'a restored session starts with no workflow');
+
+  store.replaceProject(createModel());
+  equal(store.picker(), null, 'replacing the project closes the workflow');
 }
 
 // --- A failing persist -------------------------------------------------

@@ -19,6 +19,7 @@ import {
   updateEntity,
   deletionOf,
   relate,
+  unrelate,
   file,
   placeBeside,
   childrenOf,
@@ -290,62 +291,51 @@ export function createFlows({ store, overlay, dialogs, editor, getActions }) {
   }
 
   /**
-   * Add a relationship from the selected entity, the form and the far end
-   * chosen in a dialog. The offer is generated from the metamodel and the
-   * model.
+   * Start the add-relationship workflow pinned to the selected entity,
+   * with the first offered form chosen. Asking again for the same subject
+   * closes it instead.
    */
-  async function relateSelection() {
+  function relateSelection() {
     const subjectId = store.selection();
+    const picker = store.picker();
+    if (picker !== null && picker.subject === subjectId) {
+      store.endPicking();
+      return;
+    }
     const options = relationshipOptions(store.model(), subjectId);
     if (options.length === 0) return;
+    store.beginPicking(subjectId);
+    store.setPickerForm({ typeId: options[0].type.id, direction: options[0].direction });
+  }
 
-    const relationSelect = el('select', {
-      className: 'field-input',
-      attributes: { 'aria-label': 'Relationship', id: 'relate-form' },
-    });
-    options.forEach((option, index) => {
-      const other = ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source].name;
-      const text =
-        option.direction === 'outgoing'
-          ? `${option.type.label} — ${other}`
-          : `${other} — ${option.type.label} (incoming)`;
-      relationSelect.appendChild(el('option', { text, attributes: { value: String(index) } }));
-    });
-
-    const targetSelect = el('select', {
-      className: 'field-input',
-      attributes: { 'aria-label': 'Entity', id: 'relate-target' },
-    });
-    function fillTargets() {
-      targetSelect.textContent = '';
-      for (const candidate of options[Number(relationSelect.value)].candidates) {
-        targetSelect.appendChild(el('option', { text: designated(candidate), attributes: { value: candidate.id } }));
+  /**
+   * Commit the picked relationships as one step: one undo removes them
+   * all. A pick the model no longer allows is dropped.
+   * @param {string} subjectId
+   * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
+   * @param {string[]} picks
+   */
+  function completeRelate(subjectId, form, picks) {
+    store.commit((model) => {
+      let related = 0;
+      for (const id of picks) {
+        const outcome =
+          form.direction === 'outgoing'
+            ? relate(model, form.typeId, subjectId, id)
+            : relate(model, form.typeId, id, subjectId);
+        if (outcome.ok) related += 1;
       }
-    }
-    relationSelect.addEventListener('change', fillTargets);
-    fillTargets();
+      return related > 0 ? { ok: true } : { ok: false, reason: 'Nothing could be related.' };
+    });
+  }
 
-    const body = el('div', { className: 'relate-form' }, [
-      el('div', { className: 'field' }, [
-        el('label', { className: 'field-label', text: 'Relationship', attributes: { for: 'relate-form' } }),
-        relationSelect,
-      ]),
-      el('div', { className: 'field' }, [
-        el('label', { className: 'field-label', text: 'Entity', attributes: { for: 'relate-target' } }),
-        targetSelect,
-      ]),
-    ]);
-
-    const confirmed = await dialogs.confirm({ title: 'Add a relationship', body, confirmLabel: 'Add' });
-    if (!confirmed) return;
-
-    const option = options[Number(relationSelect.value)];
-    const otherId = targetSelect.value;
-    store.commit((model) =>
-      option.direction === 'outgoing'
-        ? relate(model, option.type.id, subjectId, otherId)
-        : relate(model, option.type.id, otherId, subjectId)
-    );
+  /**
+   * Remove a relationship. Both entities stay; undo restores the
+   * relationship.
+   * @param {import('./model.js').Relationship} relationship
+   */
+  function removeRelationship(relationship) {
+    store.commit((model) => unrelate(model, relationship.type, relationship.source, relationship.target));
   }
 
   async function undo() {
@@ -376,6 +366,8 @@ export function createFlows({ store, overlay, dialogs, editor, getActions }) {
     saveEdit,
     deleteSelection,
     relateSelection,
+    completeRelate,
+    removeRelationship,
     undo,
     redo,
   };

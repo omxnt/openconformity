@@ -24,6 +24,34 @@ export function el(tag, options = {}, children = []) {
 }
 
 /**
+ * An SVG element. Text reaches it through textContent, like everywhere
+ * else.
+ * @param {string} tag
+ * @param {Object<string, string>} [attributes]
+ * @param {Node[]} [children]
+ * @returns {SVGElement}
+ */
+export function svg(tag, attributes = {}, children = []) {
+  const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+  for (const child of children) element.appendChild(child);
+  return element;
+}
+
+/**
+ * An SVG text node.
+ * @param {string} tag  'text' or 'tspan'
+ * @param {Object<string, string>} attributes
+ * @param {string} content
+ * @returns {SVGElement}
+ */
+export function svgText(tag, attributes, content) {
+  const element = svg(tag, attributes);
+  element.textContent = content;
+  return element;
+}
+
+/**
  * An icon referencing a symbol of the sprite in `index.html`.
  * @param {string} symbolId
  * @returns {SVGElement}

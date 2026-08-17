@@ -10,9 +10,15 @@
  * when `canFile` allows, its edges place beside it when `canPlaceBeside`
  * allows. Selection goes through the flows, so a selection change never
  * bypasses the draft guard.
+ *
+ * While the store holds a picker, the candidate rows of the chosen form
+ * are picked from here: clicking one toggles the pick and moves the
+ * selection nowhere; every other row still selects. The candidate set is
+ * re-derived from the model on every render.
  */
 
 import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
+import { pickerCandidates } from './relate.js';
 import { el, icon } from './dom.js';
 
 /**
@@ -128,8 +134,10 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     rowElement.classList.remove('drop-target', 'drop-before', 'drop-after');
   }
 
-  function renderRow(row) {
+  function renderRow(row, picking) {
     const selected = row.id === store.selection();
+    const pickable = picking.candidates.has(row.id);
+    const picked = picking.picks.has(row.id);
     const attributes = {
       role: 'treeitem',
       'aria-level': String(row.depth + 1),
@@ -139,8 +147,14 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
       draggable: 'true',
     };
     if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
+    if (pickable) attributes['aria-checked'] = String(picked);
 
-    const rowElement = el('div', { className: `tree-row${selected ? ' selected' : ''}`, attributes });
+    const classes = ['tree-row'];
+    if (selected) classes.push('selected');
+    if (pickable) classes.push('pickable');
+    if (picked) classes.push('picked');
+    if (picking.subject === row.id) classes.push('picker-subject');
+    const rowElement = el('div', { className: classes.join(' '), attributes });
     rowElement.style.paddingLeft = `${8 + row.depth * 16}px`;
 
     const twisty = el('span', { className: 'twisty' });
@@ -161,7 +175,10 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
       rowElement.appendChild(el('span', { className: 'row-title', text: parts.title }));
     }
 
-    rowElement.addEventListener('click', () => onSelect(row.id));
+    rowElement.addEventListener('click', () => {
+      if (pickable) store.togglePick(row.id);
+      else onSelect(row.id);
+    });
     rowElement.addEventListener('contextmenu', (event) => {
       event.preventDefault();
       onContextMenu(row.id, { x: event.clientX, y: event.clientY });
@@ -209,9 +226,15 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     const hadFocus = container.contains(document.activeElement);
 
     container.textContent = '';
+    const picker = store.picker();
+    const picking = {
+      candidates: pickerCandidates(store.model(), picker),
+      picks: new Set(picker?.picks ?? []),
+      subject: picker?.subject ?? null,
+    };
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
     for (const row of treeRows(store.model(), store.isExpanded)) {
-      tree.appendChild(renderRow(row));
+      tree.appendChild(renderRow(row, picking));
     }
     container.appendChild(tree);
 

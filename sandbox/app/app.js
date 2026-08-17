@@ -9,6 +9,8 @@ import { createDialogs } from './dialog.js';
 import { createEditor } from './editor.js';
 import { createNavigator } from './navigator.js';
 import { createRelationshipsView } from './relationships-view.js';
+import { createGraphView } from './graph-view.js';
+import { createRelateWorkflow } from './relate.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 
@@ -37,7 +39,21 @@ createNavigator({
   onPlace: (id, targetId, position) => flows.placeNode(id, targetId, position),
   onContextMenu: (id, at) => flows.openContextMenu(id, at),
 });
-createRelationshipsView({ store, container: document.getElementById('relationships-body') });
+const graph = createGraphView({ store, onSelect: (id) => flows.selectNode(id) });
+createRelationshipsView({
+  store,
+  head: document.getElementById('relationships-head'),
+  body: document.getElementById('relationships-body'),
+  graph,
+  onAdd: () => flows.relateSelection(),
+  onUnrelate: (relationship) => flows.removeRelationship(relationship),
+  onSelect: (id) => flows.selectNode(id),
+});
+createRelateWorkflow({
+  store,
+  overlay,
+  onDone: (subject, form, picks) => flows.completeRelate(subject, form, picks),
+});
 
 document.addEventListener('keydown', (event) => {
   const target = event.target;
