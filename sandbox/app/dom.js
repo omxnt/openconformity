@@ -52,15 +52,18 @@ export function svgText(tag, attributes, content) {
 }
 
 /**
- * An icon referencing a symbol of the sprite in `index.html`.
+ * An icon referencing a symbol of the sprite in `index.html`. A pillar
+ * tints it with the pillar's colour where the icon stands for a type.
  * @param {string} symbolId
+ * @param {string} [pillar]
  * @returns {SVGElement}
  */
-export function icon(symbolId) {
+export function icon(symbolId, pillar) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', 'icon');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
+  if (pillar) svg.setAttribute('data-pillar', pillar);
   const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   use.setAttribute('href', `#${symbolId}`);
   svg.appendChild(use);

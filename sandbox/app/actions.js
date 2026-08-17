@@ -7,7 +7,7 @@
  */
 
 import { nodeOf, childrenOf } from './model.js';
-import { relationshipOptions } from './flows.js';
+import { relationshipOptions, relatedTypeOffer } from './flows.js';
 
 /**
  * Whether a node has a sibling above it to change places with.
@@ -86,7 +86,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => true,
+      enabled: () => store.hasProject(),
       run: () => flows.saveProject(),
     },
     {
@@ -96,8 +96,19 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       menu: true,
-      enabled: () => true,
+      enabled: () => store.hasProject(),
       run: (invocation) => flows.toggleCreateMenu(invocation),
+    },
+    {
+      id: 'new-related',
+      label: 'New related…',
+      group: 'create',
+      toolbar: true,
+      context: true,
+      menu: true,
+      enabled: () =>
+        selected()?.kind === 'entity' && relatedTypeOffer(store.model(), store.selection()).length > 0,
+      run: (invocation) => flows.toggleRelatedMenu(invocation),
     },
     {
       id: 'new-folder',
@@ -105,7 +116,7 @@ export function createActions({ store, flows }) {
       group: 'create',
       toolbar: true,
       context: true,
-      enabled: () => true,
+      enabled: () => store.hasProject(),
       run: () => flows.createFolder(),
     },
     {

@@ -4,12 +4,14 @@
  * nothing about the model — it renders labels, states, and picks.
  */
 
-import { el } from './dom.js';
+import { el, icon } from './dom.js';
 
 /**
  * @typedef {Object} MenuItem
  * @property {string} label
  * @property {string} [group]    a heading over consecutive items sharing it
+ * @property {string} [icon]     a sprite symbol drawn before the label
+ * @property {string} [pillar]   tints the icon with the pillar's colour
  * @property {boolean} [danger]
  * @property {boolean} [disabled]
  * @property {boolean} [checked]  renders the item as a radio entry
@@ -59,11 +61,10 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
         role: item.checked === undefined ? 'menuitem' : 'menuitemradio',
       };
       if (item.checked !== undefined) attributes['aria-checked'] = String(item.checked);
-      const button = el('button', {
-        className: `menu-entry${item.danger ? ' danger' : ''}`,
-        text: item.label,
-        attributes,
-      });
+      const button = el('button', { className: `menu-entry${item.danger ? ' danger' : ''}`, attributes }, [
+        ...(item.icon ? [icon(item.icon, item.pillar)] : []),
+        el('span', { className: 'menu-entry-label', text: item.label }),
+      ]);
       if (item.disabled) button.disabled = true;
       button.addEventListener('click', () => {
         overlay.close(entry);

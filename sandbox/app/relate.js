@@ -1,39 +1,85 @@
 /**
- * The add-relationship workflow over the store's picker mode. The mode —
- * the pinned subject, the chosen form, the picked identifiers — is store
- * state; everything else here is re-derived from the model on every
- * render, so the workflow survives commits and renders alike.
+ * The add-relationship workflow over the store's picker mode, picks
+ * first: while picking, every entity relatable to the subject in any form
+ * is a candidate, and the relationship each pick means is inferred from
+ * the pair. A pair that admits exactly one relationship groups silently;
+ * one that admits more carries its own small choice, listing only that
+ * pair's options. The mode — the pinned subject and the picks — is store
+ * state; everything else is re-derived from the model on every render, so
+ * the workflow survives commits and renders alike.
  *
  * The panel opens when picking begins and closes when it ends, whoever
- * ended it: Done, Cancel, Escape, or the subject's deletion. The far ends
- * are picked in the navigator; the panel holds the form, the picks, and
- * the two ways out.
+ * ended it: Done, Cancel, Escape, or the subject's deletion.
  */
 
-import { nodeOf, canRelate } from './model.js';
-import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
-import { relationshipOptions } from './flows.js';
+import { nodeOf } from './model.js';
+import { relationshipOptions, formLabel } from './flows.js';
 import { el, icon } from './dom.js';
 
 /**
- * The identifiers the chosen form can still be picked from: every entity
- * the model allows at the far end. Empty without a form.
+ * The identifiers picking can reach: the union, over every form the
+ * subject is offered, of the entities the model allows at the far end.
  * @param {import('./model.js').Model} model
- * @param {{ subject: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }|null} picker
+ * @param {{ subject: string }|null} picker
  * @returns {Set<string>}
  */
 export function pickerCandidates(model, picker) {
-  if (picker === null || picker.form === null) return new Set();
+  if (picker === null) return new Set();
   const candidates = new Set();
-  for (const node of model.nodes.values()) {
-    if (node.kind !== 'entity') continue;
-    const allowed =
-      picker.form.direction === 'outgoing'
-        ? canRelate(model, picker.form.typeId, picker.subject, node.id)
-        : canRelate(model, picker.form.typeId, node.id, picker.subject);
-    if (allowed.ok) candidates.add(node.id);
+  for (const option of relationshipOptions(model, picker.subject)) {
+    for (const candidate of option.candidates) candidates.add(candidate.id);
   }
   return candidates;
+}
+
+/**
+ * The relationships one pair admits right now, in metamodel order: each
+ * form of the subject's offer that reaches this far end.
+ * @param {import('./model.js').Model} model
+ * @param {string} subjectId
+ * @param {string} otherId
+ * @returns {Array<{ typeId: string, direction: 'outgoing'|'incoming' }>}
+ */
+export function pairOptions(model, subjectId, otherId) {
+  return relationshipOptions(model, subjectId)
+    .filter((option) => option.candidates.some((candidate) => candidate.id === otherId))
+    .map((option) => ({ typeId: option.type.id, direction: option.direction }));
+}
+
+/**
+ * The panel's rows: the picks grouped by the relationship each one means
+ * — the pair's only option, or the chosen one, or the first on offer —
+ * with the groups sorted by label. A pick whose pair no longer admits
+ * anything falls into the trailing stale group; Done drops it.
+ * @param {import('./model.js').Model} model
+ * @param {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }> }} picker
+ * @returns {Array<{ form: { typeId: string, direction: string }|null, label: string,
+ *                   rows: Array<{ id: string, ambiguous: boolean, options: Array<{ typeId: string, direction: string }> }> }>}
+ */
+export function groupedPicks(model, picker) {
+  const groups = new Map();
+  for (const pick of picker.picks) {
+    const options = pairOptions(model, picker.subject, pick.id);
+    const chosen =
+      pick.form !== null &&
+      options.some((option) => option.typeId === pick.form.typeId && option.direction === pick.form.direction)
+        ? pick.form
+        : options[0] ?? null;
+    const key = chosen === null ? '·stale' : `${chosen.typeId} ${chosen.direction}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        form: chosen,
+        label: chosen === null ? 'No longer possible' : formLabel(chosen),
+        rows: [],
+      });
+    }
+    groups.get(key).rows.push({ id: pick.id, ambiguous: options.length > 1, options });
+  }
+  return [...groups.values()].sort((one, other) => {
+    if (one.form === null) return 1;
+    if (other.form === null) return -1;
+    return one.label.localeCompare(other.label);
+  });
 }
 
 /**
@@ -49,20 +95,10 @@ function designated(model, id) {
 }
 
 /**
- * @param {{ typeId: string, direction: string }} form
- * @returns {string}
- */
-function formLabel(form) {
-  const type = RELATIONSHIP_TYPES[form.typeId];
-  const other = ENTITY_TYPES[form.direction === 'outgoing' ? type.target : type.source].name;
-  return form.direction === 'outgoing' ? `${type.label} — ${other}` : `${other} — ${type.label} (incoming)`;
-}
-
-/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
- * @param {(subject: string, form: { typeId: string, direction: 'outgoing'|'incoming' }, picks: string[]) => void} context.onDone
+ * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
  */
 export function createRelateWorkflow({ store, overlay, onDone }) {
   /** @type {import('./overlay.js').Entry|null} */
@@ -83,63 +119,50 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
       ])
     );
 
-    const options = relationshipOptions(model, picker.subject);
-    const known = picker.form !== null && options.some(
-      (option) => option.type.id === picker.form.typeId && option.direction === picker.form.direction
-    );
-    const forms = known || picker.form === null ? options : [
-      { type: RELATIONSHIP_TYPES[picker.form.typeId], direction: picker.form.direction, candidates: [] },
-      ...options,
-    ];
-
-    const select = el('select', {
-      className: 'field-input',
-      attributes: { id: 'picker-form', 'aria-label': 'Relationship' },
-    });
-    forms.forEach((option, index) => {
-      select.appendChild(
-        el('option', {
-          text: formLabel({ typeId: option.type.id, direction: option.direction }),
-          attributes: { value: String(index) },
-        })
-      );
-    });
-    if (picker.form !== null) {
-      const at = forms.findIndex(
-        (option) => option.type.id === picker.form.typeId && option.direction === picker.form.direction
-      );
-      select.value = String(at);
-    }
-    select.addEventListener('change', () => {
-      const option = forms[Number(select.value)];
-      store.setPickerForm({ typeId: option.type.id, direction: option.direction });
-    });
-    body.appendChild(
-      el('div', { className: 'field' }, [
-        el('label', { className: 'field-label', text: 'Relationship', attributes: { for: 'picker-form' } }),
-        select,
-      ])
-    );
-
     const picks = el('div', { className: 'panel-picks' });
     picks.appendChild(
       el('div', {
         className: 'field-label',
-        text: picker.picks.length === 0 ? 'Pick entities in the navigator' : `Picked (${picker.picks.length})`,
+        text:
+          picker.picks.length === 0
+            ? 'Pick entities in the navigator'
+            : `Picked (${picker.picks.length})`,
       })
     );
-    for (const id of picker.picks) {
-      const unpick = el('button', {
-        className: 'icon-button',
-        attributes: { type: 'button', 'aria-label': `Unpick ${id}` },
-      }, [icon('i-close')]);
-      unpick.addEventListener('click', () => store.togglePick(id));
-      picks.appendChild(
-        el('div', { className: 'panel-pick' }, [
-          el('span', { className: 'mono panel-pick-name', text: designated(model, id) }),
+
+    for (const group of groupedPicks(model, picker)) {
+      picks.appendChild(el('div', { className: 'panel-group', text: group.label }));
+      for (const row of group.rows) {
+        const unpick = el(
+          'button',
+          { className: 'icon-button', attributes: { type: 'button', 'aria-label': `Unpick ${row.id}` } },
+          [icon('i-close')]
+        );
+        unpick.addEventListener('click', () => store.togglePick(row.id));
+
+        const line = el('div', { className: 'panel-pick' }, [
+          el('span', { className: 'mono panel-pick-name', text: designated(model, row.id) }),
           unpick,
-        ])
-      );
+        ]);
+        picks.appendChild(line);
+
+        if (row.ambiguous) {
+          const choice = el('select', {
+            className: 'field-input panel-pick-choice',
+            attributes: { 'aria-label': `Relationship for ${row.id}` },
+          });
+          row.options.forEach((option, index) => {
+            choice.appendChild(el('option', { text: formLabel(option), attributes: { value: String(index) } }));
+          });
+          const current = group.form;
+          const at = row.options.findIndex(
+            (option) => option.typeId === current?.typeId && option.direction === current?.direction
+          );
+          if (at >= 0) choice.value = String(at);
+          choice.addEventListener('change', () => store.setPickChoice(row.id, row.options[Number(choice.value)]));
+          picks.appendChild(el('div', { className: 'panel-pick-ambiguity' }, [choice]));
+        }
+      }
     }
     body.appendChild(picks);
 
@@ -151,9 +174,7 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
     done.disabled = picker.picks.length === 0;
     done.addEventListener('click', () => {
       const current = store.picker();
-      if (current !== null && current.form !== null && current.picks.length > 0) {
-        onDone(current.subject, current.form, current.picks);
-      }
+      if (current !== null && current.picks.length > 0) onDone(current.subject, current.picks);
       store.endPicking();
     });
     const cancel = el('button', {
@@ -169,8 +190,8 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
     body = el('div', { className: 'panel-body' });
     const element = el(
       'aside',
-      { className: 'side-panel', attributes: { 'aria-label': 'Add a relationship' } },
-      [el('h3', { className: 'panel-title', text: 'Add a relationship' }), body]
+      { className: 'side-panel', attributes: { 'aria-label': 'Add relationships' } },
+      [el('h3', { className: 'panel-title', text: 'Add relationships' }), body]
     );
     panel = overlay.open({
       kind: 'panel',
@@ -183,7 +204,6 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
       },
     });
     renderPanel();
-    element.querySelector('select')?.focus();
   }
 
   function render() {

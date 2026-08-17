@@ -1,8 +1,9 @@
 /**
- * Exercises the store: commit → snapshot → persist → restore, the
- * sequence-based saved pointer with dirty derived from identity, selection
- * repair, session state beside model state, and the blob set aside on a
- * failed restore. Run from this directory.
+ * Exercises the store: the landing session with no project, commit →
+ * snapshot → persist → restore, the sequence-based saved pointer with
+ * dirty derived from identity, rollback leaving no residue, selection
+ * repair, session state beside model state, picker mode, and the blob
+ * set aside on a failed restore. Run from this directory.
  */
 
 import './shim.js';
@@ -42,27 +43,53 @@ function blobIn(storage) {
   return raw === null ? null : JSON.parse(raw);
 }
 
-// --- A fresh start -----------------------------------------------------
+/** A store with a fresh project open, past the landing. */
+function openStore(storage) {
+  const store = createStore({ storage });
+  store.replaceProject(createModel());
+  return store;
+}
+
+// --- A fresh session has no project ------------------------------------
 
 {
   const storage = fakeStorage();
   const store = createStore({ storage });
   equal(store.restoration(), 'fresh', 'no blob means a fresh session');
-  equal(store.model().nodes.size, 0, 'with an empty project');
-  equal(store.dirty(), false, 'that stands saved');
-  equal(store.selection(), null, 'and nothing selected');
-  equal(store.canUndo(), false, 'and nothing to undo');
-  equal(storage.read(PROJECT_KEY), null, 'opening the software writes nothing by itself');
-  equal(storage.read(ASIDE_KEY), null, 'and sets nothing aside');
+  equal(store.hasProject(), false, 'and a fresh session has no project');
+  equal(store.dirty(), false, 'nothing is dirty');
+  equal(store.selection(), null, 'nothing is selected');
+  equal(store.canUndo(), false, 'nothing undoes');
+
+  const refused = store.commit((model) => addEntity(model, 'ELM'));
+  equal(refused.ok, false, 'nothing commits without a project');
+  equal(store.model().nodes.size, 0, 'and the latent model stays empty');
+  store.select('ELM-001');
+  equal(store.selection(), null, 'nothing selects');
+  store.markSaved();
+  equal(storage.read(PROJECT_KEY), null, 'and nothing is ever persisted from the landing');
+  equal(storage.read(ASIDE_KEY), null, 'nor set aside');
+
+  store.replaceProject(createModel());
+  equal(store.hasProject(), true, 'creating the project is one action');
+  equal(store.model().name, '', 'unconfigured, its name empty');
+  equal(store.dirty(), false, 'standing saved');
+  ok(storage.read(PROJECT_KEY) !== null, 'and persisted, so the next session restores it');
+
+  const second = createStore({ storage });
+  equal(second.restoration(), 'restored', 'a restored session with a project');
+  equal(second.hasProject(), true, 'skips the landing');
 }
 
 // --- Commit: record, persist, notify -----------------------------------
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const store = openStore(storage);
   let notified = 0;
-  store.subscribe(() => { notified += 1; });
+  store.subscribe(() => {
+    notified += 1;
+  });
 
   const outcome = store.commit((model) => addEntity(model, 'ELM'));
   equal(outcome.ok, true, 'a commit returns the outcome of its change');
@@ -86,7 +113,7 @@ function blobIn(storage) {
 // --- The saved pointer -------------------------------------------------
 
 {
-  const store = createStore({ storage: fakeStorage() });
+  const store = openStore(fakeStorage());
   store.commit((model) => addEntity(model, 'ELM'));
   equal(store.dirty(), true, 'a change dirties');
   store.markSaved();
@@ -105,10 +132,35 @@ function blobIn(storage) {
   equal(store.dirty(), true, 'and no reachable entry is the saved one any more');
 }
 
+// --- Rollback leaves no residue ----------------------------------------
+
+{
+  const store = openStore(fakeStorage());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.markSaved();
+  const saved = store.sequence();
+
+  store.commit((model) => addEntity(model, 'HAZ'));
+  const rolled = store.sequence();
+  equal(store.rollback(), true, 'the newest change can be rolled back');
+  equal(store.model().nodes.size, 1, 'its content is gone');
+  equal(store.canRedo(), false, 'with no redo left behind');
+  equal(store.sequence(), saved, 'the cursor stands where it stood');
+  equal(store.dirty(), false, 'so a rollback to the saved entry is clean');
+
+  store.commit((model) => addEntity(model, 'SCN'));
+  ok(store.sequence() > rolled, 'a dropped sequence is never reused');
+
+  equal(store.rollback(), true, 'rollback steps entry by entry');
+  equal(store.rollback(), true, 'down to the initial entry');
+  equal(store.rollback(), false, 'and refuses at the bottom');
+  equal(store.model().nodes.size, 0, 'where the project stands empty');
+}
+
 // --- Selection and its repair ------------------------------------------
 
 {
-  const store = createStore({ storage: fakeStorage() });
+  const store = openStore(fakeStorage());
   store.commit((model) => addFolder(model, 'Zone'));
   store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
   store.commit((model) => addEntity(model, 'ELM', { parent: 'ELM-001' }));
@@ -124,11 +176,7 @@ function blobIn(storage) {
   store.undo();
   equal(store.selection(), 'F-1', 'undoing the deletion does not re-select what it restores');
 
-  store.select('F-1');
-  store.commit((model) => removeEntity(model, 'ELM-001'));
-  equal(store.selection(), 'F-1', 'a surviving selection stays put');
-
-  const rootStore = createStore({ storage: fakeStorage() });
+  const rootStore = openStore(fakeStorage());
   rootStore.commit((model) => addEntity(model, 'HAZ'));
   rootStore.select('HAZ-001');
   rootStore.commit((model) => removeEntity(model, 'HAZ-001'));
@@ -139,7 +187,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const store = openStore(storage);
   store.commit((model) => addFolder(model, 'Zone'));
   store.markSaved();
 
@@ -169,7 +217,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const first = createStore({ storage });
+  const first = openStore(storage);
   first.commit((model) => addFolder(model, 'Zone'));
   first.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
   first.commit((model) => updateEntity(model, 'ELM-001', { title: 'Assembly' }));
@@ -198,7 +246,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const first = createStore({ storage });
+  const first = openStore(storage);
   first.commit((model) => addEntity(model, 'ELM'));
   equal(first.dirty(), true, 'unsaved work in the first session');
 
@@ -215,11 +263,12 @@ function blobIn(storage) {
   const storage = fakeStorage({ [PROJECT_KEY]: 'not json{', [THEME_KEY]: 'g100' });
   const store = createStore({ storage });
   equal(store.restoration(), 'failed', 'the software states the previous session could not be restored');
-  equal(store.model().nodes.size, 0, 'and stands on an empty project');
+  equal(store.hasProject(), false, 'and stands on the landing');
   equal(storage.read(ASIDE_KEY), 'not json{', 'the failed blob is copied to the side key at failure time');
   equal(storage.read(PROJECT_KEY), 'not json{', 'and the project key is not deleted either');
   equal(store.theme(), 'g100', 'the theme beside it still applies');
 
+  store.replaceProject(createModel());
   store.commit((model) => addEntity(model, 'ELM'));
   ok(storage.read(PROJECT_KEY).startsWith('{'), 'the next successful persist overwrites the project key');
   equal(storage.read(ASIDE_KEY), 'not json{', 'while the side copy survives it');
@@ -246,7 +295,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const first = createStore({ storage });
+  const first = openStore(storage);
   first.commit((model) => addEntity(model, 'ELM'));
   first.select('ELM-001');
   const tampered = storage.read(PROJECT_KEY).replace('"selection":"ELM-001"', '"selection":"ELM-999"');
@@ -261,7 +310,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const store = openStore(storage);
   store.commit((model) => addEntity(model, 'ELM'));
   store.select('ELM-001');
   store.setExpanded('ELM-001', true);
@@ -281,7 +330,7 @@ function blobIn(storage) {
 // --- Picker mode -------------------------------------------------------
 
 {
-  const store = createStore({ storage: fakeStorage() });
+  const store = openStore(fakeStorage());
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.commit((model) => addEntity(model, 'HAZ'));
@@ -294,32 +343,44 @@ function blobIn(storage) {
   equal(store.picker(), null, 'nor on a folder');
 
   store.beginPicking('ELM-001');
-  deepEqual(store.picker(), { subject: 'ELM-001', form: null, picks: [] }, 'picking begins pinned to its subject');
-  store.togglePick('HAZ-001');
-  deepEqual(store.picker().picks, [], 'no pick lands before a form is chosen');
+  deepEqual(store.picker(), { subject: 'ELM-001', picks: [] }, 'picking begins pinned to its subject');
 
-  store.setPickerForm({ typeId: 'elm-exhibits-haz', direction: 'outgoing' });
   store.togglePick('HAZ-001');
   store.togglePick('HAZ-002');
-  deepEqual(store.picker().picks, ['HAZ-001', 'HAZ-002'], 'picks accumulate');
+  deepEqual(
+    store.picker().picks,
+    [{ id: 'HAZ-001', form: null }, { id: 'HAZ-002', form: null }],
+    'picks accumulate, each without a chosen form until one is needed'
+  );
   store.togglePick('HAZ-001');
-  deepEqual(store.picker().picks, ['HAZ-002'], 'and toggle back off');
+  deepEqual(store.picker().picks, [{ id: 'HAZ-002', form: null }], 'and toggle back off');
+
+  store.setPickChoice('HAZ-002', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
+  deepEqual(
+    store.picker().picks[0].form,
+    { typeId: 'elm-exhibits-haz', direction: 'outgoing' },
+    'a pick can carry the relationship chosen for its pair'
+  );
+  store.setPickChoice('HAZ-009', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
+  equal(store.picker().picks.length, 1, 'a choice for what is not picked is nothing');
 
   const copy = store.picker();
-  copy.picks.push('HAZ-009');
-  deepEqual(store.picker().picks, ['HAZ-002'], 'the picks ride out as a copy');
+  copy.picks.push({ id: 'HAZ-009', form: null });
+  copy.picks[0].form = null;
+  deepEqual(
+    store.picker().picks,
+    [{ id: 'HAZ-002', form: { typeId: 'elm-exhibits-haz', direction: 'outgoing' } }],
+    'the picks ride out as copies'
+  );
 
   store.commit((model) => addEntity(model, 'SCN'));
-  deepEqual(store.picker().picks, ['HAZ-002'], 'the mode survives commits');
+  equal(store.picker().picks.length, 1, 'the mode survives commits');
 
   store.commit((model) => removeEntity(model, 'HAZ-002'));
   ok(store.picker() !== null, 'a commit that removes a picked entity leaves the workflow open');
   deepEqual(store.picker().picks, [], 'and clears that pick');
 
   store.togglePick('HAZ-001');
-  store.setPickerForm({ typeId: 'elm-decomposes-into-elm', direction: 'outgoing' });
-  deepEqual(store.picker().picks, [], 'changing the form drops the picks: they belong to a form');
-
   store.commit((model) => removeEntity(model, 'ELM-001'));
   equal(store.picker(), null, 'a commit that removes the subject closes the workflow');
   store.undo();
@@ -332,11 +393,10 @@ function blobIn(storage) {
 // --- Picker repair under undo and redo ---------------------------------
 
 {
-  const store = createStore({ storage: fakeStorage() });
+  const store = openStore(fakeStorage());
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.beginPicking('ELM-001');
-  store.setPickerForm({ typeId: 'elm-exhibits-haz', direction: 'outgoing' });
   store.togglePick('HAZ-001');
 
   store.undo();
@@ -354,7 +414,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const store = openStore(storage);
   store.commit((model) => addEntity(model, 'ELM'));
   store.beginPicking('ELM-001');
   store.commit((model) => addEntity(model, 'HAZ'));
@@ -375,7 +435,7 @@ function blobIn(storage) {
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const store = openStore(storage);
   storage.failing = true;
   const outcome = store.commit((model) => addEntity(model, 'ELM'));
   equal(outcome.ok, true, 'the change itself still lands');

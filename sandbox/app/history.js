@@ -94,6 +94,20 @@ export function createHistory(model) {
     canRedo: () => cursor < entries.length - 1,
 
     /**
+     * Step back and drop the entry stepped off, and everything ahead of
+     * it: the collapse of a change that is to leave no residue. The
+     * dropped sequences are never reused.
+     * @param {import('./model.js').Model} current
+     * @returns {import('./model.js').Model|null}
+     */
+    rollback(current) {
+      if (cursor === 0) return null;
+      cursor -= 1;
+      entries.length = cursor + 1;
+      return modelWith(entries[cursor].content, current);
+    },
+
+    /**
      * The model one step back, carrying the live model's counters, or null
      * at the bottom.
      * @param {import('./model.js').Model} current

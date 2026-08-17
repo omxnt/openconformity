@@ -138,7 +138,12 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       listHost.hidden = false;
       graph.element.hidden = true;
       listHost.textContent = '';
-      listHost.appendChild(el('p', { className: 'pane-empty', text: 'Nothing selected.' }));
+      listHost.appendChild(
+        el('p', {
+          className: 'pane-empty',
+          text: store.hasProject() ? 'Select an entity to see its relationships.' : 'No project is open.',
+        })
+      );
       return;
     }
 

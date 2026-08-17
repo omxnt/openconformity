@@ -11,7 +11,9 @@
 
 import { attributesFor } from './attributes.js';
 import { nodeOf } from './model.js';
-import { el } from './dom.js';
+import { ENTITY_TYPES } from './metamodel.js';
+import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
+import { el, icon } from './dom.js';
 
 /**
  * Whether a draft differs from the entity it edits: a defined key whose
@@ -35,9 +37,11 @@ export function draftChanged(definitions, attributes, values) {
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
  * @param {(id: string, values: Object<string, string>) => boolean} context.onSave
+ * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
+ * @param {() => void} context.onRenameProject
  */
-export function createEditor({ store, head, body, onSave, onRename }) {
+export function createEditor({ store, head, body, onSave, onCancel, onRename, onRenameProject }) {
   /** @type {'view'|'edit'} */
   let mode = 'view';
   /** @type {string|null} the entity the open draft belongs to */
@@ -56,10 +60,12 @@ export function createEditor({ store, head, body, onSave, onRename }) {
     head.hidden = false;
     const parts = [];
     if (node.kind === 'entity') {
+      parts.push(icon(TYPE_ICONS[node.type], ENTITY_TYPES[node.type].pillar));
       parts.push(el('span', { className: 'mono designation', text: node.id }));
       const title = (node.attributes.title ?? '').trim();
       if (title) parts.push(el('span', { className: 'subhead-title', text: title }));
     } else {
+      parts.push(icon(FOLDER_ICON));
       parts.push(el('span', { className: 'subhead-title', text: node.name }));
     }
     head.appendChild(el('div', { className: 'pane-head-name' }, parts));
@@ -128,7 +134,7 @@ export function createEditor({ store, head, body, onSave, onRename }) {
       headButton('Save', () => {
         if (onSave(editingId, fieldValues()) !== false) endEdit();
       }),
-      headButton('Cancel', endEdit),
+      headButton('Cancel', onCancel),
     ]);
     for (const definition of attributesFor(node.type)) {
       body.appendChild(
@@ -156,9 +162,24 @@ export function createEditor({ store, head, body, onSave, onRename }) {
 
     head.textContent = '';
     body.textContent = '';
-    if (!node) {
+    if (!store.hasProject()) {
       head.hidden = true;
-      body.appendChild(el('p', { className: 'pane-empty', text: 'Nothing selected.' }));
+      body.appendChild(el('p', { className: 'pane-empty', text: 'No project is open.' }));
+      return;
+    }
+    if (!node) {
+      head.hidden = false;
+      const name = store.model().name.trim();
+      head.appendChild(
+        el('div', { className: 'pane-head-name' }, [
+          icon(PROJECT_ICON),
+          name
+            ? el('span', { className: 'subhead-title', text: name })
+            : el('span', { className: 'subhead-title untitled', text: 'Untitled' }),
+        ])
+      );
+      head.appendChild(el('div', { className: 'pane-head-actions' }, [headButton('Rename…', onRenameProject)]));
+      body.appendChild(el('p', { className: 'pane-empty', text: 'The project carries a name; the model is its content.' }));
       return;
     }
     if (node.kind === 'folder') {

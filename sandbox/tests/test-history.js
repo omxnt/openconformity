@@ -115,6 +115,29 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), 10, 'the oldest surviving entry keeps its own sequence');
 }
 
+// --- Rollback ----------------------------------------------------------
+
+{
+  let model = createModel();
+  const history = createHistory(model);
+  equal(history.rollback(model), null, 'the initial entry cannot roll back');
+
+  addEntity(model, 'ELM');
+  history.record(model);
+  addEntity(model, 'HAZ');
+  const dropped = history.record(model);
+
+  model = history.rollback(model);
+  equal(nodeOf(model, 'HAZ-001'), null, 'a rollback reverts the newest change');
+  equal(history.canRedo(), false, 'and leaves no redo behind: the entry is dropped');
+  equal(history.canUndo(), true, 'while everything beneath it stands');
+  equal(model.counters.HAZ, 2, 'the counters never roll back');
+
+  addEntity(model, 'SCN');
+  const recorded = history.record(model);
+  ok(recorded > dropped, 'a dropped sequence is never reused');
+}
+
 // --- Reset -------------------------------------------------------------
 
 {

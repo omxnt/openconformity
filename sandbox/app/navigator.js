@@ -1,9 +1,17 @@
 /**
  * The navigator: the model as a tree of what is filed where, under its
- * toolbar. The tree presents the user's filing, folders and entities
- * interleaved in sibling order, and labels an entity by its designation
- * then its title — the designation alone when untitled. The pane owns its
- * transient state: scroll and focus survive the full re-render.
+ * toolbar, headed by the project's own row. The project row is
+ * presentation only — no entity, no identifier, nothing a model
+ * operation can address — selected as the null selection, filing drops
+ * at the top of the tree, and its context menu is the background menu.
+ * The tree presents the user's filing, folders and entities interleaved
+ * in sibling order, every row under its type's icon, an entity labelled
+ * by its designation then its title — the designation alone when
+ * untitled. The pane owns its transient state: scroll and focus survive
+ * the full re-render.
+ *
+ * With no project open, the tree is the landing: nothing to draw, and
+ * the two ways to a project offered in its place.
  *
  * The toolbar draws from the one action list, and the tree asks the model
  * the same questions a drop answers: the middle of a row files into it
@@ -11,14 +19,16 @@
  * allows. Selection goes through the flows, so a selection change never
  * bypasses the draft guard.
  *
- * While the store holds a picker, the candidate rows of the chosen form
- * are picked from here: clicking one toggles the pick and moves the
+ * While the store holds a picker, the candidate rows of any admissible
+ * form are picked from here: clicking one toggles the pick and moves the
  * selection nowhere; every other row still selects. The candidate set is
  * re-derived from the model on every render.
  */
 
 import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
 import { pickerCandidates } from './relate.js';
+import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
+import { ENTITY_TYPES } from './metamodel.js';
 import { el, icon } from './dom.js';
 
 /**
@@ -52,6 +62,22 @@ export function treeRows(model, isExpanded) {
 }
 
 /**
+ * Everything the pane draws, in drawing order: the project row first,
+ * always, then the tree; nothing at all without a project.
+ * @param {import('./model.js').Model} model
+ * @param {(id: string) => boolean} isExpanded
+ * @param {boolean} hasProject
+ * @returns {Array<{ kind: 'project', id: null } | (TreeRow & { kind: 'node' })>}
+ */
+export function visibleRows(model, isExpanded, hasProject) {
+  if (!hasProject) return [];
+  return [
+    { kind: 'project', id: null },
+    ...treeRows(model, isExpanded).map((row) => ({ kind: 'node', ...row })),
+  ];
+}
+
+/**
  * What a row says: an entity's designation and its title when it has one,
  * a folder's name alone.
  * @param {import('./model.js').Node} node
@@ -81,7 +107,7 @@ export function dropZone(ratio) {
  * @param {HTMLElement} context.container
  * @param {HTMLElement} context.toolbar
  * @param {Array<import('./actions.js').Action>} context.actions
- * @param {(id: string) => void} context.onSelect
+ * @param {(id: string|null) => void} context.onSelect
  * @param {(id: string, parentId: string|null) => void} context.onFile
  * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
  * @param {(id: string|null, at: { x: number, y: number }) => void} context.onContextMenu
@@ -128,10 +154,52 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     }
   }
 
-  // --- The tree --------------------------------------------------------
+  // --- The rows --------------------------------------------------------
 
   function clearDropMarks(rowElement) {
     rowElement.classList.remove('drop-target', 'drop-before', 'drop-after');
+  }
+
+  function renderProjectRow() {
+    const selected = store.selection() === null;
+    const rowElement = el('div', {
+      className: `tree-row project-row${selected ? ' selected' : ''}`,
+      attributes: {
+        role: 'treeitem',
+        'aria-level': '1',
+        'aria-selected': String(selected),
+        tabindex: selected ? '0' : '-1',
+      },
+    });
+    rowElement.appendChild(el('span', { className: 'twisty' }));
+    rowElement.appendChild(icon(PROJECT_ICON));
+
+    const name = store.model().name.trim();
+    rowElement.appendChild(
+      name
+        ? el('span', { className: 'row-title', text: name })
+        : el('span', { className: 'row-title untitled', text: 'Untitled' })
+    );
+
+    rowElement.addEventListener('click', () => onSelect(null));
+    rowElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      onContextMenu(null, { x: event.clientX, y: event.clientY });
+    });
+    rowElement.addEventListener('dragover', (event) => {
+      if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
+      event.preventDefault();
+      event.stopPropagation();
+      rowElement.classList.add('drop-target');
+    });
+    rowElement.addEventListener('dragleave', () => clearDropMarks(rowElement));
+    rowElement.addEventListener('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearDropMarks(rowElement);
+      if (draggedId !== null) onFile(draggedId, null);
+    });
+    return rowElement;
   }
 
   function renderRow(row, picking) {
@@ -140,7 +208,7 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     const picked = picking.picks.has(row.id);
     const attributes = {
       role: 'treeitem',
-      'aria-level': String(row.depth + 1),
+      'aria-level': String(row.depth + 2),
       'aria-selected': String(selected),
       tabindex: selected ? '0' : '-1',
       'data-id': row.id,
@@ -155,7 +223,7 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     if (picked) classes.push('picked');
     if (picking.subject === row.id) classes.push('picker-subject');
     const rowElement = el('div', { className: classes.join(' '), attributes });
-    rowElement.style.paddingLeft = `${8 + row.depth * 16}px`;
+    rowElement.style.paddingLeft = `${8 + (row.depth + 1) * 16}px`;
 
     const twisty = el('span', { className: 'twisty' });
     if (row.hasChildren) {
@@ -166,6 +234,12 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
       });
     }
     rowElement.appendChild(twisty);
+
+    rowElement.appendChild(
+      row.node.kind === 'folder'
+        ? icon(FOLDER_ICON)
+        : icon(TYPE_ICONS[row.node.type], ENTITY_TYPES[row.node.type].pillar)
+    );
 
     const parts = labelParts(row.node);
     if (parts.designation) {
@@ -221,20 +295,44 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     return rowElement;
   }
 
+  function renderLanding() {
+    const landing = el('div', { className: 'landing' }, [
+      el('p', { className: 'pane-empty', text: 'No project is open.' }),
+    ]);
+    for (const id of ['new-project', 'open']) {
+      const action = actions.find((offered) => offered.id === id);
+      if (!action) continue;
+      const button = el('button', {
+        className: 'ghost-button',
+        text: action.label,
+        attributes: { type: 'button', 'data-action': `landing-${action.id}` },
+      });
+      button.addEventListener('click', () => action.run({ anchor: button }));
+      landing.appendChild(button);
+    }
+    container.appendChild(landing);
+  }
+
   function render() {
     const scroll = container.scrollTop;
     const hadFocus = container.contains(document.activeElement);
 
     container.textContent = '';
+    if (!store.hasProject()) {
+      renderLanding();
+      syncToolbar();
+      return;
+    }
+
     const picker = store.picker();
     const picking = {
       candidates: pickerCandidates(store.model(), picker),
-      picks: new Set(picker?.picks ?? []),
+      picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
       subject: picker?.subject ?? null,
     };
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
-    for (const row of treeRows(store.model(), store.isExpanded)) {
-      tree.appendChild(renderRow(row, picking));
+    for (const row of visibleRows(store.model(), store.isExpanded, true)) {
+      tree.appendChild(row.kind === 'project' ? renderProjectRow() : renderRow(row, picking));
     }
     container.appendChild(tree);
 
@@ -255,15 +353,17 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     if (draggedId !== null) onFile(draggedId, null);
   });
   container.addEventListener('contextmenu', (event) => {
+    if (!store.hasProject()) return;
     if (event.target !== container && event.target.closest('.tree-row')) return;
     event.preventDefault();
     onContextMenu(null, { x: event.clientX, y: event.clientY });
   });
 
   container.addEventListener('keydown', (event) => {
-    const rows = treeRows(store.model(), store.isExpanded);
+    const rows = visibleRows(store.model(), store.isExpanded, store.hasProject());
     if (rows.length === 0) return;
-    const index = rows.findIndex((row) => row.id === store.selection());
+    const selection = store.selection();
+    const index = rows.findIndex((row) => row.id === selection);
     const row = index >= 0 ? rows[index] : null;
 
     if (event.key === 'ArrowDown') {
@@ -273,14 +373,14 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       if (index > 0) onSelect(rows[index - 1].id);
-    } else if (event.key === 'ArrowRight' && row) {
+    } else if (event.key === 'ArrowRight' && row && row.kind === 'node') {
       event.preventDefault();
       if (row.hasChildren && !row.expanded) store.setExpanded(row.id, true);
       else if (row.expanded) onSelect(rows[index + 1].id);
-    } else if (event.key === 'ArrowLeft' && row) {
+    } else if (event.key === 'ArrowLeft' && row && row.kind === 'node') {
       event.preventDefault();
       if (row.expanded) store.setExpanded(row.id, false);
-      else if (row.node.parent !== null) onSelect(row.node.parent);
+      else onSelect(row.node.parent);
     }
   });
 

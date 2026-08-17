@@ -24,7 +24,9 @@ const editor = createEditor({
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
   onSave: (id, values) => flows.saveEdit(id, values),
+  onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
+  onRenameProject: () => flows.renameProject(),
 });
 const flows = createFlows({
   store,
@@ -59,7 +61,7 @@ createRelationshipsView({
 createRelateWorkflow({
   store,
   overlay,
-  onDone: (subject, form, picks) => flows.completeRelate(subject, form, picks),
+  onDone: (subject, picks) => flows.completeRelate(subject, picks),
 });
 
 document.addEventListener('keydown', (event) => {

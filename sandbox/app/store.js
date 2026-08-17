@@ -12,11 +12,15 @@
  * restore seeds the pointer at the initial entry, a dirty one seeds it
  * unreachable.
  *
- * Picker mode is a third kind of state: the subject, the chosen form, and
- * the picked identifiers of an add-relationship workflow in progress. It
- * survives commits, is never persisted, and never enters history. A
- * change that removes a picked entity clears that pick; one that removes
- * the subject closes the workflow.
+ * Picker mode is a third kind of state: the subject and the picks — each
+ * an identifier with, where a pair admits more than one relationship, the
+ * chosen one — of an add-relationship workflow in progress. It survives
+ * commits, is never persisted, and never enters history. A change that
+ * removes a picked entity clears that pick; one that removes the subject
+ * closes the workflow.
+ *
+ * A session can hold no project at all: nothing commits, nothing
+ * persists, and nothing is dirty until one is created or opened.
  *
  * The blob is a cache of the open project, holding the same file shape the
  * serialisation writes, and it passes the same loader on the way back. A
@@ -57,6 +61,8 @@ export function createStore({ storage }) {
   let model = createModel();
   let history = createHistory(model);
   let savedSequence = history.sequence();
+  /** Whether a project is open at all. A fresh session has none. */
+  let projectOpen = false;
   /** @type {string|null} */
   let selection = null;
   /** @type {Set<string>} */
@@ -66,7 +72,7 @@ export function createStore({ storage }) {
   /** @type {'fresh'|'restored'|'failed'} */
   let restoration = 'fresh';
   let persistFailed = false;
-  /** @type {{ subject: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null, picks: string[] }|null} */
+  /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
   let picker = null;
   const listeners = new Set();
 
@@ -75,11 +81,15 @@ export function createStore({ storage }) {
   }
 
   function dirty() {
-    return history.sequence() !== savedSequence;
+    return projectOpen && history.sequence() !== savedSequence;
   }
 
-  /** Write the blob: the project in file shape, the session state beside it. */
+  /**
+   * Write the blob: the project in file shape, the session state beside
+   * it. With no project open there is nothing to cache.
+   */
   function persist() {
+    if (!projectOpen) return;
     const blob = {
       project: toFileObject(model),
       session: { selection, expanded: [...expanded], dirty: dirty() },
@@ -130,7 +140,7 @@ export function createStore({ storage }) {
       picker = null;
       return;
     }
-    picker.picks = picker.picks.filter((id) => model.nodes.has(id));
+    picker.picks = picker.picks.filter((pick) => model.nodes.has(pick.id));
   }
 
   // --- Restoring the previous session ---------------------------------
@@ -161,6 +171,7 @@ export function createStore({ storage }) {
         selection = typeof wanted === 'string' && model.nodes.has(wanted) ? wanted : null;
         const openIds = Array.isArray(blob.session?.expanded) ? blob.session.expanded : [];
         expanded = new Set(openIds.filter((id) => model.nodes.has(id)));
+        projectOpen = true;
         restoration = 'restored';
       }
     } catch {
@@ -178,6 +189,12 @@ export function createStore({ storage }) {
   return {
     /** @returns {import('./model.js').Model} */
     model: () => model,
+
+    /** Whether a project is open at all. A fresh session has none. */
+    hasProject: () => projectOpen,
+
+    /** The history sequence the current entry carries. */
+    sequence: () => history.sequence(),
 
     /** How the session began: fresh, restored, or failed to restore. */
     restoration: () => restoration,
@@ -201,6 +218,7 @@ export function createStore({ storage }) {
      * @returns {{ ok: boolean, reason?: string }}
      */
     commit(action) {
+      if (!projectOpen) return { ok: false, reason: 'No project is open.' };
       const trail = ancestorsOf(selection);
       const outcome = action(model);
       if (!outcome || outcome.ok !== true) {
@@ -218,9 +236,27 @@ export function createStore({ storage }) {
 
     /** Point the saved state at the entry now standing. */
     markSaved() {
+      if (!projectOpen) return;
       savedSequence = history.sequence();
       persist();
       notify();
+    },
+
+    /**
+     * Step back and drop what was stepped off, so a collapsed change
+     * leaves no residue: no entry, no redo. False at the bottom.
+     * @returns {boolean}
+     */
+    rollback() {
+      const trail = ancestorsOf(selection);
+      const rolled = history.rollback(model);
+      if (rolled === null) return false;
+      model = rolled;
+      repairSelection(trail);
+      repairPicker();
+      persist();
+      notify();
+      return true;
     },
 
     canUndo: () => history.canUndo(),
@@ -263,15 +299,18 @@ export function createStore({ storage }) {
       selection = null;
       expanded = new Set();
       picker = null;
+      projectOpen = true;
       persist();
       notify();
     },
 
     // --- Picker mode ----------------------------------------------------
 
-    /** The workflow in progress, or null. The picks ride as a copy. */
+    /** The workflow in progress, or null. The picks ride as copies. */
     picker: () =>
-      picker === null ? null : { subject: picker.subject, form: picker.form, picks: [...picker.picks] },
+      picker === null
+        ? null
+        : { subject: picker.subject, picks: picker.picks.map((pick) => ({ ...pick })) },
 
     /**
      * Start an add-relationship workflow pinned to this entity.
@@ -280,31 +319,33 @@ export function createStore({ storage }) {
     beginPicking(subjectId) {
       const subject = nodeOf(model, subjectId);
       if (!subject || subject.kind !== 'entity') return;
-      picker = { subject: subjectId, form: null, picks: [] };
+      picker = { subject: subjectId, picks: [] };
       notify();
     },
 
     /**
-     * Choose the relationship form. Changing it drops the picks: they
-     * belong to a form.
-     * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
-     */
-    setPickerForm(form) {
-      if (picker === null) return;
-      picker.form = form;
-      picker.picks = [];
-      notify();
-    },
-
-    /**
-     * Pick an entity, or unpick it.
+     * Pick an entity, or unpick it. A fresh pick carries no chosen form:
+     * the relationship is inferred from the pair until one is chosen.
      * @param {string} id
      */
     togglePick(id) {
-      if (picker === null || picker.form === null) return;
-      const at = picker.picks.indexOf(id);
+      if (picker === null) return;
+      const at = picker.picks.findIndex((pick) => pick.id === id);
       if (at >= 0) picker.picks.splice(at, 1);
-      else picker.picks.push(id);
+      else picker.picks.push({ id, form: null });
+      notify();
+    },
+
+    /**
+     * Choose the relationship a pick means, where its pair admits more
+     * than one.
+     * @param {string} id
+     * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
+     */
+    setPickChoice(id, form) {
+      const pick = picker?.picks.find((held) => held.id === id);
+      if (!pick) return;
+      pick.form = form;
       notify();
     },
 
@@ -325,6 +366,7 @@ export function createStore({ storage }) {
      * @param {string|null} id
      */
     select(id) {
+      if (!projectOpen) return;
       const next = id !== null && model.nodes.has(id) ? id : null;
       if (next === selection) return;
       selection = next;

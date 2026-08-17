@@ -11,6 +11,11 @@ import { createStore } from '../app/store.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
+/** The identifiers of the enabled offers. */
+function enabledIds(actions) {
+  return actions.filter((action) => action.enabled()).map((action) => action.id);
+}
+
 function fakeStorage() {
   const map = new Map();
   return {
@@ -41,16 +46,29 @@ function fakeStorage() {
   equal(canMoveUp(model, null), false, 'nor does no selection');
 }
 
+// --- The landing offers exactly two paths ------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const actions = createActions({ store, flows: {} });
+  deepEqual(
+    enabledIds(actions),
+    ['new-project', 'open'],
+    'the no-project state offers Open and New project, and nothing else'
+  );
+}
+
 // --- The action list against a live store ------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
   const actions = createActions({ store, flows: {} });
   const enabled = () => Object.fromEntries(actions.map((action) => [action.id, action.enabled()]));
 
   deepEqual(
     actions.map((action) => action.id),
-    ['new-project', 'open', 'save', 'new-entity', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'delete', 'undo', 'redo'],
+    ['new-project', 'open', 'save', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
@@ -71,6 +89,7 @@ function fakeStorage() {
       open: true,
       save: true,
       'new-entity': true,
+      'new-related': false,
       'new-folder': true,
       relate: false,
       rename: false,
@@ -88,6 +107,7 @@ function fakeStorage() {
   const one = enabled();
   equal(one.delete, true, 'a selected entity can be deleted');
   equal(one.relate, false, 'but not related, with no candidate in the model');
+  equal(one['new-related'], true, 'though a related entity can always be newly made');
   equal(one['move-up'], false, 'an only child moves neither way');
   equal(one['move-down'], false, 'either way');
   equal(one.undo, true, 'a change can be undone');
@@ -113,6 +133,7 @@ function fakeStorage() {
   equal(folder.rename, true, 'a selected folder can be renamed');
   equal(folder.delete, true, 'and deleted');
   equal(folder.relate, false, 'never related');
+  equal(folder['new-related'], false, 'nor newly related to');
 
   store.undo();
   equal(enabled().redo, true, 'an undone change can be redone');

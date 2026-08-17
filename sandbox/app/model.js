@@ -555,6 +555,19 @@ export function removeFolder(model, folderId) {
   return { ok: true };
 }
 
+/**
+ * Name the project, or clear its name: the schema lets a project exist
+ * before it is named.
+ * @param {Model} model
+ * @param {string} name
+ * @returns {Outcome}
+ */
+export function renameProject(model, name) {
+  if (typeof name !== 'string') return { ok: false, reason: 'A name is text.' };
+  model.name = name;
+  return { ok: true };
+}
+
 // --- Loading -----------------------------------------------------------
 
 /**

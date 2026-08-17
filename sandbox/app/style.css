@@ -195,6 +195,15 @@ body {
   fill: currentColor;
 }
 
+/* An entity type's icon carries its pillar's colour wherever it stands
+   for the type; a disabled offer grays it with the rest of the entry. */
+.icon[data-pillar="systemContext"] { fill: var(--pillar-system); }
+.icon[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
+.icon[data-pillar="riskAssessment"] { fill: var(--pillar-risk); }
+.icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-requirements); }
+.menu-entry:disabled .icon { fill: var(--disabled); }
+.menu-entry-label { flex: 1; }
+
 /* ---------- Shell bar ---------- */
 
 .shell-bar {
@@ -437,6 +446,13 @@ body {
 .designation { color: var(--text-second); }
 .tree-row .row-title,
 .rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
+.untitled { color: var(--text-place); font-weight: 400; }
+
+.project-row { padding-left: 8px; }  /* $spacing-03 */
+.project-row .row-title { font-weight: 600; }
+
+.landing { display: grid; gap: 4px; justify-items: start; padding: 8px 0; }  /* $spacing-02, $spacing-03 */
+.landing .ghost-button { margin-left: 8px; }
 
 /* ---------- Editor ---------- */
 
@@ -599,6 +615,12 @@ select.field-input {
   padding: 12px 16px 0;     /* $spacing-04, $spacing-05 */
 }
 .panel-picks { flex: 1; padding: 16px 16px 8px; overflow: auto; }
+.panel-group {
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+  padding: 12px 0 2px;      /* $spacing-04 */
+}
 .panel-pick {
   display: flex;
   align-items: center;
@@ -606,6 +628,8 @@ select.field-input {
   height: var(--row);
 }
 .panel-pick-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.panel-pick-ambiguity { padding: 2px 0 4px 16px; }  /* $spacing-05 */
+.panel-pick-choice { font-size: 12px; letter-spacing: 0.32px; padding: 4px 40px 4px 8px; }
 .panel-actions { flex: none; }
 
 /* Candidate rows while picking: outlined, and marked once picked. */

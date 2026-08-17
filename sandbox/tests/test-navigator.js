@@ -4,7 +4,7 @@
  * rendered tree is checked in the browser. Run from this directory.
  */
 
-import { treeRows, labelParts } from '../app/navigator.js';
+import { treeRows, labelParts, visibleRows } from '../app/navigator.js';
 import { createModel, addEntity, addFolder, updateEntity, file } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -47,6 +47,24 @@ function drawn(model, expanded) {
 
   file(model, 'HAZ-001', 'F-1');
   deepEqual(drawn(model, new Set(['F-1'])), ['ELM-001', 'F-1', 'ELM-002', 'HAZ-001'], 'a filed node draws last among its new siblings');
+}
+
+// --- The project row ----------------------------------------------------
+
+{
+  const model = createModel();
+  deepEqual(visibleRows(model, () => false, false), [], 'the landing draws nothing, not even the project row');
+
+  const alone = visibleRows(model, () => false, true);
+  deepEqual(alone.map((row) => row.kind), ['project'], 'a project draws its own row before anything');
+  equal(alone[0].id, null, 'the project row carries no identifier: it is the null selection');
+
+  addEntity(model, 'ELM');
+  addFolder(model, 'Zone');
+  const rows = visibleRows(model, () => false, true);
+  deepEqual(rows.map((row) => row.kind), ['project', 'node', 'node'], 'the project row renders first, always');
+  deepEqual(rows.slice(1).map((row) => row.id), ['ELM-001', 'F-1'], 'with the tree in order beneath it');
+  deepEqual(treeRows(model, () => false).map((row) => row.id), ['ELM-001', 'F-1'], 'and the tree itself never contains it');
 }
 
 // --- The labels --------------------------------------------------------
