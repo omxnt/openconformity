@@ -14,10 +14,11 @@
  *
  * The blob is a cache of the open project, holding the same file shape the
  * serialisation writes, and it passes the same loader on the way back. A
- * blob that fails to load is set aside rather than deleted: it stays in
- * storage untouched, overwritten only by the next successful persist, and
- * the restoration state says the previous session could not be restored.
- * The store never raises a file refusal for it.
+ * blob that fails to load is set aside rather than deleted: at failure
+ * time it is copied to the side key, where it survives every later
+ * persist until the next failure replaces it. The restoration state says
+ * the previous session could not be restored; the store never raises a
+ * file refusal for it.
  */
 
 import { createModel, nodeOf } from './model.js';
@@ -26,6 +27,9 @@ import { toFileObject, loadProject } from './files.js';
 
 /** The browser-storage key of the project and session blob. */
 const PROJECT_KEY = 'openconformity.project';
+
+/** The side key a blob that failed to load is copied to at failure time. */
+const ASIDE_KEY = 'openconformity.project.aside';
 
 /** The theme's own key, beside the blob, so replacing the project does not reset it. */
 const THEME_KEY = 'openconformity.theme';
@@ -139,7 +143,14 @@ export function createStore({ storage }) {
         restoration = 'restored';
       }
     } catch {
-      // The blob stays set aside in storage.
+      // Falls through to the set-aside below.
+    }
+    if (restoration === 'failed') {
+      try {
+        storage.setItem(ASIDE_KEY, raw);
+      } catch {
+        // Storage refused the copy; the project key still holds the blob.
+      }
     }
   }
 

@@ -1,0 +1,410 @@
+/* openconformity */
+
+/* Every colour, size, space and duration below is an IBM Carbon Design
+   System token, copied in by value; the token name follows each one. The
+   page carries one of two Carbon themes, White or Gray 100, chosen by
+   data-theme on the root element. Where Carbon defines a state as an alpha
+   mix, the nearest solid gray is used. */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("assets/fonts/IBMPlexSans-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("assets/fonts/IBMPlexSans-SemiBold.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("assets/fonts/IBMPlexMono-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
+/* ---------- Themes ---------- */
+
+/* Carbon White. Also the fallback, should the theme never be set. */
+:root,
+:root[data-theme="white"] {
+  color-scheme: light;
+
+  /* Layers */
+  --background:   #FFFFFF;  /* $background, $layer-02 */
+  --layer:        #F4F4F4;  /* $layer-01, $field-01, gray-10 */
+  --layer-accent: #E0E0E0;  /* $layer-accent-01, $layer-selected-01, gray-20 */
+
+  /* Borders */
+  --border-subtle: #C6C6C6;  /* $border-subtle-01, gray-30 */
+  --border-strong: #8D8D8D;  /* $border-strong-01, gray-50 */
+
+  /* Text and icons */
+  --text:         #161616;  /* $text-primary, $icon-primary, gray-100 */
+  --text-second:  #525252;  /* $text-secondary, $icon-secondary, gray-70 */
+  --text-helper:  #6F6F6F;  /* $text-helper, gray-60 */
+  --text-place:   #A8A8A8;  /* $text-placeholder, gray-40 */
+  --disabled:     rgba(22, 22, 22, 0.25);  /* $text-disabled, $icon-disabled */
+
+  /* States on white and gray-10 */
+  --hover:  #E8E8E8;  /* $background-hover, $layer-hover-01, $field-hover-01 */
+  --active: #C6C6C6;  /* $background-active, $layer-active-01, gray-30 */
+
+  /* Pillar colour on entity type icons (D-043). Never the interactive blue. */
+  --pillar-system:       #9F1853;  /* magenta-70 */
+  --pillar-legislative:  #8A3FFC;  /* purple-60 */
+  --pillar-risk:         #8E6A00;  /* yellow-60 */
+  --pillar-requirements: #007D79;  /* teal-60 */
+
+  /* Interactive */
+  --accent:     #0F62FE;  /* $interactive, $border-interactive, blue-60 */
+  --focus:      #0F62FE;  /* $focus, blue-60 */
+  --link:       #0F62FE;  /* $link-primary, blue-60 */
+  --link-hover: #0043CE;  /* $link-primary-hover, blue-70 */
+  --support-info: #0043CE;  /* $support-info, blue-70 */
+  --support-warning: #F1C21B;  /* $support-warning, yellow-30 */
+
+  --button-disabled: #C6C6C6;  /* $button-disabled, gray-30 */
+  --on-color-disabled: #8D8D8D;  /* $text-on-color-disabled, gray-50 */
+  --button-secondary:        #393939;  /* $button-secondary, gray-80 */
+  --button-secondary-hover:  #4C4C4C;  /* $button-secondary-hover */
+  --button-secondary-active: #6F6F6F;  /* $button-secondary-active, gray-60 */
+  --danger-text: #DA1E28;  /* $text-error, red-60 */
+
+  /* The high-contrast surface a content switcher selects with. */
+  --inverse:      #393939;  /* $background-inverse, gray-80 */
+  --text-inverse: #FFFFFF;  /* $text-inverse */
+
+  --overlay: rgba(22, 22, 22, 0.5);  /* $overlay */
+
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23161616'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
+}
+
+/* Carbon Gray 100. */
+:root[data-theme="g100"] {
+  color-scheme: dark;
+
+  /* Layers */
+  --background:   #161616;  /* g100 $background, gray-100 */
+  --layer:        #262626;  /* g100 $layer-01, $field-01, gray-90 */
+  --layer-accent: #393939;  /* g100 $layer-accent-01, $layer-selected-01, gray-80 */
+
+  /* Borders */
+  --border-subtle: #393939;  /* g100 $border-subtle-01, gray-80 */
+  --border-strong: #6F6F6F;  /* g100 $border-strong-01, gray-60 */
+
+  /* Text and icons */
+  --text:         #F4F4F4;  /* g100 $text-primary, $icon-primary, gray-10 */
+  --text-second:  #C6C6C6;  /* g100 $text-secondary, gray-30 */
+  --text-helper:  #A8A8A8;  /* g100 $text-helper, gray-40 */
+  --text-place:   #6F6F6F;  /* g100 $text-placeholder, gray-60 */
+  --disabled:     rgba(244, 244, 244, 0.25);  /* g100 $text-disabled */
+
+  /* States on gray-100 and gray-90 */
+  --hover:  #353535;  /* g100 $background-hover, $layer-hover-01 */
+  --active: #525252;  /* g100 $background-active, $layer-active-01, gray-70 */
+
+  /* Pillar colour, taken lighter on a dark ground (D-043). */
+  --pillar-system:       #EE5396;  /* g100 magenta-50 */
+  --pillar-legislative:  #A56EFF;  /* g100 purple-50 */
+  --pillar-risk:         #F1C21B;  /* g100 yellow-30, $support-warning */
+  --pillar-requirements: #3DDBD9;  /* g100 teal-30 */
+
+  /* Interactive */
+  --accent:     #4589FF;  /* g100 $interactive, $border-interactive, blue-50 */
+  --focus:      #FFFFFF;  /* g100 $focus */
+  --link:       #78A9FF;  /* g100 $link-primary, blue-40 */
+  --link-hover: #A6C8FF;  /* g100 $link-primary-hover, blue-30 */
+  --support-info: #4589FF;  /* g100 $support-info, blue-50 */
+  --support-warning: #F1C21B;  /* g100 $support-warning, yellow-30 */
+
+  --button-disabled: #525252;  /* g100 $button-disabled, gray-70 */
+  --on-color-disabled: #8D8D8D;  /* g100 $text-on-color-disabled, gray-50 */
+  --button-secondary:        #6F6F6F;  /* g100 $button-secondary, gray-60 */
+  --button-secondary-hover:  #606060;  /* g100 $button-secondary-hover */
+  --button-secondary-active: #393939;  /* g100 $button-secondary-active, gray-80 */
+  --danger-text: #FF8389;  /* g100 $text-error, red-40 */
+
+  --inverse:      #F4F4F4;  /* g100 $background-inverse, gray-10 */
+  --text-inverse: #161616;  /* g100 $text-inverse, gray-100 */
+
+  --overlay: rgba(0, 0, 0, 0.65);  /* g100 $overlay */
+
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23f4f4f4'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E");
+}
+
+:root {
+  /* The Carbon button palette holds across themes. */
+  --button-primary:        #0F62FE;  /* $button-primary, blue-60 */
+  --button-primary-hover:  #0043CE;  /* blue-70 */
+  --button-primary-active: #002D9C;  /* blue-80 */
+  --danger:        #DA1E28;  /* $button-danger-primary, $support-error, red-60 */
+  --danger-hover:  #A2191F;  /* red-70 */
+  --danger-active: #750E13;  /* $button-danger-active, red-80 */
+  --text-on-color: #FFFFFF;  /* $text-on-color, $icon-on-color */
+
+  /* UI Shell. Carbon themes the shell g100 whatever theme the page carries. */
+  --shell:          #161616;  /* g100 $background, gray-100 */
+  --shell-hover:    #353535;  /* g100 $background-hover, gray-90 */
+  --shell-active:   #525252;  /* g100 $background-active, gray-70 */
+  --shell-selected: #393939;  /* g100 $background-selected, gray-80 */
+  --shell-border:   #393939;  /* g100 $border-subtle-00, gray-80 */
+  --shell-text:     #F4F4F4;  /* g100 $text-primary, $icon-primary, gray-10 */
+  --shell-disabled: rgba(244, 244, 244, 0.25);  /* g100 $text-disabled */
+  --shell-focus:    #FFFFFF;  /* g100 $focus */
+
+  --motion-fast: 70ms;  /* $duration-fast-01 */
+  --motion-standard: cubic-bezier(0.2, 0, 0.38, 0.9);  /* $motion-standard-productive */
+}
+
+/* ---------- Base ---------- */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: "IBM Plex Sans", Tahoma, sans-serif;
+  font-size: 14px;          /* $body-compact-01 */
+  line-height: 1.28572;     /* $body-compact-01, 18px */
+  letter-spacing: 0.16px;   /* $body-compact-01 */
+  color: var(--text);
+  background: var(--layer);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;          /* $code-01 */
+  letter-spacing: 0.32px;
+}
+
+/* Carbon focus: a 2px $focus ring, inset so it never enlarges a control. */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.shell-bar :focus-visible { outline-color: var(--shell-focus); }
+
+/* Carbon icons are filled, not stroked. */
+.icon {
+  width: 16px;   /* Carbon icon size 16 */
+  height: 16px;
+  flex: none;
+  fill: currentColor;
+}
+
+/* ---------- Shell bar ---------- */
+
+.shell-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 48px;             /* Carbon UI Shell header, $spacing-09 */
+  padding-left: 16px;       /* $spacing-05 */
+  color: var(--shell-text);
+  background: var(--shell);
+  border-bottom: 1px solid var(--shell-border);
+}
+
+.wordmark {
+  display: block;
+  color: inherit;
+  height: 18px;
+  aspect-ratio: 869 / 109;  /* the mark's own */
+  flex: none;
+  background: currentColor;
+  -webkit-mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
+  mask: url("assets/marks/wordmark.svg") no-repeat center / contain;
+}
+
+.shell-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
+
+/* Carbon shell actions are square and fill the header. */
+.shell-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: 48px;              /* $spacing-09 */
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.shell-action:hover:not(:disabled) { background: var(--shell-hover); }
+.shell-action:active:not(:disabled) { background: var(--shell-active); }
+.shell-action[aria-expanded="true"] { background: var(--shell-selected); }
+.shell-action:disabled { color: var(--shell-disabled); cursor: not-allowed; }
+
+/* ---------- Notices ---------- */
+
+/* Carbon inline notification: a layer with a coloured edge. Non-blocking. */
+.notices { flex: none; }
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;                /* $spacing-05 */
+  padding: 12px 16px;       /* $spacing-04, $spacing-05 */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--support-info);
+}
+.notice-warning { border-left-color: var(--support-warning); }
+.notice .icon { margin-top: 1px; }
+.notice-body { flex: 1; }
+.notice-title { font-weight: 600; margin-right: 8px; }  /* $heading-compact-01 */
+.notice-text { color: var(--text-second); }
+
+.notice-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  margin: -6px -8px -6px 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.notice-dismiss:hover { background: var(--hover); }
+.notice-dismiss:active { background: var(--active); }
+
+/* ---------- Workspace ---------- */
+
+.workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.pane-navigator {
+  flex: 0 0 var(--navigator-width, 320px);
+  min-width: 240px;
+}
+
+.column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pane-editor { flex: 1 1 auto; min-height: 120px; }
+.pane-relationships { flex: 0 0 var(--relationships-height, 280px); min-height: 120px; }
+
+.pane-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 40px;             /* $spacing-08 */
+  padding: 0 16px;          /* $spacing-05 */
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.pane-title {
+  font-size: 14px;          /* $heading-compact-01 */
+  font-weight: 600;
+  line-height: 1.28572;
+  letter-spacing: 0.16px;
+}
+
+.pane-body { flex: 1; overflow: auto; }
+
+/* ---------- Splitters ---------- */
+
+.splitter {
+  flex: none;
+  background: var(--layer);
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.splitter-vertical { width: 4px; cursor: col-resize; }
+.splitter-horizontal { height: 4px; cursor: row-resize; }
+.splitter:hover, .splitter:focus-visible { background: var(--accent); outline: none; }
+.splitter.dragging { background: var(--accent); }
+
+/* ---------- Overlay ---------- */
+
+/* The one place things above the page render. The container takes no space;
+   entries position themselves. Menus draw over dialogs, dialogs over
+   panels. */
+.overlay-root { position: fixed; top: 0; left: 0; z-index: 50; }
+.overlay-panel { z-index: 40; }
+.overlay-dialog { z-index: 60; }
+.overlay-menu { z-index: 80; }
+
+/* ---------- Menus ---------- */
+
+/* Carbon puts a shadow under a menu; the boundary here is a
+   $border-subtle-01 rule instead. */
+.dropdown {
+  position: fixed;
+  min-width: 176px;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 4px 0;           /* $spacing-02 */
+  background: var(--background);  /* $layer-02 */
+  border: 1px solid var(--border-subtle);
+}
+
+.menu-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  width: 100%;
+  min-height: 32px;         /* Carbon menu item sm, $spacing-07 */
+  font: inherit;            /* $body-compact-01 */
+  text-align: left;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0 16px;          /* $spacing-05 */
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.menu-entry:hover:not(:disabled) { background: var(--hover); }
+.menu-entry:active:not(:disabled) { background: var(--active); }
+.menu-entry:disabled { color: var(--disabled); cursor: not-allowed; }
+.menu-entry[aria-checked="true"] { background: var(--layer-accent); font-weight: 600; }
+
+/* ---------- Small viewport ---------- */
+
+.small-viewport {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--background);
+}
+
+/* The provisional floor is 1000px; finalised at the closing check. */
+@media (max-width: 999.98px) {
+  .small-viewport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;          /* $spacing-08 */
+  }
+}
+
+.small-viewport-panel { max-width: 420px; display: grid; gap: 16px; justify-items: start; }
+.small-viewport-panel h1 {
+  font-size: 20px;          /* $heading-03 */
+  line-height: 1.4;
+  font-weight: 400;
+}
+.small-viewport-panel p { color: var(--text-second); }
+.wordmark-page { color: var(--text); height: 16px; }

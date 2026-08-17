@@ -12,6 +12,7 @@ import { addEntity, addFolder, removeEntity, relate, updateEntity } from '../app
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const PROJECT_KEY = 'openconformity.project';
+const ASIDE_KEY = 'openconformity.project.aside';
 const THEME_KEY = 'openconformity.theme';
 
 /**
@@ -52,6 +53,7 @@ function blobIn(storage) {
   equal(store.selection(), null, 'and nothing selected');
   equal(store.canUndo(), false, 'and nothing to undo');
   equal(storage.read(PROJECT_KEY), null, 'opening the software writes nothing by itself');
+  equal(storage.read(ASIDE_KEY), null, 'and sets nothing aside');
 }
 
 // --- Commit: record, persist, notify -----------------------------------
@@ -178,6 +180,7 @@ function blobIn(storage) {
 
   const second = createStore({ storage });
   equal(second.restoration(), 'restored', 'the next session restores');
+  equal(storage.read(ASIDE_KEY), null, 'a successful restore sets nothing aside');
   equal(serialise(second.model()), serialise(first.model()), 'the same project, through the same serialisation the file format uses');
   equal(second.selection(), 'ELM-001', 'standing where the user stood');
   equal(second.isExpanded('F-1'), true, 'with the tree open where it was open');
@@ -213,11 +216,18 @@ function blobIn(storage) {
   const store = createStore({ storage });
   equal(store.restoration(), 'failed', 'the software states the previous session could not be restored');
   equal(store.model().nodes.size, 0, 'and stands on an empty project');
-  equal(storage.read(PROJECT_KEY), 'not json{', 'the blob is set aside, not deleted');
+  equal(storage.read(ASIDE_KEY), 'not json{', 'the failed blob is copied to the side key at failure time');
+  equal(storage.read(PROJECT_KEY), 'not json{', 'and the project key is not deleted either');
   equal(store.theme(), 'g100', 'the theme beside it still applies');
 
   store.commit((model) => addEntity(model, 'ELM'));
-  ok(storage.read(PROJECT_KEY).startsWith('{'), 'the next successful persist overwrites it');
+  ok(storage.read(PROJECT_KEY).startsWith('{'), 'the next successful persist overwrites the project key');
+  equal(storage.read(ASIDE_KEY), 'not json{', 'while the side copy survives it');
+
+  storage.setItem(PROJECT_KEY, 'worse json{');
+  const second = createStore({ storage });
+  equal(second.restoration(), 'failed', 'a later failure fails the restore again');
+  equal(storage.read(ASIDE_KEY), 'worse json{', 'and replaces the side copy: it survives until the next failure');
 }
 
 // --- A well-formed blob that fails the gates ----------------------------
@@ -227,7 +237,8 @@ function blobIn(storage) {
   const storage = fakeStorage({ [PROJECT_KEY]: raw });
   const store = createStore({ storage });
   equal(store.restoration(), 'failed', 'a blob refused by the loader fails the restore');
-  equal(storage.read(PROJECT_KEY), raw, 'and is set aside untouched');
+  equal(storage.read(ASIDE_KEY), raw, 'and is copied to the side key too');
+  equal(storage.read(PROJECT_KEY), raw, 'with the project key untouched');
   equal(typeof store.restoration(), 'string', 'the store reports a state, never a file refusal');
 }
 
