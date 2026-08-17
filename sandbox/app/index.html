@@ -29,6 +29,8 @@
     <symbol id="i-close" viewBox="0 0 32 32"><path d="M17.4141 16 24 9.4141 22.5859 8 16 14.5859 9.4143 8 8 9.4141 14.5859 16 8 22.5859 9.4143 24 16 17.4141 22.5859 24 24 22.5859 17.4141 16z"/></symbol>
     <symbol id="i-information" viewBox="0 0 16 16"><path d="M8.5 11 8.5 6.5 6.5 6.5 6.5 7.5 7.5 7.5 7.5 11 6 11 6 12 10 12 10 11z"/><path d="M8,3.5c-0.4,0-0.8,0.3-0.8,0.8S7.6,5,8,5c0.4,0,0.8-0.3,0.8-0.8S8.4,3.5,8,3.5z"/><path d="M8,15c-3.9,0-7-3.1-7-7s3.1-7,7-7s7,3.1,7,7S11.9,15,8,15z M8,2C4.7,2,2,4.7,2,8s2.7,6,6,6s6-2.7,6-6S11.3,2,8,2z"/></symbol>
     <symbol id="i-warning" viewBox="0 0 16 16"><path d="M14.5,14h-13c-0.2,0-0.3-0.1-0.4-0.2c-0.1-0.2-0.1-0.3,0-0.5l6.5-12C7.7,1,8,0.9,8.2,1.1c0.1,0,0.2,0.1,0.2,0.2l6.5,12 c0.1,0.2,0.1,0.3,0,0.5C14.9,13.9,14.7,14,14.5,14z M2.3,13h11.3L8,2.5L2.3,13z"/><path d="M7.5 6H8.5V9.5H7.5z"/><path d="M8,10.8c-0.4,0-0.8,0.3-0.8,0.8s0.3,0.8,0.8,0.8c0.4,0,0.8-0.3,0.8-0.8S8.4,10.8,8,10.8z"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"/></symbol>
   </defs>
 </svg>
 
@@ -52,6 +54,14 @@
 
   <section class="pane pane-navigator" id="pane-navigator" aria-label="Navigator">
     <div class="pane-head"><h2 class="pane-title">Navigator</h2></div>
+    <div class="pane-toolbar">
+      <button type="button" class="ghost-button" id="toolbar-new" aria-haspopup="menu" aria-expanded="false">New</button>
+      <button type="button" class="ghost-button" id="toolbar-relate">Relate…</button>
+      <button type="button" class="ghost-button ghost-danger" id="toolbar-delete">Delete</button>
+      <span class="toolbar-spacer"></span>
+      <button type="button" class="ghost-button" id="toolbar-undo">Undo</button>
+      <button type="button" class="ghost-button" id="toolbar-redo">Redo</button>
+    </div>
     <div class="pane-body" id="navigator-body"></div>
   </section>
 

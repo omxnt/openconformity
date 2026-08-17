@@ -154,6 +154,9 @@
 
   --motion-fast: 70ms;  /* $duration-fast-01 */
   --motion-standard: cubic-bezier(0.2, 0, 0.38, 0.9);  /* $motion-standard-productive */
+
+  --row: 24px;     /* $spacing-06, Carbon TreeView xs node */
+  --indent: 16px;  /* $spacing-05, Carbon TreeView indent per level */
 }
 
 /* ---------- Base ---------- */
@@ -322,6 +325,215 @@ body {
 }
 
 .pane-body { flex: 1; overflow: auto; }
+
+.pane-empty {
+  color: var(--text-helper);
+  padding: 16px;            /* $spacing-05 */
+}
+
+/* ---------- Toolbar ---------- */
+
+.pane-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;         /* $spacing-02, $spacing-03 */
+  border-bottom: 1px solid var(--border-subtle);
+}
+.toolbar-spacer { flex: 1; }
+
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: 32px;             /* Carbon ghost button sm, $spacing-07 */
+  padding: 0 12px;
+  font: inherit;
+  color: var(--link);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.ghost-button:hover:not(:disabled) { background: var(--hover); }
+.ghost-button:active:not(:disabled) { background: var(--active); }
+.ghost-button:disabled { color: var(--disabled); cursor: not-allowed; }
+.ghost-danger:not(:disabled) { color: var(--danger-text); }
+
+/* ---------- Tree ---------- */
+
+.tree { padding: 4px 0; min-height: 100%; }
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: var(--row);
+  padding-right: 16px;      /* $spacing-05 */
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tree-row:hover { background: var(--hover); }
+.tree-row.selected { background: var(--layer-accent); }
+.tree-row.drop-target { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.twisty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--text-second);
+}
+
+.designation { color: var(--text-second); }
+.tree-row .row-title,
+.rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Editor ---------- */
+
+.editor-subhead {
+  display: flex;
+  align-items: center;
+  gap: 16px;                /* $spacing-05 */
+  padding: 8px 8px 8px 16px;  /* $spacing-03, $spacing-05 */
+  border-bottom: 1px solid var(--border-subtle);
+}
+.editor-subhead-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.subhead-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.editor-subhead-actions { display: flex; gap: 2px; }
+
+.field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
+.field:last-child { padding-bottom: 16px; }
+
+.field-label {
+  display: block;
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+  margin-bottom: 4px;       /* $spacing-02 */
+}
+
+.field-value { min-height: 18px; }
+.field-value.multiline { white-space: pre-wrap; }
+.field-empty { color: var(--text-place); }
+
+.field-input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--text);
+  background: var(--layer);  /* $field-01 */
+  border: none;
+  border-bottom: 1px solid var(--border-strong);
+  padding: 7px 16px;        /* Carbon text input sm */
+  resize: vertical;
+}
+.field-input:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+select.field-input {
+  appearance: none;
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* ---------- Relationships ---------- */
+
+.rel-section { padding: 8px 0; }
+.rel-heading {
+  font-size: 12px;          /* $label-01 */
+  font-weight: 400;
+  letter-spacing: 0.32px;
+  color: var(--text-helper);
+  padding: 4px 16px;        /* $spacing-02, $spacing-05 */
+}
+.rel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: var(--row);
+  padding: 0 16px;          /* $spacing-05 */
+  white-space: nowrap;
+  overflow: hidden;
+}
+.rel-label { color: var(--text-second); font-style: normal; }
+
+/* ---------- Dialogs ---------- */
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+}
+
+.dialog {
+  width: 480px;
+  max-width: calc(100vw - 64px);
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.dialog-title {
+  font-size: 20px;          /* $heading-03 */
+  line-height: 1.4;
+  font-weight: 400;
+  padding: 16px 16px 8px;   /* $spacing-05, $spacing-03 */
+}
+
+.dialog-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0 16px 24px;     /* $spacing-05, $spacing-06 */
+  color: var(--text-second);
+}
+.dialog-body .field { padding: 12px 0 0; }
+
+.doomed-list {
+  list-style: none;
+  margin-top: 12px;         /* $spacing-04 */
+}
+.doomed-list li { padding: 2px 0; color: var(--text); }
+
+.dialog-actions { display: flex; flex: none; }
+
+.dialog-button {
+  flex: 1;
+  height: 48px;             /* Carbon modal button, $spacing-09 */
+  font: inherit;
+  text-align: left;
+  padding: 0 16px;          /* $spacing-05 */
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.button-primary { color: var(--text-on-color); background: var(--button-primary); }
+.button-primary:hover { background: var(--button-primary-hover); }
+.button-primary:active { background: var(--button-primary-active); }
+.button-secondary { color: var(--text-on-color); background: var(--button-secondary); }
+.button-secondary:hover { background: var(--button-secondary-hover); }
+.button-secondary:active { background: var(--button-secondary-active); }
+.button-danger { color: var(--text-on-color); background: var(--danger); }
+.button-danger:hover { background: var(--danger-hover); }
+.button-danger:active { background: var(--danger-active); }
 
 /* ---------- Splitters ---------- */
 

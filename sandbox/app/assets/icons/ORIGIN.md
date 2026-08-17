@@ -26,3 +26,5 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-close` | `close` | 32 | `close.svg` |
 | `i-information` | `information` | 16 | `information.svg` |
 | `i-warning` | `warning--alt` | 16 | `warning--alt.svg` |
+| `i-chevron-right` | `chevron--right` | 16 | `chevron--right.svg` |
+| `i-chevron-down` | `chevron--down` | 16 | `chevron--down.svg` |
