@@ -73,10 +73,4 @@ There is no automated verification. Run a local server with `python3 -m http.ser
 
 - **Push back on bad instructions:** If the user is wrong, or a better approach exists, say so and wait for a go-ahead.
 
-- **Ask when it's unclear:** If the answer isn't in the request, the code, or the documentation, it's the user's to decide.
-
-- **Add nothing the task doesn't need:** If something more is genuinely needed, stop and say so.
-
-- **Don't invent conventions:** None exist yet for code style. When one is needed, ask.
-
 - **Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
