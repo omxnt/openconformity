@@ -155,6 +155,7 @@ export function dropZone(ratio) {
  * @param {HTMLElement} context.filterClear
  * @param {Array<import('./actions.js').Action>} context.actions
  * @param {(id: string|null) => void} context.onSelect
+ * @param {(id: string|null) => void} context.onActivate
  * @param {(id: string, parentId: string|null) => void} context.onFile
  * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
  * @param {(id: string|null, at: { x: number, y: number }) => void} context.onContextMenu
@@ -168,6 +169,7 @@ export function createNavigator({
   filterClear,
   actions,
   onSelect,
+  onActivate,
   onFile,
   onPlace,
   onContextMenu,
@@ -268,6 +270,7 @@ export function createNavigator({
     );
 
     rowElement.addEventListener('click', () => onSelect(null));
+    rowElement.addEventListener('dblclick', () => onActivate(null));
     rowElement.addEventListener('contextmenu', (event) => {
       event.preventDefault();
       onContextMenu(null, { x: event.clientX, y: event.clientY });
@@ -338,6 +341,10 @@ export function createNavigator({
     rowElement.addEventListener('click', () => {
       if (pickable) store.togglePick(row.id);
       else onSelect(row.id);
+    });
+    rowElement.addEventListener('dblclick', () => {
+      if (picking.subject !== null) return;
+      onActivate(row.id);
     });
     rowElement.addEventListener('contextmenu', (event) => {
       event.preventDefault();
@@ -446,6 +453,12 @@ export function createNavigator({
     onContextMenu(null, { x: event.clientX, y: event.clientY });
   });
 
+  /** Run an action from the one list, exactly as its button would. */
+  function runAction(id) {
+    const action = actions.find((offered) => offered.id === id);
+    if (action && action.enabled()) action.run({});
+  }
+
   container.addEventListener('keydown', (event) => {
     const rows = visibleRows(store.model(), store.isExpanded, store.hasProject(), filter);
     if (rows.length === 0) return;
@@ -453,7 +466,10 @@ export function createNavigator({
     const index = rows.findIndex((row) => row.id === selection);
     const row = index >= 0 ? rows[index] : null;
 
-    if (event.key === 'ArrowDown') {
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault();
+      runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
+    } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (index < 0) onSelect(rows[0].id);
       else if (rows[index + 1]) onSelect(rows[index + 1].id);
@@ -468,6 +484,23 @@ export function createNavigator({
       event.preventDefault();
       if (row.expanded) store.setExpanded(row.id, false);
       else onSelect(row.node.parent);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      onSelect(rows[0].id);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      onSelect(rows[rows.length - 1].id);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      if (row === null) return;
+      event.preventDefault();
+      onActivate(row.id);
+    } else if (event.key === 'Delete') {
+      event.preventDefault();
+      runAction('delete');
+    } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      event.preventDefault();
+      const at = container.querySelector('.tree-row.selected')?.getBoundingClientRect();
+      onContextMenu(selection, { x: (at?.left ?? 0) + 24, y: at?.bottom ?? 0 });
     }
   });
 

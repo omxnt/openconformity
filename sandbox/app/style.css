@@ -535,6 +535,14 @@ select.field-input {
   background-position: right 12px center;
   padding-right: 40px;
 }
+/* A list-sized select is a list, not a closed field. */
+select.field-input[size] {
+  appearance: auto;
+  background-image: none;
+  height: auto;
+  padding: 4px;             /* $spacing-02 */
+  white-space: pre;
+}
 
 /* ---------- Relationships ---------- */
 
@@ -820,6 +828,14 @@ select.field-input {
   color: var(--text-helper);
   padding: 8px 16px 4px;    /* $spacing-03, $spacing-05, $spacing-02 */
 }
+
+.menu-hint {
+  color: var(--text-second);
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  padding-left: 24px;       /* $spacing-06 */
+}
+.menu-entry:disabled .menu-hint { color: var(--disabled); }
 
 /* ---------- Small viewport ---------- */
 

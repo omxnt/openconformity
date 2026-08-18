@@ -8,10 +8,10 @@
  */
 
 import './shim.js';
-import { createFlows, relationshipOptions, relatedTypeOffer } from '../app/flows.js';
+import { createFlows, relationshipOptions, relatedTypeOffer, moveTargets } from '../app/flows.js';
 import { createStore } from '../app/store.js';
 import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/metamodel.js';
-import { createModel, addEntity, addFolder, relate, nodeOf } from '../app/model.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, nodeOf } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 function fakeStorage() {
@@ -296,6 +296,91 @@ function offered(model, subjectId) {
   equal(nodeOf(store.model(), 'ELM-002'), null, 'cancel removes the entity');
   equal(store.model().relationships.size, 1, 'and its relationship, leaving the earlier one');
   equal(store.canRedo(), false, 'with no residue');
+}
+
+// --- Every legal destination -------------------------------------------
+
+{
+  const model = createModel();
+  addFolder(model, 'Zone');
+  addEntity(model, 'ELM', { parent: 'F-1' });
+  updateEntity(model, 'ELM-001', { title: 'Assembly' });
+  addEntity(model, 'ELM', { parent: 'ELM-001' });
+  addEntity(model, 'HAZ');
+
+  deepEqual(
+    moveTargets(model, 'ELM-002').map((target) => [target.parentId, target.depth]),
+    [[null, 0], ['F-1', 1], ['HAZ-001', 1]],
+    'the offer is the root and every holder the model allows, in tree order'
+  );
+  ok(
+    !moveTargets(model, 'ELM-002').some((target) => target.parentId === 'ELM-001'),
+    'never the place it already stands'
+  );
+  deepEqual(
+    moveTargets(model, 'F-1').map((target) => target.parentId),
+    ['HAZ-001'],
+    'never itself, nothing inside itself, and not the root it already stands at'
+  );
+  deepEqual(moveTargets(model, 'ELM-9'), [], 'a missing node goes nowhere');
+  equal(moveTargets(model, 'ELM-002')[0].label, 'Untitled', 'the unnamed root offers itself as Untitled');
+  deepEqual(
+    moveTargets(model, 'HAZ-001').map((target) => target.label),
+    ['Zone', 'ELM-001  Assembly', 'ELM-002'],
+    'holders read as the tree reads them, and a root dweller is not offered the root'
+  );
+}
+
+// --- Activation and the pointerless filing path ------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  const dialogs = {
+    confirm: async () => true,
+    prompt: async (spec) => {
+      asked.push(['prompt', spec.title]);
+      return null;
+    },
+    choose: async (spec) => {
+      asked.push(['choose', spec.title]);
+      return '0';
+    },
+    open: async () => null,
+  };
+  let editsBegun = 0;
+  const editor = {
+    endEdit() {},
+    beginEdit() {
+      editsBegun += 1;
+    },
+    hasUnconfirmedEdit: () => false,
+    editing: () => false,
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, getActions: () => [], fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+
+  await flows.activateNode('ELM-001');
+  equal(store.selection(), 'ELM-001', 'activation selects first');
+  equal(editsBegun, 1, 'an entity activates into the editor');
+
+  await flows.activateNode('F-1');
+  deepEqual(asked.pop(), ['prompt', 'Rename folder'], 'a folder activates into its name');
+
+  await flows.activateNode(null);
+  deepEqual(asked.pop(), ['prompt', 'Rename project'], 'the project row activates into its own');
+
+  store.select('ELM-001');
+  await flows.moveToSelection();
+  deepEqual(asked.pop(), ['choose', 'Move to'], 'Move to asks with a list');
+  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'and files to the chosen destination');
+
+  dialogs.choose = async () => null;
+  await flows.moveToSelection();
+  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'cancelling moves nothing');
 }
 
 summary('test-flows');

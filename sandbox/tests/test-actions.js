@@ -68,8 +68,13 @@ function fakeStorage() {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['new-project', 'open', 'save', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'delete', 'undo', 'redo'],
+    ['new-project', 'open', 'save', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
+  );
+  deepEqual(
+    Object.fromEntries(actions.filter((action) => action.hint).map((action) => [action.id, action.hint])),
+    { 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', delete: 'Del' },
+    'the key hints ride on the actions the keys reach'
   );
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
   deepEqual(
@@ -102,6 +107,7 @@ function fakeStorage() {
       rename: false,
       'move-up': false,
       'move-down': false,
+      'move-to': false,
       delete: false,
       undo: false,
       redo: false,
@@ -117,6 +123,7 @@ function fakeStorage() {
   equal(one['new-related'], true, 'though a related entity can always be newly made');
   equal(one['move-up'], false, 'an only child moves neither way');
   equal(one['move-down'], false, 'either way');
+  equal(one['move-to'], false, 'and alone at the root it has nowhere else to file');
   equal(one.undo, true, 'a change can be undone');
   equal(one.rename, false, 'an entity is not renamed; its title is edited');
 

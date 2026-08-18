@@ -47,6 +47,7 @@ createNavigator({
   filterClear: document.getElementById('navigator-filter-clear'),
   actions,
   onSelect: (id) => flows.selectNode(id),
+  onActivate: (id) => flows.activateNode(id),
   onFile: (id, parentId) => flows.fileNode(id, parentId),
   onPlace: (id, targetId, position) => flows.placeNode(id, targetId, position),
   onContextMenu: (id, at) => flows.openContextMenu(id, at),

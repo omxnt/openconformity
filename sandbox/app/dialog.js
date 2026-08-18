@@ -59,7 +59,11 @@ export function createDialogs({ overlay }) {
       });
 
       backdrop.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && event.target instanceof HTMLInputElement && defaultButton) {
+        if (
+          event.key === 'Enter' &&
+          (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) &&
+          defaultButton
+        ) {
           event.preventDefault();
           defaultButton.click();
           return;
@@ -149,5 +153,42 @@ export function createDialogs({ overlay }) {
     return value === true;
   }
 
-  return { open, confirm, prompt };
+  /**
+   * A one-list question: resolves the chosen option's value, or null when
+   * cancelled or dismissed. Enter answers with the highlighted option.
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} spec.label
+   * @param {Array<{ value: string, label: string }>} spec.options
+   * @param {string} [spec.value]
+   * @param {string} [spec.confirmLabel]
+   * @returns {Promise<string|null>}
+   */
+  async function choose({ title, label, options, value, confirmLabel = 'Choose' }) {
+    const select = el(
+      'select',
+      {
+        className: 'field-input',
+        attributes: { id: 'choose-field', size: String(Math.min(Math.max(options.length, 4), 12)) },
+      },
+      options.map((option) => el('option', { text: option.label, attributes: { value: option.value } }))
+    );
+    if (value !== undefined) select.value = value;
+    const body = el('div', { className: 'field' }, [
+      el('label', { className: 'field-label', text: label, attributes: { for: 'choose-field' } }),
+      select,
+    ]);
+    const answer = await open({
+      title,
+      body,
+      actions: [
+        { label: 'Cancel', value: null, kind: 'secondary' },
+        { label: confirmLabel, value: 'confirmed', kind: 'primary', default: true },
+      ],
+      initialFocus: select,
+    });
+    return answer === 'confirmed' ? select.value : null;
+  }
+
+  return { open, confirm, prompt, choose };
 }

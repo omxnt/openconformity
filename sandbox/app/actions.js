@@ -7,7 +7,7 @@
  */
 
 import { nodeOf, childrenOf } from './model.js';
-import { relationshipOptions, relatedTypeOffer } from './flows.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets } from './flows.js';
 
 /**
  * Whether a node has a sibling above it to change places with.
@@ -45,6 +45,7 @@ export function canMoveDown(model, id) {
  * @property {boolean} [menubar]  whether the shell's Project menu offers it
  * @property {boolean} [menu]   whether running it opens a menu
  * @property {boolean} [danger]
+ * @property {string} [hint]    the right-aligned key hint a menu shows
  * @property {() => boolean} enabled
  * @property {(invocation: { anchor?: HTMLElement, at?: { x: number, y: number } }) => void} run
  */
@@ -165,6 +166,7 @@ export function createActions({ store, flows }) {
       group: 'arrange',
       toolbar: true,
       context: true,
+      hint: 'Alt ↑',
       enabled: () => canMoveUp(store.model(), store.selection()),
       run: () => flows.moveUp(),
     },
@@ -174,8 +176,18 @@ export function createActions({ store, flows }) {
       group: 'arrange',
       toolbar: true,
       context: true,
+      hint: 'Alt ↓',
       enabled: () => canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
+    },
+    {
+      id: 'move-to',
+      label: 'Move to…',
+      group: 'arrange',
+      toolbar: false,
+      context: true,
+      enabled: () => selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
+      run: () => flows.moveToSelection(),
     },
     {
       id: 'delete',
@@ -184,6 +196,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       danger: true,
+      hint: 'Del',
       enabled: () => selected() !== null,
       run: () => flows.deleteSelection(),
     },

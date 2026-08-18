@@ -25,6 +25,7 @@ import {
   relate,
   unrelate,
   file,
+  canFile,
   placeBeside,
   childrenOf,
   nodeOf,
@@ -117,6 +118,32 @@ export function relatedTypeOffer(model, subjectId) {
 function designated(entity) {
   const title = (entity.attributes.title ?? '').trim();
   return title ? `${entity.id}  ${title}` : entity.id;
+}
+
+/**
+ * Every place a node could be filed, for the Move to… dialog: the top of
+ * the tree and every folder and entity the model allows, in the order the
+ * tree draws them — the same ground dragging covers, reachable without a
+ * pointer.
+ * @param {import('./model.js').Model} model
+ * @param {string|null} id
+ * @returns {Array<{ parentId: string|null, label: string, depth: number }>}
+ */
+export function moveTargets(model, id) {
+  if (nodeOf(model, id) === null) return [];
+  const targets = [];
+  const offer = (parentId, label, depth) => {
+    if (canFile(model, id, parentId).ok) targets.push({ parentId, label, depth });
+  };
+  offer(null, model.name.trim() || 'Untitled', 0);
+  const walk = (parentId, depth) => {
+    for (const child of childrenOf(model, parentId)) {
+      offer(child.id, child.kind === 'folder' ? child.name : designated(child), depth);
+      walk(child.id, depth + 1);
+    }
+  };
+  walk(null, 1);
+  return targets;
 }
 
 /**
@@ -289,6 +316,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
         group: PILLARS[type.pillar],
         icon: TYPE_ICONS[type.code],
         pillar: type.pillar,
+        hint: type.code,
         onPick: () => createEntity(type.code),
       })),
       onClose: () => {
@@ -317,13 +345,10 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
 
     const items = offer.flatMap(({ code, forms }) => {
       const type = ENTITY_TYPES[code];
-      const shared = { group: PILLARS[type.pillar], icon: TYPE_ICONS[code], pillar: type.pillar };
-      if (forms.length === 1) {
-        return [{ ...shared, label: type.name, onPick: () => createRelated(subjectId, code, forms[0]) }];
-      }
+      const shared = { label: type.name, group: PILLARS[type.pillar], icon: TYPE_ICONS[code], pillar: type.pillar };
       return forms.map((form) => ({
         ...shared,
-        label: `${type.name} — ${RELATIONSHIP_TYPES[form.typeId].label}${form.direction === 'incoming' ? ' (incoming)' : ''}`,
+        hint: `${RELATIONSHIP_TYPES[form.typeId].label}${form.direction === 'incoming' ? ' (incoming)' : ''}`,
         onPick: () => createRelated(subjectId, code, form),
       }));
     });
@@ -373,6 +398,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
         .filter((action) => action.context)
         .map((action) => ({
           label: action.label,
+          hint: action.hint,
           danger: action.danger,
           disabled: !action.enabled(),
           onPick: () => action.run({ at }),
@@ -420,6 +446,46 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     const index = siblings.findIndex((sibling) => sibling.id === id);
     if (index < 0 || index >= siblings.length - 1) return;
     store.commit((model) => placeBeside(model, id, siblings[index + 1].id, 'after'));
+  }
+
+  /**
+   * File the selection somewhere chosen from a list of every legal
+   * destination: the pointerless filing path.
+   */
+  async function moveToSelection() {
+    const id = store.selection();
+    const targets = moveTargets(store.model(), id);
+    if (targets.length === 0) return;
+    const value = await dialogs.choose({
+      title: 'Move to',
+      label: 'Destination',
+      options: targets.map((target, index) => ({
+        value: String(index),
+        label: `${' '.repeat(target.depth * 4)}${target.label}`,
+      })),
+      value: '0',
+      confirmLabel: 'Move',
+    });
+    if (value === null) return;
+    const target = targets[Number(value)];
+    if (target) store.commit((model) => file(model, id, target.parentId));
+  }
+
+  /**
+   * Open what the row holds: an entity opens for editing, a folder opens
+   * its name, the project row its own. Reached by Enter, Space, or a
+   * double click; the selection moves there first, guarded.
+   * @param {string|null} id
+   */
+  async function activateNode(id) {
+    if (!(await selectNode(id))) return;
+    const node = nodeOf(store.model(), store.selection());
+    if (node === null) {
+      if (store.hasProject() && store.selection() === null) await renameProject();
+      return;
+    }
+    if (node.kind === 'entity') editor.beginEdit();
+    else await renameSelection();
   }
 
   /**
@@ -728,6 +794,8 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     placeNode,
     moveUp,
     moveDown,
+    moveToSelection,
+    activateNode,
     saveEdit,
     cancelEdit,
     deleteSelection,

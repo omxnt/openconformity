@@ -12,6 +12,7 @@ import { el, icon } from './dom.js';
  * @property {string} [group]    a heading over consecutive items sharing it
  * @property {string} [icon]     a sprite symbol drawn before the label
  * @property {string} [pillar]   tints the icon with the pillar's colour
+ * @property {string} [hint]     a right-aligned hint: a key, a code, a form
  * @property {boolean} [danger]
  * @property {boolean} [disabled]
  * @property {boolean} [checked]  renders the item as a radio entry
@@ -64,6 +65,7 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
       const button = el('button', { className: `menu-entry${item.danger ? ' danger' : ''}`, attributes }, [
         ...(item.icon ? [icon(item.icon, item.pillar)] : []),
         el('span', { className: 'menu-entry-label', text: item.label }),
+        ...(item.hint ? [el('span', { className: 'menu-hint', text: item.hint })] : []),
       ]);
       if (item.disabled) button.disabled = true;
       button.addEventListener('click', () => {
