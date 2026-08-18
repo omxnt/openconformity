@@ -19,129 +19,53 @@
     "attributes": {
       "description": "The project's attribute values, keyed by attribute.",
       "type": "object",
-      "propertyNames": {
-        "minLength": 1
-      },
-      "additionalProperties": {
-        "type": "string"
-      }
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "type": "string" }
     },
     "counters": {
       "description": "The next identifier number to issue, per entity type code and F for folders.",
       "type": "object",
       "properties": {
-        "LEG": {
-          "$ref": "#/$defs/counter"
-        },
-        "HST": {
-          "$ref": "#/$defs/counter"
-        },
-        "OSP": {
-          "$ref": "#/$defs/counter"
-        },
-        "CAS": {
-          "$ref": "#/$defs/counter"
-        },
-        "NTB": {
-          "$ref": "#/$defs/counter"
-        },
-        "ESR": {
-          "$ref": "#/$defs/counter"
-        },
-        "HSR": {
-          "$ref": "#/$defs/counter"
-        },
-        "OSR": {
-          "$ref": "#/$defs/counter"
-        },
-        "REQ": {
-          "$ref": "#/$defs/counter"
-        },
-        "VER": {
-          "$ref": "#/$defs/counter"
-        },
-        "HAZ": {
-          "$ref": "#/$defs/counter"
-        },
-        "SCN": {
-          "$ref": "#/$defs/counter"
-        },
-        "PRM": {
-          "$ref": "#/$defs/counter"
-        },
-        "SAF": {
-          "$ref": "#/$defs/counter"
-        },
-        "ELM": {
-          "$ref": "#/$defs/counter"
-        },
-        "ACT": {
-          "$ref": "#/$defs/counter"
-        },
-        "TSK": {
-          "$ref": "#/$defs/counter"
-        },
-        "PHS": {
-          "$ref": "#/$defs/counter"
-        },
-        "F": {
-          "$ref": "#/$defs/counter"
-        }
+        "LEG": { "$ref": "#/$defs/counter" },
+        "HST": { "$ref": "#/$defs/counter" },
+        "OSP": { "$ref": "#/$defs/counter" },
+        "CAS": { "$ref": "#/$defs/counter" },
+        "NTB": { "$ref": "#/$defs/counter" },
+        "ESR": { "$ref": "#/$defs/counter" },
+        "HSR": { "$ref": "#/$defs/counter" },
+        "OSR": { "$ref": "#/$defs/counter" },
+        "REQ": { "$ref": "#/$defs/counter" },
+        "VER": { "$ref": "#/$defs/counter" },
+        "HAZ": { "$ref": "#/$defs/counter" },
+        "SCN": { "$ref": "#/$defs/counter" },
+        "PRM": { "$ref": "#/$defs/counter" },
+        "SAF": { "$ref": "#/$defs/counter" },
+        "ELM": { "$ref": "#/$defs/counter" },
+        "ACT": { "$ref": "#/$defs/counter" },
+        "TSK": { "$ref": "#/$defs/counter" },
+        "PHS": { "$ref": "#/$defs/counter" },
+        "F": { "$ref": "#/$defs/counter" }
       },
-      "required": [
-        "LEG",
-        "HST",
-        "OSP",
-        "CAS",
-        "NTB",
-        "ESR",
-        "HSR",
-        "OSR",
-        "REQ",
-        "VER",
-        "HAZ",
-        "SCN",
-        "PRM",
-        "SAF",
-        "ELM",
-        "ACT",
-        "TSK",
-        "PHS",
-        "F"
-      ],
+      "required": ["LEG", "HST", "OSP", "CAS", "NTB", "ESR", "HSR", "OSR", "REQ", "VER", "HAZ", "SCN", "PRM", "SAF", "ELM", "ACT", "TSK", "PHS", "F"],
       "additionalProperties": false
     },
     "folders": {
       "description": "The folders of the navigator tree.",
       "type": "array",
-      "items": {
-        "$ref": "#/$defs/folder"
-      }
+      "items": { "$ref": "#/$defs/folder" }
     },
     "entities": {
       "description": "The entities of the model.",
       "type": "array",
-      "items": {
-        "$ref": "#/$defs/entity"
-      }
+      "items": { "$ref": "#/$defs/entity" }
     },
     "relationships": {
       "description": "The relationships between entities.",
       "type": "array",
-      "items": {
-        "$ref": "#/$defs/relationship"
-      }
+      "items": { "$ref": "#/$defs/relationship" }
     }
   },
-  "required": [
-    "format",
-    "schemaVersion",
-    "name",
-    "counters",
-    "folders",
-    "entities",
-    "relationships"
-  ],
+  "required": ["format", "schemaVersion", "name", "counters", "folders", "entities", "relationships"],
   "additionalProperties": false,
   "$defs": {
     "entityId": {
@@ -161,10 +85,7 @@
     },
     "parent": {
       "description": "The identifier of the folder or entity this one is filed in, or null at the top of the tree.",
-      "type": [
-        "string",
-        "null"
-      ],
+      "type": ["string", "null"],
       "pattern": "^((LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}|F-[0-9]+)$"
     },
     "folder": {
@@ -181,28 +102,17 @@
           "type": "string",
           "minLength": 1
         },
-        "parent": {
-          "$ref": "#/$defs/parent"
-        },
-        "order": {
-          "$ref": "#/$defs/order"
-        }
+        "parent": { "$ref": "#/$defs/parent" },
+        "order": { "$ref": "#/$defs/order" }
       },
-      "required": [
-        "id",
-        "name",
-        "parent",
-        "order"
-      ],
+      "required": ["id", "name", "parent", "order"],
       "additionalProperties": false
     },
     "entity": {
       "description": "An entity of the model.",
       "type": "object",
       "properties": {
-        "id": {
-          "$ref": "#/$defs/entityId"
-        },
+        "id": { "$ref": "#/$defs/entityId" },
         "type": {
           "description": "The entity type code.",
           "enum": [
@@ -226,30 +136,16 @@
             "PHS"
           ]
         },
-        "parent": {
-          "$ref": "#/$defs/parent"
-        },
-        "order": {
-          "$ref": "#/$defs/order"
-        },
+        "parent": { "$ref": "#/$defs/parent" },
+        "order": { "$ref": "#/$defs/order" },
         "attributes": {
           "description": "The entity's attribute values, keyed by attribute.",
           "type": "object",
-          "propertyNames": {
-            "minLength": 1
-          },
-          "additionalProperties": {
-            "type": "string"
-          }
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "type": "string" }
         }
       },
-      "required": [
-        "id",
-        "type",
-        "parent",
-        "order",
-        "attributes"
-      ],
+      "required": ["id", "type", "parent", "order", "attributes"],
       "additionalProperties": false
     },
     "relationship": {
@@ -314,11 +210,7 @@
           "$ref": "#/$defs/entityId"
         }
       },
-      "required": [
-        "type",
-        "source",
-        "target"
-      ],
+      "required": ["type", "source", "target"],
       "additionalProperties": false
     }
   }
