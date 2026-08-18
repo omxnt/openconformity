@@ -32,7 +32,8 @@ import {
   canRelate,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
-import { serialise, openProject, filenameFor } from './files.js';
+import { serialise, openProject, loadProject, filenameFor } from './files.js';
+import { EXAMPLE_PROJECT } from './example.js';
 import { TYPE_ICONS } from './icons.js';
 import { openMenu } from './menu.js';
 import { el } from './dom.js';
@@ -708,6 +709,26 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
   }
 
   /**
+   * Load the bundled example project. It rides with the software as a
+   * file-shaped object and goes through the same gates as a file the
+   * user picked, so the example cannot drift from the format: a schema
+   * it no longer passes fails here, and fails the test that pins it,
+   * before it misleads anyone.
+   */
+  async function loadExample() {
+    if (!(await confirmDiscard())) return;
+    if (!(await confirmDiscardProject('Discard and load the example'))) return;
+
+    const result = loadProject(EXAMPLE_PROJECT);
+    if (!result.ok) {
+      await presentRefusal(result);
+      return;
+    }
+    endEditSession();
+    store.replaceProject(result.model);
+  }
+
+  /**
    * Save the project as a downloaded file, named after the project, and
    * point the saved state at what was written.
    */
@@ -826,6 +847,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     removeRelationship,
     newProject,
     openProjectFlow,
+    loadExample,
     saveProject,
     openMetamodel,
     showAbout,

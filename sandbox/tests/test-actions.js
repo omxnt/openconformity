@@ -46,15 +46,15 @@ function fakeStorage() {
   equal(canMoveUp(model, null), false, 'nor does no selection');
 }
 
-// --- The landing offers the two project paths and the help surface ------
+// --- The landing offers the three ways in and the help surface ----------
 
 {
   const store = createStore({ storage: fakeStorage() });
   const actions = createActions({ store, flows: {} });
   deepEqual(
     enabledIds(actions),
-    ['new-project', 'open', 'about', 'metamodel'],
-    'the no-project state offers Open, New project, and the help surface — nothing that needs a project'
+    ['new-project', 'open', 'load-example', 'about', 'metamodel'],
+    'the no-project state offers the three ways in and the help surface — nothing that needs a project'
   );
 }
 
@@ -68,7 +68,7 @@ function fakeStorage() {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['new-project', 'open', 'save', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['new-project', 'open', 'save', 'load-example', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -86,8 +86,8 @@ function fakeStorage() {
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),
-    ['new-project', 'open', 'save'],
-    'the Project menu offers the file actions and nothing else'
+    ['new-project', 'open', 'save', 'load-example'],
+    'the File menu offers the file actions, the example among them, and nothing else'
   );
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'help').map((action) => action.id),
@@ -105,6 +105,7 @@ function fakeStorage() {
       'new-project': true,
       open: true,
       save: true,
+      'load-example': true,
       about: true,
       metamodel: true,
       'new-entity': true,

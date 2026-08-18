@@ -96,6 +96,17 @@ export function createActions({ store, flows }) {
       run: () => flows.saveProject(),
     },
     {
+      id: 'load-example',
+      icon: 'i-project',
+      label: 'Load example',
+      group: 'project',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => true,
+      run: () => flows.loadExample(),
+    },
+    {
       id: 'about',
       icon: 'i-information',
       label: 'About',

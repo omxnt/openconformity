@@ -427,9 +427,9 @@ export function createNavigator({
   function renderLanding() {
     const landing = el('div', { className: 'empty-state' }, [
       el('p', { className: 'empty-state-title', text: 'No project' }),
-      el('p', { className: 'empty-state-body', text: 'Create a project, or open one saved as a file.' }),
+      el('p', { className: 'empty-state-body', text: 'Create a project, open one saved as a file, or look around the example.' }),
     ]);
-    for (const id of ['new-project', 'open']) {
+    for (const id of ['new-project', 'open', 'load-example']) {
       const action = actions.find((offered) => offered.id === id);
       if (!action) continue;
       const button = el('button', {
