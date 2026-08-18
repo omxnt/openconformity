@@ -481,6 +481,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       const dropped = picks.length - related;
       dialogs.toast('Relationships refused', `${dropped} of the picked relationships could no longer be made.`);
     }
+    store.endPicking();
   }
 
   /**

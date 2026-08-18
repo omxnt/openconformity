@@ -6,9 +6,9 @@
  * relationships, never the whole model. Run from this directory.
  */
 
-import { pickerCandidates, pairOptions, groupedPicks, groupSentence } from '../app/relate.js';
-import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph.js';
-import { groupedRelationships, relationshipRows } from '../app/relationships.js';
+import { pickerCandidates, pairOptions, pickedRows } from '../app/relate.js';
+import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE, pendingNeighbours } from '../app/graph.js';
+import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/relationships.js';
 import { relationshipOptions } from '../app/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -63,87 +63,6 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(pairOptions(model, 'ELM-001', 'HAZ-001'), [], 'a relationship that exists empties its pair');
 }
 
-// --- The grouped picks -------------------------------------------------
-
-{
-  const model = createModel();
-  addEntity(model, 'ELM');
-  addEntity(model, 'ELM');
-  addEntity(model, 'HAZ');
-  addEntity(model, 'HAZ');
-
-  const picker = {
-    subject: 'ELM-001',
-    picks: [
-      { id: 'HAZ-001', form: null },
-      { id: 'ELM-002', form: null },
-      { id: 'HAZ-002', form: null },
-    ],
-  };
-  const groups = groupedPicks(model, picker);
-  deepEqual(
-    groups.map((group) => [group.label, group.rows.map((row) => row.id)]),
-    [
-      ['decomposes into — System Element', ['ELM-002']],
-      ['exhibits — Single Hazard', ['HAZ-001', 'HAZ-002']],
-    ],
-    'picks group by the relationship each pair means, groups sorted by label, rows in pick order'
-  );
-  equal(groups[0].rows[0].ambiguous, true, 'a pair with more than one option says so');
-  equal(groups[0].rows[0].options.length, 2, 'and carries only that pair\'s options');
-  equal(groups[1].rows[0].ambiguous, false, 'a pair with one option groups silently');
-
-  const chosen = groupedPicks(model, {
-    subject: 'ELM-001',
-    picks: [{ id: 'ELM-002', form: { typeId: 'elm-decomposes-into-elm', direction: 'incoming' } }],
-  });
-  deepEqual(
-    chosen.map((group) => group.label),
-    ['System Element — decomposes into'],
-    'a chosen relationship groups the pick under its own label'
-  );
-  deepEqual(
-    chosen[0].form,
-    { typeId: 'elm-decomposes-into-elm', direction: 'incoming' },
-    'and the group carries the form Done will commit'
-  );
-
-  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
-  const stale = groupedPicks(model, { subject: 'ELM-001', picks: [{ id: 'HAZ-001', form: null }] });
-  deepEqual(
-    stale.map((group) => [group.form, group.rows.map((row) => row.id)]),
-    [[null, ['HAZ-001']]],
-    'a pick whose pair no longer admits anything falls into the trailing stale group'
-  );
-  equal(stale[0].label, 'No longer possible', 'named for what it is');
-}
-
-// --- The panel groups read as sentences ----------------------------------
-
-{
-  const model = createModel();
-  addEntity(model, 'ELM');
-  addEntity(model, 'ELM');
-  const { updateEntity } = await import('../app/model.js');
-  updateEntity(model, 'ELM-001', { title: 'Machine' });
-
-  deepEqual(
-    groupSentence(model, 'ELM-001', { typeId: 'elm-decomposes-into-elm', direction: 'outgoing' }),
-    { position: 'above', text: 'ELM-001  Machine decomposes into:' },
-    'an outgoing group leads with the subject, the picks completing it beneath'
-  );
-  deepEqual(
-    groupSentence(model, 'ELM-001', { typeId: 'elm-decomposes-into-elm', direction: 'incoming' }),
-    { position: 'below', text: '… decomposes into ELM-001  Machine' },
-    'an incoming group closes beneath its picks, the ellipsis standing where they read in'
-  );
-  deepEqual(
-    groupSentence(model, 'ELM-001', null),
-    { position: 'above', text: 'No longer possible' },
-    'a stale group keeps its name'
-  );
-}
-
 // --- The grouped list --------------------------------------------------
 
 {
@@ -185,6 +104,192 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
   deepEqual(relationshipRows(model, 'F-1'), [], 'a folder makes no rows');
   deepEqual(relationshipRows(model, null), [], 'nor does no selection');
+}
+
+// --- The picks as the table lands them -----------------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'ELM');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'HAZ');
+
+  const picker = {
+    subject: 'ELM-001',
+    picks: [
+      { id: 'HAZ-001', form: null },
+      { id: 'ELM-002', form: null },
+      { id: 'HAZ-002', form: null },
+    ],
+  };
+  const rows = pickedRows(model, picker);
+  deepEqual(
+    rows.map((row) => [row.id, row.form?.typeId ?? null, row.ambiguous]),
+    [
+      ['HAZ-001', 'elm-exhibits-haz', false],
+      ['ELM-002', 'elm-decomposes-into-elm', true],
+      ['HAZ-002', 'elm-exhibits-haz', false],
+    ],
+    'each pick carries the relationship its pair means: the only option silently, the first when ambiguous'
+  );
+  equal(rows[1].options.length, 2, 'and an ambiguous pair carries only its own options');
+
+  const chosen = pickedRows(model, {
+    subject: 'ELM-001',
+    picks: [{ id: 'ELM-002', form: { typeId: 'elm-decomposes-into-elm', direction: 'incoming' } }],
+  });
+  deepEqual(chosen[0].form, { typeId: 'elm-decomposes-into-elm', direction: 'incoming' }, 'a chosen form holds while the model admits it');
+
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  const stale = pickedRows(model, { subject: 'ELM-001', picks: [{ id: 'HAZ-001', form: null }] });
+  equal(stale[0].form, null, 'a pick whose pair no longer admits anything carries no form');
+}
+
+// --- The tables, real and provisional together ----------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'ELM');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'CAS');
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  relate(model, 'cas-assesses-elm', 'CAS-001', 'ELM-001');
+
+  const still = relationshipTables(model, 'ELM-001', null);
+  deepEqual(
+    still.outgoing.map((row) => [row.kind, row.other.id]),
+    [['real', 'HAZ-001']],
+    'without a picker the tables are the real rows'
+  );
+  deepEqual(still.incoming.map((row) => [row.kind, row.other.id]), [['real', 'CAS-001']], 'split by direction');
+  deepEqual(still.stale, [], 'and nothing is stale');
+
+  relate(model, 'elm-decomposes-into-elm', 'ELM-001', 'ELM-002');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'ELM');
+  const picker = {
+    subject: 'ELM-001',
+    picks: [
+      { id: 'HAZ-002', form: null },
+      { id: 'HAZ-003', form: null },
+      { id: 'ELM-003', form: { typeId: 'elm-decomposes-into-elm', direction: 'incoming' } },
+    ],
+  };
+  const tables = relationshipTables(model, 'ELM-001', picker);
+  deepEqual(
+    tables.outgoing.map((row) => [row.kind, row.other.id]),
+    [['real', 'HAZ-001'], ['pending', 'HAZ-002'], ['pending', 'HAZ-003'], ['real', 'ELM-002']],
+    'a pick lands after the last row of its relationship group, inside the standing order, never at the end'
+  );
+  deepEqual(
+    tables.incoming.map((row) => [row.kind, row.other.id]),
+    [['real', 'CAS-001'], ['pending', 'ELM-003']],
+    'a pick with no group opens one at its direction\'s end'
+  );
+
+  const elsewhere = relationshipTables(model, 'HAZ-001', picker);
+  ok(elsewhere.outgoing.every((row) => row.kind === 'real'), 'another subject\'s table takes no picks');
+
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-002');
+  const gone = relationshipTables(model, 'ELM-001', { subject: 'ELM-001', picks: [{ id: 'HAZ-002', form: null }] });
+  deepEqual(
+    gone.stale.map((row) => [row.kind, row.label, row.other.id]),
+    [['pending', 'No longer possible', 'HAZ-002']],
+    'a pick whose pair no longer admits anything falls to the stale strip'
+  );
+}
+
+// --- The presented rows: sort and filter over the grouped order -----------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'ELM');
+  const { updateEntity } = await import('../app/model.js');
+  updateEntity(model, 'HAZ-001', { title: 'Zulu' });
+  updateEntity(model, 'HAZ-002', { title: 'Alpha' });
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-002');
+  relate(model, 'elm-decomposes-into-elm', 'ELM-001', 'ELM-002');
+
+  const rows = relationshipTables(model, 'ELM-001', {
+    subject: 'ELM-001',
+    picks: [],
+  }).outgoing;
+
+  deepEqual(
+    presentedRows(rows, null, '').map((row) => row.other.id),
+    ['HAZ-001', 'HAZ-002', 'ELM-002'],
+    'no sort, no filter: the grouped order stands'
+  );
+  deepEqual(
+    presentedRows(rows, { column: 'entity', direction: 'asc' }, '').map((row) => row.other.id),
+    ['ELM-002', 'HAZ-001', 'HAZ-002'],
+    'sorting by the far end suspends the grouped order'
+  );
+  deepEqual(
+    presentedRows(rows, { column: 'entity', direction: 'desc' }, '').map((row) => row.other.id),
+    ['HAZ-002', 'HAZ-001', 'ELM-002'],
+    'and descends when asked'
+  );
+  deepEqual(
+    presentedRows(rows, { column: 'relationship', direction: 'asc' }, '').map((row) => row.label),
+    ['decomposes into', 'exhibits', 'exhibits'],
+    'the relationship column sorts by its label'
+  );
+  deepEqual(
+    presentedRows(rows, null, 'alpha').map((row) => row.other.id),
+    ['HAZ-002'],
+    'the filter matches a title'
+  );
+  deepEqual(
+    presentedRows(rows, null, 'haz-001').map((row) => row.other.id),
+    ['HAZ-001'],
+    'a designation'
+  );
+  deepEqual(
+    presentedRows(rows, null, 'decomposes').map((row) => row.other.id),
+    ['ELM-002'],
+    'and a relationship label'
+  );
+}
+
+// --- The picks as provisional neighbours -----------------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'ELM');
+  addEntity(model, 'HAZ');
+  addEntity(model, 'CAS');
+
+  const sides = pendingNeighbours(model, {
+    subject: 'ELM-001',
+    picks: [
+      { id: 'HAZ-001', form: null },
+      { id: 'ELM-002', form: { typeId: 'elm-decomposes-into-elm', direction: 'incoming' } },
+    ],
+  });
+  deepEqual(
+    sides.outgoing.map((entry) => [entry.other.id, entry.label, entry.ambiguous]),
+    [['HAZ-001', 'exhibits', false]],
+    'an outgoing pick rides the right side with the label its pair means'
+  );
+  deepEqual(
+    sides.incoming.map((entry) => [entry.other.id, entry.label, entry.ambiguous]),
+    [['ELM-002', 'decomposes into', true]],
+    'an incoming pick the left, its ambiguity marked'
+  );
+  equal(sides.ambiguous, 1, 'and counted for the hint');
+
+  relate(model, 'cas-assesses-elm', 'CAS-001', 'ELM-001');
+  const gone = pendingNeighbours(model, { subject: 'ELM-001', picks: [{ id: 'CAS-001', form: null }] });
+  deepEqual([gone.outgoing, gone.incoming], [[], []], 'a stale pick stays off the canvas: the list carries it');
 }
 
 // --- The neighbourhood -------------------------------------------------

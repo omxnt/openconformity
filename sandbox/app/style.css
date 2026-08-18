@@ -197,10 +197,10 @@ body {
 
 /* An entity type's icon carries its pillar's colour wherever it stands
    for the type; a disabled offer grays it with the rest of the entry. */
-.icon[data-pillar="systemContext"] { fill: var(--pillar-system); }
-.icon[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
-.icon[data-pillar="riskAssessment"] { fill: var(--pillar-risk); }
-.icon[data-pillar="requirementsDefinition"] { fill: var(--pillar-requirements); }
+[data-pillar="systemContext"] { fill: var(--pillar-system); }
+[data-pillar="legislativeFramework"] { fill: var(--pillar-legislative); }
+[data-pillar="riskAssessment"] { fill: var(--pillar-risk); }
+[data-pillar="requirementsDefinition"] { fill: var(--pillar-requirements); }
 .menu-entry:disabled .icon { fill: var(--disabled); }
 .menu-entry-label { flex: 1; }
 
@@ -246,6 +246,7 @@ body {
 .menubar-item[aria-expanded="true"] { background: var(--shell-selected); }
 
 .shell-actions { display: flex; align-items: center; align-self: stretch; margin-left: auto; }
+.shell-gap { width: 16px; }  /* $spacing-05 */
 
 /* Carbon shell actions are square and fill the header. */
 .shell-action {
@@ -546,7 +547,7 @@ body {
 /* Carbon form: the label above its field, two columns with the tall
    fields spanning both, each row parted by a hairline so the form scans
    as rows rather than a flat sheet. */
-.editor-body > .fields { padding: 4px 16px 16px; }  /* $spacing-02, $spacing-05 */
+.editor-body > .fields { padding: 4px 0 8px; }  /* $spacing-02, $spacing-03 */
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -554,7 +555,7 @@ body {
   max-width: 1024px;
 }
 .fields .field {
-  padding: 12px 0;          /* $spacing-04 */
+  padding: 12px 16px;       /* $spacing-04, $spacing-05 */
   display: flex;
   flex-direction: column;
   gap: 4px;                 /* $spacing-02 */
@@ -563,22 +564,22 @@ body {
 }
 .field-tall { grid-column: 1 / -1; }
 
-/* The way onward, under the project's own fields. */
-.editor-guide { padding: 16px; color: var(--text-second); display: grid; gap: 8px; max-width: 36rem; }  /* $spacing-05, $spacing-03 */
-
-/* Carbon form actions in the 32px head: Save filled, Cancel ghost. */
-.head-action {
+/* Carbon form actions, under the attributes at the form's end: Save
+   filled, Cancel ghost beside it. */
+.form-actions { display: flex; gap: 8px; padding: 24px 16px; }  /* $spacing-03, $spacing-06, $spacing-05 */
+.form-button {
   font: inherit;
   letter-spacing: inherit;
+  height: 32px;             /* Carbon button sm */
+  padding: 0 16px;          /* $spacing-05 */
   border: none;
   cursor: pointer;
-  align-self: stretch;
-  padding: 0 16px;          /* $spacing-05 */
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
-.head-action.button-primary { background: var(--button-primary); color: var(--text-on-color); }
-.head-action.button-primary:hover { background: var(--button-primary-hover); }
-.head-action.button-primary:active { background: var(--button-primary-active); }
+.form-button.button-primary { background: var(--button-primary); color: var(--text-on-color); }
+.form-button.button-primary:hover { background: var(--button-primary-hover); }
+.form-button.button-primary:active { background: var(--button-primary-active); }
+.form-actions .ghost-button { height: 32px; padding: 0 16px; }
 
 .field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
 .field:last-child { padding-bottom: 16px; }
@@ -665,8 +666,6 @@ select.field-input[size] {
 .rel-label { color: var(--text-second); }
 .cell-entity { display: flex; align-items: center; gap: 8px; min-width: 0; }  /* $spacing-03 */
 .cell-entity .row-title { overflow: hidden; text-overflow: ellipsis; }
-/* The subject repeats on every row, so it recedes: the fact reads, the far end leads. */
-.cell-subject .row-title { color: var(--text-second); }
 
 /* A row action. Removal is neutral until pointed at, then the danger
    fill; letting go of a pending pick destroys nothing, so it does not go
@@ -726,7 +725,6 @@ select.field-input[size] {
 .graph-node:focus-visible > rect { stroke: var(--focus); stroke-width: 2; }
 .graph-node:focus { outline: none; }
 
-.node-icon { fill: var(--text-second); }
 .node-type { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }   /* $label-01 */
 .node-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }  /* $code-01 */
 .node-label { font-size: 14px; letter-spacing: 0.16px; font-weight: 600; fill: var(--text); }  /* $heading-compact-01 */
@@ -750,59 +748,61 @@ select.field-input[size] {
 .graph-label { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
 .graph-more { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
 
+/* While picking, the picks are the subject: dashed provisional edges and
+   boxes stand forward, the standing neighbourhood recedes. */
+.graph.picking .graph-node:not(.pending):not(.centre),
+.graph.picking .graph-edge:not(.pending) { opacity: 0.4; }
+.graph-node.pending > rect { stroke: var(--accent); stroke-dasharray: 4 4; }
+.graph-edge.pending line { stroke-dasharray: 4 4; }
+.graph-edge.pending { cursor: pointer; }
+
 /* ---------- The picker ---------- */
 
-/* The side panel overlays the right edge and nothing else, so the far
-   ends are picked from the tree itself. */
-.side-panel {
-  position: fixed;
-  top: 48px;                /* below the shell bar, $spacing-09 */
-  right: 0;
-  bottom: 0;
-  width: 320px;
-  display: flex;
-  flex-direction: column;
-  background: var(--background);
-  border-left: 1px solid var(--border-subtle);
-}
-.panel-title {
-  font-size: 14px;          /* $heading-compact-01 */
-  font-weight: 600;
-  padding: 12px 16px;       /* $spacing-04, $spacing-05 */
-  border-bottom: 1px solid var(--border-subtle);
-}
-.panel-body { flex: 1; display: flex; flex-direction: column; overflow: auto; }
-.panel-subject {
-  display: grid;
-  gap: 4px;                 /* $spacing-02 */
-  padding: 12px 16px 0;     /* $spacing-04, $spacing-05 */
-}
-.panel-note {
+.tree-row.picker-subject { background: var(--layer-accent); }
+
+/* The picks land in the table as provisional rows: pending-styled, the
+   check leading the far end, the unpick where the unlink would be. */
+.picking-note {
   font-size: 12px;          /* $helper-text-01 */
   letter-spacing: 0.32px;
-  line-height: 1.33334;
   color: var(--text-helper);
-  padding: 8px 16px 0;      /* $spacing-03, $spacing-05 */
+  padding: 8px 16px;        /* $spacing-03, $spacing-05 */
 }
-.panel-picks { flex: 1; padding: 16px 16px 8px; overflow: auto; }
-.panel-group {
+.table tr.receded { opacity: 0.5; }
+.table tr.receded:hover td { background: none; }
+.pending-choice {
   font-size: 12px;          /* $label-01 */
   letter-spacing: 0.32px;
-  color: var(--text-second);
-  padding: 12px 0 2px;      /* $spacing-04 */
+  height: 24px;             /* the row's own height */
+  padding: 0 32px 0 8px;
+  width: auto;
 }
-.panel-pick {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  height: var(--row);
-}
-.panel-pick-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.panel-pick-ambiguity { padding: 2px 0 4px 16px; }  /* $spacing-05 */
-.panel-pick-choice { font-size: 12px; letter-spacing: 0.32px; padding: 4px 40px 4px 8px; }
-.panel-actions { flex: none; }
 
-.tree-row.picker-subject { background: var(--layer-accent); }
+/* The subject repeats on every row: its icon keeps the pillar, its text
+   recedes — you are here, the far end leads. */
+.cell-subject { font-style: italic; }
+.cell-subject .row-title { color: var(--text-second); }
+
+.rel-list { padding-bottom: 16px; }  /* $spacing-05 */
+.rel-filter { padding: 8px 16px 0; }  /* $spacing-03, $spacing-05 */
+.rel-filter .field-input { max-width: 288px; padding: 4px 16px; }  /* Carbon search sm */
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;                 /* $spacing-02 */
+  font: inherit;
+  font-weight: 600;         /* the head's own $heading-compact-01 */
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Item 4's trial: a leading arrow column beside the two-section split. */
+.rel-arrow { color: var(--text-second); }
+.rel-arrow-head { padding: 0 0 0 16px; }  /* $spacing-05 */
 
 /* ---------- Dialogs ---------- */
 
@@ -891,8 +891,6 @@ select.field-input[size] {
   cursor: pointer;
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
-/* The side panel keeps the smaller foot. */
-.panel-actions .dialog-button { height: 48px; }  /* $spacing-09 */
 .button-primary { color: var(--text-on-color); background: var(--button-primary); }
 .button-primary:hover { background: var(--button-primary-hover); }
 .button-primary:active { background: var(--button-primary-active); }
@@ -905,20 +903,18 @@ select.field-input[size] {
 
 /* ---------- Splitters ---------- */
 
+/* The demo's gutters: a solid layer strip between background panes is
+   the only separation — one rule's worth of pixels, no floating
+   hairline. At the 32px head band the strip merges with the layer
+   heads, whose bottom rules run level across it. */
 .splitter {
   flex: none;
   position: relative;
-  background: var(--background);
+  background: var(--layer);
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
 .splitter-vertical { width: 4px; cursor: col-resize; }
 .splitter-horizontal { height: 4px; cursor: row-resize; }
-
-/* A hairline rule through the gutter, so the split reads against the
-   pane heads and the pane bodies alike. */
-.splitter::before { content: ''; position: absolute; background: var(--border-subtle); }
-.splitter-vertical::before { top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-50%); }
-.splitter-horizontal::before { left: 0; right: 0; top: 50%; height: 1px; transform: translateY(-50%); }
 
 /* The pointer target is 24px across (WCAG 2.5.8); the drawn bar stays 4px. */
 .splitter::after { content: ''; position: absolute; }
@@ -926,7 +922,6 @@ select.field-input[size] {
 .splitter-horizontal::after { inset: -10px 0; cursor: row-resize; }
 .splitter:hover, .splitter:focus-visible { background: var(--accent); outline: none; }
 .splitter.dragging { background: var(--accent); }
-.splitter:hover::before, .splitter:focus-visible::before, .splitter.dragging::before { background: transparent; }
 
 /* ---------- Overlay ---------- */
 

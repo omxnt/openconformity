@@ -224,11 +224,13 @@ function flowsOver(store) {
   equal(toasts.length, 0, 'a move that goes through says nothing');
 
   store.commit((model) => relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-002'));
+  store.beginPicking('ELM-001');
   flows.completeRelate('ELM-001', [
     { id: 'HAZ-001', form: null },
     { id: 'HAZ-002', form: null },
   ]);
   equal(store.model().relationships.size, 2, 'the picks the model still allows are made');
+  equal(store.picker(), null, 'and Done ends the picking: the panel is gone, the flow closes the mode');
   deepEqual(
     toasts.pop(),
     ['Relationships refused', '1 of the picked relationships could no longer be made.'],

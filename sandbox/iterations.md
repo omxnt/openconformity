@@ -38,7 +38,37 @@ Ten items. Suite grew from 1559 to 1589 checks across 19 files; five mutations r
 | 9 | Move to… joins the tree toolbar, grouped with Move up/down. | Joined, in its arrange group; the toolbar shape is pinned. |
 | 10 | Undo and Redo leave the toolbar; Edit menu and shortcuts keep them; a shell-bar icon pair beside the theme control if it reads well — judgment, show me. | Placed as the shell's global-action pair beside the theme control, enablement and the step-counting tooltips following the actions; the Edit menu and Cmd/Ctrl-Z keep them. The toolbar is eight buttons and the navigator floor re-derived to 278px. |
 
-## 3. References
+## 3. Batch of 2026-08-18, third
+
+Eleven items, the relationship pane's redesign among them. Suite at 1590 checks across 19 files; six mutations run, one exposing a weak pin that was sharpened until it caught.
+
+| # | Asked | Landed |
+|---|---|---|
+| 1 | The relationship table becomes the picker — the side panel dies; picks land immediately as provisional rows in place, ambiguity selects inline, unpick by row control or tree re-click, Done and Cancel in the pane head; store state, repair, one-entry commit unchanged. Show me; flag what the panel did that the table cannot. | The panel and its module surface are gone; relate.js is the derivations module (`pickerCandidates`, `pairOptions`, and the new `pickedRows`). `relationshipTables` merges real and provisional rows — a pick lands after the last row of its relationship group or opens one at its direction's end; stale picks fall to a No-longer-possible strip. Pending rows are italic-muted under a leading check, their ambiguity select inline in the relationship cell, their unpick where the unlink sits. Done (primary, disabled at zero picks) and Cancel ride the pane head; completing ends the picking in the flow. Flagged: the pane now pins the picker's subject — the selection may move while picking and the tables stay — and picking forces the list view; the candidate-count guidance survives as a note line above the tables. |
+| 2 | Split the table by direction — stacked tables or sub-tabs, composing with item 1; the POV entity keeps its tinted icon but reads as "you are here". | Two stacked sections, Outgoing then Incoming, each appearing only when it holds rows — sub-tabs would have hidden half the picture while picking. Provisional rows land in their own split, moving between sections when an ambiguity choice flips direction. The subject cell keeps its pillar-tinted icon and recedes in italic secondary text. |
+| 3 | The mid-project orientation text goes; the no-project landing guidance stays. | Gone, with its CSS; the project surface is its fields alone. |
+| 4 | Save and Cancel return to the demo's placement under the attributes; Save primary, Cancel ghost; the head keeps icon-only Edit when viewing. | A form-actions row closes both edit surfaces — 32px filled Save, ghost Cancel; the head carries the name alone while editing. |
+| 5 | Add relationship icon-only, neutral, tooltip. | A plain `ghost-icon` button, toolbar-coloured, titled "Add relationship". |
+| 6 | Gutter hairline redo — no halo; benchmark the demo's gutters. | Adopted the demo's mechanism outright: the gutter is a solid layer strip between background panes, the heads' bottom rules running level across it — no floating hairline, nothing to halo. Hover and drag still fill with the accent. |
+| 7 | Editor left padding per the demo's spacing. | Field rows carry 16px horizontal padding inside full-bleed hairlines: the rules run edge to edge, the text stands off them. |
+| 8 | Undo/Redo away from between metamodel and theme — a gapped cluster; judgment on order. | The right cluster reads unsaved · undo redo · gap · metamodel theme. |
+| 9 | Graph entity icons pillar-tinted per the demo. | The graph already stamped the pillar; the CSS selector never matched it. The pillar rules now apply wherever the pillar is stamped, and the graph's flat secondary fill is gone. |
+| 10 | Vendor any transcribed glyph; sweep for others. | The checkmark was the one fabrication: replaced with the official Carbon artwork, fetched from the package — the transcription's tail was indeed wrong. The sweep verified every other glyph has a genuine vendored file with its ORIGIN row; it also found 18 sprite symbols whose geometry was scaled from the 32-grid artwork rather than copied from their 16dp files — official art both, recorded as a finding for a pass of its own rather than regenerated blind. |
+| 11 | Carbon design review after 1–10; report what it changed. | The sweep verified more than it changed: spacing on the scale (the off-scale values are Carbon's own — 7px input padding, 3px notification bars, 64px modal buttons), type tiers with their letter-spacing, field and layer tokens, button hierarchy (ghost text staying `$link-primary` as Carbon has it, icon-ghosts neutral), menus matching the demo's flat border. Changed: the pillar-tint selector generalised (item 9's fix), a bottom-padding for the last table, and the compact 24px inline select documented as the table row's constraint. |
+
+### 3.1 Follow-up, same day
+
+Four items on the relationship pane, continuing the redesign. Suite at 1601 checks; three mutations run, one caught by crash rather than by pin — the guard restored and noted.
+
+| # | Asked | Landed |
+|---|---|---|
+| 1 | Picking is additive and reads additive: existing rows recede, unlink hidden — removals in default view only; pending rows stand forward, full strength, leading check, unpick live. Supersedes batch 3's pending-muted styling. | Inverted as ordered: real rows carry `receded` at half strength with the unlink withheld while picking — in the graph too — and pending rows stand at full strength under their check. |
+| 2 | Graph view works while picking: switcher live, pending relationships as dashed provisional edges, unpick by edge or neighbour, existing recedes; ambiguity on the graph my judgment — show me. | The switcher stays live beside Done and Cancel; the graph pins the picker's subject and draws picks as dashed accent boxes and edges among the receding neighbourhood, clicking either letting go. Judgment on ambiguity: no popover — an ambiguous pick's edge label trails an ellipsis and a hint line under the canvas counts them and points at the List view; stale picks stay off the canvas, the list's strip carries them. |
+| 3 | Table sort and filter: sortable far-end and relationship headers per Carbon, a filter over designation, title, and relationship label; sorting suspends the grouped order, clearing returns it; composes with picking. | `presentedRows` filters and sorts each section — pending rows take part like the rest — behind sortable headers cycling none, ascending, descending with `aria-sort` and arrow marks, and a small filter field above the tables that survives the re-render. Pane-local transient state, like scroll. |
+| 4 | Direction column test: a leading narrow arrow column beside the current split, to judge column-vs-sections in the browser. | A narrow → / ← column leads every row, sections unchanged — both presentations stand for the browser verdict. |
+| 4b | The verdict: one table, direction column — the sections die; grouped row order stands, direction reads by glyph and by position; the POV entity keeps its receded styling; provisional rows land in the one table. | One table again: arrow column leading, Source / Relationship / Target with the subject switching sides per direction, outgoing-first grouped order while unsorted. Source and Target sort by the far end alike, Relationship by its label; stale picks close the table. The section headings and their styles are gone. |
+
+## 4. References
 
 | No. | Reference | Link |
 |---|---|---|

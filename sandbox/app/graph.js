@@ -5,11 +5,15 @@
  * the left, outgoing targets on the right, the subject between them,
  * every edge arrowed and labelled, and each neighbour carrying the
  * control that removes the relationship that put it there. Seven boxes a
- * side; what lies beyond is counted, not drawn.
+ * side; what lies beyond is counted, not drawn. While the store holds a
+ * picker for the subject, the picks ride as dashed provisional edges —
+ * clicking one, or its box, lets go — and the standing neighbourhood
+ * recedes until Done.
  */
 
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
+import { pickedRows } from './relate.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, svg, svgText } from './dom.js';
 
@@ -38,6 +42,32 @@ export function neighbourhood(model, id) {
       other: /** @type {import('./model.js').Entity} */ (nodeOf(model, relationship.source)),
     })),
   };
+}
+
+/**
+ * The picks as provisional neighbours, per side: each with the label its
+ * pair means and whether that pair still offers a choice. A pick whose
+ * pair no longer admits anything stays off the canvas — the list's
+ * stale strip carries it.
+ * @param {import('./model.js').Model} model
+ * @param {{ subject: string, picks: Array<Object> }} picker
+ * @returns {{ outgoing: Array<Object>, incoming: Array<Object>, ambiguous: number }}
+ */
+export function pendingNeighbours(model, picker) {
+  const sides = { outgoing: [], incoming: [], ambiguous: 0 };
+  for (const row of pickedRows(model, picker)) {
+    if (row.form === null) continue;
+    const other = nodeOf(model, row.id);
+    if (!other || other.kind !== 'entity') continue;
+    if (row.ambiguous) sides.ambiguous += 1;
+    sides[row.form.direction].push({
+      pending: true,
+      other,
+      label: RELATIONSHIP_TYPES[row.form.typeId].label,
+      ambiguous: row.ambiguous,
+    });
+  }
+  return sides;
 }
 
 /** How many boxes a side draws before counting the rest. */
@@ -94,16 +124,16 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
    * @param {boolean} centre
    * @param {import('./model.js').Relationship} [relationship]  what put the box here
    */
-  function box(entity, x, y, centre, relationship) {
+  function box(entity, x, y, centre, relationship, pending = false) {
     const type = ENTITY_TYPES[entity.type];
     const group = svg('g', {
-      class: centre ? 'graph-node centre' : 'graph-node',
+      class: centre ? 'graph-node centre' : `graph-node${pending ? ' pending' : ''}`,
       transform: `translate(${x},${y})`,
     });
     if (!centre) {
       group.setAttribute('tabindex', '0');
       group.setAttribute('role', 'button');
-      group.setAttribute('aria-label', `Select ${entity.id}`);
+      group.setAttribute('aria-label', pending ? `Unpick ${entity.id}` : `Select ${entity.id}`);
     }
     group.appendChild(svg('rect', { width: String(NODE_WIDTH), height: String(NODE_HEIGHT) }));
     group.appendChild(
@@ -124,13 +154,16 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     group.appendChild(svgText('title', {}, `${type.name} ${entity.id}${title ? ` — ${title}` : ''}`));
 
     if (!centre) {
-      group.addEventListener('click', () => onSelect(entity.id));
+      const act = () => (pending ? store.togglePick(entity.id) : onSelect(entity.id));
+      group.addEventListener('click', act);
       group.addEventListener('keydown', (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
         event.preventDefault();
-        onSelect(entity.id);
+        act();
       });
-      if (relationship) group.appendChild(removeControl(relationship, entity));
+      // The unlink rides real neighbours in the default view only:
+      // removals recede with the rest while picking.
+      if (relationship && store.picker() === null) group.appendChild(removeControl(relationship, entity));
     }
     return group;
   }
@@ -173,8 +206,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
    * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
    * @param {string} label
    */
-  function edge(x1, y1, x2, y2, label) {
-    return svg('g', { class: 'graph-edge' }, [
+  function edge(x1, y1, x2, y2, label, pending = false, unpickId = null) {
+    const group = svg('g', { class: `graph-edge${pending ? ' pending' : ''}` }, [
       svg('line', {
         x1: String(x1),
         y1: String(y1),
@@ -188,14 +221,35 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
         label
       ),
     ]);
+    if (pending && unpickId !== null) {
+      group.addEventListener('click', () => store.togglePick(unpickId));
+      group.appendChild(svgText('title', {}, 'Unpick'));
+    }
+    return group;
   }
 
   function render() {
     element.textContent = '';
-    const around = neighbourhood(store.model(), store.selection());
+    const picker = store.picker();
+    const around = neighbourhood(store.model(), picker !== null ? picker.subject : store.selection());
     if (around === null) return;
 
-    const { left, right, moreIncoming, moreOutgoing } = cappedNeighbourhood(around);
+    const pend = picker !== null ? pendingNeighbours(store.model(), picker) : { outgoing: [], incoming: [], ambiguous: 0 };
+    const merged = {
+      subject: around.subject,
+      outgoing: [...around.outgoing, ...pend.outgoing],
+      incoming: [...around.incoming, ...pend.incoming],
+    };
+    if (picker !== null) {
+      element.appendChild(
+        el('p', {
+          className: 'picking-note',
+          text: 'Picked relationships land as dashed edges; click one to let go. The rest recede until Done.',
+        })
+      );
+    }
+
+    const { left, right, moreIncoming, moreOutgoing } = cappedNeighbourhood(merged);
     const step = NODE_HEIGHT + ROW_GAP;
     const lanes = Math.max(left.length, right.length, 1);
     const overflow = moreIncoming > 0 || moreOutgoing > 0;
@@ -206,7 +260,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     const centreY = MARGIN + (lanes * step - ROW_GAP - NODE_HEIGHT) / 2;
 
     const canvas = svg('svg', {
-      class: 'graph',
+      class: `graph${picker !== null ? ' picking' : ''}`,
       width: String(width),
       height: String(height),
       viewBox: `0 0 ${width} ${height}`,
@@ -233,19 +287,37 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
 
     const laneY = (count, index) => MARGIN + ((lanes - count) * step) / 2 + index * step;
 
-    left.forEach(({ relationship, other }, index) => {
+    left.forEach((entry, index) => {
       const y = laneY(left.length, index);
+      const label = entry.pending ? entry.label : RELATIONSHIP_TYPES[entry.relationship.type].label;
       canvas.appendChild(
-        edge(MARGIN + NODE_WIDTH, y + NODE_HEIGHT / 2, centreX, centreY + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type].label)
+        edge(
+          MARGIN + NODE_WIDTH,
+          y + NODE_HEIGHT / 2,
+          centreX,
+          centreY + NODE_HEIGHT / 2,
+          entry.pending && entry.ambiguous ? `${label}…` : label,
+          entry.pending === true,
+          entry.pending ? entry.other.id : null
+        )
       );
-      canvas.appendChild(box(other, MARGIN, y, false, relationship));
+      canvas.appendChild(box(entry.other, MARGIN, y, false, entry.relationship, entry.pending === true));
     });
-    right.forEach(({ relationship, other }, index) => {
+    right.forEach((entry, index) => {
       const y = laneY(right.length, index);
+      const label = entry.pending ? entry.label : RELATIONSHIP_TYPES[entry.relationship.type].label;
       canvas.appendChild(
-        edge(centreX + NODE_WIDTH, centreY + NODE_HEIGHT / 2, rightX, y + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type].label)
+        edge(
+          centreX + NODE_WIDTH,
+          centreY + NODE_HEIGHT / 2,
+          rightX,
+          y + NODE_HEIGHT / 2,
+          entry.pending && entry.ambiguous ? `${label}…` : label,
+          entry.pending === true,
+          entry.pending ? entry.other.id : null
+        )
       );
-      canvas.appendChild(box(other, rightX, y, false, relationship));
+      canvas.appendChild(box(entry.other, rightX, y, false, entry.relationship, entry.pending === true));
     });
     canvas.appendChild(box(around.subject, centreX, centreY, true));
 
@@ -257,6 +329,14 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     }
 
     element.appendChild(canvas);
+    if (pend.ambiguous > 0) {
+      element.appendChild(
+        el('p', {
+          className: 'picking-note',
+          text: `${pend.ambiguous} ${pend.ambiguous === 1 ? 'pick offers' : 'picks offer'} more than one relationship — choose it in the List view.`,
+        })
+      );
+    }
   }
 
   return { element, render };

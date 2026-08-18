@@ -10,7 +10,6 @@ import { createEditor } from './editor.js';
 import { createNavigator } from './navigator.js';
 import { createRelationshipsView } from './relationships.js';
 import { createGraphView } from './graph.js';
-import { createRelateWorkflow } from './relate.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 
@@ -64,14 +63,10 @@ createRelationshipsView({
   body: document.getElementById('relationships-body'),
   graph,
   onAdd: () => flows.relateSelection(),
+  onDone: (subject, picks) => flows.completeRelate(subject, picks),
   onUnrelate: (relationship) => flows.removeRelationship(relationship),
   onSelect: (id) => flows.selectNode(id),
   addEnabled: () => relateAction.enabled(),
-});
-createRelateWorkflow({
-  store,
-  overlay,
-  onDone: (subject, picks) => flows.completeRelate(subject, picks),
 });
 
 document.addEventListener('keydown', (event) => {

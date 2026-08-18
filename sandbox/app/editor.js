@@ -141,11 +141,13 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return button;
   }
 
-  /** Carbon's form actions in the 32px head: Save filled, Cancel ghost beside it. */
-  function saveCancel(onSavePick) {
-    const save = el('button', { className: 'head-action button-primary', text: 'Save', attributes: { type: 'button' } });
+  /** Carbon's form actions, under the attributes at the form's end: Save filled, Cancel ghost. */
+  function formActions(onSavePick) {
+    const save = el('button', { className: 'form-button button-primary', text: 'Save', attributes: { type: 'button' } });
     save.addEventListener('click', onSavePick);
-    return [save, headButton('Cancel', onCancel)];
+    const cancel = el('button', { className: 'form-button ghost-button', text: 'Cancel', attributes: { type: 'button' } });
+    cancel.addEventListener('click', onCancel);
+    return el('div', { className: 'form-actions' }, [save, cancel]);
   }
 
   /** The project head: its icon, its kind, and its name as it stands. */
@@ -198,7 +200,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return input;
   }
 
-  /** The project, on the standard surface: view fields, Edit, and the way onward. */
+  /** The project, on the standard surface: view fields and Edit. */
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
@@ -217,22 +219,12 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
-    body.appendChild(
-      el('div', { className: 'editor-guide' }, [
-        el('p', { text: 'Select something in the navigator to view and edit it.' }),
-        el('p', { text: 'Relationships are made from the selected entity, in the pane below.' }),
-      ])
-    );
   }
 
   function renderProjectEdit() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(
-      el('div', { className: 'pane-head-actions' }, saveCancel(() => {
-        if (onSave(null, fieldValues()) !== false) endEdit();
-      }))
-    );
+    head.appendChild(el('div', { className: 'pane-head-actions' }, []));
     const values = projectValues();
     const fields = el('div', { className: 'fields' });
     for (const definition of PROJECT_FIELDS) {
@@ -248,6 +240,9 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
+    body.appendChild(formActions(() => {
+      if (onSave(null, fieldValues()) !== false) endEdit();
+    }));
   }
 
   function renderView(node) {
@@ -271,9 +266,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   }
 
   function renderEdit(node) {
-    renderHead(node, saveCancel(() => {
-      if (onSave(editingId, fieldValues()) !== false) endEdit();
-    }));
+    renderHead(node, []);
     const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       fields.appendChild(
@@ -288,6 +281,9 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
+    body.appendChild(formActions(() => {
+      if (onSave(editingId, fieldValues()) !== false) endEdit();
+    }));
   }
 
   function render() {

@@ -1,21 +1,15 @@
 /**
- * The add-relationship workflow over the store's picker mode, picks
- * first: while picking, every entity relatable to the subject in any form
- * is a candidate, and the relationship each pick means is inferred from
- * the pair. A pair that admits exactly one relationship groups silently;
- * one that admits more carries its own small choice, listing only that
- * pair's options. The mode — the pinned subject and the picks — is store
- * state; everything else is re-derived from the model on every render, so
- * the workflow survives commits and renders alike.
- *
- * The panel opens when picking begins and closes when it ends, whoever
- * ended it: Done, Cancel, Escape, or the subject's deletion.
+ * The picker's derivations, picks first: while picking, every entity
+ * relatable to the subject in any form is a candidate, and the
+ * relationship each pick means is inferred from the pair — silently
+ * when the pair admits exactly one, through an inline choice when it
+ * admits more. The mode — the pinned subject and the picks — is store
+ * state; everything here is re-derived from the model on every render,
+ * so the workflow survives commits and renders alike. The relationship
+ * pane renders it: the picks land in the table as provisional rows.
  */
 
-import { nodeOf } from './model.js';
-import { RELATIONSHIP_TYPES } from './metamodel.js';
-import { relationshipOptions, formLabel, designated } from './queries.js';
-import { el, icon } from './dom.js';
+import { relationshipOptions } from './queries.js';
 
 /**
  * The identifiers picking can reach: the union, over every form the
@@ -48,211 +42,23 @@ export function pairOptions(model, subjectId, otherId) {
 }
 
 /**
- * The panel's rows: the picks grouped by the relationship each one means
- * — the pair's only option, or the chosen one, or the first on offer —
- * with the groups sorted by label. A pick whose pair no longer admits
- * anything falls into the trailing stale group; Done drops it.
+ * The picks as the table will land them: each with the relationship its
+ * pair means right now — the chosen form while the model still admits
+ * it, else the pair's first option, else nothing — and the options an
+ * ambiguous pair offers inline.
  * @param {import('./model.js').Model} model
  * @param {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }> }} picker
- * @returns {Array<{ form: { typeId: string, direction: string }|null, label: string,
- *                   rows: Array<{ id: string, ambiguous: boolean, options: Array<{ typeId: string, direction: string }> }> }>}
+ * @returns {Array<{ id: string, form: { typeId: string, direction: string }|null, ambiguous: boolean,
+ *                   options: Array<{ typeId: string, direction: string }> }>}
  */
-export function groupedPicks(model, picker) {
-  const groups = new Map();
-  for (const pick of picker.picks) {
+export function pickedRows(model, picker) {
+  return picker.picks.map((pick) => {
     const options = pairOptions(model, picker.subject, pick.id);
     const chosen =
       pick.form !== null &&
       options.some((option) => option.typeId === pick.form.typeId && option.direction === pick.form.direction)
         ? pick.form
         : options[0] ?? null;
-    const key = chosen === null ? '·stale' : `${chosen.typeId} ${chosen.direction}`;
-    if (!groups.has(key)) {
-      groups.set(key, {
-        form: chosen,
-        label: chosen === null ? 'No longer possible' : formLabel(chosen),
-        rows: [],
-      });
-    }
-    groups.get(key).rows.push({ id: pick.id, ambiguous: options.length > 1, options });
-  }
-  return [...groups.values()].sort((one, other) => {
-    if (one.form === null) return 1;
-    if (other.form === null) return -1;
-    return one.label.localeCompare(other.label);
+    return { id: pick.id, form: chosen, ambiguous: options.length > 1, options };
   });
-}
-
-/**
- * The queries' designation, reached by identifier: anything that is not
- * an entity in the model reads as the identifier alone.
- * @param {import('./model.js').Model} model
- * @param {string} id
- * @returns {string}
- */
-function designatedById(model, id) {
-  const entity = nodeOf(model, id);
-  return entity && entity.kind === 'entity' ? designated(entity) : id;
-}
-
-/**
- * The sentence a panel group states, from the subject's point of view:
- * outgoing, the subject leads and the picks complete it beneath;
- * incoming, the picks lead and the sentence closes beneath them, the
- * ellipsis standing where the picks read in. A stale group keeps its
- * name.
- * @param {import('./model.js').Model} model
- * @param {string} subjectId
- * @param {{ typeId: string, direction: string }|null} form
- * @returns {{ position: 'above'|'below', text: string }}
- */
-export function groupSentence(model, subjectId, form) {
-  if (form === null) return { position: 'above', text: 'No longer possible' };
-  const label = RELATIONSHIP_TYPES[form.typeId].label;
-  const subject = designatedById(model, subjectId);
-  return form.direction === 'outgoing'
-    ? { position: 'above', text: `${subject} ${label}:` }
-    : { position: 'below', text: `… ${label} ${subject}` };
-}
-
-/**
- * @param {Object} context
- * @param {ReturnType<import('./store.js').createStore>} context.store
- * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
- * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
- */
-export function createRelateWorkflow({ store, overlay, onDone }) {
-  /** @type {import('./overlay.js').Entry|null} */
-  let panel = null;
-  /** @type {HTMLElement|null} */
-  let body = null;
-
-  function renderPanel() {
-    const picker = store.picker();
-    if (picker === null) return;
-    const model = store.model();
-    body.textContent = '';
-
-    body.appendChild(
-      el('div', { className: 'panel-subject' }, [
-        el('span', { className: 'field-label', text: 'From' }),
-        el('span', { className: 'mono', text: designatedById(model, picker.subject) }),
-      ])
-    );
-
-    const offered = pickerCandidates(model, picker).size;
-    body.appendChild(
-      el('p', {
-        className: 'panel-note',
-        text:
-          offered === 0
-            ? 'Nothing in the model can take a relationship with it yet.'
-            : `${offered} ${offered === 1 ? 'row offers itself' : 'rows offer themselves'} in the navigator; the rest are dimmed. Picking again lets go.`,
-      })
-    );
-
-    const picks = el('div', { className: 'panel-picks' });
-    picks.appendChild(
-      el('div', {
-        className: 'field-label',
-        text:
-          picker.picks.length === 0
-            ? 'Pick entities in the navigator'
-            : `Picked (${picker.picks.length})`,
-      })
-    );
-
-    for (const group of groupedPicks(model, picker)) {
-      const sentence = groupSentence(model, picker.subject, group.form);
-      if (sentence.position === 'above') {
-        picks.appendChild(el('div', { className: 'panel-group', text: sentence.text }));
-      }
-      for (const row of group.rows) {
-        const unpick = el(
-          'button',
-          { className: 'icon-button neutral', attributes: { type: 'button', 'aria-label': `Unpick ${row.id}` } },
-          [icon('i-close')]
-        );
-        unpick.addEventListener('click', () => store.togglePick(row.id));
-
-        const line = el('div', { className: 'panel-pick' }, [
-          el('span', { className: 'mono panel-pick-name', text: designatedById(model, row.id) }),
-          unpick,
-        ]);
-        picks.appendChild(line);
-
-        if (row.ambiguous) {
-          const choice = el('select', {
-            className: 'field-input panel-pick-choice',
-            attributes: { 'aria-label': `Relationship for ${row.id}` },
-          });
-          row.options.forEach((option, index) => {
-            choice.appendChild(el('option', { text: formLabel(option), attributes: { value: String(index) } }));
-          });
-          const current = group.form;
-          const at = row.options.findIndex(
-            (option) => option.typeId === current?.typeId && option.direction === current?.direction
-          );
-          if (at >= 0) choice.value = String(at);
-          choice.addEventListener('change', () => store.setPickChoice(row.id, row.options[Number(choice.value)]));
-          picks.appendChild(el('div', { className: 'panel-pick-ambiguity' }, [choice]));
-        }
-      }
-      if (sentence.position === 'below') {
-        picks.appendChild(el('div', { className: 'panel-group panel-group-below', text: sentence.text }));
-      }
-    }
-    body.appendChild(picks);
-
-    const done = el('button', {
-      className: 'dialog-button button-primary',
-      text: 'Done',
-      attributes: { type: 'button' },
-    });
-    done.disabled = picker.picks.length === 0;
-    done.addEventListener('click', () => {
-      const current = store.picker();
-      if (current !== null && current.picks.length > 0) onDone(current.subject, current.picks);
-      store.endPicking();
-    });
-    const cancel = el('button', {
-      className: 'dialog-button button-secondary',
-      text: 'Cancel',
-      attributes: { type: 'button' },
-    });
-    cancel.addEventListener('click', () => store.endPicking());
-    body.appendChild(el('div', { className: 'dialog-actions panel-actions' }, [cancel, done]));
-  }
-
-  function openPanel() {
-    body = el('div', { className: 'panel-body' });
-    const element = el(
-      'aside',
-      { className: 'side-panel', attributes: { 'aria-label': 'Add relationships' } },
-      [el('h3', { className: 'panel-title', text: 'Add relationships' }), body]
-    );
-    panel = overlay.open({
-      kind: 'panel',
-      element,
-      opener: document.activeElement,
-      onClose() {
-        panel = null;
-        body = null;
-        store.endPicking();
-      },
-    });
-    renderPanel();
-  }
-
-  function render() {
-    const picking = store.picker() !== null;
-    if (picking && panel === null) openPanel();
-    else if (!picking && panel !== null) overlay.close(panel);
-    else if (picking) renderPanel();
-  }
-
-  store.subscribe(render);
-  render();
-
-  return { render };
 }

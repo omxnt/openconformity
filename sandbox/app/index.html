@@ -31,7 +31,7 @@
     <symbol id="i-warning" viewBox="0 0 16 16"><path d="M14.5,14h-13c-0.2,0-0.3-0.1-0.4-0.2c-0.1-0.2-0.1-0.3,0-0.5l6.5-12C7.7,1,8,0.9,8.2,1.1c0.1,0,0.2,0.1,0.2,0.2l6.5,12 c0.1,0.2,0.1,0.3,0,0.5C14.9,13.9,14.7,14,14.5,14z M2.3,13h11.3L8,2.5L2.3,13z"/><path d="M7.5 6H8.5V9.5H7.5z"/><path d="M8,10.8c-0.4,0-0.8,0.3-0.8,0.8s0.3,0.8,0.8,0.8c0.4,0,0.8-0.3,0.8-0.8S8.4,10.8,8,10.8z"/></symbol>
     <symbol id="i-launch" viewBox="0 0 16 16"><path d="M13,14H3c-0.6,0-1-0.4-1-1V3c0-0.6,0.4-1,1-1h5v1H3v10h10V8h1v5C14,13.6,13.6,14,13,14z"/><path d="M10 1 10 2 13.3 2 9 6.3 9.7 7 14 2.7 14 6 15 6 15 1z"/></symbol>
     <symbol id="i-email" viewBox="0 0 32 32"><path d="M28,6H4A2,2,0,0,0,2,8V24a2,2,0,0,0,2,2H28a2,2,0,0,0,2-2V8A2,2,0,0,0,28,6ZM25.8,8,16,14.78,6.2,8ZM4,24V8.91l11.43,7.91a1,1,0,0,0,1.14,0L28,8.91V24Z"/></symbol>
-    <symbol id="i-checkmark" viewBox="0 0 32 32"><path d="M13 24 4 15 5.414 13.586 13 21.17 26.586 5.586 28 7z"/></symbol>
+    <symbol id="i-checkmark" viewBox="0 0 32 32"><path d="M13 24 4 15 5.414 13.586 13 21.171 26.586 7.586 28 9 13 24z"/></symbol>
     <symbol id="i-chevron-right" viewBox="0 0 16 16"><path d="M11 8 6 13 5.3 12.3 9.6 8 5.3 3.7 6 3z"/></symbol>
     <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"/></symbol>
     <symbol id="i-save" viewBox="0 0 16 16"><path d="M13.9,4.6l-2.5-2.5C11.3,2.1,11.1,2,11,2H3C2.4,2,2,2.4,2,3v10c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1V5 C14,4.9,13.9,4.7,13.9,4.6z M6,3h4v2H6V3z M10,13H6V9h4V13z M11,13V9c0-0.6-0.4-1-1-1H6C5.4,8,5,8.4,5,9v4H3V3h2v2c0,0.6,0.4,1,1,1 h4c0.6,0,1-0.4,1-1V3.2l2,2V13H11z"/></symbol>
@@ -98,14 +98,15 @@
       <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>
       <span>Unsaved changes</span>
     </button>
-    <button type="button" class="shell-action" id="shell-metamodel" title="Metamodel" aria-label="Metamodel">
-      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-metamodel"/></svg>
-    </button>
     <button type="button" class="shell-action" id="shell-undo" title="Undo" aria-label="Undo">
       <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-undo"/></svg>
     </button>
     <button type="button" class="shell-action" id="shell-redo" title="Redo" aria-label="Redo">
       <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-redo"/></svg>
+    </button>
+    <span class="shell-gap" aria-hidden="true"></span>
+    <button type="button" class="shell-action" id="shell-metamodel" title="Metamodel" aria-label="Metamodel">
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-metamodel"/></svg>
     </button>
     <button type="button" class="shell-action" id="shell-theme" title="Theme" aria-label="Theme">
       <svg class="icon" aria-hidden="true" focusable="false"><use id="shell-theme-icon" href="#i-theme-light"/></svg>
