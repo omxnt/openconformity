@@ -45,6 +45,7 @@ export function canMoveDown(model, id) {
  * @property {boolean} [menubar]  whether the shell's Project menu offers it
  * @property {boolean} [menu]   whether running it opens a menu
  * @property {boolean} [danger]
+ * @property {string} icon      the sprite symbol a menu draws it under
  * @property {string} [hint]    the right-aligned key hint a menu shows
  * @property {() => string} [describe]  a tooltip naming what it would act on
  * @property {() => boolean} enabled
@@ -63,6 +64,7 @@ export function createActions({ store, flows }) {
   return [
     {
       id: 'new-project',
+      icon: 'i-new-project',
       label: 'New project',
       group: 'project',
       toolbar: false,
@@ -73,6 +75,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'open',
+      icon: 'i-open-project',
       label: 'Open…',
       group: 'project',
       toolbar: false,
@@ -83,6 +86,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'save',
+      icon: 'i-save',
       label: 'Save',
       group: 'project',
       toolbar: false,
@@ -93,6 +97,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'about',
+      icon: 'i-information',
       label: 'About',
       group: 'help',
       toolbar: false,
@@ -103,6 +108,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'metamodel',
+      icon: 'i-metamodel',
       label: 'Metamodel',
       group: 'help',
       toolbar: false,
@@ -113,6 +119,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'new-entity',
+      icon: 'i-new-entity',
       label: 'New',
       group: 'create',
       toolbar: true,
@@ -123,6 +130,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'new-related',
+      icon: 'i-new-related',
       label: 'New related…',
       group: 'create',
       toolbar: true,
@@ -134,6 +142,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'new-folder',
+      icon: 'i-new-folder',
       label: 'New folder',
       group: 'create',
       toolbar: true,
@@ -143,6 +152,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'relate',
+      icon: 'i-add-relationship',
       label: 'Relate…',
       group: 'create',
       toolbar: true,
@@ -154,6 +164,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'rename',
+      icon: 'i-edit',
       label: 'Rename…',
       group: 'arrange',
       toolbar: false,
@@ -163,6 +174,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'move-up',
+      icon: 'i-move-up',
       label: 'Move up',
       group: 'arrange',
       toolbar: true,
@@ -173,6 +185,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'move-down',
+      icon: 'i-move-down',
       label: 'Move down',
       group: 'arrange',
       toolbar: true,
@@ -183,6 +196,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'move-to',
+      icon: 'i-move-to',
       label: 'Move to…',
       group: 'arrange',
       toolbar: false,
@@ -192,6 +206,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'delete',
+      icon: 'i-delete',
       label: 'Delete',
       group: 'delete',
       toolbar: true,
@@ -204,6 +219,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'undo',
+      icon: 'i-undo',
       label: 'Undo',
       group: 'history',
       toolbar: true,
@@ -217,6 +233,7 @@ export function createActions({ store, flows }) {
     },
     {
       id: 'redo',
+      icon: 'i-redo',
       label: 'Redo',
       group: 'history',
       toolbar: true,

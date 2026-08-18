@@ -9,7 +9,8 @@
  */
 
 import { nodeOf, relationshipsOf } from './model.js';
-import { RELATIONSHIP_TYPES } from './metamodel.js';
+import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
+import { TYPE_ICONS } from './icons.js';
 import { relationshipOptions } from './flows.js';
 import { el, icon } from './dom.js';
 
@@ -90,17 +91,49 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
   }
 
   function endpoint(entity) {
-    const parts = [el('span', { className: 'mono designation', text: entity.id })];
+    const parts = [
+      icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
+      el('span', { className: 'mono designation', text: entity.id }),
+    ];
     const title = (entity.attributes.title ?? '').trim();
     if (title) parts.push(el('span', { className: 'row-title', text: title }));
     return parts;
+  }
+
+  /**
+   * Carbon's empty state: what this place holds, and the way to put the
+   * first thing in it.
+   * @param {string} title
+   * @param {string} body
+   * @param {{ label: string, icon: string, onPick: () => void }} [action]
+   */
+  function emptyState(title, body, action) {
+    const held = el('div', { className: 'empty-state' }, [
+      el('p', { className: 'empty-state-title', text: title }),
+      el('p', { className: 'empty-state-body', text: body }),
+    ]);
+    if (action) {
+      const button = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [
+        icon(action.icon),
+        el('span', { text: action.label }),
+      ]);
+      button.addEventListener('click', action.onPick);
+      held.appendChild(button);
+    }
+    return held;
   }
 
   function renderList(entity) {
     listHost.textContent = '';
     const groups = groupedRelationships(store.model(), entity.id);
     if (groups.outgoing.length === 0 && groups.incoming.length === 0) {
-      listHost.appendChild(el('p', { className: 'pane-empty', text: 'No relationships.' }));
+      listHost.appendChild(
+        emptyState('No relationships', `${entity.id} is not related to anything yet.`, {
+          label: 'Add relationship',
+          icon: 'i-add-relationship',
+          onPick: onAdd,
+        })
+      );
       return;
     }
 
@@ -118,10 +151,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
             className: 'icon-button',
             attributes: {
               type: 'button',
-              'aria-label': `Remove: ${group.label} ${other.id}`,
-              title: 'Remove the relationship',
+              'aria-label': `Remove the ${group.label} relationship with ${other.id}`,
+              title: 'Remove relationship',
             },
-          }, [icon('i-close')]);
+          }, [icon('i-remove-relationship')]);
           remove.addEventListener('click', () => onUnrelate(relationship));
           section.appendChild(el('div', { className: 'rel-row' }, [name, remove]));
         }
@@ -139,10 +172,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       graph.element.hidden = true;
       listHost.textContent = '';
       listHost.appendChild(
-        el('p', {
-          className: 'pane-empty',
-          text: store.hasProject() ? 'Select an entity to see its relationships.' : 'No project is open.',
-        })
+        store.hasProject()
+          ? emptyState('Nothing selected', 'Select an entity to see its relationships.')
+          : emptyState('No project', 'Create or open a project to work with relationships.')
       );
       return;
     }

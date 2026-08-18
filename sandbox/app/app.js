@@ -52,7 +52,11 @@ createNavigator({
   onPlace: (id, targetId, position) => flows.placeNode(id, targetId, position),
   onContextMenu: (id, at) => flows.openContextMenu(id, at),
 });
-const graph = createGraphView({ store, onSelect: (id) => flows.selectNode(id) });
+const graph = createGraphView({
+  store,
+  onSelect: (id) => flows.selectNode(id),
+  onUnrelate: (relationship) => flows.removeRelationship(relationship),
+});
 createRelationshipsView({
   store,
   head: document.getElementById('relationships-head'),

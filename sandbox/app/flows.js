@@ -401,6 +401,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
         .filter((action) => action.context)
         .map((action) => ({
           label: action.label,
+          icon: action.icon,
           hint: action.hint,
           danger: action.danger,
           disabled: !action.enabled(),

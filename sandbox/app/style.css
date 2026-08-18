@@ -346,14 +346,16 @@ body {
 .pane-relationships { flex: 0 0 var(--relationships-height, 280px); min-height: 120px; }
 
 /* A pane header is a working surface: the selection it acts for on the
-   left, the actions on the right. A pane with no working header has none. */
+   left, the actions on the right, at 32px on $layer-01 so its bottom rule
+   runs level with the navigator toolbar's across the gutter. */
 .pane-head {
   flex: none;
   display: flex;
   align-items: center;
   gap: 16px;                /* $spacing-05 */
-  height: 40px;             /* $spacing-08 */
-  padding: 0 8px 0 16px;    /* $spacing-03, $spacing-05 */
+  min-height: 32px;         /* $spacing-07 */
+  padding: 0 0 0 16px;      /* $spacing-05 */
+  background: var(--layer);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -365,8 +367,10 @@ body {
   min-width: 0;
   overflow: hidden;
 }
+.subhead-kind { color: var(--text-second); font-size: 12px; letter-spacing: 0.32px; flex: none; }  /* $label-01 */
 .subhead-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pane-head-actions { display: flex; gap: 2px; }
+.pane-head-actions { display: flex; align-items: center; align-self: stretch; }
+.pane-head-actions .ghost-button { align-self: stretch; height: auto; }
 
 .pane-body { flex: 1; overflow: auto; }
 
@@ -375,6 +379,13 @@ body {
   padding: 16px;            /* $spacing-05 */
 }
 
+/* Where nothing is yet: what this place holds, and the way to put the
+   first thing in it. Carbon's empty state, at productive scale. */
+.empty-state { padding: 16px; max-width: 36rem; }  /* $spacing-05 */
+.empty-state-title { font-weight: 600; }  /* $heading-compact-01 */
+.empty-state-body { margin-top: 4px; color: var(--text-second); }  /* $spacing-02 */
+.empty-state .ghost-button { margin-top: 16px; height: 32px; padding: 0 12px; }  /* $spacing-05 */
+
 /* ---------- Toolbar ---------- */
 
 .pane-toolbar {
@@ -382,7 +393,9 @@ body {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 4px 8px;         /* $spacing-02, $spacing-03 */
+  height: 32px;             /* $spacing-07 */
+  padding: 0 4px;           /* $spacing-02 */
+  background: var(--layer);
   border-bottom: 1px solid var(--border-subtle);
 }
 .toolbar-spacer { flex: 1; }
@@ -411,7 +424,9 @@ body {
 .ghost-button:hover:not(:disabled) { background: var(--hover); }
 .ghost-button:active:not(:disabled) { background: var(--active); }
 .ghost-button:disabled { color: var(--disabled); cursor: not-allowed; }
-.ghost-danger:not(:disabled) { color: var(--danger-text); }
+/* Carbon danger ghost: neutral until pointed at, then unmistakable. */
+.ghost-danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
+.ghost-danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
 
 /* Carbon Search: the glyph inside the field, the clear action at its end. */
 .search {
@@ -458,7 +473,10 @@ body {
 
 /* ---------- Tree ---------- */
 
-.tree { padding: 4px 0; min-height: 100%; }
+/* Carbon TreeView: chevron disclosure, 16px of indent per level, and no
+   connector lines. Long rows widen the tree and the pane scrolls, so
+   nothing ellipsizes away. */
+.tree { padding: 4px 0; min-height: 100%; width: max-content; min-width: 100%; }
 
 .tree-row {
   display: flex;
@@ -468,36 +486,65 @@ body {
   padding-right: 16px;      /* $spacing-05 */
   cursor: default;
   white-space: nowrap;
-  overflow: hidden;
+  transition: background-color var(--motion-fast) var(--motion-standard);
 }
 .tree-row:hover { background: var(--hover); }
-.tree-row.selected { background: var(--layer-accent); }
+/* Carbon TreeView active node: $layer-selected, the 3px $border-interactive
+   marker, and the heading weight. */
+.tree-row.selected {
+  background: var(--layer-accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+  font-weight: 600;
+}
+.tree-row.selected:hover { background: var(--active); }
 .tree-row.drop-target { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tree-row.drop-before { box-shadow: inset 0 2px 0 var(--accent); }
 .tree-row.drop-after { box-shadow: inset 0 -2px 0 var(--accent); }
+.tree-row.selected.drop-before,
+.tree-row.selected.drop-after { box-shadow: inset 3px 0 0 var(--accent); }
 
+/* The chevron is drawn at 16px but hit at 24, which is the WCAG 2.2
+   minimum target (2.5.8); the row's own height gives the rest. */
 .twisty {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 24px;              /* $spacing-06 */
+  height: 24px;
   flex: none;
-  color: var(--text-second);
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
 }
 
 .designation { color: var(--text-second); }
-.tree-row .row-title,
 .rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
 .untitled { color: var(--text-place); font-weight: 400; }
 
-.project-row { padding-left: 8px; }  /* $spacing-03 */
+.project-row { padding-left: 16px; }  /* $spacing-05 */
 .project-row .row-title { font-weight: 600; }
+
+/* While a relationship end is being picked, the tree is the picker: rows
+   the model refuses recede, rows it accepts offer themselves. */
+.tree-row.pick-dim { opacity: 0.3; }
+.tree-row.pick-dim:hover { background: none; }
 
 .landing { display: grid; gap: 4px; justify-items: start; padding: 8px 0; }  /* $spacing-02, $spacing-03 */
 .landing .ghost-button { margin-left: 8px; }
 
 /* ---------- Editor ---------- */
+
+/* Carbon form: the label above its field, two columns with the tall
+   fields spanning both. */
+.editor-body > .fields { padding: 16px; }  /* $spacing-05 */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;           /* $spacing-05, $spacing-07 */
+  max-width: 1024px;
+}
+.fields .field { padding: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }  /* $spacing-02 */
+.field-tall { grid-column: 1 / -1; }
 
 .field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
 .field:last-child { padding-bottom: 16px; }
@@ -586,10 +633,10 @@ select.field-input[size] {
   cursor: pointer;
   text-align: left;
 }
-.rel-row .icon-button { visibility: hidden; }
-.rel-row:hover .icon-button,
-.rel-row .icon-button:focus-visible { visibility: visible; }
 
+/* A row action. Removal is neutral until pointed at, then the danger
+   fill; letting go of a pending pick destroys nothing, so it does not go
+   red. */
 .icon-button {
   display: inline-flex;
   align-items: center;
@@ -602,9 +649,13 @@ select.field-input[size] {
   background: none;
   border: none;
   cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard),
+              color var(--motion-fast) var(--motion-standard);
 }
-.icon-button:hover { background: var(--hover); color: var(--text); }
-.icon-button:active { background: var(--active); }
+.icon-button:hover { background: var(--danger); color: var(--text-on-color); }
+.icon-button:active { background: var(--danger-active); color: var(--text-on-color); }
+.icon-button.neutral:hover { background: var(--hover); color: var(--text); }
+.icon-button.neutral:active { background: var(--active); color: var(--text); }
 
 /* Carbon content switcher, on the high-contrast surface when selected. */
 .switcher {
@@ -628,15 +679,40 @@ select.field-input[size] {
 /* ---------- The graph ---------- */
 
 .graph-host { padding: 16px; overflow: auto; }
-.graph-node rect { fill: var(--layer); stroke: var(--border-subtle); }
-.graph-node { cursor: pointer; }
-.graph-node:hover rect { fill: var(--hover); }
-.graph-node:focus-visible { outline: 2px solid var(--focus); }
-.graph-subject { cursor: default; }
-.graph-subject rect { fill: var(--layer-accent); stroke: var(--border-strong); }
-.graph-caption { fill: var(--text); font-size: 12px; letter-spacing: 0.32px; }
-.graph-edge line { stroke: var(--border-strong); }
+.graph { display: block; }
+
+/* The box's own rect only: the remove control carries a rect of its own. */
+.graph-node > rect { fill: var(--layer); stroke: var(--border-subtle); stroke-width: 1; }
+.graph-node.centre > rect { fill: var(--background); stroke: var(--accent); stroke-width: 2; }
+.graph-node:not(.centre) { cursor: pointer; }
+.graph-node:not(.centre) > rect { transition: fill var(--motion-fast) var(--motion-standard); }
+.graph-node:not(.centre):hover > rect { fill: var(--hover); stroke: var(--border-strong); }
+.graph-node:focus-visible > rect { stroke: var(--focus); stroke-width: 2; }
+.graph-node:focus { outline: none; }
+
+.node-icon { fill: var(--text-second); }
+.node-type { font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }   /* $label-01 */
+.node-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; fill: var(--text-second); }  /* $code-01 */
+.node-label { font-size: 14px; letter-spacing: 0.16px; font-weight: 600; fill: var(--text); }  /* $heading-compact-01 */
+
+/* Removing a relationship from the graph: an unlink, neutral until
+   pointed at, then the danger fill, as the same action looks in the
+   list. */
+.node-remove { cursor: pointer; }
+.node-remove:focus { outline: none; }
+.node-remove-hit { fill: transparent; transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove-icon { fill: var(--text-second); transition: fill var(--motion-fast) var(--motion-standard); }
+.node-remove:hover .node-remove-hit { fill: var(--danger); }
+.node-remove:hover .node-remove-icon { fill: var(--text-on-color); }
+.node-remove:active .node-remove-hit { fill: var(--danger-active); }
+.node-remove:focus-visible .node-remove-hit { stroke: var(--focus); stroke-width: 2; }
+
+/* One line for every relationship: the label on the edge is what names
+   it. */
+.graph-edge line { stroke: var(--border-strong); stroke-width: 1; }
+.arrow-head { fill: var(--border-strong); }
 .graph-label { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
+.graph-more { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
 
 /* ---------- The picker ---------- */
 
@@ -664,6 +740,13 @@ select.field-input[size] {
   display: grid;
   gap: 4px;                 /* $spacing-02 */
   padding: 12px 16px 0;     /* $spacing-04, $spacing-05 */
+}
+.panel-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  line-height: 1.33334;
+  color: var(--text-helper);
+  padding: 8px 16px 0;      /* $spacing-03, $spacing-05 */
 }
 .panel-picks { flex: 1; padding: 16px 16px 8px; overflow: auto; }
 .panel-group {
@@ -696,24 +779,49 @@ select.field-input[size] {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 32px;            /* $spacing-07 */
   background: var(--overlay);
 }
 
+/* Carbon modal, with the shadow the brief rules out replaced by a rule. */
 .dialog {
-  width: 480px;
-  max-width: calc(100vw - 64px);
-  max-height: calc(100vh - 64px);
+  width: 100%;
+  max-width: 640px;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--background);
+  border: 1px solid var(--border-subtle);
 }
 
+.dialog-head {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 0 8px 16px; /* $spacing-05, $spacing-03 */
+}
 .dialog-title {
   font-size: 20px;          /* $heading-03 */
   line-height: 1.4;
   font-weight: 400;
-  padding: 16px 16px 8px;   /* $spacing-05, $spacing-03 */
 }
+.dialog-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;              /* Carbon modal close, $spacing-09 */
+  height: 48px;
+  margin-top: -16px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.dialog-close:hover { background: var(--hover); }
+.dialog-close:active { background: var(--active); }
 
 .dialog-body {
   flex: 1;
@@ -742,7 +850,7 @@ select.field-input[size] {
 
 .dialog-button {
   flex: 1;
-  height: 48px;             /* Carbon modal button, $spacing-09 */
+  height: 64px;             /* Carbon modal button, $spacing-10 */
   font: inherit;
   text-align: left;
   padding: 0 16px;          /* $spacing-05 */
@@ -750,6 +858,8 @@ select.field-input[size] {
   cursor: pointer;
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
+/* The side panel keeps the smaller foot. */
+.panel-actions .dialog-button { height: 48px; }  /* $spacing-09 */
 .button-primary { color: var(--text-on-color); background: var(--button-primary); }
 .button-primary:hover { background: var(--button-primary-hover); }
 .button-primary:active { background: var(--button-primary-active); }

@@ -48,11 +48,22 @@ export function createDialogs({ overlay, toastRegion = null }) {
         return button;
       });
 
+      const dismiss = el('button', {
+        className: 'dialog-close',
+        attributes: { type: 'button', 'aria-label': 'Close' },
+      }, [icon('i-close')]);
+      dismiss.addEventListener('click', () => overlay.close(entry));
+
+      // Carbon's modal names itself by pointing at its own heading, and
+      // the heading is a heading: a reader moving by them lands on it.
       const card = el(
         'div',
-        { className: 'dialog', attributes: { role: 'dialog', 'aria-modal': 'true', 'aria-label': title } },
+        { className: 'dialog', attributes: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' } },
         [
-          el('h3', { className: 'dialog-title', text: title }),
+          el('div', { className: 'dialog-head' }, [
+            el('h2', { className: 'dialog-title', text: title, attributes: { id: 'dialog-title' } }),
+            dismiss,
+          ]),
           el('div', { className: 'dialog-body' }, [
             ...(message ? [el('p', { text: message })] : []),
             ...(body ? [body] : []),
@@ -107,7 +118,8 @@ export function createDialogs({ overlay, toastRegion = null }) {
 
   /**
    * A one-field question: resolves the entered text, or null when it is
-   * cancelled or dismissed. Enter answers with the field.
+   * cancelled or dismissed. Enter answers with the field, the text opens
+   * selected, and a blanked field falls back to what it held.
    * @param {Object} spec
    * @param {string} spec.title
    * @param {string} spec.label
@@ -125,7 +137,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
       el('label', { className: 'field-label', text: label, attributes: { for: 'prompt-field' } }),
       input,
     ]);
-    const answer = await open({
+    const asked = open({
       title,
       body,
       actions: [
@@ -134,7 +146,9 @@ export function createDialogs({ overlay, toastRegion = null }) {
       ],
       initialFocus: input,
     });
-    return answer === 'confirmed' ? input.value : null;
+    input.select();
+    const answer = await asked;
+    return answer === 'confirmed' ? input.value.trim() || value : null;
   }
 
   /**

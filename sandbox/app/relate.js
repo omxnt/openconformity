@@ -119,6 +119,17 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
       ])
     );
 
+    const offered = pickerCandidates(model, picker).size;
+    body.appendChild(
+      el('p', {
+        className: 'panel-note',
+        text:
+          offered === 0
+            ? 'Nothing in the model can take a relationship with it yet.'
+            : `${offered} ${offered === 1 ? 'row offers itself' : 'rows offer themselves'} in the navigator; the rest are dimmed. Picking again lets go.`,
+      })
+    );
+
     const picks = el('div', { className: 'panel-picks' });
     picks.appendChild(
       el('div', {
@@ -135,7 +146,7 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
       for (const row of group.rows) {
         const unpick = el(
           'button',
-          { className: 'icon-button', attributes: { type: 'button', 'aria-label': `Unpick ${row.id}` } },
+          { className: 'icon-button neutral', attributes: { type: 'button', 'aria-label': `Unpick ${row.id}` } },
           [icon('i-close')]
         );
         unpick.addEventListener('click', () => store.togglePick(row.id));

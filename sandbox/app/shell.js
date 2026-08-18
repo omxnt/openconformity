@@ -139,6 +139,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
           .filter((action) => action.menubar && action.group === group)
           .map((action) => ({
             label: action.label,
+            icon: action.icon,
             disabled: !action.enabled(),
             onPick: () => action.run({ anchor: button }),
           })),

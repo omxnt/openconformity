@@ -60,16 +60,43 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     head.hidden = false;
     const parts = [];
     if (node.kind === 'entity') {
-      parts.push(icon(TYPE_ICONS[node.type], ENTITY_TYPES[node.type].pillar));
+      const type = ENTITY_TYPES[node.type];
+      parts.push(icon(TYPE_ICONS[node.type], type.pillar));
+      parts.push(el('span', { className: 'subhead-kind', text: type.name }));
       parts.push(el('span', { className: 'mono designation', text: node.id }));
       const title = (node.attributes.title ?? '').trim();
       if (title) parts.push(el('span', { className: 'subhead-title', text: title }));
     } else {
       parts.push(icon(FOLDER_ICON));
+      parts.push(el('span', { className: 'subhead-kind', text: 'Folder' }));
       parts.push(el('span', { className: 'subhead-title', text: node.name }));
     }
     head.appendChild(el('div', { className: 'pane-head-name' }, parts));
     head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
+  }
+
+  /**
+   * Carbon's empty state for the pane.
+   * @param {string} title
+   * @param {string} text
+   */
+  function emptyState(title, text) {
+    return el('div', { className: 'empty-state' }, [
+      el('p', { className: 'empty-state-title', text: title }),
+      el('p', { className: 'empty-state-body', text }),
+    ]);
+  }
+
+  /**
+   * The identifier, read-only above the attributes: generated, never an
+   * attribute, shown as the document's conventions place it.
+   * @param {import('./model.js').Entity} node
+   */
+  function identifierField(node) {
+    return el('div', { className: 'field' }, [
+      el('div', { className: 'field-label', text: 'Identifier' }),
+      el('div', { className: 'field-value mono', text: node.id }),
+    ]);
   }
 
   function headButton(label, onPick) {
@@ -113,10 +140,11 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
 
   function renderView(node) {
     renderHead(node, [headButton('Edit', beginEdit)]);
+    const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       const value = node.attributes[definition.key];
-      body.appendChild(
-        el('div', { className: 'field' }, [
+      fields.appendChild(
+        el('div', { className: `field${definition.kind === 'multiline' ? ' field-tall' : ''}` }, [
           el('div', { className: 'field-label', text: definition.name }),
           value === undefined || value === ''
             ? el('div', { className: 'field-value field-empty', text: '–' })
@@ -127,6 +155,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
         ])
       );
     }
+    body.appendChild(fields);
   }
 
   function renderEdit(node) {
@@ -136,9 +165,10 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       }),
       headButton('Cancel', onCancel),
     ]);
+    const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
-      body.appendChild(
-        el('div', { className: 'field' }, [
+      fields.appendChild(
+        el('div', { className: `field${definition.kind === 'multiline' ? ' field-tall' : ''}` }, [
           el('label', {
             className: 'field-label',
             text: definition.name,
@@ -148,6 +178,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
         ])
       );
     }
+    body.appendChild(fields);
   }
 
   function render() {
@@ -164,7 +195,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     body.textContent = '';
     if (!store.hasProject()) {
       head.hidden = true;
-      body.appendChild(el('p', { className: 'pane-empty', text: 'No project is open.' }));
+      body.appendChild(emptyState('No project', 'Create or open a project to work with its entities.'));
       return;
     }
     if (!node) {
@@ -173,18 +204,23 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       head.appendChild(
         el('div', { className: 'pane-head-name' }, [
           icon(PROJECT_ICON),
+          el('span', { className: 'subhead-kind', text: 'Project' }),
           name
             ? el('span', { className: 'subhead-title', text: name })
             : el('span', { className: 'subhead-title untitled', text: 'Untitled' }),
         ])
       );
       head.appendChild(el('div', { className: 'pane-head-actions' }, [headButton('Rename…', onRenameProject)]));
-      body.appendChild(el('p', { className: 'pane-empty', text: 'The project carries a name; the model is its content.' }));
+      body.appendChild(
+        emptyState('Project', 'The project holds the model. Select an entity in the navigator to see its attributes here.')
+      );
       return;
     }
     if (node.kind === 'folder') {
       renderHead(node, [headButton('Rename…', onRename)]);
-      body.appendChild(el('p', { className: 'pane-empty', text: 'A folder carries a name and nothing else.' }));
+      body.appendChild(
+        emptyState('Folder', 'A folder groups things in the navigator and carries no attributes of its own.')
+      );
       return;
     }
     renderView(node);

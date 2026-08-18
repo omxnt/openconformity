@@ -76,6 +76,13 @@ function fakeStorage() {
     { 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', delete: 'Del' },
     'the key hints ride on the actions the keys reach'
   );
+  ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');
+  {
+    const page = readFile('../app/index.html');
+    for (const action of actions) {
+      ok(page.includes(`id="${action.icon}"`), `${action.id} draws under ${action.icon}, which is in the sprite`);
+    }
+  }
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),

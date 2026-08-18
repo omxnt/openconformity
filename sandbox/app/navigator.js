@@ -146,6 +146,28 @@ export function dropZone(ratio) {
 }
 
 /**
+ * The branches that must stand open for these identifiers to be visible:
+ * every ancestor of every one of them. While picking, the tree opens
+ * these transiently, leaving the durable expansion untouched.
+ * @param {import('./model.js').Model} model
+ * @param {Iterable<string>} ids
+ * @returns {Set<string>}
+ */
+export function revealSet(model, ids) {
+  const open = new Set();
+  for (const id of ids) {
+    const seen = new Set();
+    let current = nodeOf(model, id);
+    while (current && current.parent !== null && !seen.has(current.parent)) {
+      seen.add(current.parent);
+      open.add(current.parent);
+      current = nodeOf(model, current.parent);
+    }
+  }
+  return open;
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.container
@@ -319,8 +341,9 @@ export function createNavigator({
     if (pickable) classes.push('pickable');
     if (picked) classes.push('picked');
     if (picking.subject === row.id) classes.push('picker-subject');
+    if (picking.subject !== null && !pickable && picking.subject !== row.id) classes.push('pick-dim');
     const rowElement = el('div', { className: classes.join(' '), attributes });
-    rowElement.style.paddingLeft = `${8 + (row.depth + 1) * 16}px`;
+    rowElement.style.paddingLeft = `${16 + (row.depth + 1) * 16}px`;
 
     const twisty = el('span', { className: 'twisty' });
     if (row.hasChildren) {
@@ -397,17 +420,17 @@ export function createNavigator({
   }
 
   function renderLanding() {
-    const landing = el('div', { className: 'landing' }, [
-      el('p', { className: 'pane-empty', text: 'No project is open.' }),
+    const landing = el('div', { className: 'empty-state' }, [
+      el('p', { className: 'empty-state-title', text: 'No project' }),
+      el('p', { className: 'empty-state-body', text: 'Create a project, or open one saved as a file.' }),
     ]);
     for (const id of ['new-project', 'open']) {
       const action = actions.find((offered) => offered.id === id);
       if (!action) continue;
       const button = el('button', {
         className: 'ghost-button',
-        text: action.label,
         attributes: { type: 'button', 'data-action': `landing-${action.id}` },
-      });
+      }, [icon(action.icon), el('span', { text: action.label })]);
       button.addEventListener('click', () => action.run({ anchor: button }));
       landing.appendChild(button);
     }
@@ -432,8 +455,13 @@ export function createNavigator({
       picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
       subject: picker?.subject ?? null,
     };
+    // While picking, every branch holding a candidate opens transiently,
+    // so nothing on offer hides inside a collapsed level; the durable
+    // expansion is untouched.
+    const revealed = picker === null ? null : revealSet(store.model(), picking.candidates);
+    const isOpen = revealed === null ? store.isExpanded : (id) => store.isExpanded(id) || revealed.has(id);
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
-    for (const row of visibleRows(store.model(), store.isExpanded, true, filter)) {
+    for (const row of visibleRows(store.model(), isOpen, true, filter)) {
       tree.appendChild(row.kind === 'project' ? renderProjectRow() : renderRow(row, picking));
     }
     container.appendChild(tree);
@@ -468,7 +496,10 @@ export function createNavigator({
   }
 
   container.addEventListener('keydown', (event) => {
-    const rows = visibleRows(store.model(), store.isExpanded, store.hasProject(), filter);
+    const picker = store.picker();
+    const revealed = picker === null ? null : revealSet(store.model(), pickerCandidates(store.model(), picker));
+    const isOpen = revealed === null ? store.isExpanded : (id) => store.isExpanded(id) || revealed.has(id);
+    const rows = visibleRows(store.model(), isOpen, store.hasProject(), filter);
     if (rows.length === 0) return;
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);

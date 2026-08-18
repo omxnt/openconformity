@@ -7,7 +7,7 @@
  */
 
 import { pickerCandidates, pairOptions, groupedPicks } from '../app/relate.js';
-import { neighbourhood } from '../app/graph-view.js';
+import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph-view.js';
 import { groupedRelationships } from '../app/relationships-view.js';
 import { relationshipOptions } from '../app/flows.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
@@ -174,6 +174,39 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     ![...end.outgoing, ...end.incoming].some((edge) => edge.other.id === 'SCN-001'),
     'and never what lies beyond them: the graph is the selection, not the model'
   );
+}
+
+// --- The graph caps a side at seven ------------------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  for (let count = 0; count < 9; count += 1) {
+    addEntity(model, 'HAZ');
+    relate(model, 'elm-exhibits-haz', 'ELM-001', `HAZ-${String(count + 1).padStart(3, '0')}`);
+  }
+  addEntity(model, 'CAS');
+  relate(model, 'cas-assesses-elm', 'CAS-001', 'ELM-001');
+
+  equal(MAX_PER_SIDE, 7, 'seven boxes a side');
+  const capped = cappedNeighbourhood(neighbourhood(model, 'ELM-001'));
+  equal(capped.right.length, 7, 'the ninth outgoing edge does not widen the canvas');
+  equal(capped.moreOutgoing, 2, 'what lies beyond is counted');
+  equal(capped.left.length, 1, 'the sparse side draws whole');
+  equal(capped.moreIncoming, 0, 'and counts nothing');
+}
+
+// --- The box caption ----------------------------------------------------
+
+{
+  const model = createModel();
+  const entity = addEntity(model, 'ELM').entity;
+  equal(caption(entity), 'ELM-001', 'an untitled box captions its identifier');
+  entity.attributes.title = 'Short name';
+  equal(caption(entity), 'Short name', 'a title within the box rides whole');
+  entity.attributes.title = 'A title that runs well past what three lines hold';
+  equal(caption(entity), 'A title that runs well pas…', 'a long one cuts to what the box holds');
+  equal(caption(entity).length, 27, 'at twenty-seven characters');
 }
 
 summary('test-relationships');

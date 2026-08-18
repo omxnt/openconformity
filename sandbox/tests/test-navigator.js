@@ -4,7 +4,7 @@
  * rendered tree is checked in the browser. Run from this directory.
  */
 
-import { treeRows, labelParts, visibleRows, matchingIds } from '../app/navigator.js';
+import { treeRows, labelParts, visibleRows, matchingIds, revealSet } from '../app/navigator.js';
 import { createModel, addEntity, addFolder, updateEntity, file } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -117,6 +117,25 @@ function drawn(model, expanded) {
   const filtered = visibleRows(model, collapsed, true, 'crush');
   equal(filtered[0].kind, 'project', 'the project row stays first while filtering');
   deepEqual(filtered.slice(1).map((row) => row.id), ['F-1', 'ELM-001', 'HAZ-001'], 'with the filtered tree beneath it');
+}
+
+// --- The transient reveal ----------------------------------------------
+
+{
+  const model = createModel();
+  addFolder(model, 'Zone');
+  addEntity(model, 'ELM', { parent: 'F-1' });
+  addEntity(model, 'HAZ', { parent: 'ELM-001' });
+  addEntity(model, 'SCN');
+
+  deepEqual([...revealSet(model, ['HAZ-001'])].sort(), ['ELM-001', 'F-1'], 'a deep candidate opens every branch above it');
+  deepEqual([...revealSet(model, ['SCN-001'])], [], 'a root candidate opens nothing');
+  deepEqual(
+    [...revealSet(model, ['HAZ-001', 'SCN-001'])].sort(),
+    ['ELM-001', 'F-1'],
+    'the set is the union over all of them'
+  );
+  ok(!revealSet(model, ['HAZ-001']).has('HAZ-001'), 'the candidate itself is not a branch to open');
 }
 
 // --- The labels --------------------------------------------------------
