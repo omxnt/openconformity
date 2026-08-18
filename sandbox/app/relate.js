@@ -13,6 +13,7 @@
  */
 
 import { nodeOf } from './model.js';
+import { RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, formLabel, designated } from './queries.js';
 import { el, icon } from './dom.js';
 
@@ -95,6 +96,26 @@ function designatedById(model, id) {
 }
 
 /**
+ * The sentence a panel group states, from the subject's point of view:
+ * outgoing, the subject leads and the picks complete it beneath;
+ * incoming, the picks lead and the sentence closes beneath them, the
+ * ellipsis standing where the picks read in. A stale group keeps its
+ * name.
+ * @param {import('./model.js').Model} model
+ * @param {string} subjectId
+ * @param {{ typeId: string, direction: string }|null} form
+ * @returns {{ position: 'above'|'below', text: string }}
+ */
+export function groupSentence(model, subjectId, form) {
+  if (form === null) return { position: 'above', text: 'No longer possible' };
+  const label = RELATIONSHIP_TYPES[form.typeId].label;
+  const subject = designatedById(model, subjectId);
+  return form.direction === 'outgoing'
+    ? { position: 'above', text: `${subject} ${label}:` }
+    : { position: 'below', text: `… ${label} ${subject}` };
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
@@ -142,7 +163,10 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
     );
 
     for (const group of groupedPicks(model, picker)) {
-      picks.appendChild(el('div', { className: 'panel-group', text: group.label }));
+      const sentence = groupSentence(model, picker.subject, group.form);
+      if (sentence.position === 'above') {
+        picks.appendChild(el('div', { className: 'panel-group', text: sentence.text }));
+      }
       for (const row of group.rows) {
         const unpick = el(
           'button',
@@ -173,6 +197,9 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
           choice.addEventListener('change', () => store.setPickChoice(row.id, row.options[Number(choice.value)]));
           picks.appendChild(el('div', { className: 'panel-pick-ambiguity' }, [choice]));
         }
+      }
+      if (sentence.position === 'below') {
+        picks.appendChild(el('div', { className: 'panel-group panel-group-below', text: sentence.text }));
       }
     }
     body.appendChild(picks);

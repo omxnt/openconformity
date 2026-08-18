@@ -69,3 +69,4 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-view-graph` | `chart--relationship` | 32 | `chart--relationship.svg` |
 | `i-launch` | `launch` | 16 | `launch.svg` |
 | `i-email` | `email` | 32 | `email.svg` |
+| `i-checkmark` | `checkmark` | 32 | `checkmark.svg` |

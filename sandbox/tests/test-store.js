@@ -494,4 +494,23 @@ function openStore(storage) {
   equal(restored.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
+// --- The navigator's filter is session state ------------------------------
+
+{
+  const storage = fakeStorage();
+  const store = createStore({ storage });
+  store.replaceProject(createModel());
+  equal(store.navigatorFilter(), '', 'the filter starts empty');
+  let notified = 0;
+  store.subscribe(() => { notified += 1; });
+  store.setNavigatorFilter('haz');
+  equal(store.navigatorFilter(), 'haz', 'and holds what was typed');
+  equal(notified, 1, 'notifying its panes');
+  store.setNavigatorFilter('haz');
+  equal(notified, 1, 'but not for no change');
+  ok(!JSON.parse(storage.read(PROJECT_KEY)).session.navigatorFilter, 'never persisted');
+  store.replaceProject(createModel());
+  equal(store.navigatorFilter(), '', 'a replaced project starts unfiltered');
+}
+
 summary('test-store');

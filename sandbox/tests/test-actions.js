@@ -175,4 +175,37 @@ function enabledIds(actions) {
   );
 }
 
+// --- The toolbar's shape ---------------------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const actions = createActions({ store, flows: {} });
+  deepEqual(
+    actions.filter((action) => action.toolbar).map((action) => action.id),
+    ['new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete'],
+    'the tree toolbar holds the tree actions: Move to joined its group, undo and redo left for the shell'
+  );
+}
+
+// --- Reorder stands down while the tree is filtered ------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
+  store.commit((model) => {
+    addEntity(model, 'ELM');
+    addEntity(model, 'HAZ');
+  });
+  store.select('HAZ-001');
+  const actions = createActions({ store, flows: {} });
+  const enabled = (id) => actions.find((action) => action.id === id).enabled();
+  equal(enabled('move-up'), true, 'unfiltered, the second sibling moves up');
+  store.setNavigatorFilter('h');
+  equal(enabled('move-up'), false, 'filtered, it does not: visual neighbours are not real siblings');
+  equal(enabled('move-down'), false, 'nor down');
+  equal(enabled('move-to'), true, 'Move to stays: its list is complete regardless of the filter');
+  store.setNavigatorFilter('');
+  equal(enabled('move-up'), true, 'clearing the filter restores the moves');
+}
+
 summary('test-actions');

@@ -165,7 +165,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: 'Alt ↑',
-      enabled: () => canMoveUp(store.model(), store.selection()),
+      enabled: () => store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
       run: () => flows.moveUp(),
     },
     {
@@ -176,7 +176,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: 'Alt ↓',
-      enabled: () => canMoveDown(store.model(), store.selection()),
+      enabled: () => store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
     },
     {
@@ -184,7 +184,7 @@ export function createActions({ store, flows }) {
       icon: 'i-move-to',
       label: 'Move to…',
       group: 'arrange',
-      toolbar: false,
+      toolbar: true,
       context: true,
       enabled: () => selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
       run: () => flows.moveToSelection(),
@@ -207,8 +207,9 @@ export function createActions({ store, flows }) {
       icon: 'i-undo',
       label: 'Undo',
       group: 'history',
-      toolbar: true,
+      toolbar: false,
       context: false,
+      menubar: true,
       describe: () => {
         const { back } = store.historyDepth();
         return back === 0 ? 'Nothing to undo' : `Undo (${back} ${back === 1 ? 'step' : 'steps'})`;
@@ -221,8 +222,9 @@ export function createActions({ store, flows }) {
       icon: 'i-redo',
       label: 'Redo',
       group: 'history',
-      toolbar: true,
+      toolbar: false,
       context: false,
+      menubar: true,
       describe: () => {
         const { forward } = store.historyDepth();
         return forward === 0 ? 'Nothing to redo' : `Redo (${forward} ${forward === 1 ? 'step' : 'steps'})`;

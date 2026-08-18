@@ -78,11 +78,15 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- The landing offers the example as its third affordance --------------
+// --- The ways into a project live in the editor's empty state ------------
 
 {
+  const editor = readFile('../app/editor.js');
+  for (const id of ['new-project', 'open', 'load-example']) {
+    ok(editor.includes(`id: '${id}'`), `the editor's landing offers ${id}`);
+  }
   const navigator = readFile('../app/navigator.js');
-  ok(navigator.includes("'new-project', 'open', 'load-example'"), 'the landing offers the example as its third affordance');
+  ok(!navigator.includes('landing-'), 'and the navigator landing carries no buttons: they live in one place');
 }
 
 // --- Every glyph drawn is in the sprite, with its provenance -------------
@@ -134,6 +138,38 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.table th {\n  position: sticky;'), 'the relationship table head stays put while the body scrolls');
 }
 
+// --- The second dogfooding batch -----------------------------------------
+
+{
+  const page = readFile('../app/index.html');
+  const origin = readFile('../app/assets/icons/ORIGIN.md');
+  ok(page.includes('id="i-checkmark"'), 'the pick check is in the sprite');
+  ok(origin.includes('`i-checkmark`'), 'with its provenance recorded');
+  for (const id of ['shell-undo', 'shell-redo']) {
+    ok(page.includes(`id="${id}"`), `the shell's global cluster carries ${id}`);
+  }
+
+  const navigator = readFile('../app/navigator.js');
+  ok(
+    navigator.includes("const dragLocked = () => store.picker() !== null || filter().trim() !== ''"),
+    'tree drag stands down while picking and while filtering'
+  );
+
+  const sheet = readFile('../app/style.css');
+  ok(!sheet.includes('dashed var(--accent)'), 'the dashed candidate outlines are gone: dimming alone carries candidacy');
+
+  const { LANDING_OFFER } = await import('../app/editor.js');
+  const actions = createActions({ store: createStore({ storage: fakeStorage() }), flows: {} });
+  for (const offer of LANDING_OFFER) {
+    const action = actions.find((held) => held.id === offer.id);
+    ok(action !== undefined, `${offer.id} is a real action`);
+    ok(
+      action.label === offer.label && action.icon === offer.icon,
+      `the editor's ${offer.id} button matches the action's label and glyph`
+    );
+  }
+}
+
 // --- The pre-paint theme script speaks the store's literals --------------
 
 {
@@ -173,8 +209,8 @@ import { fakeStorage } from './helpers.js';
 {
   const sheet = readFile('../app/style.css');
   const shell = readFile('../app/shell.js');
-  ok(sheet.includes('min-width: 312px'), 'the pane floor is the toolbar: nine 32px buttons, eight 2px gaps, 4px padding each side');
-  ok(shell.includes('minimum: 312'), 'and the splitter stops at the same width');
+  ok(sheet.includes('min-width: 278px'), 'the pane floor is the toolbar: eight 32px buttons, seven 2px gaps, 4px padding each side');
+  ok(shell.includes('minimum: 278'), 'and the splitter stops at the same width');
 }
 
 // --- The closing check: pointer targets and the menu bar keys ------------

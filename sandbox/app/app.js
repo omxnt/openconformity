@@ -27,6 +27,7 @@ const editor = createEditor({
   onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
   onEscape: () => flows.escapeEdit(),
+  onAction: (id) => actions.find((action) => action.id === id)?.run({}),
 });
 const flows = createFlows({
   store,

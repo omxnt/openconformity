@@ -76,6 +76,8 @@ export function createStore({ storage }) {
   let persistFailed = false;
   /** @type {'list'|'graph'} the relationship pane's presentation: session state, never persisted */
   let relationshipView = 'list';
+  /** The navigator's filter as typed: session state, never persisted, one truth for the tree and every enablement. */
+  let navigatorFilter = '';
   /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
   let picker = null;
   const listeners = new Set();
@@ -306,6 +308,7 @@ export function createStore({ storage }) {
       selection = null;
       expanded = new Set();
       projectCollapsed = false;
+      navigatorFilter = '';
       picker = null;
       projectOpen = true;
       persist();
@@ -430,6 +433,20 @@ export function createStore({ storage }) {
       if (view !== 'list' && view !== 'graph') return;
       if (view === relationshipView) return;
       relationshipView = view;
+      notify();
+    },
+
+    /** The navigator's filter as typed. */
+    navigatorFilter: () => navigatorFilter,
+
+    /**
+     * Set the navigator's filter. One truth for the tree, the drag
+     * guards, and the move enablements; never persisted.
+     * @param {string} text
+     */
+    setNavigatorFilter(text) {
+      if (typeof text !== 'string' || text === navigatorFilter) return;
+      navigatorFilter = text;
       notify();
     },
 

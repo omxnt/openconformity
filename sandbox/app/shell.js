@@ -286,6 +286,27 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     metamodelButton.addEventListener('click', () => metamodelAction.run({ anchor: metamodelButton }));
   }
 
+  // Undo and redo are global, so they live in the shell's global-action
+  // cluster: enablement and the step-counting tooltip follow the action.
+  /** @type {Array<{ action: import('./actions.js').Action, button: HTMLElement }>} */
+  const shellHistory = [];
+  for (const id of ['undo', 'redo']) {
+    const action = actions.find((offered) => offered.id === id);
+    const button = document.getElementById(`shell-${id}`);
+    if (!action || !button) continue;
+    button.addEventListener('click', () => action.run({ anchor: button }));
+    shellHistory.push({ action, button });
+  }
+
+  function syncShellHistory() {
+    for (const { action, button } of shellHistory) {
+      button.disabled = !action.enabled();
+      const said = action.describe ? action.describe() : action.label;
+      button.setAttribute('title', said);
+      button.setAttribute('aria-label', said);
+    }
+  }
+
   // --- Notices ---------------------------------------------------------
 
   let restorationDismissed = false;
@@ -394,7 +415,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width * 0.6,
-    minimum: 312,
+    minimum: 278,
     preset: 320,
     apply: (width) => workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`),
     keys: ['ArrowLeft', 'ArrowRight'],
@@ -418,6 +439,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   function render() {
     applyTheme();
     renderNotices();
+    syncShellHistory();
     unsavedButton.hidden = !store.dirty();
     document.title = titleFor(store.hasProject(), store.model().name);
 

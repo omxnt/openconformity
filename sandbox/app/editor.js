@@ -39,6 +39,17 @@ export function draftChanged(definitions, attributes, values) {
 const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
 
 /**
+ * The ways into a project, offered from the editor's no-project state —
+ * the one place the buttons live. A test pins this table to the action
+ * list, so the two cannot drift.
+ */
+export const LANDING_OFFER = [
+  { id: 'new-project', icon: 'i-new-project', label: 'New project' },
+  { id: 'open', icon: 'i-open-project', label: 'Open project…' },
+  { id: 'load-example', icon: 'i-project', label: 'Load example' },
+];
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
@@ -47,8 +58,9 @@ const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
  * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
  * @param {(event: KeyboardEvent) => void} [context.onEscape]
+ * @param {(id: string) => void} [context.onAction]  runs a landing action by identifier, resolved at click time
  */
-export function createEditor({ store, head, body, onSave, onCancel, onRename, onEscape = () => {} }) {
+export function createEditor({ store, head, body, onSave, onCancel, onRename, onEscape = () => {}, onAction = () => {} }) {
   /** @type {'view'|'edit'} */
   let mode = 'view';
   /** @type {string|null} the entity the open draft belongs to */
@@ -118,6 +130,24 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return button;
   }
 
+  /** An icon-only head action, neutral with a tooltip, like the toolbar's. */
+  function headIconButton(label, iconId, onPick) {
+    const button = el(
+      'button',
+      { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: label, 'aria-label': label } },
+      [icon(iconId)]
+    );
+    button.addEventListener('click', onPick);
+    return button;
+  }
+
+  /** Carbon's form actions in the 32px head: Save filled, Cancel ghost beside it. */
+  function saveCancel(onSavePick) {
+    const save = el('button', { className: 'head-action button-primary', text: 'Save', attributes: { type: 'button' } });
+    save.addEventListener('click', onSavePick);
+    return [save, headButton('Cancel', onCancel)];
+  }
+
   /** The project head: its icon, its kind, and its name as it stands. */
   function projectHeadName() {
     const name = store.model().name.trim();
@@ -168,11 +198,11 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return input;
   }
 
-  /** The project, on the standard surface: view fields and Edit. */
+  /** The project, on the standard surface: view fields, Edit, and the way onward. */
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [headButton('Edit', beginEdit, 'i-edit')]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [headIconButton('Edit attributes', 'i-edit', beginEdit)]));
     const values = projectValues();
     const fields = el('div', { className: 'fields' });
     for (const definition of PROJECT_FIELDS) {
@@ -187,18 +217,21 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
+    body.appendChild(
+      el('div', { className: 'editor-guide' }, [
+        el('p', { text: 'Select something in the navigator to view and edit it.' }),
+        el('p', { text: 'Relationships are made from the selected entity, in the pane below.' }),
+      ])
+    );
   }
 
   function renderProjectEdit() {
     head.hidden = false;
     head.appendChild(projectHeadName());
     head.appendChild(
-      el('div', { className: 'pane-head-actions' }, [
-        headButton('Save', () => {
-          if (onSave(null, fieldValues()) !== false) endEdit();
-        }),
-        headButton('Cancel', onCancel),
-      ])
+      el('div', { className: 'pane-head-actions' }, saveCancel(() => {
+        if (onSave(null, fieldValues()) !== false) endEdit();
+      }))
     );
     const values = projectValues();
     const fields = el('div', { className: 'fields' });
@@ -218,7 +251,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   }
 
   function renderView(node) {
-    renderHead(node, [headButton('Edit', beginEdit, 'i-edit')]);
+    renderHead(node, [headIconButton('Edit attributes', 'i-edit', beginEdit)]);
     const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       const value = node.attributes[definition.key];
@@ -238,12 +271,9 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   }
 
   function renderEdit(node) {
-    renderHead(node, [
-      headButton('Save', () => {
-        if (onSave(editingId, fieldValues()) !== false) endEdit();
-      }),
-      headButton('Cancel', onCancel),
-    ]);
+    renderHead(node, saveCancel(() => {
+      if (onSave(editingId, fieldValues()) !== false) endEdit();
+    }));
     const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       fields.appendChild(
@@ -276,7 +306,20 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     body.textContent = '';
     if (!store.hasProject()) {
       head.hidden = true;
-      body.appendChild(emptyState('No project', 'Create or open a project to work with its entities.'));
+      const landing = emptyState(
+        'No project',
+        'Create a project, open one saved as a file, or look around the example. Everything stays in this browser until you save it to a file.'
+      );
+      for (const offer of LANDING_OFFER) {
+        const button = el(
+          'button',
+          { className: 'ghost-button', attributes: { type: 'button', 'data-action': `landing-${offer.id}` } },
+          [icon(offer.icon), el('span', { text: offer.label })]
+        );
+        button.addEventListener('click', () => onAction(offer.id));
+        landing.appendChild(button);
+      }
+      body.appendChild(landing);
       return;
     }
     if (!node) {

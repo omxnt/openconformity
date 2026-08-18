@@ -10,8 +10,8 @@
  * untitled. The pane owns its transient state: scroll and focus survive
  * the full re-render.
  *
- * With no project open, the tree is the landing: nothing to draw, and
- * the two ways to a project offered in its place.
+ * With no project open, the tree is the landing: one quiet line; the
+ * ways into a project live in the editor's empty state.
  *
  * The toolbar draws from the one action list, and the tree asks the model
  * the same questions a drop answers: the middle of a row files into it
@@ -245,22 +245,23 @@ export function createNavigator({
     });
   }
 
-  /** The filter as typed: the pane's own transient state, gone with the visit. */
-  let filter = '';
+  /** The filter as typed lives in the store, one truth for the tree, the drag guards, and the move enablements. */
+  const filter = () => store.navigatorFilter();
+
+  /** Whether dragging is off: picks own the tree's clicks, and a filtered view's neighbours are not real siblings. */
+  const dragLocked = () => store.picker() !== null || filter().trim() !== '';
 
   filterInput.addEventListener('input', () => {
-    filter = filterInput.value;
     filterClear.hidden = filterInput.value === '';
-    render();
+    store.setNavigatorFilter(filterInput.value);
   });
 
   // The clear action exists only while there is something to clear, and
   // Escape is the keyboard's way to it.
   function clearFilter() {
     filterInput.value = '';
-    filter = '';
     filterClear.hidden = true;
-    render();
+    store.setNavigatorFilter('');
     filterInput.focus();
   }
 
@@ -280,11 +281,7 @@ export function createNavigator({
     let lastGroup = null;
     for (const action of actions.filter((offered) => offered.toolbar)) {
       if (lastGroup !== null && action.group !== lastGroup) {
-        toolbar.appendChild(
-          action.group === 'history'
-            ? el('span', { className: 'toolbar-spacer' })
-            : el('span', { className: 'toolbar-divider' })
-        );
+        toolbar.appendChild(el('span', { className: 'toolbar-divider' }));
       }
       lastGroup = action.group;
 
@@ -389,8 +386,8 @@ export function createNavigator({
       'aria-selected': String(selected),
       tabindex: selected ? '0' : '-1',
       'data-id': row.id,
-      draggable: 'true',
     };
+    if (!dragLocked()) attributes.draggable = 'true';
     if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
     if (pickable) attributes['aria-checked'] = String(picked);
     if (row.node.kind === 'entity') {
@@ -416,6 +413,11 @@ export function createNavigator({
     }
     rowElement.appendChild(twisty);
 
+    if (picked) {
+      const check = icon('i-checkmark');
+      check.classList.add('pick-check');
+      rowElement.appendChild(check);
+    }
     rowElement.appendChild(
       row.node.kind === 'folder'
         ? icon(FOLDER_ICON)
@@ -444,6 +446,10 @@ export function createNavigator({
     });
 
     rowElement.addEventListener('dragstart', (event) => {
+      if (dragLocked()) {
+        event.preventDefault();
+        return;
+      }
       draggedId = row.id;
       event.dataTransfer.setData('text/plain', row.id);
       event.dataTransfer.effectAllowed = 'move';
@@ -480,22 +486,12 @@ export function createNavigator({
     return rowElement;
   }
 
+  // The landing keeps one quiet line; the ways in live in the editor's
+  // empty state, so the buttons exist in one place.
   function renderLanding() {
-    const landing = el('div', { className: 'empty-state' }, [
-      el('p', { className: 'empty-state-title', text: 'No project' }),
-      el('p', { className: 'empty-state-body', text: 'Create a project, open one saved as a file, or look around the example.' }),
-    ]);
-    for (const id of ['new-project', 'open', 'load-example']) {
-      const action = actions.find((offered) => offered.id === id);
-      if (!action) continue;
-      const button = el('button', {
-        className: 'ghost-button',
-        attributes: { type: 'button', 'data-action': `landing-${action.id}` },
-      }, [icon(action.icon), el('span', { text: action.label })]);
-      button.addEventListener('click', () => action.run({ anchor: button }));
-      landing.appendChild(button);
-    }
-    container.appendChild(landing);
+    container.appendChild(
+      el('div', { className: 'empty-state' }, [el('p', { className: 'empty-state-title', text: 'No project' })])
+    );
   }
 
   function render() {
@@ -518,7 +514,7 @@ export function createNavigator({
     };
     const isOpen = openWithReveal(picker, picking.candidates);
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
-    for (const row of visibleRows(store.model(), isOpen, true, filter, store.projectExpanded())) {
+    for (const row of visibleRows(store.model(), isOpen, true, filter(), store.projectExpanded())) {
       tree.appendChild(row.kind === 'project' ? renderProjectRow(row) : renderRow(row, picking));
     }
     container.appendChild(tree);
@@ -554,7 +550,7 @@ export function createNavigator({
 
   container.addEventListener('keydown', (event) => {
     const picker = store.picker();
-    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter, store.projectExpanded());
+    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter(), store.projectExpanded());
     if (rows.length === 0) return;
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);

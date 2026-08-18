@@ -142,13 +142,24 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     return held;
   }
 
+  /** The subject's own cell: muted, no icon — it repeats on every row. */
+  function subjectCell(subject) {
+    const title = (subject.attributes.title ?? '').trim();
+    const parts = [el('span', { className: 'mono designation', text: subject.id })];
+    if (title) parts.push(el('span', { className: 'row-title', text: title }));
+    return el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity cell-subject' }, parts)]);
+  }
+
   /**
-   * One table row: it selects the far end, so it is reachable by
-   * keyboard as well as by pointer, and it carries the unlink.
+   * One table row, reading as the fact it records: the subject in the
+   * source or the target position as the direction has it, the far end
+   * at the other. It selects the far end, so it is reachable by keyboard
+   * as well as by pointer, and it carries the unlink.
    * @param {{ direction: 'outgoing'|'incoming', label: string,
    *           relationship: import('./model.js').Relationship, other: import('./model.js').Entity }} row
+   * @param {import('./model.js').Entity} subject
    */
-  function tableRow({ direction, label, relationship, other }) {
+  function tableRow({ direction, label, relationship, other }, subject) {
     const title = (other.attributes.title ?? '').trim();
     const rowElement = el('tr', {
       attributes: { tabindex: '0', 'aria-label': `Select ${other.id}${title ? `, ${title}` : ''}` },
@@ -160,11 +171,17 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       onSelect(other.id);
     });
 
-    const arrow = el('span', { className: 'arrow', text: direction === 'outgoing' ? '→' : '←' });
-    arrow.setAttribute('aria-hidden', 'true');
-    rowElement.appendChild(el('td', { className: 'rel-direction' }, [arrow, el('span', { text: direction })]));
-    rowElement.appendChild(el('td', { text: label }));
-    rowElement.appendChild(el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, endpoint(other))]));
+    const otherCell = el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, endpoint(other))]);
+    const relationshipCell = el('td', { className: 'rel-label', text: label });
+    if (direction === 'outgoing') {
+      rowElement.appendChild(subjectCell(subject));
+      rowElement.appendChild(relationshipCell);
+      rowElement.appendChild(otherCell);
+    } else {
+      rowElement.appendChild(otherCell);
+      rowElement.appendChild(relationshipCell);
+      rowElement.appendChild(subjectCell(subject));
+    }
 
     const remove = el('button', {
       className: 'icon-button',
@@ -200,13 +217,13 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       el('table', { className: 'table' }, [
         el('thead', {}, [
           el('tr', {}, [
-            el('th', { text: 'Direction' }),
+            el('th', { text: 'Source' }),
             el('th', { text: 'Relationship' }),
-            el('th', { text: 'Related entity' }),
+            el('th', { text: 'Target' }),
             el('th', { className: 'shrink' }),
           ]),
         ]),
-        el('tbody', {}, rows.map(tableRow)),
+        el('tbody', {}, rows.map((row) => tableRow(row, entity))),
       ])
     );
   }

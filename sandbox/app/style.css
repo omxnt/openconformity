@@ -332,7 +332,7 @@ body {
 
 .pane-navigator {
   flex: 0 0 var(--navigator-width, 320px);
-  min-width: 312px;  /* the toolbar: nine 32px buttons, eight 2px gaps, 4px padding each side */
+  min-width: 278px;  /* the toolbar: eight 32px buttons, seven 2px gaps, 4px padding each side */
 }
 
 .column {
@@ -531,27 +531,54 @@ body {
 .project-row { padding-left: 16px; }  /* $spacing-05 */
 .project-row .row-title { font-weight: 600; }
 
-/* While a relationship end is being picked, the tree is the picker: rows
-   the model refuses recede, rows it accepts offer themselves. */
+/* While a relationship end is being picked, the tree is the picker:
+   candidacy is carried by dimming alone — candidates at full strength,
+   everything else receding — and a pick is filled, the selected-row
+   tint under a leading check, so adjacent picks never merge. */
 .tree-row.pick-dim { opacity: 0.3; }
 .tree-row.pick-dim:hover { background: none; }
-
-.landing { display: grid; gap: 4px; justify-items: start; padding: 8px 0; }  /* $spacing-02, $spacing-03 */
-.landing .ghost-button { margin-left: 8px; }
+.tree-row.pickable { cursor: pointer; }
+.tree-row.picked { background: var(--layer-accent); }
+.pick-check { fill: var(--accent); }
 
 /* ---------- Editor ---------- */
 
 /* Carbon form: the label above its field, two columns with the tall
-   fields spanning both. */
-.editor-body > .fields { padding: 16px; }  /* $spacing-05 */
+   fields spanning both, each row parted by a hairline so the form scans
+   as rows rather than a flat sheet. */
+.editor-body > .fields { padding: 4px 16px 16px; }  /* $spacing-02, $spacing-05 */
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 32px;           /* $spacing-05, $spacing-07 */
+  gap: 0 32px;              /* $spacing-07 */
   max-width: 1024px;
 }
-.fields .field { padding: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }  /* $spacing-02 */
+.fields .field {
+  padding: 12px 0;          /* $spacing-04 */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;                 /* $spacing-02 */
+  min-width: 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
 .field-tall { grid-column: 1 / -1; }
+
+/* The way onward, under the project's own fields. */
+.editor-guide { padding: 16px; color: var(--text-second); display: grid; gap: 8px; max-width: 36rem; }  /* $spacing-05, $spacing-03 */
+
+/* Carbon form actions in the 32px head: Save filled, Cancel ghost. */
+.head-action {
+  font: inherit;
+  letter-spacing: inherit;
+  border: none;
+  cursor: pointer;
+  align-self: stretch;
+  padding: 0 16px;          /* $spacing-05 */
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.head-action.button-primary { background: var(--button-primary); color: var(--text-on-color); }
+.head-action.button-primary:hover { background: var(--button-primary-hover); }
+.head-action.button-primary:active { background: var(--button-primary-active); }
 
 .field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
 .field:last-child { padding-bottom: 16px; }
@@ -635,10 +662,11 @@ select.field-input[size] {
 .table tbody tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .table tbody tr:hover td { background: var(--hover); }
 .table .shrink { width: 1%; padding: 0 8px; }  /* $spacing-03 */
-.rel-direction { color: var(--text-second); }
-.arrow { margin-right: 8px; color: var(--text-second); }  /* $spacing-03 */
+.rel-label { color: var(--text-second); }
 .cell-entity { display: flex; align-items: center; gap: 8px; min-width: 0; }  /* $spacing-03 */
 .cell-entity .row-title { overflow: hidden; text-overflow: ellipsis; }
+/* The subject repeats on every row, so it recedes: the fact reads, the far end leads. */
+.cell-subject .row-title { color: var(--text-second); }
 
 /* A row action. Removal is neutral until pointed at, then the danger
    fill; letting go of a pending pick destroys nothing, so it does not go
@@ -774,9 +802,6 @@ select.field-input[size] {
 .panel-pick-choice { font-size: 12px; letter-spacing: 0.32px; padding: 4px 40px 4px 8px; }
 .panel-actions { flex: none; }
 
-/* Candidate rows while picking: outlined, and marked once picked. */
-.tree-row.pickable { outline: 1px dashed var(--accent); outline-offset: -2px; cursor: pointer; }
-.tree-row.picked { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--layer); }
 .tree-row.picker-subject { background: var(--layer-accent); }
 
 /* ---------- Dialogs ---------- */

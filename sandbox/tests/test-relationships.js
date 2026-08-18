@@ -6,7 +6,7 @@
  * relationships, never the whole model. Run from this directory.
  */
 
-import { pickerCandidates, pairOptions, groupedPicks } from '../app/relate.js';
+import { pickerCandidates, pairOptions, groupedPicks, groupSentence } from '../app/relate.js';
 import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph.js';
 import { groupedRelationships, relationshipRows } from '../app/relationships.js';
 import { relationshipOptions } from '../app/queries.js';
@@ -116,6 +116,32 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     'a pick whose pair no longer admits anything falls into the trailing stale group'
   );
   equal(stale[0].label, 'No longer possible', 'named for what it is');
+}
+
+// --- The panel groups read as sentences ----------------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'ELM');
+  const { updateEntity } = await import('../app/model.js');
+  updateEntity(model, 'ELM-001', { title: 'Machine' });
+
+  deepEqual(
+    groupSentence(model, 'ELM-001', { typeId: 'elm-decomposes-into-elm', direction: 'outgoing' }),
+    { position: 'above', text: 'ELM-001  Machine decomposes into:' },
+    'an outgoing group leads with the subject, the picks completing it beneath'
+  );
+  deepEqual(
+    groupSentence(model, 'ELM-001', { typeId: 'elm-decomposes-into-elm', direction: 'incoming' }),
+    { position: 'below', text: '… decomposes into ELM-001  Machine' },
+    'an incoming group closes beneath its picks, the ellipsis standing where they read in'
+  );
+  deepEqual(
+    groupSentence(model, 'ELM-001', null),
+    { position: 'above', text: 'No longer possible' },
+    'a stale group keeps its name'
+  );
 }
 
 // --- The grouped list --------------------------------------------------
