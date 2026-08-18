@@ -239,6 +239,11 @@ export function createNavigator({
   function syncToolbar() {
     for (const [action, button] of toolbarButtons) {
       button.disabled = !action.enabled();
+      if (action.describe) {
+        const said = action.describe();
+        button.title = said;
+        button.setAttribute('aria-label', said);
+      }
     }
   }
 
@@ -305,6 +310,9 @@ export function createNavigator({
     };
     if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
     if (pickable) attributes['aria-checked'] = String(picked);
+    if (row.node.kind === 'entity') {
+      attributes.title = `${ENTITY_TYPES[row.node.type].name} ${row.id}`;
+    }
 
     const classes = ['tree-row'];
     if (selected) classes.push('selected');

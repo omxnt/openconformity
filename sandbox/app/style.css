@@ -837,6 +837,47 @@ select.field-input[size] {
 }
 .menu-entry:disabled .menu-hint { color: var(--disabled); }
 
+/* ---------- Toasts ---------- */
+
+/* Carbon toast notification, low contrast: told in the corner, gone by
+   itself. */
+.toasts {
+  position: fixed;
+  top: 56px;                /* the shell, plus $spacing-03 */
+  right: 8px;               /* $spacing-03 */
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                 /* $spacing-03 */
+  width: 288px;             /* Carbon toast width */
+}
+.toast {
+  display: flex;
+  align-items: flex-start;
+  background: var(--layer);       /* $notification-background-info */
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--support-info);
+}
+.toast-icon { flex: none; margin: 16px 0 0 12px; fill: var(--support-info); }  /* $spacing-05, $spacing-04 */
+.toast-content { flex: 1; padding: 12px 8px 12px 12px; min-width: 0; }  /* $spacing-04, $spacing-03 */
+.toast-title { font-weight: 600; }  /* $heading-compact-01 */
+.toast-body { margin-top: 2px; color: var(--text-second); }
+.toast-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.toast-close:hover { background: var(--hover); }
+.toast-close:active { background: var(--active); }
+
 /* ---------- Small viewport ---------- */
 
 .small-viewport {

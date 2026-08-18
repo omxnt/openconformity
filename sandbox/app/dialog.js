@@ -3,15 +3,23 @@
  * if. A dialog resolves with the value of the chosen action, or with null
  * when it is dismissed — Escape, or a pointer down on the backdrop. Focus
  * stays inside the dialog and returns to the opener when it closes.
+ *
+ * A toast is the other voice: a passing remark in the corner for what
+ * changes nothing and needs no answer — a refusal, a save that went
+ * through. It leaves by itself and never joins the overlay stack.
  */
 
-import { el } from './dom.js';
+import { el, icon } from './dom.js';
+
+/** How long a toast stands before leaving on its own. */
+const TOAST_MS = 6000;
 
 /**
  * @param {Object} context
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
+ * @param {HTMLElement} [context.toastRegion]
  */
-export function createDialogs({ overlay }) {
+export function createDialogs({ overlay, toastRegion = null }) {
   /**
    * @param {Object} spec
    * @param {string} spec.title
@@ -190,5 +198,34 @@ export function createDialogs({ overlay }) {
     return answer === 'confirmed' ? select.value : null;
   }
 
-  return { open, confirm, prompt, choose };
+  /**
+   * A passing remark: told in the corner, closed by itself or by hand.
+   * @param {string} title
+   * @param {string} message
+   */
+  function toast(title, message) {
+    if (!toastRegion) return;
+    const item = el('div', { className: 'toast', attributes: { role: 'status' } }, [
+      icon('i-information'),
+      el('div', { className: 'toast-content' }, [
+        el('p', { className: 'toast-title', text: title }),
+        el('p', { className: 'toast-body', text: message }),
+      ]),
+    ]);
+    item.querySelector('.icon').classList.add('toast-icon');
+    const timer = setTimeout(() => item.remove(), TOAST_MS);
+    const close = el(
+      'button',
+      { className: 'toast-close', attributes: { type: 'button', 'aria-label': 'Close' } },
+      [icon('i-close')]
+    );
+    close.addEventListener('click', () => {
+      clearTimeout(timer);
+      item.remove();
+    });
+    item.appendChild(close);
+    toastRegion.appendChild(item);
+  }
+
+  return { open, confirm, prompt, choose, toast };
 }

@@ -38,6 +38,19 @@ export function titleFor(hasProject, name) {
   return hasProject && trimmed ? `${trimmed} — openconformity` : 'openconformity';
 }
 
+/**
+ * Whether leaving costs something: only while there is unsaved work that
+ * persistence is failing to keep. While the blob holds it, closing the
+ * tab loses nothing, and a prompt saying otherwise would be a lie the
+ * user learns to dismiss.
+ * @param {boolean} dirty
+ * @param {boolean} persistFailed
+ * @returns {boolean}
+ */
+export function shouldWarnBeforeUnload(dirty, persistFailed) {
+  return dirty && persistFailed;
+}
+
 /** The statement made when the stored session cannot be read back. */
 export const RESTORATION_NOTICE = 'The previous session could not be restored.';
 export const RESTORATION_DETAIL =
@@ -53,9 +66,10 @@ export const PERSIST_DETAIL =
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {Array<import('./actions.js').Action>} [context.actions]
+ * @param {(title: string, message: string) => void} [context.toast]
  * @param {Document} [context.root]
  */
-export function createShell({ store, overlay, actions = [], root = document }) {
+export function createShell({ store, overlay, actions = [], toast = () => {}, root = document }) {
   const themeButton = root.getElementById('shell-theme');
   const themeIcon = root.getElementById('shell-theme-icon');
   const projectButton = root.getElementById('shell-project');
@@ -279,12 +293,26 @@ export function createShell({ store, overlay, actions = [], root = document }) {
 
   // --- Wiring ----------------------------------------------------------
 
+  let wasFailingToPersist = false;
+
   function render() {
     applyTheme();
     renderNotices();
     unsavedButton.hidden = !store.dirty();
     root.title = titleFor(store.hasProject(), store.model().name);
+
+    if (wasFailingToPersist && !store.persistFailed()) {
+      toast('Autosave working again', 'The project is being kept in this browser once more.');
+    }
+    wasFailingToPersist = store.persistFailed();
   }
+
+  // The browser's own leave-prompt, kept for the one case where leaving
+  // still costs something.
+  root.defaultView.addEventListener('beforeunload', (event) => {
+    if (!shouldWarnBeforeUnload(store.dirty(), store.persistFailed())) return;
+    event.preventDefault();
+  });
 
   store.subscribe(render);
   render();

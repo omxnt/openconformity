@@ -262,6 +262,9 @@ export function createStore({ storage }) {
     canUndo: () => history.canUndo(),
     canRedo: () => history.canRedo(),
 
+    /** How many steps back and forward the arrows reach. */
+    historyDepth: () => history.depth(),
+
     /** @returns {boolean} whether a step was taken */
     undo() {
       if (!history.canUndo()) return false;

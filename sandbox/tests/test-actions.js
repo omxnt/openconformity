@@ -149,6 +149,15 @@ function fakeStorage() {
   equal(folder.relate, false, 'never related');
   equal(folder['new-related'], false, 'nor newly related to');
 
+  const said = (id) => actions.find((action) => action.id === id).describe();
+  equal(said('delete'), 'Delete folder', 'the delete tooltip names the folder it would act on');
+  store.select('ELM-001');
+  equal(said('delete'), 'Delete entity', 'and the entity when one is selected');
+  ok(/^Undo \(\d+ steps\)$/.test(said('undo')), 'undo says how far it reaches');
+  equal(said('redo'), 'Nothing to redo', 'redo says when it reaches nowhere');
+  store.undo();
+  equal(said('redo'), 'Redo (1 step)', 'and counts a single step in the singular');
+
   store.undo();
   equal(enabled().redo, true, 'an undone change can be redone');
 }

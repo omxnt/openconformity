@@ -7,6 +7,7 @@
 import {
   effectiveTheme,
   titleFor,
+  shouldWarnBeforeUnload,
   THEME_MENU,
   RESTORATION_NOTICE,
   RESTORATION_DETAIL,
@@ -61,6 +62,13 @@ equal(titleFor(true, ''), 'openconformity', 'an unnamed project titles the softw
 equal(titleFor(true, 'Mixer line'), 'Mixer line — openconformity', 'a named project titles the tab');
 equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
 equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
+
+// --- The leave-prompt fires exactly when leaving costs something --------
+
+equal(shouldWarnBeforeUnload(true, true), true, 'unsaved work that persistence is failing to keep warns');
+equal(shouldWarnBeforeUnload(true, false), false, 'unsaved work the blob holds does not: closing loses nothing');
+equal(shouldWarnBeforeUnload(false, true), false, 'a clean project warns of nothing, kept or not');
+equal(shouldWarnBeforeUnload(false, false), false, 'and neither does the quiet case');
 
 // --- Compliance: the licences ride with the software --------------------
 

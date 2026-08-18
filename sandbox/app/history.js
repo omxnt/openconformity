@@ -133,5 +133,8 @@ export function createHistory(model) {
 
     /** The sequence of the entry the cursor stands at. */
     sequence: () => entries[cursor].sequence,
+
+    /** How many steps back and forward the arrows reach. */
+    depth: () => ({ back: cursor, forward: entries.length - 1 - cursor }),
   };
 }

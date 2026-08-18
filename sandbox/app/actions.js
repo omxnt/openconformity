@@ -46,6 +46,7 @@ export function canMoveDown(model, id) {
  * @property {boolean} [menu]   whether running it opens a menu
  * @property {boolean} [danger]
  * @property {string} [hint]    the right-aligned key hint a menu shows
+ * @property {() => string} [describe]  a tooltip naming what it would act on
  * @property {() => boolean} enabled
  * @property {(invocation: { anchor?: HTMLElement, at?: { x: number, y: number } }) => void} run
  */
@@ -197,6 +198,7 @@ export function createActions({ store, flows }) {
       context: true,
       danger: true,
       hint: 'Del',
+      describe: () => (selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
       enabled: () => selected() !== null,
       run: () => flows.deleteSelection(),
     },
@@ -206,6 +208,10 @@ export function createActions({ store, flows }) {
       group: 'history',
       toolbar: true,
       context: false,
+      describe: () => {
+        const { back } = store.historyDepth();
+        return back === 0 ? 'Nothing to undo' : `Undo (${back} ${back === 1 ? 'step' : 'steps'})`;
+      },
       enabled: () => store.canUndo(),
       run: () => flows.undo(),
     },
@@ -215,6 +221,10 @@ export function createActions({ store, flows }) {
       group: 'history',
       toolbar: true,
       context: false,
+      describe: () => {
+        const { forward } = store.historyDepth();
+        return forward === 0 ? 'Nothing to redo' : `Redo (${forward} ${forward === 1 ? 'step' : 'steps'})`;
+      },
       enabled: () => store.canRedo(),
       run: () => flows.redo(),
     },

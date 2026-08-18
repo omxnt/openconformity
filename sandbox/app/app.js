@@ -18,7 +18,7 @@ const store = createStore({ storage: window.localStorage });
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
 store.subscribe(() => overlay.closeMenus());
 
-const dialogs = createDialogs({ overlay });
+const dialogs = createDialogs({ overlay, toastRegion: document.getElementById('toasts') });
 const editor = createEditor({
   store,
   head: document.getElementById('editor-head'),
@@ -37,7 +37,7 @@ const flows = createFlows({
   fileInput: document.getElementById('file-input'),
 });
 const actions = createActions({ store, flows });
-createShell({ store, overlay, actions });
+createShell({ store, overlay, actions, toast: dialogs.toast });
 createNavigator({
   store,
   container: document.getElementById('navigator-body'),

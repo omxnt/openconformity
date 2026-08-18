@@ -234,7 +234,10 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     const admissible = offer?.forms.some(
       (offered) => offered.typeId === form.typeId && offered.direction === form.direction
     );
-    if (!admissible) return;
+    if (!admissible) {
+      dialogs.toast('Relationship refused', 'The model no longer allows that relationship.');
+      return;
+    }
 
     const outcome = store.commit((model) => {
       const created = addEntity(model, code, { parent: subjectId });
@@ -407,13 +410,25 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
   }
 
   /**
+   * A refused change is told in passing: it altered nothing and needs no
+   * answer.
+   * @param {string} title
+   * @param {{ ok: boolean, reason?: string }} outcome
+   * @returns {boolean} whether it went through
+   */
+  function toastRefusal(title, outcome) {
+    if (!outcome.ok) dialogs.toast(title, outcome.reason ?? 'That is not allowed.');
+    return outcome.ok;
+  }
+
+  /**
    * File a node in a parent. A model change like any other: undoable, and
    * it marks the project unsaved.
    * @param {string} id
    * @param {string|null} parentId
    */
   function fileNode(id, parentId) {
-    store.commit((model) => file(model, id, parentId));
+    toastRefusal('Move refused', store.commit((model) => file(model, id, parentId)));
   }
 
   /**
@@ -423,7 +438,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
    * @param {'before'|'after'} position
    */
   function placeNode(id, targetId, position) {
-    store.commit((model) => placeBeside(model, id, targetId, position));
+    toastRefusal('Move refused', store.commit((model) => placeBeside(model, id, targetId, position)));
   }
 
   /** Change places with the sibling above. */
@@ -468,7 +483,7 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     });
     if (value === null) return;
     const target = targets[Number(value)];
-    if (target) store.commit((model) => file(model, id, target.parentId));
+    if (target) toastRefusal('Move refused', store.commit((model) => file(model, id, target.parentId)));
   }
 
   /**
@@ -569,8 +584,8 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
    * @param {Array<{ id: string, form: { typeId: string, direction: string }|null }>} picks
    */
   function completeRelate(subjectId, picks) {
+    let related = 0;
     store.commit((model) => {
-      let related = 0;
       for (const pick of picks) {
         const options = relationshipOptions(model, subjectId)
           .filter((option) => option.candidates.some((candidate) => candidate.id === pick.id))
@@ -589,6 +604,10 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
       }
       return related > 0 ? { ok: true } : { ok: false, reason: 'Nothing could be related.' };
     });
+    if (related < picks.length) {
+      const dropped = picks.length - related;
+      dialogs.toast('Relationships refused', `${dropped} of the picked relationships could no longer be made.`);
+    }
   }
 
   /**
@@ -694,14 +713,16 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
   function saveProject() {
     if (!store.hasProject()) return;
     const text = serialise(store.model());
+    const filename = filenameFor(store.model().name);
     const blob = new Blob([text], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    const anchor = el('a', { attributes: { href: url, download: filenameFor(store.model().name) } });
+    const anchor = el('a', { attributes: { href: url, download: filename } });
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
     store.markSaved();
+    dialogs.toast('Project saved', `Saved to your downloads as ${filename}.`);
   }
 
   /**

@@ -138,6 +138,21 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   ok(recorded > dropped, 'a dropped sequence is never reused');
 }
 
+// --- Depth -------------------------------------------------------------
+
+{
+  let model = createModel();
+  const history = createHistory(model);
+  deepEqual(history.depth(), { back: 0, forward: 0 }, 'a fresh history reaches nowhere');
+  addEntity(model, 'ELM');
+  history.record(model);
+  addEntity(model, 'HAZ');
+  history.record(model);
+  deepEqual(history.depth(), { back: 2, forward: 0 }, 'each record deepens the way back');
+  model = history.undo(model);
+  deepEqual(history.depth(), { back: 1, forward: 1 }, 'an undo trades a step back for a step forward');
+}
+
 // --- Reset -------------------------------------------------------------
 
 {

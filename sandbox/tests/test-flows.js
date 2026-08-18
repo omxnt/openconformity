@@ -39,6 +39,9 @@ const noDialogs = {
   open() {
     throw new Error('a dialog was asked');
   },
+  toast() {
+    // A toast is a remark, not a question.
+  },
 };
 
 function flowsOver(store) {
@@ -381,6 +384,56 @@ function offered(model, subjectId) {
   dialogs.choose = async () => null;
   await flows.moveToSelection();
   equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'cancelling moves nothing');
+}
+
+// --- Refusals are told in passing ---------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const dialogs = {
+    confirm: async () => true,
+    prompt: async () => null,
+    choose: async () => null,
+    open: async () => null,
+    toast: (title, message) => toasts.push([title, message]),
+  };
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs,
+    editor: stubEditor(),
+    getActions: () => [],
+    fileInput: null,
+  });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+
+  flows.fileNode('ELM-001', null);
+  equal(toasts.length, 1, 'a refused move is told in passing');
+  equal(toasts[0][0], 'Move refused', 'named for what it is');
+  ok(toasts[0][1].length > 0, 'with the model’s own reason');
+
+  toasts.length = 0;
+  flows.fileNode('HAZ-001', 'ELM-001');
+  equal(toasts.length, 0, 'a move that goes through says nothing');
+
+  store.commit((model) => relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-002'));
+  flows.completeRelate('ELM-001', [
+    { id: 'HAZ-001', form: null },
+    { id: 'HAZ-002', form: null },
+  ]);
+  equal(store.model().relationships.size, 2, 'the picks the model still allows are made');
+  deepEqual(
+    toasts.pop(),
+    ['Relationships refused', '1 of the picked relationships could no longer be made.'],
+    'and the shortfall is told in passing'
+  );
+
+  await flows.createRelated('ELM-001', 'ELM', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
+  deepEqual(toasts.pop()?.[0], 'Relationship refused', 'an inadmissible new-related form is told too');
 }
 
 summary('test-flows');
