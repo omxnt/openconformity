@@ -13,7 +13,7 @@
  */
 
 import { nodeOf } from './model.js';
-import { relationshipOptions, formLabel } from './flows.js';
+import { relationshipOptions, formLabel, designated } from './queries.js';
 import { el, icon } from './dom.js';
 
 /**
@@ -83,15 +83,15 @@ export function groupedPicks(model, picker) {
 }
 
 /**
+ * The queries' designation, reached by identifier: anything that is not
+ * an entity in the model reads as the identifier alone.
  * @param {import('./model.js').Model} model
  * @param {string} id
  * @returns {string}
  */
-function designated(model, id) {
+function designatedById(model, id) {
   const entity = nodeOf(model, id);
-  if (!entity || entity.kind !== 'entity') return id;
-  const title = (entity.attributes.title ?? '').trim();
-  return title ? `${id}  ${title}` : id;
+  return entity && entity.kind === 'entity' ? designated(entity) : id;
 }
 
 /**
@@ -115,7 +115,7 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
     body.appendChild(
       el('div', { className: 'panel-subject' }, [
         el('span', { className: 'field-label', text: 'From' }),
-        el('span', { className: 'mono', text: designated(model, picker.subject) }),
+        el('span', { className: 'mono', text: designatedById(model, picker.subject) }),
       ])
     );
 
@@ -152,7 +152,7 @@ export function createRelateWorkflow({ store, overlay, onDone }) {
         unpick.addEventListener('click', () => store.togglePick(row.id));
 
         const line = el('div', { className: 'panel-pick' }, [
-          el('span', { className: 'mono panel-pick-name', text: designated(model, row.id) }),
+          el('span', { className: 'mono panel-pick-name', text: designatedById(model, row.id) }),
           unpick,
         ]);
         picks.appendChild(line);

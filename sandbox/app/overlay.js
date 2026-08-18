@@ -126,6 +126,5 @@ export function createOverlay({ container }) {
 
     close: (entry) => stack.close(entry),
     closeMenus: () => stack.closeMenus(),
-    top: () => stack.top(),
   };
 }

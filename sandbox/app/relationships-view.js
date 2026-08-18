@@ -11,7 +11,6 @@
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { TYPE_ICONS } from './icons.js';
-import { relationshipOptions } from './flows.js';
 import { el, icon } from './dom.js';
 
 /**
@@ -55,13 +54,14 @@ export function groupedRelationships(model, id) {
  * @param {() => void} context.onAdd
  * @param {(relationship: import('./model.js').Relationship) => void} context.onUnrelate
  * @param {(id: string) => void} context.onSelect
+ * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
  */
-export function createRelationshipsView({ store, head, body, graph, onAdd, onUnrelate, onSelect }) {
+export function createRelationshipsView({ store, head, body, graph, onAdd, onUnrelate, onSelect, addEnabled }) {
   const listHost = el('div', { className: 'rel-list' });
   body.appendChild(listHost);
   body.appendChild(graph.element);
 
-  function renderHead(entity) {
+  function renderHead() {
     head.textContent = '';
     head.hidden = false;
 
@@ -79,7 +79,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     head.appendChild(el('div', { className: 'pane-head-name' }, [switcher]));
 
     const add = el('button', { className: 'ghost-button', text: 'Add…', attributes: { type: 'button' } });
-    add.disabled = relationshipOptions(store.model(), entity.id).length === 0;
+    add.disabled = !addEnabled();
     add.addEventListener('click', onAdd);
     head.appendChild(el('div', { className: 'pane-head-actions' }, [add]));
   }
@@ -173,7 +173,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       return;
     }
 
-    renderHead(entity);
+    renderHead();
     const view = store.relationshipView();
     listHost.hidden = view !== 'list';
     graph.element.hidden = view !== 'graph';

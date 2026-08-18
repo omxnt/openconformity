@@ -76,16 +76,6 @@ export function childrenOf(model, parentId) {
 }
 
 /**
- * The title an entity is shown by, falling back to its identifier.
- * @param {Entity} entity
- * @returns {string}
- */
-export function labelOf(entity) {
-  const title = (entity.attributes.title ?? '').trim();
-  return title || entity.id;
-}
-
-/**
  * Whether a node is another node or filed anywhere beneath it. The walk
  * upwards is guarded, so a cycle that reached the model some other way
  * cannot hang it.

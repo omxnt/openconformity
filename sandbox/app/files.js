@@ -18,7 +18,7 @@
  */
 
 import { ENTITY_TYPES } from './metamodel.js';
-import { createModel, addEntity, addFolder, relate, restoreCounters, childrenOf } from './model.js';
+import { createModel, addEntity, addFolder, relate, renameProject, restoreCounters, childrenOf } from './model.js';
 import { validate } from './validator.js';
 
 /** The schema version this software writes. */
@@ -140,7 +140,7 @@ const INVALID_STATEMENT = 'The file is not a valid project file, and was not ope
 function buildModel(data) {
   const problems = [];
   const model = createModel();
-  model.name = data.name;
+  renameProject(model, data.name);
 
   const childLists = new Map();
   const list = (parent) => {

@@ -26,12 +26,6 @@
  * @property {Array<{ name: string, attributes: AttributeDefinition[] }>} groups  the collapsible groups, in render order
  */
 
-/**
- * The closed list of attribute kinds.
- * @type {AttributeKind[]}
- */
-export const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'hyperlink'];
-
 /** @type {Object<string, TypeAttributes>} */
 export const ATTRIBUTES = {
   ELM: {
@@ -172,14 +166,4 @@ export function attributesFor(code) {
   if (!Object.hasOwn(ATTRIBUTES, code)) return [];
   const type = ATTRIBUTES[code];
   return [...type.attributes, ...type.groups.flatMap((group) => group.attributes)];
-}
-
-/**
- * The definition a type holds under a key, or null.
- * @param {string} code
- * @param {string} key
- * @returns {AttributeDefinition|null}
- */
-export function attributeOf(code, key) {
-  return attributesFor(code).find((definition) => definition.key === key) ?? null;
 }

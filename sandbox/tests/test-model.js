@@ -8,7 +8,6 @@ import {
   createModel,
   nodeOf,
   childrenOf,
-  labelOf,
   addEntity,
   addFolder,
   updateEntity,
@@ -91,18 +90,6 @@ function childIds(model, parentId) {
   refused(renameFolder(model, 'F-9', 'X'), 'renaming a missing folder is refused');
   const entity = addEntity(model, 'ELM').entity;
   refused(renameFolder(model, entity.id, 'X'), 'renaming an entity as a folder is refused');
-}
-
-// --- Labels ------------------------------------------------------------
-
-{
-  const model = createModel();
-  const entity = addEntity(model, 'ELM').entity;
-  equal(labelOf(entity), 'ELM-001', 'an entity with no title is shown by its identifier');
-  updateEntity(model, 'ELM-001', { title: 'Mixer' });
-  equal(labelOf(entity), 'Mixer', 'an entity with a title is shown by it');
-  updateEntity(model, 'ELM-001', { title: '   ' });
-  equal(labelOf(entity), 'ELM-001', 'a blank title falls back to the identifier');
 }
 
 // --- Updates -----------------------------------------------------------

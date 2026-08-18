@@ -374,11 +374,6 @@ body {
 
 .pane-body { flex: 1; overflow: auto; }
 
-.pane-empty {
-  color: var(--text-helper);
-  padding: 16px;            /* $spacing-05 */
-}
-
 /* Where nothing is yet: what this place holds, and the way to put the
    first thing in it. Carbon's empty state, at productive scale. */
 .empty-state { padding: 16px; max-width: 36rem; }  /* $spacing-05 */

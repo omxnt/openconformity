@@ -30,6 +30,7 @@ import { pickerCandidates } from './relate.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { el, icon } from './dom.js';
+import { openMenu } from './menu.js';
 
 /**
  * @typedef {Object} TreeRow
@@ -175,12 +176,12 @@ export function revealSet(model, ids) {
  * @param {HTMLElement} context.search       the filter bar
  * @param {HTMLInputElement} context.filterInput
  * @param {HTMLElement} context.filterClear
+ * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {Array<import('./actions.js').Action>} context.actions
- * @param {(id: string|null) => void} context.onSelect
+ * @param {(id: string|null) => Promise<boolean>} context.onSelect
  * @param {(id: string|null) => void} context.onActivate
  * @param {(id: string, parentId: string|null) => void} context.onFile
  * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
- * @param {(id: string|null, at: { x: number, y: number }) => void} context.onContextMenu
  */
 export function createNavigator({
   store,
@@ -189,15 +190,55 @@ export function createNavigator({
   search,
   filterInput,
   filterClear,
+  overlay,
   actions,
   onSelect,
   onActivate,
   onFile,
   onPlace,
-  onContextMenu,
 }) {
   /** The id being dragged; dataTransfer is unreadable during dragover. */
   let draggedId = null;
+
+  /**
+   * The open-branch predicate the tree draws and walks with: the durable
+   * expansion, widened transiently while picking so nothing on offer
+   * hides inside a collapsed level.
+   * @param {ReturnType<typeof store.picker>} picker
+   * @param {Set<string>} [candidates]  passed when the caller already derived them
+   * @returns {(id: string) => boolean}
+   */
+  function openWithReveal(picker, candidates) {
+    if (picker === null) return store.isExpanded;
+    const revealed = revealSet(store.model(), candidates ?? pickerCandidates(store.model(), picker));
+    return (id) => store.isExpanded(id) || revealed.has(id);
+  }
+
+  /**
+   * The context menu: the same action list the toolbar draws from, at
+   * the pointer. Opening it on a node selects the node first, guarded —
+   * the menu opens only when the selection lands.
+   * @param {string|null} id
+   * @param {{ x: number, y: number }} at
+   */
+  async function onContextMenu(id, at) {
+    if (!(await onSelect(id))) return;
+    openMenu({
+      overlay,
+      label: 'Actions',
+      at,
+      items: actions
+        .filter((action) => action.context)
+        .map((action) => ({
+          label: action.label,
+          icon: action.icon,
+          hint: action.hint,
+          danger: action.danger,
+          disabled: !action.enabled(),
+          onPick: () => action.run({ at }),
+        })),
+    });
+  }
 
   /** The filter as typed: the pane's own transient state, gone with the visit. */
   let filter = '';
@@ -460,11 +501,7 @@ export function createNavigator({
       picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
       subject: picker?.subject ?? null,
     };
-    // While picking, every branch holding a candidate opens transiently,
-    // so nothing on offer hides inside a collapsed level; the durable
-    // expansion is untouched.
-    const revealed = picker === null ? null : revealSet(store.model(), picking.candidates);
-    const isOpen = revealed === null ? store.isExpanded : (id) => store.isExpanded(id) || revealed.has(id);
+    const isOpen = openWithReveal(picker, picking.candidates);
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
     for (const row of visibleRows(store.model(), isOpen, true, filter)) {
       tree.appendChild(row.kind === 'project' ? renderProjectRow() : renderRow(row, picking));
@@ -502,9 +539,7 @@ export function createNavigator({
 
   container.addEventListener('keydown', (event) => {
     const picker = store.picker();
-    const revealed = picker === null ? null : revealSet(store.model(), pickerCandidates(store.model(), picker));
-    const isOpen = revealed === null ? store.isExpanded : (id) => store.isExpanded(id) || revealed.has(id);
-    const rows = visibleRows(store.model(), isOpen, store.hasProject(), filter);
+    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter);
     if (rows.length === 0) return;
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);

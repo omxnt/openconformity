@@ -9,7 +9,7 @@
 import { pickerCandidates, pairOptions, groupedPicks } from '../app/relate.js';
 import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph-view.js';
 import { groupedRelationships } from '../app/relationships-view.js';
-import { relationshipOptions } from '../app/flows.js';
+import { relationshipOptions } from '../app/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 

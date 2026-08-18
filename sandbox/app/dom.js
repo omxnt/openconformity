@@ -52,6 +52,23 @@ export function svgText(tag, attributes, content) {
 }
 
 /**
+ * Hand the browser a file to save: the text behind an object URL on an
+ * anchor, clicked and removed in one breath.
+ * @param {string} filename
+ * @param {string} text
+ * @param {string} type  the MIME type the blob carries
+ */
+export function download(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = el('a', { attributes: { href: url, download: filename } });
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+/**
  * An icon referencing a symbol of the sprite in `index.html`. A pillar
  * tints it with the pillar's colour where the icon stands for a type.
  * @param {string} symbolId

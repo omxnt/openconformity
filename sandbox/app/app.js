@@ -33,7 +33,6 @@ const flows = createFlows({
   overlay,
   dialogs,
   editor,
-  getActions: () => actions,
   fileInput: document.getElementById('file-input'),
 });
 const actions = createActions({ store, flows });
@@ -45,18 +44,19 @@ createNavigator({
   search: document.getElementById('navigator-search'),
   filterInput: document.getElementById('navigator-filter'),
   filterClear: document.getElementById('navigator-filter-clear'),
+  overlay,
   actions,
   onSelect: (id) => flows.selectNode(id),
   onActivate: (id) => flows.activateNode(id),
   onFile: (id, parentId) => flows.fileNode(id, parentId),
   onPlace: (id, targetId, position) => flows.placeNode(id, targetId, position),
-  onContextMenu: (id, at) => flows.openContextMenu(id, at),
 });
 const graph = createGraphView({
   store,
   onSelect: (id) => flows.selectNode(id),
   onUnrelate: (relationship) => flows.removeRelationship(relationship),
 });
+const relateAction = actions.find((action) => action.id === 'relate');
 createRelationshipsView({
   store,
   head: document.getElementById('relationships-head'),
@@ -65,6 +65,7 @@ createRelationshipsView({
   onAdd: () => flows.relateSelection(),
   onUnrelate: (relationship) => flows.removeRelationship(relationship),
   onSelect: (id) => flows.selectNode(id),
+  addEnabled: () => relateAction.enabled(),
 });
 createRelateWorkflow({
   store,

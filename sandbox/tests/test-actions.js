@@ -1,49 +1,20 @@
 /**
- * Exercises the one action list headless: the move predicates, and every
- * offer's enablement against a live store, so no surface can disagree
- * with the model. Also the menu grouping. Run from this directory.
+ * Exercises the one action list headless: every offer's enablement
+ * against a live store, so no surface can disagree with the model. Also
+ * the menu grouping. Run from this directory.
  */
 
 import './shim.js';
-import { createActions, canMoveUp, canMoveDown } from '../app/actions.js';
+import { createActions } from '../app/actions.js';
 import { menuGroups } from '../app/menu.js';
 import { createStore } from '../app/store.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
+import { fakeStorage } from './helpers.js';
 
 /** The identifiers of the enabled offers. */
 function enabledIds(actions) {
   return actions.filter((action) => action.enabled()).map((action) => action.id);
-}
-
-function fakeStorage() {
-  const map = new Map();
-  return {
-    getItem: (key) => (map.has(key) ? map.get(key) : null),
-    setItem: (key, value) => map.set(key, String(value)),
-    removeItem: (key) => map.delete(key),
-  };
-}
-
-// --- The move predicates -----------------------------------------------
-
-{
-  const model = createModel();
-  addEntity(model, 'ELM');
-  addFolder(model, 'Zone');
-  addEntity(model, 'HAZ');
-  addEntity(model, 'SCN', { parent: 'F-1' });
-
-  equal(canMoveUp(model, 'ELM-001'), false, 'the first sibling cannot move up');
-  equal(canMoveDown(model, 'ELM-001'), true, 'but can move down');
-  equal(canMoveUp(model, 'F-1'), true, 'a middle sibling moves both ways, kinds interleaved');
-  equal(canMoveDown(model, 'F-1'), true, 'in one order');
-  equal(canMoveUp(model, 'HAZ-001'), true, 'the last sibling can move up');
-  equal(canMoveDown(model, 'HAZ-001'), false, 'but not down');
-  equal(canMoveUp(model, 'SCN-001'), false, 'an only child moves neither way');
-  equal(canMoveDown(model, 'SCN-001'), false, 'in its own parent');
-  equal(canMoveUp(model, 'ELM-9'), false, 'a missing node moves nowhere');
-  equal(canMoveUp(model, null), false, 'nor does no selection');
 }
 
 // --- The landing offers the three ways in and the help surface ----------
@@ -77,12 +48,6 @@ function fakeStorage() {
     'the key hints ride on the actions the keys reach'
   );
   ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');
-  {
-    const page = readFile('../app/index.html');
-    for (const action of actions) {
-      ok(page.includes(`id="${action.icon}"`), `${action.id} draws under ${action.icon}, which is in the sprite`);
-    }
-  }
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),

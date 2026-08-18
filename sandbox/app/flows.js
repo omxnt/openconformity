@@ -21,152 +21,21 @@ import {
   renameFolder,
   renameProject as nameProject,
   updateEntity,
-  deletionOf,
   relate,
   unrelate,
   file,
-  canFile,
   placeBeside,
   childrenOf,
   nodeOf,
-  canRelate,
 } from './model.js';
-import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
+import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets, cascadeQuestion, designated } from './queries.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
 import { TYPE_ICONS } from './icons.js';
 import { openMenu } from './menu.js';
-import { el } from './dom.js';
-
-/**
- * The relationship forms an entity can take part in right now: each form
- * the metamodel offers for its type, in either direction, with the
- * entities the model still allows at the far end. A form with no
- * candidate is not offered.
- * @param {import('./model.js').Model} model
- * @param {string} subjectId
- * @returns {Array<{ type: import('./metamodel.js').RelationshipType, direction: 'outgoing'|'incoming', candidates: import('./model.js').Entity[] }>}
- */
-export function relationshipOptions(model, subjectId) {
-  const subject = nodeOf(model, subjectId);
-  if (!subject || subject.kind !== 'entity') return [];
-
-  const entities = [...model.nodes.values()].filter((node) => node.kind === 'entity');
-  const options = [];
-  for (const type of relationshipsFrom(subject.type)) {
-    const candidates = entities.filter((node) => canRelate(model, type.id, subjectId, node.id).ok);
-    if (candidates.length > 0) options.push({ type, direction: 'outgoing', candidates });
-  }
-  for (const type of relationshipsTo(subject.type)) {
-    const candidates = entities.filter((node) => canRelate(model, type.id, node.id, subjectId).ok);
-    if (candidates.length > 0) options.push({ type, direction: 'incoming', candidates });
-  }
-  return options;
-}
-
-/**
- * What a form is called wherever one is offered: the relationship's
- * label and the type at the far end, in reading order — label first when
- * the subject is the source, far type first when it is the target.
- * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
- * @returns {string}
- */
-export function formLabel(form) {
-  const type = RELATIONSHIP_TYPES[form.typeId];
-  const other = ENTITY_TYPES[form.direction === 'outgoing' ? type.target : type.source].name;
-  return form.direction === 'outgoing' ? `${type.label} — ${other}` : `${other} — ${type.label}`;
-}
-
-/**
- * The types a new related entity could take, with every relationship the
- * metamodel admits between the subject and a new entity of that type. A
- * composition whose new entity would be a second owner of the subject is
- * left out; nothing else narrows, because a new entity has no
- * relationships to collide with. In metamodel order, so a menu groups by
- * pillar.
- * @param {import('./model.js').Model} model
- * @param {string} subjectId
- * @returns {Array<{ code: string, forms: Array<{ typeId: string, direction: 'outgoing'|'incoming' }> }>}
- */
-export function relatedTypeOffer(model, subjectId) {
-  const subject = nodeOf(model, subjectId);
-  if (!subject || subject.kind !== 'entity') return [];
-  const owned = [...model.relationships.values()].some(
-    (relationship) => relationship.target === subjectId && RELATIONSHIP_TYPES[relationship.type].composition
-  );
-
-  const byCode = new Map();
-  const add = (code, form) => {
-    if (!byCode.has(code)) byCode.set(code, []);
-    byCode.get(code).push(form);
-  };
-  for (const type of relationshipsFrom(subject.type)) {
-    add(type.target, { typeId: type.id, direction: 'outgoing' });
-  }
-  for (const type of relationshipsTo(subject.type)) {
-    if (type.composition && owned) continue;
-    add(type.source, { typeId: type.id, direction: 'incoming' });
-  }
-  return Object.keys(ENTITY_TYPES)
-    .filter((code) => byCode.has(code))
-    .map((code) => ({ code, forms: byCode.get(code) }));
-}
-
-/**
- * @param {import('./model.js').Entity} entity
- * @returns {string}
- */
-function designated(entity) {
-  const title = (entity.attributes.title ?? '').trim();
-  return title ? `${entity.id}  ${title}` : entity.id;
-}
-
-/**
- * Every place a node could be filed, for the Move to… dialog: the top of
- * the tree and every folder and entity the model allows, in the order the
- * tree draws them — the same ground dragging covers, reachable without a
- * pointer.
- * @param {import('./model.js').Model} model
- * @param {string|null} id
- * @returns {Array<{ parentId: string|null, label: string, depth: number }>}
- */
-export function moveTargets(model, id) {
-  if (nodeOf(model, id) === null) return [];
-  const targets = [];
-  const offer = (parentId, label, depth) => {
-    if (canFile(model, id, parentId).ok) targets.push({ parentId, label, depth });
-  };
-  offer(null, model.name.trim() || 'Untitled', 0);
-  const walk = (parentId, depth) => {
-    for (const child of childrenOf(model, parentId)) {
-      offer(child.id, child.kind === 'folder' ? child.name : designated(child), depth);
-      walk(child.id, depth + 1);
-    }
-  };
-  walk(null, 1);
-  return targets;
-}
-
-/**
- * The question a cascade deletion asks, as data: the title counts the
- * entities taken, the message counts the relationships severed — every
- * relationship touching anything in the cascade.
- * @param {import('./model.js').Model} model
- * @param {string} id
- * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
- */
-export function cascadeQuestion(model, id) {
-  const doomed = deletionOf(model, id);
-  const doomedIds = new Set(doomed.map((entity) => entity.id));
-  const severed = [...model.relationships.values()].filter(
-    (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
-  ).length;
-  return {
-    title: `Delete ${doomed.length} entities?`,
-    message: `Deleting ${id} also deletes everything it contains through composition and severs ${severed} relationship${severed === 1 ? '' : 's'}:`,
-    doomed,
-  };
-}
+import { el, download } from './dom.js';
+import { showAbout as aboutDialog } from './about.js';
 
 /**
  * @param {Object} context
@@ -174,10 +43,9 @@ export function cascadeQuestion(model, id) {
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {ReturnType<import('./dialog.js').createDialogs>} context.dialogs
  * @param {ReturnType<import('./editor.js').createEditor>} context.editor
- * @param {() => Array<import('./actions.js').Action>} context.getActions
  * @param {HTMLInputElement} context.fileInput
  */
-export function createFlows({ store, overlay, dialogs, editor, getActions, fileInput }) {
+export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
   /**
    * The creation whose first save has not happened: cancelling the edit
    * session removes it again.
@@ -401,35 +269,6 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     endEditSession();
     store.select(id);
     return true;
-  }
-
-  /**
-   * The context menu: the same action list the toolbar draws from, at the
-   * pointer. Opening it on a node selects the node first, guarded.
-   * @param {string|null} id
-   * @param {{ x: number, y: number }} at
-   */
-  async function openContextMenu(id, at) {
-    if (store.selection() !== id) {
-      if (!(await confirmDiscard())) return;
-      endEditSession();
-      store.select(id);
-    }
-    openMenu({
-      overlay,
-      label: 'Actions',
-      at,
-      items: getActions()
-        .filter((action) => action.context)
-        .map((action) => ({
-          label: action.label,
-          icon: action.icon,
-          hint: action.hint,
-          danger: action.danger,
-          disabled: !action.enabled(),
-          onPick: () => action.run({ at }),
-        })),
-    });
   }
 
   /**
@@ -755,15 +594,8 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
    */
   function saveProject() {
     if (!store.hasProject()) return;
-    const text = serialise(store.model());
     const filename = filenameFor(store.model().name);
-    const blob = new Blob([text], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = el('a', { attributes: { href: url, download: filename } });
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
+    download(filename, serialise(store.model()), 'application/json');
     store.markSaved();
     dialogs.toast('Project saved', `Saved to your downloads as ${filename}.`);
   }
@@ -778,44 +610,9 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     window.open(`assets/images/metamodel-${dark ? 'dark' : 'light'}.png`, '_blank', 'noopener');
   }
 
-  /**
-   * What the software is, who holds it under what terms, and what of
-   * other people's work it carries — every licence named is one the
-   * deployment itself carries, so all of them are reachable from here.
-   */
-  async function showAbout() {
-    const link = (href, text) =>
-      el('a', { text, attributes: { href, target: '_blank', rel: 'noopener' } });
-    await dialogs.open({
-      title: 'About',
-      body: el('div', { className: 'about' }, [
-        el('p', { className: 'about-headline', text: 'openconformity' }),
-        el('p', {
-          text:
-            'This project is an initiative to develop a free, open-source, browser-based tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230, with no commercial interests behind it.',
-        }),
-        el('p', {}, [
-          document.createTextNode('© 2026 omxnt, licensed under the '),
-          link('LICENSE.txt', 'EUPL-1.2'),
-          document.createTextNode('.'),
-        ]),
-        el('p', {}, [link('https://github.com/omxnt/openconformity', 'Source on GitHub')]),
-        el('p', { text: 'Third-party assets, vendored with the software:' }),
-        el('ul', { className: 'doomed-list' }, [
-          el('li', {}, [
-            document.createTextNode('IBM Plex, under the '),
-            link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1'),
-            document.createTextNode('.'),
-          ]),
-          el('li', {}, [
-            document.createTextNode('Carbon Icons, under the '),
-            link('assets/icons/LICENSE.txt', 'Apache License 2.0'),
-            document.createTextNode('.'),
-          ]),
-        ]),
-      ]),
-      actions: [{ label: 'Close', value: null, kind: 'primary' }],
-    });
+  /** The About dialog; its content is chrome and lives in about.js. */
+  function showAbout() {
+    return aboutDialog(dialogs);
   }
 
   /**
@@ -853,7 +650,6 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     toggleCreateMenu,
     toggleRelatedMenu,
     selectNode,
-    openContextMenu,
     fileNode,
     placeNode,
     moveUp,

@@ -15,20 +15,7 @@ import { addEntity } from '../app/model.js';
 import { createFlows } from '../app/flows.js';
 import { createStore } from '../app/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
-
-function fakeStorage() {
-  const map = new Map();
-  return {
-    getItem: (key) => (map.has(key) ? map.get(key) : null),
-    setItem: (key, value) => map.set(key, String(value)),
-    removeItem: (key) => map.delete(key),
-  };
-}
-
-/** An editor that is never editing, so no guard ever needs a dialog. */
-function stubEditor() {
-  return { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false };
-}
+import { fakeStorage, stubEditor } from './helpers.js';
 
 // --- The example passes the gates a user's file passes ------------------
 
@@ -109,7 +96,6 @@ if (loaded.ok) {
       toast() {},
     },
     editor: stubEditor(),
-    getActions: () => [],
     fileInput: null,
   });
   equal(store.hasProject(), false, 'the landing has no project');
@@ -133,7 +119,6 @@ if (loaded.ok) {
       toast() {},
     },
     editor: stubEditor(),
-    getActions: () => [],
     fileInput: null,
   });
   await flows.loadExample();
@@ -141,13 +126,6 @@ if (loaded.ok) {
   await flows.loadExample();
   deepEqual(answers, ['Unsaved changes'], 'over unsaved work the question comes first');
   equal(store.model().nodes.size, 91, 'and declining it leaves the project untouched');
-}
-
-// --- The example rides on every surface it was ordered onto -------------
-
-{
-  const navigator = readFile('../app/navigator.js');
-  ok(navigator.includes("'new-project', 'open', 'load-example'"), 'the landing offers the example as its third affordance');
 }
 
 summary('test-example');

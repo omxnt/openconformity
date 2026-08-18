@@ -59,7 +59,7 @@ const UNREACHABLE = -1;
  */
 export function createStore({ storage }) {
   let model = createModel();
-  let history = createHistory(model);
+  const history = createHistory(model);
   let savedSequence = history.sequence();
   /** Whether a project is open at all. A fresh session has none. */
   let projectOpen = false;
@@ -167,8 +167,8 @@ export function createStore({ storage }) {
       const loaded = loadProject(blob.project);
       if (loaded.ok) {
         model = loaded.model;
-        history = createHistory(model);
-        savedSequence = blob.session?.dirty ? UNREACHABLE : history.sequence();
+        const seeded = history.reset(model);
+        savedSequence = blob.session?.dirty ? UNREACHABLE : seeded;
         const wanted = blob.session?.selection;
         selection = typeof wanted === 'string' && model.nodes.has(wanted) ? wanted : null;
         const openIds = Array.isArray(blob.session?.expanded) ? blob.session.expanded : [];
@@ -299,8 +299,7 @@ export function createStore({ storage }) {
      */
     replaceProject(next) {
       model = next;
-      history = createHistory(model);
-      savedSequence = history.sequence();
+      savedSequence = history.reset(model);
       selection = null;
       expanded = new Set();
       picker = null;
@@ -385,7 +384,6 @@ export function createStore({ storage }) {
     isExpanded: (id) => expanded.has(id),
 
     /** The expanded identifiers, for the tree. */
-    expandedIds: () => [...expanded],
 
     /**
      * Expand or collapse a node in the tree. Session state: persisted on

@@ -71,30 +71,29 @@ export const PERSIST_DETAIL =
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {Array<import('./actions.js').Action>} [context.actions]
  * @param {(title: string, message: string) => void} [context.toast]
- * @param {Document} [context.root]
  */
-export function createShell({ store, overlay, actions = [], toast = () => {}, root = document }) {
-  const themeButton = root.getElementById('shell-theme');
-  const themeIcon = root.getElementById('shell-theme-icon');
-  const fileButton = root.getElementById('shell-file');
-  const editButton = root.getElementById('shell-edit');
-  const viewButton = root.getElementById('shell-view');
-  const helpButton = root.getElementById('shell-help');
-  const metamodelButton = root.getElementById('shell-metamodel');
-  const unsavedButton = root.getElementById('shell-unsaved');
-  const notices = root.getElementById('notices');
-  const workspace = root.getElementById('workspace');
-  const navigatorPane = root.getElementById('pane-navigator');
-  const column = root.getElementById('workspace-column');
-  const relationshipsPane = root.getElementById('pane-relationships');
+export function createShell({ store, overlay, actions = [], toast = () => {} }) {
+  const themeButton = document.getElementById('shell-theme');
+  const themeIcon = document.getElementById('shell-theme-icon');
+  const fileButton = document.getElementById('shell-file');
+  const editButton = document.getElementById('shell-edit');
+  const viewButton = document.getElementById('shell-view');
+  const helpButton = document.getElementById('shell-help');
+  const metamodelButton = document.getElementById('shell-metamodel');
+  const unsavedButton = document.getElementById('shell-unsaved');
+  const notices = document.getElementById('notices');
+  const workspace = document.getElementById('workspace');
+  const navigatorPane = document.getElementById('pane-navigator');
+  const column = document.getElementById('workspace-column');
+  const relationshipsPane = document.getElementById('pane-relationships');
 
   // --- Theme -----------------------------------------------------------
 
-  const dark = root.defaultView.matchMedia('(prefers-color-scheme: dark)');
+  const dark = document.defaultView.matchMedia('(prefers-color-scheme: dark)');
 
   function applyTheme() {
     const theme = effectiveTheme(store.theme(), dark.matches);
-    root.documentElement.dataset.theme = theme;
+    document.documentElement.dataset.theme = theme;
     themeIcon.setAttribute('href', theme === 'g100' ? '#i-theme-dark' : '#i-theme-light');
   }
 
@@ -266,37 +265,37 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
    * @param {(() => void)|null} onDismiss
    */
   function notice(kind, title, text, onDismiss) {
-    const element = root.createElement('div');
+    const element = document.createElement('div');
     element.className = kind === 'warning' ? 'notice notice-warning' : 'notice';
 
-    const icon = root.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     icon.setAttribute('class', 'icon');
     icon.setAttribute('aria-hidden', 'true');
-    const use = root.createElementNS('http://www.w3.org/2000/svg', 'use');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
     use.setAttribute('href', kind === 'warning' ? '#i-warning' : '#i-information');
     icon.appendChild(use);
     element.appendChild(icon);
 
-    const body = root.createElement('div');
+    const body = document.createElement('div');
     body.className = 'notice-body';
-    const heading = root.createElement('span');
+    const heading = document.createElement('span');
     heading.className = 'notice-title';
     heading.textContent = title;
-    const detail = root.createElement('span');
+    const detail = document.createElement('span');
     detail.className = 'notice-text';
     detail.textContent = text;
     body.append(heading, detail);
     element.appendChild(body);
 
     if (onDismiss) {
-      const dismiss = root.createElement('button');
+      const dismiss = document.createElement('button');
       dismiss.type = 'button';
       dismiss.className = 'notice-dismiss';
       dismiss.setAttribute('aria-label', 'Dismiss');
-      const cross = root.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      const cross = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       cross.setAttribute('class', 'icon');
       cross.setAttribute('aria-hidden', 'true');
-      const glyph = root.createElementNS('http://www.w3.org/2000/svg', 'use');
+      const glyph = document.createElementNS('http://www.w3.org/2000/svg', 'use');
       glyph.setAttribute('href', '#i-close');
       cross.appendChild(glyph);
       dismiss.appendChild(cross);
@@ -359,7 +358,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
   }
 
   splitter({
-    splitter: root.getElementById('splitter-main'),
+    splitter: document.getElementById('splitter-main'),
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width * 0.6,
@@ -370,7 +369,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
   });
 
   splitter({
-    splitter: root.getElementById('splitter-column'),
+    splitter: document.getElementById('splitter-column'),
     sizeAt: (event) => column.getBoundingClientRect().bottom - event.clientY,
     size: () => relationshipsPane.getBoundingClientRect().height,
     limit: () => column.getBoundingClientRect().height - 160,
@@ -388,7 +387,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
     applyTheme();
     renderNotices();
     unsavedButton.hidden = !store.dirty();
-    root.title = titleFor(store.hasProject(), store.model().name);
+    document.title = titleFor(store.hasProject(), store.model().name);
 
     if (wasFailingToPersist && !store.persistFailed()) {
       toast('Autosave working again', 'The project is being kept in this browser once more.');
@@ -398,7 +397,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
 
   // The browser's own leave-prompt, kept for the one case where leaving
   // still costs something.
-  root.defaultView.addEventListener('beforeunload', (event) => {
+  document.defaultView.addEventListener('beforeunload', (event) => {
     if (!shouldWarnBeforeUnload(store.dirty(), store.persistFailed())) return;
     event.preventDefault();
   });

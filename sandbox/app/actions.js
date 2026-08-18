@@ -6,34 +6,8 @@
  * business.
  */
 
-import { nodeOf, childrenOf } from './model.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets } from './flows.js';
-
-/**
- * Whether a node has a sibling above it to change places with.
- * @param {import('./model.js').Model} model
- * @param {string|null} id
- * @returns {boolean}
- */
-export function canMoveUp(model, id) {
-  const node = nodeOf(model, id);
-  if (!node) return false;
-  return childrenOf(model, node.parent).findIndex((sibling) => sibling.id === id) > 0;
-}
-
-/**
- * Whether a node has a sibling below it to change places with.
- * @param {import('./model.js').Model} model
- * @param {string|null} id
- * @returns {boolean}
- */
-export function canMoveDown(model, id) {
-  const node = nodeOf(model, id);
-  if (!node) return false;
-  const siblings = childrenOf(model, node.parent);
-  const index = siblings.findIndex((sibling) => sibling.id === id);
-  return index >= 0 && index < siblings.length - 1;
-}
+import { nodeOf } from './model.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
 
 /**
  * @typedef {Object} Action

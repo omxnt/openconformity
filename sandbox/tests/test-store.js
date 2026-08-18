@@ -11,31 +11,11 @@ import { createStore } from '../app/store.js';
 import { openProject, serialise } from '../app/files.js';
 import { createModel, addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
+import { fakeStorage } from './helpers.js';
 
 const PROJECT_KEY = 'openconformity.project';
 const ASIDE_KEY = 'openconformity.project.aside';
 const THEME_KEY = 'openconformity.theme';
-
-/**
- * A localStorage stand-in over a Map, with a switch that makes writes
- * fail.
- * @param {Object<string, string>} [initial]
- */
-function fakeStorage(initial = {}) {
-  const map = new Map(Object.entries(initial));
-  return {
-    failing: false,
-    getItem: (key) => (map.has(key) ? map.get(key) : null),
-    setItem(key, value) {
-      if (this.failing) throw new Error('quota');
-      map.set(key, String(value));
-    },
-    removeItem: (key) => {
-      map.delete(key);
-    },
-    read: (key) => (map.has(key) ? map.get(key) : null),
-  };
-}
 
 /** The parsed blob a storage holds. */
 function blobIn(storage) {

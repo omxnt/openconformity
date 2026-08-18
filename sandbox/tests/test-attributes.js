@@ -4,7 +4,10 @@
  * definition by definition. Run from this directory.
  */
 
-import { ATTRIBUTE_KINDS, ATTRIBUTES, attributesFor, attributeOf } from '../app/attributes.js';
+import { ATTRIBUTES, attributesFor } from '../app/attributes.js';
+
+/** The closed list of kinds, as plan §5.9 rules it. */
+const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'hyperlink'];
 import { ENTITY_TYPES } from '../app/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -68,8 +71,6 @@ const documentTypes = parseDocument(document);
 
 // --- The transcription -------------------------------------------------
 
-deepEqual(ATTRIBUTE_KINDS, ['text', 'multiline', 'choice', 'hyperlink'], 'the four kinds, as the document lists them');
-
 equal(documentTypes.length, 18, 'the document specifies 18 types');
 deepEqual(
   Object.keys(ATTRIBUTES),
@@ -114,7 +115,5 @@ for (const type of documentTypes) {
 }
 deepEqual(attributesFor('XXX'), [], 'attributesFor of an unknown code is empty');
 deepEqual(attributesFor('constructor'), [], 'attributesFor of an inherited object key is empty');
-equal(attributeOf('ELM', 'title')?.kind, 'text', 'attributeOf finds a definition by key');
-equal(attributeOf('ELM', 'missing'), null, 'attributeOf of an unknown key is null');
 
 summary('test-attributes');
