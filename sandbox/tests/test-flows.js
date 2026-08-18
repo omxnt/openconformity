@@ -8,10 +8,10 @@
  */
 
 import './shim.js';
-import { createFlows, relationshipOptions, relatedTypeOffer, moveTargets } from '../app/flows.js';
+import { createFlows, cascadeQuestion, relationshipOptions, relatedTypeOffer, moveTargets } from '../app/flows.js';
 import { createStore } from '../app/store.js';
 import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/metamodel.js';
-import { createModel, addEntity, addFolder, updateEntity, relate, nodeOf } from '../app/model.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 function fakeStorage() {
@@ -434,6 +434,33 @@ function offered(model, subjectId) {
 
   await flows.createRelated('ELM-001', 'ELM', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
   deepEqual(toasts.pop()?.[0], 'Relationship refused', 'an inadmissible new-related form is told too');
+}
+
+// --- The cascade question counts what it takes -------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'ELM');
+  addEntity(model, 'ACT');
+  relate(model, 'elm-decomposes-into-elm', 'ELM-001', 'ELM-002');
+  relate(model, 'act-interacts-with-elm', 'ACT-001', 'ELM-002');
+
+  const question = cascadeQuestion(model, 'ELM-001');
+  equal(question.title, 'Delete 2 entities?', 'the title counts the entities the cascade takes');
+  equal(
+    question.message,
+    'Deleting ELM-001 also deletes everything it contains through composition and severs 2 relationships:',
+    'the message counts every relationship touching the cascade — the composition included'
+  );
+  deepEqual(question.doomed.map((entity) => entity.id), ['ELM-001', 'ELM-002'], 'over the entities it lists');
+
+  unrelate(model, 'act-interacts-with-elm', 'ACT-001', 'ELM-002');
+  equal(
+    cascadeQuestion(model, 'ELM-001').message,
+    'Deleting ELM-001 also deletes everything it contains through composition and severs 1 relationship:',
+    'one severed relationship reads in the singular'
+  );
 }
 
 summary('test-flows');

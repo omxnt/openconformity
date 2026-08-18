@@ -152,9 +152,26 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
   }
 
   /**
+   * The menu bar's menus in bar order, so the arrow keys can walk them.
+   * @type {Array<{ button: HTMLElement, openIt: () => void }>}
+   */
+  const menubar = [];
+
+  /**
+   * @param {HTMLElement} button
+   * @param {-1|1} step
+   */
+  function neighbourMenu(button, step) {
+    const index = menubar.findIndex((held) => held.button === button);
+    return menubar[(index + step + menubar.length) % menubar.length];
+  }
+
+  /**
    * A menubar button opening its menu, built fresh each time so
    * enablement and checks are live. The menu toggles on click and opens
-   * on ArrowDown.
+   * on ArrowDown; ArrowLeft and ArrowRight walk the bar, moving between
+   * the buttons when the menus are closed and between the open menus
+   * when one is open.
    * @param {HTMLElement} button
    * @param {string} label
    * @param {() => Array<import('./menu.js').MenuItem>} build
@@ -168,6 +185,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
         label,
         anchor: button,
         items: build(),
+        onArrow: (step) => neighbourMenu(button, step).openIt(),
         onClose: () => {
           open = null;
         },
@@ -178,10 +196,15 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
       else openIt();
     });
     button.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowDown') return;
-      event.preventDefault();
-      if (!open) openIt();
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!open) openIt();
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        neighbourMenu(button, event.key === 'ArrowLeft' ? -1 : 1).button.focus();
+      }
     });
+    menubar.push({ button, openIt });
   }
 
   menubarMenu(fileButton, 'File', () =>
@@ -307,10 +330,11 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
    * @param {() => number} spec.size      the pane's current size
    * @param {() => number} spec.limit     the largest size the container allows
    * @param {number} spec.minimum
+   * @param {number} spec.preset  the default size a double click returns to, so resizing needs no drag
    * @param {(size: number) => void} spec.apply
    * @param {[string, string]} spec.keys  the arrow keys that shrink and grow
    */
-  function splitter({ splitter: element, sizeAt, size, limit, minimum, apply, keys }) {
+  function splitter({ splitter: element, sizeAt, size, limit, minimum, preset, apply, keys }) {
     const clamp = (value) => Math.min(Math.max(value, minimum), Math.max(limit(), minimum));
 
     element.addEventListener('pointerdown', (event) => {
@@ -325,6 +349,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
       element.releasePointerCapture(event.pointerId);
       element.classList.remove('dragging');
     });
+    element.addEventListener('dblclick', () => apply(clamp(preset)));
     element.addEventListener('keydown', (event) => {
       const step = event.key === keys[0] ? -16 : event.key === keys[1] ? 16 : 0;
       if (step === 0) return;
@@ -338,7 +363,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width * 0.6,
-    minimum: 240,
+    minimum: 312,
+    preset: 320,
     apply: (width) => workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`),
     keys: ['ArrowLeft', 'ArrowRight'],
   });
@@ -349,6 +375,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
     size: () => relationshipsPane.getBoundingClientRect().height,
     limit: () => column.getBoundingClientRect().height - 160,
     minimum: 120,
+    preset: 280,
     apply: (height) => column.style.setProperty('--relationships-height', `${Math.round(height)}px`),
     keys: ['ArrowDown', 'ArrowUp'],
   });

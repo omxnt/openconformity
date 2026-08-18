@@ -148,6 +148,27 @@ export function moveTargets(model, id) {
 }
 
 /**
+ * The question a cascade deletion asks, as data: the title counts the
+ * entities taken, the message counts the relationships severed — every
+ * relationship touching anything in the cascade.
+ * @param {import('./model.js').Model} model
+ * @param {string} id
+ * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
+ */
+export function cascadeQuestion(model, id) {
+  const doomed = deletionOf(model, id);
+  const doomedIds = new Set(doomed.map((entity) => entity.id));
+  const severed = [...model.relationships.values()].filter(
+    (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
+  ).length;
+  return {
+    title: `Delete ${doomed.length} entities?`,
+    message: `Deleting ${id} also deletes everything it contains through composition and severs ${severed} relationship${severed === 1 ? '' : 's'}:`,
+    doomed,
+  };
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
@@ -541,16 +562,16 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
       return;
     }
 
-    const doomed = deletionOf(store.model(), id);
-    if (doomed.length > 1) {
+    const question = cascadeQuestion(store.model(), id);
+    if (question.doomed.length > 1) {
       const list = el(
         'ul',
         { className: 'doomed-list' },
-        doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) }))
+        question.doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) }))
       );
       const confirmed = await dialogs.confirm({
-        title: `Delete ${doomed.length} entities?`,
-        message: `Deleting ${id} also deletes everything it contains through composition:`,
+        title: question.title,
+        message: question.message,
         body: list,
         confirmLabel: 'Delete',
         danger: true,

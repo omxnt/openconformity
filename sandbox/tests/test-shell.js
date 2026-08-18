@@ -123,4 +123,91 @@ equal(shouldWarnBeforeUnload(false, false), false, 'and neither does the quiet c
   }
 }
 
+// --- The closing check: the exact minimum viewport ----------------------
+
+{
+  const sheet = readFile('../app/style.css');
+  const page = readFile('../app/index.html');
+  ok(
+    sheet.includes('@media (max-width: 999.98px), (max-height: 331.98px)'),
+    'the notice covers both floors: 1000 wide, and the 332 the column needs — 48 shell, 160 editor, 4 splitter, 120 relationships'
+  );
+  ok(page.includes('at least 1000 pixels wide and 332 pixels tall'), 'and states both numbers');
+  ok(sheet.includes('.pane-editor { flex: 1 1 auto; min-height: 160px; }'), 'the editor floor matches the 160px the splitter reserves');
+  ok(sheet.includes('.pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }'), 'the relationship pane shrinks to its floor before anything overflows');
+}
+
+// --- The closing check: the navigator holds its toolbar -----------------
+
+{
+  const sheet = readFile('../app/style.css');
+  const shell = readFile('../app/shell.js');
+  ok(sheet.includes('min-width: 312px'), 'the pane floor is the toolbar: nine 32px buttons, eight 2px gaps, 4px padding each side');
+  ok(shell.includes('minimum: 312'), 'and the splitter stops at the same width');
+}
+
+// --- The closing check: pointer targets and the menu bar keys ------------
+
+{
+  const sheet = readFile('../app/style.css');
+  ok(
+    sheet.includes('.splitter-vertical::after { inset: 0 -10px;') && sheet.includes('.splitter-horizontal::after { inset: -10px 0;'),
+    'the splitters take a 24px pointer target around the 4px bar'
+  );
+  const shell = readFile('../app/shell.js');
+  const menu = readFile('../app/menu.js');
+  ok(shell.includes('onArrow: (step) => neighbourMenu(button, step).openIt()'), 'the arrow keys walk the open menus along the bar');
+  ok(menu.includes("event.key === 'ArrowLeft' || event.key === 'ArrowRight'"), 'which the menu forwards');
+  ok(shell.includes("addEventListener('dblclick', () => apply(clamp(preset)))"), 'a double click returns a pane to its preset: resizing needs no drag');
+}
+
+// --- The closing check: text carries AA contrast in both themes ---------
+
+{
+  const sheet = readFile('../app/style.css');
+  const g100At = sheet.indexOf(':root[data-theme="g100"]');
+  const themes = { white: sheet.slice(0, g100At), g100: sheet.slice(g100At).split('}')[0] };
+
+  /** @param {string} block @param {string} name */
+  const token = (block, name) => {
+    const match = block.match(new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`));
+    if (!match) throw new Error(`token --${name} not found`);
+    return match[1];
+  };
+  /** @param {string} hex */
+  const luminance = (hex) => {
+    const channel = (index) => {
+      const value = Number.parseInt(hex.slice(1 + index * 2, 3 + index * 2), 16) / 255;
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * channel(0) + 0.7152 * channel(1) + 0.0722 * channel(2);
+  };
+  /** @param {string} one @param {string} other */
+  const contrast = (one, other) => {
+    const [high, low] = [luminance(one), luminance(other)].sort((a, b) => b - a);
+    return (high + 0.05) / (low + 0.05);
+  };
+
+  for (const [theme, block] of Object.entries(themes)) {
+    const background = token(block, 'background');
+    const layer = token(block, 'layer');
+    for (const name of ['text', 'text-second', 'text-helper', 'link', 'danger-text', 'accent']) {
+      ok(contrast(token(block, name), background) >= 4.5, `${theme}: --${name} carries AA on the background`);
+    }
+    for (const name of ['text', 'text-second', 'text-helper']) {
+      ok(contrast(token(block, name), layer) >= 4.5, `${theme}: --${name} carries AA on the layer`);
+    }
+    for (const name of ['pillar-system', 'pillar-legislative', 'pillar-risk', 'pillar-requirements']) {
+      ok(contrast(token(block, name), background) >= 3, `${theme}: --${name} carries 3:1 for the type icons`);
+    }
+    ok(contrast(token(block, 'focus'), background) >= 3, `${theme}: the focus ring carries 3:1`);
+  }
+
+  ok(!sheet.includes('var(--text-place)'), 'the placeholder tier styles no text: what reads must meet AA');
+  ok(
+    sheet.includes('.dialog a { color: var(--link); text-decoration: underline; }'),
+    'a link inside prose is underlined: colour alone cannot mark it'
+  );
+}
+
 summary('test-shell');

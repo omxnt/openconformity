@@ -332,7 +332,7 @@ body {
 
 .pane-navigator {
   flex: 0 0 var(--navigator-width, 320px);
-  min-width: 240px;
+  min-width: 312px;  /* the toolbar: nine 32px buttons, eight 2px gaps, 4px padding each side */
 }
 
 .column {
@@ -342,8 +342,8 @@ body {
   min-width: 0;
 }
 
-.pane-editor { flex: 1 1 auto; min-height: 120px; }
-.pane-relationships { flex: 0 0 var(--relationships-height, 280px); min-height: 120px; }
+.pane-editor { flex: 1 1 auto; min-height: 160px; }  /* the splitter reserves the same 160px */
+.pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }
 
 /* A pane header is a working surface: the selection it acts for on the
    left, the actions on the right, at 32px on $layer-01 so its bottom rule
@@ -463,7 +463,7 @@ body {
   border: none;
   padding: 0 32px 0 36px;   /* $spacing-07; the glyph's 12px plus its 16px plus 8px */
 }
-.search-input::placeholder { color: var(--text-place); }
+.search-input::placeholder { color: var(--text-helper); }
 .search-input::-webkit-search-cancel-button { display: none; }
 .search-input:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
 .search-clear {
@@ -532,7 +532,7 @@ body {
 
 .designation { color: var(--text-second); }
 .rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
-.untitled { color: var(--text-place); font-weight: 400; }
+.untitled { color: var(--text-helper); font-weight: 400; }
 
 .project-row { padding-left: 16px; }  /* $spacing-05 */
 .project-row .row-title { font-weight: 600; }
@@ -572,7 +572,7 @@ body {
 
 .field-value { min-height: 18px; }
 .field-value.multiline { white-space: pre-wrap; }
-.field-empty { color: var(--text-place); }
+.field-empty { color: var(--text-helper); }
 
 .field-input {
   display: block;
@@ -851,10 +851,10 @@ select.field-input[size] {
 .doomed-list li { padding: 2px 0; color: var(--text); }
 
 /* The dialogs are the one place the software sets prose, and so the one
-   place it carries a link. Carbon's link: the colour marks it, a rule
-   appears on hover. */
-.dialog a { color: var(--link); }
-.dialog a:hover { color: var(--link-hover); text-decoration: underline; }
+   place it carries a link. Carbon's inline link: underlined, because a
+   link inside prose cannot be marked by colour alone (WCAG 1.4.1). */
+.dialog a { color: var(--link); text-decoration: underline; }
+.dialog a:hover { color: var(--link-hover); }
 
 .about { display: grid; gap: 12px; }  /* $spacing-04 */
 .about-headline { font-size: 16px; line-height: 1.375; font-weight: 600; color: var(--text); }  /* $heading-compact-02 */
@@ -887,11 +887,17 @@ select.field-input[size] {
 
 .splitter {
   flex: none;
+  position: relative;
   background: var(--layer);
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
 .splitter-vertical { width: 4px; cursor: col-resize; }
 .splitter-horizontal { height: 4px; cursor: row-resize; }
+
+/* The pointer target is 24px across (WCAG 2.5.8); the drawn bar stays 4px. */
+.splitter::after { content: ''; position: absolute; }
+.splitter-vertical::after { inset: 0 -10px; cursor: col-resize; }
+.splitter-horizontal::after { inset: -10px 0; cursor: row-resize; }
 .splitter:hover, .splitter:focus-visible { background: var(--accent); outline: none; }
 .splitter.dragging { background: var(--accent); }
 
@@ -1008,11 +1014,14 @@ select.field-input[size] {
   position: fixed;
   inset: 0;
   z-index: 100;
+  overflow: auto;
   background: var(--background);
 }
 
-/* The provisional floor is 1000px; finalised at the closing check. */
-@media (max-width: 999.98px) {
+/* The supported viewport is 1000 by 332: the ruled 1000px width, and the
+   height the column needs — 48px shell bar, 160px editor floor, 4px
+   splitter, 120px relationships floor. */
+@media (max-width: 999.98px), (max-height: 331.98px) {
   .small-viewport {
     display: flex;
     align-items: center;

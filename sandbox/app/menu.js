@@ -48,9 +48,10 @@ export function menuGroups(items) {
  * @param {'start'|'end'} [spec.align]  which edge of the anchor the menu shares
  * @param {{ x: number, y: number }} [spec.at]  opens at this point instead
  * @param {() => void} [spec.onClose]
+ * @param {(step: -1|1) => void} [spec.onArrow]  called on ArrowLeft and ArrowRight, for a menu bar to switch menus
  * @returns {import('./overlay.js').Entry}
  */
-export function openMenu({ overlay, label, items, anchor = null, align = 'start', at = null, onClose = null }) {
+export function openMenu({ overlay, label, items, anchor = null, align = 'start', at = null, onClose = null, onArrow = null }) {
   const menu = el('div', { className: 'dropdown', attributes: { role: 'menu', 'aria-label': label } });
 
   // Separators split the list into runs; headings group within a run.
@@ -101,6 +102,9 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
     } else if (event.key === 'End') {
       event.preventDefault();
       entries[entries.length - 1].focus();
+    } else if (onArrow !== null && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      event.preventDefault();
+      onArrow(event.key === 'ArrowLeft' ? -1 : 1);
     }
   });
 
