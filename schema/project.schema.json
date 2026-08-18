@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "openconformity project",
-  "description": "A project: one product's conformity model, held as a single file. The folders, parents, and order are the user's filing of the entities in the navigator tree. A file is valid when it conforms to this schema and satisfies the constraints the schema cannot express:\n- Identifiers are unique across folders and entities.\n- An entity's identifier begins with its own type code.\n- Every counter exceeds every issued number of its kind in the file.\n- Every non-null parent names a folder or an entity in the file.\n- Filing has no cycle: nothing sits inside itself, directly or through what holds it.\n- No two folders or entities sharing a parent share an order.\n- Every relationship's source and target name entities in the file, of the entity types its type identifier names, source first, target last.\n- No two relationships share type, source, and target.\n- An entity is the target of at most one composition relationship (the contains and decomposes-into types).\n- Composition has no cycle: no entity owns itself, directly or through what it owns.",
+  "description": "A project: a model of one product's CE marking, held as a single file. The folders, parents, and order are the user's filing of the entities in the navigator tree. A file is valid when it conforms to this schema and satisfies the constraints the schema cannot express:\n- Identifiers are unique across folders and entities.\n- An entity's identifier begins with its own type code.\n- Every counter exceeds every issued number of its kind in the file.\n- Every non-null parent names a folder or an entity in the file.\n- Filing has no cycle: nothing sits inside itself, directly or through what holds it.\n- No two folders or entities sharing a parent share an order.\n- Every relationship's source and target name entities in the file, of the entity types its type identifier names, source first, target last.\n- No two relationships share type, source, and target.\n- An entity is the target of at most one composition relationship (the contains and decomposes-into types).\n- Composition has no cycle: no entity owns itself, directly or through what it owns.",
   "type": "object",
   "properties": {
     "format": {
@@ -147,7 +147,7 @@
     "entityId": {
       "description": "An entity identifier: the type code, a hyphen, and a number.",
       "type": "string",
-      "pattern": "^[A-Z]{3}-[0-9]{3,}$"
+      "pattern": "^(LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}$"
     },
     "counter": {
       "description": "The next number to issue for one identifier kind.",
@@ -165,7 +165,7 @@
         "string",
         "null"
       ],
-      "pattern": "^(F-[0-9]+|[A-Z]{3}-[0-9]{3,})$"
+      "pattern": "^((LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}|F-[0-9]+)$"
     },
     "folder": {
       "description": "A folder of the navigator tree.",
@@ -178,7 +178,8 @@
         },
         "name": {
           "description": "The folder's name.",
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "parent": {
           "$ref": "#/$defs/parent"
@@ -234,6 +235,9 @@
         "attributes": {
           "description": "The entity's attribute values, keyed by attribute.",
           "type": "object",
+          "propertyNames": {
+            "minLength": 1
+          },
           "additionalProperties": {
             "type": "string"
           }
