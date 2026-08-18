@@ -400,7 +400,7 @@ function openStore(storage) {
   store.commit((model) => addEntity(model, 'HAZ'));
   deepEqual(
     Object.keys(blobIn(storage).session),
-    ['selection', 'expanded', 'dirty'],
+    ['selection', 'expanded', 'projectCollapsed', 'dirty'],
     'the blob carries session state and no picker'
   );
 
@@ -433,7 +433,7 @@ function openStore(storage) {
 
   deepEqual(
     Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
-    ['selection', 'expanded', 'dirty'],
+    ['selection', 'expanded', 'projectCollapsed', 'dirty'],
     'the blob never carries it'
   );
   const second = createStore({ storage });
@@ -455,6 +455,43 @@ function openStore(storage) {
   store.commit((model) => addEntity(model, 'HAZ'));
   equal(store.persistFailed(), false, 'a later successful persist clears it');
   equal(blobIn(storage).project.entities.length, 2, 'and writes the whole state');
+}
+
+// --- The project row's expansion is session state ------------------------
+
+{
+  const storage = fakeStorage();
+  const store = createStore({ storage });
+  equal(store.projectExpanded(), true, 'with no project the row reads open');
+  store.setProjectExpanded(false);
+  equal(store.projectExpanded(), true, 'and nothing changes it on the landing');
+
+  store.replaceProject(createModel());
+  equal(store.projectExpanded(), true, 'a project opens with its row open');
+  store.setProjectExpanded(false);
+  equal(store.projectExpanded(), false, 'collapsing holds');
+  equal(store.dirty(), false, 'without marking the project unsaved');
+  equal(blobIn(storage).session.projectCollapsed, true, 'and persists with the session');
+
+  const restored = createStore({ storage });
+  equal(restored.projectExpanded(), false, 'a restore honours the collapse');
+
+  restored.setProjectExpanded(true);
+  equal(blobIn(storage).session.projectCollapsed, false, 'reopening persists too');
+  restored.setProjectExpanded(false);
+  restored.replaceProject(createModel());
+  equal(restored.projectExpanded(), true, 'a replaced project starts open again, whatever stood collapsed');
+}
+
+{
+  const storage = fakeStorage();
+  const seeded = createStore({ storage });
+  seeded.replaceProject(createModel());
+  const blob = JSON.parse(storage.read(PROJECT_KEY));
+  delete blob.session.projectCollapsed;
+  storage.setItem(PROJECT_KEY, JSON.stringify(blob));
+  const restored = createStore({ storage });
+  equal(restored.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
 summary('test-store');

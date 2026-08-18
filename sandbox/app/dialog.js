@@ -125,18 +125,27 @@ export function createDialogs({ overlay, toastRegion = null }) {
    * @param {string} spec.label
    * @param {string} [spec.value]
    * @param {string} [spec.confirmLabel]
+   * @param {(value: string) => string} [spec.preview]  a live line under the field, following what is typed
    * @returns {Promise<string|null>}
    */
-  async function prompt({ title, label, value = '', confirmLabel = 'Save' }) {
+  async function prompt({ title, label, value = '', confirmLabel = 'Save', preview = null }) {
     const input = el('input', {
       className: 'field-input',
       attributes: { type: 'text', id: 'prompt-field' },
     });
     input.value = value;
-    const body = el('div', { className: 'field' }, [
+    const parts = [
       el('label', { className: 'field-label', text: label, attributes: { for: 'prompt-field' } }),
       input,
-    ]);
+    ];
+    if (preview !== null) {
+      const note = el('p', { className: 'field-note', text: preview(input.value) });
+      input.addEventListener('input', () => {
+        note.textContent = preview(input.value);
+      });
+      parts.push(note);
+    }
+    const body = el('div', { className: 'field' }, parts);
     const asked = open({
       title,
       body,

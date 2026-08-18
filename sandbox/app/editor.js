@@ -32,20 +32,29 @@ export function draftChanged(definitions, attributes, values) {
 }
 
 /**
+ * The project's field set: the name, mapped to the model's own name
+ * rather than the attribute bag, and nothing else until
+ * `docs/attributes.md` gains its Project section.
+ */
+const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
- * @param {(id: string, values: Object<string, string>) => boolean} context.onSave
+ * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
  * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
- * @param {() => void} context.onRenameProject
+ * @param {(event: KeyboardEvent) => void} [context.onEscape]
  */
-export function createEditor({ store, head, body, onSave, onCancel, onRename, onRenameProject }) {
+export function createEditor({ store, head, body, onSave, onCancel, onRename, onEscape = () => {} }) {
   /** @type {'view'|'edit'} */
   let mode = 'view';
   /** @type {string|null} the entity the open draft belongs to */
   let editingId = null;
+  /** Whether the open draft edits the project itself. */
+  let editingProject = false;
 
   function fieldValues() {
     /** @type {Object<string, string>} */
@@ -99,10 +108,31 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     ]);
   }
 
-  function headButton(label, onPick) {
-    const button = el('button', { className: 'ghost-button', text: label, attributes: { type: 'button' } });
+  function headButton(label, onPick, iconId = null) {
+    const button = el(
+      'button',
+      { className: 'ghost-button', attributes: { type: 'button' } },
+      [...(iconId ? [icon(iconId)] : []), el('span', { text: label })]
+    );
     button.addEventListener('click', onPick);
     return button;
+  }
+
+  /** The project head: its icon, its kind, and its name as it stands. */
+  function projectHeadName() {
+    const name = store.model().name.trim();
+    return el('div', { className: 'pane-head-name' }, [
+      icon(PROJECT_ICON),
+      el('span', { className: 'subhead-kind', text: 'Project' }),
+      name
+        ? el('span', { className: 'subhead-title', text: name })
+        : el('span', { className: 'subhead-title untitled', text: 'Untitled' }),
+    ]);
+  }
+
+  /** The values the project's fields edit: the name, from the model itself. */
+  function projectValues() {
+    return { name: store.model().name };
   }
 
   function control(definition, value) {
@@ -138,8 +168,57 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return input;
   }
 
+  /** The project, on the standard surface: view fields and Edit. */
+  function renderProjectView() {
+    head.hidden = false;
+    head.appendChild(projectHeadName());
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [headButton('Edit', beginEdit, 'i-edit')]));
+    const values = projectValues();
+    const fields = el('div', { className: 'fields' });
+    for (const definition of PROJECT_FIELDS) {
+      const value = values[definition.key];
+      fields.appendChild(
+        el('div', { className: 'field' }, [
+          el('div', { className: 'field-label', text: definition.name }),
+          value === undefined || value === ''
+            ? el('div', { className: 'field-value field-empty', text: '–' })
+            : el('div', { className: 'field-value', text: value }),
+        ])
+      );
+    }
+    body.appendChild(fields);
+  }
+
+  function renderProjectEdit() {
+    head.hidden = false;
+    head.appendChild(projectHeadName());
+    head.appendChild(
+      el('div', { className: 'pane-head-actions' }, [
+        headButton('Save', () => {
+          if (onSave(null, fieldValues()) !== false) endEdit();
+        }),
+        headButton('Cancel', onCancel),
+      ])
+    );
+    const values = projectValues();
+    const fields = el('div', { className: 'fields' });
+    for (const definition of PROJECT_FIELDS) {
+      fields.appendChild(
+        el('div', { className: 'field' }, [
+          el('label', {
+            className: 'field-label',
+            text: definition.name,
+            attributes: { for: `field-${definition.key}` },
+          }),
+          control(definition, values[definition.key] ?? ''),
+        ])
+      );
+    }
+    body.appendChild(fields);
+  }
+
   function renderView(node) {
-    renderHead(node, [headButton('Edit', beginEdit)]);
+    renderHead(node, [headButton('Edit', beginEdit, 'i-edit')]);
     const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       const value = node.attributes[definition.key];
@@ -186,9 +265,11 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     const node = nodeOf(store.model(), id);
 
     if (mode === 'edit') {
-      if (id === editingId && node && node.kind === 'entity') return;
+      if (editingProject && id === null && store.hasProject()) return;
+      if (!editingProject && id === editingId && node && node.kind === 'entity') return;
       mode = 'view';
       editingId = null;
+      editingProject = false;
     }
 
     head.textContent = '';
@@ -199,21 +280,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       return;
     }
     if (!node) {
-      head.hidden = false;
-      const name = store.model().name.trim();
-      head.appendChild(
-        el('div', { className: 'pane-head-name' }, [
-          icon(PROJECT_ICON),
-          el('span', { className: 'subhead-kind', text: 'Project' }),
-          name
-            ? el('span', { className: 'subhead-title', text: name })
-            : el('span', { className: 'subhead-title untitled', text: 'Untitled' }),
-        ])
-      );
-      head.appendChild(el('div', { className: 'pane-head-actions' }, [headButton('Rename…', onRenameProject)]));
-      body.appendChild(
-        emptyState('Project', 'The project holds the model. Select an entity in the navigator to see its attributes here.')
-      );
+      renderProjectView();
       return;
     }
     if (node.kind === 'folder') {
@@ -229,18 +296,28 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   function beginEdit() {
     const id = store.selection();
     const node = nodeOf(store.model(), id);
-    if (!node || node.kind !== 'entity') return;
-    mode = 'edit';
-    editingId = id;
-    head.textContent = '';
-    body.textContent = '';
-    renderEdit(node);
+    if (id === null && store.hasProject()) {
+      mode = 'edit';
+      editingProject = true;
+      head.textContent = '';
+      body.textContent = '';
+      renderProjectEdit();
+    } else if (node && node.kind === 'entity') {
+      mode = 'edit';
+      editingId = id;
+      head.textContent = '';
+      body.textContent = '';
+      renderEdit(node);
+    } else {
+      return;
+    }
     body.querySelector('[data-key]')?.focus();
   }
 
   function endEdit() {
     mode = 'view';
     editingId = null;
+    editingProject = false;
     render();
   }
 
@@ -250,9 +327,25 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
    */
   function hasUnconfirmedEdit() {
     if (mode !== 'edit') return false;
+    if (editingProject) {
+      if (!store.hasProject()) return false;
+      return draftChanged(PROJECT_FIELDS, projectValues(), fieldValues());
+    }
     const node = nodeOf(store.model(), editingId);
     if (!node || node.kind !== 'entity') return false;
     return draftChanged(attributesFor(node.type), node.attributes, fieldValues());
+  }
+
+  // Escape while a draft is open belongs to the editor, not the overlay:
+  // it asks to leave the edit, and it must not fall through to whatever
+  // stands above the page.
+  for (const surface of [head, body]) {
+    surface.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || mode !== 'edit') return;
+      event.preventDefault();
+      event.stopPropagation();
+      onEscape(event);
+    });
   }
 
   store.subscribe(render);

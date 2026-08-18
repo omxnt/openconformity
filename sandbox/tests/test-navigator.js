@@ -67,6 +67,30 @@ function drawn(model, expanded) {
   deepEqual(treeRows(model, () => false).map((row) => row.id), ['ELM-001', 'F-1'], 'and the tree itself never contains it');
 }
 
+// --- The project row collapses over the whole tree -----------------------
+
+{
+  const model = createModel();
+  equal(visibleRows(model, () => false, true)[0].hasChildren, false, 'an empty project offers no chevron');
+
+  addEntity(model, 'ELM');
+  addFolder(model, 'Zone');
+  const open = visibleRows(model, () => false, true);
+  equal(open[0].hasChildren, true, 'a held project offers one');
+  equal(open[0].expanded, true, 'standing open by default');
+
+  const closed = visibleRows(model, () => false, true, '', false);
+  deepEqual(closed.map((row) => row.kind), ['project'], 'collapsed, the project row hides the whole tree');
+  equal(closed[0].expanded, false, 'and reads as collapsed');
+
+  const filtered = visibleRows(model, () => false, true, 'zone', false);
+  deepEqual(
+    filtered.map((row) => row.id),
+    [null, 'F-1'],
+    'a filter reveals through the collapsed root the way it reveals through any collapsed branch'
+  );
+}
+
 // --- The filter --------------------------------------------------------
 
 {

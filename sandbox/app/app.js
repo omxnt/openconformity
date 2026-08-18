@@ -8,8 +8,8 @@ import { createShell } from './shell.js';
 import { createDialogs } from './dialog.js';
 import { createEditor } from './editor.js';
 import { createNavigator } from './navigator.js';
-import { createRelationshipsView } from './relationships-view.js';
-import { createGraphView } from './graph-view.js';
+import { createRelationshipsView } from './relationships.js';
+import { createGraphView } from './graph.js';
 import { createRelateWorkflow } from './relate.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
@@ -26,7 +26,7 @@ const editor = createEditor({
   onSave: (id, values) => flows.saveEdit(id, values),
   onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
-  onRenameProject: () => flows.renameProject(),
+  onEscape: () => flows.escapeEdit(),
 });
 const flows = createFlows({
   store,

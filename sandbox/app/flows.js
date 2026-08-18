@@ -20,6 +20,7 @@ import {
   removeFolder,
   renameFolder,
   renameProject as nameProject,
+  setProjectAttribute,
   updateEntity,
   relate,
   unrelate,
@@ -44,8 +45,9 @@ import { showAbout as aboutDialog } from './about.js';
  * @param {ReturnType<import('./dialog.js').createDialogs>} context.dialogs
  * @param {ReturnType<import('./editor.js').createEditor>} context.editor
  * @param {HTMLInputElement} context.fileInput
+ * @param {typeof download} [context.saveFile]  the download, injectable where no page exists
  */
-export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
+export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFile = download }) {
   /**
    * The creation whose first save has not happened: cancelling the edit
    * session removes it again.
@@ -172,19 +174,14 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
     store.commit((model) => renameFolder(model, node.id, name));
   }
 
-  /** Name the project, or clear its name: an empty answer clears it. */
-  async function renameProject() {
-    if (!store.hasProject()) return;
-    const name = await dialogs.prompt({
-      title: 'Rename project',
-      label: 'Name',
-      value: store.model().name,
-      confirmLabel: 'Rename',
-    });
-    if (name === null) return;
-    const trimmed = name.trim();
-    if (trimmed === store.model().name) return;
-    store.commit((model) => nameProject(model, trimmed));
+  /**
+   * Leave the open edit by the key that means leave: a clean draft
+   * cancels silently, a dirty one gets the standard discard question.
+   */
+  async function escapeEdit() {
+    if (!editor.editing()) return;
+    if (!(await confirmDiscard())) return;
+    endEditSession();
   }
 
   /** @type {import('./overlay.js').Entry|null} */
@@ -358,7 +355,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
     if (!(await selectNode(id))) return;
     const node = nodeOf(store.model(), store.selection());
     if (node === null) {
-      if (store.hasProject() && store.selection() === null) await renameProject();
+      if (store.hasProject() && store.selection() === null) editor.beginEdit();
       return;
     }
     if (node.kind === 'entity') editor.beginEdit();
@@ -366,13 +363,27 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
   }
 
   /**
-   * Apply a confirmed draft. The first save of a pristine creation makes
+   * Apply a confirmed draft. A null identifier is the project itself:
+   * the name goes to the model's own name, everything else to the
+   * project's attribute bag. The first save of a pristine creation makes
    * it an ordinary entity: from here on, Cancel keeps it.
-   * @param {string} id
+   * @param {string|null} id
    * @param {Object<string, string>} values
    * @returns {boolean}
    */
   function saveEdit(id, values) {
+    if (id === null) {
+      return store.commit((model) => {
+        const named = nameProject(model, (values.name ?? model.name).trim());
+        if (!named.ok) return named;
+        for (const [key, value] of Object.entries(values)) {
+          if (key === 'name') continue;
+          const set = setProjectAttribute(model, key, value);
+          if (!set.ok) return set;
+        }
+        return { ok: true };
+      }).ok;
+    }
     const outcome = store.commit((model) => updateEntity(model, id, values));
     if (outcome.ok && freshCreation !== null && freshCreation.id === id) freshCreation = null;
     return outcome.ok;
@@ -589,13 +600,27 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
   }
 
   /**
-   * Save the project as a downloaded file, named after the project, and
-   * point the saved state at what was written.
+   * Save the project as a downloaded file, asking every time: the name,
+   * prefilled and renamed on confirm like any rename, and the filename
+   * it makes, previewed live. Cancel costs nothing — no download, no
+   * rename, no pointer move.
    */
-  function saveProject() {
+  async function saveProject() {
     if (!store.hasProject()) return;
+    const name = await dialogs.prompt({
+      title: 'Save project',
+      label: 'Project name',
+      value: store.model().name,
+      confirmLabel: 'Save',
+      preview: (typed) => `Saved to your downloads as ${filenameFor(typed.trim() || store.model().name)}.`,
+    });
+    if (name === null) return;
+    if (name !== store.model().name) {
+      const named = store.commit((model) => nameProject(model, name));
+      if (!named.ok) return;
+    }
     const filename = filenameFor(store.model().name);
-    download(filename, serialise(store.model()), 'application/json');
+    saveFile(filename, serialise(store.model()), 'application/json');
     store.markSaved();
     dialogs.toast('Project saved', `Saved to your downloads as ${filename}.`);
   }
@@ -646,7 +671,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput }) {
     createRelated,
     createFolder,
     renameSelection,
-    renameProject,
+    escapeEdit,
     toggleCreateMenu,
     toggleRelatedMenu,
     selectNode,

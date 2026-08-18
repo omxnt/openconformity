@@ -7,6 +7,7 @@
 
 import {
   effectiveTheme,
+  themeSwitch,
   titleFor,
   shouldWarnBeforeUnload,
   THEME_MENU,
@@ -35,8 +36,26 @@ deepEqual(
 );
 deepEqual(
   THEME_MENU.map((item) => item.label),
-  ['Light', 'Dark'],
-  'presented as Light and Dark, with no System entry: the first load follows the system, a choice then owns it'
+  ['Light theme', 'Dark theme'],
+  'presented as named themes, with no System entry: the first load follows the system, a choice then owns it'
+);
+deepEqual(
+  THEME_MENU.map((item) => item.icon),
+  ['i-theme-light', 'i-theme-dark'],
+  'each wearing its glyph: the sun, the moon'
+);
+
+// --- The one-click flip ------------------------------------------------
+
+deepEqual(
+  themeSwitch('white'),
+  { next: 'g100', icon: 'i-theme-dark', label: 'Switch to the dark theme' },
+  'in the light, the button wears the moon and offers the dark'
+);
+deepEqual(
+  themeSwitch('g100'),
+  { next: 'white', icon: 'i-theme-light', label: 'Switch to the light theme' },
+  'in the dark, the sun and the light'
 );
 
 // --- The notices -------------------------------------------------------

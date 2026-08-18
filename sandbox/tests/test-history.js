@@ -7,7 +7,7 @@
 
 import './shim.js';
 import { createHistory } from '../app/history.js';
-import { createModel, addEntity, updateEntity, relate, nodeOf } from '../app/model.js';
+import { createModel, addEntity, updateEntity, relate, nodeOf, setProjectAttribute } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- The line ----------------------------------------------------------
@@ -189,6 +189,21 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   updateEntity(undone, 'ELM-001', { title: 'Kneader' });
   const again = history.redo(undone);
   equal(nodeOf(history.undo(again), 'ELM-001').attributes.title, 'Mixer', 'a change made to a restored model does not reach the entry');
+}
+
+// --- Snapshots carry the project's attributes ---------------------------
+
+{
+  const model = createModel();
+  const history = createHistory(model);
+  setProjectAttribute(model, 'description', 'First');
+  history.record(model);
+  setProjectAttribute(model, 'description', 'Second');
+  history.record(model);
+  const back = history.undo(model);
+  equal(back.attributes.description, 'First', 'undo returns the bag as it stood');
+  const forward = history.redo(back);
+  equal(forward.attributes.description, 'Second', 'and redo returns it forward');
 }
 
 summary('test-history');

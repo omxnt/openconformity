@@ -6,7 +6,7 @@
  */
 
 import { SCHEMA_VERSION, toFileObject, serialise, openProject, loadProject, filenameFor } from '../app/files.js';
-import { createModel, addEntity, addFolder, updateEntity, relate, file, nodeOf, childrenOf } from '../app/model.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, file, nodeOf, childrenOf, setProjectAttribute } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** The identifiers of a parent's children, in sibling order. */
@@ -123,6 +123,25 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   const asBlobProject = loadProject(toFileObject(opened.model));
   equal(asBlobProject.ok, true, 'the file object passes the same loader the file text does');
   equal(serialise(asBlobProject.model), serialise(opened.model), 'and rebuilds the same model');
+}
+
+// --- The project's attribute bag rides the file -------------------------
+
+{
+  const model = createModel();
+  ok(!Object.hasOwn(toFileObject(model), 'attributes'), 'an empty bag is not written');
+  setProjectAttribute(model, 'description', 'A machine');
+  const written = toFileObject(model);
+  deepEqual(written.attributes, { description: 'A machine' }, 'a non-empty bag is written');
+  deepEqual(
+    Object.keys(written),
+    ['format', 'schemaVersion', 'name', 'attributes', 'counters', 'folders', 'entities', 'relationships'],
+    'in the schema\'s place, after the name'
+  );
+  const reopened = openProject(serialise(model));
+  ok(reopened.ok, 'a file carrying the bag opens');
+  deepEqual(reopened.model.attributes, { description: 'A machine' }, 'and the loader carries it verbatim');
+  equal(serialise(reopened.model), serialise(model), 'byte-stable through the round trip');
 }
 
 summary('test-files');

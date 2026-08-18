@@ -21,6 +21,7 @@ import {
   unrelate,
   relationshipsOf,
   removeFolder,
+  setProjectAttribute,
 } from '../app/model.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
@@ -240,6 +241,19 @@ function childIds(model, parentId) {
   ok(nodeOf(model, a.id) !== null, 'the entities filed in it are not');
   equal(nodeOf(model, a.id).parent, outer.id, 'its contents moved up to where it sat');
   equal(nodeOf(model, inner.id).parent, outer.id, 'folders among them');
+}
+
+// --- The project's own attributes ---------------------------------------
+
+{
+  const model = createModel();
+  deepEqual(model.attributes, {}, 'a new project carries an empty bag');
+  allowed(setProjectAttribute(model, 'description', 'A machine'), 'a value sets');
+  equal(model.attributes.description, 'A machine', 'verbatim');
+  allowed(setProjectAttribute(model, 'description', ''), 'an empty value removes the key');
+  ok(!Object.hasOwn(model.attributes, 'description'), 'so the project carries only what is set');
+  refused(setProjectAttribute(model, '', 'x'), 'an empty key is refused');
+  refused(setProjectAttribute(model, 'description', 7), 'a non-text value is refused');
 }
 
 summary('test-model');

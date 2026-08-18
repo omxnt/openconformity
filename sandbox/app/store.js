@@ -67,6 +67,8 @@ export function createStore({ storage }) {
   let selection = null;
   /** @type {Set<string>} */
   let expanded = new Set();
+  /** Whether the project row is collapsed over the whole tree. */
+  let projectCollapsed = false;
   /** @type {string|null} */
   let theme = null;
   /** @type {'fresh'|'restored'|'failed'} */
@@ -94,7 +96,7 @@ export function createStore({ storage }) {
     if (!projectOpen) return;
     const blob = {
       project: toFileObject(model),
-      session: { selection, expanded: [...expanded], dirty: dirty() },
+      session: { selection, expanded: [...expanded], projectCollapsed, dirty: dirty() },
     };
     try {
       storage.setItem(PROJECT_KEY, JSON.stringify(blob));
@@ -173,6 +175,7 @@ export function createStore({ storage }) {
         selection = typeof wanted === 'string' && model.nodes.has(wanted) ? wanted : null;
         const openIds = Array.isArray(blob.session?.expanded) ? blob.session.expanded : [];
         expanded = new Set(openIds.filter((id) => model.nodes.has(id)));
+        projectCollapsed = blob.session?.projectCollapsed === true;
         projectOpen = true;
         restoration = 'restored';
       }
@@ -302,6 +305,7 @@ export function createStore({ storage }) {
       savedSequence = history.reset(model);
       selection = null;
       expanded = new Set();
+      projectCollapsed = false;
       picker = null;
       projectOpen = true;
       persist();
@@ -383,8 +387,6 @@ export function createStore({ storage }) {
     /** @param {string} id */
     isExpanded: (id) => expanded.has(id),
 
-    /** The expanded identifiers, for the tree. */
-
     /**
      * Expand or collapse a node in the tree. Session state: persisted on
      * change, never in history, never dirtying.
@@ -396,6 +398,22 @@ export function createStore({ storage }) {
       if (open === expanded.has(id)) return;
       if (open) expanded.add(id);
       else expanded.delete(id);
+      persist();
+      notify();
+    },
+
+    /** Whether the project row stands open over the tree. Open by default. */
+    projectExpanded: () => !projectCollapsed,
+
+    /**
+     * Collapse or reopen the project row. Session state like a node's
+     * expansion, held as its collapse so an absent record means open.
+     * @param {boolean} open
+     */
+    setProjectExpanded(open) {
+      if (!projectOpen) return;
+      if (open === !projectCollapsed) return;
+      projectCollapsed = !open;
       persist();
       notify();
     },

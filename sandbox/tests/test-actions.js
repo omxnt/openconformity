@@ -51,8 +51,18 @@ function enabledIds(actions) {
   ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),
-    ['new-project', 'open', 'save', 'load-example'],
-    'the File menu offers the file actions, the example among them, and nothing else'
+    ['new-project', 'open', 'save'],
+    'the File menu leads with the file actions'
+  );
+  deepEqual(
+    actions.filter((action) => action.menubar && action.group === 'example').map((action) => action.id),
+    ['load-example'],
+    'and holds the example alone in its own group, behind the separator'
+  );
+  deepEqual(
+    actions.filter((action) => ['project', 'example'].includes(action.group)).map((action) => action.label),
+    ['New project', 'Open project…', 'Save project', 'Load example'],
+    'named as the File menu reads, top to bottom'
   );
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'help').map((action) => action.id),

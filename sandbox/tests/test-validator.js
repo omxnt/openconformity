@@ -186,4 +186,15 @@ for (const id of relationshipIds) {
   );
 }
 
+// --- The project's attribute bag ----------------------------------------
+
+{
+  const bagged = JSON.parse(readFile('fixtures/valid-attributes.json'));
+  equal(validate(bagged, 1).ok, true, 'a file carrying the project attribute bag passes: the schema defines it');
+  equal(validate(valid, 1).ok, true, 'and one without it passes: the bag is optional');
+  refusedOver({ ...bagged, attributes: 'notes' }, 'not an object', 'a bag that is not an object is refused');
+  refusedOver({ ...bagged, attributes: { description: 7 } }, 'is not text', 'a non-text value in the bag is refused');
+  refusedOver({ ...bagged, attributes: { '': 'x' } }, 'key is empty', 'an empty key in the bag is refused');
+}
+
 summary('test-validator');

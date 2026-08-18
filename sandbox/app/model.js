@@ -38,6 +38,7 @@ import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
  *
  * @typedef {Object} Model
  * @property {string} name
+ * @property {Object<string, string>} attributes  the project's own values, carried like an entity's
  * @property {Map<string, Node>} nodes
  * @property {Map<string, Relationship>} relationships  keyed by `type source target`
  * @property {Object<string, number>} counters  the next number to issue, per entity type code and F for folders
@@ -50,7 +51,7 @@ export function createModel() {
   /** @type {Object<string, number>} */
   const counters = { F: 1 };
   for (const code of Object.keys(ENTITY_TYPES)) counters[code] = 1;
-  return { name: '', nodes: new Map(), relationships: new Map(), counters };
+  return { name: '', attributes: {}, nodes: new Map(), relationships: new Map(), counters };
 }
 
 /**
@@ -555,6 +556,26 @@ export function removeFolder(model, folderId) {
 export function renameProject(model, name) {
   if (typeof name !== 'string') return { ok: false, reason: 'A name is text.' };
   model.name = name;
+  return { ok: true };
+}
+
+/**
+ * Set one of the project's own attribute values, like an entity's: an
+ * empty value removes the key, so the project carries only what is set.
+ * @param {Model} model
+ * @param {string} key
+ * @param {string} value
+ * @returns {Outcome}
+ */
+export function setProjectAttribute(model, key, value) {
+  if (typeof key !== 'string' || key === '') {
+    return { ok: false, reason: 'An attribute needs a key.' };
+  }
+  if (typeof value !== 'string') {
+    return { ok: false, reason: 'An attribute value is text.' };
+  }
+  if (value === '') delete model.attributes[key];
+  else model.attributes[key] = value;
   return { ok: true };
 }
 

@@ -7,8 +7,8 @@
  */
 
 import { pickerCandidates, pairOptions, groupedPicks } from '../app/relate.js';
-import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph-view.js';
-import { groupedRelationships } from '../app/relationships-view.js';
+import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE } from '../app/graph.js';
+import { groupedRelationships, relationshipRows } from '../app/relationships.js';
 import { relationshipOptions } from '../app/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -146,6 +146,19 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     [['assesses', ['CAS-001']]],
     'incoming rows group the same way, with the source as the far end'
   );
+
+  deepEqual(
+    relationshipRows(model, 'ELM-001').map((row) => [row.direction, row.label, row.other.id]),
+    [
+      ['outgoing', 'exhibits', 'HAZ-001'],
+      ['outgoing', 'exhibits', 'HAZ-002'],
+      ['outgoing', 'decomposes into', 'ELM-002'],
+      ['incoming', 'assesses', 'CAS-001'],
+    ],
+    'the table flattens the same grouping: outgoing before incoming, types adjacent, model order within'
+  );
+  deepEqual(relationshipRows(model, 'F-1'), [], 'a folder makes no rows');
+  deepEqual(relationshipRows(model, null), [], 'nor does no selection');
 }
 
 // --- The neighbourhood -------------------------------------------------

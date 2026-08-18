@@ -35,6 +35,7 @@ const DEPTH = 50;
 function contentOf(model) {
   return structuredClone({
     name: model.name,
+    attributes: model.attributes,
     nodes: model.nodes,
     relationships: model.relationships,
   });

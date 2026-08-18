@@ -97,6 +97,7 @@ const V1_FOLDER_ID = /^F-[0-9]+$/;
 const V1_PARENT = /^((LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|ELM|ACT|TSK|PHS)-[0-9]{3,}|F-[0-9]+)$/;
 
 const V1_FILE_KEYS = ['format', 'schemaVersion', 'name', 'counters', 'folders', 'entities', 'relationships'];
+const V1_FILE_OPTIONAL_KEYS = ['attributes'];
 const V1_FOLDER_KEYS = ['id', 'name', 'parent', 'order'];
 const V1_ENTITY_KEYS = ['id', 'type', 'parent', 'order', 'attributes'];
 const V1_RELATIONSHIP_KEYS = ['type', 'source', 'target'];
@@ -130,18 +131,22 @@ function numberOf(id) {
 }
 
 /**
- * The keys an object must carry, no more and no fewer.
+ * The keys an object must carry, no more and no fewer — beyond the keys
+ * the schema defines without requiring.
  * @param {Object} value
  * @param {string[]} keys
  * @param {string} label
  * @param {string[]} problems
+ * @param {string[]} [optional]
  */
-function checkKeys(value, keys, label, problems) {
+function checkKeys(value, keys, label, problems, optional = []) {
   for (const key of keys) {
     if (!Object.hasOwn(value, key)) problems.push(`${label} has no ${key}.`);
   }
   for (const key of Object.keys(value)) {
-    if (!keys.includes(key)) problems.push(`${label} holds ${key}, which the schema does not define.`);
+    if (!keys.includes(key) && !optional.includes(key)) {
+      problems.push(`${label} holds ${key}, which the schema does not define.`);
+    }
   }
 }
 
@@ -172,7 +177,7 @@ function isValidOrder(order) {
 function keywordProblems(data) {
   const problems = [];
 
-  checkKeys(data, V1_FILE_KEYS, 'The file', problems);
+  checkKeys(data, V1_FILE_KEYS, 'The file', problems, V1_FILE_OPTIONAL_KEYS);
   if (Object.hasOwn(data, 'format') && data.format !== 'openconformity-project') {
     problems.push('The format does not mark an openconformity project.');
   }
@@ -181,6 +186,16 @@ function keywordProblems(data) {
   }
   if (Object.hasOwn(data, 'name') && typeof data.name !== 'string') {
     problems.push('The name is not text.');
+  }
+  if (Object.hasOwn(data, 'attributes')) {
+    if (!isPlainObject(data.attributes)) {
+      problems.push('The project attributes are not an object.');
+    } else {
+      for (const [key, value] of Object.entries(data.attributes)) {
+        if (key.length < 1) problems.push('A project attribute key is empty.');
+        if (typeof value !== 'string') problems.push(`The project ${key} attribute is not text.`);
+      }
+    }
   }
 
   if (Object.hasOwn(data, 'counters')) {

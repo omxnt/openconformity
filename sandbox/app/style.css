@@ -526,7 +526,6 @@ body {
 }
 
 .designation { color: var(--text-second); }
-.rel-row .row-title { overflow: hidden; text-overflow: ellipsis; }
 .untitled { color: var(--text-helper); font-weight: 400; }
 
 .project-row { padding-left: 16px; }  /* $spacing-05 */
@@ -565,6 +564,14 @@ body {
   margin-bottom: 4px;       /* $spacing-02 */
 }
 
+/* Carbon helper text: the live line under a dialog field. */
+.field-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-helper);
+  margin-top: 4px;          /* $spacing-02 */
+}
+
 .field-value { min-height: 18px; }
 .field-value.multiline { white-space: pre-wrap; }
 .field-empty { color: var(--text-helper); }
@@ -601,46 +608,37 @@ select.field-input[size] {
 
 /* ---------- Relationships ---------- */
 
-.rel-section { padding: 8px 0; }
-.rel-heading {
-  font-size: 12px;          /* $label-01 */
-  font-weight: 400;
-  letter-spacing: 0.32px;
-  color: var(--text-helper);
-  padding: 4px 16px;        /* $spacing-02, $spacing-05 */
-}
-.rel-type {
-  font-size: 12px;          /* $label-01 */
-  letter-spacing: 0.32px;
-  color: var(--text-second);
-  padding: 8px 16px 2px;    /* $spacing-03, $spacing-05 */
-}
-.rel-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  height: var(--row);
-  padding: 0 8px 0 24px;    /* $spacing-03, $spacing-06 */
-  white-space: nowrap;
-  overflow: hidden;
-}
-.rel-row:hover { background: var(--hover); }
-.rel-endpoint {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  font: inherit;
-  letter-spacing: inherit;
-  color: var(--text);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
+/* Carbon DataTable, xs rows: a $layer-accent-01 head, rows parted by a
+   single $border-subtle-01 rule, and no vertical rules at all. The head
+   stays put while the pane body scrolls. */
+.table { border-collapse: collapse; width: 100%; }
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
+  font-weight: 600;         /* $heading-compact-01, the same 14px as the cells */
+  height: 24px;             /* Carbon data table xs */
+  padding: 0 16px;          /* $spacing-05 */
+  background: var(--layer-accent);
+  white-space: nowrap;
 }
+.table td {
+  height: 24px;             /* Carbon data table xs */
+  padding: 0 16px;          /* $spacing-05 */
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.table td.wrap { white-space: normal; }
+.table tbody tr { cursor: pointer; }
+.table tbody tr:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.table tbody tr:hover td { background: var(--hover); }
+.table .shrink { width: 1%; padding: 0 8px; }  /* $spacing-03 */
+.rel-direction { color: var(--text-second); }
+.arrow { margin-right: 8px; color: var(--text-second); }  /* $spacing-03 */
+.cell-entity { display: flex; align-items: center; gap: 8px; min-width: 0; }  /* $spacing-03 */
+.cell-entity .row-title { overflow: hidden; text-overflow: ellipsis; }
 
 /* A row action. Removal is neutral until pointed at, then the danger
    fill; letting go of a pending pick destroys nothing, so it does not go
@@ -665,23 +663,25 @@ select.field-input[size] {
 .icon-button.neutral:hover { background: var(--hover); color: var(--text); }
 .icon-button.neutral:active { background: var(--active); color: var(--text); }
 
-/* Carbon content switcher, on the high-contrast surface when selected. */
-.switcher {
-  display: inline-flex;
-  border: 1px solid var(--border-strong);
-}
+/* Carbon content switcher: one set of views of the same thing, the
+   chosen one carried on the inverse surface. */
+.switcher { display: inline-flex; align-self: center; }
 .switcher-button {
-  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;             /* $spacing-06, to sit inside the 32px head */
+  font: inherit;            /* $body-compact-01 */
   letter-spacing: inherit;
-  height: 28px;
-  padding: 0 12px;
-  color: var(--text);
+  padding: 0 12px;          /* $spacing-04 */
+  color: var(--text-second);
   background: none;
   border: none;
   cursor: pointer;
-  transition: background-color var(--motion-fast) var(--motion-standard);
+  white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--motion-standard),
+              color var(--motion-fast) var(--motion-standard);
 }
-.switcher-button:hover:not(.selected) { background: var(--hover); }
+.switcher-button:hover:not(.selected) { background: var(--hover); color: var(--text); }
 .switcher-button.selected { background: var(--inverse); color: var(--text-inverse); }
 
 /* ---------- The graph ---------- */
@@ -883,11 +883,17 @@ select.field-input[size] {
 .splitter {
   flex: none;
   position: relative;
-  background: var(--layer);
+  background: var(--background);
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
 .splitter-vertical { width: 4px; cursor: col-resize; }
 .splitter-horizontal { height: 4px; cursor: row-resize; }
+
+/* A hairline rule through the gutter, so the split reads against the
+   pane heads and the pane bodies alike. */
+.splitter::before { content: ''; position: absolute; background: var(--border-subtle); }
+.splitter-vertical::before { top: 0; bottom: 0; left: 50%; width: 1px; transform: translateX(-50%); }
+.splitter-horizontal::before { left: 0; right: 0; top: 50%; height: 1px; transform: translateY(-50%); }
 
 /* The pointer target is 24px across (WCAG 2.5.8); the drawn bar stays 4px. */
 .splitter::after { content: ''; position: absolute; }
@@ -895,6 +901,7 @@ select.field-input[size] {
 .splitter-horizontal::after { inset: -10px 0; cursor: row-resize; }
 .splitter:hover, .splitter:focus-visible { background: var(--accent); outline: none; }
 .splitter.dragging { background: var(--accent); }
+.splitter:hover::before, .splitter:focus-visible::before, .splitter.dragging::before { background: transparent; }
 
 /* ---------- Overlay ---------- */
 

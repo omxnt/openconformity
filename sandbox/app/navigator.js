@@ -107,19 +107,24 @@ export function treeRows(model, isExpanded, filter = '') {
 
 /**
  * Everything the pane draws, in drawing order: the project row first,
- * always, then the tree; nothing at all without a project.
+ * always, then the tree while the project row stands open; nothing at
+ * all without a project.
  * @param {import('./model.js').Model} model
  * @param {(id: string) => boolean} isExpanded
  * @param {boolean} hasProject
  * @param {string} [filter]
- * @returns {Array<{ kind: 'project', id: null } | (TreeRow & { kind: 'node' })>}
+ * @param {boolean} [projectExpanded]
+ * @returns {Array<{ kind: 'project', id: null, hasChildren: boolean, expanded: boolean } | (TreeRow & { kind: 'node' })>}
  */
-export function visibleRows(model, isExpanded, hasProject, filter = '') {
+export function visibleRows(model, isExpanded, hasProject, filter = '', projectExpanded = true) {
   if (!hasProject) return [];
-  return [
-    { kind: 'project', id: null },
-    ...treeRows(model, isExpanded, filter).map((row) => ({ kind: 'node', ...row })),
-  ];
+  const hasChildren = childrenOf(model, null).length > 0;
+  // A filter reveals through the collapsed root the way it reveals
+  // through any collapsed branch.
+  const open = projectExpanded || filter.trim() !== '';
+  const project = { kind: 'project', id: null, hasChildren, expanded: hasChildren && open };
+  if (!project.expanded) return [project];
+  return [project, ...treeRows(model, isExpanded, filter).map((row) => ({ kind: 'node', ...row }))];
 }
 
 /**
@@ -321,18 +326,28 @@ export function createNavigator({
     rowElement.classList.remove('drop-target', 'drop-before', 'drop-after');
   }
 
-  function renderProjectRow() {
+  function renderProjectRow(row) {
     const selected = store.selection() === null;
+    const attributes = {
+      role: 'treeitem',
+      'aria-level': '1',
+      'aria-selected': String(selected),
+      tabindex: selected ? '0' : '-1',
+    };
+    if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
     const rowElement = el('div', {
       className: `tree-row project-row${selected ? ' selected' : ''}`,
-      attributes: {
-        role: 'treeitem',
-        'aria-level': '1',
-        'aria-selected': String(selected),
-        tabindex: selected ? '0' : '-1',
-      },
+      attributes,
     });
-    rowElement.appendChild(el('span', { className: 'twisty' }));
+    const twisty = el('span', { className: 'twisty' });
+    if (row.hasChildren) {
+      twisty.appendChild(icon(row.expanded ? 'i-chevron-down' : 'i-chevron-right'));
+      twisty.addEventListener('click', (event) => {
+        event.stopPropagation();
+        store.setProjectExpanded(!row.expanded);
+      });
+    }
+    rowElement.appendChild(twisty);
     rowElement.appendChild(icon(PROJECT_ICON));
 
     const name = store.model().name.trim();
@@ -503,8 +518,8 @@ export function createNavigator({
     };
     const isOpen = openWithReveal(picker, picking.candidates);
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
-    for (const row of visibleRows(store.model(), isOpen, true, filter)) {
-      tree.appendChild(row.kind === 'project' ? renderProjectRow() : renderRow(row, picking));
+    for (const row of visibleRows(store.model(), isOpen, true, filter, store.projectExpanded())) {
+      tree.appendChild(row.kind === 'project' ? renderProjectRow(row) : renderRow(row, picking));
     }
     container.appendChild(tree);
 
@@ -539,7 +554,7 @@ export function createNavigator({
 
   container.addEventListener('keydown', (event) => {
     const picker = store.picker();
-    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter);
+    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter, store.projectExpanded());
     if (rows.length === 0) return;
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);
@@ -555,14 +570,22 @@ export function createNavigator({
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
       if (index > 0) onSelect(rows[index - 1].id);
-    } else if (event.key === 'ArrowRight' && row && row.kind === 'node') {
+    } else if (event.key === 'ArrowRight' && row) {
       event.preventDefault();
-      if (row.hasChildren && !row.expanded) store.setExpanded(row.id, true);
-      else if (row.expanded) onSelect(rows[index + 1].id);
-    } else if (event.key === 'ArrowLeft' && row && row.kind === 'node') {
+      if (row.hasChildren && !row.expanded) {
+        if (row.kind === 'project') store.setProjectExpanded(true);
+        else store.setExpanded(row.id, true);
+      } else if (row.expanded) {
+        onSelect(rows[index + 1].id);
+      }
+    } else if (event.key === 'ArrowLeft' && row) {
       event.preventDefault();
-      if (row.expanded) store.setExpanded(row.id, false);
-      else onSelect(row.node.parent);
+      if (row.expanded) {
+        if (row.kind === 'project') store.setProjectExpanded(false);
+        else store.setExpanded(row.id, false);
+      } else if (row.kind === 'node') {
+        onSelect(row.node.parent);
+      }
     } else if (event.key === 'Home') {
       event.preventDefault();
       onSelect(rows[0].id);

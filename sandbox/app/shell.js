@@ -20,15 +20,27 @@ export function effectiveTheme(choice, systemPrefersDark) {
 }
 
 /**
- * The theme offer, in menu order: two states, presented as Light and
- * Dark. The first load follows the system preference; any explicit
+ * The theme offer, in menu order: two states, each named and carrying
+ * its glyph. The first load follows the system preference; any explicit
  * choice then owns the theme permanently. The stored values stay the
  * Carbon theme names.
  */
 export const THEME_MENU = [
-  { value: 'white', label: 'Light' },
-  { value: 'g100', label: 'Dark' },
+  { value: 'white', label: 'Light theme', icon: 'i-theme-light' },
+  { value: 'g100', label: 'Dark theme', icon: 'i-theme-dark' },
 ];
+
+/**
+ * What the shell's theme button offers: one click to the other theme,
+ * wearing the glyph of the state it would switch to.
+ * @param {'white'|'g100'} effective
+ * @returns {{ next: 'white'|'g100', icon: string, label: string }}
+ */
+export function themeSwitch(effective) {
+  return effective === 'g100'
+    ? { next: 'white', icon: 'i-theme-light', label: 'Switch to the light theme' }
+    : { next: 'g100', icon: 'i-theme-dark', label: 'Switch to the dark theme' };
+}
 
 /**
  * The browser tab's title: the project's name when it has one, the
@@ -94,7 +106,10 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   function applyTheme() {
     const theme = effectiveTheme(store.theme(), dark.matches);
     document.documentElement.dataset.theme = theme;
-    themeIcon.setAttribute('href', theme === 'g100' ? '#i-theme-dark' : '#i-theme-light');
+    const offer = themeSwitch(theme);
+    themeIcon.setAttribute('href', `#${offer.icon}`);
+    themeButton.setAttribute('aria-label', offer.label);
+    themeButton.setAttribute('title', offer.label);
   }
 
   dark.addEventListener('change', applyTheme);
@@ -106,31 +121,18 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
    */
   function themeItems() {
     const effective = effectiveTheme(store.theme(), dark.matches);
-    return THEME_MENU.map(({ value, label }) => ({
+    return THEME_MENU.map(({ value, label, icon }) => ({
       label,
+      icon,
       checked: effective === value,
       onPick: () => store.setTheme(value),
     }));
   }
 
-  /** @type {import('./overlay.js').Entry|null} */
-  let themeMenu = null;
-
+  // One click flips the theme; the button wears the state it would
+  // switch to.
   themeButton.addEventListener('click', () => {
-    if (themeMenu) {
-      overlay.close(themeMenu);
-      return;
-    }
-    themeMenu = openMenu({
-      overlay,
-      label: 'Theme',
-      anchor: themeButton,
-      align: 'end',
-      items: themeItems(),
-      onClose: () => {
-        themeMenu = null;
-      },
-    });
+    store.setTheme(themeSwitch(effectiveTheme(store.theme(), dark.matches)).next);
   });
 
   // --- The menu bar and the shell actions ------------------------------
@@ -206,9 +208,19 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     menubar.push({ button, openIt });
   }
 
-  menubarMenu(fileButton, 'File', () =>
-    actions.filter((action) => action.menubar && action.group === 'project').map((action) => actionItem(action, fileButton))
-  );
+  // The file actions, then the example behind a separator: the way in
+  // that replaces your work stands apart from the ones that save it.
+  const fileGroups = ['project', 'example'];
+  menubarMenu(fileButton, 'File', () => {
+    const items = [];
+    let lastGroup = null;
+    for (const action of actions.filter((offered) => offered.menubar && fileGroups.includes(offered.group))) {
+      if (lastGroup !== null && action.group !== lastGroup) items.push({ separator: true });
+      lastGroup = action.group;
+      items.push(actionItem(action, fileButton));
+    }
+    return items;
+  });
 
   // Everything that changes the model, separated as the action groups
   // separate, so the menu and the toolbar cannot drift.
@@ -225,8 +237,6 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   });
 
   menubarMenu(viewButton, 'View', () => [
-    ...themeItems(),
-    { separator: true },
     {
       label: 'Relationships as list',
       icon: 'i-view-list',
@@ -239,11 +249,33 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
       checked: store.relationshipView() === 'graph',
       onPick: () => store.setRelationshipView('graph'),
     },
+    { separator: true },
+    ...themeItems(),
   ]);
 
-  menubarMenu(helpButton, 'Help', () =>
-    actions.filter((action) => action.menubar && action.group === 'help').map((action) => actionItem(action, helpButton))
-  );
+  /** @param {string} url */
+  function openLink(url) {
+    window.open(url, '_blank', 'noopener');
+  }
+
+  // About and the metamodel act in the tool; behind the separator,
+  // everything leaves it — the launch glyph marks each external link,
+  // and the email stands apart the way the demo held it.
+  menubarMenu(helpButton, 'Help', () => [
+    ...actions.filter((action) => action.menubar && action.group === 'help').map((action) => actionItem(action, helpButton)),
+    { separator: true },
+    { label: 'Project site', icon: 'i-launch', onPick: () => openLink('https://openconformity.org') },
+    { label: 'Source on GitHub', icon: 'i-launch', onPick: () => openLink('https://github.com/omxnt/openconformity') },
+    { label: 'Follow on LinkedIn', icon: 'i-launch', onPick: () => openLink('https://www.linkedin.com/company/openconformity') },
+    { separator: true },
+    {
+      label: 'Write an email',
+      icon: 'i-email',
+      onPick: () => {
+        window.location.href = 'mailto:info@openconformity.org';
+      },
+    },
+  ]);
 
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {

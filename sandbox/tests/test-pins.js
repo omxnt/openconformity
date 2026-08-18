@@ -101,6 +101,39 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
+// --- The dogfooding batch: what the review ordered -----------------------
+
+{
+  const shell = readFile('../app/shell.js');
+  const page = readFile('../app/index.html');
+  const origin = readFile('../app/assets/icons/ORIGIN.md');
+
+  for (const glyph of ['i-launch', 'i-email']) {
+    ok(page.includes(`id="${glyph}"`), `${glyph} is in the sprite`);
+    ok(origin.includes(`\`${glyph}\``), `${glyph} has its provenance recorded`);
+  }
+  ok(shell.includes("window.open(url, '_blank', 'noopener')"), 'every external link leaves in a new tab, noopener');
+  for (const label of ['Project site', 'Source on GitHub', 'Follow on LinkedIn', 'Write an email']) {
+    ok(shell.includes(`label: '${label}'`), `the Help menu offers ${label}`);
+  }
+  ok(shell.includes("window.location.href = 'mailto:info@openconformity.org'"), 'the email is a mailto, not a tab');
+  ok(
+    !shell.includes("{ label: 'Metamodel', icon: 'i-launch'"),
+    'the metamodel carries no launch mark: it leaves for no external site'
+  );
+
+  ok(shell.includes("const fileGroups = ['project', 'example']"), 'the File menu parts the example behind a separator');
+
+  const editor = readFile('../app/editor.js');
+  ok(
+    editor.includes("if (event.key !== 'Escape' || mode !== 'edit') return;") && editor.includes('event.stopPropagation();'),
+    'Escape in an open edit stops at the editor and never falls through to the overlay'
+  );
+
+  const sheet = readFile('../app/style.css');
+  ok(sheet.includes('.table th {\n  position: sticky;'), 'the relationship table head stays put while the body scrolls');
+}
+
 // --- The pre-paint theme script speaks the store's literals --------------
 
 {

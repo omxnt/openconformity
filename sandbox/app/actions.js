@@ -50,7 +50,7 @@ export function createActions({ store, flows }) {
     {
       id: 'open',
       icon: 'i-open-project',
-      label: 'Open…',
+      label: 'Open project…',
       group: 'project',
       toolbar: false,
       context: false,
@@ -61,7 +61,7 @@ export function createActions({ store, flows }) {
     {
       id: 'save',
       icon: 'i-save',
-      label: 'Save',
+      label: 'Save project',
       group: 'project',
       toolbar: false,
       context: false,
@@ -73,7 +73,7 @@ export function createActions({ store, flows }) {
       id: 'load-example',
       icon: 'i-project',
       label: 'Load example',
-      group: 'project',
+      group: 'example',
       toolbar: false,
       context: false,
       menubar: true,

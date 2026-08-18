@@ -67,3 +67,5 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-open-project` | `folder--open` | 32 | `folder--open.svg` |
 | `i-view-list` | `list` | 32 | `list.svg` |
 | `i-view-graph` | `chart--relationship` | 32 | `chart--relationship.svg` |
+| `i-launch` | `launch` | 16 | `launch.svg` |
+| `i-email` | `email` | 32 | `email.svg` |

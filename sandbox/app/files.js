@@ -79,6 +79,7 @@ export function toFileObject(model) {
     format: FILE_FORMAT,
     schemaVersion: SCHEMA_VERSION,
     name: model.name,
+    ...(Object.keys(model.attributes).length > 0 ? { attributes: { ...model.attributes } } : {}),
     counters,
     folders,
     entities,
@@ -141,6 +142,7 @@ function buildModel(data) {
   const problems = [];
   const model = createModel();
   renameProject(model, data.name);
+  if (isPlainObject(data.attributes)) model.attributes = { ...data.attributes };
 
   const childLists = new Map();
   const list = (parent) => {

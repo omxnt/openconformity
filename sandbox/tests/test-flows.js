@@ -178,7 +178,7 @@ function flowsOver(store) {
   deepEqual(asked.pop(), ['prompt', 'Rename folder'], 'a folder activates into its name');
 
   await flows.activateNode(null);
-  deepEqual(asked.pop(), ['prompt', 'Rename project'], 'the project row activates into its own');
+  equal(editsBegun, 2, 'the project row activates into the editor, like an entity');
 
   store.select('ELM-001');
   await flows.moveToSelection();
@@ -237,6 +237,106 @@ function flowsOver(store) {
 
   await flows.createRelated('ELM-001', 'ELM', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
   deepEqual(toasts.pop()?.[0], 'Relationship refused', 'an inadmissible new-related form is told too');
+}
+
+// --- The project saves like an entity -----------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const flows = flowsOver(store);
+  store.replaceProject(createModel());
+  equal(flows.saveEdit(null, { name: '  Mixer line  ', description: 'A machine' }), true, 'the project draft applies');
+  equal(store.model().name, 'Mixer line', 'the name goes to the model itself, trimmed');
+  deepEqual(store.model().attributes, { description: 'A machine' }, 'everything else goes to the attribute bag');
+  store.undo();
+  equal(store.model().name, '', 'one commit: one undo returns both');
+  deepEqual(store.model().attributes, {}, 'the bag with it');
+}
+
+// --- Escape leaves the edit, asking only when it costs -------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  let ended = 0;
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => true };
+  const flows = createFlows({ store, overlay: {}, dialogs: noDialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  await flows.escapeEdit();
+  equal(ended, 1, 'a clean draft cancels silently: no dialog is asked');
+}
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  let ended = 0;
+  const asked = [];
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => true, editing: () => true };
+  const dialogs = {
+    confirm(question) {
+      asked.push(question.title);
+      return Promise.resolve(false);
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  await flows.escapeEdit();
+  deepEqual(asked, ['Discard the changes?'], 'a dirty draft gets the standard discard question');
+  equal(ended, 0, 'declining keeps editing');
+  dialogs.confirm = () => Promise.resolve(true);
+  await flows.escapeEdit();
+  equal(ended, 1, 'accepting discards the draft');
+}
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  let ended = 0;
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false };
+  const flows = createFlows({ store, overlay: {}, dialogs: noDialogs, editor, fileInput: null });
+  await flows.escapeEdit();
+  equal(ended, 0, 'with no edit open, Escape passes by');
+}
+
+// --- Save asks every time, and cancel costs nothing ----------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const saved = [];
+  const toasts = [];
+  const prompts = [];
+  const dialogs = {
+    prompt: async (spec) => {
+      prompts.push(spec);
+      return 'Mixer line';
+    },
+    toast: (title, message) => toasts.push([title, message]),
+  };
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs,
+    editor: stubEditor(),
+    fileInput: null,
+    saveFile: (filename, text, type) => saved.push({ filename, text, type }),
+  });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  equal(store.dirty(), true, 'a change stands unsaved');
+
+  await flows.saveProject();
+  equal(prompts[0].value, '', 'the question prefills the name as it stands');
+  ok(prompts[0].preview('Mixer line').includes('mixer-line.json'), 'and previews the filename live');
+  equal(store.model().name, 'Mixer line', 'confirming applies the typed name as an ordinary rename');
+  deepEqual(saved.map((held) => held.filename), ['mixer-line.json'], 'the download fires, named for the project');
+  equal(saved[0].type, 'application/json', 'as JSON');
+  equal(store.dirty(), false, 'the saved pointer moves');
+  deepEqual(toasts.pop(), ['Project saved', 'Saved to your downloads as mixer-line.json.'], 'and the toast confirms');
+
+  dialogs.prompt = async () => null;
+  store.commit((model) => addEntity(model, 'HAZ'));
+  await flows.saveProject();
+  equal(saved.length, 1, 'cancel downloads nothing');
+  equal(store.dirty(), true, 'moves no pointer');
+  equal(store.model().name, 'Mixer line', 'and renames nothing');
 }
 
 summary('test-flows');

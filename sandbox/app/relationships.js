@@ -46,6 +46,28 @@ export function groupedRelationships(model, id) {
 }
 
 /**
+ * The table's rows, in the order the grouping ruled: outgoing before
+ * incoming, each direction's relationships grouped by type in model
+ * order, every row carrying its far end resolved.
+ * @param {import('./model.js').Model} model
+ * @param {string|null} id
+ * @returns {Array<{ direction: 'outgoing'|'incoming', label: string,
+ *                   relationship: import('./model.js').Relationship, other: import('./model.js').Entity }>}
+ */
+export function relationshipRows(model, id) {
+  const groups = groupedRelationships(model, id);
+  const rows = [];
+  for (const [direction, groupList] of [['outgoing', groups.outgoing], ['incoming', groups.incoming]]) {
+    for (const group of groupList) {
+      for (const { relationship, other } of group.rows) {
+        rows.push({ direction, label: group.label, relationship, other });
+      }
+    }
+  }
+  return rows;
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
@@ -78,7 +100,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     }
     head.appendChild(el('div', { className: 'pane-head-name' }, [switcher]));
 
-    const add = el('button', { className: 'ghost-button', text: 'Add…', attributes: { type: 'button' } });
+    const add = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [
+      icon('i-add-relationship'),
+      el('span', { text: 'Add…' }),
+    ]);
     add.disabled = !addEnabled();
     add.addEventListener('click', onAdd);
     head.appendChild(el('div', { className: 'pane-head-actions' }, [add]));
@@ -117,10 +142,50 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     return held;
   }
 
+  /**
+   * One table row: it selects the far end, so it is reachable by
+   * keyboard as well as by pointer, and it carries the unlink.
+   * @param {{ direction: 'outgoing'|'incoming', label: string,
+   *           relationship: import('./model.js').Relationship, other: import('./model.js').Entity }} row
+   */
+  function tableRow({ direction, label, relationship, other }) {
+    const title = (other.attributes.title ?? '').trim();
+    const rowElement = el('tr', {
+      attributes: { tabindex: '0', 'aria-label': `Select ${other.id}${title ? `, ${title}` : ''}` },
+    });
+    rowElement.addEventListener('click', () => onSelect(other.id));
+    rowElement.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      onSelect(other.id);
+    });
+
+    const arrow = el('span', { className: 'arrow', text: direction === 'outgoing' ? '→' : '←' });
+    arrow.setAttribute('aria-hidden', 'true');
+    rowElement.appendChild(el('td', { className: 'rel-direction' }, [arrow, el('span', { text: direction })]));
+    rowElement.appendChild(el('td', { text: label }));
+    rowElement.appendChild(el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, endpoint(other))]));
+
+    const remove = el('button', {
+      className: 'icon-button',
+      attributes: {
+        type: 'button',
+        'aria-label': `Remove the ${label} relationship with ${other.id}`,
+        title: 'Remove relationship',
+      },
+    }, [icon('i-remove-relationship')]);
+    remove.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onUnrelate(relationship);
+    });
+    rowElement.appendChild(el('td', { className: 'shrink' }, [remove]));
+    return rowElement;
+  }
+
   function renderList(entity) {
     listHost.textContent = '';
-    const groups = groupedRelationships(store.model(), entity.id);
-    if (groups.outgoing.length === 0 && groups.incoming.length === 0) {
+    const rows = relationshipRows(store.model(), entity.id);
+    if (rows.length === 0) {
       listHost.appendChild(
         emptyState('No relationships', `${entity.id} is not related to anything yet.`, {
           label: 'Add relationship',
@@ -131,30 +196,19 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
       return;
     }
 
-    for (const [heading, groupList] of [['Outgoing', groups.outgoing], ['Incoming', groups.incoming]]) {
-      if (groupList.length === 0) continue;
-      const section = el('div', { className: 'rel-section' }, [
-        el('h3', { className: 'rel-heading', text: heading }),
-      ]);
-      for (const group of groupList) {
-        section.appendChild(el('div', { className: 'rel-type', text: group.label }));
-        for (const { relationship, other } of group.rows) {
-          const name = el('button', { className: 'rel-endpoint', attributes: { type: 'button' } }, endpoint(other));
-          name.addEventListener('click', () => onSelect(other.id));
-          const remove = el('button', {
-            className: 'icon-button',
-            attributes: {
-              type: 'button',
-              'aria-label': `Remove the ${group.label} relationship with ${other.id}`,
-              title: 'Remove relationship',
-            },
-          }, [icon('i-remove-relationship')]);
-          remove.addEventListener('click', () => onUnrelate(relationship));
-          section.appendChild(el('div', { className: 'rel-row' }, [name, remove]));
-        }
-      }
-      listHost.appendChild(section);
-    }
+    listHost.appendChild(
+      el('table', { className: 'table' }, [
+        el('thead', {}, [
+          el('tr', {}, [
+            el('th', { text: 'Direction' }),
+            el('th', { text: 'Relationship' }),
+            el('th', { text: 'Related entity' }),
+            el('th', { className: 'shrink' }),
+          ]),
+        ]),
+        el('tbody', {}, rows.map(tableRow)),
+      ])
+    );
   }
 
   function render() {
