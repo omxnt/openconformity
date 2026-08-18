@@ -678,6 +678,15 @@ select.field-input {
 }
 .doomed-list li { padding: 2px 0; color: var(--text); }
 
+/* The dialogs are the one place the software sets prose, and so the one
+   place it carries a link. Carbon's link: the colour marks it, a rule
+   appears on hover. */
+.dialog a { color: var(--link); }
+.dialog a:hover { color: var(--link-hover); text-decoration: underline; }
+
+.about { display: grid; gap: 12px; }  /* $spacing-04 */
+.about-headline { font-size: 16px; line-height: 1.375; font-weight: 600; color: var(--text); }  /* $heading-compact-02 */
+
 .dialog-actions { display: flex; flex: none; }
 
 .dialog-button {

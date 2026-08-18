@@ -26,6 +26,18 @@ export const THEME_MENU = [
   { value: 'g100', label: 'Gray 100' },
 ];
 
+/**
+ * The browser tab's title: the project's name when it has one, the
+ * software's alone otherwise.
+ * @param {boolean} hasProject
+ * @param {string} name
+ * @returns {string}
+ */
+export function titleFor(hasProject, name) {
+  const trimmed = name.trim();
+  return hasProject && trimmed ? `${trimmed} — openconformity` : 'openconformity';
+}
+
 /** The statement made when the stored session cannot be read back. */
 export const RESTORATION_NOTICE = 'The previous session could not be restored.';
 export const RESTORATION_DETAIL =
@@ -47,6 +59,8 @@ export function createShell({ store, overlay, actions = [], root = document }) {
   const themeButton = root.getElementById('shell-theme');
   const themeIcon = root.getElementById('shell-theme-icon');
   const projectButton = root.getElementById('shell-project');
+  const helpButton = root.getElementById('shell-help');
+  const metamodelButton = root.getElementById('shell-metamodel');
   const unsavedButton = root.getElementById('shell-unsaved');
   const notices = root.getElementById('notices');
   const workspace = root.getElementById('workspace');
@@ -90,36 +104,56 @@ export function createShell({ store, overlay, actions = [], root = document }) {
     });
   });
 
-  // --- The Project menu and the unsaved indicator ----------------------
+  // --- The menu bar and the shell actions ------------------------------
 
-  /** @type {import('./overlay.js').Entry|null} */
-  let projectMenu = null;
-
-  projectButton.addEventListener('click', () => {
-    if (projectMenu) {
-      overlay.close(projectMenu);
-      return;
-    }
-    projectMenu = openMenu({
-      overlay,
-      label: 'Project',
-      anchor: projectButton,
-      items: actions
-        .filter((action) => action.menubar)
-        .map((action) => ({
-          label: action.label,
-          disabled: !action.enabled(),
-          onPick: () => action.run({ anchor: projectButton }),
-        })),
-      onClose: () => {
-        projectMenu = null;
-      },
+  /**
+   * A menubar button opening its menu from the action list. The menu
+   * toggles on click and opens on ArrowDown.
+   * @param {HTMLElement} button
+   * @param {string} label
+   * @param {string} group
+   */
+  function menubarMenu(button, label, group) {
+    /** @type {import('./overlay.js').Entry|null} */
+    let open = null;
+    const openIt = () => {
+      open = openMenu({
+        overlay,
+        label,
+        anchor: button,
+        items: actions
+          .filter((action) => action.menubar && action.group === group)
+          .map((action) => ({
+            label: action.label,
+            disabled: !action.enabled(),
+            onPick: () => action.run({ anchor: button }),
+          })),
+        onClose: () => {
+          open = null;
+        },
+      });
+    };
+    button.addEventListener('click', () => {
+      if (open) overlay.close(open);
+      else openIt();
     });
-  });
+    button.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowDown') return;
+      event.preventDefault();
+      if (!open) openIt();
+    });
+  }
+
+  menubarMenu(projectButton, 'Project', 'project');
+  menubarMenu(helpButton, 'Help', 'help');
 
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {
     unsavedButton.addEventListener('click', () => saveAction.run({ anchor: unsavedButton }));
+  }
+  const metamodelAction = actions.find((action) => action.id === 'metamodel');
+  if (metamodelAction) {
+    metamodelButton.addEventListener('click', () => metamodelAction.run({ anchor: metamodelButton }));
   }
 
   // --- Notices ---------------------------------------------------------
@@ -249,6 +283,7 @@ export function createShell({ store, overlay, actions = [], root = document }) {
     applyTheme();
     renderNotices();
     unsavedButton.hidden = !store.dirty();
+    root.title = titleFor(store.hasProject(), store.model().name);
   }
 
   store.subscribe(render);

@@ -6,6 +6,7 @@
 
 import {
   effectiveTheme,
+  titleFor,
   THEME_MENU,
   RESTORATION_NOTICE,
   RESTORATION_DETAIL,
@@ -50,6 +51,51 @@ ok(PERSIST_DETAIL.includes('Save the project'), 'and points at the file as the d
   ok(!page.includes('pane-title'), 'no pane header only names its pane');
   for (const pane of ['Navigator', 'Editor', 'Relationships']) {
     ok(page.includes(`aria-label="${pane}"`), `the ${pane} pane stays an ARIA landmark`);
+  }
+}
+
+// --- The tab title -----------------------------------------------------
+
+equal(titleFor(false, ''), 'openconformity', 'the landing titles the software');
+equal(titleFor(true, ''), 'openconformity', 'an unnamed project titles the software');
+equal(titleFor(true, 'Mixer line'), 'Mixer line — openconformity', 'a named project titles the tab');
+equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
+equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
+
+// --- Compliance: the licences ride with the software --------------------
+
+{
+  ok(readFile('../app/LICENSE.txt').includes('EUROPEAN UNION PUBLIC LICENCE v. 1.2'), 'the EUPL-1.2 text is reachable at LICENSE.txt');
+  ok(readFile('../app/assets/fonts/LICENSE.txt').includes('SIL OPEN FONT LICENSE'), 'the OFL rides with the fonts');
+  ok(readFile('../app/assets/icons/LICENSE.txt').includes('Apache License'), 'the Apache licence rides with the icons');
+}
+
+// --- The help surface and the chrome ------------------------------------
+
+{
+  const page = readFile('../app/index.html');
+  ok(page.includes('id="shell-help"'), 'the shell carries a Help menu');
+  ok(page.includes('id="shell-metamodel"'), 'and the metamodel action');
+  ok(page.includes('id="i-metamodel"'), 'with its glyph in the sprite');
+  ok(
+    page.includes('href="https://openconformity.org"') &&
+      page.includes('class="wordmark"') &&
+      /<a class="wordmark"[^>]*target="_blank"[^>]*rel="noopener"/.test(page),
+    'the wordmark is a plain link to the project site, opening in a new tab'
+  );
+}
+
+// --- The bundled metamodel exports --------------------------------------
+
+{
+  for (const theme of ['light', 'dark']) {
+    let held = '';
+    try {
+      held = readFile(`../app/assets/images/metamodel-${theme}.png`);
+    } catch {
+      held = '';
+    }
+    ok(held.length > 0, `the ${theme} metamodel export is bundled`);
   }
 }
 

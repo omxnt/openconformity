@@ -639,6 +639,56 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
   }
 
   /**
+   * The metamodel diagram, exported for each theme and carried with the
+   * software, so it opens without a network and in the colours the user
+   * is already in.
+   */
+  function openMetamodel() {
+    const dark = document.documentElement.dataset.theme === 'g100';
+    window.open(`assets/images/metamodel-${dark ? 'dark' : 'light'}.png`, '_blank', 'noopener');
+  }
+
+  /**
+   * What the software is, who holds it under what terms, and what of
+   * other people's work it carries — every licence named is one the
+   * deployment itself carries, so all of them are reachable from here.
+   */
+  async function showAbout() {
+    const link = (href, text) =>
+      el('a', { text, attributes: { href, target: '_blank', rel: 'noopener' } });
+    await dialogs.open({
+      title: 'About',
+      body: el('div', { className: 'about' }, [
+        el('p', { className: 'about-headline', text: 'openconformity' }),
+        el('p', {
+          text:
+            'This project is an initiative to develop a free, open-source, browser-based tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230, with no commercial interests behind it.',
+        }),
+        el('p', {}, [
+          document.createTextNode('© 2026 omxnt, licensed under the '),
+          link('LICENSE.txt', 'EUPL-1.2'),
+          document.createTextNode('.'),
+        ]),
+        el('p', {}, [link('https://github.com/omxnt/openconformity', 'Source on GitHub')]),
+        el('p', { text: 'Third-party assets, vendored with the software:' }),
+        el('ul', { className: 'doomed-list' }, [
+          el('li', {}, [
+            document.createTextNode('IBM Plex, under the '),
+            link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1'),
+            document.createTextNode('.'),
+          ]),
+          el('li', {}, [
+            document.createTextNode('Carbon Icons, under the '),
+            link('assets/icons/LICENSE.txt', 'Apache License 2.0'),
+            document.createTextNode('.'),
+          ]),
+        ]),
+      ]),
+      actions: [{ label: 'Close', value: null, kind: 'primary' }],
+    });
+  }
+
+  /**
    * Undo. A pristine creation collapses instead: removing it is the undo
    * of the one change standing.
    */
@@ -687,6 +737,8 @@ export function createFlows({ store, overlay, dialogs, editor, getActions, fileI
     newProject,
     openProjectFlow,
     saveProject,
+    openMetamodel,
+    showAbout,
     undo,
     redo,
   };

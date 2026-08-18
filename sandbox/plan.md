@@ -6,6 +6,8 @@ The build plan for v1, written from scratch in `sandbox/app/`. It fixes the modu
 
 The build covers the workspace, the model with its relationships, undo and redo, session persistence, and project files. Deferred out of it: views (F-VIE-001, draft), library persistence (F-PER-002, draft), migration content (the pipeline exists empty until a schema v2 exists), and risk rating on the Accident Scenario — SCN carries no rating attributes at all in this build; how a risk is rated is designed later and added as attribute definitions when it is. Deferring the library defers only its file: the project clauses of F-PER-003…010 are built in full, and their library clauses bind when F-PER-002 lands.
 
+The published demo is the feature baseline: every demo capability is present, improved, or dropped by recorded ruling. The comparison audit and its triage govern the remaining surface work.
+
 ## 2. Modules
 
 The constraints C-TEC-001…007 bind every module, and N-OPS-001/002 and N-PRV-001…004 are satisfied by the absence of any network, account, or server code anywhere. Beyond those, each module answers for the requirements beside it.
