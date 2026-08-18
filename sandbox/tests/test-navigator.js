@@ -4,7 +4,7 @@
  * rendered tree is checked in the browser. Run from this directory.
  */
 
-import { treeRows, labelParts, visibleRows } from '../app/navigator.js';
+import { treeRows, labelParts, visibleRows, matchingIds } from '../app/navigator.js';
 import { createModel, addEntity, addFolder, updateEntity, file } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -65,6 +65,58 @@ function drawn(model, expanded) {
   deepEqual(rows.map((row) => row.kind), ['project', 'node', 'node'], 'the project row renders first, always');
   deepEqual(rows.slice(1).map((row) => row.id), ['ELM-001', 'F-1'], 'with the tree in order beneath it');
   deepEqual(treeRows(model, () => false).map((row) => row.id), ['ELM-001', 'F-1'], 'and the tree itself never contains it');
+}
+
+// --- The filter --------------------------------------------------------
+
+{
+  const model = createModel();
+  addFolder(model, 'Machine zone');
+  addEntity(model, 'ELM', { parent: 'F-1' });
+  updateEntity(model, 'ELM-001', { title: 'Mixer drum' });
+  addEntity(model, 'HAZ', { parent: 'ELM-001' });
+  updateEntity(model, 'HAZ-001', { title: 'Crush point' });
+  addEntity(model, 'SCN');
+  updateEntity(model, 'SCN-001', { title: 'Operator reaches in' });
+
+  deepEqual([...matchingIds(model, 'elm-0')], ['ELM-001'], 'an entity matches by its identifier');
+  deepEqual([...matchingIds(model, 'drum')], ['ELM-001'], 'and by its title');
+  deepEqual([...matchingIds(model, 'single hazard')], ['HAZ-001'], 'and by its type name');
+  deepEqual([...matchingIds(model, 'machine')], ['F-1'], 'a folder matches by its name');
+  deepEqual([...matchingIds(model, 'CRUSH')], [], 'matchingIds takes the query already lowercased');
+  deepEqual([...matchingIds(model, 'nowhere')], [], 'no match, nothing');
+
+  const collapsed = () => false;
+  deepEqual(
+    treeRows(model, collapsed, 'crush').map((row) => row.id),
+    ['F-1', 'ELM-001', 'HAZ-001'],
+    'a filter shows the matches with their ancestors'
+  );
+  ok(
+    treeRows(model, collapsed, 'crush').every((row) => !row.hasChildren || row.expanded),
+    'every branch on the way is drawn open, whatever the expansion holds'
+  );
+  deepEqual(
+    treeRows(model, collapsed, 'crush').map((row) => row.id).includes('SCN-001'),
+    false,
+    'what does not match and holds no match is not drawn'
+  );
+  deepEqual(
+    treeRows(model, collapsed, 'machine').map((row) => row.id),
+    ['F-1'],
+    'a matching holder with no matching contents shows alone'
+  );
+  equal(treeRows(model, collapsed, 'machine')[0].hasChildren, false, 'and carries no twisty');
+  deepEqual(
+    treeRows(model, collapsed, '  CRUSH  ').map((row) => row.id),
+    ['F-1', 'ELM-001', 'HAZ-001'],
+    'the query trims and lowercases on the way in'
+  );
+  deepEqual(treeRows(model, collapsed, '   '), treeRows(model, collapsed), 'a blank filter is no filter');
+
+  const filtered = visibleRows(model, collapsed, true, 'crush');
+  equal(filtered[0].kind, 'project', 'the project row stays first while filtering');
+  deepEqual(filtered.slice(1).map((row) => row.id), ['F-1', 'ELM-001', 'HAZ-001'], 'with the filtered tree beneath it');
 }
 
 // --- The labels --------------------------------------------------------

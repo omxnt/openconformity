@@ -413,6 +413,49 @@ body {
 .ghost-button:disabled { color: var(--disabled); cursor: not-allowed; }
 .ghost-danger:not(:disabled) { color: var(--danger-text); }
 
+/* Carbon Search: the glyph inside the field, the clear action at its end. */
+.search {
+  flex: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 32px;             /* Carbon search sm */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.search[hidden] { display: none; }
+.search-icon { position: absolute; left: 12px; fill: var(--text); pointer-events: none; }  /* $spacing-04 */
+.search-input {
+  width: 100%;
+  height: 100%;
+  font: inherit;            /* $body-compact-01 */
+  letter-spacing: inherit;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0 32px 0 36px;   /* $spacing-07; the glyph's 12px plus its 16px plus 8px */
+}
+.search-input::placeholder { color: var(--text-place); }
+.search-input::-webkit-search-cancel-button { display: none; }
+.search-input:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
+.search-clear {
+  position: absolute;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;              /* $spacing-07 */
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.search-clear:hover { background: var(--hover); }
+.search-clear:active { background: var(--active); }
+.search-clear[hidden] { display: none; }
+
 /* ---------- Tree ---------- */
 
 .tree { padding: 4px 0; min-height: 100%; }

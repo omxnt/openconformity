@@ -41,24 +41,67 @@ import { el, icon } from './dom.js';
  */
 
 /**
+ * The identifiers a filter query finds: an entity by its identifier, its
+ * title, or its type's name; a folder by its name. Matching reads
+ * case-insensitively.
+ * @param {import('./model.js').Model} model
+ * @param {string} query  trimmed and lowercased
+ * @returns {Set<string>}
+ */
+export function matchingIds(model, query) {
+  const found = new Set();
+  for (const node of model.nodes.values()) {
+    const haystack =
+      node.kind === 'folder'
+        ? node.name
+        : `${node.id} ${node.attributes.title ?? ''} ${ENTITY_TYPES[node.type].name}`;
+    if (haystack.toLowerCase().includes(query)) found.add(node.id);
+  }
+  return found;
+}
+
+/**
  * The rows the tree draws: every visible node, in drawing order. A node's
- * children follow it only while it is expanded.
+ * children follow it only while it is expanded. While a filter is set,
+ * the rows are the matches and their ancestors, every branch on the way
+ * drawn open whatever the expansion holds, and nothing beneath a match
+ * unless it matches too.
  * @param {import('./model.js').Model} model
  * @param {(id: string) => boolean} isExpanded
+ * @param {string} [filter]
  * @returns {TreeRow[]}
  */
-export function treeRows(model, isExpanded) {
-  const rows = [];
+export function treeRows(model, isExpanded, filter = '') {
+  const query = filter.trim().toLowerCase();
+
+  if (query === '') {
+    const rows = [];
+    const walk = (parentId, depth) => {
+      for (const node of childrenOf(model, parentId)) {
+        const hasChildren = childrenOf(model, node.id).length > 0;
+        const expanded = hasChildren && isExpanded(node.id);
+        rows.push({ id: node.id, node, depth, hasChildren, expanded });
+        if (expanded) walk(node.id, depth + 1);
+      }
+    };
+    walk(null, 0);
+    return rows;
+  }
+
+  const matches = matchingIds(model, query);
   const walk = (parentId, depth) => {
+    const rows = [];
     for (const node of childrenOf(model, parentId)) {
-      const hasChildren = childrenOf(model, node.id).length > 0;
-      const expanded = hasChildren && isExpanded(node.id);
-      rows.push({ id: node.id, node, depth, hasChildren, expanded });
-      if (expanded) walk(node.id, depth + 1);
+      const beneath = walk(node.id, depth + 1);
+      if (beneath.length === 0 && !matches.has(node.id)) continue;
+      rows.push(
+        { id: node.id, node, depth, hasChildren: beneath.length > 0, expanded: beneath.length > 0 },
+        ...beneath
+      );
     }
+    return rows;
   };
-  walk(null, 0);
-  return rows;
+  return walk(null, 0);
 }
 
 /**
@@ -67,13 +110,14 @@ export function treeRows(model, isExpanded) {
  * @param {import('./model.js').Model} model
  * @param {(id: string) => boolean} isExpanded
  * @param {boolean} hasProject
+ * @param {string} [filter]
  * @returns {Array<{ kind: 'project', id: null } | (TreeRow & { kind: 'node' })>}
  */
-export function visibleRows(model, isExpanded, hasProject) {
+export function visibleRows(model, isExpanded, hasProject, filter = '') {
   if (!hasProject) return [];
   return [
     { kind: 'project', id: null },
-    ...treeRows(model, isExpanded).map((row) => ({ kind: 'node', ...row })),
+    ...treeRows(model, isExpanded, filter).map((row) => ({ kind: 'node', ...row })),
   ];
 }
 
@@ -106,15 +150,57 @@ export function dropZone(ratio) {
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.container
  * @param {HTMLElement} context.toolbar
+ * @param {HTMLElement} context.search       the filter bar
+ * @param {HTMLInputElement} context.filterInput
+ * @param {HTMLElement} context.filterClear
  * @param {Array<import('./actions.js').Action>} context.actions
  * @param {(id: string|null) => void} context.onSelect
  * @param {(id: string, parentId: string|null) => void} context.onFile
  * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
  * @param {(id: string|null, at: { x: number, y: number }) => void} context.onContextMenu
  */
-export function createNavigator({ store, container, toolbar, actions, onSelect, onFile, onPlace, onContextMenu }) {
+export function createNavigator({
+  store,
+  container,
+  toolbar,
+  search,
+  filterInput,
+  filterClear,
+  actions,
+  onSelect,
+  onFile,
+  onPlace,
+  onContextMenu,
+}) {
   /** The id being dragged; dataTransfer is unreadable during dragover. */
   let draggedId = null;
+
+  /** The filter as typed: the pane's own transient state, gone with the visit. */
+  let filter = '';
+
+  filterInput.addEventListener('input', () => {
+    filter = filterInput.value;
+    filterClear.hidden = filterInput.value === '';
+    render();
+  });
+
+  // The clear action exists only while there is something to clear, and
+  // Escape is the keyboard's way to it.
+  function clearFilter() {
+    filterInput.value = '';
+    filter = '';
+    filterClear.hidden = true;
+    render();
+    filterInput.focus();
+  }
+
+  filterInput.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || filterInput.value === '') return;
+    event.preventDefault();
+    event.stopPropagation();
+    clearFilter();
+  });
+  filterClear.addEventListener('click', clearFilter);
 
   // --- The toolbar, drawn once from the action list --------------------
 
@@ -318,6 +404,7 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
     const hadFocus = container.contains(document.activeElement);
 
     container.textContent = '';
+    search.hidden = !store.hasProject();
     if (!store.hasProject()) {
       renderLanding();
       syncToolbar();
@@ -331,7 +418,7 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
       subject: picker?.subject ?? null,
     };
     const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
-    for (const row of visibleRows(store.model(), store.isExpanded, true)) {
+    for (const row of visibleRows(store.model(), store.isExpanded, true, filter)) {
       tree.appendChild(row.kind === 'project' ? renderProjectRow() : renderRow(row, picking));
     }
     container.appendChild(tree);
@@ -360,7 +447,7 @@ export function createNavigator({ store, container, toolbar, actions, onSelect, 
   });
 
   container.addEventListener('keydown', (event) => {
-    const rows = visibleRows(store.model(), store.isExpanded, store.hasProject());
+    const rows = visibleRows(store.model(), store.isExpanded, store.hasProject(), filter);
     if (rows.length === 0) return;
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);

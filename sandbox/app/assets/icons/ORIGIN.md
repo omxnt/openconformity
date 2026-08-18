@@ -50,3 +50,4 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-folder` | `folder` | 32 | `folder.svg` |
 | `i-project` | `portfolio` | 32 | `portfolio.svg` |
 | `i-metamodel` | `model--alt` | 32 | `model--alt.svg` |
+| `i-search` | `search` | 16 | `search.svg` |
