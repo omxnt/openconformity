@@ -8,15 +8,16 @@ import { el, icon } from './dom.js';
 
 /**
  * @typedef {Object} MenuItem
- * @property {string} label
+ * @property {string} [label]
  * @property {string} [group]    a heading over consecutive items sharing it
  * @property {string} [icon]     a sprite symbol drawn before the label
  * @property {string} [pillar]   tints the icon with the pillar's colour
  * @property {string} [hint]     a right-aligned hint: a key, a code, a form
+ * @property {boolean} [separator]  a rule between runs of items, not an item
  * @property {boolean} [danger]
  * @property {boolean} [disabled]
  * @property {boolean} [checked]  renders the item as a radio entry
- * @property {() => void} onPick
+ * @property {() => void} [onPick]
  */
 
 /**
@@ -52,11 +53,20 @@ export function menuGroups(items) {
 export function openMenu({ overlay, label, items, anchor = null, align = 'start', at = null, onClose = null }) {
   const menu = el('div', { className: 'dropdown', attributes: { role: 'menu', 'aria-label': label } });
 
-  for (const group of menuGroups(items)) {
-    if (group.heading !== null) {
-      menu.appendChild(el('div', { className: 'menu-heading', text: group.heading }));
-    }
-    for (const item of group.items) {
+  // Separators split the list into runs; headings group within a run.
+  const runs = [[]];
+  for (const item of items) {
+    if (item.separator) runs.push([]);
+    else runs[runs.length - 1].push(item);
+  }
+
+  runs.forEach((run, index) => {
+    if (index > 0 && run.length > 0) menu.appendChild(el('div', { className: 'dropdown-separator' }));
+    for (const group of menuGroups(run)) {
+      if (group.heading !== null) {
+        menu.appendChild(el('div', { className: 'menu-heading', text: group.heading }));
+      }
+      for (const item of group.items) {
       const attributes = {
         type: 'button',
         role: item.checked === undefined ? 'menuitem' : 'menuitemradio',
@@ -73,8 +83,9 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
         item.onPick();
       });
       menu.appendChild(button);
+      }
     }
-  }
+  });
 
   menu.addEventListener('keydown', (event) => {
     const entries = [...menu.querySelectorAll('.menu-entry')].filter((button) => !button.disabled);

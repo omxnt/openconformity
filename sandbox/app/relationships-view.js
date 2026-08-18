@@ -4,8 +4,8 @@
  * header, beside the action that starts the add workflow. The list groups
  * by direction and then by relationship type, in model order, and every
  * row carries the affordance to remove it. All of it is re-read from the
- * model on every render; the chosen view is the pane's own transient
- * state.
+ * model on every render; the chosen view is store session state, one
+ * truth for the switcher here and the View menu.
  */
 
 import { nodeOf, relationshipsOf } from './model.js';
@@ -57,9 +57,6 @@ export function groupedRelationships(model, id) {
  * @param {(id: string) => void} context.onSelect
  */
 export function createRelationshipsView({ store, head, body, graph, onAdd, onUnrelate, onSelect }) {
-  /** @type {'list'|'graph'} the pane's own transient state */
-  let view = 'list';
-
   const listHost = el('div', { className: 'rel-list' });
   body.appendChild(listHost);
   body.appendChild(graph.element);
@@ -68,6 +65,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     head.textContent = '';
     head.hidden = false;
 
+    const view = store.relationshipView();
     const switcher = el('div', { className: 'switcher', attributes: { role: 'group', 'aria-label': 'Relationship view' } });
     for (const [value, label] of [['list', 'List'], ['graph', 'Graph']]) {
       const button = el('button', {
@@ -75,11 +73,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
         text: label,
         attributes: { type: 'button', 'aria-pressed': String(view === value) },
       });
-      button.addEventListener('click', () => {
-        if (view === value) return;
-        view = value;
-        render();
-      });
+      button.addEventListener('click', () => store.setRelationshipView(value));
       switcher.appendChild(button);
     }
     head.appendChild(el('div', { className: 'pane-head-name' }, [switcher]));
@@ -180,6 +174,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onUnr
     }
 
     renderHead(entity);
+    const view = store.relationshipView();
     listHost.hidden = view !== 'list';
     graph.element.hidden = view !== 'graph';
     if (view === 'list') renderList(entity);

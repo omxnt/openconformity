@@ -428,6 +428,19 @@ body {
 .ghost-danger:hover:not(:disabled) { background: var(--danger); color: var(--text-on-color); }
 .ghost-danger:active:not(:disabled) { background: var(--danger-active); color: var(--text-on-color); }
 
+/* Carbon icon button: square, the glyph alone, the tooltip carrying the
+   words. */
+.ghost-icon {
+  width: 32px;              /* Carbon icon button sm, $spacing-07 */
+  padding: 0;
+  justify-content: center;
+  color: var(--text);
+  align-self: stretch;
+  height: auto;
+}
+
+.dropdown-separator { height: 1px; background: var(--border-subtle); margin: 4px 0; }  /* $spacing-02 */
+
 /* Carbon Search: the glyph inside the field, the clear action at its end. */
 .search {
   flex: none;

@@ -72,6 +72,8 @@ export function createStore({ storage }) {
   /** @type {'fresh'|'restored'|'failed'} */
   let restoration = 'fresh';
   let persistFailed = false;
+  /** @type {'list'|'graph'} the relationship pane's presentation: session state, never persisted */
+  let relationshipView = 'list';
   /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
   let picker = null;
   const listeners = new Set();
@@ -397,6 +399,21 @@ export function createStore({ storage }) {
       if (open) expanded.add(id);
       else expanded.delete(id);
       persist();
+      notify();
+    },
+
+    /** Which presentation the relationship pane shows. */
+    relationshipView: () => relationshipView,
+
+    /**
+     * Choose the relationship pane's presentation. One truth for the
+     * pane's switcher and the View menu; never persisted.
+     * @param {'list'|'graph'} view
+     */
+    setRelationshipView(view) {
+      if (view !== 'list' && view !== 'graph') return;
+      if (view === relationshipView) return;
+      relationshipView = view;
       notify();
     },
 

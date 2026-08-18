@@ -242,16 +242,21 @@ export function createNavigator({
       }
       lastGroup = action.group;
 
-      const attributes = { type: 'button', 'data-action': action.id };
+      const attributes = {
+        type: 'button',
+        'data-action': action.id,
+        title: action.label,
+        'aria-label': action.label,
+      };
       if (action.menu) {
         attributes['aria-haspopup'] = 'menu';
         attributes['aria-expanded'] = 'false';
       }
-      const button = el('button', {
-        className: `ghost-button${action.danger ? ' ghost-danger' : ''}`,
-        text: action.label,
-        attributes,
-      });
+      const button = el(
+        'button',
+        { className: `ghost-button ghost-icon${action.danger ? ' ghost-danger' : ''}`, attributes },
+        [icon(action.icon)]
+      );
       button.addEventListener('click', () => action.run({ anchor: button }));
       toolbar.appendChild(button);
       toolbarButtons.set(action, button);

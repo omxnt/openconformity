@@ -29,13 +29,13 @@ equal(effectiveTheme('solarized', false), 'white', 'an unknown theme follows the
 
 deepEqual(
   THEME_MENU.map((item) => item.value),
-  [null, 'white', 'g100'],
-  'the menu offers the system and the two Carbon themes'
+  ['white', 'g100'],
+  'the theme offer is two-state: the stored values stay the Carbon names'
 );
 deepEqual(
   THEME_MENU.map((item) => item.label),
-  ['System', 'White', 'Gray 100'],
-  'named as Carbon names them'
+  ['Light', 'Dark'],
+  'presented as Light and Dark, with no System entry: the first load follows the system, a choice then owns it'
 );
 
 // --- The notices -------------------------------------------------------
@@ -82,8 +82,10 @@ equal(shouldWarnBeforeUnload(false, false), false, 'and neither does the quiet c
 
 {
   const page = readFile('../app/index.html');
-  ok(page.includes('id="shell-help"'), 'the shell carries a Help menu');
-  ok(page.includes('id="shell-metamodel"'), 'and the metamodel action');
+  for (const menu of ['file', 'edit', 'view', 'help']) {
+    ok(page.includes(`id="shell-${menu}"`), `the menu bar carries ${menu}`);
+  }
+  ok(page.includes('id="shell-metamodel"'), 'and the shell the metamodel action');
   ok(page.includes('id="i-metamodel"'), 'with its glyph in the sprite');
   ok(
     page.includes('href="https://openconformity.org"') &&

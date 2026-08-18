@@ -431,6 +431,35 @@ function openStore(storage) {
   equal(store.picker(), null, 'replacing the project closes the workflow');
 }
 
+// --- The relationship view is one truth, never persisted ----------------
+
+{
+  const storage = fakeStorage();
+  const store = openStore(storage);
+  store.commit((model) => addEntity(model, 'ELM'));
+  equal(store.relationshipView(), 'list', 'the pane opens on the list');
+
+  let notified = 0;
+  store.subscribe(() => {
+    notified += 1;
+  });
+  store.setRelationshipView('graph');
+  equal(store.relationshipView(), 'graph', 'the view can be chosen');
+  equal(notified, 1, 'and every surface is told');
+  store.setRelationshipView('graph');
+  equal(notified, 1, 'choosing it again is nothing');
+  store.setRelationshipView('mosaic');
+  equal(store.relationshipView(), 'graph', 'an unknown view is refused');
+
+  deepEqual(
+    Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
+    ['selection', 'expanded', 'dirty'],
+    'the blob never carries it'
+  );
+  const second = createStore({ storage });
+  equal(second.relationshipView(), 'list', 'a restored session opens on the list again');
+}
+
 // --- A failing persist -------------------------------------------------
 
 {

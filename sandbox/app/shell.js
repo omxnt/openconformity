@@ -19,11 +19,15 @@ export function effectiveTheme(choice, systemPrefersDark) {
   return systemPrefersDark ? 'g100' : 'white';
 }
 
-/** The theme menu, in menu order. */
+/**
+ * The theme offer, in menu order: two states, presented as Light and
+ * Dark. The first load follows the system preference; any explicit
+ * choice then owns the theme permanently. The stored values stay the
+ * Carbon theme names.
+ */
 export const THEME_MENU = [
-  { value: null, label: 'System' },
-  { value: 'white', label: 'White' },
-  { value: 'g100', label: 'Gray 100' },
+  { value: 'white', label: 'Light' },
+  { value: 'g100', label: 'Dark' },
 ];
 
 /**
@@ -72,7 +76,9 @@ export const PERSIST_DETAIL =
 export function createShell({ store, overlay, actions = [], toast = () => {}, root = document }) {
   const themeButton = root.getElementById('shell-theme');
   const themeIcon = root.getElementById('shell-theme-icon');
-  const projectButton = root.getElementById('shell-project');
+  const fileButton = root.getElementById('shell-file');
+  const editButton = root.getElementById('shell-edit');
+  const viewButton = root.getElementById('shell-view');
   const helpButton = root.getElementById('shell-help');
   const metamodelButton = root.getElementById('shell-metamodel');
   const unsavedButton = root.getElementById('shell-unsaved');
@@ -94,6 +100,20 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
 
   dark.addEventListener('change', applyTheme);
 
+  /**
+   * The two theme radios, checked by what is in effect, so the offer
+   * reads the same whether the theme is chosen or still following the
+   * system.
+   */
+  function themeItems() {
+    const effective = effectiveTheme(store.theme(), dark.matches);
+    return THEME_MENU.map(({ value, label }) => ({
+      label,
+      checked: effective === value,
+      onPick: () => store.setTheme(value),
+    }));
+  }
+
   /** @type {import('./overlay.js').Entry|null} */
   let themeMenu = null;
 
@@ -107,11 +127,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
       label: 'Theme',
       anchor: themeButton,
       align: 'end',
-      items: THEME_MENU.map(({ value, label }) => ({
-        label,
-        checked: store.theme() === value,
-        onPick: () => store.setTheme(value),
-      })),
+      items: themeItems(),
       onClose: () => {
         themeMenu = null;
       },
@@ -121,13 +137,29 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
   // --- The menu bar and the shell actions ------------------------------
 
   /**
-   * A menubar button opening its menu from the action list. The menu
-   * toggles on click and opens on ArrowDown.
+   * @param {import('./actions.js').Action} action
+   * @param {HTMLElement} anchor
+   */
+  function actionItem(action, anchor) {
+    return {
+      label: action.label,
+      icon: action.icon,
+      hint: action.hint,
+      danger: action.danger,
+      disabled: !action.enabled(),
+      onPick: () => action.run({ anchor }),
+    };
+  }
+
+  /**
+   * A menubar button opening its menu, built fresh each time so
+   * enablement and checks are live. The menu toggles on click and opens
+   * on ArrowDown.
    * @param {HTMLElement} button
    * @param {string} label
-   * @param {string} group
+   * @param {() => Array<import('./menu.js').MenuItem>} build
    */
-  function menubarMenu(button, label, group) {
+  function menubarMenu(button, label, build) {
     /** @type {import('./overlay.js').Entry|null} */
     let open = null;
     const openIt = () => {
@@ -135,14 +167,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
         overlay,
         label,
         anchor: button,
-        items: actions
-          .filter((action) => action.menubar && action.group === group)
-          .map((action) => ({
-            label: action.label,
-            icon: action.icon,
-            disabled: !action.enabled(),
-            onPick: () => action.run({ anchor: button }),
-          })),
+        items: build(),
         onClose: () => {
           open = null;
         },
@@ -159,8 +184,44 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, ro
     });
   }
 
-  menubarMenu(projectButton, 'Project', 'project');
-  menubarMenu(helpButton, 'Help', 'help');
+  menubarMenu(fileButton, 'File', () =>
+    actions.filter((action) => action.menubar && action.group === 'project').map((action) => actionItem(action, fileButton))
+  );
+
+  // Everything that changes the model, separated as the action groups
+  // separate, so the menu and the toolbar cannot drift.
+  const modelGroups = ['create', 'arrange', 'delete', 'history'];
+  menubarMenu(editButton, 'Edit', () => {
+    const items = [];
+    let lastGroup = null;
+    for (const action of actions.filter((offered) => modelGroups.includes(offered.group))) {
+      if (lastGroup !== null && action.group !== lastGroup) items.push({ separator: true });
+      lastGroup = action.group;
+      items.push(actionItem(action, editButton));
+    }
+    return items;
+  });
+
+  menubarMenu(viewButton, 'View', () => [
+    ...themeItems(),
+    { separator: true },
+    {
+      label: 'Relationships as list',
+      icon: 'i-view-list',
+      checked: store.relationshipView() === 'list',
+      onPick: () => store.setRelationshipView('list'),
+    },
+    {
+      label: 'Relationships as graph',
+      icon: 'i-view-graph',
+      checked: store.relationshipView() === 'graph',
+      onPick: () => store.setRelationshipView('graph'),
+    },
+  ]);
+
+  menubarMenu(helpButton, 'Help', () =>
+    actions.filter((action) => action.menubar && action.group === 'help').map((action) => actionItem(action, helpButton))
+  );
 
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {

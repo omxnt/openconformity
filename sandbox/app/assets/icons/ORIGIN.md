@@ -65,3 +65,5 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-redo` | `redo` | 32 | `redo.svg` |
 | `i-new-project` | `document--add` | 32 | `document--add.svg` |
 | `i-open-project` | `folder--open` | 32 | `folder--open.svg` |
+| `i-view-list` | `list` | 32 | `list.svg` |
+| `i-view-graph` | `chart--relationship` | 32 | `chart--relationship.svg` |
