@@ -743,8 +743,11 @@ select.field-input[size] {
 
 /* One line for every relationship: the label on the edge is what names
    it. */
-.graph-edge line { stroke: var(--border-strong); stroke-width: 1; }
+.graph-edge polyline { fill: none; stroke: var(--border-strong); stroke-width: 1; }
 .arrow-head { fill: var(--border-strong); }
+.diamond-head { fill: var(--border-strong); }
+.graph-fold { cursor: pointer; text-decoration: underline; }
+.graph-fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .graph-label { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
 .graph-more { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
 
@@ -753,7 +756,7 @@ select.field-input[size] {
 .graph.picking .graph-node:not(.pending):not(.centre),
 .graph.picking .graph-edge:not(.pending) { opacity: 0.4; }
 .graph-node.pending > rect { stroke: var(--accent); stroke-dasharray: 4 4; }
-.graph-edge.pending line { stroke-dasharray: 4 4; }
+.graph-edge.pending polyline { stroke-dasharray: 4 4; }
 .graph-edge.pending { cursor: pointer; }
 
 /* ---------- The picker ---------- */

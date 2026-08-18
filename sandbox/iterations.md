@@ -68,6 +68,16 @@ Four items on the relationship pane, continuing the redesign. Suite at 1601 chec
 | 4 | Direction column test: a leading narrow arrow column beside the current split, to judge column-vs-sections in the browser. | A narrow → / ← column leads every row, sections unchanged — both presentations stand for the browser verdict. |
 | 4b | The verdict: one table, direction column — the sections die; grouped row order stands, direction reads by glyph and by position; the POV entity keeps its receded styling; provisional rows land in the one table. | One table again: arrow column leading, Source / Relationship / Target with the subject switching sides per direction, outgoing-first grouped order while unsorted. Source and Target sort by the far end alike, Relationship by its label; stale picks close the table. The section headings and their styles are gone. |
 
+### 3.2 Graph try-out, same day
+
+Three rounds on the neighbourhood graph's routing, held as one try-out: right angles first, then the rules that hold, then the dogleg verdict. Suite at 1613 checks; the layout mutations caught at every round.
+
+| # | Asked | Landed |
+|---|---|---|
+| 1 | Right-angle routes — horizontal out, a per-edge vertical channel between the columns, horizontal in; labels upright on the horizontal; subject attachments spread along its sides, the box growing modestly; compositions carry the filled diamond at the owner's end, all else the plain arrowhead; pending edges keep their dash; the 7-cap stays but the +N chip unfolds its side and picks always draw. Pure layout derivations pinned. | Edges are polylines over `orthogonalPoints`, attaching along the subject at `attachmentYs` spread over `subjectHeight`'s modest growth. The six compositions draw the filled diamond at the drawn start — the source owns in all six — with no arrowhead; pendings included, since the notation is the form's. The +N chip is a focusable fold that opens its side and offers Fold back; provisional picks draw beyond the cap. Dashed pending styling rides the new routes. |
+| 2 | The first cut rendered arrows oddly and placed some labels badly; make rules that hold — labels one vertical position, bends right and never crossing, spacing static-worst-case or dynamic, POV height either. | The rules, each pinned: every label at the same x per side and 6px above its own lane, independent of where its bend falls; the column gap is the static worst case, sized for the longest relationship label; a port level with its lane routes dead straight, so no zero-length bend ever misorients a marker; the subject keeps its dynamic modest height. First held by a proven channel-depth discipline (`channelDepths`), then superseded by row 3. |
+| 3 | Would horizontal–angled–horizontal lines look better? | Doglegs, and they carry the day: horizontal stub out (long at the neighbour, the label's home), one slant across a bend band shared by the whole side, short stub into the subject. Sharing the band means monotone lanes and ports make crossings impossible outright — the channel-depth discipline became unnecessary and was retired. Markers sit on horizontal segments at both ends; the straight-line degenerate case and every label rule carry over unchanged (`doglegPoints`, pinned). |
+
 ## 4. References
 
 | No. | Reference | Link |

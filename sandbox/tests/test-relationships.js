@@ -7,7 +7,16 @@
  */
 
 import { pickerCandidates, pairOptions, pickedRows } from '../app/relate.js';
-import { neighbourhood, cappedNeighbourhood, caption, MAX_PER_SIDE, pendingNeighbours } from '../app/graph.js';
+import {
+  neighbourhood,
+  cappedNeighbourhood,
+  caption,
+  MAX_PER_SIDE,
+  pendingNeighbours,
+  attachmentYs,
+  doglegPoints,
+  subjectHeight,
+} from '../app/graph.js';
 import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/relationships.js';
 import { relationshipOptions } from '../app/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
@@ -351,6 +360,47 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   entity.attributes.title = 'A title that runs well past what three lines hold';
   equal(caption(entity), 'A title that runs well pas…', 'a long one cuts to what the box holds');
   equal(caption(entity).length, 27, 'at twenty-seven characters');
+}
+
+// --- The orthogonal layout ------------------------------------------------
+
+{
+  deepEqual(attachmentYs(3, 120), [30, 60, 90], 'attachments spread evenly along the subject');
+  deepEqual(attachmentYs(1, 64), [32], 'a single edge attaches at the middle');
+  deepEqual(attachmentYs(0, 64), [], 'no edges, no attachments');
+  equal(
+    doglegPoints(240, 100, 352, 384, 400, 150),
+    '240,100 352,100 384,150 400,150',
+    'a dogleg is horizontal out, one slant across the shared band, horizontal in'
+  );
+  equal(
+    doglegPoints(240, 100, 352, 384, 400, 100),
+    '240,100 400,100',
+    'a port level with its lane routes dead straight'
+  );
+  equal(subjectHeight(3), 64, 'a quiet subject keeps the box height');
+  equal(subjectHeight(7), 120, 'a busy one grows modestly to give the attachments room');
+
+}
+
+// --- The fold: a cap that opens, and picks that ignore it -----------------
+
+{
+  const real = Array.from({ length: 9 }, (unused, index) => ({ relationship: { type: 'elm-exhibits-haz' }, other: { id: `HAZ-00${index}` } }));
+  const pending = [
+    { pending: true, other: { id: 'HAZ-100' }, label: 'exhibits', ambiguous: false },
+    { pending: true, other: { id: 'HAZ-101' }, label: 'exhibits', ambiguous: false },
+  ];
+  const around = { subject: { id: 'ELM-001' }, incoming: [...real, ...pending], outgoing: [] };
+
+  const folded = cappedNeighbourhood(around);
+  equal(folded.left.length, MAX_PER_SIDE + 2, 'a folded side caps the real boxes; the picks always draw');
+  equal(folded.moreIncoming, 2, 'and counts what the fold holds');
+  ok(folded.left.slice(MAX_PER_SIDE).every((entry) => entry.pending === true), 'the picks ride beyond the cap');
+
+  const open = cappedNeighbourhood(around, { incoming: true, outgoing: false });
+  equal(open.left.length, 11, 'unfolding a side draws everything');
+  equal(open.moreIncoming, 0, 'with nothing left to count');
 }
 
 summary('test-relationships');
