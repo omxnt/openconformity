@@ -2,6 +2,8 @@
 
 The build plan for v1, written from scratch in `sandbox/app/`. It fixes the module inventory, the order the modules are built in, the vertical slice that proves the foundation, and the decisions taken on the open points the retrospective left. The requirements, the metamodel, and the schema govern what is built; the retrospective governs how, and this plan records what was decided where the two needed a ruling.
 
+**Completed 2026-08-18.** This plan governed the v1 build — stages 1 to 8, the parity batch against the published demo, and the architecture audit's refactoring — and all of it is done. It is kept as the record of the build's order, decisions, and rationale, as they stood when they governed. From here the codebase and its tests are the inventory: this document is not maintained, and nothing in it is updated to follow the code.
+
 ## 1. Scope
 
 The build covers the workspace, the model with its relationships, undo and redo, session persistence, and project files. Deferred out of it: views (F-VIE-001, draft), library persistence (F-PER-002, draft), migration content (the pipeline exists empty until a schema v2 exists), and risk rating on the Accident Scenario — SCN carries no rating attributes at all in this build; how a risk is rated is designed later and added as attribute definitions when it is. Deferring the library defers only its file: the project clauses of F-PER-003…010 are built in full, and their library clauses bind when F-PER-002 lands.
@@ -92,7 +94,19 @@ The rulings on the retrospective's open points, with the refinements settled dur
 - The relationship table is not taken from the demo, whose vocabulary predates the metamodel document: `metamodel.js` transcribes the diagram and the schema's forty-four relationship identifiers.
 - The identifier is generated and read-only, not an attribute. Every attribute is optional and every value is stored as text.
 
-## 7. References
+## 7. Audit
+
+The closing audit, run 2026-08-18 on the completed build by fresh eyes, asked one question: whether the codebase is structurally sound to iterate on, or whether anything needs restructuring before growth makes it expensive. It judged against the retrospective's own failure catalogue, with the settled design out of scope. The verdict was sound after four small changes, none structural, and one commit — `d4db403`, *Arrest the audit findings* — made them the same day.
+
+**The walls held.** The six load-bearing boundaries — the single writer, the store as sole state owner, the one action list, the one overlay owner, the flows as the only guard sites, and presentation never in the file format — all stood. Two erosions were found, neither a breach: the relationship pane's Add button carried its own enablement expression beside the action list's, and the model-query derivations had accumulated in `flows.js`, drawing three panes into importing from the orchestrator — the retrospective's app.js disease regrowing, at about a third of the demo's size.
+
+**The arrest.** The queries moved to `queries.js` — the pure derivations over the model and the metamodel, the move predicates among them — so no pane imports from the flows. The flows returned to their stated job: the About dialog's content moved to `about.js`, the download anchor to `dom.js`, and the context menu to the navigator, whose guard is still the flows' `selectNode`; with it went the last flows–actions dependency. The relationship pane's Add now asks the relate action itself, so no surface re-derives an enablement. The tests gained `helpers.js` for the shared stand-ins, `test-queries.js` for the moved layer, and `test-pins.js`, which separates the source pins from the behaviour tests: a pin failing means a recorded ruling's expression moved, not that the software broke. The dead surface — unused exports, a dead style rule, a duplicated label function, one direct write outside the model — was swept, and `history.reset` now backs `replaceProject`, so a history sequence is never reused across projects.
+
+**Left deliberately unbuilt.** The derivation layer carries no indexes — `childrenOf` scans the collection, the tree walk is quadratic, and every selection change persists the whole blob. None of it matters below roughly a thousand nodes, and the fix the architecture already accommodates — derived indexes rebuilt in one place on commit, the blob split by key — waits for a real model that stutters, per the retrospective's lesson that unused generality taxes every line. Likewise the pristine-creation state stays in the flows until a surface must render it, at which point it moves to the store.
+
+The module inventory in chapter 2 stands as it stood when it governed. The audit added `queries.js` and `about.js` beside it, and the three test files named above.
+
+## 8. References
 
 | No. | Reference | Link |
 |---|---|---|
