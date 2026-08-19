@@ -13,7 +13,7 @@ import { createGraphView } from './graph.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 
-const store = createStore({ storage: window.localStorage });
+const store = createStore({ storage: window.localStorage, session: window.sessionStorage });
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
 store.subscribe(() => overlay.closeMenus());
 

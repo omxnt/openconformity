@@ -44,6 +44,9 @@ const ASIDE_KEY = 'openconformity.project.aside';
 /** The theme's own key, beside the blob, so replacing the project does not reset it. */
 const THEME_KEY = 'openconformity.theme';
 
+/** The relationship view's key in the browser session: a reload keeps it, a new session opens on the default. */
+const VIEW_KEY = 'openconformity.view';
+
 /** The two Carbon themes; null follows the system preference. */
 const THEMES = ['white', 'g100'];
 
@@ -56,8 +59,12 @@ const UNREACHABLE = -1;
  *           setItem: (key: string, value: string) => void,
  *           removeItem: (key: string) => void }} context.storage
  *        localStorage in the browser, or a stand-in in tests
+ * @param {{ getItem: (key: string) => string|null,
+ *           setItem: (key: string, value: string) => void }} [context.session]
+ *        sessionStorage: presentation choices that survive a reload but
+ *        never a new session, and never enter the project blob
  */
-export function createStore({ storage }) {
+export function createStore({ storage, session = null }) {
   let model = createModel();
   const history = createHistory(model);
   let savedSequence = history.sequence();
@@ -74,8 +81,14 @@ export function createStore({ storage }) {
   /** @type {'fresh'|'restored'|'failed'} */
   let restoration = 'fresh';
   let persistFailed = false;
-  /** @type {'list'|'graph'} the relationship pane's presentation: session state, never persisted */
-  let relationshipView = 'list';
+  /** @type {'list'|'graph'} the relationship pane's presentation: graph by default, a reload keeping the choice for the browser session */
+  let relationshipView = 'graph';
+  try {
+    const storedView = session?.getItem(VIEW_KEY);
+    if (storedView === 'list' || storedView === 'graph') relationshipView = storedView;
+  } catch {
+    // A session store that refuses changes nothing.
+  }
   /** The navigator's filter as typed: session state, never persisted, one truth for the tree and every enablement. */
   let navigatorFilter = '';
   /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
@@ -433,6 +446,11 @@ export function createStore({ storage }) {
       if (view !== 'list' && view !== 'graph') return;
       if (view === relationshipView) return;
       relationshipView = view;
+      try {
+        session?.setItem(VIEW_KEY, view);
+      } catch {
+        // A session store that refuses changes nothing.
+      }
       notify();
     },
 

@@ -410,14 +410,38 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     });
   }
 
+  // The splitter positions survive a reload within the browser session,
+  // never across sessions and never in the project blob.
+  const LAYOUT_KEY = 'openconformity.layout';
+
+  function readLayout() {
+    try {
+      return JSON.parse(document.defaultView.sessionStorage.getItem(LAYOUT_KEY)) ?? {};
+    } catch {
+      return {};
+    }
+  }
+
+  /** @param {Object<string, number>} part */
+  function saveLayout(part) {
+    try {
+      document.defaultView.sessionStorage.setItem(LAYOUT_KEY, JSON.stringify({ ...readLayout(), ...part }));
+    } catch {
+      // A session store that refuses changes nothing.
+    }
+  }
+
   splitter({
     splitter: document.getElementById('splitter-main'),
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width * 0.6,
-    minimum: 278,
+    minimum: 244,
     preset: 320,
-    apply: (width) => workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`),
+    apply: (width) => {
+      workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`);
+      saveLayout({ navigator: Math.round(width) });
+    },
     keys: ['ArrowLeft', 'ArrowRight'],
   });
 
@@ -428,9 +452,22 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     limit: () => column.getBoundingClientRect().height - 160,
     minimum: 120,
     preset: 280,
-    apply: (height) => column.style.setProperty('--relationships-height', `${Math.round(height)}px`),
+    apply: (height) => {
+      column.style.setProperty('--relationships-height', `${Math.round(height)}px`);
+      saveLayout({ relationships: Math.round(height) });
+    },
     keys: ['ArrowDown', 'ArrowUp'],
   });
+
+  {
+    const layout = readLayout();
+    if (Number.isFinite(layout.navigator)) {
+      workspace.style.setProperty('--navigator-width', `${layout.navigator}px`);
+    }
+    if (Number.isFinite(layout.relationships)) {
+      column.style.setProperty('--relationships-height', `${layout.relationships}px`);
+    }
+  }
 
   // --- Wiring ----------------------------------------------------------
 

@@ -417,19 +417,19 @@ function openStore(storage) {
   const storage = fakeStorage();
   const store = openStore(storage);
   store.commit((model) => addEntity(model, 'ELM'));
-  equal(store.relationshipView(), 'list', 'the pane opens on the list');
+  equal(store.relationshipView(), 'graph', 'the pane opens on the graph');
 
   let notified = 0;
   store.subscribe(() => {
     notified += 1;
   });
-  store.setRelationshipView('graph');
-  equal(store.relationshipView(), 'graph', 'the view can be chosen');
+  store.setRelationshipView('list');
+  equal(store.relationshipView(), 'list', 'the view can be chosen');
   equal(notified, 1, 'and every surface is told');
-  store.setRelationshipView('graph');
+  store.setRelationshipView('list');
   equal(notified, 1, 'choosing it again is nothing');
   store.setRelationshipView('mosaic');
-  equal(store.relationshipView(), 'graph', 'an unknown view is refused');
+  equal(store.relationshipView(), 'list', 'an unknown view is refused');
 
   deepEqual(
     Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
@@ -437,7 +437,7 @@ function openStore(storage) {
     'the blob never carries it'
   );
   const second = createStore({ storage });
-  equal(second.relationshipView(), 'list', 'a restored session opens on the list again');
+  equal(second.relationshipView(), 'graph', 'a restored session opens on the default view again');
 }
 
 // --- A failing persist -------------------------------------------------
@@ -511,6 +511,27 @@ function openStore(storage) {
   ok(!JSON.parse(storage.read(PROJECT_KEY)).session.navigatorFilter, 'never persisted');
   store.replaceProject(createModel());
   equal(store.navigatorFilter(), '', 'a replaced project starts unfiltered');
+}
+
+// --- The view survives a reload, never a new session, never the blob ------
+
+{
+  const storage = fakeStorage();
+  const session = fakeStorage();
+  const store = createStore({ storage, session });
+  store.replaceProject(createModel());
+  store.setRelationshipView('list');
+  equal(session.read('openconformity.view'), 'list', 'the choice rides the browser session');
+  ok(!JSON.parse(storage.read(PROJECT_KEY)).session.relationshipView, 'and never the project blob');
+
+  const reloaded = createStore({ storage, session });
+  equal(reloaded.relationshipView(), 'list', 'a reload within the session keeps it');
+
+  const fresh = createStore({ storage, session: fakeStorage() });
+  equal(fresh.relationshipView(), 'graph', 'a new session opens on the default');
+
+  const none = createStore({ storage });
+  equal(none.relationshipView(), 'graph', 'and no session store at all is just the default');
 }
 
 summary('test-store');

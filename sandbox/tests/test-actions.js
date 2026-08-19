@@ -182,8 +182,8 @@ function enabledIds(actions) {
   const actions = createActions({ store, flows: {} });
   deepEqual(
     actions.filter((action) => action.toolbar).map((action) => action.id),
-    ['new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete'],
-    'the tree toolbar holds the tree actions: Move to joined its group, undo and redo left for the shell'
+    ['new-entity', 'new-related', 'new-folder', 'move-up', 'move-down', 'move-to', 'delete'],
+    'the tree toolbar holds the tree actions: relating lives in the relationship pane, undo and redo in the shell'
   );
 }
 

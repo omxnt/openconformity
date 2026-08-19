@@ -140,7 +140,7 @@ export function createActions({ store, flows }) {
       icon: 'i-add-relationship',
       label: 'Relate…',
       group: 'create',
-      toolbar: true,
+      toolbar: false,
       context: true,
       enabled: () =>
         selected()?.kind === 'entity' &&

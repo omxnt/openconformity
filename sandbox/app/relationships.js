@@ -1,11 +1,11 @@
 /**
- * The relationship pane: the selected entity's relationships as one
- * table — a leading arrow column and the grouped row order, outgoing
- * first, so direction reads by glyph and by position both — or as the
- * neighbourhood graph, behind a toggle in the pane's working header.
- * Every row reads as the fact it records, the subject standing in the
- * source or the target column as the direction has it, and carries the
- * affordance to remove it.
+ * The relationship pane: the selected entity's relationships as two
+ * tables, Outgoing and Incoming, each behind a compact fold and both
+ * sharing one fixed column skeleton so they can never misalign — or as
+ * the neighbourhood graph, the pane's default view, behind a toggle in
+ * the working header. Every row reads as the fact it records, the
+ * subject standing in the source or the target column as the direction
+ * has it, and carries the affordance to remove it.
  *
  * The table is also the picker: while the store holds a picker for this
  * pane's subject, each pick lands immediately as a provisional row in
@@ -174,25 +174,68 @@ export function presentedRows(rows, sort, filter) {
  * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
  */
 export function createRelationshipsView({ store, head, body, graph, onAdd, onDone, onUnrelate, onSelect, addEnabled }) {
-  /** @type {{ column: 'entity'|'relationship', direction: 'asc'|'desc' }|null} the pane's own transient sort */
-  let tableSort = null;
-  /** The pane's own transient filter, gone with the visit. */
+  /**
+   * The pane's own transients, gone with the visit: a sort per table, the
+   * filter behind the head's magnifier, and each table's fold.
+   * @type {{ outgoing: { column: string, direction: string }|null, incoming: { column: string, direction: string }|null }}
+   */
+  const tableSort = { outgoing: null, incoming: null };
   let tableFilter = '';
-
-  const filterInput = el('input', {
-    className: 'field-input rel-filter-input',
-    attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the relationships' },
-  });
-  filterInput.addEventListener('input', () => {
-    tableFilter = filterInput.value;
-    render();
-  });
-  const filterBar = el('div', { className: 'rel-filter' }, [filterInput]);
+  let searchOpen = false;
+  const collapsed = { outgoing: false, incoming: false };
 
   const listHost = el('div', { className: 'rel-list' });
-  body.appendChild(filterBar);
   body.appendChild(listHost);
   body.appendChild(graph.element);
+
+  /**
+   * The head's filter, on demand: a magnifier opens a compact field,
+   * focused; Escape closes and clears, so does leaving it empty.
+   */
+  function searchControl() {
+    if (!searchOpen) {
+      return headIcon('Filter the list', 'i-search', () => {
+        searchOpen = true;
+        render();
+        head.querySelector('.head-search')?.focus();
+      });
+    }
+    const input = el('input', {
+      className: 'field-input head-search',
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the relationships' },
+    });
+    input.value = tableFilter;
+    input.addEventListener('input', () => {
+      tableFilter = input.value;
+      renderBody();
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      searchOpen = false;
+      tableFilter = '';
+      render();
+    });
+    input.addEventListener('blur', () => {
+      if (input.value.trim() !== '') return;
+      searchOpen = false;
+      tableFilter = '';
+      render();
+    });
+    return input;
+  }
+
+  /** A neutral icon-only head action with a tooltip, like the toolbar's. */
+  function headIcon(label, iconId, onPick) {
+    const button = el(
+      'button',
+      { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: label, 'aria-label': label } },
+      [icon(iconId)]
+    );
+    button.addEventListener('click', onPick);
+    return button;
+  }
 
   function renderHead(picking) {
     head.textContent = '';
@@ -211,6 +254,8 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     }
     head.appendChild(el('div', { className: 'pane-head-name' }, [switcher]));
 
+    const actions = [];
+    if (store.relationshipView() === 'list') actions.push(searchControl());
     if (picking) {
       const done = el('button', { className: 'form-button button-primary', text: 'Done', attributes: { type: 'button' } });
       done.disabled = store.picker().picks.length === 0;
@@ -220,17 +265,13 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       });
       const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
       cancel.addEventListener('click', () => store.endPicking());
-      head.appendChild(el('div', { className: 'pane-head-actions' }, [done, cancel]));
-      return;
+      actions.push(done, cancel);
+    } else {
+      const add = headIcon('Add relationship', 'i-add-relationship', onAdd);
+      add.disabled = !addEnabled();
+      actions.push(add);
     }
-
-    const add = el('button', {
-      className: 'ghost-button ghost-icon',
-      attributes: { type: 'button', title: 'Add relationship', 'aria-label': 'Add relationship' },
-    }, [icon('i-add-relationship')]);
-    add.disabled = !addEnabled();
-    add.addEventListener('click', onAdd);
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [add]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
   }
 
   function endpoint(entity) {
@@ -372,53 +413,85 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return rowElement;
   }
 
-  /** A column head that sorts: none to ascending to descending to none. */
-  function sortableHeader(label, column) {
-    const active = tableSort !== null && tableSort.column === column;
+  /** A column head that sorts its own table: none, ascending, descending, none. */
+  function sortableHeader(label, column, direction) {
+    const sort = tableSort[direction];
+    const active = sort !== null && sort.column === column;
     const header = el('th', {
-      attributes: { 'aria-sort': active ? (tableSort.direction === 'asc' ? 'ascending' : 'descending') : 'none' },
+      attributes: { 'aria-sort': active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none' },
     });
     const button = el('button', { className: 'th-sort', attributes: { type: 'button' } }, [
       el('span', { text: label }),
-      ...(active ? [icon(tableSort.direction === 'asc' ? 'i-move-up' : 'i-move-down')] : []),
+      ...(active ? [icon(sort.direction === 'asc' ? 'i-move-up' : 'i-move-down')] : []),
     ]);
     button.addEventListener('click', () => {
-      if (!active) tableSort = { column, direction: 'asc' };
-      else if (tableSort.direction === 'asc') tableSort = { column, direction: 'desc' };
-      else tableSort = null;
-      render();
+      if (!active) tableSort[direction] = { column, direction: 'asc' };
+      else if (sort.direction === 'asc') tableSort[direction] = { column, direction: 'desc' };
+      else tableSort[direction] = null;
+      renderBody();
     });
     header.appendChild(button);
     return header;
   }
 
-  /**
-   * The one table: direction reads by glyph and by position both — the
-   * arrow leads each row, and the subject stands in the source or the
-   * target column as the direction has it. Source and Target sort by
-   * the far end alike; the grouped order stands while no sort is
-   * chosen.
-   */
-  function oneTable(rows, subject, picking) {
-    const arrows = { outgoing: '→', incoming: '←' };
-    return el('table', { className: 'table' }, [
-      el('thead', {}, [
-        el('tr', {}, [
-          el('th', { className: 'shrink rel-arrow-head' }),
-          sortableHeader('Source', 'entity'),
-          sortableHeader('Relationship', 'relationship'),
-          sortableHeader('Target', 'entity'),
-          el('th', { className: 'shrink' }),
-        ]),
-      ]),
-      el('tbody', {}, rows.map((row) => {
-        const rowElement = row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking);
-        const cell = el('td', { className: 'rel-arrow', text: arrows[row.direction] ?? '' });
-        cell.setAttribute('aria-hidden', 'true');
-        rowElement.insertBefore(cell, rowElement.firstChild);
-        return rowElement;
-      })),
+  /** The shared column skeleton, so the two tables can never misalign. */
+  function columns() {
+    return el('colgroup', {}, [
+      el('col', { className: 'col-entity' }),
+      el('col', { className: 'col-relationship' }),
+      el('col', { className: 'col-entity' }),
+      el('col', { className: 'col-action' }),
     ]);
+  }
+
+  /**
+   * One direction's table under its fold: a compact accordion heading,
+   * then the fixed-layout table both directions share the widths of.
+   * The split carries direction; the subject stands in the source or
+   * the target column as the direction has it.
+   */
+  function section(direction, labelText, rows, subject, picking) {
+    const open = !collapsed[direction];
+    const heading = el('button', {
+      className: 'rel-fold',
+      attributes: { type: 'button', 'aria-expanded': String(open) },
+    }, [
+      icon(open ? 'i-chevron-down' : 'i-chevron-right'),
+      el('span', { text: `${labelText} (${rows.length})` }),
+    ]);
+    heading.addEventListener('click', () => {
+      collapsed[direction] = open;
+      renderBody();
+    });
+    const held = el('div', { className: 'rel-section' }, [heading]);
+    if (!open) return held;
+
+    const headers =
+      direction === 'incoming'
+        ? [sortableHeader('Source', 'entity', direction), sortableHeader('Relationship', 'relationship', direction), el('th', { text: 'Target' })]
+        : [el('th', { text: 'Source' }), sortableHeader('Relationship', 'relationship', direction), sortableHeader('Target', 'entity', direction)];
+    held.appendChild(
+      el('table', { className: 'table' }, [
+        columns(),
+        el('thead', {}, [el('tr', {}, [...headers, el('th', { className: 'shrink' })])]),
+        el('tbody', {}, rows.map((row) => (row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking)))),
+      ])
+    );
+    return held;
+  }
+
+  /** The stale strip: picks the model no longer admits, closing the list. */
+  function staleSection(rows, subject) {
+    const held = el('div', { className: 'rel-section' }, [
+      el('div', { className: 'rel-fold rel-fold-still', text: `No longer possible (${rows.length})` }),
+    ]);
+    held.appendChild(
+      el('table', { className: 'table' }, [
+        columns(),
+        el('tbody', {}, rows.map((row) => pendingRow(row, subject))),
+      ])
+    );
+    return held;
   }
 
   function renderList(subject, picker) {
@@ -449,15 +522,24 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       return;
     }
 
-    const rows = presentedRows(
-      [...tables.outgoing, ...tables.incoming, ...tables.stale],
-      tableSort,
-      tableFilter
-    );
-    if (rows.length > 0) listHost.appendChild(oneTable(rows, subject, picking));
-    if (!empty && rows.length === 0) {
+    const outgoing = presentedRows(tables.outgoing, tableSort.outgoing, tableFilter);
+    const incoming = presentedRows(tables.incoming, tableSort.incoming, tableFilter);
+    const stale = presentedRows(tables.stale, null, tableFilter);
+    if (outgoing.length > 0) listHost.appendChild(section('outgoing', 'Outgoing', outgoing, subject, picking));
+    if (incoming.length > 0) listHost.appendChild(section('incoming', 'Incoming', incoming, subject, picking));
+    if (stale.length > 0) listHost.appendChild(staleSection(stale, subject));
+    if (!empty && outgoing.length + incoming.length + stale.length === 0) {
       listHost.appendChild(el('p', { className: 'picking-note', text: 'Nothing matches the filter.' }));
     }
+  }
+
+  /** Refresh the body alone, so typing in the head's filter keeps its focus. */
+  function renderBody() {
+    const picker = store.picker();
+    const subjectId = picker !== null ? picker.subject : store.selection();
+    const subject = nodeOf(store.model(), subjectId);
+    if (!subject || subject.kind !== 'entity') return;
+    if (store.relationshipView() === 'list') renderList(subject, picker);
   }
 
   function render() {
@@ -467,7 +549,6 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     if (!subject || subject.kind !== 'entity') {
       head.hidden = true;
       head.textContent = '';
-      filterBar.hidden = true;
       listHost.hidden = false;
       graph.element.hidden = true;
       listHost.textContent = '';
@@ -481,7 +562,6 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
 
     renderHead(picker !== null);
     const view = store.relationshipView();
-    filterBar.hidden = view !== 'list';
     listHost.hidden = view !== 'list';
     graph.element.hidden = view !== 'graph';
     if (view === 'list') renderList(subject, picker);

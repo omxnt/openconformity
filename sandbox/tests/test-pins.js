@@ -170,6 +170,26 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
+// --- The fourth dogfooding batch -----------------------------------------
+
+{
+  const relationships = readFile('../app/relationships.js');
+  ok(relationships.includes("el('colgroup', {}, ["), 'the two direction tables share one fixed column skeleton');
+  ok(relationships.includes("className: 'rel-fold'"), 'each behind its compact fold');
+  ok(!relationships.includes('rel-arrow'), 'the direction arrow column is gone: the split carries direction');
+  ok(relationships.includes("className: 'field-input head-search'"), 'the list filter lives behind the head magnifier, on demand');
+
+  const sheet = readFile('../app/style.css');
+  ok(sheet.includes('table-layout: fixed;'), 'the tables lay out fixed, so the columns never drift');
+  ok(sheet.includes('height: 32px;             /* Carbon data table sm */'), 'rows at Carbon short scale');
+
+  const shell = readFile('../app/shell.js');
+  ok(
+    shell.includes("const LAYOUT_KEY = 'openconformity.layout'") && shell.includes('sessionStorage'),
+    'the splitter geometry rides the browser session, never the project blob'
+  );
+}
+
 // --- The pre-paint theme script speaks the store's literals --------------
 
 {
@@ -209,8 +229,8 @@ import { fakeStorage } from './helpers.js';
 {
   const sheet = readFile('../app/style.css');
   const shell = readFile('../app/shell.js');
-  ok(sheet.includes('min-width: 278px'), 'the pane floor is the toolbar: eight 32px buttons, seven 2px gaps, 4px padding each side');
-  ok(shell.includes('minimum: 278'), 'and the splitter stops at the same width');
+  ok(sheet.includes('min-width: 244px'), 'the pane floor is the toolbar: seven 32px buttons, six 2px gaps, 4px padding each side');
+  ok(shell.includes('minimum: 244'), 'and the splitter stops at the same width');
 }
 
 // --- The closing check: pointer targets and the menu bar keys ------------

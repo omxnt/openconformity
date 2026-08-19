@@ -141,13 +141,16 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     return button;
   }
 
-  /** Carbon's form actions, under the attributes at the form's end: Save filled, Cancel ghost. */
-  function formActions(onSavePick) {
+  /**
+   * Save and Cancel in the head, exactly as the relationship pane's Done
+   * and Cancel sit in its head: primary and ghost at the head's 32px.
+   */
+  function saveCancel(onSavePick) {
     const save = el('button', { className: 'form-button button-primary', text: 'Save', attributes: { type: 'button' } });
     save.addEventListener('click', onSavePick);
-    const cancel = el('button', { className: 'form-button ghost-button', text: 'Cancel', attributes: { type: 'button' } });
+    const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
     cancel.addEventListener('click', onCancel);
-    return el('div', { className: 'form-actions' }, [save, cancel]);
+    return [save, cancel];
   }
 
   /** The project head: its icon, its kind, and its name as it stands. */
@@ -224,7 +227,11 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   function renderProjectEdit() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(el('div', { className: 'pane-head-actions' }, []));
+    head.appendChild(
+      el('div', { className: 'pane-head-actions' }, saveCancel(() => {
+        if (onSave(null, fieldValues()) !== false) endEdit();
+      }))
+    );
     const values = projectValues();
     const fields = el('div', { className: 'fields' });
     for (const definition of PROJECT_FIELDS) {
@@ -240,9 +247,6 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
-    body.appendChild(formActions(() => {
-      if (onSave(null, fieldValues()) !== false) endEdit();
-    }));
   }
 
   function renderView(node) {
@@ -266,7 +270,9 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   }
 
   function renderEdit(node) {
-    renderHead(node, []);
+    renderHead(node, saveCancel(() => {
+      if (onSave(editingId, fieldValues()) !== false) endEdit();
+    }));
     const fields = el('div', { className: 'fields' }, [identifierField(node)]);
     for (const definition of attributesFor(node.type)) {
       fields.appendChild(
@@ -281,9 +287,6 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       );
     }
     body.appendChild(fields);
-    body.appendChild(formActions(() => {
-      if (onSave(editingId, fieldValues()) !== false) endEdit();
-    }));
   }
 
   function render() {

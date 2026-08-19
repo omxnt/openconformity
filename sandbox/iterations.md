@@ -78,7 +78,21 @@ Three rounds on the neighbourhood graph's routing, held as one try-out: right an
 | 2 | The first cut rendered arrows oddly and placed some labels badly; make rules that hold — labels one vertical position, bends right and never crossing, spacing static-worst-case or dynamic, POV height either. | The rules, each pinned: every label at the same x per side and 6px above its own lane, independent of where its bend falls; the column gap is the static worst case, sized for the longest relationship label; a port level with its lane routes dead straight, so no zero-length bend ever misorients a marker; the subject keeps its dynamic modest height. First held by a proven channel-depth discipline (`channelDepths`), then superseded by row 3. |
 | 3 | Would horizontal–angled–horizontal lines look better? | Doglegs, and they carry the day: horizontal stub out (long at the neighbour, the label's home), one slant across a bend band shared by the whole side, short stub into the subject. Sharing the band means monotone lanes and ports make crossings impossible outright — the channel-depth discipline became unnecessary and was retired. Markers sit on horizontal segments at both ends; the straight-line degenerate case and every label rule carry over unchanged (`doglegPoints`, pinned). |
 
-## 4. References
+## 4. Batch of 2026-08-19
+
+Seven items. Suite at 1625 checks across 19 files; three mutations on the session boundary, all caught.
+
+| # | Asked | Landed |
+|---|---|---|
+| 1 | Two tables again, superseding the one-table verdict from living with it: Outgoing and Incoming under small headings, identical synced column widths, each collapsible per Carbon's accordion idiom with pane-local transient state; the arrow column dies; picks land in their table; sort and filter per table. | Two folded sections sharing one fixed `colgroup` skeleton under `table-layout: fixed`, so the columns cannot drift apart; compact chevron folds carrying counts, `aria-expanded`, transient state; the arrow column and its styles deleted. Sort state is per table; the filter is pane-wide, applying to both — the one judgment call in the item. Provisional picks land in their own table; the stale strip closes the list unfolded. |
+| 2 | Graph is the default view. | The store opens on `graph`; switcher, View radios, and everything else untouched. |
+| 3 | View and splitter layout survive reload within a browser session — sessionStorage, never across sessions, never in the blob; pin the boundary. | The store takes an optional session store: the view choice rides `openconformity.view`, restored on construction, defaulting to graph in a fresh session; the shell keeps the two splitter positions under `openconformity.layout` the same way. Pinned on all three edges — kept on reload, absent in a new session, never in the project blob — with mutations against each. |
+| 4 | List filter on demand: the always-visible field goes; a magnifier in the head opens a compact field — focused on open, Escape or empty-blur closes, filter clears on close. Show both only if always-visible genuinely beats it. | On demand only — the standing bar stole a row from a small pane and never earned it. The magnifier sits with the head actions in both modes, picking included; typing refreshes the body alone so the field keeps focus; Escape and empty-blur close and clear. |
+| 5 | Save and Cancel return to the editor head, aligned with the relationship pane's Done and Cancel; primary plus ghost at 32px. | Relocated on both edit surfaces, sharing the `form-button` primary and ghost pair the Done head uses; the under-form actions row and its styles are gone. |
+| 6 | Table design polish against Carbon's data-table spec; report what changed. | Rows lifted from xs 24px to Carbon short 32px so cells and controls breathe; fixed layout with ellipsis overflow instead of ragged column drift; sortable headers gain a hover state; the fold headings take Carbon's compact accordion form with hover; the head search and committing pair sized into the 32px head. Header tier, hairlines, hover fills, and the no-vertical-rules rule were already Carbon and stand. |
+| 7 | Add relationship leaves the tree toolbar; Edit and context menus keep it; the floor re-derives. | Off the toolbar — the pane's own affordance carries it; the toolbar is seven buttons and the navigator floor re-derived to 244px, pinned with its arithmetic. |
+
+## 5. References
 
 | No. | Reference | Link |
 |---|---|---|
