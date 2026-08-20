@@ -20,7 +20,7 @@
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
-import { formLabel } from './queries.js';
+import { formLabel, entityLabel } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, icon } from './dom.js';
 
@@ -140,10 +140,10 @@ export function presentedRows(rows, sort, filter) {
   let held = rows;
   if (query !== '') {
     held = held.filter((row) => {
-      const title = (row.other.attributes.title ?? '').trim().toLowerCase();
+      const label = entityLabel(row.other).toLowerCase();
       return (
         row.other.id.toLowerCase().includes(query) ||
-        title.includes(query) ||
+        label.includes(query) ||
         row.label.toLowerCase().includes(query)
       );
     });
@@ -153,8 +153,8 @@ export function presentedRows(rows, sort, filter) {
       sort.column === 'relationship'
         ? (row) => row.label
         : (row) => {
-            const title = (row.other.attributes.title ?? '').trim();
-            return title ? `${row.other.id}  ${title}` : row.other.id;
+            const label = entityLabel(row.other);
+            return label ? `${row.other.id}  ${label}` : row.other.id;
           };
     held = [...held].sort((a, b) => key(a).localeCompare(key(b)) * (sort.direction === 'desc' ? -1 : 1));
   }
@@ -279,8 +279,8 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
       el('span', { className: 'mono designation', text: entity.id }),
     ];
-    const title = (entity.attributes.title ?? '').trim();
-    if (title) parts.push(el('span', { className: 'row-title', text: title }));
+    const label = entityLabel(entity);
+    if (label) parts.push(el('span', { className: 'row-title', text: label }));
     return parts;
   }
 
@@ -309,12 +309,12 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
 
   /** The subject's own cell: its tinted icon, its text receding — you are here. */
   function subjectCell(subject) {
-    const title = (subject.attributes.title ?? '').trim();
+    const label = entityLabel(subject);
     const parts = [
       icon(TYPE_ICONS[subject.type], ENTITY_TYPES[subject.type].pillar),
       el('span', { className: 'mono designation', text: subject.id }),
     ];
-    if (title) parts.push(el('span', { className: 'row-title', text: title }));
+    if (label) parts.push(el('span', { className: 'row-title', text: label }));
     return el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity cell-subject' }, parts)]);
   }
 
@@ -325,10 +325,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    */
   function realRow(row, subject, picking) {
     const { label, relationship, other } = row;
-    const title = (other.attributes.title ?? '').trim();
+    const said = entityLabel(other);
     const rowElement = el('tr', {
       className: picking ? 'receded' : '',
-      attributes: { tabindex: '0', 'aria-label': `Select ${other.id}${title ? `, ${title}` : ''}` },
+      attributes: { tabindex: '0', 'aria-label': `Select ${other.id}${said ? `, ${said}` : ''}` },
     });
     rowElement.addEventListener('click', () => onSelect(other.id));
     rowElement.addEventListener('keydown', (event) => {

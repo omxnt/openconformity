@@ -16,6 +16,7 @@
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickedRows } from './relate.js';
+import { entityLabel } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, svg, svgText } from './dom.js';
 
@@ -141,8 +142,7 @@ export function subjectHeight(busiest) {
  * @returns {string}
  */
 export function caption(entity) {
-  const title = (entity.attributes.title ?? '').trim();
-  const text = title || entity.id;
+  const text = entityLabel(entity) || entity.id;
   return text.length > 27 ? `${text.slice(0, 26)}…` : text;
 }
 
@@ -205,8 +205,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     group.appendChild(svgText('text', { x: '40', y: '24', class: 'node-type' }, type.name));
     group.appendChild(svgText('text', { x: '16', y: '42', class: 'node-id' }, entity.id));
     group.appendChild(svgText('text', { x: '16', y: '58', class: 'node-label' }, caption(entity)));
-    const title = (entity.attributes.title ?? '').trim();
-    group.appendChild(svgText('title', {}, `${type.name} ${entity.id}${title ? ` — ${title}` : ''}`));
+    const label = entityLabel(entity);
+    group.appendChild(svgText('title', {}, `${type.name} ${entity.id}${label ? ` — ${label}` : ''}`));
 
     if (!centre) {
       const act = () => (pending ? store.togglePick(entity.id) : onSelect(entity.id));

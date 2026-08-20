@@ -9,11 +9,12 @@
  * one, and a render never rebuilds over an open draft.
  */
 
-import { attributesFor } from './attributes.js';
+import { ATTRIBUTES, attributesFor } from './attributes.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon } from './dom.js';
+import { entityLabel } from './queries.js';
 
 /**
  * Whether a draft differs from the entity it edits: a defined key whose
@@ -37,6 +38,18 @@ export function draftChanged(definitions, attributes, values) {
  * `docs/attributes.md` gains its Project section.
  */
 const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
+
+/**
+ * Whether a hyperlink value may be presented as a link. Only the web
+ * schemes are followed: anything else — a `javascript:` value above all
+ * — renders as the text it is, so rendering can never arm what a user
+ * typed or a file carried.
+ * @param {string} value
+ * @returns {boolean}
+ */
+export function linkable(value) {
+  return /^https?:\/\/\S/i.test((value ?? '').trim());
+}
 
 /**
  * The ways into a project, offered from the editor's no-project state —
@@ -85,8 +98,8 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
       parts.push(icon(TYPE_ICONS[node.type], type.pillar));
       parts.push(el('span', { className: 'subhead-kind', text: type.name }));
       parts.push(el('span', { className: 'mono designation', text: node.id }));
-      const title = (node.attributes.title ?? '').trim();
-      if (title) parts.push(el('span', { className: 'subhead-title', text: title }));
+      const label = entityLabel(node);
+      if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
     } else {
       parts.push(icon(FOLDER_ICON));
       parts.push(el('span', { className: 'subhead-kind', text: 'Folder' }));
@@ -109,14 +122,68 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
   }
 
   /**
-   * The identifier, read-only above the attributes: generated, never an
-   * attribute, shown as the document's conventions place it.
-   * @param {import('./model.js').Entity} node
+   * A field's own class: a value that runs long — a multiline or a
+   * hyperlink — takes the width of both columns, and so begins a row.
+   * Inside a pair the row is already the pair's, so nothing spans.
+   * @param {{ kind: string }} definition
+   * @param {boolean} [paired]
    */
-  function identifierField(node) {
-    return el('div', { className: 'field' }, [
-      el('div', { className: 'field-label', text: 'Identifier' }),
-      el('div', { className: 'field-value mono', text: node.id }),
+  function fieldClass(definition) {
+    const wide = definition.kind === 'multiline' || definition.kind === 'hyperlink';
+    return `field${wide ? ' field-tall' : ''}`;
+  }
+
+  /**
+   * One run of definitions as a grid of fields.
+   * @param {Array<Object>} definitions
+   * @param {Object<string, string>} values
+   * @param {(definition: Object, value: string|undefined) => HTMLElement} cell
+   */
+  function fieldGrid(definitions, values, cell) {
+    return el('div', { className: 'fields' }, definitions.map((definition) => cell(definition, values[definition.key])));
+  }
+
+  /**
+   * A type's whole form: the ungrouped fields where a type has them,
+   * then each group under its own heading. A group is a heading over its
+   * fields and nothing more — Carbon's fieldset and legend — so nothing
+   * a reader came for sits behind a control.
+   * @param {string} code
+   * @param {Object<string, string>} values
+   * @param {(definition: Object, value: string|undefined) => HTMLElement} cell
+   */
+  function layOut(code, values, cell) {
+    const type = ATTRIBUTES[code] ?? { attributes: [], groups: [] };
+    const held = el('div', { className: 'form' });
+    if (type.attributes.length > 0) held.appendChild(fieldGrid(type.attributes, values, cell));
+    for (const group of type.groups) {
+      held.appendChild(
+        el('fieldset', { className: 'field-group' }, [
+          el('legend', { className: 'group-legend', text: group.name }),
+          fieldGrid(group.attributes, values, cell),
+        ])
+      );
+    }
+    return held;
+  }
+
+  /** One field as the view mode shows it. */
+  function viewCell(definition, value) {
+    return el('div', { className: fieldClass(definition) }, [
+      el('div', { className: 'field-label', text: definition.name }),
+      viewValue(definition, value),
+    ]);
+  }
+
+  /** One field as the edit mode offers it. */
+  function editCell(definition, value) {
+    return el('div', { className: fieldClass(definition) }, [
+      el('label', {
+        className: 'field-label',
+        text: definition.name,
+        attributes: { for: `field-${definition.key}` },
+      }),
+      control(definition, value ?? ''),
     ]);
   }
 
@@ -128,6 +195,32 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     );
     button.addEventListener('click', onPick);
     return button;
+  }
+
+  /**
+   * A value as the view mode shows it: a followable hyperlink as a link
+   * in a new tab, a multiline value keeping its breaks, anything else as
+   * its text; an unset value as the em dash.
+   * @param {{ kind: string }} definition
+   * @param {string|undefined} value
+   */
+  function viewValue(definition, value) {
+    if (value === undefined || value === '') {
+      return el('div', { className: 'field-value field-empty', text: '–' });
+    }
+    if (definition.kind === 'hyperlink' && linkable(value)) {
+      const address = value.trim();
+      return el('div', { className: 'field-value' }, [
+        el('a', {
+          text: address,
+          attributes: { href: address, target: '_blank', rel: 'noopener' },
+        }),
+      ]);
+    }
+    return el('div', {
+      className: `field-value${definition.kind === 'multiline' ? ' multiline' : ''}`,
+      text: value,
+    });
   }
 
   /** An icon-only head action, neutral with a tooltip, like the toolbar's. */
@@ -184,7 +277,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
         className: 'field-input',
         attributes: { 'data-key': definition.key, id: `field-${definition.key}` },
       });
-      select.appendChild(el('option', { text: '(not set)', attributes: { value: '' } }));
+      select.appendChild(el('option', { text: '–', attributes: { value: '' } }));
       for (const choice of definition.values ?? []) {
         select.appendChild(el('option', { text: choice, attributes: { value: choice } }));
       }
@@ -208,20 +301,7 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
     head.hidden = false;
     head.appendChild(projectHeadName());
     head.appendChild(el('div', { className: 'pane-head-actions' }, [headIconButton('Edit attributes', 'i-edit', beginEdit)]));
-    const values = projectValues();
-    const fields = el('div', { className: 'fields' });
-    for (const definition of PROJECT_FIELDS) {
-      const value = values[definition.key];
-      fields.appendChild(
-        el('div', { className: 'field' }, [
-          el('div', { className: 'field-label', text: definition.name }),
-          value === undefined || value === ''
-            ? el('div', { className: 'field-value field-empty', text: '–' })
-            : el('div', { className: 'field-value', text: value }),
-        ])
-      );
-    }
-    body.appendChild(fields);
+    body.appendChild(fieldGrid(PROJECT_FIELDS, projectValues(), viewCell));
   }
 
   function renderProjectEdit() {
@@ -232,61 +312,19 @@ export function createEditor({ store, head, body, onSave, onCancel, onRename, on
         if (onSave(null, fieldValues()) !== false) endEdit();
       }))
     );
-    const values = projectValues();
-    const fields = el('div', { className: 'fields' });
-    for (const definition of PROJECT_FIELDS) {
-      fields.appendChild(
-        el('div', { className: 'field' }, [
-          el('label', {
-            className: 'field-label',
-            text: definition.name,
-            attributes: { for: `field-${definition.key}` },
-          }),
-          control(definition, values[definition.key] ?? ''),
-        ])
-      );
-    }
-    body.appendChild(fields);
+    body.appendChild(fieldGrid(PROJECT_FIELDS, projectValues(), editCell));
   }
 
   function renderView(node) {
     renderHead(node, [headIconButton('Edit attributes', 'i-edit', beginEdit)]);
-    const fields = el('div', { className: 'fields' }, [identifierField(node)]);
-    for (const definition of attributesFor(node.type)) {
-      const value = node.attributes[definition.key];
-      fields.appendChild(
-        el('div', { className: `field${definition.kind === 'multiline' ? ' field-tall' : ''}` }, [
-          el('div', { className: 'field-label', text: definition.name }),
-          value === undefined || value === ''
-            ? el('div', { className: 'field-value field-empty', text: '–' })
-            : el('div', {
-                className: `field-value${definition.kind === 'multiline' ? ' multiline' : ''}`,
-                text: value,
-              }),
-        ])
-      );
-    }
-    body.appendChild(fields);
+    body.appendChild(layOut(node.type, node.attributes, viewCell));
   }
 
   function renderEdit(node) {
     renderHead(node, saveCancel(() => {
       if (onSave(editingId, fieldValues()) !== false) endEdit();
     }));
-    const fields = el('div', { className: 'fields' }, [identifierField(node)]);
-    for (const definition of attributesFor(node.type)) {
-      fields.appendChild(
-        el('div', { className: `field${definition.kind === 'multiline' ? ' field-tall' : ''}` }, [
-          el('label', {
-            className: 'field-label',
-            text: definition.name,
-            attributes: { for: `field-${definition.key}` },
-          }),
-          control(definition, node.attributes[definition.key] ?? ''),
-        ])
-      );
-    }
-    body.appendChild(fields);
+    body.appendChild(layOut(node.type, node.attributes, editCell));
   }
 
   function render() {

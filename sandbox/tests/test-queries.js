@@ -6,6 +6,7 @@
  */
 
 import {
+  entityLabel,
   relationshipOptions,
   formLabel,
   relatedTypeOffer,
@@ -269,6 +270,36 @@ function offered(model, subjectId) {
     'Deleting ELM-001 also deletes everything it contains through composition and severs 1 relationship:',
     'one severed relationship reads in the singular'
   );
+}
+
+// --- The label a reference-bearing type composes --------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'LEG');
+  equal(entityLabel(nodeOf(model, 'LEG-001')), '', 'an empty entity has no label');
+
+  updateEntity(model, 'LEG-001', { title: 'Machinery Regulation' });
+  equal(entityLabel(nodeOf(model, 'LEG-001')), 'Machinery Regulation', 'a title alone stands');
+
+  updateEntity(model, 'LEG-001', { reference: '(EU) 2023/1230' });
+  equal(
+    entityLabel(nodeOf(model, 'LEG-001')),
+    '(EU) 2023/1230 Machinery Regulation',
+    'reference then title, one space between: the citation format is the delimiter, nothing is bracketed'
+  );
+  equal(
+    designated(nodeOf(model, 'LEG-001')),
+    'LEG-001  (EU) 2023/1230 Machinery Regulation',
+    'and the designation carries the composed label'
+  );
+
+  updateEntity(model, 'LEG-001', { title: '' });
+  equal(entityLabel(nodeOf(model, 'LEG-001')), '(EU) 2023/1230', 'a reference alone stands too');
+
+  addEntity(model, 'ELM');
+  updateEntity(model, 'ELM-001', { title: 'Machine' });
+  equal(entityLabel(nodeOf(model, 'ELM-001')), 'Machine', 'a type with no reference is its title alone');
 }
 
 summary('test-queries');

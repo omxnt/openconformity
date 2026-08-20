@@ -190,6 +190,23 @@ import { fakeStorage } from './helpers.js';
   );
 }
 
+// --- The editor form and its read-only state share one geometry -----------
+
+{
+  const sheet = readFile('../app/style.css');
+  ok(sheet.includes('gap: 24px 32px;'), 'rows sit 24px apart, the side-panel figure');
+  const value = sheet.slice(sheet.indexOf('.field-value {'), sheet.indexOf('.field-value.multiline'));
+  ok(value.includes('padding: 7px 16px;') && value.includes('min-height: 32px;'), 'a view value holds the slot its input would take, so an edit never reflows');
+  ok(value.includes('background: transparent;') && value.includes('border-bottom: 1px solid var(--border-subtle);'), 'read-only: transparent ground, the rule made subtle');
+  const input = sheet.slice(sheet.indexOf('.field-input {'), sheet.indexOf('.field-input:focus'));
+  ok(input.includes('background: var(--layer);') && input.includes('border-bottom: 1px solid var(--border-strong);'), 'editable: the field fill and the strong rule');
+  ok(sheet.includes('padding: 32px 0 8px;'), 'a group heading stands one step above the row spacing');
+  ok(!sheet.includes('data-fields'), 'and the treatment trial is gone');
+
+  const shell = readFile('../app/shell.js');
+  ok(!shell.includes('fieldStyle'), 'the shell no longer stamps or offers a choice of treatments');
+}
+
 // --- The pre-paint theme script speaks the store's literals --------------
 
 {

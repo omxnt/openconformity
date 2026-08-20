@@ -83,14 +83,30 @@ export function relatedTypeOffer(model, subjectId) {
 }
 
 /**
- * How an entity reads in a list: its identifier, then its title when it
+ * What an entity is called, wherever a label is shown. A type carrying a
+ * reference composes reference then title, separated by a single space —
+ * `(EU) 2023/1230 Machinery Regulation` — the citation's own format
+ * standing as the delimiter, so nothing is bracketed or punctuated
+ * around it; either part alone stands when the other is unset. The
+ * composition happens at display and is never stored.
+ * @param {import('./model.js').Entity} entity
+ * @returns {string}  the label, empty when the entity carries neither part
+ */
+export function entityLabel(entity) {
+  const reference = (entity.attributes.reference ?? '').trim();
+  const title = (entity.attributes.title ?? '').trim();
+  return [reference, title].filter(Boolean).join(' ');
+}
+
+/**
+ * How an entity reads in a list: its identifier, then its label when it
  * carries one.
  * @param {import('./model.js').Entity} entity
  * @returns {string}
  */
 export function designated(entity) {
-  const title = (entity.attributes.title ?? '').trim();
-  return title ? `${entity.id}  ${title}` : entity.id;
+  const label = entityLabel(entity);
+  return label ? `${entity.id}  ${label}` : entity.id;
 }
 
 /**

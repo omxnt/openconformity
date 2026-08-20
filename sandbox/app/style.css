@@ -544,25 +544,48 @@ body {
 
 /* ---------- Editor ---------- */
 
-/* Carbon form: the label above its field, two columns with the tall
-   fields spanning both, each row parted by a hairline so the form scans
-   as rows rather than a flat sheet. */
-.editor-body > .fields { padding: 4px 0 8px; }  /* $spacing-02, $spacing-03 */
+/* Carbon form, and its read-only state for view mode: same structure
+   and spacing in both, as the read-only pattern requires, so switching
+   modes never reflows. Headings, labels, and field edges share one key
+   line; the text inside a field is inset by the field's own padding.
+   Rows sit 24px apart — the side-panel figure, where a dedicated page
+   would take 32px — and fields are the 32px `sm` size throughout,
+   the app's density choice. */
+.editor-body > .form,
+.editor-body > .fields { padding: 4px 16px 16px; }  /* $spacing-02, $spacing-05 */
+.form { max-width: 1024px; }
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 32px;              /* $spacing-07 */
+  gap: 24px 32px;           /* $spacing-06, $spacing-07 */
   max-width: 1024px;
 }
 .fields .field {
-  padding: 12px 16px;       /* $spacing-04, $spacing-05 */
   display: flex;
   flex-direction: column;
-  gap: 4px;                 /* $spacing-02 */
   min-width: 0;
-  border-bottom: 1px solid var(--border-subtle);
 }
 .field-tall { grid-column: 1 / -1; }
+
+/* A choice holds one value from a short list, so its control never
+   stretches to the width of a sentence: a field's width says what
+   length of value is expected (Carbon form guidance). */
+select.field-input { max-width: 192px; }
+
+/* A group is a heading over its fields, as Carbon groups a form: a
+   fieldset and its legend, never a disclosure. */
+.field-group { border: none; padding: 0; margin: 0; min-width: 0; }
+.group-legend {
+  display: block;
+  width: 100%;
+  padding: 32px 0 8px;      /* $spacing-07, $spacing-03 */
+  font-size: 14px;          /* $heading-compact-01 */
+  font-weight: 600;
+  line-height: 1.28572;
+  color: var(--text);
+}
+.form > .fields:first-child + .field-group > .group-legend,
+.form > .field-group:first-child > .group-legend { padding-top: 8px; }  /* $spacing-03 */
 
 /* The head's committing pair, shared by the editor's Save and the
    relationship pane's Done: a small primary beside a ghost. */
@@ -588,7 +611,7 @@ body {
   font-size: 12px;          /* $label-01 */
   letter-spacing: 0.32px;
   color: var(--text-second);
-  margin-bottom: 4px;       /* $spacing-02 */
+  margin-bottom: 8px;       /* $spacing-03 */
 }
 
 /* Carbon helper text: the live line under a dialog field. */
@@ -599,8 +622,19 @@ body {
   margin-top: 4px;          /* $spacing-02 */
 }
 
-.field-value { min-height: 18px; }
+/* The field's read-only state: the slot its input takes, transparent
+   ground, the rule made subtle. */
+.field-value {
+  padding: 7px 16px;        /* Carbon text input sm, as the input */
+  min-height: 32px;
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+}
 .field-value.multiline { white-space: pre-wrap; }
+/* A hyperlink value, Carbon's inline link: underlined, since colour
+   alone cannot mark a link inside content (WCAG 1.4.1). */
+.field-value a { color: var(--link); text-decoration: underline; overflow-wrap: anywhere; }
+.field-value a:hover { color: var(--link-hover); }
 .field-empty { color: var(--text-helper); }
 
 .field-input {

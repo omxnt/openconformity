@@ -1,7 +1,9 @@
 /**
  * The attribute definitions per entity type, transcribed from
- * `docs/attributes.md`, which is the authoritative definition, in the order
- * the document records the types.
+ * `sandbox/attributes.md` — the working draft that supersedes
+ * `docs/attributes.md` while the attribute-definition work runs, and the
+ * authoritative definition for now — in the order the document records
+ * the types.
  *
  * Per type, the ungrouped definitions come first and the named collapsible
  * groups follow, with keys unique across all of a type's tables. The
@@ -57,25 +59,68 @@ export const ATTRIBUTES = {
     groups: [],
   },
   LEG: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Act',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'link', name: 'Link', kind: 'hyperlink' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   HST: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Standard',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'edition', name: 'Edition', kind: 'text' },
+          { key: 'date', name: 'Date', kind: 'text' },
+          { key: 'link', name: 'Link', kind: 'hyperlink' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   OSP: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Specification',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'edition', name: 'Edition', kind: 'text' },
+          { key: 'date', name: 'Date', kind: 'text' },
+          { key: 'link', name: 'Link', kind: 'hyperlink' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   CAS: {
     attributes: [
@@ -120,25 +165,64 @@ export const ATTRIBUTES = {
     groups: [],
   },
   ESR: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Requirement',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'requirement', name: 'Requirement', kind: 'multiline' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   HSR: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Requirement',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'requirement', name: 'Requirement', kind: 'multiline' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   OSR: {
-    attributes: [
-      { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+    attributes: [],
+    groups: [
+      {
+        name: 'Requirement',
+        attributes: [
+          { key: 'reference', name: 'Reference', kind: 'text' },
+          { key: 'title', name: 'Title', kind: 'text' },
+          { key: 'requirement', name: 'Requirement', kind: 'multiline' },
+        ],
+      },
+      {
+        name: 'Applicability',
+        attributes: [
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+        ],
+      },
     ],
-    groups: [],
   },
   REQ: {
     attributes: [

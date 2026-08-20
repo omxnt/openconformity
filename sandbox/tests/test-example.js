@@ -12,6 +12,7 @@ import { validate } from '../app/validator.js';
 import { loadProject, openProject, serialise, toFileObject } from '../app/files.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/metamodel.js';
 import { addEntity } from '../app/model.js';
+import { attributesFor } from '../app/attributes.js';
 import { createFlows } from '../app/flows.js';
 import { createStore } from '../app/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -42,8 +43,8 @@ if (loaded.ok) {
 {
   equal(EXAMPLE_PROJECT.name, 'Example machine', 'the example is the demo machine');
   equal(EXAMPLE_PROJECT.folders.length, 16, 'sixteen folders');
-  equal(EXAMPLE_PROJECT.entities.length, 74, 'seventy-four entities');
-  equal(EXAMPLE_PROJECT.relationships.length, 135, 'a hundred and thirty-five relationships');
+  equal(EXAMPLE_PROJECT.entities.length, 75, 'seventy-five entities');
+  equal(EXAMPLE_PROJECT.relationships.length, 136, 'a hundred and thirty-six relationships');
 
   const typesUsed = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));
   for (const code of Object.keys(ENTITY_TYPES)) {
@@ -59,15 +60,43 @@ if (loaded.ok) {
 
   ok(
     EXAMPLE_PROJECT.entities.every((entity) => {
-      const keys = Object.keys(entity.attributes);
-      return keys.every((key) => key === 'title' || key === 'description');
+      const defined = new Set(attributesFor(entity.type).map((definition) => definition.key));
+      return Object.keys(entity.attributes).every((key) => defined.has(key));
     }),
-    'the attributes are the current definitions: a title and a description, nothing the demo carried in richer fields'
+    'every value the example carries stands under a key its type defines: the example follows the definitions, round by round'
   );
   ok(
     EXAMPLE_PROJECT.entities.every((entity) => !/S\d\/P\d/.test(entity.attributes.description ?? '')),
     'no risk rating rode along: rating is out of this build'
   );
+}
+
+// --- The assessment shows all three verdict states ------------------------
+
+{
+  const verdicts = EXAMPLE_PROJECT.entities
+    .filter((entity) => entity.type === 'ESR')
+    .map((entity) => [entity.id, entity.attributes.applicable ?? null]);
+  ok(verdicts.some(([, verdict]) => verdict === 'Yes'), 'an applicable requirement carries Yes');
+  ok(verdicts.some(([, verdict]) => verdict === 'No'), 'one ruled out carries No');
+  ok(verdicts.some(([, verdict]) => verdict === null), 'and one stands unassessed: the key is absent, not empty');
+
+  const choices = new Set(
+    attributesFor('ESR').find((definition) => definition.key === 'applicable').values
+  );
+  ok(
+    verdicts.every(([, verdict]) => verdict === null || choices.has(verdict)),
+    'every verdict recorded is one the definition offers'
+  );
+
+  for (const [id, verdict] of verdicts) {
+    const entity = EXAMPLE_PROJECT.entities.find((held) => held.id === id);
+    if (verdict === null) continue;
+    ok(
+      (entity.attributes.rationale ?? '').trim() !== '',
+      `${id} argues its verdict: a rationale rides with every assessment`
+    );
+  }
 }
 
 // --- The counters stand ready to issue ----------------------------------
@@ -125,7 +154,7 @@ if (loaded.ok) {
   store.commit((model) => addEntity(model, 'ELM'));
   await flows.loadExample();
   deepEqual(answers, ['Unsaved changes'], 'over unsaved work the question comes first');
-  equal(store.model().nodes.size, 91, 'and declining it leaves the project untouched');
+  equal(store.model().nodes.size, 92, 'and declining it leaves the project untouched');
 }
 
 summary('test-example');

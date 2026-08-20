@@ -6,9 +6,10 @@
  * at the top of the tree, and its context menu is the background menu.
  * The tree presents the user's filing, folders and entities interleaved
  * in sibling order, every row under its type's icon, an entity labelled
- * by its designation then its title — the designation alone when
- * untitled. The pane owns its transient state: scroll and focus survive
- * the full re-render.
+ * by its designation then its label — reference and title composed for
+ * the types that carry a reference, the designation alone when the entity
+ * carries neither. The pane owns its transient state: scroll and focus
+ * survive the full re-render.
  *
  * With no project open, the tree is the landing: one quiet line; the
  * ways into a project live in the editor's empty state.
@@ -29,6 +30,7 @@ import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
 import { pickerCandidates } from './relate.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
+import { entityLabel } from './queries.js';
 import { el, icon } from './dom.js';
 import { openMenu } from './menu.js';
 
@@ -43,7 +45,7 @@ import { openMenu } from './menu.js';
 
 /**
  * The identifiers a filter query finds: an entity by its identifier, its
- * title, or its type's name; a folder by its name. Matching reads
+ * label, or its type's name; a folder by its name. Matching reads
  * case-insensitively.
  * @param {import('./model.js').Model} model
  * @param {string} query  trimmed and lowercased
@@ -55,7 +57,7 @@ export function matchingIds(model, query) {
     const haystack =
       node.kind === 'folder'
         ? node.name
-        : `${node.id} ${node.attributes.title ?? ''} ${ENTITY_TYPES[node.type].name}`;
+        : `${node.id} ${entityLabel(node)} ${ENTITY_TYPES[node.type].name}`;
     if (haystack.toLowerCase().includes(query)) found.add(node.id);
   }
   return found;
@@ -128,15 +130,15 @@ export function visibleRows(model, isExpanded, hasProject, filter = '', projectE
 }
 
 /**
- * What a row says: an entity's designation and its title when it has one,
+ * What a row says: an entity's designation and its label when it has one,
  * a folder's name alone.
  * @param {import('./model.js').Node} node
  * @returns {{ designation: string|null, title: string|null }}
  */
 export function labelParts(node) {
   if (node.kind === 'folder') return { designation: null, title: node.name };
-  const title = (node.attributes.title ?? '').trim();
-  return { designation: node.id, title: title || null };
+  const label = entityLabel(node);
+  return { designation: node.id, title: label || null };
 }
 
 /**
