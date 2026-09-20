@@ -534,4 +534,34 @@ function openStore(storage) {
   equal(none.relationshipView(), 'graph', 'and no session store at all is just the default');
 }
 
+// --- The tab chosen per type: the session's --------------------------------
+
+{
+  const storage = fakeStorage();
+  const session = fakeStorage();
+  const store = createStore({ storage, session });
+  store.replaceProject(createModel());
+  equal(store.tabOf('ESR'), null, 'a type opens on its first tab');
+
+  let notified = 0;
+  store.subscribe(() => {
+    notified += 1;
+  });
+  store.setTab('ESR', 'Applicability');
+  equal(store.tabOf('ESR'), 'Applicability', 'chosen, the tab stands');
+  equal(store.tabOf('HSR'), null, 'for that type alone');
+  equal(notified, 0, 'and nothing is told: the editor showed the panel itself');
+  equal(store.dirty(), false, 'nor is the project marked unsaved');
+  deepEqual(JSON.parse(session.read('openconformity.tabs')), { ESR: 'Applicability' }, 'the choice rides the browser session');
+  ok(!('tabs' in JSON.parse(storage.read(PROJECT_KEY)).session), 'and never the project blob');
+
+  equal(createStore({ storage, session }).tabOf('ESR'), 'Applicability', 'a reload within the session keeps it');
+  equal(createStore({ storage, session: fakeStorage() }).tabOf('ESR'), null, 'a new session opens on the first tab again');
+
+  session.setItem('openconformity.tabs', '{nonsense');
+  equal(createStore({ storage, session }).tabOf('ESR'), null, 'a session holding nonsense opens on the first tab, not broken');
+  session.setItem('openconformity.tabs', '["Applicability"]');
+  equal(createStore({ storage, session }).tabOf('ESR'), null, 'as does one holding the wrong shape');
+}
+
 summary('test-store');

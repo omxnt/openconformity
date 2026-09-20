@@ -70,3 +70,15 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-launch` | `launch` | 16 | `launch.svg` |
 | `i-email` | `email` | 32 | `email.svg` |
 | `i-checkmark` | `checkmark` | 32 | `checkmark.svg` |
+| `i-error-filled` | `error--filled` | 16 | `error--filled.svg` |
+| `i-warning-filled` | `warning--filled` | 16 | `warning--filled.svg` |
+| `i-checkmark-filled` | `checkmark--filled` | 16 | `checkmark--filled.svg` |
+
+The three status glyphs are Carbon's status indicators, shown in the
+support colours. The warning glyph's inner path — the mark inside the
+circle, which the package ships transparent — is filled gray-100 in the
+sprite, as Carbon draws the warning indicator so the mark stands on the
+yellow in either theme.
+
+These three were taken from @carbon/icons 11.88.0, the version current when
+they were added; the earlier glyphs stay as taken from 11.85.0.

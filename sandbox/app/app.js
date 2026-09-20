@@ -19,6 +19,8 @@ store.subscribe(() => overlay.closeMenus());
 
 const dialogs = createDialogs({ overlay, toastRegion: document.getElementById('toasts') });
 const editor = createEditor({
+  dialogs,
+  overlay,
   store,
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
@@ -27,6 +29,7 @@ const editor = createEditor({
   onRename: () => flows.renameSelection(),
   onEscape: () => flows.escapeEdit(),
   onAction: (id) => actions.find((action) => action.id === id)?.run({}),
+  onNavigate: (id) => flows.selectNode(id),
 });
 const flows = createFlows({
   store,

@@ -15,7 +15,10 @@ import {
   designated,
   canMoveUp,
   canMoveDown,
+  relatedIds,
 } from '../app/queries.js';
+import { EXAMPLE_PROJECT } from '../app/example.js';
+import { loadProject } from '../app/files.js';
 import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/metamodel.js';
 import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -300,6 +303,19 @@ function offered(model, subjectId) {
   addEntity(model, 'ELM');
   updateEntity(model, 'ELM-001', { title: 'Machine' });
   equal(entityLabel(nodeOf(model, 'ELM-001')), 'Machine', 'a type with no reference is its title alone');
+}
+
+{
+  const model = loadProject(EXAMPLE_PROJECT).model;
+  deepEqual(relatedIds(model, 'SCN-001', 'prm-reduces-risk-of-scn'), ['PRM-002'], 'the measures reducing a scenario, from its end of the relationship');
+  deepEqual(relatedIds(model, 'PRM-004', 'prm-reduces-risk-of-scn'), ['SCN-002', 'SCN-003'], 'and the scenarios a measure reduces, from its end, in order');
+  deepEqual(relatedIds(model, 'SCN-001', 'haz-contributes-to-scn'), ['HAZ-001'], 'any type the entity takes part in');
+  deepEqual(relatedIds(model, 'SCN-001', 'saf-realises-prm'), [], 'nothing where it does not');
+}
+
+{
+  const node = { id: 'SAF-001', type: 'SAF', attributes: { reference: 'SF1', title: 'Emergency Stop' } };
+  equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
 }
 
 summary('test-queries');

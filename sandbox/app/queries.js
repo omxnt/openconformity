@@ -104,6 +104,24 @@ export function entityLabel(entity) {
  * @param {import('./model.js').Entity} entity
  * @returns {string}
  */
+/**
+ * The entities one relationship type joins to an entity, whichever end
+ * it stands on, by id in order.
+ * @param {import('./model.js').Model} model
+ * @param {string} id
+ * @param {string} type  a relationship type id
+ * @returns {string[]}
+ */
+export function relatedIds(model, id, type) {
+  const held = [];
+  for (const relationship of model.relationships.values()) {
+    if (relationship.type !== type) continue;
+    if (relationship.source === id) held.push(relationship.target);
+    else if (relationship.target === id) held.push(relationship.source);
+  }
+  return [...new Set(held)].sort();
+}
+
 export function designated(entity) {
   const label = entityLabel(entity);
   return label ? `${entity.id}  ${label}` : entity.id;

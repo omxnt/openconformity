@@ -47,6 +47,9 @@ const THEME_KEY = 'openconformity.theme';
 /** The relationship view's key in the browser session: a reload keeps it, a new session opens on the default. */
 const VIEW_KEY = 'openconformity.view';
 
+/** The chosen tabs' key in the browser session: the tab chosen for a type stays chosen until the session ends. */
+const TABS_KEY = 'openconformity.tabs';
+
 /** The two Carbon themes; null follows the system preference. */
 const THEMES = ['white', 'g100'];
 
@@ -88,6 +91,16 @@ export function createStore({ storage, session = null }) {
     if (storedView === 'list' || storedView === 'graph') relationshipView = storedView;
   } catch {
     // A session store that refuses changes nothing.
+  }
+  /** @type {Object<string, string>} the tab chosen per entity type, by name: session state, a reload keeping it */
+  const chosenTabs = {};
+  try {
+    const storedTabs = JSON.parse(session?.getItem(TABS_KEY) ?? '{}');
+    if (storedTabs && typeof storedTabs === 'object' && !Array.isArray(storedTabs)) {
+      for (const [code, name] of Object.entries(storedTabs)) if (typeof name === 'string') chosenTabs[code] = name;
+    }
+  } catch {
+    // A session store that refuses, or holds nonsense, changes nothing.
   }
   /** The navigator's filter as typed: session state, never persisted, one truth for the tree and every enablement. */
   let navigatorFilter = '';
@@ -434,12 +447,31 @@ export function createStore({ storage, session = null }) {
       notify();
     },
 
+    /** The tab chosen for an entity type, or null for its first. */
+    tabOf: (code) => chosenTabs[code] ?? null,
+
+    /**
+     * Choose a type's tab for the browser session. The editor has shown
+     * the panel in place already, and no other surface shows the choice,
+     * so nothing is notified.
+     * @param {string} code
+     * @param {string} name
+     */
+    setTab(code, name) {
+      chosenTabs[code] = name;
+      try {
+        session?.setItem(TABS_KEY, JSON.stringify(chosenTabs));
+      } catch {
+        // A session store that refuses changes nothing.
+      }
+    },
+
     /** Which presentation the relationship pane shows. */
     relationshipView: () => relationshipView,
 
     /**
      * Choose the relationship pane's presentation. One truth for the
-     * pane's switcher and the View menu; never persisted.
+     * pane's tabs and the View menu; never persisted.
      * @param {'list'|'graph'} view
      */
     setRelationshipView(view) {

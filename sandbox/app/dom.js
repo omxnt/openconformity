@@ -75,6 +75,26 @@ export function download(filename, text, type) {
  * @param {string} [pillar]
  * @returns {SVGElement}
  */
+/**
+ * Arrow keys along a tab list, as Carbon's tabs take them: Left and
+ * Right move by one and wrap, Home and End go to the ends, and each
+ * activates what it lands on.
+ * @param {HTMLElement} bar  the element carrying the tabs
+ * @param {(index: number) => void} pick  activates the tab at the index
+ */
+export function tabKeys(bar, pick) {
+  bar.addEventListener('keydown', (event) => {
+    const tabs = [...bar.querySelectorAll('[role="tab"]')];
+    const at = tabs.indexOf(document.activeElement);
+    if (at < 0) return;
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    const to = step !== undefined ? (at + step + tabs.length) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : -1;
+    if (to < 0) return;
+    event.preventDefault();
+    pick(to);
+  });
+}
+
 export function icon(symbolId, pillar) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('class', 'icon');

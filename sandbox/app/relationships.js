@@ -13,7 +13,7 @@
  * Done and Cancel sit in the pane head. The pane pins the picker's
  * subject: the selection may move while picking, the tables stay. All
  * of it is re-read from the model on every render; the chosen view is
- * store session state, one truth for the switcher here and the View
+ * store session state, one truth for the tabs here and the View
  * menu.
  */
 
@@ -22,7 +22,7 @@ import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
 import { formLabel, entityLabel } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
-import { el, icon } from './dom.js';
+import { el, icon, tabKeys } from './dom.js';
 
 /**
  * The rows the list draws: per direction, the relationships grouped by
@@ -242,17 +242,22 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     head.hidden = false;
 
     const view = store.relationshipView();
-    const switcher = el('div', { className: 'switcher', attributes: { role: 'group', 'aria-label': 'Relationship view' } });
-    for (const [value, label] of [['list', 'List'], ['graph', 'Graph']]) {
-      const button = el('button', {
-        className: `switcher-button${view === value ? ' selected' : ''}`,
+    const views = [['list', 'List'], ['graph', 'Graph']];
+    const tabs = el('div', { className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' } });
+    for (const [value, label] of views) {
+      const tab = el('button', {
+        className: 'tab',
         text: label,
-        attributes: { type: 'button', 'aria-pressed': String(view === value) },
+        attributes: { type: 'button', role: 'tab', 'aria-selected': String(view === value), tabindex: view === value ? '0' : '-1' },
       });
-      button.addEventListener('click', () => store.setRelationshipView(value));
-      switcher.appendChild(button);
+      tab.addEventListener('click', () => store.setRelationshipView(value));
+      tabs.appendChild(tab);
     }
-    head.appendChild(el('div', { className: 'pane-head-name' }, [switcher]));
+    tabKeys(tabs, (i) => {
+      store.setRelationshipView(views[i][0]);
+      head.querySelector('.tab[aria-selected="true"]')?.focus();
+    });
+    head.appendChild(tabs);
 
     const actions = [];
     if (store.relationshipView() === 'list') actions.push(searchControl());

@@ -62,6 +62,7 @@
   --link-hover: #0043CE;  /* $link-primary-hover, blue-70 */
   --support-info: #0043CE;  /* $support-info, blue-70 */
   --support-warning: #F1C21B;  /* $support-warning, yellow-30 */
+  --support-success: #24A148;  /* $support-success, green-50 */
 
   --button-disabled: #C6C6C6;  /* $button-disabled, gray-30 */
   --on-color-disabled: #8D8D8D;  /* $text-on-color-disabled, gray-50 */
@@ -116,6 +117,7 @@
   --link-hover: #A6C8FF;  /* g100 $link-primary-hover, blue-30 */
   --support-info: #4589FF;  /* g100 $support-info, blue-50 */
   --support-warning: #F1C21B;  /* g100 $support-warning, yellow-30 */
+  --support-success: #42BE65;  /* g100 $support-success, green-40 */
 
   --button-disabled: #525252;  /* g100 $button-disabled, gray-70 */
   --on-color-disabled: #8D8D8D;  /* g100 $text-on-color-disabled, gray-50 */
@@ -544,48 +546,148 @@ body {
 
 /* ---------- Editor ---------- */
 
-/* Carbon form, and its read-only state for view mode: same structure
-   and spacing in both, as the read-only pattern requires, so switching
-   modes never reflows. Headings, labels, and field edges share one key
-   line; the text inside a field is inset by the field's own padding.
-   Rows sit 24px apart — the side-panel figure, where a dedicated page
-   would take 32px — and fields are the 32px `sm` size throughout,
-   the app's density choice. */
-.editor-body > .form,
-.editor-body > .fields { padding: 4px 16px 16px; }  /* $spacing-02, $spacing-05 */
-.form { max-width: 1024px; }
-.fields {
+/* The editor is Carbon's form, and in view mode its read-only state:
+   each attribute its name over its field, two to a row, a multiline
+   one the row to itself, and the same geometry in both modes — in view
+   the field's ground is transparent and its rule subtle, in an edit the
+   ground is $field and the rule strong. Every name reads at the one
+   size and every value at the one size; a choice reads as a tag. A
+   group tagged tab stands on a tab of its own under the head, in
+   Carbon's line tabs at the navigator filter bar's 32px, so the two
+   bars run level across the gutter; the cells scroll beneath. */
+.pane-editor .pane-body { display: flex; flex-direction: column; overflow: hidden; }
+.pane-editor .form { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px 16px 32px; }  /* $spacing-05, $spacing-07 */
+.cells {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px 32px;           /* $spacing-06, $spacing-07 */
-  max-width: 1024px;
+  gap: 24px 32px;           /* $spacing-06 between fields in a side panel, $spacing-07 */
+  max-width: 960px;
 }
-.fields .field {
+.cells[hidden] { display: none; }
+.cell { min-width: 0; }
+.cell.tall { grid-column: 1 / -1; }
+.cell-group { display: contents; }
+.cell-group[hidden] { display: none; }
+.cell-name {
+  display: block;
+  margin-bottom: 8px;       /* $spacing-03, as .cds--label */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  line-height: 1.33;
+  color: var(--text-second);
+}
+/* The field's read-only state: the slot its input takes, transparent
+   ground, the rule made subtle. */
+.cell-value {
+  padding: 7px 16px;        /* Carbon text input sm, as the input */
+  min-height: 32px;
+  background: transparent;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.cell-value.prose { line-height: 1.42857; white-space: pre-wrap; }  /* $body-01, as the text area */
+.cell .empty { color: var(--text-helper); }
+.cell-legend {
+  grid-column: 1 / -1;
+  margin-top: 4px;          /* $spacing-02 */
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  font-weight: 600;
+  color: var(--text-second);
+}
+/* A hyperlink value, Carbon's inline link: underlined, since colour
+   alone cannot mark a link inside content (WCAG 1.4.1). */
+.cell a { color: var(--link); text-decoration: underline; overflow-wrap: anywhere; }
+.cell a:hover { color: var(--link-hover); }
+/* A set's tags wrap inside the slot. */
+.cell-value.tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
+/* A set in an edit: Carbon's multiselect. The field says how many are
+   chosen, in the high-contrast count tag, and which; it opens a listbox
+   of every value with its checkbox, drawn as Carbon draws a checkbox:
+   a 16px box, filled with the check when chosen. */
+.field-input.multiselect {
   display: flex;
-  flex-direction: column;
-  min-width: 0;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  text-align: left;
+  cursor: pointer;
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
 }
-.field-tall { grid-column: 1 / -1; }
+.multiselect .count { flex: none; min-width: 18px; padding: 0 6px; justify-content: center; background: var(--inverse); color: var(--text-inverse); }
+.multiselect .count[hidden] { display: none; }
+.multiselect-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.multiselect-text.empty { color: var(--text-helper); }
+.listbox .option .checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;              /* Carbon checkbox */
+  height: 16px;
+  border: 1px solid var(--text);  /* $icon-primary */
+  border-radius: 1px;
+  color: var(--text-inverse);
+}
+.listbox .option .checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
+.listbox .option[aria-selected="true"] .checkbox { background: var(--text); }
+.listbox .option[aria-selected="true"] .checkbox .icon { visibility: visible; }
+/* A choice as Carbon's tag: the gray tag at its small size, so it sits
+   inside the field's slot. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;             /* Carbon tag sm */
+  padding: 0 8px;           /* $spacing-03 */
+  border-radius: 9px;
+  background: var(--layer-accent);  /* $layer-accent-01 */
+  color: var(--text);
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  white-space: nowrap;
+}
 
 /* A choice holds one value from a short list, so its control never
    stretches to the width of a sentence: a field's width says what
    length of value is expected (Carbon form guidance). */
-select.field-input { max-width: 192px; }
+select.field-input,
+input[type="number"].field-input { max-width: 192px; }
+select.field-input.wide { max-width: none; }
 
-/* A group is a heading over its fields, as Carbon groups a form: a
-   fieldset and its legend, never a disclosure. */
-.field-group { border: none; padding: 0; margin: 0; min-width: 0; }
-.group-legend {
-  display: block;
-  width: 100%;
-  padding: 32px 0 8px;      /* $spacing-07, $spacing-03 */
-  font-size: 14px;          /* $heading-compact-01 */
-  font-weight: 600;
-  line-height: 1.28572;
-  color: var(--text);
+/* Carbon's line tabs at the app's 32px: the list on one rule, every tab
+   on a 2px rule of its own — subtle, strong on hover, interactive when
+   selected, its label semibold. */
+.tabs {
+  display: flex;
+  flex: none;
+  height: 32px;             /* $spacing-07, the navigator filter bar's */
+  background: var(--layer);
+  border-bottom: 1px solid var(--border-subtle);
 }
-.form > .fields:first-child + .field-group > .group-legend,
-.form > .field-group:first-child > .group-legend { padding-top: 8px; }  /* $spacing-03 */
+.tab {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 16px;          /* $spacing-05 */
+  margin-bottom: -1px;
+  font: inherit;            /* $body-compact-01 */
+  letter-spacing: inherit;
+  color: var(--text-second);
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--border-subtle);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--motion-fast) var(--motion-standard),
+              border-color var(--motion-fast) var(--motion-standard);
+}
+.tab:hover { color: var(--text); border-bottom-color: var(--border-strong); }
+.tab[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+/* In a pane head the tabs stand in the name's place, on the head's own
+   ground and rule, their labels on the head's key line. */
+.pane-head > .tabs { flex: 1; align-self: stretch; height: auto; margin-left: -16px; background: none; border-bottom: none; }
 
 /* The head's committing pair, shared by the editor's Save and the
    relationship pane's Done: a small primary beside a ghost. */
@@ -622,21 +724,6 @@ select.field-input { max-width: 192px; }
   margin-top: 4px;          /* $spacing-02 */
 }
 
-/* The field's read-only state: the slot its input takes, transparent
-   ground, the rule made subtle. */
-.field-value {
-  padding: 7px 16px;        /* Carbon text input sm, as the input */
-  min-height: 32px;
-  background: transparent;
-  border-bottom: 1px solid var(--border-subtle);
-}
-.field-value.multiline { white-space: pre-wrap; }
-/* A hyperlink value, Carbon's inline link: underlined, since colour
-   alone cannot mark a link inside content (WCAG 1.4.1). */
-.field-value a { color: var(--link); text-decoration: underline; overflow-wrap: anywhere; }
-.field-value a:hover { color: var(--link-hover); }
-.field-empty { color: var(--text-helper); }
-
 .field-input {
   display: block;
   width: 100%;
@@ -666,6 +753,157 @@ select.field-input[size] {
   padding: 4px;             /* $spacing-02 */
   white-space: pre;
 }
+
+/* ---------- Rating ---------- */
+
+/* A rating's row, in the field's slot: the status glyph and what it
+   comes to, the parameter codes in mono beside it, and the way into its
+   dialog trailing, its glyph after the label as a Carbon ghost button
+   has it. */
+/* A rating: what it comes to and the code of each parameter set, as
+   tags — the outcome's status glyph inside its tag, at the tag's
+   scale — and, in an edit, the field that opens its dialog, growing as
+   its tags wrap, the edit pencil trailing where a select keeps its
+   arrow: the one field edited in a dialog rather than typed. */
+.tag .status-icon { width: 12px; height: 12px; margin-right: 4px; }  /* $spacing-02 */
+.field-input.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: auto;
+  min-height: 32px;
+  padding: 7px 12px 7px 16px;
+  text-align: left;
+  cursor: pointer;
+}
+.field-input.rating .tags { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
+.field-input.rating .icon { flex: none; width: 16px; height: 16px; fill: currentColor; }
+/* A slot with nothing chosen for the attribute it waits on: Carbon's
+   disabled field, saying so, holding the cell so the form keeps its
+   shape. */
+.field-input.placeholder { color: var(--disabled); border-bottom-color: transparent; cursor: not-allowed; }
+.status-icon { flex: none; width: 16px; height: 16px; fill: currentColor; }
+.status-icon.tone-high { color: var(--danger); }
+.status-icon.tone-medium { color: var(--support-warning); }
+.status-icon.tone-low { color: var(--support-success); }
+.status-icon.tone-none { color: var(--text-second); }
+
+/* The related entities as the tree shows them: a row each on the first
+   layer — its type's glyph in the pillar colour, its identifier, its
+   label, the chevron on to it — entities rather than a value, so no
+   rule beneath them. */
+.related { display: grid; gap: 8px; }  /* $spacing-03 */
+.related-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }  /* $spacing-02 */
+.related-item { display: grid; gap: 2px; }
+.entity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  width: 100%;
+  height: 32px;             /* $spacing-07 */
+  padding: 0 8px 0 12px;    /* $spacing-03, $spacing-04 */
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--text);
+  background: var(--layer); /* $layer-01 */
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.entity-row:hover { background: var(--hover); }
+.entity-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.entity-row .entity-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entity-row > .icon:last-child { color: var(--text-second); }
+/* The dialog: wider than a question, for the matrix and the graph. */
+.dialog:has(.rating) { max-width: 800px; }
+.rating { display: grid; gap: 16px; color: var(--text); }  /* $spacing-05 */
+.rating-surface { display: grid; gap: 16px; }
+.rating-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }  /* $spacing-05, $spacing-06 */
+.risk-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+/* Carbon's status colours mark the levels: error, warning, success, and none. */
+.risk-dot { flex: none; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
+.tone-high .risk-dot { background: var(--danger); }
+.tone-medium .risk-dot { background: var(--support-warning); }
+.tone-low .risk-dot { background: var(--support-success); }
+
+/* The parameters as Carbon's content switcher: the chosen option inverted. */
+.risk-choice .field-label { margin-bottom: 4px; }  /* $spacing-02 */
+.risk-options { display: flex; flex-wrap: wrap; gap: 1px; }
+.risk-option {
+  min-height: 32px;         /* Carbon content switcher sm */
+  padding: 0 12px;          /* $spacing-04 */
+  font: inherit;
+  color: var(--text);
+  background: var(--layer);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.risk-option:hover { background: var(--hover); }
+.risk-option[aria-pressed="true"] { background: var(--inverse); color: var(--text-inverse); }
+.risk-option:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* A matrix: the classes as headers, a cell per pair, the one the rating stands on marked. */
+.risk-matrix { width: 100%; border-collapse: collapse; font-size: 12px; letter-spacing: 0.16px; }  /* $body-compact-01 at $label-01 size */
+.risk-matrix th { padding: 8px; font-weight: 600; text-align: left; color: var(--text-second); border-bottom: 1px solid var(--border-subtle); }
+.risk-matrix th[scope="row"] { border-bottom: none; border-right: 1px solid var(--border-subtle); white-space: nowrap; }
+.risk-matrix td { padding: 2px; }
+.risk-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  width: 100%;
+  min-height: 40px;         /* Carbon field md */
+  padding: 0 12px;          /* $spacing-04 */
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--layer);
+  border: none;
+  text-align: left;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+button.risk-cell { cursor: pointer; }
+button.risk-cell:hover { background: var(--hover); }
+button.risk-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.risk-cell[aria-pressed="true"],
+.risk-cell.reached { background: var(--layer-accent); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+
+/* The graph as the report draws it and as the picker: labels on their
+   branches, every code a button, the path decided so far in the
+   interactive colour, the lines on pixel centres. */
+.rating-graph { overflow-x: auto; }
+.risk-graph { display: block; width: 100%; height: auto; font-size: 12px; letter-spacing: 0.32px; }
+.risk-graph text { fill: var(--text-second); }
+.risk-graph .risk-head { fill: var(--text); font-weight: 600; }
+.risk-graph .risk-label { fill: var(--text); }
+.risk-graph .risk-label.dim { fill: var(--text-helper); }
+.risk-graph .risk-code { cursor: pointer; }
+.risk-graph .risk-code:hover { fill: var(--link); text-decoration: underline; }
+.risk-graph .risk-code.selected { fill: var(--accent); font-weight: 600; }
+.risk-graph .risk-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.risk-graph .risk-edge { fill: none; stroke: var(--border-strong); stroke-width: 1; shape-rendering: crispEdges; }
+.risk-graph .risk-edge.active { stroke: var(--accent); stroke-width: 2; }
+.risk-graph .risk-leaf circle { fill: var(--layer); stroke: var(--border-strong); }
+.risk-graph .risk-leaf text { fill: var(--text); text-anchor: middle; }
+.risk-graph .risk-leaf.active circle { fill: var(--accent); stroke: var(--accent); }
+.risk-graph .risk-leaf.active text { fill: var(--text-on-color); font-weight: 600; }
+
+/* What the rating comes to, under the surface. */
+.risk-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  padding-top: 12px;        /* $spacing-04 */
+  border-top: 1px solid var(--border-subtle);
+  font-size: 16px;          /* $heading-compact-02 */
+  line-height: 1.375;
+  font-weight: 600;
+}
+.risk-result.unrated { color: var(--text-helper); font-weight: 400; }
 
 /* ---------- Relationships ---------- */
 
@@ -733,28 +971,14 @@ select.field-input[size] {
 
 /* Carbon content switcher: one set of views of the same thing, the
    chosen one carried on the inverse surface. */
-.switcher { display: inline-flex; align-self: center; }
-.switcher-button {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;             /* $spacing-06, to sit inside the 32px head */
-  font: inherit;            /* $body-compact-01 */
-  letter-spacing: inherit;
-  padding: 0 12px;          /* $spacing-04 */
-  color: var(--text-second);
-  background: none;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color var(--motion-fast) var(--motion-standard),
-              color var(--motion-fast) var(--motion-standard);
-}
-.switcher-button:hover:not(.selected) { background: var(--hover); color: var(--text); }
-.switcher-button.selected { background: var(--inverse); color: var(--text-inverse); }
-
 /* ---------- The graph ---------- */
 
-.graph-host { padding: 16px; overflow: auto; }
+/* The graph's host fills the pane beneath the head, so its scrollbars
+   sit at the pane's edges however tall the pane is dragged. */
+.pane-relationships .pane-body { display: flex; flex-direction: column; }
+.rel-list { flex: none; }
+.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }
+.graph-host[hidden] { display: none; }
 .graph { display: block; }
 
 /* The box's own rect only: the remove control carries a rect of its own. */
