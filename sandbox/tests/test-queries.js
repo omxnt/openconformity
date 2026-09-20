@@ -11,11 +11,12 @@ import {
   formLabel,
   relatedTypeOffer,
   moveTargets,
-  cascadeQuestion,
+  deletionQuestion,
   designated,
   canMoveUp,
   canMoveDown,
   relatedIds,
+  entityMatches,
 } from '../app/queries.js';
 import { EXAMPLE_PROJECT } from '../app/example.js';
 import { loadProject } from '../app/files.js';
@@ -258,7 +259,7 @@ function offered(model, subjectId) {
   relate(model, 'elm-decomposes-into-elm', 'ELM-001', 'ELM-002');
   relate(model, 'act-interacts-with-elm', 'ACT-001', 'ELM-002');
 
-  const question = cascadeQuestion(model, 'ELM-001');
+  const question = deletionQuestion(model, 'ELM-001');
   equal(question.title, 'Delete 2 entities?', 'the title counts the entities the cascade takes');
   equal(
     question.message,
@@ -269,10 +270,22 @@ function offered(model, subjectId) {
 
   unrelate(model, 'act-interacts-with-elm', 'ACT-001', 'ELM-002');
   equal(
-    cascadeQuestion(model, 'ELM-001').message,
+    deletionQuestion(model, 'ELM-001').message,
     'Deleting ELM-001 also deletes everything it contains through composition and severs 1 relationship:',
     'one severed relationship reads in the singular'
   );
+}
+
+{
+  const model = createModel();
+  addEntity(model, 'ELM');
+  addEntity(model, 'HAZ');
+  const alone = deletionQuestion(model, 'HAZ-001');
+  equal(alone.title, 'Delete HAZ-001?', 'an entity owning nothing is asked about by its identifier');
+  equal(alone.message, 'HAZ-001 takes part in no relationship.', 'and says when nothing is severed');
+  equal(alone.doomed.length, 1, 'it alone goes');
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  equal(deletionQuestion(model, 'HAZ-001').message, 'Deleting HAZ-001 severs 1 relationship.', 'or counts what is severed, in the singular');
 }
 
 // --- The label a reference-bearing type composes --------------------------
@@ -316,6 +329,15 @@ function offered(model, subjectId) {
 {
   const node = { id: 'SAF-001', type: 'SAF', attributes: { reference: 'SF1', title: 'Emergency Stop' } };
   equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
+}
+
+// --- A filter's one rule ---------------------------------------------------
+
+{
+  const entity = { id: 'HAZ-001', kind: 'entity', type: 'HAZ', attributes: { title: 'Moving Parts' } };
+  ok(entityMatches(entity, 'haz-001') && entityMatches(entity, 'moving') && entityMatches(entity, ' PARTS '), 'an entity answers a filter by its identifier or its label, case and edges aside');
+  ok(entityMatches(entity, '') && entityMatches(entity, '   ') && entityMatches(entity, undefined), 'and an empty filter matches everything');
+  ok(!entityMatches(entity, 'guard'), 'but not text it holds nowhere');
 }
 
 summary('test-queries');

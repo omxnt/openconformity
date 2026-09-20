@@ -66,7 +66,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'filed into the selected container');
   equal(store.selection(), 'ELM-001', 'and selected');
 
-  flows.cancelEdit();
+  await flows.cancelEdit();
   equal(nodeOf(store.model(), 'ELM-001'), null, 'cancel removes the pristine creation');
   equal(store.canRedo(), false, 'and leaves no history residue');
   equal(store.canUndo(), true, 'while the change before it still undoes');
@@ -83,7 +83,7 @@ function flowsOver(store) {
 
   await flows.createEntity('ELM');
   flows.saveEdit('ELM-001', { title: 'Kept' });
-  flows.cancelEdit();
+  await flows.cancelEdit();
   ok(nodeOf(store.model(), 'ELM-001') !== null, 'the moment an entity has been saved once, Cancel keeps it');
   equal(nodeOf(store.model(), 'ELM-001').attributes.title, 'Kept', 'with what was saved');
 }
@@ -97,7 +97,7 @@ function flowsOver(store) {
 
   await flows.createEntity('ELM');
   store.commit((model) => addEntity(model, 'HAZ'));
-  flows.cancelEdit();
+  await flows.cancelEdit();
   equal(nodeOf(store.model(), 'ELM-001'), null, 'the pristine creation still leaves');
   ok(nodeOf(store.model(), 'HAZ-001') !== null, 'later work stays');
   store.undo();
@@ -132,7 +132,7 @@ function flowsOver(store) {
     { type: 'elm-decomposes-into-elm', source: 'ELM-002', target: 'ELM-001' },
     'an incoming form makes the new entity the source'
   );
-  flows.cancelEdit();
+  await flows.cancelEdit();
   equal(nodeOf(store.model(), 'ELM-002'), null, 'cancel removes the entity');
   equal(store.model().relationships.size, 1, 'and its relationship, leaving the earlier one');
   equal(store.canRedo(), false, 'with no residue');
@@ -339,6 +339,127 @@ function flowsOver(store) {
   equal(saved.length, 1, 'cancel downloads nothing');
   equal(store.dirty(), true, 'moves no pointer');
   equal(store.model().name, 'Mixer line', 'and renames nothing');
+}
+
+// --- Every deletion asks first ------------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  const dialogs = {
+    confirm: async (question) => {
+      asked.push([question.title, question.message, question.confirmLabel]);
+      return answer;
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'HAZ', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001'));
+
+  store.select('HAZ-001');
+  await flows.deleteSelection();
+  deepEqual(asked.pop(), ['Delete HAZ-001?', 'Deleting HAZ-001 severs 1 relationship.', 'Delete'], 'a single entity is asked about by its identifier and what it severs');
+  ok(nodeOf(store.model(), 'HAZ-001') !== null, 'declining keeps it');
+  answer = true;
+  await flows.deleteSelection();
+  equal(nodeOf(store.model(), 'HAZ-001'), null, 'accepting deletes it');
+
+  store.select('F-1');
+  answer = false;
+  await flows.deleteSelection();
+  deepEqual(asked.pop(), ['Delete the folder Zone?', 'Deleting a folder removes only its filing: what it holds moves up a level.', 'Delete'], 'a folder is asked about by its name');
+  ok(nodeOf(store.model(), 'F-1') !== null, 'declining keeps the folder');
+  answer = true;
+  await flows.deleteSelection();
+  equal(nodeOf(store.model(), 'F-1'), null, 'accepting removes the filing');
+}
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const flows = flowsOver(store);
+  store.replaceProject(createModel());
+  await flows.createEntity('ELM');
+  await flows.deleteSelection();
+  equal(nodeOf(store.model(), 'ELM-001'), null, 'a pristine creation collapses without a question');
+}
+
+// --- Removing a relationship asks first ----------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  const dialogs = {
+    confirm: async (question) => {
+      asked.push([question.title, question.message, question.confirmLabel, question.danger]);
+      return answer;
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addEntity(model, 'SCN'));
+  store.commit((model) => relate(model, 'haz-contributes-to-scn', 'HAZ-001', 'SCN-001'));
+  const relationship = { type: 'haz-contributes-to-scn', source: 'HAZ-001', target: 'SCN-001' };
+
+  await flows.removeRelationship(relationship);
+  deepEqual(asked.pop(), ['Remove the relationship?', 'HAZ-001 contributes to SCN-001. Both entities stay.', 'Remove', true], 'the question states the fact as it reads');
+  equal(store.model().relationships.size, 1, 'declining keeps it');
+  answer = true;
+  await flows.removeRelationship(relationship);
+  equal(store.model().relationships.size, 0, 'accepting removes it');
+  ok(nodeOf(store.model(), 'HAZ-001') !== null && nodeOf(store.model(), 'SCN-001') !== null, 'and both entities stay');
+}
+
+// --- Cancel asks like Escape when the draft is dirty ---------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  let ended = 0;
+  const asked = [];
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => true, editing: () => true };
+  const dialogs = {
+    confirm(question) {
+      asked.push(question.title);
+      return Promise.resolve(false);
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  await flows.cancelEdit();
+  deepEqual(asked, ['Discard the changes?'], 'a dirty draft gets the standard discard question on Cancel');
+  equal(ended, 0, 'declining keeps editing');
+  dialogs.confirm = () => Promise.resolve(true);
+  await flows.cancelEdit();
+  equal(ended, 1, 'accepting discards the draft');
+}
+
+// --- A save that removes what a choice no longer shows asks first --------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  const dialogs = {
+    confirm: async (question) => {
+      asked.push(question);
+      return false;
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  equal(await flows.confirmRemoval([{ name: 'Initial risk', value: 'Risk graph' }, { name: 'Residual risk', value: 'Risk graph' }]), false, 'the answer is the dialog\'s');
+  deepEqual(
+    [asked[0].title, asked[0].message, asked[0].confirmLabel, asked[0].cancelLabel, asked[0].danger],
+    ['Remove what is no longer chosen?', 'Saving removes Initial risk and Residual risk under Risk graph.', 'Save', 'Keep editing', true],
+    'the question names the groups by the value they stood under, Save being the destructive answer'
+  );
 }
 
 summary('test-flows');

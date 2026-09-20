@@ -569,7 +569,9 @@ body {
 .cell-group { display: contents; }
 .cell-group[hidden] { display: none; }
 .cell-name {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03, before a help glyph, as Carbon's toggletip label */
   margin-bottom: 8px;       /* $spacing-03, as .cds--label */
   font-size: 12px;          /* $label-01 */
   letter-spacing: 0.32px;
@@ -778,6 +780,63 @@ select.field-input[size] {
 }
 .field-input.rating .tags { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 .field-input.rating .icon { flex: none; width: 16px; height: 16px; fill: currentColor; }
+/* Help on a name: Carbon's tooltip on the outlined information glyph,
+   as the forms pattern has it. The glyph is a small focusable button,
+   secondary at rest and primary on hover, with Carbon's inset focus
+   outline; on hover or focus its tooltip opens under it on the inverse
+   ground at Carbon's offset, the 12 by 6 caret centred on the glyph,
+   the content at body-01 in 16px padding up to 288px wide, and Escape
+   closes it. */
+.help-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-second);  /* $icon-secondary */
+  cursor: default;
+}
+.help-trigger .icon { width: 16px; height: 16px; fill: currentColor; }
+.help-trigger:hover,
+.help-trigger:focus-visible { color: var(--text); }
+.help-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.tooltip {
+  position: absolute;
+  top: calc(100% + 12px);  /* Carbon's popover offset for a tooltip */
+  left: -8px;
+  border-radius: 2px;
+  z-index: 30;
+  width: max-content;
+  max-width: 288px;        /* Carbon tooltip, 18rem */
+  padding: 16px;           /* $spacing-05 */
+  background: var(--inverse);  /* $background-inverse */
+  color: var(--text-inverse);
+  font-size: 14px;         /* $body-01 */
+  line-height: 1.42857;
+  letter-spacing: 0.16px;
+  font-weight: 400;
+  text-align: left;
+  white-space: normal;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 70ms var(--motion-standard);
+}
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 10px;               /* centred on the 16px glyph, the box starting 8px before it */
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--inverse);  /* Carbon's caret, 12 by 6 */
+}
+.help-trigger:hover .tooltip,
+.help-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
+
 /* A slot with nothing chosen for the attribute it waits on: Carbon's
    disabled field, saying so, holding the cell so the form keeps its
    shape. */
@@ -795,6 +854,14 @@ select.field-input[size] {
 .related { display: grid; gap: 8px; }  /* $spacing-03 */
 .related-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }  /* $spacing-02 */
 .related-item { display: grid; gap: 2px; }
+.related-notice { border-bottom: none; }
+/* A row's state since the record, in the chevron's place: the word in
+   the label style, an unlinked row dimmed and a deleted one inert. */
+.entity-row .row-state { margin-left: auto; font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $label-01 */
+.entity-row.unlinked { color: var(--text-helper); }
+.entity-row.unlinked .icon { opacity: 0.5; }
+.entity-row.still { cursor: default; }
+.entity-row.still:hover { background: var(--layer); }
 .entity-row {
   display: flex;
   align-items: center;

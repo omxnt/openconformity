@@ -6,7 +6,7 @@
  * definition by definition. Run from this directory.
  */
 
-import { ATTRIBUTES, attributesFor, groupsOf } from '../app/attributes.js';
+import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/attributes.js';
 import { RELATIONSHIP_TYPES } from '../app/metamodel.js';
 import { ESTIMATED } from '../app/risk.js';
 
@@ -29,6 +29,8 @@ function parseDocument(text) {
   let fenced = false;
   let current = null;
   let table = null;
+  /** where the table being read keeps its help, -1 where it has none */
+  let helpColumn = -1;
 
   for (const raw of text.split('\n')) {
     const line = raw.trim();
@@ -71,20 +73,54 @@ function parseDocument(text) {
 
     if (line.startsWith('|')) {
       const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
-      if (cells[0] === 'Key' || cells.every((cell) => /^-+$/.test(cell))) continue;
+      if (cells[0] === 'Key') {
+        helpColumn = cells.indexOf('Help');
+        continue;
+      }
+      if (cells.every((cell) => /^-+$/.test(cell))) continue;
       const list = (cell) => (cell ?? '').split(';').map((value) => value.trim()).filter((value) => value !== '');
       const definition = { key: cells[0], name: cells[1], kind: cells[2] };
       if (definition.kind === 'number') [definition.min, definition.max] = list(cells[3]).map(Number);
       else if (definition.kind === 'computed') definition.method = cells[3];
       else if (definition.kind === 'related') definition.relationship = cells[3];
       else if (list(cells[3]).length > 0) definition.values = list(cells[3]);
+      if (helpColumn >= 0 && (cells[helpColumn] ?? '') !== '') definition.help = cells[helpColumn];
       table.push(definition);
     }
   }
   return types;
 }
 
+/**
+ * §1.9's table: the help a shared name carries, by name.
+ * @param {string} text
+ * @returns {Object<string, string>}
+ */
+function parseSharedHelp(text) {
+  const lines = text.split('\n');
+  const start = lines.findIndex((line) => /^### [\d.]+ Help$/.test(line));
+  /** @type {Object<string, string>} */
+  const help = {};
+  for (const line of lines.slice(start + 1)) {
+    if (line.startsWith('#')) break;
+    if (!line.startsWith('| ')) continue;
+    const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
+    if (cells[0] === 'Name' || cells.every((cell) => /^-+$/.test(cell))) continue;
+    help[cells[0]] = cells[1];
+  }
+  return help;
+}
+
 const documentTypes = parseDocument(document);
+
+// --- The shared help ---------------------------------------------------
+
+deepEqual(SHARED_HELP, parseSharedHelp(document), 'the help a shared name carries matches §1.9, name for name');
+for (const name of Object.keys(SHARED_HELP)) {
+  if (name === 'Identifier') continue;
+  const carried = documentTypes.filter((type) => [type.attributes, ...type.groups.flatMap((group) => [group.attributes, ...(group.groups ?? []).map((sub) => sub.attributes)])].flat().some((definition) => definition.name === name)).length;
+  ok(carried > 1, `${name} is a name several types share: ${carried}`);
+}
 
 // --- The transcription -------------------------------------------------
 

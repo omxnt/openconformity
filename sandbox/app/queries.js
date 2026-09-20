@@ -99,6 +99,19 @@ export function entityLabel(entity) {
 }
 
 /**
+ * Whether an entity answers a filter: its identifier or its label holds
+ * the text, case aside; an empty filter matches everything.
+ * @param {import('./model.js').Entity} entity
+ * @param {string} filter  as typed
+ * @returns {boolean}
+ */
+export function entityMatches(entity, filter) {
+  const query = (filter ?? '').trim().toLowerCase();
+  if (query === '') return true;
+  return entity.id.toLowerCase().includes(query) || entityLabel(entity).toLowerCase().includes(query);
+}
+
+/**
  * How an entity reads in a list: its identifier, then its label when it
  * carries one.
  * @param {import('./model.js').Entity} entity
@@ -154,22 +167,32 @@ export function moveTargets(model, id) {
 }
 
 /**
- * The question a cascade deletion asks, as data: the title counts the
- * entities taken, the message counts the relationships severed — every
- * relationship touching anything in the cascade.
+ * The question a deletion asks, as data: for an entity owning nothing,
+ * the title names it and the message counts its relationships; for a
+ * cascade, the title counts the entities taken and the message counts
+ * the relationships severed — every relationship touching anything in
+ * the cascade.
  * @param {import('./model.js').Model} model
  * @param {string} id
  * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
  */
-export function cascadeQuestion(model, id) {
+export function deletionQuestion(model, id) {
   const doomed = deletionOf(model, id);
   const doomedIds = new Set(doomed.map((entity) => entity.id));
   const severed = [...model.relationships.values()].filter(
     (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
   ).length;
+  const relationships = `${severed} relationship${severed === 1 ? '' : 's'}`;
+  if (doomed.length === 1) {
+    return {
+      title: `Delete ${id}?`,
+      message: severed === 0 ? `${id} takes part in no relationship.` : `Deleting ${id} severs ${relationships}.`,
+      doomed,
+    };
+  }
   return {
     title: `Delete ${doomed.length} entities?`,
-    message: `Deleting ${id} also deletes everything it contains through composition and severs ${severed} relationship${severed === 1 ? '' : 's'}:`,
+    message: `Deleting ${id} also deletes everything it contains through composition and severs ${relationships}:`,
     doomed,
   };
 }

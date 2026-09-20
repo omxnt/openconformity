@@ -20,7 +20,7 @@
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
-import { formLabel, entityLabel } from './queries.js';
+import { formLabel, entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, icon, tabKeys } from './dom.js';
 
@@ -139,14 +139,7 @@ export function presentedRows(rows, sort, filter) {
   const query = (filter ?? '').trim().toLowerCase();
   let held = rows;
   if (query !== '') {
-    held = held.filter((row) => {
-      const label = entityLabel(row.other).toLowerCase();
-      return (
-        row.other.id.toLowerCase().includes(query) ||
-        label.includes(query) ||
-        row.label.toLowerCase().includes(query)
-      );
-    });
+    held = held.filter((row) => entityMatches(row.other, query) || row.label.toLowerCase().includes(query));
   }
   if (sort !== null) {
     const key =
@@ -194,7 +187,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    */
   function searchControl() {
     if (!searchOpen) {
-      return headIcon('Filter the list', 'i-search', () => {
+      return headIcon('Filter the relationships', 'i-search', () => {
         searchOpen = true;
         render();
         head.querySelector('.head-search')?.focus();
@@ -242,7 +235,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     head.hidden = false;
 
     const view = store.relationshipView();
-    const views = [['list', 'List'], ['graph', 'Graph']];
+    const views = [['graph', 'Graph'], ['list', 'List']];
     const tabs = el('div', { className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' } });
     for (const [value, label] of views) {
       const tab = el('button', {
@@ -259,8 +252,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     });
     head.appendChild(tabs);
 
-    const actions = [];
-    if (store.relationshipView() === 'list') actions.push(searchControl());
+    const actions = [searchControl()];
     if (picking) {
       const done = el('button', { className: 'form-button button-primary', text: 'Done', attributes: { type: 'button' } });
       done.disabled = store.picker().picks.length === 0;
@@ -538,13 +530,14 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     }
   }
 
-  /** Refresh the body alone, so typing in the head's filter keeps its focus. */
+  /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, or the graph around its subject. */
   function renderBody() {
     const picker = store.picker();
     const subjectId = picker !== null ? picker.subject : store.selection();
     const subject = nodeOf(store.model(), subjectId);
     if (!subject || subject.kind !== 'entity') return;
     if (store.relationshipView() === 'list') renderList(subject, picker);
+    else graph.render(tableFilter);
   }
 
   function render() {
@@ -570,7 +563,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     listHost.hidden = view !== 'list';
     graph.element.hidden = view !== 'graph';
     if (view === 'list') renderList(subject, picker);
-    else graph.render();
+    else graph.render(tableFilter);
   }
 
   store.subscribe(render);

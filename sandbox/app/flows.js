@@ -30,7 +30,8 @@ import {
   nodeOf,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets, cascadeQuestion, designated } from './queries.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated } from './queries.js';
+import { removalText } from './editor.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
 import { TYPE_ICONS } from './icons.js';
@@ -90,7 +91,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /** The editor's Cancel: the fresh entity leaves with the session. */
-  function cancelEdit() {
+  /**
+   * Leave the open edit by its Cancel: a clean draft cancels silently, a
+   * dirty one gets the standard discard question.
+   */
+  async function cancelEdit() {
+    if (!(await confirmDiscard())) return;
     endEditSession();
   }
 
@@ -390,11 +396,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Delete the selection. A folder deletion removes filing, never
-   * entities, and proceeds without a question. A pristine creation
-   * collapses. An entity deletion that cascades states the entities that
-   * will go, before it goes; one that removes a single entity proceeds,
-   * and undo forgives.
+   * Delete the selection, asking first. A folder deletion removes
+   * filing, never entities. An entity deletion severs the entity's
+   * relationships and takes what it owns through composition, the
+   * entities that will go stated before they go. A pristine creation
+   * collapses without a question, having nothing to lose; one typed into
+   * gets the discard question instead.
    */
   async function deleteSelection() {
     const id = store.selection();
@@ -402,35 +409,55 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (!node) return;
 
     if (node.kind === 'folder') {
-      store.commit((model) => removeFolder(model, id));
-      return;
-    }
-
-    if (!(await confirmDiscard())) return;
-    if (freshCreation !== null && freshCreation.id === id) {
-      endEditSession();
-      return;
-    }
-
-    const question = cascadeQuestion(store.model(), id);
-    if (question.doomed.length > 1) {
-      const list = el(
-        'ul',
-        { className: 'doomed-list' },
-        question.doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) }))
-      );
       const confirmed = await dialogs.confirm({
-        title: question.title,
-        message: question.message,
-        body: list,
+        title: `Delete the folder ${node.name}?`,
+        message: 'Deleting a folder removes only its filing: what it holds moves up a level.',
         confirmLabel: 'Delete',
         danger: true,
       });
       if (!confirmed) return;
+      store.commit((model) => removeFolder(model, id));
+      return;
     }
+
+    if (freshCreation !== null && freshCreation.id === id) {
+      if (!(await confirmDiscard())) return;
+      endEditSession();
+      return;
+    }
+
+    const question = deletionQuestion(store.model(), id);
+    const list =
+      question.doomed.length > 1
+        ? el('ul', { className: 'doomed-list' }, question.doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) })))
+        : undefined;
+    const confirmed = await dialogs.confirm({
+      title: question.title,
+      message: question.message,
+      body: list,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!confirmed) return;
 
     endEditSession();
     store.commit((model) => removeEntity(model, id));
+  }
+
+  /**
+   * Ask before a save removes what a choice no longer shows: the groups
+   * hidden while still holding values, by the value they stood under.
+   * @param {Array<{ name: string, value: string }>} entries
+   * @returns {Promise<boolean>}
+   */
+  async function confirmRemoval(entries) {
+    return dialogs.confirm({
+      title: 'Remove what is no longer chosen?',
+      message: `Saving removes ${removalText(entries)}`,
+      confirmLabel: 'Save',
+      cancelLabel: 'Keep editing',
+      danger: true,
+    });
   }
 
   /**
@@ -485,11 +512,18 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Remove a relationship. Both entities stay; undo restores the
-   * relationship.
+   * Remove a relationship, asking first, the fact stated as it reads.
+   * Both entities stay; undo restores the relationship.
    * @param {import('./model.js').Relationship} relationship
    */
-  function removeRelationship(relationship) {
+  async function removeRelationship(relationship) {
+    const confirmed = await dialogs.confirm({
+      title: 'Remove the relationship?',
+      message: `${relationship.source} ${RELATIONSHIP_TYPES[relationship.type].label} ${relationship.target}. Both entities stay.`,
+      confirmLabel: 'Remove',
+      danger: true,
+    });
+    if (!confirmed) return;
     store.commit((model) => unrelate(model, relationship.type, relationship.source, relationship.target));
   }
 
@@ -683,6 +717,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     moveToSelection,
     activateNode,
     saveEdit,
+    confirmRemoval,
     cancelEdit,
     deleteSelection,
     relateSelection,

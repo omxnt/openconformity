@@ -16,7 +16,7 @@
 import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickedRows } from './relate.js';
-import { entityLabel } from './queries.js';
+import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, svg, svgText } from './dom.js';
 
@@ -72,6 +72,24 @@ export function pendingNeighbours(model, picker) {
     });
   }
   return sides;
+}
+
+/**
+ * The neighbourhood as a filter leaves it: the subject always, and on
+ * each side the entries whose entity answers the filter or whose
+ * relationship is labelled with it — a pending pick's label as it
+ * carries it, a standing relationship's as its type names it.
+ * @param {{ subject: Object, outgoing: Array<Object>, incoming: Array<Object> }} around
+ * @param {string} filter  as typed
+ */
+export function filteredNeighbourhood(around, filter) {
+  const query = (filter ?? '').trim().toLowerCase();
+  if (query === '') return around;
+  const keeps = (entry) => {
+    const label = entry.label ?? RELATIONSHIP_TYPES[entry.relationship.type].label;
+    return entityMatches(entry.other, query) || label.toLowerCase().includes(query);
+  };
+  return { ...around, outgoing: around.outgoing.filter(keeps), incoming: around.incoming.filter(keeps) };
 }
 
 /** How many boxes a side draws before counting the rest. */
@@ -306,18 +324,26 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     return chip;
   }
 
-  function render() {
+  /**
+   * Draw the subject's neighbourhood, narrowed to a filter where one is
+   * typed: the subject stays whatever the filter says.
+   * @param {string} [filter]
+   */
+  function render(filter = '') {
     element.textContent = '';
     const picker = store.picker();
     const around = neighbourhood(store.model(), picker !== null ? picker.subject : store.selection());
     if (around === null) return;
 
     const pend = picker !== null ? pendingNeighbours(store.model(), picker) : { outgoing: [], incoming: [], ambiguous: 0 };
-    const merged = {
-      subject: around.subject,
-      outgoing: [...around.outgoing, ...pend.outgoing],
-      incoming: [...around.incoming, ...pend.incoming],
-    };
+    const merged = filteredNeighbourhood(
+      {
+        subject: around.subject,
+        outgoing: [...around.outgoing, ...pend.outgoing],
+        incoming: [...around.incoming, ...pend.incoming],
+      },
+      filter
+    );
     if (picker !== null) {
       element.appendChild(
         el('p', {

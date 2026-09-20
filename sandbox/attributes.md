@@ -8,11 +8,11 @@ This document specifies the attributes each entity type carries. The metamodel d
 
 ### 1.1 Identifier
 
-Each entity type has an identifier which is generated and read only, so it is not an attribute: a file carries it beside the attributes rather than among them. The editor shows it as the first cell of the type's own tab, in the field's read-only state in either mode, beside the reference where the type carries one.
+Each entity type has an identifier which is generated and read only, so it is not an attribute: a file carries it beside the attributes rather than among them. The editor shows it as the first cell of the type's own tab, in the field's read-only state in either mode, beside the reference where the type carries one, and explains it on the information glyph beside its name with the help §1.9 records.
 
 ### 1.2 Optional
 
-Every attribute is optional, and every value is stored as text. An unset attribute is the absence of its key; clearing a choice removes the key. A computed attribute and a related one are the exceptions: derived wherever they are shown — the one from the attributes beside it, the other from the model's relationships — they are never stored.
+Every attribute is optional, and every value is stored as text. An unset attribute is the absence of its key; clearing a choice removes the key. A computed attribute is the one exception: derived from the attributes beside it wherever it is shown, it is never stored. A related attribute stores nothing of the list it shows, only the record a rating makes of it (§1.3).
 
 ### 1.3 Kinds
 
@@ -27,7 +27,7 @@ Each attribute uses one of the kinds below.
 | hyperlink | A web address |
 | number | A whole number, kept between the least and the greatest the Values column gives |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
-| related | The entities related to this one by the relationship type the Values column names, listed as they stand, each a way to it: shown, never stored |
+| related | The entities related to this one by the relationship type the Values column names, listed as they stand, each a way to it; the value stored is the list as recorded when the rating standing nearest before it was applied, kept while that rating stands |
 
 ### 1.4 Groups
 
@@ -35,7 +35,7 @@ The editor may present a type's attributes in groups. Each group is its own sub-
 
 A group is a heading over its cells, within the tab it stands in. A group whose heading carries the tag `tab` stands instead on a tab of its own, named for the group, as §1.8 lays out.
 
-A group whose heading carries the tag `when key = value` is shown only while the attribute of that key holds that value, and what it holds is saved only then: a rating made under one method does not ride along under another. Sub-groups sharing a name and waiting on the same attribute are one slot, a cell held whichever of them holds; while none does, the slot shows in the value's place that nothing is chosen for the attribute it waits on — as a disabled field in an edit — so the form keeps its shape. A group's sub-groups stand after its attributes, in their order; where one of them waits on an attribute of the group, they stand right after that attribute, so what a choice governs stands under the choice.
+A group whose heading carries the tag `when key = value` is shown only while the attribute of that key holds that value, and what it holds is kept only then: a save made while the group is hidden removes what it held, so a rating made under one method does not ride along under another and an entity carries one at a time. Until the save nothing is lost, and Cancel keeps everything; a save that would remove what a hidden group still holds asks first, naming the groups by the value they stood under. Sub-groups sharing a name and waiting on the same attribute are one slot, a cell held whichever of them holds; while none does, the slot shows in the value's place that nothing is chosen for the attribute it waits on — as a disabled field in an edit — so the form keeps its shape. A group's sub-groups stand after its attributes, in their order; where one of them waits on an attribute of the group, they stand right after that attribute, so what a choice governs stands under the choice.
 
 ### 1.5 Status
 
@@ -48,7 +48,7 @@ Each entity type shall carry a status tag.
 
 ### 1.6 Template
 
-Each entity type is written using the template below.
+Each entity type is written using the template below. A table may add a fifth column, Help, holding a sentence or two the editor shows on the information glyph beside the name (§1.8); a row with none shows no glyph.
 
 ```
 ### CODE Entity Type `status`
@@ -88,20 +88,39 @@ A type that carries a reference composes its label from the reference and the ti
 
 ### 1.8 Layout
 
-The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline and a hyperlink each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A choice or a number is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
+The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline and a hyperlink each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice or a number is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
 
 A type's own attributes stand on the first tab, named for the type by the last word of its name — Legislation, Requirement, Function — and each group tagged `tab` on a tab of its own, named for the group: a tab is earned by a distinct task, such as a verdict or an estimate, or by a set of fields about a distinct concern, never by a single text and never by the identity alone. Every type closes with a Notes tab, one multiline field for what fits nowhere else, so every pane has its tab bar. The tabs are Carbon's line tabs at the navigator filter bar's height. The tab chosen stands for the rest of the browser session, by type, so the next entity of the type opens on the same tab, and choosing a tab leaves an open edit as it is: what stands on another tab is still part of the draft. A group carrying no tag stands within its tab as a legend over its cells, unless it holds a single attribute, which then stands on its own.
 
 A group that closes on a computed attribute is a rating, a cell like any other: its name, then what the rating comes to and the code of each parameter set, as tags — a code being a value's first word, and its second where the first holds no digit — the parameter's name and full value shown on hovering a tag. In an edit the cell is a field that opens the rating's dialog, which presents the method as chapter 6 lays it out: the matrix to click, the graph to follow, the scores to enter, the scales beside their matrix.
 
-A related attribute lists, live, the entities its relationship type joins to this one, each shown as the tree shows an entity and each a way to it. The list is the model's, not the entity's, so nothing of it is stored; it takes a row to itself and, being a list of entities rather than a value, stands without a rule beneath it.
+A related attribute lists, live, the entities its relationship type joins to this one, each shown as the tree shows an entity and each a way to it, on a row of its own and, being a list of entities rather than a value, without a rule beneath it. Where a rating stands nearest before it in its group, applying that rating records the list as it then stands; while the record and the live list differ, the list keeps the record's order and says at the end of a row what changed — Unlinked, the row dimmed and kept in place, or Added — and a notice says the rating should be made again. An entity gone from the project reads Deleted, dimmed, its glyph known from its identifier. Rating again refreshes the record, and a rating applied empty clears it, as does a save that leaves no rating made before the list.
+
+### 1.9 Help
+
+A name shared by several types means the same on each, so its help is recorded once, below, and every cell of that name carries it; a row's own Help column, where it has one, stands instead. The identifier's help stands here too.
+
+| Name | Help |
+|---|---|
+| Identifier | Assigned by the tool when the entity is created, from its type's code and a running number. It never changes and is never reused. |
+| Designation | A short name of your own for the entity. Wherever the entity is listed, the label shows it before the title. |
+| Title | What the entity is called. Wherever the entity is listed, the label shows it after the designation or reference where there is one. |
+| Description | A free description of the entity, as long as it needs to be. |
+| Notes | Free notes: anything worth keeping that no field holds, such as how something was assessed or decided. |
+| Reference | The citation the entity is known by, as its source writes it: an act's number, a standard's designation, a clause's number. An import joins on it. |
+| Link | Where it is published online. |
+| Applicable | Whether it applies to this product. The rationale beside it says why. |
+| Rationale | Why the verdict on applicability is what it is. |
 
 ## 2. System Context
 
 ### 2.1 System Element (ELM) `draft`
 
+The designation is the element's own short name — `E1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
 | description | Description | multiline | |
 
@@ -113,8 +132,11 @@ A related attribute lists, live, the entities its relationship type joins to thi
 
 ### 2.2 System Actor (ACT) `draft`
 
+The designation is the actor's own short name — `A1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
 | description | Description | multiline | |
 
@@ -139,8 +161,11 @@ A related attribute lists, live, the entities its relationship type joins to thi
 
 ### 2.4 System Phase (PHS) `draft`
 
+The designation is the phase's own short name — `P1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
 | description | Description | multiline | |
 
@@ -251,8 +276,11 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 ### 4.1 Single Hazard (HAZ) `draft`
 
+The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
 | description | Description | multiline | |
 
@@ -264,12 +292,13 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 ### 4.2 Accident Scenario (SCN) `draft`
 
-The scenario is rated by the methods of an estimation standard — ISO/TR 14121-2, the report chapter 6 transcribes — the method chosen being one of the report's four and so offered only under it: each method's parameters stand in a pair of groups shown only while it is the method chosen, once for the initial risk and once for the residual risk, side by side, with the protective measures the model links to the scenario listed beneath the two, the measures in place when the residual risk is rated. What a rating comes to — its level, index or score — is computed where it is shown and never stored, and the measures listed are those linked at the time of looking, each a way to the measure.
+The designation is the scenario's own short name — `S1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The scenario is rated by the methods of an estimation standard — ISO/TR 14121-2, the report chapter 6 transcribes — the method chosen being one of the report's four and so offered only under it: each method's parameters stand in a pair of groups shown only while it is the method chosen, once for the initial risk and once for the residual risk, side by side, with the protective measures the model links to the scenario listed beneath the two, the measures in place when the residual risk is rated. What a rating comes to — its level, index or score — is computed where it is shown and never stored. The measures are the one thing the residual rating records: applying it stores the measures then linked as the scenario's own value, and the list shows that record against what is linked now, a measure unlinked since dimmed in place and marked Unlinked, one linked since marked Added, and a notice saying the residual risk should be rated again while they differ; rating again refreshes the record. The tab closes on the risk evaluation, the modeller's own judgement whether the residual risk is adequately reduced and why. On the scenario's own tab the hazardous situation, the hazardous event and the potential consequence are the modeller's own text.
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
-| hazardZone | Hazard zone | text | |
+| hazardousSituation | Hazardous situation | multiline | |
 | hazardousEvent | Hazardous event | multiline | |
 | consequence | Potential consequence | multiline | |
 
@@ -359,9 +388,15 @@ The scenario is rated by the methods of an estimation standard — ISO/TR 14121-
 
 ##### Protective measures
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| measures | Measures in place for the residual risk | related | prm-reduces-risk-of-scn |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| measures | Protective measures | related | prm-reduces-risk-of-scn | The protective measures linked to the scenario. Rating the residual risk records the ones linked at that moment; a measure linked or unlinked since is marked, and the residual risk should be rated again. |
+
+##### Risk evaluation
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| evaluation | Risk evaluation | multiline | | Your judgement whether the residual risk is adequately reduced by the measures listed, and why. |
 
 #### Notes `tab`
 
@@ -371,8 +406,11 @@ The scenario is rated by the methods of an estimation standard — ISO/TR 14121-
 
 ### 4.3 Protective Measure (PRM) `draft`
 
+The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
 | description | Description | multiline | |
 
@@ -384,7 +422,7 @@ The scenario is rated by the methods of an estimation standard — ISO/TR 14121-
 
 ### 4.4 Safety Function (SAF) `draft`
 
-The designation is the function's own short name — `SF1` — entered by the modeller, and it is the reference the label composes with the title (§1.7): `SF1 Emergency Stop`. The tabs follow one rule: a sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. So the tabs read: what it is, what it does, what it does when it fails, and what it must achieve, in numbers. The technologies follow those ISO 13849-1 names in its scope, software standing for the programmable electronic among them, and a function spanning several carries them all. The design standard names the functional-safety standard the function is designed to, and the integrity level it requires is not chosen but read by that standard's own method, in the one slot beside it. Under EN ISO 13849-1 the risk graph (§6.5) reads the performance level from the function's S, F, P and occurrence; under EN IEC 62061 the matrix (§6.6) reads the safety integrity level from its Se, Fr, Pr and Av. The function stores those four, and the level is computed.
+The designation is the function's own short name — `SF1` — entered by the modeller, and it is the reference the label composes with the title (§1.7): `SF1 Emergency Stop`. The tabs follow one rule: a sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. So the tabs read: what it is, what it does, what it does when it fails, and what it must achieve, in numbers. On Fault handling, fault detection says which faults in the function's own parts are found, and how; fault reaction what the function does once one is found; fault indication how a found fault is made known; and power loss behaviour what the function does when its supply goes. The technologies follow those ISO 13849-1 names in its scope, software standing for the programmable electronic among them, and a function spanning several carries them all. The design standard names the functional-safety standard the function is designed to, and the integrity level it requires is not chosen but read by that standard's own method, in the one slot beside it. Under EN ISO 13849-1 the risk graph (§6.5) reads the performance level from the function's S, F, P and occurrence; under EN IEC 62061 the matrix (§6.6) reads the safety integrity level from its Se, Fr, Pr and Av. The function stores those four, and the level is computed.
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
@@ -404,12 +442,12 @@ The designation is the function's own short name — `SF1` — entered by the mo
 | safeState | Intended safe state | multiline | |
 | restart | Restart conditions | multiline | |
 
-#### Faults `tab`
+#### Fault handling `tab`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
 | faultDetection | Fault detection | multiline | |
-| faultHandling | Reaction to faults | multiline | |
+| faultHandling | Fault reaction | multiline | |
 | faultIndication | Fault indication | multiline | |
 | powerLoss | Power loss behaviour | multiline | |
 
@@ -454,13 +492,21 @@ The designation is the function's own short name — `SF1` — entered by the mo
 
 ### 5.1 Essential Requirement (ESR) `draft`
 
-The reference is the requirement's citation within the legislation that contains it — `1.3.7`, not the act's own citation — so it is scoped by its owner: an import joins on the owning legislation's reference together with this one. The title is the requirement's heading as the act prints it, and the requirement holds its text. Applicable is the assessment verdict, and unset means the requirement has not been assessed yet: an unassessed requirement is not the same as one ruled out. The rationale carries the reasoning behind the verdict, and is what an assessor reads to follow the argument; it belongs with every verdict, and most of all with `No`.
+The reference is the requirement's citation within the legislation that contains it — `1.3.7`, not the act's own citation — so it is scoped by its owner: an import joins on the owning legislation's reference together with this one. The title is the requirement's heading as the act prints it, and the requirement holds its text. The guidance holds what helps read the requirement, apart from the requirement's own text: the source names the document it is taken from, the section where in that document, and the guidance carries the text or the modeller's account of it. Applicable is the assessment verdict, and unset means the requirement has not been assessed yet: an unassessed requirement is not the same as one ruled out. The rationale carries the reasoning behind the verdict, and is what an assessor reads to follow the argument; it belongs with every verdict, and most of all with `No`.
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
 | reference | Reference | text | |
 | title | Title | text | |
 | requirement | Requirement | multiline | |
+
+#### Guidance `tab`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| guidanceSource | Source | text | |
+| guidanceSection | Section | text | |
+| guidance | Guidance | multiline | |
 
 #### Applicability `tab`
 
@@ -523,10 +569,15 @@ The same fields again, scoped to the specification that holds it.
 
 ### 5.4 System Requirement (REQ) `draft`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| title | Title | text | |
-| description | Description | multiline | |
+The designation is the requirement's own short name — `R1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The type sorts the requirement as functional or non-functional. The rationale carries why the requirement exists, and is what a reader follows from the requirement back to what called for it.
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | |
+| type | Type | choice | Functional; Non-functional | |
+| description | Description | multiline | | |
+| rationale | Rationale | multiline | | Why the requirement exists: what called for it, followed back from the requirement. |
 
 #### Notes `tab`
 
@@ -536,10 +587,15 @@ The same fields again, scoped to the specification that holds it.
 
 ### 5.5 System Verification (VER) `draft`
 
+The designation is the verification's own short name — `V1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The method is the way the verification is carried out, one of the four the discipline names. The procedure says what is done, and the acceptance criteria what counts as passing.
+
 | Key | Name | Kind | Values |
 |---|---|---|---|
+| reference | Designation | text | |
 | title | Title | text | |
-| description | Description | multiline | |
+| method | Method | choice | Inspection; Analysis; Demonstration; Test |
+| description | Procedure | multiline | |
+| acceptanceCriteria | Acceptance criteria | multiline | |
 
 #### Notes `tab`
 

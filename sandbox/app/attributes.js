@@ -25,6 +25,7 @@
  * @property {number} [max]  the greatest a number may be
  * @property {string} [method]  the estimation method a computed value is read by, from `risk.js`
  * @property {string} [relationship]  the relationship type a related attribute lists, from the metamodel
+ * @property {string} [help]  a sentence or two shown on the information glyph beside the name
  */
 
 /**
@@ -43,9 +44,28 @@
  */
 
 /** @type {Object<string, TypeAttributes>} */
+/**
+ * The help a name shared by several types carries on every cell of that
+ * name, recorded once, as §1.9 of the document has it; a definition's
+ * own help stands instead where it has one.
+ * @type {Object<string, string>}
+ */
+export const SHARED_HELP = {
+  Identifier: "Assigned by the tool when the entity is created, from its type's code and a running number. It never changes and is never reused.",
+  Designation: 'A short name of your own for the entity. Wherever the entity is listed, the label shows it before the title.',
+  Title: 'What the entity is called. Wherever the entity is listed, the label shows it after the designation or reference where there is one.',
+  Description: 'A free description of the entity, as long as it needs to be.',
+  Notes: 'Free notes: anything worth keeping that no field holds, such as how something was assessed or decided.',
+  Reference: "The citation the entity is known by, as its source writes it: an act's number, a standard's designation, a clause's number. An import joins on it.",
+  Link: 'Where it is published online.',
+  Applicable: 'Whether it applies to this product. The rationale beside it says why.',
+  Rationale: 'Why the verdict on applicability is what it is.',
+};
+
 export const ATTRIBUTES = {
   ELM: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
       { key: 'description', name: 'Description', kind: 'multiline' },
     ],
@@ -53,6 +73,7 @@ export const ATTRIBUTES = {
   },
   ACT: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
       { key: 'description', name: 'Description', kind: 'multiline' },
     ],
@@ -67,6 +88,7 @@ export const ATTRIBUTES = {
   },
   PHS: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
       { key: 'description', name: 'Description', kind: 'multiline' },
     ],
@@ -146,6 +168,7 @@ export const ATTRIBUTES = {
   },
   HAZ: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
       { key: 'description', name: 'Description', kind: 'multiline' },
     ],
@@ -153,8 +176,9 @@ export const ATTRIBUTES = {
   },
   SCN: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'hazardZone', name: 'Hazard zone', kind: 'text' },
+      { key: 'hazardousSituation', name: 'Hazardous situation', kind: 'multiline' },
       { key: 'hazardousEvent', name: 'Hazardous event', kind: 'multiline' },
       { key: 'consequence', name: 'Potential consequence', kind: 'multiline' },
     ],
@@ -251,7 +275,19 @@ export const ATTRIBUTES = {
           },
           {
             name: 'Protective measures',
-            attributes: [{ key: 'measures', name: 'Measures in place for the residual risk', kind: 'related', relationship: 'prm-reduces-risk-of-scn' }],
+            attributes: [
+              {
+                key: 'measures',
+                name: 'Protective measures',
+                kind: 'related',
+                relationship: 'prm-reduces-risk-of-scn',
+                help: 'The protective measures linked to the scenario. Rating the residual risk records the ones linked at that moment; a measure linked or unlinked since is marked, and the residual risk should be rated again.',
+              },
+            ],
+          },
+          {
+            name: 'Risk evaluation',
+            attributes: [{ key: 'evaluation', name: 'Risk evaluation', kind: 'multiline', help: 'Your judgement whether the residual risk is adequately reduced by the measures listed, and why.' }],
           },
         ],
       },
@@ -260,6 +296,7 @@ export const ATTRIBUTES = {
   },
   PRM: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
       { key: 'description', name: 'Description', kind: 'multiline' },
     ],
@@ -286,11 +323,11 @@ export const ATTRIBUTES = {
         ],
       },
       {
-        name: 'Faults',
+        name: 'Fault handling',
         tab: true,
         attributes: [
           { key: 'faultDetection', name: 'Fault detection', kind: 'multiline' },
-          { key: 'faultHandling', name: 'Reaction to faults', kind: 'multiline' },
+          { key: 'faultHandling', name: 'Fault reaction', kind: 'multiline' },
           { key: 'faultIndication', name: 'Fault indication', kind: 'multiline' },
           { key: 'powerLoss', name: 'Power loss behaviour', kind: 'multiline' },
         ],
@@ -347,6 +384,15 @@ export const ATTRIBUTES = {
     ],
     groups: [
       {
+        name: 'Guidance',
+        tab: true,
+        attributes: [
+          { key: 'guidanceSource', name: 'Source', kind: 'text' },
+          { key: 'guidanceSection', name: 'Section', kind: 'text' },
+          { key: 'guidance', name: 'Guidance', kind: 'multiline' },
+        ],
+      },
+      {
         name: 'Applicability',
         tab: true,
         attributes: [
@@ -399,15 +445,21 @@ export const ATTRIBUTES = {
   },
   REQ: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
+      { key: 'type', name: 'Type', kind: 'choice', values: ['Functional', 'Non-functional'] },
       { key: 'description', name: 'Description', kind: 'multiline' },
+      { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why the requirement exists: what called for it, followed back from the requirement.' },
     ],
     groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
   },
   VER: {
     attributes: [
+      { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text' },
-      { key: 'description', name: 'Description', kind: 'multiline' },
+      { key: 'method', name: 'Method', kind: 'choice', values: ['Inspection', 'Analysis', 'Demonstration', 'Test'] },
+      { key: 'description', name: 'Procedure', kind: 'multiline' },
+      { key: 'acceptanceCriteria', name: 'Acceptance criteria', kind: 'multiline' },
     ],
     groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
   },

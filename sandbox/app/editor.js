@@ -9,7 +9,7 @@
  * one, and a render never rebuilds over an open draft.
  */
 
-import { ATTRIBUTES, attributesFor } from './attributes.js';
+import { ATTRIBUTES, attributesFor, SHARED_HELP } from './attributes.js';
 import { estimate, levelTone } from './risk.js';
 import { rateDialog, statusIcon } from './rating.js';
 import { openMultiSelect } from './multiselect.js';
@@ -85,10 +85,50 @@ export function codeShown(value) {
 }
 
 /**
+ * What changed among related entities since a list was recorded: the ids
+ * linked since, and the ids unlinked since. No record, nothing changed.
+ * @param {string[]|null} recorded  as last recorded, null when never
+ * @param {string[]} live
+ * @returns {{ added: string[], removed: string[] }}
+ */
+export function relatedDiff(recorded, live) {
+  if (recorded === null) return { added: [], removed: [] };
+  return {
+    added: live.filter((id) => !recorded.includes(id)),
+    removed: recorded.filter((id) => !live.includes(id)),
+  };
+}
+
+/**
+ * A record as its ids: the stored text split on semicolons, trimmed,
+ * empties dropped — null where nothing was ever recorded.
+ * @param {string|undefined} value
+ * @returns {string[]|null}
+ */
+export function recordedIds(value) {
+  const ids = String(value ?? '').split(';').map((id) => id.trim()).filter(Boolean);
+  return ids.length === 0 ? null : ids;
+}
+
+/**
  * The first tab's name: the type's own noun, the last word of its name —
  * Legislation, Requirement, Function.
  * @param {string} code
  */
+/**
+ * What a save removes, as the question before it tells it: the groups by
+ * the value they stood under, in order, as "A and B under X; C under Y."
+ * @param {Array<{ name: string, value: string }>} entries
+ * @returns {string}
+ */
+export function removalText(entries) {
+  /** @type {Map<string, Array<string>>} */
+  const byValue = new Map();
+  for (const { name, value } of entries) byValue.set(value, [...(byValue.get(value) ?? []), name]);
+  const listed = (names) => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`);
+  return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join('; ')}.`;
+}
+
 export function firstTabName(code) {
   return (ENTITY_TYPES[code]?.name ?? 'Description').split(' ').at(-1);
 }
@@ -140,6 +180,7 @@ export const LANDING_OFFER = [
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
  * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
+ * @param {(entries: Array<{ name: string, value: string }>) => Promise<boolean>} [context.onRemoval]  asks before a save removes what hidden groups still hold
  * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
  * @param {(event: KeyboardEvent) => void} [context.onEscape]
@@ -152,6 +193,7 @@ export function createEditor({
   onSave,
   onCancel,
   onRename,
+  onRemoval = async () => true,
   onEscape = () => {},
   onAction = () => {},
   onNavigate = () => {},
@@ -179,9 +221,9 @@ export function createEditor({
   }
 
   /**
-   * The draft as the controls hold it. A control under a group hidden by
-   * its condition is left out: what is not shown is not saved. A control
-   * on another tab is shown, only elsewhere, and is read like any other.
+   * The draft as the controls show it. A control under a group hidden by
+   * its condition is left out, so what waits on it follows. A control on
+   * another tab is shown, only elsewhere, and is read like any other.
    */
   function fieldValues() {
     /** @type {Object<string, string>} */
@@ -191,6 +233,33 @@ export function createEditor({
       values[control.dataset.key] = control.value;
     }
     return values;
+  }
+
+  /**
+   * The draft as a save commits it: the draft as shown, and the empty
+   * value for every control under a hidden group, so what is not shown
+   * is removed, and for a record with no rating made before it.
+   */
+  function savedValues() {
+    const values = fieldValues();
+    for (const control of body.querySelectorAll('.cell-group[hidden] [data-key]')) values[control.dataset.key] = '';
+    for (const record of body.querySelectorAll('input[data-related]')) {
+      const rating = ratingBefore(record.closest('.cell'));
+      const rated = rating !== null && [...rating.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== '');
+      if (!rated) values[record.dataset.key] = '';
+    }
+    return values;
+  }
+
+  /** A grid's cells as shown, in order. */
+  function shownCells(grid) {
+    return [...grid.querySelectorAll('.cell')].filter((cell) => !cell.hidden && !cell.closest('.cell-group[hidden]'));
+  }
+
+  /** The rating cell shown nearest before a cell in its grid, or null. */
+  function ratingBefore(cell) {
+    const cells = shownCells(cell.closest('.cells'));
+    return cells.slice(0, cells.indexOf(cell)).findLast((held) => held.querySelector('.field-input.rating')) ?? null;
   }
 
   function renderHead(node, actions) {
@@ -235,24 +304,59 @@ export function createEditor({
    */
   function fieldCell(definition, values, editing) {
     const value = values[definition.key];
-    const name = editing
-      ? el('label', { className: 'cell-name', text: definition.name, attributes: { for: `field-${definition.key}` } })
-      : el('div', { className: 'cell-name', text: definition.name });
     const held = editing ? control(definition, value ?? '', values) : valueNode(definition, value);
-    return el('div', { className: takesRow(definition) ? 'cell tall' : 'cell' }, [name, held]);
+    return el('div', { className: takesRow(definition) ? 'cell tall' : 'cell' }, [nameNode(definition, editing), held]);
+  }
+
+  /**
+   * A cell's name: a label for the field in an edit, plain text in view,
+   * and the information glyph with the definition's help where it has
+   * any, or the help its name carries on every type.
+   */
+  function nameNode(definition, editing) {
+    const text = editing
+      ? el('label', { text: definition.name, attributes: { for: `field-${definition.key}` } })
+      : el('span', { text: definition.name });
+    const help = definition.help ?? SHARED_HELP[definition.name];
+    return el('div', { className: 'cell-name' }, [text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]);
   }
 
   /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink. */
   const takesRow = (definition) => definition.key === 'title' || definition.kind === 'multiline' || definition.kind === 'hyperlink';
 
   /**
+   * Carbon's icon tooltip on a name: the information glyph as a small
+   * focusable button, its text shown on hover or focus and dismissed
+   * with Escape.
+   * @param {string} key  what the help is about, for the tooltip's id
+   * @param {string} about  its name, for the button's label
+   * @param {string} text
+   */
+  function helpTip(key, about, text) {
+    const id = `help-${key}`;
+    const tip = el('span', { className: 'tooltip', text, attributes: { role: 'tooltip', id } });
+    const trigger = el(
+      'button',
+      { className: 'help-trigger', attributes: { type: 'button', 'aria-label': `About the ${about.toLowerCase()}`, 'aria-describedby': id } },
+      [icon('i-information'), tip]
+    );
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') trigger.blur();
+    });
+    return trigger;
+  }
+
+  /** The identifier's help, as the document has it. */
+
+  /**
    * The identifier as the first cell: generated and read only, so it is
-   * in the field's read-only state in either mode, beside the reference.
+   * in the field's read-only state in either mode, beside the reference,
+   * its help on the glyph beside its name.
    * @param {string} id
    */
   function identifierCell(id) {
     return el('div', { className: 'cell' }, [
-      el('div', { className: 'cell-name', text: 'Identifier' }),
+      el('div', { className: 'cell-name' }, [el('span', { text: 'Identifier' }), helpTip('identifier', 'identifier', SHARED_HELP.Identifier)]),
       el('div', { className: 'cell-value mono', text: id }),
     ]);
   }
@@ -288,38 +392,109 @@ export function createEditor({
 
   /**
    * One related entity as the tree shows one — its type's glyph in the
-   * pillar colour, its identifier, its label — and the way to it.
+   * pillar colour, its identifier, its label — and the way to it. Its
+   * state since the record, where there is one, stands in the chevron's
+   * place: Unlinked, the row dimmed, or Added; an entity gone from the
+   * project reads Deleted, dimmed, its glyph known from its identifier.
+   * @param {string} id
+   * @param {'unlinked'|'added'|null} [state]
    */
-  function relatedItem(id) {
+  function relatedItem(id, state = null) {
     const entity = nodeOf(store.model(), id);
+    const word = { unlinked: 'Unlinked', added: 'Added' }[state];
     let held;
     if (entity) {
       const label = entityLabel(entity);
-      held = el('button', { className: 'entity-row', attributes: { type: 'button' } }, [
+      held = el('button', { className: state === 'unlinked' ? 'entity-row unlinked' : 'entity-row', attributes: { type: 'button' } }, [
         icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
         el('span', { className: 'mono designation', text: entity.id }),
         ...(label ? [el('span', { className: 'entity-title', text: label })] : []),
-        icon('i-chevron-right'),
+        word ? el('span', { className: 'row-state', text: word }) : icon('i-chevron-right'),
       ]);
       held.addEventListener('click', () => onNavigate(id));
     } else {
-      held = el('span', { className: 'mono', text: id });
+      const type = ENTITY_TYPES[id.split('-')[0]];
+      held = el('div', { className: 'entity-row unlinked still' }, [
+        ...(type ? [icon(TYPE_ICONS[type.code], type.pillar)] : []),
+        el('span', { className: 'mono designation', text: id }),
+        el('span', { className: 'row-state', text: 'Deleted' }),
+      ]);
     }
     return el('li', { className: 'related-item' }, [held]);
   }
 
   /**
-   * A related attribute as a cell: the entities its relationship type
-   * joins to this one, live from the model and the same in either mode,
-   * on a row of their own.
+   * The list a related attribute shows: with no record, what is linked;
+   * with one, the record in its order, each row saying what changed
+   * about it, the entities linked since appended, and a notice while
+   * the two differ.
    */
-  function relatedCell(definition) {
+  function relatedList(definition, values) {
     const live = current ? relatedIds(store.model(), current.id, definition.relationship) : [];
-    const list =
-      live.length === 0
-        ? el('div', { className: 'cell-value empty', text: 'None linked.' })
-        : el('ul', { className: 'related-list' }, live.map((id) => relatedItem(id)));
-    return el('div', { className: 'cell tall' }, [el('div', { className: 'cell-name', text: definition.name }), el('div', { className: 'related' }, [list])]);
+    const recorded = recordedIds(values[definition.key]);
+    const { added, removed } = relatedDiff(recorded, live);
+    const rows =
+      recorded === null
+        ? live.map((id) => [id, null])
+        : [...recorded.map((id) => [id, removed.includes(id) ? 'unlinked' : null]), ...added.map((id) => [id, 'added'])];
+    const parts = [];
+    if (rows.length === 0) {
+      parts.push(el('div', { className: 'cell-value empty', text: 'None linked.' }));
+    } else {
+      parts.push(el('ul', { className: 'related-list' }, rows.map(([id, state]) => relatedItem(id, state))));
+    }
+    if (added.length + removed.length > 0) {
+      parts.push(
+        el('div', { className: 'notice notice-warning related-notice', attributes: { role: 'status' } }, [
+          icon('i-warning'),
+          el('div', { className: 'notice-body' }, [
+            el('span', { className: 'notice-title', text: 'Changed since the rating' }),
+            el('span', { className: 'notice-text', text: 'The rating above was made against a different set. Rate it again.' }),
+          ]),
+        ])
+      );
+    }
+    return el('div', { className: 'related' }, parts);
+  }
+
+  /**
+   * Refresh the record of each related attribute this rating stands
+   * nearest before: those later in the same grid with no other rating
+   * shown between. An empty rating clears them.
+   * @param {HTMLElement} ratingCellElement
+   * @param {boolean} empty
+   */
+  function recordAfter(ratingCellElement, empty) {
+    const grid = ratingCellElement.closest('.cells');
+    const cells = shownCells(grid);
+    const at = cells.indexOf(ratingCellElement);
+    for (const record of grid.querySelectorAll('input[data-related]')) {
+      const index = cells.indexOf(record.closest('.cell'));
+      if (index <= at) continue;
+      if (cells.slice(at + 1, index).some((cell) => cell.querySelector('.field-input.rating'))) continue;
+      record.value = empty ? '' : relatedIds(store.model(), current.id, record.dataset.related).join('; ');
+    }
+  }
+
+  /**
+   * A related attribute as a cell: its list, live against its record, on
+   * a row of its own; in an edit the hidden control that carries the
+   * record, refreshed when the rating nearest before it is applied. The
+   * list follows the draft.
+   */
+  function relatedCell(definition, values, editing) {
+    const cell = el('div', { className: 'cell tall' });
+    const input = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key, 'data-related': definition.relationship } }) : null;
+    if (input) input.value = values[definition.key] ?? '';
+    const show = (held) => {
+      cell.textContent = '';
+      cell.appendChild(nameNode(definition, false));
+      cell.appendChild(relatedList(definition, held));
+      if (input) cell.appendChild(input);
+    };
+    show(values);
+    if (editing) refreshers.push(() => show(fieldValues()));
+    return cell;
   }
 
   /** Whether a group's condition holds, or that it has none. */
@@ -396,6 +571,7 @@ export function createEditor({
       });
       if (chosen === null) return;
       for (const input of hidden) input.value = chosen[input.dataset.key] ?? '';
+      recordAfter(cellElement, hidden.every((input) => input.value.trim() === ''));
       body.dispatchEvent(new Event('input', { bubbles: true }));
     });
     cellElement.appendChild(el('label', { className: 'cell-name', text: group.name, attributes: { for: `field-${computed.key}` } }));
@@ -464,7 +640,7 @@ export function createEditor({
     }
     if (target !== grid) {
       target.hidden = !groupShown(group, values);
-      conditionals.push({ held: target, shown: (draft) => groupShown(group, draft) });
+      conditionals.push({ held: target, shown: (draft) => groupShown(group, draft), group });
       grid.appendChild(target);
     }
   }
@@ -550,6 +726,16 @@ export function createEditor({
    */
   function followConditions() {
     for (const { held, shown } of conditionals) held.hidden = !shown(fieldValues());
+  }
+
+  /**
+   * What a save would remove: the groups hidden while still holding
+   * values, by name and the value they stood under, in document order.
+   */
+  function removals() {
+    return conditionals
+      .filter(({ held, group }) => group && held.hidden && [...held.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== ''))
+      .map(({ group }) => ({ name: group.name, value: group.when.value }));
   }
 
   function headButton(label, onPick, iconId = null) {
@@ -709,8 +895,10 @@ export function createEditor({
 
   function renderEdit(node) {
     current = node;
-    renderHead(node, saveCancel(() => {
-      if (onSave(editingId, fieldValues()) !== false) endEdit();
+    renderHead(node, saveCancel(async () => {
+      const removed = removals();
+      if (removed.length > 0 && !(await onRemoval(removed))) return;
+      if (onSave(editingId, savedValues()) !== false) endEdit();
     }));
     mount(node.id, node.type, node.attributes, true);
     followConditions();

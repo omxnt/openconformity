@@ -18,6 +18,7 @@ import {
   subjectHeight,
 } from '../app/graph.js';
 import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/relationships.js';
+import { filteredNeighbourhood } from '../app/graph.js';
 import { relationshipOptions } from '../app/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -401,6 +402,28 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   const open = cappedNeighbourhood(around, { incoming: true, outgoing: false });
   equal(open.left.length, 11, 'unfolding a side draws everything');
   equal(open.moreIncoming, 0, 'with nothing left to count');
+}
+
+// --- The graph narrows to a filter, the subject staying ------------------------
+
+{
+  const subject = { id: 'SCN-001', kind: 'entity', type: 'SCN', attributes: { title: 'Contact with Moving Parts' } };
+  const around = {
+    subject,
+    outgoing: [],
+    incoming: [
+      { relationship: { type: 'haz-contributes-to-scn', source: 'HAZ-001', target: 'SCN-001' }, other: { id: 'HAZ-001', kind: 'entity', type: 'HAZ', attributes: { title: 'Moving Parts' } } },
+      { relationship: { type: 'prm-reduces-risk-of-scn', source: 'PRM-002', target: 'SCN-001' }, other: { id: 'PRM-002', kind: 'entity', type: 'PRM', attributes: { title: 'Interlocked Guard' } } },
+      { pending: true, label: 'exposed in', typeId: 'act-exposed-in-scn', other: { id: 'ACT-001', kind: 'entity', type: 'ACT', attributes: { title: 'Operator' } }, ambiguous: false },
+    ],
+  };
+  equal(filteredNeighbourhood(around, ''), around, 'no filter, the neighbourhood as it is');
+  const guard = filteredNeighbourhood(around, 'guard');
+  deepEqual([guard.subject.id, guard.outgoing.map((e) => e.other.id), guard.incoming.map((e) => e.other.id)], ['SCN-001', [], ['PRM-002']], 'a filter keeps the subject and the entities that answer it');
+  deepEqual(filteredNeighbourhood(around, 'contributes').incoming.map((e) => e.other.id), ['HAZ-001'], 'a relationship answers by its label');
+  deepEqual(filteredNeighbourhood(around, 'exposed').incoming.map((e) => e.other.id), ['ACT-001'], 'a pending pick answers by the label it carries');
+  deepEqual(filteredNeighbourhood(around, 'reduces risk').incoming.map((e) => e.other.id), ['PRM-002'], "a standing relationship by its type's label");
+  equal(filteredNeighbourhood(around, 'zzz').outgoing.length + filteredNeighbourhood(around, 'zzz').incoming.length, 0, 'and nothing answers what nothing holds');
 }
 
 summary('test-relationships');

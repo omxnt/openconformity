@@ -25,6 +25,7 @@ const editor = createEditor({
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
   onSave: (id, values) => flows.saveEdit(id, values),
+  onRemoval: (entries) => flows.confirmRemoval(entries),
   onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
   onEscape: () => flows.escapeEdit(),
