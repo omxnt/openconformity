@@ -8,6 +8,7 @@
 
 import { nodeOf } from './model.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
+import { VIEWS } from './views.js';
 
 /**
  * @typedef {Object} Action
@@ -36,6 +37,18 @@ export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
 
   return [
+    ...VIEWS.map((view) => ({
+      id: `view-${view.id}`,
+      icon: 'i-view-list',
+      label: view.name,
+      group: 'views',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => store.hasProject(),
+      checked: () => store.view()?.id === view.id,
+      run: () => flows.openView(view.id),
+    })),
     {
       id: 'new-project',
       icon: 'i-new-project',

@@ -6,12 +6,15 @@
  * definition by definition. Run from this directory.
  */
 
-import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/attributes.js';
+import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/attributes.js';
 import { RELATIONSHIP_TYPES } from '../app/metamodel.js';
 import { ESTIMATED } from '../app/risk.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
-const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'computed', 'related'];
+const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'computed', 'rationale'];
+
+/** The project's tables as §1.10 records them, read beside the types. */
+let documentProject = null;
 import { ENTITY_TYPES } from '../app/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -47,6 +50,12 @@ function parseDocument(text) {
       types.push(current);
       continue;
     }
+    if (/^### [\d.]+ Project$/.test(line)) {
+      current = { code: 'PROJECT', name: 'Project', status: 'draft', attributes: [], groups: [] };
+      table = current.attributes;
+      documentProject = current;
+      continue;
+    }
     if (line.startsWith('## ') || (line.startsWith('### ') && !heading)) {
       current = null;
       table = null;
@@ -54,13 +63,19 @@ function parseDocument(text) {
     }
     if (!current) continue;
 
-    const group = line.match(/^(####|#####) (.+?)(?: `(.+?)`)?$/);
+    const group = line.match(/^(####|#####) (.+?)((?: `[^`]+`)*)$/);
     if (group) {
       table = [];
-      const when = (group[3] ?? '').match(/^when (\w+) = (.+)$/);
-      const tag =
-        group[3] === undefined ? {} : group[3] === 'tab' ? { tab: true } : when ? { when: { key: when[1], value: when[2] } } : { tag: group[3] };
-      const held = { name: group[2], ...tag, attributes: table };
+      const tags = {};
+      for (const [, tag] of group[3].matchAll(/`([^`]+)`/g)) {
+        const when = tag.match(/^when (\w+) =(?: (.+))?$/);
+        const after = tag.match(/^after (\w+)$/);
+        if (tag === 'tab') tags.tab = true;
+        else if (when) tags.when = { key: when[1], value: when[2] ?? '' };
+        else if (after) tags.after = after[1];
+        else tags.tag = tag;
+      }
+      const held = { name: group[2], ...tags, attributes: table };
       if (group[1] === '#####') {
         const parent = current.groups.at(-1);
         if (!parent) problems.push(`${current.code}: a sub-group "${held.name}" with no group above it`);
@@ -82,7 +97,7 @@ function parseDocument(text) {
       const definition = { key: cells[0], name: cells[1], kind: cells[2] };
       if (definition.kind === 'number') [definition.min, definition.max] = list(cells[3]).map(Number);
       else if (definition.kind === 'computed') definition.method = cells[3];
-      else if (definition.kind === 'related') definition.relationship = cells[3];
+      else if (definition.kind === 'rationale') definition.parameter = cells[3];
       else if (list(cells[3]).length > 0) definition.values = list(cells[3]);
       if (helpColumn >= 0 && (cells[helpColumn] ?? '') !== '') definition.help = cells[helpColumn];
       table.push(definition);
@@ -113,13 +128,37 @@ function parseSharedHelp(text) {
 
 const documentTypes = parseDocument(document);
 
+// --- The project -------------------------------------------------------
+
+ok(documentProject !== null, 'the document has its Project section');
+deepEqual(PROJECT.attributes, documentProject?.attributes, "the project's own definitions match the document");
+deepEqual(PROJECT.groups, documentProject?.groups, "the project's groups match the document");
+deepEqual(attributesFor('PROJECT').map((definition) => definition.key), ['designation', 'organisation', 'description', 'version', 'date', 'author', 'role', 'changes', 'estimationMethod', 'notes'], 'attributesFor reads the project under PROJECT, the notes last');
+ok(typeOf('PROJECT') === PROJECT && typeOf('SCN') === ATTRIBUTES.SCN && typeOf('XYZ') === null, 'typeOf finds the project, a type, and nothing for a stranger');
+for (const definition of attributesFor('PROJECT')) {
+  ok(ATTRIBUTE_KINDS.includes(definition.kind) && definition.kind !== 'rationale' && definition.kind !== 'computed', `PROJECT.${definition.key} uses a defined kind, and rates nothing`);
+  ok(typeof (definition.help ?? SHARED_HELP[definition.name]) === 'string', `PROJECT.${definition.key} explains itself`);
+}
+
 // --- The shared help ---------------------------------------------------
 
 deepEqual(SHARED_HELP, parseSharedHelp(document), 'the help a shared name carries matches §1.9, name for name');
+const everyGroup = (type) => type.groups.flatMap((group) => [group, ...(group.groups ?? [])]);
+const isRating = (group) => group.attributes.some((definition) => definition.kind === 'computed');
 for (const name of Object.keys(SHARED_HELP)) {
   if (name === 'Identifier') continue;
-  const carried = documentTypes.filter((type) => [type.attributes, ...type.groups.flatMap((group) => [group.attributes, ...(group.groups ?? []).map((sub) => sub.attributes)])].flat().some((definition) => definition.name === name)).length;
-  ok(carried > 1, `${name} is a name several types share: ${carried}`);
+  const asAttribute = documentTypes.filter((type) => [type.attributes, ...everyGroup(type).map((group) => group.attributes)].flat().some((definition) => definition.name === name)).length;
+  const asGroup = documentTypes.flatMap(everyGroup).filter((group) => group.name === name).length;
+  ok(asAttribute > 1 || asGroup > 1, `${name} is a name several types or variants share: ${asAttribute} types, ${asGroup} groups`);
+}
+for (const type of documentTypes) {
+  const tables = [{ attributes: type.attributes }, ...everyGroup(type)];
+  for (const table of tables) {
+    if (isRating(table)) continue;
+    for (const definition of table.attributes) {
+      ok(typeof (definition.help ?? SHARED_HELP[definition.name]) === 'string', `${type.code}.${definition.key} explains itself, by its own help or its name's`);
+    }
+  }
 }
 
 // --- The transcription -------------------------------------------------
@@ -151,14 +190,14 @@ for (const type of documentTypes) {
       ok(new Set(definition.values).size === definition.values.length, `${type.code}.${definition.key} lists each value once`);
     } else if (definition.kind === 'number') {
       ok(Number.isInteger(definition.min) && Number.isInteger(definition.max) && definition.min < definition.max, `${type.code}.${definition.key} is bounded below and above`);
+    } else if (definition.kind === 'rationale') {
+      const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));
+      ok(group !== undefined && group.attributes.some((held) => held.key === definition.parameter && isParameter(held)), `${type.code}.${definition.key} is given for a parameter of its own rating: ${definition.parameter}`);
+      ok(!('values' in definition), `${type.code}.${definition.key} offers no values of its own`);
     } else if (definition.kind === 'computed') {
       ok(ESTIMATED.includes(definition.method), `${type.code}.${definition.key} is read by a method the software knows`);
       const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));
-      ok(group !== undefined && group.attributes.some((held) => held.kind !== 'computed'), `${type.code}.${definition.key} has parameters beside it to read`);
-    } else if (definition.kind === 'related') {
-      const relationship = RELATIONSHIP_TYPES[definition.relationship];
-      ok(relationship !== undefined, `${type.code}.${definition.key} lists a relationship type the metamodel defines`);
-      ok(relationship?.source === type.code || relationship?.target === type.code, `${type.code}.${definition.key} lists a relationship ${type.code} takes part in`);
+      ok(group !== undefined && group.attributes.some(isParameter), `${type.code}.${definition.key} has parameters beside it to read`);
     } else {
       ok(!('values' in definition), `${type.code}.${definition.key} carries no values`);
     }
@@ -166,11 +205,15 @@ for (const type of documentTypes) {
   ok(!keys.includes('id'), `${type.code} does not carry the identifier as an attribute`);
   for (const group of groupsOf(type.code)) {
     ok(!(group.groups ?? []).some((sub) => (sub.groups ?? []).length > 0), `${type.code} "${group.name}" nests one level at most`);
+    for (const sub of group.groups ?? []) {
+      if (sub.after === undefined) continue;
+      ok(sub.when !== undefined && group.attributes.some((held) => held.key === sub.after), `${type.code} "${sub.name}" stands after an attribute of its group: ${sub.after}`);
+    }
     if (!group.when) continue;
-    const leader = attributesFor(type.code).find((held) => held.key === group.when.key);
+    const offered = attributesFor(type.code).find((held) => held.key === group.when.key) ?? attributesFor('PROJECT').find((held) => held.key === group.when.key);
     ok(
-      leader?.kind === 'choice' && (leader.values ?? []).includes(group.when.value),
-      `${type.code} "${group.name}" waits on a value ${group.when.key} offers: ${group.when.value}`
+      offered?.kind === 'choice' && (group.when.value === '' || (offered.values ?? []).includes(group.when.value)),
+      `${type.code} "${group.name}" waits on a value ${group.when.key} offers, on the type or the project, or on nothing chosen: ${group.when.value || '(nothing)'}`
     );
   }
 }

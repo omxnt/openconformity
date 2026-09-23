@@ -12,7 +12,7 @@ Each entity type has an identifier which is generated and read only, so it is no
 
 ### 1.2 Optional
 
-Every attribute is optional, and every value is stored as text. An unset attribute is the absence of its key; clearing a choice removes the key. A computed attribute is the one exception: derived from the attributes beside it wherever it is shown, it is never stored. A related attribute stores nothing of the list it shows, only the record a rating makes of it (§1.3).
+Every attribute is optional, and every value is stored as text. An unset attribute is the absence of its key; clearing a choice removes the key. A computed attribute is the one exception: derived from the attributes beside it wherever it is shown, it is never stored.
 
 ### 1.3 Kinds
 
@@ -27,7 +27,7 @@ Each attribute uses one of the kinds below.
 | hyperlink | A web address |
 | number | A whole number, kept between the least and the greatest the Values column gives |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
-| related | The entities related to this one by the relationship type the Values column names, listed as they stand, each a way to it; the value stored is the list as recorded when the rating standing nearest before it was applied, kept while that rating stands |
+| rationale | The reasoning behind the parameter of the same rating whose key the Values column names, free text of any length for why its class was chosen, shown with the parameter's value (§1.8) |
 
 ### 1.4 Groups
 
@@ -35,7 +35,7 @@ The editor may present a type's attributes in groups. Each group is its own sub-
 
 A group is a heading over its cells, within the tab it stands in. A group whose heading carries the tag `tab` stands instead on a tab of its own, named for the group, as §1.8 lays out.
 
-A group whose heading carries the tag `when key = value` is shown only while the attribute of that key holds that value, and what it holds is kept only then: a save made while the group is hidden removes what it held, so a rating made under one method does not ride along under another and an entity carries one at a time. Until the save nothing is lost, and Cancel keeps everything; a save that would remove what a hidden group still holds asks first, naming the groups by the value they stood under. Sub-groups sharing a name and waiting on the same attribute are one slot, a cell held whichever of them holds; while none does, the slot shows in the value's place that nothing is chosen for the attribute it waits on — as a disabled field in an edit — so the form keeps its shape. A group's sub-groups stand after its attributes, in their order; where one of them waits on an attribute of the group, they stand right after that attribute, so what a choice governs stands under the choice.
+A group whose heading carries the tag `when key = value` is shown only while the attribute of that key holds that value, and what it holds is kept only then: a save made while the group is hidden removes what it held, so a rating made under one method does not ride along under another and an entity carries one at a time. Until the save nothing is lost, and Cancel keeps everything; a save that would remove what a hidden group still holds asks first, naming the groups by the value they stood under. The key may instead name an attribute of the project (§1.10) where the type has none of that key; the group then waits on the project's choice, which changes on the project's own form, and saving the project removes what every entity held under the old choice, asking first with their count. Sub-groups sharing a name and waiting on the same attribute are one slot, a cell held whichever of them holds; while none does, the slot shows in the value's place that nothing is chosen for the attribute it waits on — as a disabled field in an edit — so the form keeps its shape. A variant may instead wait on nothing chosen, `when key =` with no value after it, and then holds while the attribute is unset; such a slot needs no holder, that variant standing in its place. A group's sub-groups stand after its attributes, in their order; where one of them waits on an attribute of the group, they stand right after that attribute, so what a choice governs stands under the choice. Where one choice governs more than one slot, a sub-group's heading may carry a second tag, `after key`, to stand after that attribute instead.
 
 ### 1.5 Status
 
@@ -88,29 +88,54 @@ A type that carries a reference composes its label from the reference and the ti
 
 ### 1.8 Layout
 
-The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline and a hyperlink each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice or a number is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
+The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline, a hyperlink and a set each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice or a number is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
 
 A type's own attributes stand on the first tab, named for the type by the last word of its name — Legislation, Requirement, Function — and each group tagged `tab` on a tab of its own, named for the group: a tab is earned by a distinct task, such as a verdict or an estimate, or by a set of fields about a distinct concern, never by a single text and never by the identity alone. Every type closes with a Notes tab, one multiline field for what fits nowhere else, so every pane has its tab bar. The tabs are Carbon's line tabs at the navigator filter bar's height. The tab chosen stands for the rest of the browser session, by type, so the next entity of the type opens on the same tab, and choosing a tab leaves an open edit as it is: what stands on another tab is still part of the draft. A group carrying no tag stands within its tab as a legend over its cells, unless it holds a single attribute, which then stands on its own.
 
-A group that closes on a computed attribute is a rating, a cell like any other: its name, then what the rating comes to and the code of each parameter set, as tags — a code being a value's first word, and its second where the first holds no digit — the parameter's name and full value shown on hovering a tag. In an edit the cell is a field that opens the rating's dialog, which presents the method as chapter 6 lays it out: the matrix to click, the graph to follow, the scores to enter, the scales beside their matrix.
-
-A related attribute lists, live, the entities its relationship type joins to this one, each shown as the tree shows an entity and each a way to it, on a row of its own and, being a list of entities rather than a value, without a rule beneath it. Where a rating stands nearest before it in its group, applying that rating records the list as it then stands; while the record and the live list differ, the list keeps the record's order and says at the end of a row what changed — Unlinked, the row dimmed and kept in place, or Added — and a notice says the rating should be made again. An entity gone from the project reads Deleted, dimmed, its glyph known from its identifier. Rating again refreshes the record, and a rating applied empty clears it, as does a save that leaves no rating made before the list.
+A group that closes on a computed attribute is a rating, a cell like any other: its name, then what the rating comes to and the code of each parameter set, as tags — a code being a value's first word, and its second where the first holds no digit, or for a number the initials of its name before it, SS 95 — the parameter's name and full value shown on hovering a tag. Each parameter may carry a rationale, a `rationale` kind naming the parameter in its Values column, free text of any length for why that class was chosen; a tag whose parameter has one is underlined, and outside an edit is a button whose tooltip holds the parameter and the reasoning, shown on hovering or focusing it as the help glyph's tooltip is, so the tags stay the rating's whole face. In an edit the cell is a field that opens the rating's dialog, titled by the rating and the method, which presents the method as chapter 6 lays it out, the matrix to click, the graph to follow, the scores to enter, and beneath it a text area per parameter for its rationale, the two of a row kept the same height. What is chosen can be unchosen there: a matrix cell pressed again clears its pair, a graph code picked again clears its level and those below it, and a score is deleted. With no method chosen the slot is a text field instead, and the rating is typed.
 
 ### 1.9 Help
 
-A name shared by several types means the same on each, so its help is recorded once, below, and every cell of that name carries it; a row's own Help column, where it has one, stands instead. The identifier's help stands here too.
+A name shared by several types means the same on each, so its help is recorded once, below, and every cell of that name carries it; a row's own Help column, where it has one, stands instead. The identifier's help stands here too, and so does the help of the names a rating's cell and its slot carry, shared by the variants under each method.
 
 | Name | Help |
 |---|---|
-| Identifier | Assigned by the tool when the entity is created, from its type's code and a running number. It never changes and is never reused. |
-| Designation | A short name of your own for the entity. Wherever the entity is listed, the label shows it before the title. |
-| Title | What the entity is called. Wherever the entity is listed, the label shows it after the designation or reference where there is one. |
-| Description | A free description of the entity, as long as it needs to be. |
-| Notes | Free notes: anything worth keeping that no field holds, such as how something was assessed or decided. |
-| Reference | The citation the entity is known by, as its source writes it: an act's number, a standard's designation, a clause's number. An import joins on it. |
+| Identifier | Assigned by the tool from the entity type's code and a running number, never changed and never reused. |
+| Designation | A short name of your own, shown in the label before the title. |
+| Notes | Anything worth keeping that no field holds, such as how something was assessed. |
 | Link | Where it is published online. |
-| Applicable | Whether it applies to this product. The rationale beside it says why. |
-| Rationale | Why the verdict on applicability is what it is. |
+| Applicable | Whether it applies to this product. |
+| Rationale | Why it applies, or why not. |
+| Initial risk estimation | The risk before protective measures, estimated by the method chosen or typed where none is. |
+| Residual risk estimation | The risk with the protective measures in place, estimated by the method chosen or typed where none is. |
+| Required integrity level | The level the safety function must reach, in its standard's own terms. |
+
+### 1.10 Project
+
+The project is edited under the root of the tree, on the surface an entity has: its own tabs, Edit and Save. Its name is the model's own rather than an attribute, the file saved being named after it, and stands on the first tab, named Project, as a row of its own after the designation and the organisation; the rest are attributes of the project, stored in the project's own map beside the entities. The first tab identifies the project and the revision the file is. The Settings tab holds the choice the scenarios' ratings wait on (§1.4, §4.2): the risk estimation method they are rated by. A method names in its value the document, its year and the clause its example stands in, as a citation, so wherever the choice is shown, on the project, in the rating's dialog and in the views, a rating says by what and from where; the sources are chapter 6's. A safety function's standard is not the project's choice but the function's own (§4.4), a machine designed to one standard commonly holding a subsystem designed to another. A group of any type may wait on one of these keys (§1.4).
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| designation | Designation | text | | A short name or number of your own for the project. |
+| organisation | Organisation | text | | Who the project is done by, or for. |
+| description | Description | multiline | | What the project covers. |
+| version | Version | text | | The revision this file is, as you number it. |
+| date | Date | text | | When this revision was made. |
+| author | Author | text | | Who prepared this revision. |
+| role | Role | text | | The capacity in which the author prepared it. |
+| changes | Changes | multiline | | What changed in this revision since the last. |
+
+#### Settings `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| estimationMethod | Risk estimation method | choice | Risk matrix (ISO/TR 14121-2:2012, 6.2.2); Risk graph (ISO/TR 14121-2:2012, 6.3.2); Numerical scoring (ISO/TR 14121-2:2012, 6.4.2) | The method every scenario's initial and residual risk is rated by, or none to type them freely. Changing it removes the ratings made under the old one. |
+
+#### Notes `tab`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| notes | Notes | multiline | |
 
 ## 2. System Context
 
@@ -118,11 +143,11 @@ A name shared by several types means the same on each, so its help is recorded o
 
 The designation is the element's own short name — `E1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Description | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the system element. |
+| description | Description | multiline | | What the system element is and what it does in the machinery. |
 
 #### Notes `tab`
 
@@ -134,11 +159,11 @@ The designation is the element's own short name — `E1` — entered by the mode
 
 The designation is the actor's own short name — `A1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Description | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name or role of the system actor. |
+| description | Description | multiline | | Who the system actor is and how they interact with the machinery. |
 
 #### Notes `tab`
 
@@ -148,10 +173,13 @@ The designation is the actor's own short name — `A1` — entered by the modell
 
 ### 2.3 System Task (TSK) `draft`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| title | Title | text | |
-| description | Description | multiline | |
+The designation is the task's own short name — `T1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | |
+| title | Title | text | | The name of the system task. |
+| description | Description | multiline | | What is done in the system task, and on which part of the machinery. |
 
 #### Notes `tab`
 
@@ -163,11 +191,11 @@ The designation is the actor's own short name — `A1` — entered by the modell
 
 The designation is the phase's own short name — `P1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Description | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the system phase. |
+| description | Description | multiline | | What happens to the machinery in the system phase. |
 
 #### Notes `tab`
 
@@ -181,11 +209,11 @@ The designation is the phase's own short name — `P1` — entered by the modell
 
 The reference is the act's citation in canonical form — `(EU) 2023/1230` for a regulation, `2006/42/EC` for a directive. It is load-bearing beyond display: an import will join on it, matching on the year and number at its core, so it is written as the act itself writes it and nothing else is put in the field. The title is the short human name the act is known by, and the link is the act's canonical online home. Applicable and the rationale carry the verdict and its reasoning: whether the act applies to this product at all, and the account of why — coverage, transition, exclusions — that a reader follows. Unset means unassessed, not ruled out.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| link | Link | hyperlink | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The official number of the legislation, as cited. |
+| title | Title | text | | The title of the legislation. |
+| link | Link | hyperlink | | |
 
 #### Applicability `tab`
 
@@ -204,11 +232,11 @@ The reference is the act's citation in canonical form — `(EU) 2023/1230` for a
 
 The reference is the standard's designation as it is cited — `EN ISO 12100` — and an import joins on it. The title is the standard's own title, and the link is where it is published online. Applicable and the rationale hold the verdict and its reasoning: whether the standard is applied to this product, and why.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| link | Link | hyperlink | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The designation of the standard, as cited. |
+| title | Title | text | | The title of the standard, as published. |
+| link | Link | hyperlink | | |
 
 #### Applicability `tab`
 
@@ -227,11 +255,11 @@ The reference is the standard's designation as it is cited — `EN ISO 12100` �
 
 The same fields as a harmonised standard, for a specification that is not harmonised to the legislation and so carries no presumption of conformity. What that changes is the metamodel's business, not this document's: the requirements it holds support an essential requirement rather than covering one.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| link | Link | hyperlink | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The number or designation of the specification, as cited. |
+| title | Title | text | | The title of the specification. |
+| link | Link | hyperlink | | |
 
 #### Applicability `tab`
 
@@ -248,10 +276,13 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 ### 3.4 Conformity Assessment (CAS) `draft`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| title | Title | text | |
-| description | Description | multiline | |
+The designation is the procedure's own short name — `CA1`, the module it runs under where that names it — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | |
+| title | Title | text | | The name of the conformity assessment procedure. |
+| description | Description | multiline | | What the conformity assessment involves for this product. |
 
 #### Notes `tab`
 
@@ -261,10 +292,13 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 ### 3.5 Notified Body (NTB) `draft`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| title | Title | text | |
-| description | Description | multiline | |
+The designation is the body's own short name — `NB1`, its notified body number where it has one — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | |
+| title | Title | text | | The name of the notified body. |
+| description | Description | multiline | | The role of the notified body for this product. |
 
 #### Notes `tab`
 
@@ -278,11 +312,11 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Description | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the hazard. |
+| description | Description | multiline | | Where the hazard arises and how it could cause harm. |
 
 #### Notes `tab`
 
@@ -292,111 +326,102 @@ The designation is the hazard's own short name — `H1` — entered by the model
 
 ### 4.2 Accident Scenario (SCN) `draft`
 
-The designation is the scenario's own short name — `S1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The scenario is rated by the methods of an estimation standard — ISO/TR 14121-2, the report chapter 6 transcribes — the method chosen being one of the report's four and so offered only under it: each method's parameters stand in a pair of groups shown only while it is the method chosen, once for the initial risk and once for the residual risk, side by side, with the protective measures the model links to the scenario listed beneath the two, the measures in place when the residual risk is rated. What a rating comes to — its level, index or score — is computed where it is shown and never stored. The measures are the one thing the residual rating records: applying it stores the measures then linked as the scenario's own value, and the list shows that record against what is linked now, a measure unlinked since dimmed in place and marked Unlinked, one linked since marked Added, and a notice saying the residual risk should be rated again while they differ; rating again refreshes the record. The tab closes on the risk evaluation, the modeller's own judgement whether the residual risk is adequately reduced and why. On the scenario's own tab the hazardous situation, the hazardous event and the potential consequence are the modeller's own text.
+The designation is the scenario's own short name — `S1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The scenario is rated by the risk estimation method the project chooses (§1.10), one of the three chapter 6 transcribes from ISO/TR 14121-2, so every scenario is rated the same way: each method's parameters stand in a pair of groups waiting on the project's choice (§1.4), once for the initial risk and once for the residual risk, side by side, each parameter with a rationale of its own for why its class was chosen, and with no method chosen a pair of text fields stands in their place, the ratings then typed in whatever terms the assessment uses. What a rating comes to — its level, index or score — is computed where it is shown and never stored; a typed rating is stored as typed. The protective measures reducing the scenario's risk are its relationships, shown by the relationship pane and the risk assessment view, not by the tab. The tab closes on the risk evaluation, the modeller's own judgement whether the residual risk is adequately reduced and why. On the scenario's own tab the hazardous event and the potential consequence are the modeller's own text; what the scenario arises from is not a field but its relationships, the hazards contributing to it, the actors exposed in it and the tasks giving rise to it, which the risk assessment view lays out beside it.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| hazardousSituation | Hazardous situation | multiline | |
-| hazardousEvent | Hazardous event | multiline | |
-| consequence | Potential consequence | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the accident scenario. |
+| hazardousEvent | Hazardous event | multiline | | What goes wrong in the accident scenario and sets the harm in motion. |
+| consequence | Potential consequence | multiline | | The harm the accident scenario could result in. |
 
 #### Risk `tab`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| standard | Estimation standard | choice | ISO/TR 14121-2 |
-
-##### Estimation method `when standard = ISO/TR 14121-2`
+##### Initial risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| method | Estimation method | choice | Risk matrix; Risk graph; Numerical scoring; Hybrid tool |
+| initialSeverity | Severity | choice | Catastrophic; Serious; Moderate; Minor |
+| initialSeverityRationale | Severity rationale | rationale | initialSeverity |
+| initialProbability | Probability | choice | Very likely; Likely; Unlikely; Remote |
+| initialProbabilityRationale | Probability rationale | rationale | initialProbability |
+| initialLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |
 
-##### Initial risk `when method = Risk matrix`
-
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| initialSeverity | Severity of harm | choice | Catastrophic; Serious; Moderate; Minor |
-| initialProbability | Probability of occurrence of harm | choice | Very likely; Likely; Unlikely; Remote |
-| initialLevel | Risk level | computed | Risk matrix |
-
-##### Initial risk `when method = Risk graph`
+##### Initial risk estimation `when estimationMethod = Risk graph (ISO/TR 14121-2:2012, 6.3.2)`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| initialS | Severity of harm | choice | S1; S2 |
-| initialF | Frequency and duration of exposure | choice | F1; F2 |
-| initialO | Probability of occurrence of a hazardous event | choice | O1; O2; O3 |
-| initialA | Possibility of avoidance | choice | A1; A2 |
-| initialIndex | Risk index | computed | Risk graph |
+| initialS | Severity | choice | S1; S2 |
+| initialSRationale | Severity rationale | rationale | initialS |
+| initialF | Exposure | choice | F1; F2 |
+| initialFRationale | Exposure rationale | rationale | initialF |
+| initialO | Occurrence | choice | O1; O2; O3 |
+| initialORationale | Occurrence rationale | rationale | initialO |
+| initialA | Avoidance | choice | A1; A2 |
+| initialARationale | Avoidance rationale | rationale | initialA |
+| initialIndex | Risk index | computed | Risk graph (ISO/TR 14121-2:2012, 6.3.2) |
 
-##### Initial risk `when method = Numerical scoring`
+##### Initial risk estimation `when estimationMethod = Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
 | initialSeverityScore | Severity score | number | 0; 100 |
+| initialSeverityScoreRationale | Severity rationale | rationale | initialSeverityScore |
 | initialProbabilityScore | Probability score | number | 0; 100 |
-| initialScore | Risk score | computed | Numerical scoring |
+| initialProbabilityScoreRationale | Probability rationale | rationale | initialProbabilityScore |
+| initialScore | Risk score | computed | Numerical scoring (ISO/TR 14121-2:2012, 6.4.2) |
 
-##### Initial risk `when method = Hybrid tool`
-
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| initialSe | Severity Se | choice | Se 1; Se 2; Se 3; Se 4 |
-| initialFr | Frequency Fr | choice | Fr 2; Fr 3; Fr 4; Fr 5 |
-| initialPr | Probability Pr | choice | Pr 1; Pr 2; Pr 3; Pr 4; Pr 5 |
-| initialAv | Avoidance Av | choice | Av 1; Av 3; Av 5 |
-| initialClass | Class and risk | computed | Hybrid tool |
-
-##### Residual risk `when method = Risk matrix`
+##### Initial risk estimation `when estimationMethod =`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| residualSeverity | Severity of harm | choice | Catastrophic; Serious; Moderate; Minor |
-| residualProbability | Probability of occurrence of harm | choice | Very likely; Likely; Unlikely; Remote |
-| residualLevel | Risk level | computed | Risk matrix |
+| initialRating | Initial risk estimation | text |  |
 
-##### Residual risk `when method = Risk graph`
+##### Residual risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| residualS | Severity of harm | choice | S1; S2 |
-| residualF | Frequency and duration of exposure | choice | F1; F2 |
-| residualO | Probability of occurrence of a hazardous event | choice | O1; O2; O3 |
-| residualA | Possibility of avoidance | choice | A1; A2 |
-| residualIndex | Risk index | computed | Risk graph |
+| residualSeverity | Severity | choice | Catastrophic; Serious; Moderate; Minor |
+| residualSeverityRationale | Severity rationale | rationale | residualSeverity |
+| residualProbability | Probability | choice | Very likely; Likely; Unlikely; Remote |
+| residualProbabilityRationale | Probability rationale | rationale | residualProbability |
+| residualLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |
 
-##### Residual risk `when method = Numerical scoring`
+##### Residual risk estimation `when estimationMethod = Risk graph (ISO/TR 14121-2:2012, 6.3.2)`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| residualS | Severity | choice | S1; S2 |
+| residualSRationale | Severity rationale | rationale | residualS |
+| residualF | Exposure | choice | F1; F2 |
+| residualFRationale | Exposure rationale | rationale | residualF |
+| residualO | Occurrence | choice | O1; O2; O3 |
+| residualORationale | Occurrence rationale | rationale | residualO |
+| residualA | Avoidance | choice | A1; A2 |
+| residualARationale | Avoidance rationale | rationale | residualA |
+| residualIndex | Risk index | computed | Risk graph (ISO/TR 14121-2:2012, 6.3.2) |
+
+##### Residual risk estimation `when estimationMethod = Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
 | residualSeverityScore | Severity score | number | 0; 100 |
+| residualSeverityScoreRationale | Severity rationale | rationale | residualSeverityScore |
 | residualProbabilityScore | Probability score | number | 0; 100 |
-| residualScore | Risk score | computed | Numerical scoring |
+| residualProbabilityScoreRationale | Probability rationale | rationale | residualProbabilityScore |
+| residualScore | Risk score | computed | Numerical scoring (ISO/TR 14121-2:2012, 6.4.2) |
 
-##### Residual risk `when method = Hybrid tool`
+##### Residual risk estimation `when estimationMethod =`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| residualSe | Severity Se | choice | Se 1; Se 2; Se 3; Se 4 |
-| residualFr | Frequency Fr | choice | Fr 2; Fr 3; Fr 4; Fr 5 |
-| residualPr | Probability Pr | choice | Pr 1; Pr 2; Pr 3; Pr 4; Pr 5 |
-| residualAv | Avoidance Av | choice | Av 1; Av 3; Av 5 |
-| residualClass | Class and risk | computed | Hybrid tool |
-
-##### Protective measures
-
-| Key | Name | Kind | Values | Help |
-|---|---|---|---|---|
-| measures | Protective measures | related | prm-reduces-risk-of-scn | The protective measures linked to the scenario. Rating the residual risk records the ones linked at that moment; a measure linked or unlinked since is marked, and the residual risk should be rated again. |
+| residualRating | Residual risk estimation | text |  |
 
 ##### Risk evaluation
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| evaluation | Risk evaluation | multiline | | Your judgement whether the residual risk is adequately reduced by the measures listed, and why. |
+| evaluation | Risk evaluation | multiline | | Your judgement whether the accident scenario's residual risk is acceptable, and why. |
 
 #### Notes `tab`
 
@@ -408,11 +433,11 @@ The designation is the scenario's own short name — `S1` — entered by the mod
 
 The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Description | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the protective measure. |
+| description | Description | multiline | | What the protective measure is and how it reduces the risk. |
 
 #### Notes `tab`
 
@@ -422,65 +447,71 @@ The designation is the measure's own short name — `M1` — entered by the mode
 
 ### 4.4 Safety Function (SAF) `draft`
 
-The designation is the function's own short name — `SF1` — entered by the modeller, and it is the reference the label composes with the title (§1.7): `SF1 Emergency Stop`. The tabs follow one rule: a sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. So the tabs read: what it is, what it does, what it does when it fails, and what it must achieve, in numbers. On Fault handling, fault detection says which faults in the function's own parts are found, and how; fault reaction what the function does once one is found; fault indication how a found fault is made known; and power loss behaviour what the function does when its supply goes. The technologies follow those ISO 13849-1 names in its scope, software standing for the programmable electronic among them, and a function spanning several carries them all. The design standard names the functional-safety standard the function is designed to, and the integrity level it requires is not chosen but read by that standard's own method, in the one slot beside it. Under EN ISO 13849-1 the risk graph (§6.5) reads the performance level from the function's S, F, P and occurrence; under EN IEC 62061 the matrix (§6.6) reads the safety integrity level from its Se, Fr, Pr and Av. The function stores those four, and the level is computed.
+The designation is the function's own short name — `SF1` — entered by the modeller, and it is the reference the label composes with the title (§1.7): `SF1 Emergency Stop`. The tabs follow one rule: a sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. So the tabs read: what it is, what it does, what it must achieve in numbers, and what it does when it fails. On Behaviour, operator feedback says how the function makes itself known to the operator, and muting or override, before the way back, whether and how it can be suspended, muted or overridden, in whichever form the design has, and under what conditions. On Fault handling, the faults to be detected say which faults in the function's parts must not go unnoticed, and the means of detection how they are found, a proof test at an interval among them where one is needed; fault reaction says what the function does once a fault is found and the state it brings the machinery to, the same for any fault or fault by fault, the state kept within the reaction rather than in a field of its own because reactions differ by fault, one fault only flagged, another degrading operation, another going to the intended safe state and another to a different one, a function that brakes to a standstill on demand perhaps only cutting power and coasting on a fault, so that a list of reactions carries its states line by line instead of a reader matching two lists; the two times run from the fault occurring to its detection and from detection to the state the reaction brings the machinery to, stopping included, their sum being what the person at the machine feels; fault indication says how a found fault is made known, fault recovery whether it latches or clears itself, when and how it may be reset, and how the function returns to service, the fault path's counterpart of the restart conditions on Behaviour; and power disturbances what the function does when its supply goes, returns or fluctuates, on its own because the function cannot react to a lost supply by its own logic, whereas a lost communication is a fault like any other, detected and reacted to. The technologies follow those ISO 13849-1 names in its scope, software standing for the programmable electronic among them, with, beside them, optoelectronic for sensing by light, configurable for a controller parameterised rather than programmed, networked for signals over a wired safety network and wireless for those over radio; the set does not classify the parts so much as mark what the design and the requirements must take further, so a function spanning several carries them all. The functional safety standard is the function's own choice, since a machine designed to one standard commonly holds a subsystem designed to another; the level the function requires is chosen in the one slot beside it, among the standard's own levels, under the one name Required integrity level whichever standard's term it is. The two standards offered are the harmonised ones for machinery; with none chosen the slot takes the level as text, in whatever terms the design uses, another standard being named in the specific design targets or the notes until it earns a place in the list. How the level was arrived at, by the standard's own method read on paper, by a type-C standard or by a specification, is noted on the Notes tab, as its help invites. What the standard requires of the design beyond the level — a structure, a fault tolerance, a failure rate, a software level, a proof test — differs from standard to standard and is complete for none of them as fields, so it stands in one text, the specific design targets, in the standard's own terms rather than in fields that would fit one standard and not the next. Response time runs from a demand to the function's output and stopping time from there until hazardous motion has stopped, the two adding up to what a safety distance needs; the external interfaces and the independence and separation say what the function exchanges and what it must stay apart from, and the measures against defeating how it resists being bypassed or disabled, by a person working around it or by a mistake; the environmental conditions are those the parts carrying the function must work in, noted on the function because the specification is read as one, though a function is what the system does rather than what can be touched. Fault handling is self-contained: everything about faults, the two times and the supply included, stands there.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| description | Brief description | multiline | |
-| relevantStandards | Relevant standards | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the safety function. |
+| description | Description | multiline | | What the safety function is for. |
 
 #### Behaviour `tab`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| priority | Priority | text | |
-| operatingMode | Operating mode | text | |
-| trigger | Triggering event | multiline | |
-| reaction | Safety-related reaction | multiline | |
-| safeState | Intended safe state | multiline | |
-| restart | Restart conditions | multiline | |
-
-#### Fault handling `tab`
-
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| faultDetection | Fault detection | multiline | |
-| faultHandling | Fault reaction | multiline | |
-| faultIndication | Fault indication | multiline | |
-| powerLoss | Power loss behaviour | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| priority | Priority | text | | The priority of the safety function when functions conflict. |
+| operatingMode | Operating mode | text | | The operating modes in which the safety function is active. |
+| trigger | Triggering event | multiline | | What starts the safety function. |
+| reaction | Safety-related reaction | multiline | | What the safety function does when triggered to reach the safe state. |
+| safeState | Intended safe state | multiline | | The state the safety function brings the machinery to. |
+| feedback | Operator feedback | multiline | | How the safety function makes itself known to the operator, such as lights, messages or sounds. |
+| muting | Muting or override | multiline | | Whether and how the safety function can be suspended, muted or overridden, and under what conditions. |
+| restart | Restart conditions | multiline | | What must hold before the safety function resets and operation resumes. |
 
 #### Characteristics `tab`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| standard | Design standard | choice | EN ISO 13849-1; EN IEC 62061 |
-| responseTime | Demand response time | text | |
-| faultReactionTime | Fault reaction time | text | |
-| demandRate | Demand rate | text | |
-| technology | Technology | set | Mechanical; Hydraulic; Pneumatic; Electrical; Electronic; Software |
-| interfaces | Specific interfaces | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 | The standard the safety function is designed to, which sets the levels offered, or none to type the level freely. |
+| designTargets | Specific design targets | multiline | | What the standard requires of the safety function's design beyond the level, such as a structure, a fault tolerance, a failure rate or a software level, in its own terms. |
+| responseTime | Response time | text | | How long from a demand to the safety function's output. |
+| stoppingTime | Stopping time | text | | How long from the safety function's output until hazardous motion has stopped. |
+| technology | Implementing technology | set | Mechanical; Hydraulic; Pneumatic; Electrical; Electronic; Optoelectronic; Software; Configurable; Networked; Wireless | The technologies the safety function is built with, each a heading for the design and the requirements that follow. |
+| interfaces | External interfaces | multiline | | The signals and services the safety function exchanges with other functions or systems. |
+| independence | Independence and separation | multiline | | What the safety function must keep independent of, or separated from, the nominal control or other functions, and how. |
+| defeating | Measures against defeating | multiline | | How the safety function resists being bypassed, disabled or fooled, whether on purpose or by mistake. |
+| environment | Environmental conditions | multiline | | The conditions the parts carrying the safety function must work in. |
 
-##### Integrity level `when standard = EN ISO 13849-1`
-
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| plS | Severity of injury | choice | S1; S2 |
-| plF | Frequency and exposure | choice | F1; F2 |
-| plP | Possibility of avoidance | choice | P1; P2 |
-| plO | Probability of occurrence | choice | High; Low |
-| plr | Required performance level | computed | PL risk graph |
-
-##### Integrity level `when standard = EN IEC 62061`
+##### Required integrity level `when standard = EN ISO 13849-1:2023`
 
 | Key | Name | Kind | Values |
 |---|---|---|---|
-| silSe | Severity Se | choice | Se 1; Se 2; Se 3; Se 4 |
-| silFr | Frequency Fr | choice | Fr 1; Fr 2; Fr 3; Fr 4; Fr 5 |
-| silPr | Probability Pr | choice | Pr 1; Pr 2; Pr 3; Pr 4; Pr 5 |
-| silAv | Avoidance Av | choice | Av 1; Av 3; Av 5 |
-| sil | Required safety integrity level | computed | SIL matrix |
+| plr | Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |
+
+##### Required integrity level `when standard = EN IEC 62061:2021`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| sil | Required integrity level | choice | SIL 1; SIL 2; SIL 3 |
+
+##### Required integrity level `when standard =`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| ownLevel | Required integrity level | text | |
+
+#### Fault handling `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| faultsDetected | Faults to be detected | multiline | | Which faults in the safety function's parts must not go unnoticed. |
+| detectionMeans | Means of detection | multiline | | How those faults are found and how often, such as by monitoring, checks or tests. |
+| faultHandling | Fault reaction | multiline | | What the safety function does once a fault is found and the state it brings the machinery to, for any fault or fault by fault. |
+| faultDetectionTime | Fault detection time | text | | How long from a fault occurring to its detection. |
+| faultReactionTime | Fault reaction time | text | | How long from detection until the machinery reaches the state the reaction brings it to, stopping included. |
+| faultIndication | Fault indication | multiline | | How a found fault is made known. |
+| faultRecovery | Fault recovery | multiline | | Whether a fault latches or clears itself, when and how it may be reset, and how the safety function returns to service. |
+| powerDisturbances | Power disturbances | multiline | | What the safety function does when its supply goes, returns or fluctuates. |
 
 #### Notes `tab`
 
@@ -494,19 +525,19 @@ The designation is the function's own short name — `SF1` — entered by the mo
 
 The reference is the requirement's citation within the legislation that contains it — `1.3.7`, not the act's own citation — so it is scoped by its owner: an import joins on the owning legislation's reference together with this one. The title is the requirement's heading as the act prints it, and the requirement holds its text. The guidance holds what helps read the requirement, apart from the requirement's own text: the source names the document it is taken from, the section where in that document, and the guidance carries the text or the modeller's account of it. Applicable is the assessment verdict, and unset means the requirement has not been assessed yet: an unassessed requirement is not the same as one ruled out. The rationale carries the reasoning behind the verdict, and is what an assessor reads to follow the argument; it belongs with every verdict, and most of all with `No`.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| requirement | Requirement | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The clause number of the essential requirement within the legislation. |
+| title | Title | text | | The heading of the essential requirement. |
+| requirement | Requirement | multiline | | The essential requirement as the legislation states it. |
 
 #### Guidance `tab`
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| guidanceSource | Source | text | |
-| guidanceSection | Section | text | |
-| guidance | Guidance | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| guidanceSource | Source | text | | Where the guidance comes from, such as an official guide, a standard, a commentary or yourself. |
+| guidanceSection | Section | text | | The section of the source the guidance is taken from. |
+| guidance | Guidance | multiline | | How to read and meet the essential requirement, whether a guide's advice, a commentary's or your own interpretation. |
 
 #### Applicability `tab`
 
@@ -523,13 +554,21 @@ The reference is the requirement's citation within the legislation that contains
 
 ### 5.2 Harmonised Requirement (HSR) `draft`
 
-The fields an essential requirement carries, scoped to the standard that holds it: the reference is the clause number within that standard — `5.4` — and an import joins on the standard's designation together with it. A standard's text is a copyright work, unlike the legislation's, so whether to record it under the requirement is the modeller's own call.
+The fields an essential requirement carries, scoped to the standard that holds it: the reference is the clause number within that standard — `5.4` — and an import joins on the standard's designation together with it. A standard's text is a copyright work, unlike the legislation's, so whether to record it under the requirement is the modeller's own call. A Guidance tab stands between the requirement and the verdict as on the essential requirement, for a guide's advice where one exists and for one's own interpretation of the clause where none does.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| requirement | Requirement | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The clause number of the harmonised requirement within the standard. |
+| title | Title | text | | The heading of the harmonised requirement. |
+| requirement | Requirement | multiline | | The harmonised requirement in your own words, since a standard's text is copyrighted. |
+
+#### Guidance `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| guidanceSource | Source | text | | Where the guidance comes from, such as an official guide, a standard, a commentary or yourself. |
+| guidanceSection | Section | text | | The section of the source the guidance is taken from. |
+| guidance | Guidance | multiline | | How to read and meet the harmonised requirement, whether a guide's advice, a commentary's or your own interpretation. |
 
 #### Applicability `tab`
 
@@ -546,13 +585,21 @@ The fields an essential requirement carries, scoped to the standard that holds i
 
 ### 5.3 Other Requirement (OSR) `draft`
 
-The same fields again, scoped to the specification that holds it.
+The same fields again, scoped to the specification that holds it, with a Guidance tab like the essential requirement's.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Reference | text | |
-| title | Title | text | |
-| requirement | Requirement | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Reference | text | | The clause number of the requirement within the specification. |
+| title | Title | text | | The heading of the requirement. |
+| requirement | Requirement | multiline | | The requirement as the specification states it. |
+
+#### Guidance `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| guidanceSource | Source | text | | Where the guidance comes from, such as an official guide, a standard, a commentary or yourself. |
+| guidanceSection | Section | text | | The section of the source the guidance is taken from. |
+| guidance | Guidance | multiline | | How to read and meet the requirement, whether a guide's advice, a commentary's or your own interpretation. |
 
 #### Applicability `tab`
 
@@ -569,15 +616,16 @@ The same fields again, scoped to the specification that holds it.
 
 ### 5.4 System Requirement (REQ) `draft`
 
-The designation is the requirement's own short name — `R1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The type sorts the requirement as functional or non-functional. The rationale carries why the requirement exists, and is what a reader follows from the requirement back to what called for it.
+The designation is the requirement's own short name — `R1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The type sorts the requirement into one of the five categories SEBoK's requirements article [2] gives, derived from the INCOSE Needs and Requirements Manual: function and performance, fit and operation, form, quality and compliance, named as the article names them so a reader recognises the source, their meaning the article's and not reproduced here; a set that touches every category is what the article calls complete, which is the prompt the choice gives a writer. Beside it the verification method says how the requirement is to be shown met, chosen when the requirement is written, before any verification exists; a verification records the method it was in fact carried out by, so the two can be compared. The rationale carries why the requirement exists, and is what a reader follows from the requirement back to what called for it.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
-| title | Title | text | | |
-| type | Type | choice | Functional; Non-functional | |
-| description | Description | multiline | | |
-| rationale | Rationale | multiline | | Why the requirement exists: what called for it, followed back from the requirement. |
+| title | Title | text | | The name of the system requirement. |
+| type | Type | choice | Function/Performance; Fit/Operational; Form; Quality; Compliance | The kind of requirement, whether what the system does and how well, how it fits and operates with its surroundings, its physical form, its qualities, or what it must comply with. |
+| verificationMethod | Verification method | choice | Inspection; Analysis; Demonstration; Test | How the system requirement is to be verified. |
+| description | Requirement | multiline | | What the system must do or be. |
+| rationale | Rationale | multiline | | Why the system requirement exists. |
 
 #### Notes `tab`
 
@@ -587,15 +635,17 @@ The designation is the requirement's own short name — `R1` — entered by the 
 
 ### 5.5 System Verification (VER) `draft`
 
-The designation is the verification's own short name — `V1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The method is the way the verification is carried out, one of the four the discipline names. The procedure says what is done, and the acceptance criteria what counts as passing.
+The designation is the verification's own short name — `V1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The verification method is the way the verification is carried out, one of the four the discipline names, and beside it the responsible party says who carries it out, a person, a department or an organisation. The verification setup holds what the verification is carried out with, the configuration of the system, the environment it stands in and the tools and instruments used, whichever the method, an analysis having its models and tools as a test has its rig. The verification procedure says what is done, and the acceptance criteria what counts as passing.
 
-| Key | Name | Kind | Values |
-|---|---|---|---|
-| reference | Designation | text | |
-| title | Title | text | |
-| method | Method | choice | Inspection; Analysis; Demonstration; Test |
-| description | Procedure | multiline | |
-| acceptanceCriteria | Acceptance criteria | multiline | |
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| reference | Designation | text | | |
+| title | Title | text | | The name of the system verification. |
+| method | Verification method | choice | Inspection; Analysis; Demonstration; Test | How the system verification is carried out. |
+| responsible | Responsible party | text | | Who carries out the system verification, whether a person, a department or an organisation. |
+| setup | Verification setup | multiline | | The configuration, environment and tools the system verification is carried out with. |
+| description | Verification procedure | multiline | | What is done in the system verification, step by step. |
+| acceptanceCriteria | Acceptance criteria | multiline | | What counts as passing the system verification. |
 
 #### Notes `tab`
 
@@ -605,13 +655,13 @@ The designation is the verification's own short name — `V1` — entered by the
 
 ## 6. Risk estimation
 
-An accident scenario is rated by one of the four methods ISO/TR 14121-2:2012 [1] describes, chosen per scenario, and a safety function's required level is read by its target standard's own method (§6.5, §6.6). Each method's parameters are attributes of the entity; the level, index or score they come to is computed by the tables below wherever it is shown, and is never stored. Every parameter carries its source's codes and scores alone; the class definitions behind them are the source document's own, at the clause given, and are not reproduced here.
+An accident scenario is rated by one of the three methods ISO/TR 14121-2:2012 [1] gives as its examples, chosen on the project (§1.10), or by no method, the ratings then typed. Each method's parameters are attributes of the scenario, each with a rationale of the modeller's own beside it (§1.8); the level, index or score they come to is computed by the tables below wherever it is shown, and is never stored. Every parameter carries its source's classes alone, as codes or class names; the class definitions behind them are the source document's own, at the clause given, and are not reproduced here. The report's hybrid tool is not transcribed.
 
 ### 6.1 Risk matrix
 
-ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity of harm across, the probability of occurrence of harm down.
+ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity across, the probability down.
 
-| Probability of occurrence of harm | Catastrophic | Serious | Moderate | Minor |
+| Probability | Catastrophic | Serious | Moderate | Minor |
 |---|---|---|---|---|
 | Very likely | High | High | High | Medium |
 | Likely | High | High | Medium | Low |
@@ -620,7 +670,7 @@ ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity of harm across, the probabilit
 
 ### 6.2 Risk graph
 
-ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, probability of occurrence O and possibility of avoidance A across, giving a risk index from 1 to 6, read as the second table bands it.
+ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, occurrence O and avoidance A across, giving a risk index RI from 1 to 6, shown with the band the second table gives it. The dialog draws the graph as the report does, each branch the codes it takes, branches the report merges merged, each leaf ending in the index it reaches, and names the codes still to pick while the path is not decided.
 
 | S F | O1 A1 | O1 A2 | O2 A1 | O2 A2 | O3 A1 | O3 A2 |
 |---|---|---|---|---|---|---|
@@ -637,7 +687,7 @@ ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, pro
 
 ### 6.3 Numerical scoring
 
-ISO/TR 14121-2:2012, 6.4.2: the software adds the severity score and the probability score, each 0 to 100, and reads the category from the third table; the first two say which class a score falls in, as the dialog notes beside each score.
+ISO/TR 14121-2:2012, 6.4.2: the software adds the severity score SS and the probability score PS, each a whole number from 0 to 100, into the risk score RS, shown with the category the third table gives it; the first two say which class a score falls in, as the dialog lists beneath each score, the score's own class marked. The dialog takes digits alone for a score, kept within its bounds.
 
 | Severity score | Class |
 |---|---|
@@ -660,55 +710,9 @@ ISO/TR 14121-2:2012, 6.4.2: the software adds the severity score and the probabi
 | 90 | 119 | low |
 | 0 | 89 | negligible |
 
-### 6.4 Hybrid tool
-
-ISO/TR 14121-2:2012, 6.5.2: the software adds Fr, Pr and Av into the class Cl and crosses Se with it. The lowest column is taken to start at 4, the lowest class the scores can add to. Which score a situation takes is the report's own guidance, and is the modeller's reading of it.
-
-| Severity | Cl 4 – 7 | Cl 8 – 10 | Cl 11 – 13 | Cl 14 – 15 |
-|---|---|---|---|---|
-| 4 | medium | high | high | high |
-| 3 | low | medium | high | high |
-| 2 | low | low | medium | high |
-| 1 | low | low | low | medium |
-
-### 6.5 Performance level risk graph
-
-ISO 13849-1 [2], Annex A, Figure A.1: the required performance level of a safety function, read from its S, F and P. Where the function's probability of occurrence is set low, the level read is lowered by one, as the second table has it; PL a has none below it. A function designed to EN ISO 13849-1 stores the four, and the level is computed.
-
-| S | F | P | PLr |
-|---|---|---|---|
-| S1 | F1 | P1 | a |
-| S1 | F1 | P2 | b |
-| S1 | F2 | P1 | b |
-| S1 | F2 | P2 | c |
-| S2 | F1 | P1 | c |
-| S2 | F1 | P2 | d |
-| S2 | F2 | P1 | d |
-| S2 | F2 | P2 | e |
-
-| Read | Low occurrence |
-|---|---|
-| a | a |
-| b | a |
-| c | b |
-| d | c |
-| e | d |
-
-### 6.6 Safety integrity level matrix
-
-IEC 62061 [3], Annex A, Table A.6: the required safety integrity level of a safety function, read from Se crossed with the class Cl, the sum of Fr, Pr and Av. Se scores 1 to 4, Fr and Pr 1 to 5 and Av 1, 3 or 5; which score a situation takes is the standard's own guidance, and is the modeller's reading of it. OM is the standard's abbreviation for other measures, and No SIL says the matrix requires no level there. A function designed to EN IEC 62061 stores the four, and the level is computed.
-
-| Severity | Cl 3 – 4 | Cl 5 – 7 | Cl 8 – 10 | Cl 11 – 13 | Cl 14 – 15 |
-|---|---|---|---|---|---|
-| 4 | SIL 1 | SIL 2 | SIL 2 | SIL 3 | SIL 3 |
-| 3 | No SIL | OM | SIL 1 | SIL 2 | SIL 3 |
-| 2 | No SIL | No SIL | OM | SIL 1 | SIL 2 |
-| 1 | No SIL | No SIL | No SIL | OM | SIL 1 |
-
 ## 7. References
 
 | No. | Reference | Link |
 |---|---|---|
 | [1] | ISO/TR 14121-2:2012, Safety of machinery — Risk assessment — Part 2: Practical guidance and examples of methods | |
-| [2] | ISO 13849-1:2023, Safety of machinery — Safety-related parts of control systems — Part 1: General principles for design | |
-| [3] | IEC 62061:2021, Safety of machinery — Functional safety of safety-related control systems | |
+| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements, categorising requirements, derived from the INCOSE Needs and Requirements Manual | https://sebokwiki.org/wiki/System_Requirements |

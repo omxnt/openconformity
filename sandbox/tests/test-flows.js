@@ -441,6 +441,90 @@ function flowsOver(store) {
   equal(ended, 1, 'accepting discards the draft');
 }
 
+// --- A view opens over the workspace and keeps the way back --------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  let ended = 0;
+  const asked = [];
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false };
+  const dialogs = {
+    confirm(question) {
+      asked.push(question.title);
+      return Promise.resolve(false);
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  await flows.openView('risk');
+  equal(store.view(), null, 'no project, no view');
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'SCN'));
+  store.commit((model) => addEntity(model, 'SCN'));
+  await flows.openView('no-such-view');
+  equal(store.view(), null, 'an unknown view does not open');
+  await flows.openView('risk');
+  deepEqual(store.view(), { id: 'risk', section: 0 }, 'the risk assessment opens');
+  equal(ended, 1, 'over a closed edit session');
+  store.setViewSection(1);
+
+  flows.openFromView('SCN-002');
+  equal(store.view(), null, 'choosing an entity in the view closes it');
+  equal(store.selection(), 'SCN-002', 'and selects the entity');
+  deepEqual(store.viewReturn(), { id: 'risk', name: 'Risk assessment', section: 1, rowId: 'SCN-002' }, 'keeping the way back to the view, its section and the row');
+
+  editor.hasUnconfirmedEdit = () => true;
+  await flows.returnToView();
+  deepEqual(asked, ['Discard the changes?'], 'going back over a dirty draft asks first');
+  equal(store.view(), null, 'declining stays');
+  editor.hasUnconfirmedEdit = () => false;
+  await flows.returnToView();
+  deepEqual(store.view(), { id: 'risk', section: 1 }, 'going back reopens the view at the same section');
+  equal(store.viewReturn()?.rowId, 'SCN-002', 'with the row still known, for the pane to show');
+
+  flows.closeView();
+  equal(store.view(), null, 'closed');
+  flows.openFromView('SCN-001');
+  equal(store.selection(), 'SCN-002', 'choosing from no open view does nothing');
+}
+
+// --- Saving the project sweeps what entities held under the old choice ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  const dialogs = {
+    confirm: async (question) => {
+      asked.push([question.title, question.message]);
+      return answer;
+    },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'SCN', { attributes: { initialSeverity: 'Serious', initialProbability: 'Likely' } }));
+  store.commit((model) => addEntity(model, 'SCN', { attributes: { title: 'Unrated' } }));
+  store.commit((model) => addEntity(model, 'SAF', { attributes: { standard: 'EN ISO 13849-1:2023', plr: 'PL c' } }));
+
+  equal(await flows.saveProjectEdit({ name: 'Mixer', version: '1', estimationMethod: 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)' }), true, 'choosing the method a rated scenario already fits saves without a question');
+  deepEqual(asked, [], 'nothing asked');
+  deepEqual([store.model().name, store.model().attributes.version, store.model().attributes.estimationMethod], ['Mixer', '1', 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)'], 'the name and the attributes are set');
+  ok('initialSeverity' in nodeOf(store.model(), 'SCN-001').attributes, 'the matrix rating stays under the matrix');
+
+  equal(await flows.saveProjectEdit({ name: 'Mixer', estimationMethod: '' }), false, 'clearing the method over a rated scenario asks, and declining saves nothing');
+  deepEqual(asked, [['Remove what is no longer chosen?', 'Saving removes what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).']], 'the question counts what goes and names the old choice');
+  equal(store.model().attributes.estimationMethod, 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'the choice is unchanged');
+  answer = true;
+  equal(await flows.saveProjectEdit({ name: 'Mixer', estimationMethod: '' }), true, 'accepting saves');
+  equal(asked.at(-1)[1], 'Saving removes what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'the one choice changed, told');
+  deepEqual(Object.keys(nodeOf(store.model(), 'SCN-001').attributes), [], 'the matrix rating is gone');
+  deepEqual(Object.keys(nodeOf(store.model(), 'SAF-001').attributes), ['standard', 'plr'], "a function's level follows its own standard, not the project's, so the project's save leaves it");
+  ok(!('estimationMethod' in store.model().attributes) || store.model().attributes.estimationMethod === '', 'under no choice, the ratings now typed');
+  store.undo();
+  ok('initialSeverity' in nodeOf(store.model(), 'SCN-001').attributes && store.model().attributes.estimationMethod === 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'one undo brings the choice and the ratings back together');
+}
+
 // --- A save that removes what a choice no longer shows asks first --------
 
 {
@@ -454,10 +538,10 @@ function flowsOver(store) {
     toast() {},
   };
   const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
-  equal(await flows.confirmRemoval([{ name: 'Initial risk', value: 'Risk graph' }, { name: 'Residual risk', value: 'Risk graph' }]), false, 'the answer is the dialog\'s');
+  equal(await flows.confirmRemoval([{ name: 'Initial risk estimation', value: 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)' }, { name: 'Residual risk estimation', value: 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)' }]), false, 'the answer is the dialog\'s');
   deepEqual(
     [asked[0].title, asked[0].message, asked[0].confirmLabel, asked[0].cancelLabel, asked[0].danger],
-    ['Remove what is no longer chosen?', 'Saving removes Initial risk and Residual risk under Risk graph.', 'Save', 'Keep editing', true],
+    ['Remove what is no longer chosen?', 'Saving removes Initial risk estimation and Residual risk estimation under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'Save', 'Keep editing', true],
     'the question names the groups by the value they stood under, Save being the destructive answer'
   );
 }

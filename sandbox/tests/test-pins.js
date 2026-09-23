@@ -227,7 +227,10 @@ import { fakeStorage } from './helpers.js';
   const flows = readFile('../app/flows.js');
   ok(editor.includes("if (control.closest('.cell-group[hidden]')) continue;"), 'a control under a group hidden by its condition drops out of the draft as shown');
   ok(editor.includes("for (const control of body.querySelectorAll('.cell-group[hidden] [data-key]')) values[control.dataset.key] = '';") && editor.includes("if (onSave(editingId, savedValues()) !== false) endEdit();"), 'and a save commits it empty, so what is not shown is removed');
-  ok(editor.includes("const rated = rating !== null && [...rating.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== '');") && editor.includes("if (!rated) values[record.dataset.key] = '';"), 'a record with no rating made before it goes with the save too');
+  ok(editor.includes("const values = { ...stored, ...projectReads(code) };") && editor.includes(".filter((group) => group.when && !own.has(group.when.key))\n        .map((group) => [group.when.key, attributes[group.when.key] ?? ''])"), "a type reads the project's value of every key its groups wait on without defining, in either mode, so what waits on the project's choice follows");
+  ok(editor.includes("return { ...(editingProject ? {} : projectReads(current?.type ?? 'PROJECT')), ...fieldValues() };") && editor.includes("held.hidden = !shown(draftValues());") && !editor.includes('data-project'), "in an edit the conditions read the draft with the project's values beneath it, which no control carries and no save writes");
+  ok(editor.includes("if ((await onSaveProject(savedValues())) !== false) endEdit();") && readFile('../app/app.js').includes('onSaveProject: (values) => flows.saveProjectEdit(values),') && flows.includes("message: `Saving removes ${sweep.text}.`,") && flows.includes("for (const key of keys) delete node.attributes[key];"), "saving the project asks before removing what entities held under the old choice, and removes it in the same step");
+  ok(editor.includes("value: group.when.value || `no ${leaderName(group.when.key)}`"), 'what stood under nothing chosen is named by the attribute it waited on');
   ok(editor.includes("if (removed.length > 0 && !(await onRemoval(removed))) return;") && editor.includes(".filter(({ held, group }) => group && held.hidden && [...held.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== ''))"), 'a save that would remove what hidden groups still hold asks first');
   ok(flows.includes("title: 'Remove what is no longer chosen?'") && flows.includes("message: `Saving removes ${removalText(entries)}`") && flows.includes("cancelLabel: 'Keep editing'"), 'the question names the groups by the value they stood under, Save or keep editing');
   ok(!editor.includes('removal-notice') && !sheet.includes('removal-notice'), 'and nothing shows in the form for it');
@@ -235,13 +238,14 @@ import { fakeStorage } from './helpers.js';
   ok(!editor.includes("closest('[hidden]')"), 'but a control on another tab, hidden only by the tab, is');
   ok(editor.includes('const chosen = store.tabOf(code);') && editor.includes('store.setTab(code, panels[i].name);'), 'the tab chosen is remembered per type');
   ok(editor.includes("const panels = [{ name: firstTabName(code), grid: first }];") && editor.includes("return (ENTITY_TYPES[code]?.name ?? 'Description').split(' ').at(-1);"), 'the first tab is named for the type, by the last word of its name');
-  ok(editor.includes("[identifierCell(id), ...cellsOf(type.attributes, values, editing)]"), 'and opens on the identifier, read-only');
+  ok(editor.includes("const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);") && editor.includes("[...cellsOf(type.attributes.slice(0, ahead), values, editing), lead, ...cellsOf(type.attributes.slice(ahead), values, editing)]") && editor.includes('const NAME_AFTER = 2;') && editor.includes("definition.key === 'name' ||"), 'and opens on the identifier, read-only; the project on its designation and organisation, then its name as a row of its own');
   ok(readFile('../app/attributes.js').includes('export const SHARED_HELP = {') && editor.includes("helpTip('identifier', 'identifier', SHARED_HELP.Identifier)"), 'the identifier explains itself with the help the document records once for the names types share');
   ok(editor.includes("helpTip('identifier', 'identifier', SHARED_HELP.Identifier)") && editor.includes("attributes: { type: 'button', 'aria-label': `About the ${about.toLowerCase()}`, 'aria-describedby': id }"), "on Carbon's icon tooltip: a focusable glyph describing itself by its tooltip");
+  ok(editor.includes("cellElement.appendChild(groupNameNode(group.name, closing.key));") && editor.includes("groupNameNode(group.name, closing.key, `field-${closing.key}`)") && editor.includes("groupNameNode(first.name, `slot-${first.when.key}-${first.name.toLowerCase().replaceAll(' ', '-')}`, null, SHARED_HELP[first.name] ?? (first.attributes.length === 1 ? first.attributes[0].help : undefined))") && editor.includes("function groupNameNode(name, key, forId = null, help = SHARED_HELP[name])"), "a rating's cell and its slot carry the help their shared name has");
   ok(editor.includes("const help = definition.help ?? SHARED_HELP[definition.name];") && editor.includes("[text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]") && editor.includes("[nameNode(definition, editing), held]"), 'and any attribute with help in its table, or a name that shares help, carries the glyph beside its name');
   const styles = readFile('../app/style.css');
   ok(styles.includes('.help-trigger:hover .tooltip,\n.help-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }') && styles.includes('max-width: 288px;'), 'shown on hover or focus, at the tooltip width Carbon sets');
-  ok(editor.includes("definition.key === 'title' || definition.kind === 'multiline' || definition.kind === 'hyperlink'"), 'the title, a multiline and a hyperlink each take a row');
+  ok(editor.includes("definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set'"), 'the title, the project name, a multiline, a hyperlink and a set each take a row');
   ok(readFile('../attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
   ok(editor.includes('if (panels.length > 1) body.appendChild(tabBar(code, panels));'), 'and a type with no tabbed group shows no tab bar');
   ok(editor.includes('tabKeys(bar, (i) => select(i, true));') && readFile('../app/dom.js').includes('export function tabKeys(bar, pick) {'), 'arrow keys walk the tabs, from one helper');
@@ -265,35 +269,48 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.pane-relationships .pane-body { display: flex; flex-direction: column; }') && sheet.includes('.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }'), "the graph's host fills its pane, so its scrollbar sits at the pane's edge");
 }
 
-// --- A safety function's required level, read from the standard's graph ------
+// --- A safety function's required level, chosen in its standard's terms -------
 
 {
   const doc = readFile('../attributes.md');
-  ok(doc.includes('##### Integrity level `when standard = EN ISO 13849-1`') && doc.includes('| plr | Required performance level | computed | PL risk graph |'), "under ISO 13849-1 the level is a rating read by the standard's graph");
-  ok(doc.includes('##### Integrity level `when standard = EN IEC 62061`'), 'under IEC 62061 by its matrix, the two one slot');
-  ok(doc.includes('### 6.5 Performance level risk graph') && doc.includes('| [2] | ISO 13849-1:2023,'), 'the graph is transcribed in chapter 6, from its reference');
-  ok(doc.includes('### 6.6 Safety integrity level matrix') && doc.includes('| [3] | IEC 62061:2021,') && doc.includes('| sil | Required safety integrity level | computed | SIL matrix |'), 'so is the matrix, and under IEC 62061 the level is a rating read by it');
-  ok(!doc.includes('### 1.9 Dependent choices') && !doc.includes('by standard'), 'the dependent choice, which this replaces, is gone from the document');
+  ok(doc.includes('##### Required integrity level `when standard = EN ISO 13849-1:2023`') && doc.includes('| plr | Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |'), "under ISO 13849-1 the level is chosen among the standard's own");
+  ok(doc.includes('##### Required integrity level `when standard = EN IEC 62061:2021`') && doc.includes('| sil | Required integrity level | choice | SIL 1; SIL 2; SIL 3 |'), 'under IEC 62061 likewise, the two one slot');
+  ok(doc.includes('| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 |') && !doc.includes('| safetyStandard |') && !doc.includes('Other standard'), "the standard is the function's own choice, not the project's, and the list holds standards alone");
+  ok(doc.includes('##### Required integrity level `when standard =`') && doc.includes('| ownLevel | Required integrity level | text | |') && !doc.includes('| ownStandard |') && doc.includes('A variant may instead wait on nothing chosen, `when key =` with no value after it'), 'with no standard chosen the level is text, by a variant waiting on nothing, and the standard itself is not entered freely');
+  ok(doc.includes('| designTargets | Specific design targets | multiline | |') && !doc.includes('| failureRate |') && !doc.includes('| demandRate |') && !doc.includes('| missionTime |') && !doc.includes('Target architecture'), "what a standard asks of the design is one text in its own terms, not fields in one standard's");
+  ok(!doc.includes('PL risk graph') && !doc.includes('SIL matrix') && !doc.includes('| rated |') && !doc.includes('ISO 13849-1:2023, Safety of machinery'), 'no transcription of a standard reads the level: the tool ships no table nobody has verified');
+  ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article [2]"), "the requirement categories cite their source, with none of its text");
   const editor = readFile('../app/editor.js');
+  ok(!editor.includes('ownInto') && !readFile('../app/style.css').includes('.cell-own'), 'no free entry stands beneath a choice');
+  ok(!doc.includes('### 1.9 Dependent choices') && !doc.includes('by standard'), 'the dependent choice, which this replaces, is gone from the document');
   ok(!editor.includes('followChoices') && !editor.includes('choiceValues') && !editor.includes('dependsOn'), 'and from the editor');
-  ok(editor.includes("if (subs.some((sub) => sub.when?.key === held.key)) anchor = i;") && editor.includes("if (i === anchor) place();"), "a group's sub-groups stand right after the last attribute one of them waits on");
+  ok(editor.includes("const key = sub.after ?? sub.when?.key ?? null;") && editor.includes("placeAfter(definition.key);") && editor.includes("placeAfter(null);"), "a group's sub-groups stand right after the last attribute one of them waits on");
   ok(editor.includes("if (named && group.attributes.length > 1) target.appendChild(el('div', { className: 'cell-legend', text: group.name }));"), 'a sub-group of one attribute shows no legend');
   ok(editor.includes("...(view.tone === 'none' ? [] : [statusIcon(view.tone)]),"), 'a level in no tone wears no glyph');
   const rating = readFile('../app/rating.js');
-  ok(rating.includes('[PL_METHOD]: graphSurface(PL_GRAPH_SPEC),') && rating.includes("headings: ['Severity', 'Exposure', 'Avoidance', 'PLr'],"), "the dialog draws ISO 13849-1's graph with the same picker as the report's");
+  ok(!rating.includes('PL_') && !rating.includes('SIL_') && !rating.includes("'rated'"), "the dialog draws the scenario's methods alone");
 }
 
 // --- A rating shows only under its method, and what it comes to is never stored ---
 
 {
   const editor = readFile('../app/editor.js');
-  ok(editor.includes("for (const { held, shown } of conditionals) held.hidden = !shown(fieldValues());"), 'a change to what a group waits on shows or hides it in place, each read against the draft as the ones before it left it');
-  ok(editor.includes("if (variants.at(-1) === sub) target.appendChild(slotHolder(code, variants, values, editing));") && editor.includes("const text = `No ${(leader?.name ?? first.when.key).toLowerCase()} chosen`;"), 'a slot holds its cell while nothing is chosen, saying so');
+  const rating = readFile('../app/rating.js');
+  ok(editor.includes("for (const { held, shown } of conditionals) held.hidden = !shown(draftValues());"), 'a change to what a group waits on shows or hides it in place, each read against the draft as the ones before it left it');
+  ok(editor.includes("if (variants.at(-1) === sub && !variants.some((held) => held.when.value === '')) target.appendChild(slotHolder(code, variants, values, editing));") && editor.includes("const text = `No ${(leader?.name ?? first.when.key).toLowerCase()} chosen`;"), 'a slot holds its cell while nothing is chosen, saying so, unless a variant waits on nothing chosen and stands in for it');
   ok(readFile('../app/style.css').includes('.field-input.placeholder { color: var(--disabled); border-bottom-color: transparent; cursor: not-allowed; }'), "in an edit as Carbon's disabled field");
   ok(editor.includes("target.appendChild(ratingCell(group, values, editing));"), 'a group closing on a computed attribute is a rating, a cell among the cells');
-  ok(editor.includes("className: 'tag outcome'") && editor.includes("text: parameter.code, attributes: { title: `${parameter.name}: ${parameter.value}` }"), 'the cell: the outcome as a tag, then the code of each parameter set, the full value on hovering it');
-  ok(editor.includes("if (parameter.value === '') continue;"), 'a parameter unset shows no tag');
-  ok(editor.includes("{ className: 'field-input rating', attributes: { type: 'button', id: `field-${computed.key}`, 'aria-haspopup': 'dialog' } },\n      [held, icon('i-edit')]"), 'in an edit the cell is a field opening the dialog, the edit pencil trailing');
+  ok(editor.includes("className: 'tag outcome'") && editor.includes("text: parameter.code, attributes: { title: hoverText(parameter) }") && editor.includes("`${parameter.name}: ${parameter.value}\\n${parameter.rationale}`"), 'the cell: the outcome as a tag, then the code of each parameter set, the full value on hovering it and the rationale given for it');
+  ok(editor.includes("className: parameter.rationale ? 'tag reasoned' : 'tag'") && editor.includes("const tag = el('button', { className: 'tag reasoned tag-trigger', attributes: { type: 'button', 'aria-describedby': id } }, [el('span', { text: parameter.code }), tip]);") && editor.includes("const tags = ratingTags(ratingView(group.attributes, values), closing.key);") && editor.includes("const tags = ratingTags(ratingView(group.attributes, draft));"), 'a tag with a rationale is underlined, and outside an edit a button whose tooltip holds the parameter and the reasoning');
+  ok(readFile('../app/style.css').includes('.tag-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }') && readFile('../app/style.css').includes('.tag.reasoned { text-decoration: underline dotted; text-underline-offset: 3px; }'), "shown on hovering or focusing it, as the help glyph's is");
+  ok(rating.includes("state[severity.key] = pressed ? '' : column;") && rating.includes("held[ancestors.length] === code ? held.map((chosen, level) => (level >= ancestors.length ? '' : chosen)) : graphPick(held, ancestors, code)") && !rating.includes('Clear'), 'what is chosen can be unchosen: a matrix cell pressed again, a graph code picked again, and nothing clears the whole');
+  ok(rating.includes("layout.set(node, { depth, row: Number.isInteger(middle) ? rows[middle] : (rows[Math.floor(middle)] + rows[Math.ceil(middle)]) / 2 });") && rating.includes("const to = node.children ? x(depth + 1) - GAP + 0.5 : cx - RADIUS;"), 'a parent runs straight into its middle child, and each leaf ends in its own index');
+  ok(rating.includes("const rationales = definitions.filter(isRationale);") && rating.includes("...(rationales.length > 0 ? [reasons.element] : [])") && rating.includes("el('textarea', { className: 'field-input', attributes: { rows: '2', id: `rate-${rationale.key}` } })"), 'the dialog closes on a text area per parameter for its rationale');
+  ok(rating.includes("for (const area of pair) area.style.height = `${tallest}px`;"), 'the two of a row kept the same height');
+  ok(rating.includes("if (event.data && /\\D/.test(event.data)) event.preventDefault();") && rating.includes("attributes: { type: 'text', inputmode: 'numeric', autocomplete: 'off', id: `rate-${definition.key}` }"), 'a score takes digits alone');
+  ok(rating.includes("outcome.appendChild(el('span', { text: held ?? built.hint?.() ?? 'Not rated' }));") && rating.includes("return `Pick ${listed([...new Set(last.children.flatMap((child) => child.codes))])}`;"), 'the graph names the codes still to pick while the path is not decided');
+  ok(editor.includes("if (parameter.value === '') return;"), 'a parameter unset shows no tag');
+  ok(editor.includes("{ className: 'field-input rating', attributes: { type: 'button', id: `field-${closing.key}`, 'aria-haspopup': 'dialog' } },\n      [held, icon('i-edit')]"), 'in an edit the cell is a field opening the dialog, the edit pencil trailing');
   const styles = readFile('../app/style.css');
   ok(styles.includes('.field-input.rating {') && styles.includes('.tag .status-icon { width: 12px; height: 12px;'), "the field wraps its tags, and a tag's glyph is at the tag's scale");
   const page = readFile('../app/index.html');
@@ -304,33 +321,18 @@ import { fakeStorage } from './helpers.js';
   }
   ok(page.includes('data-icon-path="inner-path" fill="#161616"'), "the warning glyph's mark stands on the yellow");
   ok(readFile('../app/rating.js').includes("export function statusIcon(tone) {"), 'the status indicator is one function, shared by the card and the dialog');
-  ok(editor.includes("definition.kind === 'related' ? relatedCell(definition, values, editing) : fieldCell(definition, values, editing)"), 'a related attribute is its live list, a cell among the cells');
-  ok(editor.includes("'data-related': definition.relationship") && editor.includes("recordAfter(cellElement, hidden.every((input) => input.value.trim() === ''));"), 'its record rides in a hidden control, refreshed when a rating is applied, cleared by an empty one');
-  ok(editor.includes("if (cells.slice(at + 1, index).some((cell) => cell.querySelector('.field-input.rating'))) continue;"), 'only by the rating nearest before it: another rating between them leaves it');
-  ok(editor.includes("[...recorded.map((id) => [id, removed.includes(id) ? 'unlinked' : null]), ...added.map((id) => [id, 'added'])]") && editor.includes("word ? el('span', { className: 'row-state', text: word }) : icon('i-chevron-right')") && editor.includes("text: 'Changed since the rating'"), "the record keeps its order, a row's state stands in the chevron's place, and a notice says it");
-  ok(editor.includes("el('span', { className: 'row-state', text: 'Deleted' }),") && editor.includes("const type = ENTITY_TYPES[id.split('-')[0]];") && readFile('../app/style.css').includes('.entity-row.unlinked { color: var(--text-helper); }'), 'a deleted entity reads so with its glyph, and an unlinked row is dimmed');
   ok(!page.includes('id="i-rate"') && !origin.includes('i-rate'), 'the rating field has no glyph of its own: it trails the edit pencil');
-  ok(editor.includes("if (rows.length === 0) {\n      parts.push(el('div', { className: 'cell-value empty', text: 'None linked.' }));"), 'an empty list says so, as an empty value');
-  ok(readFile('../app/style.css').includes('.related-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }'), 'the rows span the row they take');
   ok(readFile('../app/index.html').includes('<button type="button" class="shell-action shell-action-wide" id="shell-unsaved" hidden>\n      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>\n      <span>Save to file</span>') && readFile('../app/shell.js').includes('unsavedButton.hidden = !store.dirty();'), 'the top bar offers Save to file while the file is behind the project, labelled by what it does');
-  ok(editor.includes("held.addEventListener('click', () => onNavigate(id));") && readFile('../app/app.js').includes('onNavigate: (id) => flows.selectNode(id),'), 'each entity a row on to it, through the guarded selection');
-  ok(editor.includes("className: state === 'unlinked' ? 'entity-row unlinked' : 'entity-row', attributes: { type: 'button' } }, [") && editor.includes("icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),"), 'shown as the tree shows an entity: its glyph in the pillar colour, its identifier, its label');
-  ok(readFile('../attributes.md').includes('##### Protective measures'), 'the document nests the measures in the estimation');
   ok(editor.includes("attributes: { type: 'hidden', 'data-key': definition.key }"), 'its parameters ride in hidden controls, read into the draft as any field');
   ok(editor.includes('const chosen = await rateDialog(dialogs, {') && editor.includes("body.dispatchEvent(new Event('input', { bubbles: true }));"), 'Rate opens the dialog, and what it returns is written to the draft and shown');
   ok(readFile('../app/app.js').includes('  dialogs,\n'), 'the editor is given the dialogs to open');
-  const rating = readFile('../app/rating.js');
-  for (const method of ['Risk matrix', 'Risk graph', 'Numerical scoring', 'Hybrid tool']) {
-    ok(rating.includes(`'${method}': `), `the dialog has a surface for ${method}`);
-  }
-  ok(rating.includes('[PL_METHOD]: graphSurface(PL_GRAPH_SPEC),') && rating.includes('[SIL_METHOD]: classMatrixSurface({ bands: SIL_BANDS, table: SIL_MATRIX }),'), "and for the two standards' levels");
+  ok(rating.includes('[MATRIX_METHOD]: matrixSurface,') && rating.includes('[GRAPH_METHOD]: graphSurface(RISK_GRAPH_SPEC),') && rating.includes('[SCORING_METHOD]: scoringSurface,') && !rating.includes('Hybrid'), 'the dialog has a surface per method: the matrix, the graph, the scores');
+  ok(rating.includes("role: 'button', tabindex: '0', 'data-pick':") && rating.includes(': graphPick(held, ancestors, code);'), 'every code on the graph is a button, a pick deciding its level and every single ancestor');
   ok(rating.includes("{ label: 'Apply', value: 'confirmed', kind: 'primary' }"), 'applied by its primary action, cancelled by anything else');
-  ok(rating.includes("role: 'button', tabindex: '0', 'data-pick':"), 'every code on the graph is a button, by pointer or keyboard');
-  ok(rating.includes('const next = graphPick(') && !rating.includes("function graphSurface(parameters, state, changed) {\n  const groups"), 'the graph is the picker: no option rows above it');
-  ok(rating.includes("node.codes.length > 1 ? code : node.label"), 'a merged branch offers its codes as separate words');
   const doc = readFile('../attributes.md');
-  ok(doc.includes('#### Initial risk `when method = Risk matrix`'), 'the document tags a rating with the method it waits on');
-  ok(doc.includes('| initialLevel | Risk level | computed | Risk matrix |'), 'and names the method a computed value is read by');
+  ok(doc.includes('#### Initial risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`'), "the document tags a rating with the project's method it waits on");
+  ok(doc.includes('| initialLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |'), 'and names the method a computed value is read by');
+  ok(doc.includes('| initialSeverityRationale | Severity rationale | rationale | initialSeverity |'), 'and the parameter a rationale is given for');
   ok(doc.includes('## 6. Risk estimation') && doc.indexOf('## 6. Risk estimation') < doc.indexOf('## 7. References'), 'the methods stand in their own chapter, before the references');
   const sheet = readFile('../app/style.css');
   ok(sheet.includes('.cell-group[hidden] { display: none; }') && sheet.includes('select.field-input.wide { max-width: none; }'), 'the sheet hides a waiting group and widens a long choice');
@@ -443,6 +445,37 @@ import { fakeStorage } from './helpers.js';
     sheet.includes('.dialog a { color: var(--link); text-decoration: underline; }'),
     'a link inside prose is underlined: colour alone cannot mark it'
   );
+}
+
+// --- A view over the workspace ---------------------------------------------
+
+{
+  const views = readFile('../app/views.js');
+  const app = readFile('../app/app.js');
+  const page = readFile('../app/index.html');
+  const sheet = readFile('../app/style.css');
+  const shell = readFile('../app/shell.js');
+  const editor = readFile('../app/editor.js');
+  ok(page.includes('<section class="pane pane-view" id="pane-view" aria-label="View" hidden>') && app.includes("pane: document.getElementById('pane-view'),"), 'the view pane stands in the workspace beside the panes');
+  ok(views.includes("workspace.classList.toggle('viewing', viewing);") && sheet.includes('.workspace.viewing > :not(.pane-view) { display: none; }'), 'and takes the whole workspace while a view is open');
+  ok(shell.includes("...actions.filter((offered) => offered.group === 'views').map((action) => ({ ...actionItem(action, viewButton), checked: action.checked() })),"), 'the View menu lists the views, the open one checked');
+  ok(views.includes("tab.addEventListener('click', () => store.openView(view.id));") && views.includes("className: 'ctab'"), "the pane's head switches views on Carbon's contained tabs");
+  ok(views.includes("if (event.key !== 'Escape' || store.view() === null || overlay.isOpen()) return;") && readFile('../app/overlay.js').includes('isOpen: () => stack.top() !== null,') && views.includes("close.addEventListener('click', onClose);"), 'Escape, when nothing is open over the page, and the close leave the view');
+  ok(views.includes("event.preventDefault();\n      onSelect(id);") && app.includes('onSelect: (id) => flows.openFromView(id),'), 'an entity in a cell is a way to the editor');
+  ok(editor.includes("if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));") && app.includes('onReturn: () => flows.returnToView(),'), 'which offers the way back to the row it came from');
+  ok(views.includes("const id = row.id ?? null;") && views.includes("if (back !== null && back.rowId === id) tr.classList.add('row-return');") && views.includes("row.scrollIntoView({ block: 'center' });"), 'a row names the entity it is about, marked and scrolled to on return');
+  ok(views.includes("print.addEventListener('click', () => window.print());") && sheet.includes('.shell-bar, .notices, .toasts, #overlay-root, .pane-navigator, .splitter, .column, .view-head, .pane-view .tabs { display: none !important; }') && sheet.includes('@page { size: A4 landscape; margin: 12mm; }'), 'printing prints the view alone, landscape');
+  ok(views.includes("held.setAttribute('aria-sort', sort.direction === 'asc' ? 'ascending' : 'descending');") && views.includes("const next = sort?.column !== i ? 'asc' : sort.direction === 'asc' ? 'desc' : null;"), 'a column head sorts up, down, then not at all');
+}
+
+// --- A method carries its source --------------------------------------------
+
+{
+  const risk = readFile('../app/risk.js');
+  const editor = readFile('../app/editor.js');
+  ok(!risk.includes('SOURCES') && !editor.includes('sourceHelper') && !readFile('../app/style.css').includes('.field-helper'), 'no source is looked up or shown as helper text: the method names it');
+  ok(editor.includes("title: `${group.name} by ${closing.method}`,"), "the rating dialog's title carries the method, its source within it");
+  ok(readFile('../app/view-risk.js').includes("one per parameter of the ${method} and the rating it comes to"), "and so does the risk assessment's lead");
 }
 
 summary('test-pins');

@@ -4,7 +4,7 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, relatedDiff, recordedIds, setValues, joinSet, removalText } from '../app/editor.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, removalText } from '../app/editor.js';
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -60,8 +60,8 @@ equal(linkable(''), false, 'and an empty value is nothing');
   equal(firstTabName('XYZ'), 'Description', 'a type the metamodel does not know falls back');
   deepEqual(
     Object.entries(ATTRIBUTES).flatMap(([code, type]) => type.groups.filter((group) => group.tab && group.name !== 'Notes').map((group) => `${code}:${group.name}`)),
-    ['LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'SAF:Behaviour', 'SAF:Fault handling', 'SAF:Characteristics', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Applicability', 'OSR:Applicability'],
-    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, faults and characteristics"
+    ['LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability'],
+    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults"
   );
   for (const [code, type] of Object.entries(ATTRIBUTES)) {
     const last = type.groups.at(-1);
@@ -71,91 +71,67 @@ equal(linkable(''), false, 'and an empty value is nothing');
 
   deepEqual(
     ATTRIBUTES.SAF.attributes.map((definition) => definition.key),
-    ['reference', 'title', 'description', 'relevantStandards'],
+    ['reference', 'title', 'description'],
     'a safety function reads what it is: its designation, title, description, and the standards that apply'
   );
   equal(ATTRIBUTES.SAF.attributes[0].name, 'Designation', 'the reference a safety function carries is its designation');
-  for (const code of ['ELM', 'ACT', 'PHS', 'HAZ', 'SCN', 'PRM']) {
+  for (const code of ['ELM', 'ACT', 'TSK', 'PHS', 'CAS', 'NTB', 'HAZ', 'SCN', 'PRM']) {
     deepEqual(attributesFor(code)[0], { key: 'reference', name: 'Designation', kind: 'text' }, `${code} opens on a designation of the modeller's own, composed into its label before the title`);
   }
-  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Title', 'Description', 'Notes', 'Reference', 'Link', 'Applicable', 'Rationale'], 'the names shared across types carry one help each');
-  equal(attributesFor('REQ').find((definition) => definition.key === 'rationale').help, 'Why the requirement exists: what called for it, followed back from the requirement.', "a system requirement's rationale says its own thing, so it carries its own help");
+  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Notes', 'Link', 'Applicable', 'Rationale', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the names shared across types, and the rating names shared across methods, carry one help each');
+  equal(attributesFor('REQ').find((definition) => definition.key === 'rationale').help, 'Why the system requirement exists.', "a system requirement's rationale says its own thing, so it carries its own help");
+  equal(attributesFor('HST').find((definition) => definition.key === 'title').help, "The title of the standard, as published.", 'a harmonised standard says its title is the standard\'s');
+  equal(attributesFor('ESR').find((definition) => definition.key === 'reference').help, 'The clause number of the essential requirement within the legislation.', 'an essential requirement says its reference is the clause');
   deepEqual(
     ATTRIBUTES.REQ.attributes.map((definition) => [definition.key, definition.name, definition.kind, definition.values]),
-    [['reference', 'Designation', 'text', undefined], ['title', 'Title', 'text', undefined], ['type', 'Type', 'choice', ['Functional', 'Non-functional']], ['description', 'Description', 'multiline', undefined], ['rationale', 'Rationale', 'multiline', undefined]],
-    'a system requirement reads its designation, title, type, text and rationale'
+    [['reference', 'Designation', 'text', undefined], ['title', 'Title', 'text', undefined], ['type', 'Type', 'choice', ['Function/Performance', 'Fit/Operational', 'Form', 'Quality', 'Compliance']], ['verificationMethod', 'Verification method', 'choice', ['Inspection', 'Analysis', 'Demonstration', 'Test']], ['description', 'Requirement', 'multiline', undefined], ['rationale', 'Rationale', 'multiline', undefined]],
+    "a system requirement reads its designation, title, its type among SEBoK's five categories, the method it is to be verified by beside it, text and rationale"
   );
   deepEqual(
     ATTRIBUTES.VER.attributes.map((definition) => [definition.key, definition.name, definition.kind, definition.values]),
-    [['reference', 'Designation', 'text', undefined], ['title', 'Title', 'text', undefined], ['method', 'Method', 'choice', ['Inspection', 'Analysis', 'Demonstration', 'Test']], ['description', 'Procedure', 'multiline', undefined], ['acceptanceCriteria', 'Acceptance criteria', 'multiline', undefined]],
-    'a verification reads its designation, title, method, procedure and acceptance criteria'
+    [['reference', 'Designation', 'text', undefined], ['title', 'Title', 'text', undefined], ['method', 'Verification method', 'choice', ['Inspection', 'Analysis', 'Demonstration', 'Test']], ['responsible', 'Responsible party', 'text', undefined], ['setup', 'Verification setup', 'multiline', undefined], ['description', 'Verification procedure', 'multiline', undefined], ['acceptanceCriteria', 'Acceptance criteria', 'multiline', undefined]],
+    'a verification reads its designation, title, method and who carries it out beside it, what it is carried out with, the procedure and the acceptance criteria'
   );
-  deepEqual(groups('SAF'), ['Behaviour', 'Fault handling', 'Characteristics', 'Notes'], 'then what it does, what it does when it fails, what it must achieve, and its notes, each a tab');
+  deepEqual(attributesFor('REQ').find((definition) => definition.key === 'verificationMethod').values, attributesFor('VER').find((definition) => definition.key === 'method').values, "the requirement's intended method and the verification's actual one are chosen from the one list, so the two can be compared");
+  deepEqual(groups('SAF'), ['Behaviour', 'Characteristics', 'Fault handling', 'Notes'], 'then what it does, what it must achieve, what it does when it fails, and its notes, each a tab');
   deepEqual(
     ATTRIBUTES.SAF.groups[0].attributes.map((definition) => definition.key),
-    ['priority', 'operatingMode', 'trigger', 'reaction', 'safeState', 'restart'],
-    'behaviour as a state machine: its priority and the context it is armed in, the path from trigger to safe state, and the way out again'
+    ['priority', 'operatingMode', 'trigger', 'reaction', 'safeState', 'feedback', 'muting', 'restart'],
+    'behaviour as a state machine: its priority and the context it is armed in, the path from trigger to safe state and what the operator sees of it, how it can be set aside, and the way out again'
   );
   deepEqual(
-    ATTRIBUTES.SAF.groups[1].attributes.map((definition) => [definition.key, definition.name]),
-    [['faultDetection', 'Fault detection'], ['faultHandling', 'Fault reaction'], ['faultIndication', 'Fault indication'], ['powerLoss', 'Power loss behaviour']],
-    'fault handling, the story of a fault: detected, reacted to, indicated, and the reaction to losing power'
+    ATTRIBUTES.SAF.groups[2].attributes.map((definition) => [definition.key, definition.name]),
+    [
+      ['faultsDetected', 'Faults to be detected'], ['detectionMeans', 'Means of detection'], ['faultHandling', 'Fault reaction'],
+      ['faultDetectionTime', 'Fault detection time'], ['faultReactionTime', 'Fault reaction time'],
+      ['faultIndication', 'Fault indication'], ['faultRecovery', 'Fault recovery'], ['powerDisturbances', 'Power disturbances'],
+    ],
+    'fault handling, self-contained: what to find, how, what happens and the state it ends in fault by fault, how fast found and how fast reacted, how it shows, how it is recovered from, and the reaction to the supply going, returning or fluctuating'
   );
   deepEqual(
-    ATTRIBUTES.SAF.groups[2].attributes.map((definition) => definition.key),
-    ['standard', 'responseTime', 'faultReactionTime', 'demandRate', 'technology', 'interfaces'],
-    'characteristics, every quantity and interface: the standard first, the two timings side by side, demand, technology, interfaces'
+    ATTRIBUTES.SAF.groups[1].attributes.map((definition) => definition.key),
+    ['standard', 'designTargets', 'responseTime', 'stoppingTime', 'technology', 'interfaces', 'independence', 'defeating', 'environment'],
+    'characteristics, agnostic to the standard and read as requirement then realisation: the standard and its level, what else the standard asks of the design, the two machinery timings; then how the function is realised, what it exchanges, keeps apart from, resists and works in'
   );
-  const characteristics = ATTRIBUTES.SAF.groups[2];
+  const characteristics = ATTRIBUTES.SAF.groups[1];
   deepEqual(
     characteristics.groups.map((group) => `${group.name} | ${group.when.key} = ${group.when.value}`),
-    ['Integrity level | standard = EN ISO 13849-1', 'Integrity level | standard = EN IEC 62061'],
-    'the integrity level is one slot waiting on the design standard: read by the graph under ISO 13849-1, by the matrix under IEC 62061'
+    ['Required integrity level | standard = EN ISO 13849-1:2023', 'Required integrity level | standard = EN IEC 62061:2021', 'Required integrity level | standard = '],
+    "the level is one slot waiting on the function's own standard: chosen among its levels, or text while none is chosen"
   );
-  equal(characteristics.attributes[0].name, 'Design standard', 'the standard is the one the function is designed to');
-  deepEqual(
-    characteristics.groups[0].attributes.map((definition) => [definition.key, definition.kind]),
-    [['plS', 'choice'], ['plF', 'choice'], ['plP', 'choice'], ['plO', 'choice'], ['plr', 'computed']],
-    'the performance level is read from S, F and P, and the probability of occurrence'
-  );
-  equal(characteristics.groups[0].attributes.at(-1).method, 'PL risk graph', "by ISO 13849-1's risk graph");
-  deepEqual(
-    characteristics.groups[0].attributes.slice(0, 4).map((definition) => definition.values),
-    [['S1', 'S2'], ['F1', 'F2'], ['P1', 'P2'], ['High', 'Low']],
-    "the parameters carry the standard's codes alone"
-  );
-  deepEqual(
-    characteristics.groups[1].attributes.map((definition) => [definition.key, definition.kind]),
-    [['silSe', 'choice'], ['silFr', 'choice'], ['silPr', 'choice'], ['silAv', 'choice'], ['sil', 'computed']],
-    'the safety integrity level is read from Se, Fr, Pr and Av'
-  );
-  equal(characteristics.groups[1].attributes.at(-1).method, 'SIL matrix', "by IEC 62061's matrix");
-  deepEqual(
-    characteristics.groups[1].attributes.slice(0, 4).map((definition) => definition.values),
-    [['Se 1', 'Se 2', 'Se 3', 'Se 4'], ['Fr 1', 'Fr 2', 'Fr 3', 'Fr 4', 'Fr 5'], ['Pr 1', 'Pr 2', 'Pr 3', 'Pr 4', 'Pr 5'], ['Av 1', 'Av 3', 'Av 5']],
-    "as the standard's scores, and no more"
-  );
-  deepEqual(
-    ratingView(characteristics.groups[0].attributes, { plS: 'S1', plF: 'F2', plP: 'P1' }),
-    {
-      outcome: 'PL b',
-      tone: 'none',
-      parameters: [
-        { name: 'Severity of injury', value: 'S1', code: 'S1' },
-        { name: 'Frequency and exposure', value: 'F2', code: 'F2' },
-        { name: 'Possibility of avoidance', value: 'P1', code: 'P1' },
-        { name: 'Probability of occurrence', value: '', code: '' },
-      ],
-    },
-    'S1 F2 P1 reads as PL b, in no tone: a required level is neither good nor bad; the occurrence unset reduces nothing'
-  );
-  equal(ratingView(characteristics.groups[0].attributes, { plS: 'S1', plF: 'F2', plP: 'P1', plO: 'Low' }).outcome, 'PL a', 'and as PL a where the probability of occurrence is low');
-  equal(ratingView(characteristics.groups[1].attributes, { silSe: 'Se 2', silFr: 'Fr 3', silPr: 'Pr 4', silAv: 'Av 5' }).outcome, 'SIL 1', 'Se 2 at a class of 12 reads as SIL 1');
+  equal(characteristics.attributes[0].name, 'Functional safety standard', 'the standard the function is designed to stands first');
+  deepEqual([characteristics.attributes[0].kind, characteristics.attributes[0].values], ['choice', ['EN ISO 13849-1:2023', 'EN IEC 62061:2021']], "the function's own choice, since a machine holds subsystems designed to another standard than its own; the two harmonised for machinery and nothing else");
+  deepEqual(characteristics.groups[0].attributes, [{ key: 'plr', name: 'Required integrity level', kind: 'choice', values: ['PL a', 'PL b', 'PL c', 'PL d', 'PL e'] }], "under ISO 13849-1 the level is chosen among the standard's own, under the agnostic name, its help the shared one");
+  deepEqual(characteristics.groups[1].attributes, [{ key: 'sil', name: 'Required integrity level', kind: 'choice', values: ['SIL 1', 'SIL 2', 'SIL 3'] }], 'under IEC 62061 likewise');
+  deepEqual(characteristics.groups[2], { name: 'Required integrity level', when: { key: 'standard', value: '' }, attributes: [{ key: 'ownLevel', name: 'Required integrity level', kind: 'text' }] }, 'with no standard chosen the level is entered as text, in whatever terms the design uses, so the slot never needs a holder');
+  ok(!characteristics.groups.some((group) => group.attributes.some((definition) => definition.kind === 'computed')) && !attributesFor('SAF').some((definition) => ['failureRate', 'demandRate', 'missionTime', 'category', 'architecture'].includes(definition.key)), "no method reads the level and no field speaks one standard's language: what a standard asks of the design goes in the specific design targets");
+  equal(attributesFor('SAF').find((definition) => definition.key === 'designTargets').kind, 'multiline', 'a text of any length, in the standard\'s own terms');
+  deepEqual(ratingView(ATTRIBUTES.SCN.groups[0].groups[0].attributes, { initialLevel: 'High' }).outcome, null, "a scenario's computed outcome is never read from what is stored");
   const technology = attributesFor('SAF').find((definition) => definition.key === 'technology');
   deepEqual(
     [technology.kind, technology.values],
-    ['set', ['Mechanical', 'Hydraulic', 'Pneumatic', 'Electrical', 'Electronic', 'Software']],
-    "the technologies are a set of those ISO 13849-1 names in its scope, software for the programmable electronic"
+    ['set', ['Mechanical', 'Hydraulic', 'Pneumatic', 'Electrical', 'Electronic', 'Optoelectronic', 'Software', 'Configurable', 'Networked', 'Wireless']],
+    "the technologies are a set of those ISO 13849-1 names in its scope, software for the programmable electronic, and beside them the headings further work takes: optoelectronic, configurable, networked, wireless"
   );
   deepEqual(setValues(technology, 'Electrical; Pneumatic'), ['Pneumatic', 'Electrical'], 'a stored set reads in the listed order, whatever order it was stored in');
   deepEqual(setValues(technology, ' Electrical ;Hydraulics; Firmware'), ['Electrical'], 'trimmed, and only what the set offers');
@@ -182,94 +158,115 @@ equal(linkable(''), false, 'and an empty value is nothing');
     equal(judgement.tab, true, `${code}'s judgement is a tab of its own`);
     deepEqual(judgement.attributes.map((definition) => definition.key), ['applicable', 'rationale'], `${code} holds the verdict with its reasoning there`);
   }
-  deepEqual(groups('ESR'), ['Guidance', 'Applicability', 'Notes'], 'an essential requirement reads its guidance between the requirement and the verdict');
+  for (const code of ['ESR', 'HSR', 'OSR']) {
+    deepEqual(groups(code), ['Guidance', 'Applicability', 'Notes'], `${code} reads its guidance between the requirement and the verdict`);
+  }
   deepEqual(
     ATTRIBUTES.ESR.groups[0].attributes,
-    [{ key: 'guidanceSource', name: 'Source', kind: 'text' }, { key: 'guidanceSection', name: 'Section', kind: 'text' }, { key: 'guidance', name: 'Guidance', kind: 'multiline' }],
-    'the guidance names its source and the section within it, then carries its text'
+    [
+      { key: 'guidanceSource', name: 'Source', kind: 'text', help: 'Where the guidance comes from, such as an official guide, a standard, a commentary or yourself.' },
+      { key: 'guidanceSection', name: 'Section', kind: 'text', help: 'The section of the source the guidance is taken from.' },
+      { key: 'guidance', name: 'Guidance', kind: 'multiline', help: "How to read and meet the essential requirement, whether a guide's advice, a commentary's or your own interpretation." },
+    ],
+    'the guidance names its source and the section within it, then carries its text, each saying what it is for'
   );
 
   deepEqual(
     ATTRIBUTES.SCN.attributes.map((definition) => definition.key),
-    ['reference', 'title', 'hazardousSituation', 'hazardousEvent', 'consequence'],
+    ['reference', 'title', 'hazardousEvent', 'consequence'],
     'a scenario reads where, what happens, and what it leads to'
   );
   ok(ATTRIBUTES.SCN.attributes.every((definition) => definition.kind !== 'related'), 'the scenario tab is text: the relationship pane lists what is related');
   const estimation = ATTRIBUTES.SCN.groups[0];
   ok(ATTRIBUTES.SCN.groups.length === 2 && estimation.name === 'Risk' && estimation.tab === true, 'then rates its risk on a tab of its own, before its notes');
-  deepEqual(estimation.attributes.map((definition) => [definition.key, definition.name, definition.values]), [['standard', 'Estimation standard', ['ISO/TR 14121-2']]], 'the tab opens on the estimation standard');
-  deepEqual(
-    estimation.groups[0],
-    { name: 'Estimation method', when: { key: 'standard', value: 'ISO/TR 14121-2' }, attributes: [{ key: 'method', name: 'Estimation method', kind: 'choice', values: ['Risk matrix', 'Risk graph', 'Numerical scoring', 'Hybrid tool'] }] },
-    "and the method beside it, offered under the report whose methods they are"
-  );
-  const ratings = estimation.groups.filter((group) => group.when?.key === 'method');
+  deepEqual(estimation.attributes, [], "the tab holds no fields of its own: the ratings wait on the project's choice, and nothing else is asked of every scenario");
+  const ratings = estimation.groups.filter((group) => group.when?.key === 'estimationMethod');
+  ok(ratings.length === 8 && ratings.every((group) => group.after === undefined), "the ratings wait on the project's method, a key the scenario has none of, and stand in their order");
   deepEqual(
     estimation.groups.map((group) => (group.when ? `${group.name} | ${group.when.key} = ${group.when.value}` : group.name)),
     [
-      'Estimation method | standard = ISO/TR 14121-2',
-      ...['Risk matrix', 'Risk graph', 'Numerical scoring', 'Hybrid tool'].map((method) => `Initial risk | method = ${method}`),
-      ...['Risk matrix', 'Risk graph', 'Numerical scoring', 'Hybrid tool'].map((method) => `Residual risk | method = ${method}`),
-      'Protective measures',
+      ...['Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)', ''].map((method) => `Initial risk estimation | estimationMethod = ${method}`),
+      ...['Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)', ''].map((method) => `Residual risk estimation | estimationMethod = ${method}`),
       'Risk evaluation',
     ],
-    'the method, the initial ratings, then the residual ones, each shown only under its method, then the measures beneath the two, then the evaluation'
+    "the initial rating, then the residual, each read by one of the three methods under the project's choice and typed under none, then the evaluation"
   );
   deepEqual(
     estimation.groups.find((group) => group.name === 'Risk evaluation').attributes,
-    [{ key: 'evaluation', name: 'Risk evaluation', kind: 'multiline', help: 'Your judgement whether the residual risk is adequately reduced by the measures listed, and why.' }],
+    [{ key: 'evaluation', name: 'Risk evaluation', kind: 'multiline', help: 'Your judgement whether the accident scenario\'s residual risk is acceptable, and why.' }],
     'the tab closes on the risk evaluation, free text with its help'
   );
-  for (const group of ratings) {
+  const read = ratings.filter((group) => group.when.value !== '');
+  const typed = ratings.filter((group) => group.when.value === '');
+  for (const group of read) {
     const last = group.attributes.at(-1);
     ok(last.kind === 'computed' && last.method === group.when.value, `${group.name} under ${group.when.value} closes on what the rating comes to, read by that method`);
     ok(group.attributes.slice(0, -1).every((definition) => definition.kind !== 'computed'), `with the parameters before it, under ${group.when.value}`);
+    const parameters = group.attributes.filter((definition) => definition.kind !== 'computed' && definition.kind !== 'rationale');
+    deepEqual(
+      group.attributes.filter((definition) => definition.kind === 'rationale').map((definition) => definition.parameter),
+      parameters.map((definition) => definition.key),
+      `and a rationale for every parameter, each right after its own, under ${group.when.value}`
+    );
+    ok(parameters.every((definition, i) => group.attributes[2 * i] === definition && group.attributes[2 * i + 1].key === `${definition.key}Rationale`), `the rationale keyed by its parameter with Rationale appended, under ${group.when.value}`);
   }
-  const measures = estimation.groups.find((group) => group.name === 'Protective measures').attributes;
+  deepEqual(typed.map((group) => group.attributes), [[{ key: 'initialRating', name: 'Initial risk estimation', kind: 'text' }], [{ key: 'residualRating', name: 'Residual risk estimation', kind: 'text' }]], 'with no method chosen each rating is one text, named as its slot so the shared help speaks for it');
+  ok(!estimation.groups.some((group) => group.name === 'Protective measures'), 'the measures are relationships, shown by the relationship pane and the views, not by the tab');
+  deepEqual(groupsOf('SCN').map((group) => group.name).slice(0, 3), ['Risk', 'Initial risk estimation', 'Initial risk estimation'], 'the groups walk in render order, sub-groups after their group');
+
+  const matrix = read.find((group) => group.name === 'Initial risk estimation').attributes;
   deepEqual(
-    measures,
-    [{ key: 'measures', name: 'Protective measures', kind: 'related', relationship: 'prm-reduces-risk-of-scn', help: 'The protective measures linked to the scenario. Rating the residual risk records the ones linked at that moment; a measure linked or unlinked since is marked, and the residual risk should be rated again.' }],
-    'the measures are the ones that reduce the risk of the scenario, their help saying what the residual rating records'
-  );
-  deepEqual(relatedDiff(null, ['PRM-002']), { added: [], removed: [] }, 'with no record, nothing has changed');
-  deepEqual(relatedDiff(['PRM-002', 'PRM-004'], ['PRM-002', 'PRM-006']), { added: ['PRM-006'], removed: ['PRM-004'] }, 'a record against the live list: linked since, unlinked since');
-  deepEqual(recordedIds('PRM-002; PRM-004'), ['PRM-002', 'PRM-004'], 'a record reads as its ids');
-  deepEqual([recordedIds(''), recordedIds(undefined), recordedIds(' ; ')], [null, null, null], 'and an empty record is no record');
-  deepEqual(groupsOf('SCN').map((group) => group.name).slice(0, 3), ['Risk', 'Estimation method', 'Initial risk'], 'the groups walk in render order, sub-groups after their group');
-
-
-  const scores = ratings.find((group) => group.when.value === 'Numerical scoring').attributes.filter((definition) => definition.kind === 'number');
-  deepEqual(scores.map((definition) => [definition.min, definition.max]), [[0, 100], [0, 100]], 'the two scores run from 0 to 100');
-
-  const graph = ratings.find((group) => group.name === 'Initial risk' && group.when.value === 'Risk graph').attributes;
-  deepEqual(
-    ratingView(graph, { initialS: 'S2', initialF: 'F2', initialO: 'O2', initialA: 'A2' }),
+    ratingView(matrix, { initialSeverity: 'Serious', initialProbability: 'Likely' }),
     {
-      outcome: '5 (highest)',
+      outcome: 'High',
       tone: 'high',
       parameters: [
-        { name: 'Severity of harm', value: 'S2', code: 'S2' },
-        { name: 'Frequency and duration of exposure', value: 'F2', code: 'F2' },
-        { name: 'Probability of occurrence of a hazardous event', value: 'O2', code: 'O2' },
-        { name: 'Possibility of avoidance', value: 'A2', code: 'A2' },
+        { name: 'Severity', value: 'Serious', code: 'Serious', rationale: '' },
+        { name: 'Probability', value: 'Likely', code: 'Likely', rationale: '' },
       ],
     },
-    'a rating reads as what it comes to, its tone, and its parameters by name, each with the code it shows'
+    'a rating reads as what it comes to, its tone, and its parameters by name, each with the code it shows and the rationale given for it'
+  );
+  deepEqual(
+    ratingView(matrix, { initialSeverity: 'Serious', initialProbability: 'Likely', initialSeverityRationale: ' Amputation is credible at the tool ', initialProbabilityRationale: '' }).parameters.map((parameter) => parameter.rationale),
+    ['Amputation is credible at the tool', ''],
+    'a rationale reads trimmed beside its own parameter, the unset ones empty'
   );
   deepEqual(
     ['K1 word', '4 words after', 'Se 4', 'Very likely', 'Catastrophic', '95', '', ' Low ', undefined].map(codeShown),
     ['K1', '4', 'Se 4', 'Very likely', 'Catastrophic', '95', '', 'Low', ''],
     "a code is a value's first word, and its second where the first holds no digit"
   );
-  const half = ratingView(graph, { initialS: 'S2', initialF: ' F2 ' });
+  deepEqual(
+    [codeShown('95', { kind: 'number', name: 'Severity score' }), codeShown('', { kind: 'number', name: 'Probability score' }), codeShown('S2', { kind: 'choice', name: 'Severity' })],
+    ['SS 95', '', 'S2'],
+    "and for a number the initials of its name before it, as the report abbreviates its scores"
+  );
+  const half = ratingView(matrix, { initialSeverity: 'Serious', initialProbability: '  ' });
   equal(half.outcome, null, 'a rating half made comes to nothing yet');
   equal(half.tone, 'none', 'and wears no tone');
-  deepEqual(half.parameters.map((parameter) => parameter.value), ['S2', 'F2', '', ''], 'its parameters read trimmed, the unset ones empty');
-  const scoring = ratings.find((group) => group.name === 'Residual risk' && group.when.value === 'Numerical scoring').attributes;
+  deepEqual(half.parameters.map((parameter) => parameter.value), ['Serious', ''], 'its parameters read trimmed, the unset ones empty');
+  equal(ratingView(matrix, { initialSeverity: 'Minor', initialProbability: 'Remote' }).tone, 'none', 'negligible wears no tone');
+  const graph = read.find((group) => group.name === 'Initial risk estimation' && group.when.value === 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)').attributes;
   deepEqual(
-    [ratingView(scoring, { residualSeverityScore: '60', residualProbabilityScore: '40' }).outcome, ratingView(scoring, { residualSeverityScore: '10', residualProbabilityScore: '10' }).tone],
-    ['100 (low)', 'none'],
-    'a score comes to its category, negligible wearing no tone'
+    ratingView(graph, { initialS: 'S2', initialF: 'F2', initialO: 'O2', initialA: 'A2' }),
+    {
+      outcome: 'RI 5 (highest)',
+      tone: 'high',
+      parameters: [
+        { name: 'Severity', value: 'S2', code: 'S2', rationale: '' },
+        { name: 'Exposure', value: 'F2', code: 'F2', rationale: '' },
+        { name: 'Occurrence', value: 'O2', code: 'O2', rationale: '' },
+        { name: 'Avoidance', value: 'A2', code: 'A2', rationale: '' },
+      ],
+    },
+    'under the graph a rating reads as its index and band, its four codes beside it'
+  );
+  const scoring = read.find((group) => group.name === 'Residual risk estimation' && group.when.value === 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)').attributes;
+  deepEqual(
+    [ratingView(scoring, { residualSeverityScore: '60', residualProbabilityScore: '40' }).outcome, ratingView(scoring, { residualSeverityScore: '10', residualProbabilityScore: '10' }).tone, ratingView(scoring, { residualSeverityScore: '95', residualProbabilityScore: '80' }).parameters.map((parameter) => parameter.code)],
+    ['RS 100 (low)', 'none', ['SS 95', 'PS 80']],
+    "under the scoring a rating reads as its total and category under the report's RS, negligible wearing no tone, the scores its codes under SS and PS"
   );
   for (const code of ['LEG', 'HST', 'OSP', 'ESR', 'HSR', 'OSR']) {
     const applicable = attributesFor(code).find((definition) => definition.key === 'applicable');
@@ -280,11 +277,11 @@ equal(linkable(''), false, 'and an empty value is nothing');
 
 // --- what a save removes, as the notice tells it ---
 equal(removalText([{ name: 'Integrity level', value: 'EN ISO 13849-1' }]), 'Integrity level under EN ISO 13849-1.', 'one group under one value');
-equal(removalText([{ name: 'Initial risk', value: 'Risk matrix' }, { name: 'Residual risk', value: 'Risk matrix' }]), 'Initial risk and Residual risk under Risk matrix.', 'two groups under one value are joined by and');
+equal(removalText([{ name: 'Initial risk estimation', value: 'Risk matrix' }, { name: 'Residual risk estimation', value: 'Risk matrix' }]), 'Initial risk estimation and Residual risk estimation under Risk matrix.', 'two groups under one value are joined by and');
 equal(removalText([{ name: 'A', value: 'X' }, { name: 'B', value: 'X' }, { name: 'C', value: 'X' }]), 'A, B and C under X.', 'three are listed with commas and an and');
 equal(
-  removalText([{ name: 'Estimation method', value: 'ISO/TR 14121-2' }, { name: 'Initial risk', value: 'Risk matrix' }, { name: 'Residual risk', value: 'Risk matrix' }]),
-  'Estimation method under ISO/TR 14121-2; Initial risk and Residual risk under Risk matrix.',
+  removalText([{ name: 'Estimation method', value: 'ISO/TR 14121-2' }, { name: 'Initial risk estimation', value: 'Risk matrix' }, { name: 'Residual risk estimation', value: 'Risk matrix' }]),
+  'Estimation method under ISO/TR 14121-2; Initial risk estimation and Residual risk estimation under Risk matrix.',
   'groups under different values are told in order, one clause each'
 );
 

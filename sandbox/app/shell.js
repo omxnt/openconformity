@@ -237,6 +237,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   });
 
   menubarMenu(viewButton, 'View', () => [
+    ...actions.filter((offered) => offered.group === 'views').map((action) => ({ ...actionItem(action, viewButton), checked: action.checked() })),
+    { separator: true },
     {
       label: 'Relationships as list',
       icon: 'i-view-list',

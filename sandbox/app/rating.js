@@ -1,32 +1,30 @@
 /**
  * The rating dialog: a rating made by its method, laid out as the
  * method's document lays it out — the matrix to click, the graph to
- * follow, the scores to enter, the scales beside their matrix. It
- * resolves the parameter values chosen, or null when it is cancelled;
- * nothing is written until the caller does.
+ * follow, the scores to enter — and beneath it the rationale to type
+ * for each parameter, why that class was chosen. It resolves the
+ * parameter and rationale values as chosen, or null when it is
+ * cancelled; nothing is written until the caller does.
  */
 
 import { el, icon, svg, svgText } from './dom.js';
+import { isOutcome, isRationale } from './attributes.js';
 import {
   estimate,
   levelTone,
   codeOf,
   scoreOf,
+  MATRIX_METHOD,
+  GRAPH_METHOD,
+  SCORING_METHOD,
   MATRIX,
   MATRIX_SEVERITY,
   MATRIX_PROBABILITY,
   GRAPH_TREE,
-  PL_TREE,
-  PL_METHOD,
-  SIL_METHOD,
-  SIL_BANDS,
-  SIL_MATRIX,
   graphPath,
   graphPick,
   graphLive,
   SCORING_CLASSES,
-  HYBRID,
-  HYBRID_BANDS,
 } from './risk.js';
 
 /**
@@ -40,43 +38,7 @@ export function statusIcon(tone) {
   return held;
 }
 
-/** A level as a cell reads it: its dot in its tone where it has one, then its word. */
-function levelCell(level, className) {
-  const tone = levelTone(level);
-  return el('div', { className: `${className} tone-${tone}` }, [
-    ...(tone === 'none' ? [] : [el('span', { className: 'risk-dot' })]),
-    el('span', { text: level }),
-  ]);
-}
-
-/**
- * One parameter as a row of options, Carbon's content switcher: the
- * chosen one pressed, a second press clearing it.
- */
-function optionGroup(definition, state, changed) {
-  const buttons = definition.values.map((value) => {
-    const button = el('button', {
-      className: 'risk-option',
-      text: value,
-      attributes: { type: 'button', 'aria-pressed': 'false' },
-    });
-    button.addEventListener('click', () => {
-      state[definition.key] = state[definition.key] === value ? '' : value;
-      changed();
-    });
-    return button;
-  });
-  const element = el('div', { className: 'risk-choice' }, [
-    el('div', { className: 'field-label', text: definition.name }),
-    el('div', { className: 'risk-options', attributes: { role: 'group', 'aria-label': definition.name } }, buttons),
-  ]);
-  const repaint = () => {
-    for (const button of buttons) button.setAttribute('aria-pressed', String(button.textContent === state[definition.key]));
-  };
-  return { element, repaint };
-}
-
-/** Table 1 as the tool it is: a cell per pair, pressed where the rating stands. */
+/** Table 1 as the tool it is: a cell per pair, pressed where the rating stands, pressed again to clear it. */
 function matrixSurface(parameters, state, changed) {
   const [severity, probability] = parameters;
   const cells = [];
@@ -95,8 +57,9 @@ function matrixSurface(parameters, state, changed) {
           [el('span', { className: 'risk-dot' }), el('span', { text: level })]
         );
         button.addEventListener('click', () => {
-          state[severity.key] = column;
-          state[probability.key] = held;
+          const pressed = state[severity.key] === column && state[probability.key] === held;
+          state[severity.key] = pressed ? '' : column;
+          state[probability.key] = pressed ? '' : held;
           changed();
         });
         cells.push({ button, column, row: held });
@@ -113,13 +76,20 @@ function matrixSurface(parameters, state, changed) {
   return { element, repaint };
 }
 
+/** Codes as a phrase: `S1 or S2`, `O1, O2 or O3`. */
+const listed = (codes) => (codes.length < 2 ? codes.join('') : `${codes.slice(0, -1).join(', ')} or ${codes.at(-1)}`);
+
 /**
  * A graph drawn and made the picker: each branch a line with its label
  * above it, the codes of a merged branch as separate words, every word
- * a button; the leaves gathered on the outcomes they reach; the path the
- * rating resolves so far in the interactive colour, branches no longer
- * reachable dimmed. The lines sit on pixel centres.
- * @param {{ tree: Object, headings: string[], outcomes: string[], leafOutcome: (leaf: Object) => string }} spec
+ * a button; a parent running straight into its middle child, so a
+ * junction reads as one line branching; each leaf ending in the index it
+ * reaches; the path the rating resolves so far in the interactive
+ * colour, the codes next to pick in the link colour, branches no longer
+ * reachable dimmed. The figure is drawn at its own size, the lines on
+ * pixel centres, so nothing is scaled, and top down, so the keyboard
+ * opens on the first severity.
+ * @param {{ name: string, tree: Object, headings: string[], leafOutcome: (leaf: Object) => string }} spec
  */
 function graphFigure(spec, parameters, state, pick) {
   const COLUMN = 128;
@@ -139,38 +109,33 @@ function graphFigure(spec, parameters, state, pick) {
     }
     for (const child of node.children) place(child, depth + 1);
     const rows = node.children.map((child) => layout.get(child).row);
-    layout.set(node, { depth, row: rows.reduce((sum, held) => sum + held, 0) / rows.length });
+    const middle = (rows.length - 1) / 2;
+    layout.set(node, { depth, row: Number.isInteger(middle) ? rows[middle] : (rows[Math.floor(middle)] + rows[Math.ceil(middle)]) / 2 });
   })(spec.tree, 0);
   const x = (depth) => LEFT + depth * COLUMN;
   const y = (row) => TOP + Math.round(row * ROW) + 0.5;
-  const outcomeRow = (i) => (i * (leaves.length - 1)) / Math.max(1, spec.outcomes.length - 1);
   const cx = x(levels + 1) + RADIUS + 4;
 
   const codes = parameters.map((definition) => codeOf(state[definition.key]));
-  const path = new Set(graphPath(codes, spec.tree));
-  const last = [...path].at(-1);
-  const reached = last.children ? null : spec.leafOutcome(last);
+  const path = graphPath(codes, spec.tree);
+  const onPath = new Set(path);
+  const last = path.at(-1);
+  const frontier = last.children && codes[path.length - 1] === '' ? last : null;
 
   const parts = [];
   spec.headings.forEach((heading, i) => {
-    parts.push(svgText('text', { x: String(x(i + 1)), y: '16', class: 'risk-head' }, heading));
+    const column = i === levels ? { x: String(cx), 'text-anchor': 'middle' } : { x: String(x(i + 1)) };
+    parts.push(svgText('text', { ...column, y: '16', class: 'risk-head' }, heading));
   });
   const edge = (d, active) => svg('path', { d, class: active ? 'risk-edge active' : 'risk-edge' });
 
-  (function draw(node, ancestors, id) {
+  (function draw(node, ancestors, id, parent) {
     const { depth, row } = layout.get(node);
-    const from = depth === 0 ? x(0) : x(depth) - GAP;
-    const to = x(depth + 1) - GAP;
-    parts.push(edge(`M ${from} ${y(row)} H ${to}`, path.has(node)));
-    for (const [i, child] of (node.children ?? []).entries()) {
-      parts.push(edge(`M ${to} ${y(row)} V ${y(layout.get(child).row)}`, path.has(node) && path.has(child)));
-      draw(child, depth === 0 ? [] : [...ancestors, node], `${id}.${i}`);
-    }
-    if (!node.children) {
-      const leafY = y(outcomeRow(spec.outcomes.indexOf(spec.leafOutcome(node))));
-      parts.push(edge(`M ${to} ${y(row)} V ${leafY} H ${cx - RADIUS}`, path.has(node)));
-    }
+    const from = depth === 0 ? x(0) : x(depth) - GAP + 0.5;
+    const to = node.children ? x(depth + 1) - GAP + 0.5 : cx - RADIUS;
+    parts.push(edge(`M ${from} ${y(row)} H ${to}`, onPath.has(node)));
     const live = depth === 0 || graphLive(codes, ancestors);
+    const next = parent === frontier;
     const label = svgText('text', { x: String(x(depth) + (depth === 0 ? 0 : 2)), y: String(y(row) - 6), class: live ? 'risk-label' : 'risk-label dim' }, '');
     if (depth === 0) {
       label.textContent = node.label;
@@ -180,8 +145,8 @@ function graphFigure(spec, parameters, state, pick) {
         const chosen = live && codes[ancestors.length] === code;
         const word = svgText(
           'tspan',
-          { class: chosen ? 'risk-code selected' : 'risk-code', role: 'button', tabindex: '0', 'data-pick': `${id}:${code}` },
-          node.codes.length > 1 ? code : node.label
+          { class: chosen ? 'risk-code selected' : next ? 'risk-code next' : 'risk-code', role: 'button', tabindex: '0', 'data-pick': `${id}:${code}` },
+          code
         );
         word.addEventListener('click', () => pick(ancestors, code));
         word.addEventListener('keydown', (event) => {
@@ -193,88 +158,110 @@ function graphFigure(spec, parameters, state, pick) {
       });
     }
     parts.push(label);
-  })(spec.tree, [], '0');
+    if (!node.children) {
+      parts.push(
+        svg('g', { class: node === last ? 'risk-leaf active' : 'risk-leaf' }, [
+          svg('circle', { cx: String(cx), cy: String(y(row)), r: String(RADIUS) }),
+          svgText('text', { x: String(cx), y: String(y(row) + 4) }, spec.leafOutcome(node)),
+        ])
+      );
+    }
+    for (const [i, child] of (node.children ?? []).entries()) {
+      parts.push(edge(`M ${to} ${y(row)} V ${y(layout.get(child).row)}`, onPath.has(node) && onPath.has(child)));
+      draw(child, depth === 0 ? [] : [...ancestors, node], `${id}.${i}`, node);
+    }
+  })(spec.tree, [], '0', null);
 
-  spec.outcomes.forEach((outcome, i) => {
-    parts.push(
-      svg('g', { class: reached === outcome ? 'risk-leaf active' : 'risk-leaf' }, [
-        svg('circle', { cx: String(cx), cy: String(y(outcomeRow(i))), r: String(RADIUS) }),
-        svgText('text', { x: String(cx), y: String(y(outcomeRow(i)) + 4) }, outcome),
-      ])
-    );
-  });
-  const width = cx + RADIUS + 8;
-  const height = y(leaves.length - 1) + 12;
+  const width = cx + 40;
+  const height = y(leaves.length - 1) + RADIUS + 4;
   return svg(
     'svg',
-    { class: 'risk-graph', viewBox: `0 0 ${width} ${height}`, role: 'group', 'aria-label': `${spec.name}: pick a branch at each level` },
+    { class: 'risk-graph', width: String(width), height: String(height), viewBox: `0 0 ${width} ${height}`, role: 'group', 'aria-label': `${spec.name}: pick a branch at each level` },
     parts
   );
 }
 
-/** ISO/TR 14121-2's risk graph, Figure 3: four levels gathered on six indices. */
+/** What the graph waits on: the codes to pick at the level the path stops at, or null where it is decided. */
+function graphHint(spec, codes) {
+  const path = graphPath(codes, spec.tree);
+  const last = path.at(-1);
+  if (!last.children || codes[path.length - 1] !== '') return null;
+  return `Pick ${listed([...new Set(last.children.flatMap((child) => child.codes))])}`;
+}
+
+/** The report's risk graph, Figure 3: four levels, each leaf ending in its index. */
 const RISK_GRAPH_SPEC = {
   name: 'The risk graph',
   tree: GRAPH_TREE,
-  headings: ['Severity', 'Exposure', 'Probability', 'Avoidance', 'Risk index'],
-  outcomes: ['1', '2', '3', '4', '5', '6'],
+  headings: ['Severity', 'Exposure', 'Occurrence', 'Avoidance', 'Risk index'],
   leafOutcome: (leaf) => String(leaf.index),
-  note: 'Pick a branch at each level: the path lights as far as it is decided, and the index at its end.',
-};
-
-/** ISO 13849-1's risk graph, Figure A.1: three levels gathered on five performance levels, the occurrence chosen beneath. */
-const PL_GRAPH_SPEC = {
-  name: 'The performance level graph',
-  tree: PL_TREE,
-  headings: ['Severity', 'Exposure', 'Avoidance', 'PLr'],
-  outcomes: ['a', 'b', 'c', 'd', 'e'],
-  leafOutcome: (leaf) => leaf.outcome,
-  note: 'Pick a branch at each level: the level stands at its end, one lower where the occurrence is set low.',
+  note: 'Pick a branch at each level: the path lights as far as it is decided, and the index at its end. A code picked again clears it.',
 };
 
 /**
- * A graph as the picker, a word of guidance above it, and any parameter
- * beyond the graph's levels as options beneath it; a pick keeps the
- * keyboard where it was.
+ * A graph as the picker, a word of guidance above it; a pick keeps the
+ * keyboard where it was, and a chosen code picked again clears its level
+ * and those below it.
  */
 const graphSurface = (spec) => (parameters, state, changed) => {
-  const inTree = parameters.slice(0, spec.headings.length - 1);
-  const beyond = parameters.slice(spec.headings.length - 1).map((definition) => optionGroup(definition, state, changed));
+  const codes = () => parameters.map((definition) => codeOf(state[definition.key]));
   const valueOf = (definition, code) => definition.values.find((value) => codeOf(value) === code) ?? code;
   const pick = (ancestors, code) => {
-    const next = graphPick(inTree.map((definition) => codeOf(state[definition.key])), ancestors, code);
-    inTree.forEach((definition, level) => {
+    const held = codes();
+    const next = held[ancestors.length] === code ? held.map((chosen, level) => (level >= ancestors.length ? '' : chosen)) : graphPick(held, ancestors, code);
+    parameters.forEach((definition, level) => {
       state[definition.key] = next[level] === '' ? '' : valueOf(definition, next[level]);
     });
     changed();
   };
-  let figure = graphFigure(spec, inTree, state, pick);
+  let figure = graphFigure(spec, parameters, state, pick);
   const holder = el('div', { className: 'rating-graph' }, [figure]);
-  const element = el('div', { className: 'rating-surface' }, [
-    el('div', { className: 'field-note', text: spec.note }),
-    holder,
-    ...(beyond.length > 0 ? [el('div', { className: 'rating-choices' }, beyond.map((held) => held.element))] : []),
-  ]);
+  const element = el('div', { className: 'rating-surface' }, [el('div', { className: 'field-note', text: spec.note }), holder]);
   const repaint = () => {
-    for (const held of beyond) held.repaint();
     const focused = figure.contains(document.activeElement) ? document.activeElement.getAttribute('data-pick') : null;
-    const fresh = graphFigure(spec, inTree, state, pick);
+    const fresh = graphFigure(spec, parameters, state, pick);
     holder.replaceChild(fresh, figure);
     figure = fresh;
     if (focused) fresh.querySelector(`[data-pick="${focused}"]`)?.focus();
   };
-  return { element, repaint };
+  return { element, repaint, hint: () => graphHint(spec, codes()) };
 };
 
-/** The classes a score falls in, as one line, the score's own class named first when it has one. */
-function scaleNote(classes, value) {
-  const spans = classes.map(([from, name], i) => {
+/** A score's classes as a small table beneath it, the range then the class, the score's own class marked. */
+function scaleTable(classes) {
+  const rows = classes.map(([from, name], i) => {
     const to = i === 0 ? from : classes[i - 1][0] - 1;
-    return `${to === from ? from : `${from}–${to}`} ${name}`;
+    return [el('span', { className: 'risk-scale-range', text: to === from ? String(from) : `${from}–${to}` }), el('span', { className: 'risk-scale-class', text: name })];
   });
-  const held = scoreOf(value);
-  const own = Number.isNaN(held) ? null : classes.find(([from]) => held >= from)?.[1];
-  return own ? `${held} is ${own} — ${spans.join(' · ')}` : spans.join(' · ');
+  const element = el('div', { className: 'risk-scale' }, rows.flat());
+  const repaint = (value) => {
+    const held = scoreOf(value);
+    const own = Number.isNaN(held) ? -1 : classes.findIndex(([from]) => held >= from);
+    rows.forEach((row, i) => {
+      for (const span of row) span.classList.toggle('own', i === own);
+    });
+  };
+  return { element, repaint };
+}
+
+/** A score to enter: digits alone, kept within the parameter's bounds. */
+function scoreInput(definition, state, changed) {
+  const input = el('input', {
+    className: 'field-input',
+    attributes: { type: 'text', inputmode: 'numeric', autocomplete: 'off', id: `rate-${definition.key}` },
+  });
+  input.value = state[definition.key];
+  input.addEventListener('beforeinput', (event) => {
+    if (event.data && /\D/.test(event.data)) event.preventDefault();
+  });
+  input.addEventListener('input', () => {
+    const digits = input.value.replace(/\D/g, '');
+    const held = digits === '' ? '' : String(Math.min(definition.max, Math.max(definition.min, Number(digits))));
+    if (input.value !== held) input.value = held;
+    state[definition.key] = held;
+    changed();
+  });
+  return input;
 }
 
 /** Two scores to enter, each with the classes it falls in beneath it. */
@@ -283,23 +270,16 @@ function scoringSurface(parameters, state, changed) {
     [parameters[0], SCORING_CLASSES.severity],
     [parameters[1], SCORING_CLASSES.probability],
   ].map(([definition, classes]) => {
-    const input = el('input', {
-      className: 'field-input',
-      attributes: { type: 'number', min: String(definition.min), max: String(definition.max), id: `rate-${definition.key}` },
-    });
-    input.value = state[definition.key];
-    input.addEventListener('input', () => {
-      state[definition.key] = input.value;
-      changed();
-    });
-    const note = el('div', { className: 'field-note' });
+    const input = scoreInput(definition, state, changed);
+    const scale = scaleTable(classes);
     const element = el('div', { className: 'field' }, [
       el('label', { className: 'field-label', text: definition.name, attributes: { for: `rate-${definition.key}` } }),
       input,
-      note,
+      scale.element,
     ]);
     const repaint = () => {
-      note.textContent = scaleNote(classes, state[definition.key]);
+      if (input.value !== state[definition.key]) input.value = state[definition.key];
+      scale.repaint(state[definition.key]);
     };
     return { element, repaint };
   });
@@ -312,53 +292,57 @@ function scoringSurface(parameters, state, changed) {
 }
 
 /**
- * The four scales as options, and a matrix of severity against the
- * class the other three add to beneath them, the cell the class reaches
- * marked: the report's hybrid form, and IEC 62061's assignment.
- * @param {{ bands: number[][], table: Object<number, string[]> }} spec
+ * The rationale beneath the surface: a text area per parameter, two to
+ * a row and the two of a row kept the same height, labelled by the
+ * parameter's name and the code it holds, for why that class was
+ * chosen.
  */
-const classMatrixSurface = ({ bands, table }) => (parameters, state, changed) => {
-  const [se, fr, pr, av] = parameters;
-  const groups = parameters.map((definition) => optionGroup(definition, state, changed));
-  const cells = [];
-  const head = el('tr', {}, [
-    el('th', { text: 'Severity Se' }),
-    ...bands.map(([low, high]) => el('th', { text: `Cl ${low}–${high}`, attributes: { scope: 'col' } })),
-  ]);
-  const rows = [4, 3, 2, 1].map((severity) =>
-    el('tr', {}, [
-      el('th', { text: String(severity), attributes: { scope: 'row' } }),
-      ...table[severity].map((level, column) => {
-        const cell = levelCell(level, 'risk-cell still');
-        cells.push({ cell, severity, column });
-        return el('td', {}, [cell]);
-      }),
-    ])
-  );
-  const matrix = el('table', { className: 'risk-matrix' }, [el('thead', {}, [head]), el('tbody', {}, rows)]);
-  const element = el('div', { className: 'rating-surface' }, [el('div', { className: 'rating-choices' }, groups.map((held) => held.element)), matrix]);
-  const repaint = () => {
-    for (const held of groups) held.repaint();
-    const severity = scoreOf(state[se.key]);
-    const cl = scoreOf(state[fr.key]) + scoreOf(state[pr.key]) + scoreOf(state[av.key]);
-    const column = Number.isNaN(cl) ? -1 : bands.findIndex(([low, high]) => cl >= low && cl <= high);
-    for (const held of cells) held.cell.classList.toggle('reached', held.severity === severity && held.column === column);
+function rationaleBlock(parameters, rationales, state) {
+  const fields = rationales.map((rationale) => {
+    const parameter = parameters.find((definition) => definition.key === rationale.parameter);
+    const area = el('textarea', { className: 'field-input', attributes: { rows: '2', id: `rate-${rationale.key}` } });
+    area.value = state[rationale.key];
+    area.addEventListener('input', () => {
+      state[rationale.key] = area.value;
+      level();
+    });
+    const label = el('label', { className: 'field-label', attributes: { for: `rate-${rationale.key}` } });
+    const element = el('div', { className: 'field' }, [label, area]);
+    const repaint = () => {
+      const code = codeOf(state[parameter.key]);
+      label.textContent = code ? `${parameter.name}: ${code}` : parameter.name;
+      if (area.value !== state[rationale.key]) area.value = state[rationale.key];
+    };
+    return { element, area, repaint };
+  });
+  function level() {
+    for (let i = 0; i < fields.length; i += 2) {
+      const pair = fields.slice(i, i + 2).map((held) => held.area);
+      for (const area of pair) area.style.height = 'auto';
+      const tallest = Math.max(...pair.map((area) => area.scrollHeight));
+      for (const area of pair) area.style.height = `${tallest}px`;
+    }
+  }
+  return {
+    element: el('div', { className: 'rating-rationale' }, [el('div', { className: 'cell-legend', text: 'Rationale' }), el('div', { className: 'rating-rationale-fields' }, fields.map((held) => held.element))]),
+    repaint: () => {
+      for (const held of fields) held.repaint();
+      level();
+    },
+    level,
   };
-  return { element, repaint };
-};
+}
 
 const SURFACES = {
-  'Risk matrix': matrixSurface,
-  'Risk graph': graphSurface(RISK_GRAPH_SPEC),
-  'Numerical scoring': scoringSurface,
-  'Hybrid tool': classMatrixSurface({ bands: HYBRID_BANDS, table: HYBRID }),
-  [PL_METHOD]: graphSurface(PL_GRAPH_SPEC),
-  [SIL_METHOD]: classMatrixSurface({ bands: SIL_BANDS, table: SIL_MATRIX }),
+  [MATRIX_METHOD]: matrixSurface,
+  [GRAPH_METHOD]: graphSurface(RISK_GRAPH_SPEC),
+  [SCORING_METHOD]: scoringSurface,
 };
 
 /**
- * Rate under a method. Resolves the parameters' values as chosen, keyed
- * as the definitions are, or null when cancelled or dismissed.
+ * Rate under a method. Resolves the parameters' and rationales' values
+ * as chosen, keyed as the definitions are, or null when cancelled or
+ * dismissed.
  * @param {{ open: Function }} dialogs
  * @param {Object} spec
  * @param {string} spec.title
@@ -370,20 +354,25 @@ const SURFACES = {
 export async function rateDialog(dialogs, { title, method, definitions, values }) {
   const surface = SURFACES[method];
   if (!surface) return null;
-  const parameters = definitions.filter((definition) => definition.kind !== 'computed');
-  const state = Object.fromEntries(parameters.map((definition) => [definition.key, values[definition.key] ?? '']));
-  const result = el('div', { className: 'risk-result' });
+  const parameters = definitions.filter((definition) => !isOutcome(definition) && !isRationale(definition));
+  const rationales = definitions.filter(isRationale);
+  const state = Object.fromEntries([...parameters, ...rationales].map((definition) => [definition.key, values[definition.key] ?? '']));
+  const outcome = el('span', { className: 'risk-outcome' });
+  const result = el('div', { className: 'risk-result' }, [outcome]);
   const built = surface(parameters, state, () => repaint());
+  const reasons = rationaleBlock(parameters, rationales, state);
   function repaint() {
     built.repaint();
+    reasons.repaint();
     const held = estimate(method, parameters.map((definition) => state[definition.key]));
     result.className = `risk-result${held === null ? ' unrated' : ''}`;
-    result.textContent = '';
-    if (held !== null && levelTone(held) !== 'none') result.appendChild(statusIcon(levelTone(held)));
-    result.appendChild(el('span', { text: held ?? 'Not rated' }));
+    outcome.textContent = '';
+    if (held !== null && levelTone(held) !== 'none') outcome.appendChild(statusIcon(levelTone(held)));
+    outcome.appendChild(el('span', { text: held ?? built.hint?.() ?? 'Not rated' }));
   }
   repaint();
-  const body = el('div', { className: 'rating' }, [built.element, result]);
+  const body = el('div', { className: 'rating' }, [built.element, result, ...(rationales.length > 0 ? [reasons.element] : [])]);
+  requestAnimationFrame(() => reasons.level());
   const answer = await dialogs.open({
     title,
     body,
@@ -391,7 +380,7 @@ export async function rateDialog(dialogs, { title, method, definitions, values }
       { label: 'Cancel', value: null, kind: 'secondary' },
       { label: 'Apply', value: 'confirmed', kind: 'primary' },
     ],
-    initialFocus: body.querySelector('button, input'),
+    initialFocus: body.querySelector('button, input, [tabindex="0"], textarea'),
   });
   return answer === 'confirmed' ? { ...state } : null;
 }

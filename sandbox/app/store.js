@@ -49,6 +49,8 @@ const VIEW_KEY = 'openconformity.view';
 
 /** The chosen tabs' key in the browser session: the tab chosen for a type stays chosen until the session ends. */
 const TABS_KEY = 'openconformity.tabs';
+/** Session storage: the view open over the workspace, and its section, so a reload returns to it. */
+const OPEN_VIEW_KEY = 'openconformity.open-view';
 
 /** The two Carbon themes; null follows the system preference. */
 const THEMES = ['white', 'g100'];
@@ -101,6 +103,24 @@ export function createStore({ storage, session = null }) {
     }
   } catch {
     // A session store that refuses, or holds nonsense, changes nothing.
+  }
+  /** @type {{ id: string, section: number }|null} the view open over the workspace, session state */
+  let openView = null;
+  try {
+    const stored = JSON.parse(session?.getItem(OPEN_VIEW_KEY) ?? 'null');
+    if (stored && typeof stored.id === 'string') openView = { id: stored.id, section: Number.isInteger(stored.section) ? stored.section : 0 };
+  } catch {
+    // A session store that refuses, or holds nonsense, changes nothing.
+  }
+  /** @type {{ id: string, name: string, section: number, rowId: string }|null} the view an entity was chosen from, for the way back; never stored */
+  let viewReturn = null;
+  function keepOpenView() {
+    try {
+      if (openView === null) session?.removeItem(OPEN_VIEW_KEY);
+      else session?.setItem(OPEN_VIEW_KEY, JSON.stringify(openView));
+    } catch {
+      // A session store that refuses changes nothing.
+    }
   }
   /** The navigator's filter as typed: session state, never persisted, one truth for the tree and every enablement. */
   let navigatorFilter = '';
@@ -206,6 +226,7 @@ export function createStore({ storage, session = null }) {
         projectCollapsed = blob.session?.projectCollapsed === true;
         projectOpen = true;
         restoration = 'restored';
+        if (openView !== null && Number.isInteger(openView.section) === false) openView = null;
       }
     } catch {
       // Falls through to the set-aside below.
@@ -336,6 +357,9 @@ export function createStore({ storage, session = null }) {
       projectCollapsed = false;
       navigatorFilter = '';
       picker = null;
+      openView = null;
+      viewReturn = null;
+      keepOpenView();
       projectOpen = true;
       persist();
       notify();
@@ -405,6 +429,7 @@ export function createStore({ storage, session = null }) {
     select(id) {
       if (!projectOpen) return;
       const next = id !== null && model.nodes.has(id) ? id : null;
+      if (viewReturn !== null && next !== viewReturn.rowId) viewReturn = null;
       if (next === selection) return;
       selection = next;
       persist();
@@ -464,6 +489,51 @@ export function createStore({ storage, session = null }) {
       } catch {
         // A session store that refuses changes nothing.
       }
+    },
+
+    /** The view open over the workspace, with its section, or null. */
+    view: () => (projectOpen ? openView : null),
+
+    /**
+     * Open a view over the workspace, at a section. One truth for the
+     * pane, the View menu and the editor's way back; kept for the
+     * browser session, never in the project blob.
+     * @param {string} id
+     * @param {number} [section]
+     */
+    openView(id, section = 0) {
+      if (!projectOpen || typeof id !== 'string') return;
+      openView = { id, section: Number.isInteger(section) && section >= 0 ? section : 0 };
+      keepOpenView();
+      notify();
+    },
+
+    closeView() {
+      if (openView === null) return;
+      openView = null;
+      keepOpenView();
+      notify();
+    },
+
+    /** @param {number} section */
+    setViewSection(section) {
+      if (openView === null || !Number.isInteger(section) || section < 0 || section === openView.section) return;
+      openView = { ...openView, section };
+      keepOpenView();
+      notify();
+    },
+
+    /** The view an entity was chosen from, with the row, or null. */
+    viewReturn: () => viewReturn,
+
+    /**
+     * Record, or clear, the way back to a view. Selecting another entity
+     * clears it too.
+     * @param {{ id: string, name: string, section: number, rowId: string }|null} value
+     */
+    setViewReturn(value) {
+      viewReturn = value;
+      notify();
     },
 
     /** Which presentation the relationship pane shows. */

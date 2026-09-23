@@ -440,6 +440,55 @@ function openStore(storage) {
   equal(second.relationshipView(), 'graph', 'a restored session opens on the default view again');
 }
 
+// --- The open view is session state with a way back ---------------------
+
+{
+  const storage = fakeStorage();
+  const session = fakeStorage();
+  const store = createStore({ storage, session });
+  equal(store.view(), null, 'no project, no view');
+  store.openView('risk');
+  equal(store.view(), null, 'a view cannot open over no project');
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'SCN'));
+  store.commit((model) => addEntity(model, 'SCN'));
+
+  let notified = 0;
+  store.subscribe(() => {
+    notified += 1;
+  });
+  store.openView('risk');
+  deepEqual(store.view(), { id: 'risk', section: 0 }, 'a view opens at its first section');
+  equal(notified, 1, 'and every surface is told');
+  store.setViewSection(2);
+  deepEqual(store.view(), { id: 'risk', section: 2 }, 'a section can be chosen');
+  store.setViewSection(2);
+  store.setViewSection(-1);
+  equal(notified, 2, 'the same or a nonsense section is nothing');
+  equal(JSON.parse(session.read('openconformity.open-view')).section, 2, 'the browser session keeps the view and section');
+  deepEqual(
+    Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
+    ['selection', 'expanded', 'projectCollapsed', 'dirty'],
+    'the blob never carries it'
+  );
+
+  const second = createStore({ storage, session });
+  deepEqual(second.view(), { id: 'risk', section: 2 }, 'a reload returns to the view');
+
+  store.setViewReturn({ id: 'risk', name: 'Risk assessment', section: 2, rowId: 'SCN-002' });
+  store.closeView();
+  equal(store.view(), null, 'closed');
+  equal(session.read('openconformity.open-view'), null, 'and forgotten by the session');
+  store.select('SCN-002');
+  equal(store.viewReturn()?.rowId, 'SCN-002', 'selecting the row the user came from keeps the way back');
+  store.select('SCN-001');
+  equal(store.viewReturn(), null, 'selecting another entity drops it');
+  store.openView('risk', 1);
+  store.replaceProject(createModel());
+  equal(store.view(), null, 'another project opens with no view');
+  equal(session.read('openconformity.open-view'), null, 'and none remembered');
+}
+
 // --- A failing persist -------------------------------------------------
 
 {

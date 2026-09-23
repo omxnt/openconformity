@@ -32,6 +32,8 @@ import {
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated } from './queries.js';
 import { removalText } from './editor.js';
+import { VIEWS } from './views.js';
+import { projectSweep } from './project.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
 import { TYPE_ICONS } from './icons.js';
@@ -445,6 +447,81 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
+   * Apply the project's confirmed draft. A choice the entities read
+   * through their project attributes, changed, removes what they held
+   * under the old one, and asks first with the count.
+   * @param {Object<string, string>} values
+   * @returns {Promise<boolean>}
+   */
+  async function saveProjectEdit(values) {
+    const sweep = projectSweep(store.model(), values);
+    if (sweep.count > 0) {
+      const confirmed = await dialogs.confirm({
+        title: 'Remove what is no longer chosen?',
+        message: `Saving removes ${sweep.text}.`,
+        confirmLabel: 'Save',
+        cancelLabel: 'Keep editing',
+        danger: true,
+      });
+      if (!confirmed) return false;
+    }
+    return store.commit((model) => {
+      const named = nameProject(model, (values.name ?? model.name).trim());
+      if (!named.ok) return named;
+      for (const [key, value] of Object.entries(values)) {
+        if (key === 'name') continue;
+        const set = setProjectAttribute(model, key, value);
+        if (!set.ok) return set;
+      }
+      for (const { id, keys } of sweep.entities) {
+        const node = nodeOf(model, id);
+        for (const key of keys) delete node.attributes[key];
+      }
+      return { ok: true };
+    }).ok;
+  }
+
+  /**
+   * Open a view over the workspace. An open edit gets the discard
+   * question first, as any move away from it does.
+   * @param {string} id
+   */
+  async function openView(id) {
+    if (!store.hasProject() || !VIEWS.some((view) => view.id === id)) return;
+    if (!(await confirmDiscard())) return;
+    endEditSession();
+    store.setViewReturn(null);
+    store.openView(id);
+  }
+
+  function closeView() {
+    store.closeView();
+  }
+
+  /**
+   * An entity chosen in a view: the view closes, the entity opens in the
+   * editor, and the editor keeps the way back to the row it came from.
+   * @param {string} id
+   */
+  function openFromView(id) {
+    const open = store.view();
+    if (open === null || nodeOf(store.model(), id) === null) return;
+    const view = VIEWS.find((held) => held.id === open.id);
+    store.setViewReturn({ id: open.id, name: view?.name ?? open.id, section: open.section, rowId: id });
+    store.closeView();
+    store.select(id);
+  }
+
+  /** Back to the view an entity was chosen from, at the same section. */
+  async function returnToView() {
+    const back = store.viewReturn();
+    if (back === null) return;
+    if (!(await confirmDiscard())) return;
+    endEditSession();
+    store.openView(back.id, back.section);
+  }
+
+  /**
    * Ask before a save removes what a choice no longer shows: the groups
    * hidden while still holding values, by the value they stood under.
    * @param {Array<{ name: string, value: string }>} entries
@@ -717,7 +794,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     moveToSelection,
     activateNode,
     saveEdit,
+    saveProjectEdit,
     confirmRemoval,
+    openView,
+    closeView,
+    openFromView,
+    returnToView,
     cancelEdit,
     deleteSelection,
     relateSelection,

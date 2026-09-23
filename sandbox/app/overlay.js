@@ -126,5 +126,7 @@ export function createOverlay({ container }) {
 
     close: (entry) => stack.close(entry),
     closeMenus: () => stack.closeMenus(),
+    /** Whether anything at all is open: a menu, a panel or a dialog. */
+    isOpen: () => stack.top() !== null,
   };
 }

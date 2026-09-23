@@ -12,6 +12,7 @@ import { createRelationshipsView } from './relationships.js';
 import { createGraphView } from './graph.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
+import { createViewsPane } from './views.js';
 
 const store = createStore({ storage: window.localStorage, session: window.sessionStorage });
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
@@ -25,12 +26,13 @@ const editor = createEditor({
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
   onSave: (id, values) => flows.saveEdit(id, values),
+  onSaveProject: (values) => flows.saveProjectEdit(values),
   onRemoval: (entries) => flows.confirmRemoval(entries),
   onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
+  onReturn: () => flows.returnToView(),
   onEscape: () => flows.escapeEdit(),
   onAction: (id) => actions.find((action) => action.id === id)?.run({}),
-  onNavigate: (id) => flows.selectNode(id),
 });
 const flows = createFlows({
   store,
@@ -71,6 +73,16 @@ createRelationshipsView({
   onUnrelate: (relationship) => flows.removeRelationship(relationship),
   onSelect: (id) => flows.selectNode(id),
   addEnabled: () => relateAction.enabled(),
+});
+createViewsPane({
+  store,
+  overlay,
+  workspace: document.getElementById('workspace'),
+  pane: document.getElementById('pane-view'),
+  head: document.getElementById('view-head'),
+  body: document.getElementById('view-body'),
+  onSelect: (id) => flows.openFromView(id),
+  onClose: () => flows.closeView(),
 });
 
 document.addEventListener('keydown', (event) => {

@@ -9,7 +9,7 @@
  * one, and a render never rebuilds over an open draft.
  */
 
-import { ATTRIBUTES, attributesFor, SHARED_HELP } from './attributes.js';
+import { attributesFor, typeOf, groupsOf, SHARED_HELP, isOutcome, isRationale, isParameter } from './attributes.js';
 import { estimate, levelTone } from './risk.js';
 import { rateDialog, statusIcon } from './rating.js';
 import { openMultiSelect } from './multiselect.js';
@@ -17,7 +17,7 @@ import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys } from './dom.js';
-import { entityLabel, relatedIds } from './queries.js';
+import { entityLabel } from './queries.js';
 
 /**
  * Whether a draft differs from the entity it edits: a defined key whose
@@ -40,7 +40,9 @@ export function draftChanged(definitions, attributes, values) {
  * rather than the attribute bag, and nothing else until
  * `docs/attributes.md` gains its Project section.
  */
-const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
+const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text', help: "The project's name, which the saved file is named after." }];
+/** How many of the project's own attributes stand before its name on the first tab: the designation and the organisation. */
+const NAME_AFTER = 2;
 
 /**
  * Whether a hyperlink value may be presented as a link. Only the web
@@ -53,61 +55,42 @@ const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text' }];
 /**
  * A rating as the card shows it: what it comes to and its tone — null
  * and none while a parameter is missing — and the parameters by name,
- * in order, an unset one an empty value.
- * @param {Array<Object>} definitions  the rating's, the computed one among them
+ * in order, an unset one an empty value, each with the rationale given for it.
+ * @param {Array<Object>} definitions  the rating's, the computed one and the rationales among them
  * @param {Object<string, string>} values
- * @returns {{ outcome: string|null, tone: string, parameters: Array<{ name: string, value: string }> }}
+ * @returns {{ outcome: string|null, tone: string, parameters: Array<{ name: string, value: string, code: string, rationale: string }> }}
  */
 export function ratingView(definitions, values) {
-  const parameters = definitions.filter((definition) => definition.kind !== 'computed');
-  const computed = definitions.find((definition) => definition.kind === 'computed');
-  const outcome = computed ? estimate(computed.method, parameters.map((definition) => values[definition.key] ?? '')) : null;
+  const parameters = definitions.filter(isParameter);
+  const closing = definitions.find(isOutcome);
+  const rationaleOf = (definition) => definitions.find((held) => isRationale(held) && held.parameter === definition.key);
+  const outcome = closing ? estimate(closing.method, parameters.map((definition) => values[definition.key] ?? '')) : null;
   return {
     outcome,
     tone: levelTone(outcome),
     parameters: parameters.map((definition) => {
       const value = (values[definition.key] ?? '').trim();
-      return { name: definition.name, value, code: codeShown(value) };
+      return { name: definition.name, value, code: codeShown(value, definition), rationale: (values[rationaleOf(definition)?.key] ?? '').trim() };
     }),
   };
 }
 
+/** The initials of a name — `SS` of `Severity score` — as the report abbreviates its scores. */
+export const initials = (name) => String(name ?? '').split(/\s+/).filter(Boolean).map((word) => word[0].toUpperCase()).join('');
+
 /**
  * The code a rating shows for a value: its first word, and its second
  * where the first holds no digit — `S1`, `Se 4`, `Very likely`, or `4`
- * of `4 words after`.
+ * of `4 words after` — and for a number the initials of its name before
+ * it, `SS 95`.
  * @param {string} value
+ * @param {{ kind: string, name: string }} [definition]  the parameter the value is of
  */
-export function codeShown(value) {
+export function codeShown(value, definition = null) {
   const words = String(value ?? '').trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return '';
+  if (definition?.kind === 'number') return `${initials(definition.name)} ${words[0]}`;
   return /\d/.test(words[0]) ? words[0] : words.slice(0, 2).join(' ');
-}
-
-/**
- * What changed among related entities since a list was recorded: the ids
- * linked since, and the ids unlinked since. No record, nothing changed.
- * @param {string[]|null} recorded  as last recorded, null when never
- * @param {string[]} live
- * @returns {{ added: string[], removed: string[] }}
- */
-export function relatedDiff(recorded, live) {
-  if (recorded === null) return { added: [], removed: [] };
-  return {
-    added: live.filter((id) => !recorded.includes(id)),
-    removed: recorded.filter((id) => !live.includes(id)),
-  };
-}
-
-/**
- * A record as its ids: the stored text split on semicolons, trimmed,
- * empties dropped — null where nothing was ever recorded.
- * @param {string|undefined} value
- * @returns {string[]|null}
- */
-export function recordedIds(value) {
-  const ids = String(value ?? '').split(';').map((id) => id.trim()).filter(Boolean);
-  return ids.length === 0 ? null : ids;
 }
 
 /**
@@ -130,6 +113,7 @@ export function removalText(entries) {
 }
 
 export function firstTabName(code) {
+  if (code === 'PROJECT') return 'Project';
   return (ENTITY_TYPES[code]?.name ?? 'Description').split(' ').at(-1);
 }
 
@@ -180,9 +164,11 @@ export const LANDING_OFFER = [
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
  * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
+ * @param {(values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveProject]  the project's draft, asked about first where it removes what entities hold
  * @param {(entries: Array<{ name: string, value: string }>) => Promise<boolean>} [context.onRemoval]  asks before a save removes what hidden groups still hold
  * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
+ * @param {() => void} [context.onReturn]  back to the view the entity was chosen from
  * @param {(event: KeyboardEvent) => void} [context.onEscape]
  * @param {(id: string) => void} [context.onAction]  runs a landing action by identifier, resolved at click time
  */
@@ -191,12 +177,13 @@ export function createEditor({
   head,
   body,
   onSave,
+  onSaveProject = (values) => onSave(null, values),
   onCancel,
   onRename,
+  onReturn = () => {},
   onRemoval = async () => true,
   onEscape = () => {},
   onAction = () => {},
-  onNavigate = () => {},
   dialogs = null,
   overlay = null,
 }) {
@@ -238,28 +225,17 @@ export function createEditor({
   /**
    * The draft as a save commits it: the draft as shown, and the empty
    * value for every control under a hidden group, so what is not shown
-   * is removed, and for a record with no rating made before it.
+   * is removed.
    */
   function savedValues() {
     const values = fieldValues();
     for (const control of body.querySelectorAll('.cell-group[hidden] [data-key]')) values[control.dataset.key] = '';
-    for (const record of body.querySelectorAll('input[data-related]')) {
-      const rating = ratingBefore(record.closest('.cell'));
-      const rated = rating !== null && [...rating.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== '');
-      if (!rated) values[record.dataset.key] = '';
-    }
     return values;
   }
 
-  /** A grid's cells as shown, in order. */
-  function shownCells(grid) {
-    return [...grid.querySelectorAll('.cell')].filter((cell) => !cell.hidden && !cell.closest('.cell-group[hidden]'));
-  }
-
-  /** The rating cell shown nearest before a cell in its grid, or null. */
-  function ratingBefore(cell) {
-    const cells = shownCells(cell.closest('.cells'));
-    return cells.slice(0, cells.indexOf(cell)).findLast((held) => held.querySelector('.field-input.rating')) ?? null;
+  /** The draft with what the type reads from the project (§1.4), for the conditions waiting on the project's choice. */
+  function draftValues() {
+    return { ...(editingProject ? {} : projectReads(current?.type ?? 'PROJECT')), ...fieldValues() };
   }
 
   function renderHead(node, actions) {
@@ -309,6 +285,41 @@ export function createEditor({
   }
 
   /**
+   * What a type reads from the project: the project's value of every
+   * key a group of the type waits on without the type defining it
+   * (§1.4), so the groups waiting on the project's choice stand or fall
+   * by it in either mode.
+   * @param {string} code
+   * @returns {Object<string, string>}
+   */
+  function projectReads(code) {
+    const own = new Set(attributesFor(code).map((definition) => definition.key));
+    const attributes = store.model().attributes;
+    return Object.fromEntries(
+      groupsOf(code)
+        .filter((group) => group.when && !own.has(group.when.key))
+        .map((group) => [group.when.key, attributes[group.when.key] ?? ''])
+    );
+  }
+
+  /** The attribute a group waits on: the type's own of that key, or the project's where the type has none (§1.4). */
+  const leaderOf = (code, key) =>
+    attributesFor(code).find((definition) => definition.key === key) ?? attributesFor('PROJECT').find((definition) => definition.key === key);
+
+  /**
+   * A group's name over its cell — a rating's, or its slot's — with the
+   * glyph where the name carries help on every type.
+   * @param {string} name
+   * @param {string} key  what the tooltip's id is made of
+   * @param {string|null} [forId]  the control the name labels in an edit
+   * @param {string} [help]  the help shown, the shared name's unless given
+   */
+  function groupNameNode(name, key, forId = null, help = SHARED_HELP[name]) {
+    const text = forId ? el('label', { text: name, attributes: { for: forId } }) : el('span', { text: name });
+    return el('div', { className: 'cell-name' }, [text, ...(help ? [helpTip(key, name, help)] : [])]);
+  }
+
+  /**
    * A cell's name: a label for the field in an edit, plain text in view,
    * and the information glyph with the definition's help where it has
    * any, or the help its name carries on every type.
@@ -322,7 +333,8 @@ export function createEditor({
   }
 
   /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink. */
-  const takesRow = (definition) => definition.key === 'title' || definition.kind === 'multiline' || definition.kind === 'hyperlink';
+  const takesRow = (definition) =>
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set';
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -383,118 +395,9 @@ export function createEditor({
     return el('div', { className: definition.kind === 'multiline' ? 'cell-value prose' : 'cell-value', text: value });
   }
 
-  /** The cells of a run of definitions, a related attribute's list among them. */
+  /** The cells of a run of definitions. */
   function cellsOf(definitions, values, editing) {
-    return definitions.map((definition) =>
-      definition.kind === 'related' ? relatedCell(definition, values, editing) : fieldCell(definition, values, editing)
-    );
-  }
-
-  /**
-   * One related entity as the tree shows one — its type's glyph in the
-   * pillar colour, its identifier, its label — and the way to it. Its
-   * state since the record, where there is one, stands in the chevron's
-   * place: Unlinked, the row dimmed, or Added; an entity gone from the
-   * project reads Deleted, dimmed, its glyph known from its identifier.
-   * @param {string} id
-   * @param {'unlinked'|'added'|null} [state]
-   */
-  function relatedItem(id, state = null) {
-    const entity = nodeOf(store.model(), id);
-    const word = { unlinked: 'Unlinked', added: 'Added' }[state];
-    let held;
-    if (entity) {
-      const label = entityLabel(entity);
-      held = el('button', { className: state === 'unlinked' ? 'entity-row unlinked' : 'entity-row', attributes: { type: 'button' } }, [
-        icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
-        el('span', { className: 'mono designation', text: entity.id }),
-        ...(label ? [el('span', { className: 'entity-title', text: label })] : []),
-        word ? el('span', { className: 'row-state', text: word }) : icon('i-chevron-right'),
-      ]);
-      held.addEventListener('click', () => onNavigate(id));
-    } else {
-      const type = ENTITY_TYPES[id.split('-')[0]];
-      held = el('div', { className: 'entity-row unlinked still' }, [
-        ...(type ? [icon(TYPE_ICONS[type.code], type.pillar)] : []),
-        el('span', { className: 'mono designation', text: id }),
-        el('span', { className: 'row-state', text: 'Deleted' }),
-      ]);
-    }
-    return el('li', { className: 'related-item' }, [held]);
-  }
-
-  /**
-   * The list a related attribute shows: with no record, what is linked;
-   * with one, the record in its order, each row saying what changed
-   * about it, the entities linked since appended, and a notice while
-   * the two differ.
-   */
-  function relatedList(definition, values) {
-    const live = current ? relatedIds(store.model(), current.id, definition.relationship) : [];
-    const recorded = recordedIds(values[definition.key]);
-    const { added, removed } = relatedDiff(recorded, live);
-    const rows =
-      recorded === null
-        ? live.map((id) => [id, null])
-        : [...recorded.map((id) => [id, removed.includes(id) ? 'unlinked' : null]), ...added.map((id) => [id, 'added'])];
-    const parts = [];
-    if (rows.length === 0) {
-      parts.push(el('div', { className: 'cell-value empty', text: 'None linked.' }));
-    } else {
-      parts.push(el('ul', { className: 'related-list' }, rows.map(([id, state]) => relatedItem(id, state))));
-    }
-    if (added.length + removed.length > 0) {
-      parts.push(
-        el('div', { className: 'notice notice-warning related-notice', attributes: { role: 'status' } }, [
-          icon('i-warning'),
-          el('div', { className: 'notice-body' }, [
-            el('span', { className: 'notice-title', text: 'Changed since the rating' }),
-            el('span', { className: 'notice-text', text: 'The rating above was made against a different set. Rate it again.' }),
-          ]),
-        ])
-      );
-    }
-    return el('div', { className: 'related' }, parts);
-  }
-
-  /**
-   * Refresh the record of each related attribute this rating stands
-   * nearest before: those later in the same grid with no other rating
-   * shown between. An empty rating clears them.
-   * @param {HTMLElement} ratingCellElement
-   * @param {boolean} empty
-   */
-  function recordAfter(ratingCellElement, empty) {
-    const grid = ratingCellElement.closest('.cells');
-    const cells = shownCells(grid);
-    const at = cells.indexOf(ratingCellElement);
-    for (const record of grid.querySelectorAll('input[data-related]')) {
-      const index = cells.indexOf(record.closest('.cell'));
-      if (index <= at) continue;
-      if (cells.slice(at + 1, index).some((cell) => cell.querySelector('.field-input.rating'))) continue;
-      record.value = empty ? '' : relatedIds(store.model(), current.id, record.dataset.related).join('; ');
-    }
-  }
-
-  /**
-   * A related attribute as a cell: its list, live against its record, on
-   * a row of its own; in an edit the hidden control that carries the
-   * record, refreshed when the rating nearest before it is applied. The
-   * list follows the draft.
-   */
-  function relatedCell(definition, values, editing) {
-    const cell = el('div', { className: 'cell tall' });
-    const input = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key, 'data-related': definition.relationship } }) : null;
-    if (input) input.value = values[definition.key] ?? '';
-    const show = (held) => {
-      cell.textContent = '';
-      cell.appendChild(nameNode(definition, false));
-      cell.appendChild(relatedList(definition, held));
-      if (input) cell.appendChild(input);
-    };
-    show(values);
-    if (editing) refreshers.push(() => show(fieldValues()));
-    return cell;
+    return definitions.map((definition) => fieldCell(definition, values, editing));
   }
 
   /** Whether a group's condition holds, or that it has none. */
@@ -503,14 +406,18 @@ export function createEditor({
   }
 
   /** Whether a group is a rating: it closes on a computed attribute, and is rated in a dialog. */
-  const isRating = (group) => group.attributes.some((definition) => definition.kind === 'computed');
+  const isRating = (group) => group.attributes.some(isOutcome);
 
   /**
    * A rating's tags: what it comes to, carrying its status where it has
    * a tone, then the code of each parameter set, the full value on
-   * hovering it.
+   * hovering it. A parameter with a rationale is underlined, and outside
+   * an edit its tag is a button whose tooltip holds the parameter and
+   * the reasoning, as the help glyph's holds the help.
+   * @param {Object} view
+   * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
    */
-  function ratingTags(view) {
+  function ratingTags(view, tipKey = null) {
     const tags = [];
     if (view.outcome !== null) {
       tags.push(
@@ -520,12 +427,28 @@ export function createEditor({
         ])
       );
     }
-    for (const parameter of view.parameters) {
-      if (parameter.value === '') continue;
-      tags.push(el('span', { className: 'tag', text: parameter.code, attributes: { title: `${parameter.name}: ${parameter.value}` } }));
-    }
+    view.parameters.forEach((parameter, i) => {
+      if (parameter.value === '') return;
+      if (parameter.rationale === '' || tipKey === null) {
+        tags.push(el('span', { className: parameter.rationale ? 'tag reasoned' : 'tag', text: parameter.code, attributes: { title: hoverText(parameter) } }));
+        return;
+      }
+      const id = `rationale-${tipKey}-${i}`;
+      const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, [
+        el('span', { className: 'tooltip-lead', text: `${parameter.name}: ${parameter.value}` }),
+        el('span', { className: 'tooltip-text', text: parameter.rationale }),
+      ]);
+      const tag = el('button', { className: 'tag reasoned tag-trigger', attributes: { type: 'button', 'aria-describedby': id } }, [el('span', { text: parameter.code }), tip]);
+      tag.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') tag.blur();
+      });
+      tags.push(tag);
+    });
     return tags;
   }
+
+  /** What hovering a parameter's tag tells: its name and full value, and the rationale given for it beneath. */
+  const hoverText = (parameter) => (parameter.rationale ? `${parameter.name}: ${parameter.value}\n${parameter.rationale}` : `${parameter.name}: ${parameter.value}`);
 
   /**
    * A rating as a cell like any other: its name over its tags. In an
@@ -534,16 +457,16 @@ export function createEditor({
    * reads any field, and the cell follows the draft as it changes.
    */
   function ratingCell(group, values, editing) {
-    const parameters = group.attributes.filter((definition) => definition.kind !== 'computed');
-    const computed = group.attributes.find((definition) => definition.kind === 'computed');
+    const closing = group.attributes.find(isOutcome);
+    const carried = group.attributes.filter((definition) => !isOutcome(definition));
     const cellElement = el('div', { className: 'cell' });
     if (!editing) {
-      const tags = ratingTags(ratingView(group.attributes, values));
-      cellElement.appendChild(el('div', { className: 'cell-name', text: group.name }));
+      const tags = ratingTags(ratingView(group.attributes, values), closing.key);
+      cellElement.appendChild(groupNameNode(group.name, closing.key));
       cellElement.appendChild(tags.length === 0 ? el('div', { className: 'cell-value empty', text: '–' }) : el('div', { className: 'cell-value tags' }, tags));
       return cellElement;
     }
-    const hidden = parameters.map((definition) => {
+    const hidden = carried.map((definition) => {
       const input = el('input', { attributes: { type: 'hidden', 'data-key': definition.key } });
       input.value = values[definition.key] ?? '';
       return input;
@@ -551,7 +474,7 @@ export function createEditor({
     const held = el('span', { className: 'tags' });
     const field = el(
       'button',
-      { className: 'field-input rating', attributes: { type: 'button', id: `field-${computed.key}`, 'aria-haspopup': 'dialog' } },
+      { className: 'field-input rating', attributes: { type: 'button', id: `field-${closing.key}`, 'aria-haspopup': 'dialog' } },
       [held, icon('i-edit')]
     );
     const show = (draft) => {
@@ -564,17 +487,16 @@ export function createEditor({
     field.addEventListener('click', async () => {
       if (!dialogs) return;
       const chosen = await rateDialog(dialogs, {
-        title: `${group.name} – ${computed.method}`,
-        method: computed.method,
+        title: `${group.name} by ${closing.method}`,
+        method: closing.method,
         definitions: group.attributes,
         values: fieldValues(),
       });
       if (chosen === null) return;
       for (const input of hidden) input.value = chosen[input.dataset.key] ?? '';
-      recordAfter(cellElement, hidden.every((input) => input.value.trim() === ''));
       body.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    cellElement.appendChild(el('label', { className: 'cell-name', text: group.name, attributes: { for: `field-${computed.key}` } }));
+    cellElement.appendChild(groupNameNode(group.name, closing.key, `field-${closing.key}`));
     cellElement.appendChild(field);
     for (const input of hidden) cellElement.appendChild(input);
     refreshers.push(() => show(fieldValues()));
@@ -588,11 +510,11 @@ export function createEditor({
    */
   function slotHolder(code, variants, values, editing) {
     const [first] = variants;
-    const leader = attributesFor(code).find((definition) => definition.key === first.when.key);
+    const leader = leaderOf(code, first.when.key);
     const text = `No ${(leader?.name ?? first.when.key).toLowerCase()} chosen`;
     const tall = variants.some((variant) => !isRating(variant) && variant.attributes.length === 1 && takesRow(variant.attributes[0]));
     const cell = el('div', { className: tall ? 'cell tall' : 'cell' }, [
-      el('div', { className: 'cell-name', text: first.name }),
+      groupNameNode(first.name, `slot-${first.when.key}-${first.name.toLowerCase().replaceAll(' ', '-')}`, null, SHARED_HELP[first.name] ?? (first.attributes.length === 1 ? first.attributes[0].help : undefined)),
       editing
         ? el('div', { className: 'field-input placeholder', text, attributes: { 'aria-disabled': 'true' } })
         : el('div', { className: 'cell-value empty', text }),
@@ -611,7 +533,8 @@ export function createEditor({
    * governs stands under the choice, or after all its attributes when
    * none does. A group waiting on a condition is wrapped, so it can be
    * shown or hidden as one; sub-groups sharing a name and a condition's
-   * attribute are one slot, given its holder after the last of them.
+   * attribute are one slot, given its holder after the last of them
+   * unless one of them waits on nothing chosen and so stands in for it.
    */
   function groupInto(grid, code, group, values, editing, named) {
     const target = group.when ? el('div', { className: 'cell-group' }) : grid;
@@ -620,23 +543,27 @@ export function createEditor({
     } else {
       if (named && group.attributes.length > 1) target.appendChild(el('div', { className: 'cell-legend', text: group.name }));
       const subs = group.groups ?? [];
-      let anchor = group.attributes.length - 1;
-      group.attributes.forEach((held, i) => {
-        if (subs.some((sub) => sub.when?.key === held.key)) anchor = i;
-      });
-      const place = () => {
+      const keys = new Set(group.attributes.map((held) => held.key));
+      const anchorOf = (sub) => {
+        const key = sub.after ?? sub.when?.key ?? null;
+        return keys.has(key) ? key : null;
+      };
+      const placed = new Set();
+      const placeAfter = (key) => {
         for (const sub of subs) {
+          if (placed.has(sub) || anchorOf(sub) !== key) continue;
+          placed.add(sub);
           groupInto(target, code, sub, values, editing, true);
           if (!sub.when) continue;
           const variants = subs.filter((held) => held.when && held.name === sub.name && held.when.key === sub.when.key);
-          if (variants.at(-1) === sub) target.appendChild(slotHolder(code, variants, values, editing));
+          if (variants.at(-1) === sub && !variants.some((held) => held.when.value === '')) target.appendChild(slotHolder(code, variants, values, editing));
         }
       };
-      group.attributes.forEach((definition, i) => {
-        target.appendChild(definition.kind === 'related' ? relatedCell(definition, values, editing) : fieldCell(definition, values, editing));
-        if (i === anchor) place();
-      });
-      if (anchor === -1) place();
+      for (const definition of group.attributes) {
+        target.appendChild(fieldCell(definition, values, editing));
+        placeAfter(definition.key);
+      }
+      placeAfter(null);
     }
     if (target !== grid) {
       target.hidden = !groupShown(group, values);
@@ -655,9 +582,12 @@ export function createEditor({
    * @param {Object<string, string>} values
    * @param {boolean} editing
    */
-  function mount(id, code, values, editing) {
-    const type = ATTRIBUTES[code] ?? { attributes: [], groups: [] };
-    const first = el('div', { className: 'cells' }, [identifierCell(id), ...cellsOf(type.attributes, values, editing)]);
+  function mount(id, code, stored, editing) {
+    const type = typeOf(code) ?? { attributes: [], groups: [] };
+    const values = { ...stored, ...projectReads(code) };
+    const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);
+    const ahead = id === null ? NAME_AFTER : 0;
+    const first = el('div', { className: 'cells' }, [...cellsOf(type.attributes.slice(0, ahead), values, editing), lead, ...cellsOf(type.attributes.slice(ahead), values, editing)]);
     const panels = [{ name: firstTabName(code), grid: first }];
     for (const group of type.groups) {
       if (!group.tab) {
@@ -725,17 +655,19 @@ export function createEditor({
    * draft the next reads, so what waits on it follows.
    */
   function followConditions() {
-    for (const { held, shown } of conditionals) held.hidden = !shown(fieldValues());
+    for (const { held, shown } of conditionals) held.hidden = !shown(draftValues());
   }
 
   /**
    * What a save would remove: the groups hidden while still holding
-   * values, by name and the value they stood under, in document order.
+   * values, by name and the value they stood under, in document order;
+   * a group that stood under nothing chosen names the attribute instead.
    */
   function removals() {
+    const leaderName = (key) => (leaderOf(current?.type ?? 'PROJECT', key)?.name ?? key).toLowerCase();
     return conditionals
       .filter(({ held, group }) => group && held.hidden && [...held.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== ''))
-      .map(({ group }) => ({ name: group.name, value: group.when.value }));
+      .map(({ group }) => ({ name: group.name, value: group.when.value || `no ${leaderName(group.when.key)}` }));
   }
 
   function headButton(label, onPick, iconId = null) {
@@ -783,9 +715,9 @@ export function createEditor({
     ]);
   }
 
-  /** The values the project's fields edit: the name, from the model itself. */
+  /** The values the project's fields edit: the name, from the model itself, and the project's attributes. */
   function projectValues() {
-    return { name: store.model().name };
+    return { name: store.model().name, ...store.model().attributes };
   }
 
   function control(definition, value, values = {}) {
@@ -800,7 +732,7 @@ export function createEditor({
     if (definition.kind === 'choice') {
       const choices = definition.values ?? [];
       const select = el('select', {
-        className: choices.some((choice) => choice.length > 24) ? 'field-input wide' : 'field-input',
+        className: choices.some((choice) => choice.length > 16) ? 'field-input wide' : 'field-input',
         attributes: { 'data-key': definition.key, id: `field-${definition.key}` },
       });
       select.appendChild(el('option', { text: '–', attributes: { value: '' } }));
@@ -868,28 +800,32 @@ export function createEditor({
     return input;
   }
 
-  /** The project, on the standard surface: view fields and Edit. */
+  /** The project, on the standard surface: its tabs, view fields and Edit. */
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
     head.appendChild(el('div', { className: 'pane-head-actions' }, [headIconButton('Edit attributes', 'i-edit', beginEdit)]));
-    body.appendChild(el('div', { className: 'form' }, [el('div', { className: 'cells' }, cellsOf(PROJECT_FIELDS, projectValues(), false))]));
+    mount(null, 'PROJECT', projectValues(), false);
   }
 
   function renderProjectEdit() {
     head.hidden = false;
     head.appendChild(projectHeadName());
     head.appendChild(
-      el('div', { className: 'pane-head-actions' }, saveCancel(() => {
-        if (onSave(null, fieldValues()) !== false) endEdit();
+      el('div', { className: 'pane-head-actions' }, saveCancel(async () => {
+        if ((await onSaveProject(savedValues())) !== false) endEdit();
       }))
     );
-    body.appendChild(el('div', { className: 'form' }, [el('div', { className: 'cells' }, cellsOf(PROJECT_FIELDS, projectValues(), true))]));
+    mount(null, 'PROJECT', projectValues(), true);
+    followConditions();
   }
 
   function renderView(node) {
     current = node;
-    renderHead(node, [headIconButton('Edit attributes', 'i-edit', beginEdit)]);
+    const back = store.viewReturn();
+    const actions = [headIconButton('Edit attributes', 'i-edit', beginEdit)];
+    if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));
+    renderHead(node, actions);
     mount(node.id, node.type, node.attributes, false);
   }
 
@@ -988,7 +924,7 @@ export function createEditor({
     if (mode !== 'edit') return false;
     if (editingProject) {
       if (!store.hasProject()) return false;
-      return draftChanged(PROJECT_FIELDS, projectValues(), fieldValues());
+      return draftChanged([...PROJECT_FIELDS, ...attributesFor('PROJECT')], projectValues(), fieldValues());
     }
     const node = nodeOf(store.model(), editingId);
     if (!node || node.kind !== 'entity') return false;
