@@ -655,7 +655,6 @@ body {
 .consent-box input:checked + .checkbox { background: var(--text); }
 .consent-box input:checked + .checkbox .icon { visibility: visible; }
 .consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
-.about-consent { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }
 
@@ -1319,8 +1318,37 @@ select.field-input[size] {
 .dialog a { color: var(--link); text-decoration: underline; }
 .dialog a:hover { color: var(--link-hover); }
 
-.about { display: grid; gap: 12px; }  /* $spacing-04 */
-.about-headline { font-size: 16px; line-height: 1.375; font-weight: 600; color: var(--text); }  /* $heading-compact-02 */
+/* About: the mark and the wordmark over two lines, then groups of
+   rows as Carbon's structured list sets them, a rule above and under
+   every row, each group's label at $label-01. A link leaving the page
+   wears the launch glyph, as the Help menu's do. */
+.dialog:has(.about) { max-width: 720px; }
+.about { display: grid; gap: 24px; }  /* $spacing-06 */
+.about p { margin: 0; }
+/* The header: the mark beside the wordmark and two lines, set apart
+   from the groups by space alone. */
+.about-brand { display: flex; align-items: center; gap: 16px; padding: 4px 0 8px; color: var(--text); }  /* $spacing-05, $spacing-03 */
+.about-mark {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  background: currentColor;
+  -webkit-mask: url("assets/marks/favicon.svg") no-repeat center / contain;
+  mask: url("assets/marks/favicon.svg") no-repeat center / contain;
+}
+.about-brand-text { display: grid; gap: 6px; color: var(--text-second); }
+.about-wordmark { height: 20px; color: var(--text); }
+.about-meta { color: var(--text-helper); }
+.about-section { display: grid; gap: 8px; }  /* $spacing-03 */
+.about-label { margin: 0; font-size: 12px; line-height: 1.33; letter-spacing: 0.32px; font-weight: 400; color: var(--text-helper); }  /* $label-01 */
+.about-table { width: 100%; border-collapse: collapse; }
+.about-table td { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
+.about-table tr:first-child td { border-top: 1px solid var(--border-subtle); }
+.about-table td:last-child { padding-right: 0; text-align: right; width: 1%; }
+.about-table td:last-child > * + * { margin-left: 16px; }  /* $spacing-05 between a control and a link */
+.about-table td:first-child { width: 12em; color: var(--text); }  /* one first column across the groups */
+.about a { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }  /* $spacing-02 */
+.about a .icon { width: 12px; height: 12px; fill: currentColor; }
 
 .dialog-actions { display: flex; flex: none; }
 

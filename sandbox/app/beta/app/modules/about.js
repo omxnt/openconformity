@@ -1,11 +1,19 @@
 /**
- * The About dialog's content: what the software is, who holds it under
- * what terms, and what of other people's work it carries — every licence
- * named is one the deployment itself carries, so all of them are
- * reachable from here. Chrome, not flow: the flow only asks for it.
+ * The About dialog's content: the mark and the wordmark over one line on
+ * what the software is and one on where it lives and under what terms,
+ * then four groups of rows by what each thing does for the tool, in
+ * alphabetical order. The design, saying of each part whether it is
+ * followed or carried, with its licence. The diagram editor, with where
+ * it loads from and the session's standing consent. The legislation the
+ * model is built around. The methods its ratings follow, each by
+ * designation with its clauses. The header is the mark beside the
+ * wordmark, set apart by space alone.
+ * Every reference is named by designation only, and every licence named
+ * is one the deployment itself carries. Chrome, not flow: the flow only
+ * asks for it.
  */
 
-import { el } from './dom.js';
+import { el, icon } from './dom.js';
 
 /**
  * @param {ReturnType<import('./dialog.js').createDialogs>} dialogs
@@ -13,9 +21,18 @@ import { el } from './dom.js';
  * @returns {Promise<void>}
  */
 export async function showAbout(dialogs, store = null) {
-  const link = (href, text) =>
-    el('a', { text, attributes: { href, target: '_blank', rel: 'noopener' } });
-  const consentText = () => (store?.consented() ? 'draw.io, the diagram editor: not asking before it loads this session.' : 'draw.io, the diagram editor: asks before it loads, on every edit.');
+  /** A link leaving the page, wearing the launch glyph as the Help menu's do. */
+  const link = (href, text) => el('a', { attributes: { href, target: '_blank', rel: 'noopener' } }, [el('span', { text }), icon('i-launch')]);
+  const text = (held) => document.createTextNode(held);
+  const cell = (parts) => el('td', {}, typeof parts === 'string' ? [text(parts)] : parts);
+  /** A group: its label over rows of three cells, a name, what it is, and a link or a control at the end. */
+  const group = (label, rows) =>
+    el('section', { className: 'about-section' }, [
+      el('h3', { className: 'about-label', text: label }),
+      el('table', { className: 'about-table' }, [el('tbody', {}, rows.map((row) => el('tr', {}, row.map(cell))))]),
+    ]);
+
+  const consentText = () => (store?.consented() ? 'From embed.diagrams.net, not asking this session' : 'From embed.diagrams.net, asked before each edit');
   const consentLine = el('span', { text: consentText() });
   const forget = el('button', { className: 'ghost-button about-forget', text: 'Forget', attributes: { type: 'button' } });
   forget.hidden = !store?.consented();
@@ -24,35 +41,38 @@ export async function showAbout(dialogs, store = null) {
     consentLine.textContent = consentText();
     forget.hidden = true;
   });
+
   await dialogs.open({
     title: 'About',
     body: el('div', { className: 'about' }, [
-      el('p', { className: 'about-headline', text: 'openconformity' }),
-      el('p', {
-        text:
-          'This project is an initiative to develop a free, open-source, browser-based tool for CE marking of machinery according to the Machinery Regulation (EU) 2023/1230, with no commercial interests behind it.',
-      }),
-      el('p', {}, [
-        document.createTextNode('© 2026 omxnt, licensed under the '),
-        link('LICENSE.txt', 'EUPL-1.2'),
-        document.createTextNode('.'),
+      el('header', { className: 'about-brand' }, [
+        el('span', { className: 'about-mark', attributes: { 'aria-hidden': 'true' } }),
+        el('div', { className: 'about-brand-text' }, [
+          el('span', { className: 'wordmark about-wordmark', attributes: { role: 'img', 'aria-label': 'openconformity' } }),
+          el('p', { text: 'A free, open-source, browser-based tool for CE marking of machinery.' }),
+          el('p', { className: 'about-meta' }, [
+            text('© 2026 omxnt'),
+            text(' · '),
+            link('LICENSE.txt', 'EUPL-1.2'),
+            text(' · '),
+            link('https://openconformity.org', 'openconformity.org'),
+            text(' · '),
+            link('https://github.com/omxnt/openconformity', 'Source on GitHub'),
+          ]),
+        ]),
       ]),
-      el('p', {}, [link('https://github.com/omxnt/openconformity', 'Source on GitHub')]),
-      el('p', { className: 'about-consent' }, [consentLine, forget]),
-      el('p', { text: 'Third-party assets, vendored with the software:' }),
-      el('ul', { className: 'doomed-list' }, [
-        el('li', {}, [
-          document.createTextNode('IBM Plex, under the '),
-          link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1'),
-          document.createTextNode('.'),
-        ]),
-        el('li', {}, [
-          document.createTextNode('Carbon Icons, under the '),
-          link('assets/icons/LICENSE.txt', 'Apache License 2.0'),
-          document.createTextNode('.'),
-        ]),
+      group('Design', [
+        ['IBM Carbon', 'Design system, followed', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
+        ['IBM Plex', 'Typeface, vendored', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
+        ['Carbon Icons', 'Icon set, vendored', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
+      ]),
+      group('Diagrams', [['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]]]),
+      group('Legislation', [['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'EUR-Lex')]]]),
+      group('Methods', [
+        ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', ''],
+        ['EN ISO 13849-1:2023', 'Required performance level of a safety function', ''],
+        ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', ''],
       ]),
     ]),
-    actions: [{ label: 'Close', value: null, kind: 'primary' }],
   });
 }
