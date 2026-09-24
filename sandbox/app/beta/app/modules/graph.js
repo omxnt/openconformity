@@ -6,11 +6,17 @@
  * every edge a dogleg — horizontal out of its box, one slant across the
  * shared bend band, horizontal into the far one — labelled upright on
  * the neighbour-side run, compositions carrying the filled diamond at
- * the owner's end and every other form the plain arrowhead. Seven boxes a
- * side while a side is folded; the +N chip unfolds it. While the store
- * holds a picker for the subject, the picks ride as dashed provisional
- * edges — clicking one, or its box, lets go — and the standing
- * neighbourhood recedes until Done.
+ * the owner's end and every other form the plain arrowhead. Each side
+ * stands grouped by relationship type, which binds the entity type at
+ * the far end: the first of a group always draws, and where the group
+ * holds more a line under it says how many and opens them beneath,
+ * each with its own edge, the line then closing the block from its end
+ * and a rule along the block's outer side saying what it spans. A group
+ * opened stays open while its subject is selected and closes on the
+ * next; nothing is remembered beyond that. While the store holds a picker for the subject, the picks ride
+ * as dashed provisional edges in their type's group, held open —
+ * clicking one, or its box, lets go — and the standing neighbourhood
+ * recedes until Done.
  */
 
 import { nodeOf, relationshipsOf } from './model.js';
@@ -92,39 +98,105 @@ export function filteredNeighbourhood(around, filter) {
   return { ...around, outgoing: around.outgoing.filter(keeps), incoming: around.incoming.filter(keeps) };
 }
 
-/** How many boxes a side draws before counting the rest. */
+/** How many attachments the subject grows for; past it they fan within the same height. */
 export const MAX_PER_SIDE = 7;
 
+/** The key a group is remembered by: the side it stands on and its relationship type. */
+export const groupKey = (direction, typeId) => `${direction}:${typeId}`;
+
 /**
- * The neighbourhood the canvas actually draws: at most MAX_PER_SIDE real
- * boxes a side while the side is folded, the overflow counted; an
- * unfolded side draws everything. Provisional picks always draw, the cap
- * notwithstanding.
- * @param {ReturnType<typeof neighbourhood>} around
- * @param {{ incoming: boolean, outgoing: boolean }} [unfolded]
- * @returns {{ left: any[], right: any[], moreIncoming: number, moreOutgoing: number }}
+ * A side's entries grouped by relationship type, which binds the entity
+ * type at the far end: the groups in the metamodel's order, the members
+ * by identifier, a provisional pick in its type's group like any other.
+ * @param {Array<Object>} entries  a side of the neighbourhood, picks among them
+ * @param {'incoming'|'outgoing'} direction
+ * @returns {Array<{ key: string, typeId: string, label: string, type: string, members: Array<Object> }>}
  */
-export function cappedNeighbourhood(around, unfolded = { incoming: false, outgoing: false }) {
-  const side = (list, open) => {
-    const real = list.filter((entry) => entry.pending !== true);
-    const pending = list.filter((entry) => entry.pending === true);
-    const shown = open ? real : real.slice(0, MAX_PER_SIDE);
-    return { rows: [...shown, ...pending], more: real.length - shown.length };
-  };
-  const left = side(around.incoming, unfolded.incoming);
-  const right = side(around.outgoing, unfolded.outgoing);
-  return { left: left.rows, right: right.rows, moreIncoming: left.more, moreOutgoing: right.more };
+export function groupedSide(entries, direction) {
+  const order = Object.keys(RELATIONSHIP_TYPES);
+  const groups = new Map();
+  for (const entry of entries) {
+    const typeId = entry.pending ? entry.typeId : entry.relationship.type;
+    if (!groups.has(typeId)) {
+      const form = RELATIONSHIP_TYPES[typeId];
+      groups.set(typeId, {
+        key: groupKey(direction, typeId),
+        typeId,
+        label: form.label,
+        type: direction === 'incoming' ? form.source : form.target,
+        members: [],
+      });
+    }
+    groups.get(typeId).members.push(entry);
+  }
+  return [...groups.values()]
+    .sort((a, b) => order.indexOf(a.typeId) - order.indexOf(b.typeId))
+    .map((group) => ({ ...group, members: [...group.members].sort((a, b) => a.other.id.localeCompare(b.other.id)) }));
 }
 
 /**
- * Where a side's edges attach along the subject: spread evenly over its
- * height, never all at centre.
- * @param {number} count
- * @param {number} height
- * @returns {number[]}  y offsets within the box
+ * Whether each group stands open: closed unless the user opened it for
+ * this subject, and open regardless while a filter narrows the side or
+ * the group holds a pick, so nothing asked for hides.
+ * @param {ReturnType<typeof groupedSide>} groups
+ * @param {Set<string>} [opened]  the keys the user opened
+ * @param {boolean} [filtered]
  */
-export function attachmentYs(count, height) {
-  return Array.from({ length: count }, (unused, index) => ((index + 1) * height) / (count + 1));
+export function openGroups(groups, opened = new Set(), filtered = false) {
+  return groups.map((group) => ({
+    ...group,
+    open: filtered || group.members.some((entry) => entry.pending === true) || opened.has(group.key),
+  }));
+}
+
+/**
+ * A side's rows from top to bottom, each with where it starts and how
+ * tall it is: a group's first member always, the rest while the group
+ * is open, then, where the group holds more, the strip that opens or
+ * closes it. Every box stands one ROW_GAP below the last, whatever
+ * group it is in, and a strip lives inside the gap beneath its group's
+ * last box, so the boxes keep an even step and their edges an even fan
+ * however the groups fold. A box row carries where its edge attaches, a
+ * strip row where its block began.
+ * @param {ReturnType<typeof openGroups>} groups
+ * @returns {{ rows: Array<{ kind: 'box'|'strip', group: Object, entry?: Object, y: number, height: number, mid?: number, top?: number }>, height: number }}
+ */
+export function sideRows(groups) {
+  const rows = [];
+  let y = 0;
+  let height = 0;
+  for (const group of groups) {
+    const top = y;
+    const shown = group.open ? group.members : group.members.slice(0, 1);
+    for (const entry of shown) {
+      rows.push({ kind: 'box', group, entry, y, height: NODE_HEIGHT, mid: y + NODE_HEIGHT / 2 });
+      y += NODE_HEIGHT;
+      height = y;
+      y += ROW_GAP;
+    }
+    if (group.members.length > 1) {
+      rows.push({ kind: 'strip', group, y: height, height: STRIP_HEIGHT, top });
+      height += STRIP_HEIGHT;
+    }
+  }
+  return { rows, height };
+}
+
+/** How far from the subject's top and bottom the outermost attachments keep. */
+const ATTACH_PAD = 10;
+
+/**
+ * Where a row's edge attaches along the subject: the row's middle mapped
+ * from its side's span onto the subject's, so a side fans the same way
+ * whatever its rows' heights, and no two of its edges cross.
+ * @param {number} mid  the row's middle, from the side's top
+ * @param {number} span  the side's height
+ * @param {number} height  the subject's
+ * @returns {number}  y offset within the subject
+ */
+export function attachmentY(mid, span, height) {
+  if (span <= 0) return height / 2;
+  return ATTACH_PAD + ((height - 2 * ATTACH_PAD) * mid) / span;
 }
 
 /**
@@ -146,13 +218,29 @@ export function doglegPoints(x1, y1, bendA, bendB, x2, y2) {
 
 /**
  * The subject box grows modestly with its busiest side, so the
- * attachment points keep room.
+ * attachment points keep room, and stops growing at MAX_PER_SIDE: past
+ * that the attachments fan within it, the subject being one thing
+ * whatever its neighbours count.
  * @param {number} busiest  the larger side's edge count
  * @returns {number}
  */
 export function subjectHeight(busiest) {
-  return Math.max(NODE_HEIGHT, busiest * 14 + 22);
+  return Math.max(NODE_HEIGHT, Math.min(busiest, MAX_PER_SIDE) * 14 + 22);
 }
+
+/**
+ * How far a side's boxes reach, from its top to the bottom of its last
+ * box: the span the side is centred by and its edges are spread over,
+ * the strips beneath the boxes hanging outside it.
+ * @param {ReturnType<typeof sideRows>} side
+ */
+export function boxSpan(side) {
+  const boxes = side.rows.filter((row) => row.kind === 'box');
+  return boxes.length === 0 ? 0 : boxes.at(-1).y + boxes.at(-1).height;
+}
+
+/** What a group's strip says: how many more stand folded, or that fewer can be shown. */
+export const stripText = (group) => (group.open ? 'Show fewer' : `Show ${group.members.length - 1} more`);
 
 /**
  * The title line a box carries, cut to what three lines of box hold.
@@ -164,10 +252,15 @@ export function caption(entity) {
   return text.length > 27 ? `${text.slice(0, 26)}…` : text;
 }
 
-// The box holds three lines of Carbon type at a 16px gutter.
+// The box holds three lines of Carbon type at a 16px gutter; the gap
+// between boxes holds a group's strip, one compact line.
 const NODE_WIDTH = 224;
 const NODE_HEIGHT = 64;
-const ROW_GAP = 16;
+const ROW_GAP = 24;
+// A group's strip fills the gap under its last shown box; the rule
+// along an open block's outer side keeps clear of the boxes.
+const STRIP_HEIGHT = ROW_GAP;
+const RULE_GAP = 6;
 // The gap is the static worst case: the longest relationship label sits
 // over the guaranteed horizontal with the channel zone reserved.
 const COLUMN_GAP = 176;
@@ -186,9 +279,13 @@ const SUBJECT_STUB = 16;
 export function createGraphView({ store, onSelect, onUnrelate }) {
   const element = el('div', { className: 'graph-host' });
 
-  /** Which sides stand unfolded past the cap; the fold closes on a new subject. */
-  let unfolded = { incoming: false, outgoing: false };
-  let unfoldedFor = null;
+  /** The filter the last render drew under, so a group toggling redraws under it. */
+  let lastFilter = '';
+  /** The groups the user opened, for the subject they were opened on; a new subject starts closed. */
+  let opened = new Set();
+  let openedFor = null;
+  /** The strip to give focus back to after a toggle redraws it. */
+  let focusKey = null;
 
   /**
    * @param {import('./model.js').Entity} entity
@@ -239,6 +336,48 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       if (relationship && store.picker() === null) group.appendChild(removeControl(relationship, entity));
     }
     return group;
+  }
+
+  /**
+   * The line under a group's last shown box: how many more the group
+   * holds, a button in the link's colour that opens them beneath, or
+   * folds them again from the block's end, focus staying on it through
+   * the redraw.
+   * @param {Object} group  as openGroups leaves it
+   * @param {number} x
+   * @param {number} y
+   */
+  function strip(group, x, y) {
+    const control = svg('g', {
+      class: `node-more${group.open ? ' open' : ''}`,
+      transform: `translate(${x},${y})`,
+      tabindex: '0',
+      role: 'button',
+      'aria-expanded': String(group.open),
+      'aria-label': `${stripText(group)}, ${ENTITY_TYPES[group.type].name}`,
+      'data-group': group.key,
+    });
+    control.appendChild(svg('rect', { class: 'node-more-hit', width: String(NODE_WIDTH), height: String(STRIP_HEIGHT) }));
+    control.appendChild(svg('use', { href: `#${group.open ? 'i-chevron-down' : 'i-chevron-right'}`, x: '8', y: '4', width: '16', height: '16', class: 'node-chevron' }));
+    control.appendChild(svgText('text', { x: '32', y: '16', class: 'node-more-text' }, stripText(group)));
+    const toggle = () => {
+      if (opened.has(group.key)) opened.delete(group.key);
+      else opened.add(group.key);
+      focusKey = group.key;
+      render(lastFilter);
+    };
+    control.addEventListener('click', toggle);
+    control.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      toggle();
+    });
+    return control;
+  }
+
+  /** The rule along an open block's outer side, from its first box to its strip. */
+  function blockRule(x, top, bottom) {
+    return svg('line', { class: 'group-rule', x1: String(x), y1: String(top), x2: String(x), y2: String(bottom) });
   }
 
   /**
@@ -311,19 +450,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     return group;
   }
 
-  /** The fold: a +N chip that opens its side, and the way back. */
-  function foldChip(x, y, text, onPick) {
-    const chip = svgText('text', { x: String(x), y: String(y), class: 'graph-more graph-fold', tabindex: '0', role: 'button' }, text);
-    chip.setAttribute('aria-label', text);
-    chip.addEventListener('click', onPick);
-    chip.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      onPick();
-    });
-    return chip;
-  }
-
   /**
    * Draw the subject's neighbourhood, narrowed to a filter where one is
    * typed: the subject stays whatever the filter says.
@@ -353,22 +479,29 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       );
     }
 
-    if (unfoldedFor !== around.subject.id) {
-      unfolded = { incoming: false, outgoing: false };
-      unfoldedFor = around.subject.id;
+    lastFilter = filter;
+    if (openedFor !== around.subject.id) {
+      opened = new Set();
+      openedFor = around.subject.id;
     }
-
-    const { left, right, moreIncoming, moreOutgoing } = cappedNeighbourhood(merged, unfolded);
-    const step = NODE_HEIGHT + ROW_GAP;
-    const lanes = Math.max(left.length, right.length, 1);
-    const subjectH = subjectHeight(Math.max(left.length, right.length));
-    const foldRow = moreIncoming > 0 || moreOutgoing > 0 || unfolded.incoming || unfolded.outgoing;
-    const columnH = Math.max(lanes * step - ROW_GAP, subjectH);
-    const height = columnH + MARGIN * 2 + (foldRow ? 24 : 0);
+    const filtered = filter.trim() !== '';
+    const leftSide = sideRows(openGroups(groupedSide(merged.incoming, 'incoming'), opened, filtered));
+    const rightSide = sideRows(openGroups(groupedSide(merged.outgoing, 'outgoing'), opened, filtered));
+    const boxes = (side) => side.rows.filter((row) => row.kind === 'box').length;
+    const subjectH = subjectHeight(Math.max(boxes(leftSide), boxes(rightSide)));
+    // Each side is centred by its boxes alone, so a lone box faces the
+    // subject dead level whether or not a strip hangs beneath it, and
+    // its edges spread over that same span, symmetric about the middle.
+    const leftSpan = boxSpan(leftSide);
+    const rightSpan = boxSpan(rightSide);
+    const columnH = Math.max(leftSpan, rightSpan, subjectH);
     const width = MARGIN * 2 + NODE_WIDTH * 3 + COLUMN_GAP * 2;
     const centreX = MARGIN + NODE_WIDTH + COLUMN_GAP;
     const rightX = centreX + NODE_WIDTH + COLUMN_GAP;
     const centreY = MARGIN + (columnH - subjectH) / 2;
+    const leftTop = MARGIN + (columnH - leftSpan) / 2;
+    const rightTop = MARGIN + (columnH - rightSpan) / 2;
+    const height = Math.max(MARGIN + columnH, leftTop + leftSide.height, rightTop + rightSide.height) + MARGIN;
 
     const canvas = svg('svg', {
       class: `graph${picker !== null ? ' picking' : ''}`,
@@ -409,9 +542,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       ])
     );
 
-    const laneY = (count, index) => MARGIN + ((Math.max(lanes, 1) - count) * step) / 2 + index * step;
-    const leftAttach = attachmentYs(left.length, subjectH).map((y) => centreY + y);
-    const rightAttach = attachmentYs(right.length, subjectH).map((y) => centreY + y);
+    const attachAt = (span, row) => centreY + attachmentY(row.mid, span, subjectH);
     // The shared bend bands, and every label at the same place: centred
     // over its neighbour stub, 6px above its lane.
     const leftBendA = MARGIN + NODE_WIDTH + NEIGHBOUR_STUB;
@@ -421,86 +552,50 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     const leftLabelX = MARGIN + NODE_WIDTH + NEIGHBOUR_STUB / 2;
     const rightLabelX = rightX - NEIGHBOUR_STUB / 2;
 
-    left.forEach((entry, index) => {
-      const y = laneY(left.length, index);
+    /** What a row's edge says and how. */
+    const edgeSpec = (entry) => {
       const label = entry.pending ? entry.label : RELATIONSHIP_TYPES[entry.relationship.type].label;
-      const composition =
-        RELATIONSHIP_TYPES[entry.pending ? entry.typeId : entry.relationship.type].composition === true;
+      return {
+        label: entry.pending && entry.ambiguous ? `${label}…` : label,
+        composition: RELATIONSHIP_TYPES[entry.pending ? entry.typeId : entry.relationship.type].composition === true,
+        pending: entry.pending === true,
+        unpickId: entry.pending ? entry.other.id : null,
+      };
+    };
+
+    for (const row of leftSide.rows) {
+      const y = leftTop + row.y;
+      if (row.kind === 'strip') {
+        if (row.group.open) canvas.appendChild(blockRule(MARGIN - RULE_GAP, leftTop + row.top, y + STRIP_HEIGHT));
+        canvas.appendChild(strip(row.group, MARGIN, y));
+        continue;
+      }
+      const mid = leftTop + row.mid;
       canvas.appendChild(
-        edge({
-          x1: MARGIN + NODE_WIDTH,
-          y1: y + NODE_HEIGHT / 2,
-          bendA: leftBendA,
-          bendB: leftBendB,
-          x2: centreX,
-          y2: leftAttach[index],
-          label: entry.pending && entry.ambiguous ? `${label}…` : label,
-          composition,
-          labelX: leftLabelX,
-          labelY: y + NODE_HEIGHT / 2,
-          pending: entry.pending === true,
-          unpickId: entry.pending ? entry.other.id : null,
-        })
+        edge({ x1: MARGIN + NODE_WIDTH, y1: mid, bendA: leftBendA, bendB: leftBendB, x2: centreX, y2: attachAt(leftSpan, row), labelX: leftLabelX, labelY: mid, ...edgeSpec(row.entry) })
       );
-      canvas.appendChild(box(entry.other, MARGIN, y, false, entry.relationship, entry.pending === true));
-    });
-    right.forEach((entry, index) => {
-      const y = laneY(right.length, index);
-      const label = entry.pending ? entry.label : RELATIONSHIP_TYPES[entry.relationship.type].label;
-      const composition =
-        RELATIONSHIP_TYPES[entry.pending ? entry.typeId : entry.relationship.type].composition === true;
+      canvas.appendChild(box(row.entry.other, MARGIN, y, false, row.entry.relationship, row.entry.pending === true));
+    }
+    for (const row of rightSide.rows) {
+      const y = rightTop + row.y;
+      if (row.kind === 'strip') {
+        if (row.group.open) canvas.appendChild(blockRule(rightX + NODE_WIDTH + RULE_GAP, rightTop + row.top, y + STRIP_HEIGHT));
+        canvas.appendChild(strip(row.group, rightX, y));
+        continue;
+      }
+      const mid = rightTop + row.mid;
       canvas.appendChild(
-        edge({
-          x1: centreX + NODE_WIDTH,
-          y1: rightAttach[index],
-          bendA: rightBendA,
-          bendB: rightBendB,
-          x2: rightX,
-          y2: y + NODE_HEIGHT / 2,
-          label: entry.pending && entry.ambiguous ? `${label}…` : label,
-          composition,
-          labelX: rightLabelX,
-          labelY: y + NODE_HEIGHT / 2,
-          pending: entry.pending === true,
-          unpickId: entry.pending ? entry.other.id : null,
-        })
+        edge({ x1: centreX + NODE_WIDTH, y1: attachAt(rightSpan, row), bendA: rightBendA, bendB: rightBendB, x2: rightX, y2: mid, labelX: rightLabelX, labelY: mid, ...edgeSpec(row.entry) })
       );
-      canvas.appendChild(box(entry.other, rightX, y, false, entry.relationship, entry.pending === true));
-    });
+      canvas.appendChild(box(row.entry.other, rightX, y, false, row.entry.relationship, row.entry.pending === true));
+    }
     canvas.appendChild(box(around.subject, centreX, centreY, true, undefined, false, subjectH));
 
-    if (moreIncoming > 0) {
-      canvas.appendChild(
-        foldChip(MARGIN, height - 6, `+${moreIncoming} more incoming`, () => {
-          unfolded.incoming = true;
-          render();
-        })
-      );
-    } else if (unfolded.incoming && merged.incoming.filter((entry) => entry.pending !== true).length > MAX_PER_SIDE) {
-      canvas.appendChild(
-        foldChip(MARGIN, height - 6, 'Fold incoming', () => {
-          unfolded.incoming = false;
-          render();
-        })
-      );
-    }
-    if (moreOutgoing > 0) {
-      canvas.appendChild(
-        foldChip(rightX, height - 6, `+${moreOutgoing} more outgoing`, () => {
-          unfolded.outgoing = true;
-          render();
-        })
-      );
-    } else if (unfolded.outgoing && merged.outgoing.filter((entry) => entry.pending !== true).length > MAX_PER_SIDE) {
-      canvas.appendChild(
-        foldChip(rightX, height - 6, 'Fold outgoing', () => {
-          unfolded.outgoing = false;
-          render();
-        })
-      );
-    }
-
     element.appendChild(canvas);
+    if (focusKey !== null) {
+      canvas.querySelector(`[data-group="${focusKey}"]`)?.focus();
+      focusKey = null;
+    }
     if (pend.ambiguous > 0) {
       element.appendChild(
         el('p', {

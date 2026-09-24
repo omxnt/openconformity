@@ -491,6 +491,7 @@ export function createStore({ storage, session = null }) {
       }
     },
 
+
     /** The view open over the workspace, with its section, or null. */
     view: () => (projectOpen ? openView : null),
 

@@ -1092,10 +1092,19 @@ select.field-input[size] {
 .graph-edge polyline { fill: none; stroke: var(--border-strong); stroke-width: 1; }
 .arrow-head { fill: var(--border-strong); }
 .diamond-head { fill: var(--border-strong); }
-.graph-fold { cursor: pointer; text-decoration: underline; }
-.graph-fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .graph-label { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
-.graph-more { fill: var(--text-second); font-size: 12px; letter-spacing: 0.32px; }
+/* The line under a group's last shown box: how many more of its type
+   stand folded, or the way back, as a ghost button in the link's colour
+   with its chevron; an open block carries a rule along its outer side
+   from its first box to this line. */
+.node-more { cursor: pointer; }
+.node-more:focus { outline: none; }
+.node-more-hit { fill: transparent; transition: fill var(--motion-fast) var(--motion-standard); }
+.node-more:hover .node-more-hit { fill: var(--hover); }
+.node-more:focus-visible .node-more-hit { stroke: var(--focus); stroke-width: 2; }
+.node-chevron { fill: var(--link); }
+.node-more-text { font-size: 12px; letter-spacing: 0.32px; fill: var(--link); }
+.group-rule { stroke: var(--border-strong); stroke-width: 2; }
 
 /* While picking, the picks are the subject: dashed provisional edges and
    boxes stand forward, the standing neighbourhood recedes. */

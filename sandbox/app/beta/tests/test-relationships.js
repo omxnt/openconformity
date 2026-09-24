@@ -9,11 +9,15 @@
 import { pickerCandidates, pairOptions, pickedRows } from '../app/modules/relate.js';
 import {
   neighbourhood,
-  cappedNeighbourhood,
+  groupedSide,
+  openGroups,
+  sideRows,
+  stripText,
+  boxSpan,
   caption,
   MAX_PER_SIDE,
   pendingNeighbours,
-  attachmentYs,
+  attachmentY,
   doglegPoints,
   subjectHeight,
 } from '../app/modules/graph.js';
@@ -342,12 +346,19 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   addEntity(model, 'CAS');
   relate(model, 'cas-assesses-elm', 'CAS-001', 'ELM-001');
 
-  equal(MAX_PER_SIDE, 7, 'seven boxes a side');
-  const capped = cappedNeighbourhood(neighbourhood(model, 'ELM-001'));
-  equal(capped.right.length, 7, 'the ninth outgoing edge does not widen the canvas');
-  equal(capped.moreOutgoing, 2, 'what lies beyond is counted');
-  equal(capped.left.length, 1, 'the sparse side draws whole');
-  equal(capped.moreIncoming, 0, 'and counts nothing');
+  equal(MAX_PER_SIDE, 7, 'seven boxes a side stand open by default');
+  const around = neighbourhood(model, 'ELM-001');
+  const right = groupedSide(around.outgoing, 'outgoing');
+  equal(right.length, 1, 'nine hazards exhibited are one group');
+  deepEqual([right[0].key, right[0].type, right[0].label, right[0].members.length], ['outgoing:elm-exhibits-haz', 'HAZ', 'exhibits', 9], 'keyed by its side and relationship type, typed by the far end, labelled as the relationship is');
+  deepEqual(right[0].members.map((member) => member.other.id), right[0].members.map((member) => member.other.id).sort(), 'the members by identifier');
+  const left = groupedSide(around.incoming, 'incoming');
+  deepEqual(left.map((group) => [group.type, group.members.length]), [['CAS', 1]], 'the sparse side groups just the same');
+  equal(openGroups(right)[0].open, false, 'a group starts closed: its first member shows, the rest fold');
+  equal(openGroups(right, new Set(['outgoing:elm-exhibits-haz']))[0].open, true, 'opened by the user, it stands open');
+  equal(openGroups(right, new Set(), true)[0].open, true, 'a filter opens every group');
+  equal(stripText(openGroups(right)[0]), 'Show 8 more', 'the strip counts what stands folded');
+  equal(stripText(openGroups(right, new Set(['outgoing:elm-exhibits-haz']))[0]), 'Show fewer', 'and offers the way back');
 }
 
 // --- The box caption ----------------------------------------------------
@@ -366,9 +377,10 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 // --- The orthogonal layout ------------------------------------------------
 
 {
-  deepEqual(attachmentYs(3, 120), [30, 60, 90], 'attachments spread evenly along the subject');
-  deepEqual(attachmentYs(1, 64), [32], 'a single edge attaches at the middle');
-  deepEqual(attachmentYs(0, 64), [], 'no edges, no attachments');
+  equal(attachmentY(32, 64, 64), 32, 'a lone row attaches at the middle of the subject');
+  deepEqual([attachmentY(0, 200, 120), attachmentY(200, 200, 120)], [10, 110], 'the outermost rows keep ten from the ends');
+  equal(attachmentY(50, 100, 120), 60, 'and the rest map in proportion to where they stand on their side');
+  equal(attachmentY(0, 0, 64), 32, 'an empty side attaches at the middle, harmlessly');
   equal(
     doglegPoints(240, 100, 352, 384, 400, 150),
     '240,100 352,100 384,150 400,150',
@@ -381,27 +393,49 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
   equal(subjectHeight(3), 64, 'a quiet subject keeps the box height');
   equal(subjectHeight(7), 120, 'a busy one grows modestly to give the attachments room');
+  equal(subjectHeight(30), 120, 'and stops growing at seven, the attachments fanning within it');
 
 }
 
-// --- The fold: a cap that opens, and picks that ignore it -----------------
+// --- The groups: the first always shows, a pick holds its group open ----------
 
 {
-  const real = Array.from({ length: 9 }, (unused, index) => ({ relationship: { type: 'elm-exhibits-haz' }, other: { id: `HAZ-00${index}` } }));
+  const real = Array.from({ length: 9 }, (unused, index) => ({ relationship: { type: 'elm-exhibits-haz' }, other: { id: `HAZ-00${index}`, type: 'HAZ' } }));
   const pending = [
-    { pending: true, other: { id: 'HAZ-100' }, label: 'exhibits', ambiguous: false },
-    { pending: true, other: { id: 'HAZ-101' }, label: 'exhibits', ambiguous: false },
+    { pending: true, other: { id: 'HAZ-100', type: 'HAZ' }, typeId: 'elm-exhibits-haz', label: 'exhibits', ambiguous: false },
+    { pending: true, other: { id: 'CAS-001', type: 'CAS' }, typeId: 'cas-assesses-elm', label: 'assesses', ambiguous: false },
   ];
-  const around = { subject: { id: 'ELM-001' }, incoming: [...real, ...pending], outgoing: [] };
+  const groups = openGroups(groupedSide([...real, ...pending], 'incoming'));
+  deepEqual(
+    groups.map((group) => [group.typeId, group.members.length, group.open]).sort(),
+    [['cas-assesses-elm', 1, true], ['elm-exhibits-haz', 10, true]],
+    "a pick rides in its type's group, which stands open for it"
+  );
+  const { rows, height } = sideRows(groups);
+  equal(rows.filter((row) => row.kind === 'box').length, 11, 'every member of both groups stands, the picks among them');
+  deepEqual(rows.filter((row) => row.kind === 'strip').map((row) => row.group.typeId), ['elm-exhibits-haz'], 'the group holding more ends in its strip, the group of one has none');
+  ok(rows.every((row, index) => index === 0 || row.y > rows[index - 1].y), 'the rows run down the side');
+  equal(height, rows.at(-1).y + rows.at(-1).height, 'the side is as tall as its last row reaches');
+  equal(rows.at(-1).top, rows.find((row) => row.group.typeId === 'elm-exhibits-haz').y, "a strip knows where its block began, for the rule along it");
 
-  const folded = cappedNeighbourhood(around);
-  equal(folded.left.length, MAX_PER_SIDE + 2, 'a folded side caps the real boxes; the picks always draw');
-  equal(folded.moreIncoming, 2, 'and counts what the fold holds');
-  ok(folded.left.slice(MAX_PER_SIDE).every((entry) => entry.pending === true), 'the picks ride beyond the cap');
-
-  const open = cappedNeighbourhood(around, { incoming: true, outgoing: false });
-  equal(open.left.length, 11, 'unfolding a side draws everything');
-  equal(open.moreIncoming, 0, 'with nothing left to count');
+  const closed = sideRows(openGroups(groupedSide(real, 'incoming')));
+  deepEqual(closed.rows.map((row) => [row.kind, row.y, row.height]), [['box', 0, 64], ['strip', 64, 24]], 'a closed group is its first box and the strip in the gap beneath it');
+  equal(closed.rows[0].mid, 32, "the edge attaches at the box's middle");
+  deepEqual([boxSpan(closed), closed.height], [64, 88], 'the side is centred by its box alone, the strip hanging outside the span');
+  const mixed = sideRows([
+    { key: 'a', open: false, members: [{ other: { id: 'A1' } }, { other: { id: 'A2' } }] },
+    { key: 'b', open: false, members: [{ other: { id: 'B1' } }] },
+    { key: 'c', open: true, members: [{ other: { id: 'C1' } }, { other: { id: 'C2' } }] },
+  ]);
+  deepEqual(mixed.rows.filter((row) => row.kind === 'box').map((row) => row.y), [0, 88, 176, 264], 'every box stands one step below the last whatever group it is in, a strip taking no room of its own');
+  deepEqual(mixed.rows.filter((row) => row.kind === 'strip').map((row) => [row.y, row.top]), [[64, 0], [328, 176]], 'a strip lives in the gap under its group\'s last box and knows where the block began');
+  equal(mixed.height, 352, 'the side ends with the last strip');
+  const mids = mixed.rows.filter((row) => row.kind === 'box').map((row) => row.mid);
+  ok(mids.every((mid, i) => mid + mids[mids.length - 1 - i] === boxSpan(mixed)), 'so the boxes mirror about the middle of their span, and their edges fan alike above and below');
+  equal(boxSpan(sideRows(groups)), sideRows(groups).rows.filter((row) => row.kind === 'box').at(-1).y + 64, 'an open side spans to the bottom of its last box');
+  equal(attachmentY(32, boxSpan(closed), 64), 32, 'so a lone box with a strip beneath it still faces the subject dead level');
+  const lone = sideRows(openGroups(groupedSide(real.slice(0, 1), 'incoming')));
+  deepEqual([lone.rows.length, lone.height], [1, 64], 'a group of one is a box and nothing more, as the graph always drew it');
 }
 
 // --- The graph narrows to a filter, the subject staying ------------------------
