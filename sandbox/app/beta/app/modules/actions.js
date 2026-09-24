@@ -134,7 +134,7 @@ export function createActions({ store, flows }) {
     {
       id: 'new-entity',
       icon: 'i-new-entity',
-      label: 'New',
+      label: 'New entity',
       group: 'create',
       toolbar: true,
       context: true,
