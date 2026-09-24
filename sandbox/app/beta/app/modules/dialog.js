@@ -206,7 +206,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
       'select',
       {
         className: 'field-input',
-        attributes: { id: 'choose-field', size: String(Math.min(Math.max(options.length, 4), 12)) },
+        attributes: { id: 'choose-field', size: String(Math.min(Math.max(options.length, 4), 24)) },
       },
       options.map((option) => el('option', { text: option.label, attributes: { value: option.value } }))
     );

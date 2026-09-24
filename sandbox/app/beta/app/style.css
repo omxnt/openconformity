@@ -1304,8 +1304,8 @@ select.field-input[size] {
   color: var(--text-second);
 }
 .dialog-body .field { padding: 12px 0 0; }
-.dialog-body select.field-input[size] { width: 100%; max-width: none; height: auto; padding: 4px 0; overflow: auto; resize: none; }
-.dialog-body select.field-input[size] option { padding: 6px 16px; white-space: pre; }
+.dialog-body select.field-input[size] { width: 100%; max-width: none; height: auto; max-height: min(60vh, 720px); padding: 4px 0; overflow: auto; resize: none; }
+.dialog-body select.field-input[size] option { padding: 3px 16px; white-space: pre; }
 
 .doomed-list {
   list-style: none;

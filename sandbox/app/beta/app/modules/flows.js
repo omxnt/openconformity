@@ -239,12 +239,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   let relatedMenu = null;
 
   /**
-   * The new-related offer: the types relatable to the selection, grouped
-   * by pillar, each with the relationship as its hint and no direction
-   * word, since the pair fixes the direction. A type whose pair with the
-   * subject admits the relationship both ways offers one entry per way,
-   * the one making the new entity the source naming the subject as what
-   * it points at.
+   * The new-related offer, seen from the selection as the relationship
+   * list is: the outgoing forms first, where the selection is the
+   * source, then the incoming, under the two words the list uses. Each
+   * entry is the type the new entity takes with the relationship as its
+   * hint, in pillar order within its group, so a type admitting the
+   * relationship both ways stands once in each.
    * @param {{ anchor?: HTMLElement, at?: { x: number, y: number } }} [invocation]
    */
   function toggleRelatedMenu(invocation = {}) {
@@ -256,15 +256,21 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const offer = relatedTypeOffer(store.model(), subjectId);
     if (offer.length === 0) return;
 
-    const items = offer.flatMap(({ code, forms }) => {
-      const type = ENTITY_TYPES[code];
-      const shared = { label: type.name, group: PILLARS[type.pillar], icon: TYPE_ICONS[code], pillar: type.pillar };
-      return forms.map((form) => ({
-        ...shared,
-        hint: `${RELATIONSHIP_TYPES[form.typeId].label}${forms.length > 1 && form.direction === 'incoming' ? ` ${subjectId}` : ''}`,
-        onPick: () => createRelated(subjectId, code, form),
-      }));
-    });
+    const items = ['outgoing', 'incoming'].flatMap((direction) =>
+      offer.flatMap(({ code, forms }) => {
+        const type = ENTITY_TYPES[code];
+        return forms
+          .filter((form) => form.direction === direction)
+          .map((form) => ({
+            label: type.name,
+            group: direction === 'outgoing' ? 'Outgoing' : 'Incoming',
+            icon: TYPE_ICONS[code],
+            pillar: type.pillar,
+            hint: RELATIONSHIP_TYPES[form.typeId].label,
+            onPick: () => createRelated(subjectId, code, form),
+          }));
+      })
+    );
 
     relatedMenu = openMenu({
       overlay,
