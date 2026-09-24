@@ -603,6 +603,26 @@ body {
 /* A set's tags wrap inside the slot. */
 .cell-value.tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 
+/* The icon sprite, kept out of the flow. */
+.sprite { position: absolute; }
+
+/* A drawing: the picture on a white card in either theme, as an image
+   viewer shows it, opened at full size on a click; beneath it its size
+   and the file actions. A drawing that fails the check says why in the
+   picture's place. */
+.drawing { display: grid; gap: 8px; }  /* $spacing-03 */
+.drawing-card { display: grid; justify-items: center; padding: 16px; background: #ffffff; color-scheme: light; border: 1px solid var(--border-subtle); }  /* $spacing-05 */
+.drawing-open { display: block; max-width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.drawing-open:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.drawing-image { display: block; max-width: 100%; max-height: 480px; width: auto; height: auto; }
+.drawing-refused { padding: 7px 16px; min-height: 32px; color: var(--text-second); border-bottom: 1px solid var(--border-subtle); }
+.drawing-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }  /* $spacing-03 */
+.drawing-size { margin-right: auto; font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
+.drawing-meta .ghost-button .icon { width: 16px; height: 16px; fill: currentColor; }
+.drawing-large { overflow: auto; max-height: 70vh; padding: 16px; background: #ffffff; color-scheme: light; }
+.drawing-large img { display: block; }
+.dialog:has(.drawing-large) { max-width: min(1400px, 95vw); }
+
 /* A table attribute: its rows under the column names on the data
    table's styles, numbered; in an edit each cell a field filling it, the
    row's rule serving as the fields' own, a remove at the row's end and

@@ -310,6 +310,22 @@ import { fakeStorage } from './helpers.js';
   ok(readFile('../app/style.css').includes('.field-input.placeholder { color: var(--disabled); border-bottom-color: transparent; cursor: not-allowed; }'), "in an edit as Carbon's disabled field");
   ok(editor.includes("target.appendChild(ratingCell(group, values, editing));"), 'a group closing on a computed attribute is a rating, a cell among the cells');
   ok(editor.includes("tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], `${view.name}: ${view.outcome}`, '', 'outcome'));") && editor.includes("tags.push(tag(parameter.rationale ? 'tag reasoned' : 'tag', [el('span', { text: parameter.code })], `${parameter.name}: ${parameter.value}`, parameter.rationale, i));"), 'the cell: the outcome as a tag, then the code of each parameter set, each tag saying what it stands for on hovering it and the rationale given for it');
+  ok(editor.includes("if (definition.kind === 'drawing') return drawingCell(value, true, definition);") && editor.includes("if (definition.kind === 'drawing') return drawingCell(value, false);") && editor.includes("el('img', { className: 'drawing-image', attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } })"), 'a drawing is shown as an image from a data URL in both modes, and nothing else');
+  ok(editor.includes("const exportDrawing = () => download(fileName(), text, 'image/svg+xml');") && editor.includes("body.appendChild(el('div', { className: 'drawing-refused', text: `This drawing cannot be shown. It ${verdict.reason}.` }));") && editor.includes("note.textContent = `Not imported. The file ${verdict.reason}.`;"), 'a drawing exports as stored, a failing one says why and stays, and an import refused says why');
+  {
+    const modules = readFile('../app/index.html').match(/src="modules\/app\.js"/) ? ['about', 'actions', 'app', 'attributes', 'dialog', 'dom', 'drawing', 'editor', 'example', 'files', 'flows', 'graph', 'history', 'icons', 'menu', 'metamodel', 'model', 'multiselect', 'navigator', 'overlay', 'project', 'queries', 'rating', 'relate', 'relationships', 'risk', 'shell', 'store', 'validator', 'view-risk', 'views'] : [];
+    const sources = modules.map((name) => [name, readFile(`../app/modules/${name}.js`)]);
+    ok(sources.every(([, source]) => !/innerHTML|insertAdjacentHTML|outerHTML|srcdoc/.test(source)), 'no module builds markup from text: every element is created and every string set as text');
+    ok(sources.every(([name, source]) => name === 'drawing' || !source.includes('DOMParser')) && !readFile('../app/modules/drawing.js').includes('DOMParser'), 'no module parses markup with the browser, the drawing check reading XML itself and inserting nothing');
+    ok(!readFile('../app/index.html').includes('<iframe') && sources.every(([name, source]) => name === 'drawing' || !source.includes('iframe')), 'no frame stands in the page or is created by any module; the check module names one only to refuse it');
+  }
+  {
+    const page = readFile('../app/index.html');
+    ok(page.includes(`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">`), "the page carries its content security policy: its own scripts and styles, images from itself or data, no connection, no frame, no object, no base, no form");
+    ok(page.indexOf('Content-Security-Policy') < page.indexOf('<script') && page.indexOf('Content-Security-Policy') < page.indexOf('<link'), 'stated before anything loads');
+    ok(!/<script(?![^>]*\ssrc=)/.test(page) && !/\sstyle="/.test(page) && page.includes('<script src="theme.js"></script>') && page.includes('class="sprite"'), 'no inline script or style remains on the page: the theme is a file and the sprite a class');
+  }
+  ok(!readFile('../app/modules/history.js').includes('structuredClone') && readFile('../app/modules/history.js').includes("const cloneNode = (node) => ({ ...node, ...(node.attributes ? { attributes: { ...node.attributes } } : {}) });"), "a history snapshot copies the model's objects and reuses its strings, so drawings are held once");
   ok(editor.includes("if (definition.kind === 'table') return tableControl(definition, value);") && editor.includes("const hidden = el('input', { attributes: { type: 'hidden', 'data-key': definition.key } });\n    const wrap = el('div', { className: 'cell-table' });") && editor.includes("hidden.value = joinTable(definition, rows);") && editor.includes("type: definition.kind === 'hyperlink' ? 'url' : definition.kind === 'date' ? 'date' : 'text',"), "a table is edited as rows of fields kept in one hidden control carrying the key, as a set is, and a date is the browser's own date field");
   ok(editor.includes("attributes: { type: 'button', 'aria-label': `Remove row ${r + 1}` } }, [icon('i-delete')]") && editor.includes("[icon('i-new-entity'), el('span', { text: 'Add row' })]") && editor.includes("paint(rows.length - 1);") && editor.includes(".filter((row) => row.some((cell) => cell !== ''))"), 'a row is removed at its end and added beneath, the new row focused, and a row left empty is dropped');
   ok(editor.includes("if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\\n${text}` : lead } }, content);") && editor.includes("const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);") && editor.includes("const tags = ratingTags(ratingView(group.attributes, values), closing.key);") && editor.includes("const tags = ratingTags(ratingView(group.attributes, draft));"), "outside an edit every tag is a button whose tooltip is the help glyph's kind, a tag with a rationale underlined and carrying the reasoning; within an edit a span with the browser's own");
@@ -355,11 +371,11 @@ import { fakeStorage } from './helpers.js';
 // --- The pre-paint theme script speaks the store's literals --------------
 
 {
-  const page = readFile('../app/index.html');
+  const page = readFile('../app/theme.js');
   const source = readFile('../app/modules/store.js');
   const key = source.match(/const THEME_KEY = '([^']+)'/)?.[1];
   ok(typeof key === 'string', 'the store names its theme key');
-  ok(page.includes(`localStorage.getItem('${key}')`), 'the inline script reads the store’s own key');
+  ok(page.includes(`localStorage.getItem('${key}')`), 'the theme script reads the store’s own key');
   const themes = source
     .match(/const THEMES = \[([^\]]+)\]/)?.[1]
     .match(/'[^']+'/g)
@@ -367,7 +383,7 @@ import { fakeStorage } from './helpers.js';
   ok(Array.isArray(themes) && themes.length === 2, 'the store holds two themes');
   ok(
     page.includes(`stored === '${themes[0]}' || stored === '${themes[1]}'`),
-    'the inline script accepts exactly the store’s theme values'
+    'the theme script accepts exactly the store’s theme values'
   );
   ok(page.includes(`? '${themes[1]}' : '${themes[0]}'`), 'and its system fallback lands on the same pair');
 }

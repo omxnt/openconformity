@@ -5,7 +5,7 @@
  * the cursor, so the two walk a line rather than a tree.
  *
  * A snapshot holds the model's content — its name, nodes, and
- * relationships — over `structuredClone`, and never the counters: undo and
+ * relationships — copied object by object with its strings reused, and never the counters: undo and
  * redo roll back content, not the next number to issue, so an undone
  * creation leaves a hole in the numbering rather than a number that
  * returns on a different entity.
@@ -33,12 +33,30 @@ const DEPTH = 50;
  * @returns {Content}
  */
 function contentOf(model) {
-  return structuredClone({
+  return cloneContent({
     name: model.name,
     attributes: model.attributes,
     nodes: model.nodes,
     relationships: model.relationships,
   });
+}
+
+/**
+ * A copy of content that shares no object with the original but reuses
+ * every string as it is: a string cannot change, so a snapshot need not
+ * copy an attribute's text, and fifty snapshots of a project full of
+ * drawings hold each drawing once.
+ * @param {Content} content
+ * @returns {Content}
+ */
+function cloneContent(content) {
+  const cloneNode = (node) => ({ ...node, ...(node.attributes ? { attributes: { ...node.attributes } } : {}) });
+  return {
+    name: content.name,
+    attributes: { ...content.attributes },
+    nodes: new Map([...content.nodes].map(([id, node]) => [id, cloneNode(node)])),
+    relationships: new Map([...content.relationships].map(([key, held]) => [key, { ...held }])),
+  };
 }
 
 /**
@@ -49,7 +67,7 @@ function contentOf(model) {
  * @returns {import('./model.js').Model}
  */
 function modelWith(content, current) {
-  return { ...structuredClone(content), counters: { ...current.counters } };
+  return { ...cloneContent(content), counters: { ...current.counters } };
 }
 
 /**

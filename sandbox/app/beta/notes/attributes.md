@@ -26,6 +26,7 @@ Each attribute uses one of the kinds below.
 | set | Any number of the values in the Values column, stored as those chosen separated by semicolons, in the order the column lists them |
 | hyperlink | A web address |
 | number | A whole number, kept between the least and the greatest the Values column gives |
+| drawing | A picture held as SVG text, accepted only after the check §1.8 describes and shown only as an image, never as markup |
 | date | A calendar date, stored as its year, month and day, 2026-09-24 |
 | table | Rows of columns, the columns the rows beneath it define, each keyed by the table's key, a dot and its own, and each a text, a multiline, a date, a choice or a number; stored as one line per row with the cells parted by tabs, in column order, a cell holding a tab, a break or a quotation mark quoted as a CSV cell is, a row with every cell empty dropped |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
@@ -90,7 +91,7 @@ A type that carries a reference composes its label from the reference and the ti
 
 ### 1.8 Layout
 
-The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline, a hyperlink and a set each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. A date is a field with the browser's own picker, and reads as the date it holds. A table reads as its rows, numbered, under the column names, a choice in a cell as a tag, a multiline keeping its breaks, an empty cell as the dash, a date, a choice or a number column as wide as its values, a text column brief, and a multiline column taking the rest; in an edit each row's cells are fields, a multiline a text area growing as it is typed, a button at the row's end removes it, and Carbon's ghost Add beneath adds a row and focuses its first cell. A table takes a row to itself, as a multiline does. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice, a number or a date is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
+The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline, a hyperlink and a set each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. A date is a field with the browser's own picker, and reads as the date it holds. A drawing reads as the picture on a white card in either theme, shown as an image so that the browser grants it no script, no document and no network, opened at full size on a click, its size and Export beneath; in an edit, Import takes an SVG file and Remove clears it, and the drawing enters the draft as a set does. Before it is accepted, and again before it is shown, a drawing is checked: an SVG document within 512 kilobytes, declaring no entities, linking no stylesheet, holding no element that runs code or embeds a document and no event handler, referencing nothing outside itself, and no larger than 16,384 units a side; one that fails is refused with the reason, or, already stored, shown as the reason in the picture's place and kept unchanged. The stored text is the file as it came, never re-serialised, so it exports as it was imported. A table reads as its rows, numbered, under the column names, a choice in a cell as a tag, a multiline keeping its breaks, an empty cell as the dash, a date, a choice or a number column as wide as its values, a text column brief, and a multiline column taking the rest; in an edit each row's cells are fields, a multiline a text area growing as it is typed, a button at the row's end removes it, and Carbon's ghost Add beneath adds a row and focuses its first cell. A table takes a row to itself, as a multiline does. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice, a number or a date is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
 
 A type's own attributes stand on the first tab, named for the type by the last word of its name — Legislation, Requirement, Function — and each group tagged `tab` on a tab of its own, named for the group: a tab is earned by a distinct task, such as a verdict or an estimate, or by a set of fields about a distinct concern, never by a single text and never by the identity alone. Every type closes with a Notes tab, one multiline field for what fits nowhere else, so every pane has its tab bar. The tabs are Carbon's line tabs at the navigator filter bar's height. The tab chosen stands for the rest of the browser session, by type, so the next entity of the type opens on the same tab, and choosing a tab leaves an open edit as it is: what stands on another tab is still part of the draft. A group carrying no tag stands within its tab as a legend over its cells, unless it holds a single attribute, which then stands on its own.
 
@@ -108,6 +109,7 @@ A name shared by several types means the same on each, so its help is recorded o
 | Link | Where it is published online. |
 | Applicable | Whether it applies to this product. |
 | Rationale | Why it applies, or why not. |
+| Drawing | A picture of it, imported as an SVG file and shown as an image. |
 | Initial risk estimation | The risk before protective measures, estimated by the method chosen or typed where none is. |
 | Residual risk estimation | The risk with the protective measures in place, estimated by the method chosen or typed where none is. |
 | Required integrity level | The level the safety function must reach, in its standard's own terms. |
@@ -150,6 +152,12 @@ The designation is the element's own short name — `E1` — entered by the mode
 | reference | Designation | text | | |
 | title | Title | text | | The name of the system element. |
 | description | Description | multiline | | What the system element is and what it does in the machinery. |
+
+#### Drawing `tab`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| drawing | Drawing | drawing | |
 
 #### Notes `tab`
 
@@ -441,6 +449,12 @@ The designation is the measure's own short name — `M1` — entered by the mode
 | title | Title | text | | The name of the protective measure. |
 | description | Description | multiline | | What the protective measure is and how it reduces the risk. |
 
+#### Drawing `tab`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| drawing | Drawing | drawing | |
+
 #### Notes `tab`
 
 | Key | Name | Kind | Values |
@@ -514,6 +528,12 @@ The designation is the function's own short name — `SF1` — entered by the mo
 | faultIndication | Fault indication | multiline | | How a found fault is made known. |
 | faultRecovery | Fault recovery | multiline | | Whether a fault latches or clears itself, when and how it may be reset, and how the safety function returns to service. |
 | powerDisturbances | Power disturbances | multiline | | What the safety function does when its supply goes, returns or fluctuates. |
+
+#### Drawing `tab`
+
+| Key | Name | Kind | Values |
+|---|---|---|---|
+| drawing | Drawing | drawing | |
 
 #### Notes `tab`
 

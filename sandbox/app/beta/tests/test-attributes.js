@@ -11,7 +11,7 @@ import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { ESTIMATED } from '../app/modules/risk.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
-const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'computed', 'rationale'];
+const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'drawing', 'computed', 'rationale'];
 /** What a table's column may be. */
 const COLUMN_KINDS = ['text', 'multiline', 'date', 'choice', 'number'];
 

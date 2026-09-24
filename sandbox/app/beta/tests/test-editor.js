@@ -60,8 +60,8 @@ equal(linkable(''), false, 'and an empty value is nothing');
   equal(firstTabName('XYZ'), 'Description', 'a type the metamodel does not know falls back');
   deepEqual(
     Object.entries(ATTRIBUTES).flatMap(([code, type]) => type.groups.filter((group) => group.tab && group.name !== 'Notes').map((group) => `${code}:${group.name}`)),
-    ['LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability', 'VER:Result'],
-    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults, a verification's result"
+    ['ELM:Drawing', 'LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'PRM:Drawing', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'SAF:Drawing', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability', 'VER:Result'],
+    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults, a verification's result, and a drawing on an element, a measure and a function"
   );
   for (const [code, type] of Object.entries(ATTRIBUTES)) {
     const last = type.groups.at(-1);
@@ -78,7 +78,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
   for (const code of ['ELM', 'ACT', 'TSK', 'PHS', 'CAS', 'NTB', 'HAZ', 'SCN', 'PRM']) {
     deepEqual(attributesFor(code)[0], { key: 'reference', name: 'Designation', kind: 'text' }, `${code} opens on a designation of the modeller's own, composed into its label before the title`);
   }
-  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Notes', 'Link', 'Applicable', 'Rationale', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the names shared across types, and the rating names shared across methods, carry one help each');
+  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Notes', 'Link', 'Applicable', 'Rationale', 'Drawing', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the names shared across types, and the rating names shared across methods, carry one help each');
   equal(attributesFor('REQ').find((definition) => definition.key === 'rationale').help, 'Why the system requirement exists.', "a system requirement's rationale says its own thing, so it carries its own help");
   equal(attributesFor('HST').find((definition) => definition.key === 'title').help, "The title of the standard, as published.", 'a harmonised standard says its title is the standard\'s');
   equal(attributesFor('ESR').find((definition) => definition.key === 'reference').help, 'The clause number of the essential requirement within the legislation.', 'an essential requirement says its reference is the clause');
@@ -108,7 +108,12 @@ equal(linkable(''), false, 'and an empty value is nothing');
   const stored = [['2026-09-01', 'Failed', 'TR-015'], ['2026-09-24', 'Passed', 'Line one\nline two']];
   deepEqual(tableRows(three, joinTable(three, stored)), stored, 'a table stored and read again is the same');
   equal(attributesFor('PROJECT').find((definition) => definition.key === 'date').kind, 'date', "the project's date is a date, as a run's is");
-  deepEqual(groups('SAF'), ['Behaviour', 'Characteristics', 'Fault handling', 'Notes'], 'then what it does, what it must achieve, what it does when it fails, and its notes, each a tab');
+  deepEqual(groups('SAF'), ['Behaviour', 'Characteristics', 'Fault handling', 'Drawing', 'Notes'], 'then what it does, what it must achieve, what it does when it fails, its drawing, and its notes, each a tab');
+  for (const code of ['ELM', 'PRM', 'SAF']) {
+    const drawing = ATTRIBUTES[code].groups.find((group) => group.name === 'Drawing');
+    deepEqual(drawing, { name: 'Drawing', tab: true, attributes: [{ key: 'drawing', name: 'Drawing', kind: 'drawing' }] }, `${code} carries the one Drawing tab, before its notes`);
+    equal(ATTRIBUTES[code].groups.indexOf(drawing), ATTRIBUTES[code].groups.length - 2, `${code}'s drawing stands right before its notes`);
+  }
   deepEqual(
     ATTRIBUTES.SAF.groups[0].attributes.map((definition) => definition.key),
     ['priority', 'operatingMode', 'trigger', 'reaction', 'safeState', 'feedback', 'muting', 'restart'],

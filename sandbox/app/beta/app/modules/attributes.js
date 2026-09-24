@@ -13,7 +13,7 @@
  * attribute is the absence of its key.
  */
 
-/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'date'|'table'|'computed'|'rationale'} AttributeKind */
+/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'date'|'table'|'drawing'|'computed'|'rationale'} AttributeKind */
 
 /**
  * @typedef {Object} AttributeDefinition
@@ -59,10 +59,14 @@ export const SHARED_HELP = {
   Link: 'Where it is published online.',
   Applicable: 'Whether it applies to this product.',
   Rationale: 'Why it applies, or why not.',
+  Drawing: 'A picture of it, imported as an SVG file and shown as an image.',
   'Initial risk estimation': 'The risk before protective measures, estimated by the method chosen or typed where none is.',
   'Residual risk estimation': 'The risk with the protective measures in place, estimated by the method chosen or typed where none is.',
   'Required integrity level': "The level the safety function must reach, in its standard's own terms.",
 };
+
+/** The Drawing tab three types carry: one picture, held as SVG text and shown as an image. */
+const drawingTab = () => ({ name: 'Drawing', tab: true, attributes: [{ key: 'drawing', name: 'Drawing', kind: 'drawing' }] });
 
 export const ATTRIBUTES = {
   ELM: {
@@ -71,7 +75,7 @@ export const ATTRIBUTES = {
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system element." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the system element is and what it does in the machinery.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
   },
   ACT: {
     attributes: [
@@ -291,7 +295,7 @@ export const ATTRIBUTES = {
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the protective measure." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the protective measure is and how it reduces the risk.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
   },
   SAF: {
     attributes: [
@@ -372,6 +376,7 @@ export const ATTRIBUTES = {
           { key: 'powerDisturbances', name: 'Power disturbances', kind: 'multiline', help: 'What the safety function does when its supply goes, returns or fluctuates.' },
         ],
       },
+      drawingTab(),
       { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
     ],
   },

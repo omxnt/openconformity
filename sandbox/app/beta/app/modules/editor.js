@@ -16,8 +16,9 @@ import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
-import { el, icon, tabKeys } from './dom.js';
+import { el, icon, tabKeys, download } from './dom.js';
 import { entityLabel } from './queries.js';
+import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 
 /**
  * Whether a draft differs from the entity it edits: a defined key whose
@@ -394,9 +395,9 @@ export function createEditor({
     return el('div', { className: 'cell-name' }, [text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]);
   }
 
-  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table. */
+  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table, a drawing. */
   const takesRow = (definition) =>
-    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table';
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing';
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -454,6 +455,7 @@ export function createEditor({
       const address = value.trim();
       return el('div', { className: 'cell-value' }, [el('a', { text: address, attributes: { href: address, target: '_blank', rel: 'noopener' } })]);
     }
+    if (definition.kind === 'drawing') return drawingCell(value, false);
     if (definition.kind === 'table') {
       const rows = tableRows(definition, value);
       if (rows.length === 0) return el('div', { className: 'cell-value empty', text: '–' });
@@ -873,6 +875,7 @@ export function createEditor({
       return input;
     }
     if (definition.kind === 'table') return tableControl(definition, value);
+    if (definition.kind === 'drawing') return drawingCell(value, true, definition);
     const input = el('input', {
       className: 'field-input',
       attributes: {
@@ -883,6 +886,94 @@ export function createEditor({
     });
     input.value = value;
     return input;
+  }
+
+  /**
+   * A drawing as read or as edited: the picture on a white card, shown
+   * as an image and nothing else, opened at full size on a click, its
+   * size and Export beneath; in an edit the card stands over a hidden
+   * control carrying the key, with Import from an SVG file and Remove
+   * beside Export, so the draft reads the drawing as it reads a set. A
+   * drawing that fails the check shows why instead of a picture, and
+   * stays exportable unchanged.
+   * @param {string|undefined} value
+   * @param {boolean} editing
+   * @param {Object} [definition]  in an edit, the attribute the control carries
+   */
+  function drawingCell(value, editing, definition = null) {
+    let text = value ?? '';
+    const subject = () => (current ? entityLabel(current) || current.id : 'the entity');
+    const fileName = () => `${current?.id ?? 'drawing'}.svg`;
+    const hidden = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key } }) : null;
+    const picker = editing ? el('input', { className: 'drawing-file', attributes: { type: 'file', accept: '.svg,image/svg+xml', hidden: '' } }) : null;
+    const body = el('div', { className: 'drawing-body' });
+    const note = el('p', { className: 'field-note', attributes: { role: 'status' } });
+    const ghost = (label, glyph, onPick, danger = false) => {
+      const button = el('button', { className: `ghost-button${danger ? ' ghost-danger' : ''}`, attributes: { type: 'button' } }, [icon(glyph), el('span', { text: label })]);
+      button.addEventListener('click', onPick);
+      return button;
+    };
+    const exportDrawing = () => download(fileName(), text, 'image/svg+xml');
+    const enlarge = async () => {
+      const picked = await dialogs.open({
+        title: `Drawing of ${subject()}`,
+        body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } })]),
+        actions: [
+          { label: 'Export', value: 'export', kind: 'secondary' },
+          { label: 'Close', value: null, kind: 'primary', default: true },
+        ],
+      });
+      if (picked === 'export') exportDrawing();
+    };
+    const hold = (held) => {
+      text = held;
+      if (hidden) {
+        hidden.value = text;
+        hidden.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      paint();
+    };
+    const paint = () => {
+      body.textContent = '';
+      const actions = [];
+      if (text !== '') {
+        const verdict = checkDrawing(text);
+        if (verdict.ok) {
+          const open = el('button', { className: 'drawing-open', attributes: { type: 'button', 'aria-label': `Open the drawing of ${subject()} at full size` } }, [
+            el('img', { className: 'drawing-image', attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } }),
+          ]);
+          open.addEventListener('click', enlarge);
+          body.appendChild(el('div', { className: 'drawing-card' }, [open]));
+        } else {
+          body.appendChild(el('div', { className: 'drawing-refused', text: `This drawing cannot be shown. It ${verdict.reason}.` }));
+        }
+        actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }), ghost('Export', 'i-save', exportDrawing));
+      } else {
+        body.appendChild(el('div', { className: 'cell-value empty', text: '–' }));
+      }
+      if (editing) {
+        actions.push(ghost('Import', 'i-open-project', () => picker.click()));
+        if (text !== '') actions.push(ghost('Remove', 'i-delete', () => hold(''), true));
+      }
+      if (actions.length > 0) body.appendChild(el('div', { className: 'drawing-meta' }, actions));
+    };
+    if (picker) {
+      picker.addEventListener('change', async () => {
+        const file = picker.files[0] ?? null;
+        picker.value = '';
+        if (!file) return;
+        const held = await file.text();
+        const verdict = checkDrawing(held);
+        if (verdict.ok) {
+          note.textContent = '';
+          hold(held);
+        } else {
+          note.textContent = `Not imported. The file ${verdict.reason}.`;
+        }
+      });
+    }
+    paint();
+    return el('div', { className: 'drawing' }, [body, note, ...(picker ? [picker] : []), ...(hidden ? [hidden] : [])]);
   }
 
   /**
