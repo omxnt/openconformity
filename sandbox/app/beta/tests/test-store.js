@@ -7,9 +7,9 @@
  */
 
 import './shim.js';
-import { createStore } from '../app/store.js';
-import { openProject, serialise } from '../app/files.js';
-import { createModel, addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/model.js';
+import { createStore } from '../app/modules/store.js';
+import { openProject, serialise } from '../app/modules/files.js';
+import { createModel, addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 

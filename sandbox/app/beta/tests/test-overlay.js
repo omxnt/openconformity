@@ -5,7 +5,7 @@
  * browser. Run from this directory.
  */
 
-import { createOverlayStack } from '../app/overlay.js';
+import { createOverlayStack } from '../app/modules/overlay.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /**

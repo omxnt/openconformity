@@ -6,8 +6,8 @@
  */
 
 import './shim.js';
-import { createHistory } from '../app/history.js';
-import { createModel, addEntity, updateEntity, relate, nodeOf, setProjectAttribute } from '../app/model.js';
+import { createHistory } from '../app/modules/history.js';
+import { createModel, addEntity, updateEntity, relate, nodeOf, setProjectAttribute } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- The line ----------------------------------------------------------

@@ -1,0 +1,84 @@
+/* Mockup chrome and data tables. Tokens, fonts, tags and tabs come from
+   the app's stylesheet; this file only lays the mockup out. */
+
+body { margin: 0; background: var(--background); color: var(--text); font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; }
+.chrome { position: sticky; top: 0; z-index: 2; background: var(--layer); border-bottom: 1px solid var(--border-subtle); }
+.chrome-row { display: flex; align-items: center; gap: 16px; height: 48px; padding: 0 16px; }
+.brand { font-weight: 600; font-size: 16px; letter-spacing: 0.16px; }
+.crumb { color: var(--text-second); }
+.grow { flex: 1; }
+.action { height: 32px; padding: 0 16px; border: 1px solid var(--border-strong); background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+.action:hover { background: var(--hover); }
+.action.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+/* Contained tabs, as Carbon specifies them: 40px, on $layer-accent with
+   a $border-strong divider, the selected one on $layer with a
+   $border-interactive top edge, and the panel beneath on that same
+   layer. The panel's line tabs are the second level. */
+.contained-tabs { display: flex; padding: 0 16px; background: var(--background); }
+.ctab { height: 40px; padding: 0 16px; border: none; border-right: 1px solid var(--border-strong); background: var(--layer-accent); color: var(--text-second); font: inherit; font-size: 14px; letter-spacing: 0.16px; cursor: pointer; }
+.ctab:last-child { border-right: none; }
+.ctab:hover { background: var(--layer-accent-hover, var(--hover)); color: var(--text); }
+.ctab[aria-selected="true"] { background: var(--layer); color: var(--text); font-weight: 600; box-shadow: inset 0 2px 0 var(--accent); }
+.ctab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+main.panel { background: var(--layer); padding: 0 16px 64px; min-height: calc(100vh - 88px); }
+main.panel .section-tabs { margin: 0 -16px 16px; padding: 0 16px; background: var(--layer); }
+main.panel .data { background: var(--layer); }
+.lead { color: var(--text-second); margin: 0 0 16px; max-width: 80ch; }
+.section[hidden] { display: none; }
+.print-only { display: none; }
+h1 { font-size: 20px; font-weight: 400; margin: 0 0 8px; }
+h2 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; }
+
+.data { border-collapse: collapse; width: 100%; background: var(--layer); }
+.data th { text-align: left; font-weight: 600; background: var(--layer-accent); padding: 8px 16px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; vertical-align: bottom; }
+.data th small { display: block; font-weight: 400; color: var(--text-second); }
+/* Two header rows as one head: the group row and the column row share
+   the header ground, the group's edges are ruled down through the head
+   and, faintly, the body, and the group name sits centred over its
+   columns with a strong rule beneath it. */
+.data th.group { text-align: center; border-bottom: 1px solid var(--border-strong); }
+.data thead th.group-first, .data thead th.group-last { position: relative; }
+.data th.group-first, .data td.group-first { border-left: 1px solid var(--border-subtle); }
+.data th.group-last, .data td.group-last { border-right: 1px solid var(--border-subtle); }
+.data th.narrow, .data td.narrow { text-align: center; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+.data td.code { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; }
+.data td .tag.outcome { font-weight: 600; }
+.data td { padding: 8px 16px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+.data td.mark { text-align: center; }
+.data td.wide { min-width: 24ch; }
+.data td p { margin: 0; white-space: pre-wrap; }
+/* An entity as the app shows one, glyph tinted by pillar, identifier in
+   mono, the title as the link. */
+.entity { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--text); text-decoration: none; }
+.entity + .entity { margin-top: 4px; }
+.entity .icon { width: 16px; height: 16px; flex: none; }
+.entity .entity-title { color: var(--accent); }
+.entity:hover .entity-title { text-decoration: underline; }
+.entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.data th.sortable { cursor: pointer; user-select: none; }
+.data th.sortable:hover { background: var(--layer-accent-hover, var(--hover)); }
+.data th .sort { width: 16px; height: 16px; vertical-align: -3px; margin-left: 4px; }
+.note { position: fixed; bottom: 16px; left: 16px; padding: 12px 16px; background: var(--layer-accent); border-left: 3px solid var(--accent); font-size: 14px; }
+.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; color: var(--text-second); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--text-second); }
+.tag.tone-high .dot { background: var(--danger, #da1e28); }
+.tag.tone-medium .dot { background: var(--support-warning, #f1c21b); }
+.tag.tone-low .dot { background: var(--support-success, #24a148); }
+.empty { color: var(--text-helper); }
+.spec { width: 100%; max-width: 120ch; }
+.spec th { width: 22ch; }
+
+@page { size: A4 landscape; margin: 12mm; }
+@media print {
+  .chrome, .section-tabs { display: none; }
+  .print-only { display: block; }
+  main { padding: 0; }
+  .section[hidden] { display: block; }
+  .section { page-break-after: always; }
+  .data { font-size: 10px; }
+  .data th, .data td { padding: 4px 8px; }
+  .mono { font-size: 9px; }
+  body { background: #fff; color: #000; }
+}

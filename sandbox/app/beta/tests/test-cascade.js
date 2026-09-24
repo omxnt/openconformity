@@ -16,7 +16,7 @@ import {
   deletionOf,
   removeEntity,
   removeFolder,
-} from '../app/model.js';
+} from '../app/modules/model.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
 // --- Single owner ------------------------------------------------------

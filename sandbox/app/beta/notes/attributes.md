@@ -2,7 +2,7 @@
 
 This document specifies the attributes each entity type carries. The metamodel defines the types and how they relate, and this document defines what data each one holds. An attribute not recorded here is not part of the model.
 
-**Working draft.** This copy supersedes `docs/attributes.md` while the attribute-definition work runs: the rounds land here, `sandbox/app/attributes.js` is kept in step with it, and the published document is untouched until the work is promoted over it. Types still reading title and description carry the placeholder definitions the build started from.
+**Working draft.** This copy supersedes `docs/attributes.md` while the attribute-definition work runs: the rounds land here, `sandbox/app/beta/app/modules/attributes.js` is kept in step with it, and the published document is untouched until the work is promoted over it. Types still reading title and description carry the placeholder definitions the build started from.
 
 ## 1. Conventions
 

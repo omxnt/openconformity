@@ -22,7 +22,7 @@ import {
   relationshipsOf,
   removeFolder,
   setProjectAttribute,
-} from '../app/model.js';
+} from '../app/modules/model.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
 /** The identifiers of a parent's children, in sibling order. */

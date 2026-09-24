@@ -4,8 +4,8 @@
  * rendered tree is checked in the browser. Run from this directory.
  */
 
-import { treeRows, labelParts, visibleRows, matchingIds, revealSet } from '../app/navigator.js';
-import { createModel, addEntity, addFolder, updateEntity, file } from '../app/model.js';
+import { treeRows, labelParts, visibleRows, matchingIds, revealSet } from '../app/modules/navigator.js';
+import { createModel, addEntity, addFolder, updateEntity, file } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** The identifiers of the drawn rows, in order. */

@@ -7,14 +7,14 @@
  */
 
 import './shim.js';
-import { EXAMPLE_PROJECT } from '../app/example.js';
-import { validate } from '../app/validator.js';
-import { loadProject, openProject, serialise, toFileObject } from '../app/files.js';
-import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/metamodel.js';
-import { addEntity } from '../app/model.js';
-import { attributesFor } from '../app/attributes.js';
-import { createFlows } from '../app/flows.js';
-import { createStore } from '../app/store.js';
+import { EXAMPLE_PROJECT } from '../app/modules/example.js';
+import { validate } from '../app/modules/validator.js';
+import { loadProject, openProject, serialise, toFileObject } from '../app/modules/files.js';
+import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
+import { addEntity } from '../app/modules/model.js';
+import { attributesFor } from '../app/modules/attributes.js';
+import { createFlows } from '../app/modules/flows.js';
+import { createStore } from '../app/modules/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor } from './helpers.js';
 

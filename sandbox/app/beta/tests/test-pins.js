@@ -9,9 +9,9 @@
  */
 
 import './shim.js';
-import { createActions } from '../app/actions.js';
-import { createStore } from '../app/store.js';
-import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/icons.js';
+import { createActions } from '../app/modules/actions.js';
+import { createStore } from '../app/modules/store.js';
+import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/modules/icons.js';
 import { ok, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 
@@ -70,7 +70,7 @@ import { fakeStorage } from './helpers.js';
   const page = readFile('../app/index.html');
   ok(page.includes('id="file-input"') && page.includes('accept=".json'), 'a .json file input is the way in');
   for (const module of ['flows.js', 'files.js', 'shell.js', 'app.js', 'store.js']) {
-    const source = readFile(`../app/${module}`);
+    const source = readFile(`../app/modules/${module}`);
     ok(
       !source.includes('showOpenFilePicker') && !source.includes('showSaveFilePicker'),
       `${module} uses no File System Access API`
@@ -81,11 +81,11 @@ import { fakeStorage } from './helpers.js';
 // --- The ways into a project live in the editor's empty state ------------
 
 {
-  const editor = readFile('../app/editor.js');
+  const editor = readFile('../app/modules/editor.js');
   for (const id of ['new-project', 'open', 'load-example']) {
     ok(editor.includes(`id: '${id}'`), `the editor's landing offers ${id}`);
   }
-  const navigator = readFile('../app/navigator.js');
+  const navigator = readFile('../app/modules/navigator.js');
   ok(!navigator.includes('landing-'), 'and the navigator landing carries no buttons: they live in one place');
 }
 
@@ -108,7 +108,7 @@ import { fakeStorage } from './helpers.js';
 // --- The dogfooding batch: what the review ordered -----------------------
 
 {
-  const shell = readFile('../app/shell.js');
+  const shell = readFile('../app/modules/shell.js');
   const page = readFile('../app/index.html');
   const origin = readFile('../app/assets/icons/ORIGIN.md');
 
@@ -128,7 +128,7 @@ import { fakeStorage } from './helpers.js';
 
   ok(shell.includes("const fileGroups = ['project', 'example']"), 'the File menu parts the example behind a separator');
 
-  const editor = readFile('../app/editor.js');
+  const editor = readFile('../app/modules/editor.js');
   ok(
     editor.includes("if (event.key !== 'Escape' || mode !== 'edit') return;") && editor.includes('event.stopPropagation();'),
     'Escape in an open edit stops at the editor and never falls through to the overlay'
@@ -149,7 +149,7 @@ import { fakeStorage } from './helpers.js';
     ok(page.includes(`id="${id}"`), `the shell's global cluster carries ${id}`);
   }
 
-  const navigator = readFile('../app/navigator.js');
+  const navigator = readFile('../app/modules/navigator.js');
   ok(
     navigator.includes("const dragLocked = () => store.picker() !== null || filter().trim() !== ''"),
     'tree drag stands down while picking and while filtering'
@@ -158,7 +158,7 @@ import { fakeStorage } from './helpers.js';
   const sheet = readFile('../app/style.css');
   ok(!sheet.includes('dashed var(--accent)'), 'the dashed candidate outlines are gone: dimming alone carries candidacy');
 
-  const { LANDING_OFFER } = await import('../app/editor.js');
+  const { LANDING_OFFER } = await import('../app/modules/editor.js');
   const actions = createActions({ store: createStore({ storage: fakeStorage() }), flows: {} });
   for (const offer of LANDING_OFFER) {
     const action = actions.find((held) => held.id === offer.id);
@@ -173,18 +173,18 @@ import { fakeStorage } from './helpers.js';
 // --- The fourth dogfooding batch -----------------------------------------
 
 {
-  const relationships = readFile('../app/relationships.js');
+  const relationships = readFile('../app/modules/relationships.js');
   ok(relationships.includes("el('colgroup', {}, ["), 'the two direction tables share one fixed column skeleton');
   ok(relationships.includes("className: 'rel-fold'"), 'each behind its compact fold');
   ok(!relationships.includes('rel-arrow'), 'the direction arrow column is gone: the split carries direction');
-  ok(relationships.includes("const actions = [searchControl()];") && relationships.includes('graph.render(tableFilter)') && readFile('../app/graph.js').includes('const merged = filteredNeighbourhood('), 'the filter serves both views: the list, and the graph narrowed around its subject');
+  ok(relationships.includes("const actions = [searchControl()];") && relationships.includes('graph.render(tableFilter)') && readFile('../app/modules/graph.js').includes('const merged = filteredNeighbourhood('), 'the filter serves both views: the list, and the graph narrowed around its subject');
   ok(relationships.includes("className: 'field-input head-search'"), 'the list filter lives behind the head magnifier, on demand');
 
   const sheet = readFile('../app/style.css');
   ok(sheet.includes('table-layout: fixed;'), 'the tables lay out fixed, so the columns never drift');
   ok(sheet.includes('height: 32px;             /* Carbon data table sm */'), 'rows at Carbon short scale');
 
-  const shell = readFile('../app/shell.js');
+  const shell = readFile('../app/modules/shell.js');
   ok(
     shell.includes("const LAYOUT_KEY = 'openconformity.layout'") && shell.includes('sessionStorage'),
     'the splitter geometry rides the browser session, never the project blob'
@@ -204,16 +204,16 @@ import { fakeStorage } from './helpers.js';
   const input = sheet.slice(sheet.indexOf('.field-input {'), sheet.indexOf('.field-input:focus'));
   ok(input.includes('background: var(--layer);') && input.includes('border-bottom: 1px solid var(--border-strong);'), 'editable: the field fill and the strong rule');
   ok(sheet.includes('height: 18px;             /* Carbon tag sm */'), 'the tag at its small size, to sit inside the slot');
-  const editorSource = readFile('../app/editor.js');
+  const editorSource = readFile('../app/modules/editor.js');
   ok(editorSource.includes("className: 'field-input multiselect', attributes: { type: 'button', id: `field-${definition.key}`, 'aria-haspopup': 'listbox'"), "a set in an edit is a field opening Carbon's multiselect");
-  const multiselect = readFile('../app/multiselect.js');
+  const multiselect = readFile('../app/modules/multiselect.js');
   ok(multiselect.includes("attributes: { role: 'listbox', 'aria-label': label, 'aria-multiselectable': 'true' }") && multiselect.includes("role: 'option', 'aria-selected': String(chosen.has(option))"), 'a listbox of every value, each an option carrying its state');
   ok(multiselect.includes("kind: 'menu',\n    element: list,\n    opener: anchor,"), 'stacked on the overlay as a menu is, so it closes as one and hands focus back');
   ok(editorSource.includes("hidden.value = joinSet(definition, chosen);") && editorSource.includes("hidden.dispatchEvent(new Event('input', { bubbles: true }));"), 'a toggle rewrites the hidden control the draft reads, and tells the form');
-  ok(readFile('../app/app.js').includes('  overlay,\n'), 'the editor is given the overlay to open it on');
-  ok(readFile('../attributes.md').includes('| set | Any number of the values in the Values column'), 'the document defines the set kind');
+  ok(readFile('../app/modules/app.js').includes('  overlay,\n'), 'the editor is given the overlay to open it on');
+  ok(readFile('../notes/attributes.md').includes('| set | Any number of the values in the Values column'), 'the document defines the set kind');
   ok(sheet.includes('.cell-group { display: contents; }'), 'a conditional group lays its cells on the grid itself');
-  ok(sheet.includes('.tag {') && readFile('../app/editor.js').includes("if (definition.kind === 'choice') return el('div', { className: 'cell-value' }, [el('span', { className: 'tag', text: value })]);"), "a choice reads as Carbon's tag");
+  ok(sheet.includes('.tag {') && readFile('../app/modules/editor.js').includes("if (definition.kind === 'choice') return el('div', { className: 'cell-value' }, [el('span', { className: 'tag', text: value })]);"), "a choice reads as Carbon's tag");
   const editorSheet = sheet.slice(sheet.indexOf('/* ---------- Editor ---------- */'), sheet.indexOf('/* ---------- Rating ---------- */'));
   ok(!/font-size: (16|20|24|28|32)px/.test(editorSheet), 'nothing in the pane is a heading: every name and every value reads at the one size');
   const tabs = sheet.slice(sheet.indexOf('.tabs {'), sheet.indexOf('.tab {'));
@@ -223,13 +223,13 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.tab[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }'), "the selected tab on Carbon's interactive rule, its label semibold");
   ok(sheet.includes('.pane-editor .pane-body { display: flex; flex-direction: column; overflow: hidden; }') && sheet.includes('.pane-editor .form { flex: 1 1 auto; min-height: 0; overflow: auto;'), 'the tab bar stands still while the rows scroll');
 
-  const editor = readFile('../app/editor.js');
-  const flows = readFile('../app/flows.js');
+  const editor = readFile('../app/modules/editor.js');
+  const flows = readFile('../app/modules/flows.js');
   ok(editor.includes("if (control.closest('.cell-group[hidden]')) continue;"), 'a control under a group hidden by its condition drops out of the draft as shown');
   ok(editor.includes("for (const control of body.querySelectorAll('.cell-group[hidden] [data-key]')) values[control.dataset.key] = '';") && editor.includes("if (onSave(editingId, savedValues()) !== false) endEdit();"), 'and a save commits it empty, so what is not shown is removed');
   ok(editor.includes("const values = { ...stored, ...projectReads(code) };") && editor.includes(".filter((group) => group.when && !own.has(group.when.key))\n        .map((group) => [group.when.key, attributes[group.when.key] ?? ''])"), "a type reads the project's value of every key its groups wait on without defining, in either mode, so what waits on the project's choice follows");
   ok(editor.includes("return { ...(editingProject ? {} : projectReads(current?.type ?? 'PROJECT')), ...fieldValues() };") && editor.includes("held.hidden = !shown(draftValues());") && !editor.includes('data-project'), "in an edit the conditions read the draft with the project's values beneath it, which no control carries and no save writes");
-  ok(editor.includes("if ((await onSaveProject(savedValues())) !== false) endEdit();") && readFile('../app/app.js').includes('onSaveProject: (values) => flows.saveProjectEdit(values),') && flows.includes("message: `Saving removes ${sweep.text}.`,") && flows.includes("for (const key of keys) delete node.attributes[key];"), "saving the project asks before removing what entities held under the old choice, and removes it in the same step");
+  ok(editor.includes("if ((await onSaveProject(savedValues())) !== false) endEdit();") && readFile('../app/modules/app.js').includes('onSaveProject: (values) => flows.saveProjectEdit(values),') && flows.includes("message: `Saving removes ${sweep.text}.`,") && flows.includes("for (const key of keys) delete node.attributes[key];"), "saving the project asks before removing what entities held under the old choice, and removes it in the same step");
   ok(editor.includes("value: group.when.value || `no ${leaderName(group.when.key)}`"), 'what stood under nothing chosen is named by the attribute it waited on');
   ok(editor.includes("if (removed.length > 0 && !(await onRemoval(removed))) return;") && editor.includes(".filter(({ held, group }) => group && held.hidden && [...held.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== ''))"), 'a save that would remove what hidden groups still hold asks first');
   ok(flows.includes("title: 'Remove what is no longer chosen?'") && flows.includes("message: `Saving removes ${removalText(entries)}`") && flows.includes("cancelLabel: 'Keep editing'"), 'the question names the groups by the value they stood under, Save or keep editing');
@@ -239,32 +239,32 @@ import { fakeStorage } from './helpers.js';
   ok(editor.includes('const chosen = store.tabOf(code);') && editor.includes('store.setTab(code, panels[i].name);'), 'the tab chosen is remembered per type');
   ok(editor.includes("const panels = [{ name: firstTabName(code), grid: first }];") && editor.includes("return (ENTITY_TYPES[code]?.name ?? 'Description').split(' ').at(-1);"), 'the first tab is named for the type, by the last word of its name');
   ok(editor.includes("const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);") && editor.includes("[...cellsOf(type.attributes.slice(0, ahead), values, editing), lead, ...cellsOf(type.attributes.slice(ahead), values, editing)]") && editor.includes('const NAME_AFTER = 2;') && editor.includes("definition.key === 'name' ||"), 'and opens on the identifier, read-only; the project on its designation and organisation, then its name as a row of its own');
-  ok(readFile('../app/attributes.js').includes('export const SHARED_HELP = {') && editor.includes("helpTip('identifier', 'identifier', SHARED_HELP.Identifier)"), 'the identifier explains itself with the help the document records once for the names types share');
+  ok(readFile('../app/modules/attributes.js').includes('export const SHARED_HELP = {') && editor.includes("helpTip('identifier', 'identifier', SHARED_HELP.Identifier)"), 'the identifier explains itself with the help the document records once for the names types share');
   ok(editor.includes("helpTip('identifier', 'identifier', SHARED_HELP.Identifier)") && editor.includes("attributes: { type: 'button', 'aria-label': `About the ${about.toLowerCase()}`, 'aria-describedby': id }"), "on Carbon's icon tooltip: a focusable glyph describing itself by its tooltip");
   ok(editor.includes("cellElement.appendChild(groupNameNode(group.name, closing.key));") && editor.includes("groupNameNode(group.name, closing.key, `field-${closing.key}`)") && editor.includes("groupNameNode(first.name, `slot-${first.when.key}-${first.name.toLowerCase().replaceAll(' ', '-')}`, null, SHARED_HELP[first.name] ?? (first.attributes.length === 1 ? first.attributes[0].help : undefined))") && editor.includes("function groupNameNode(name, key, forId = null, help = SHARED_HELP[name])"), "a rating's cell and its slot carry the help their shared name has");
   ok(editor.includes("const help = definition.help ?? SHARED_HELP[definition.name];") && editor.includes("[text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]") && editor.includes("[nameNode(definition, editing), held]"), 'and any attribute with help in its table, or a name that shares help, carries the glyph beside its name');
   const styles = readFile('../app/style.css');
   ok(styles.includes('.help-trigger:hover .tooltip,\n.help-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }') && styles.includes('max-width: 288px;'), 'shown on hover or focus, at the tooltip width Carbon sets');
   ok(editor.includes("definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set'"), 'the title, the project name, a multiline, a hyperlink and a set each take a row');
-  ok(readFile('../attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
+  ok(readFile('../notes/attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
   ok(editor.includes('if (panels.length > 1) body.appendChild(tabBar(code, panels));'), 'and a type with no tabbed group shows no tab bar');
-  ok(editor.includes('tabKeys(bar, (i) => select(i, true));') && readFile('../app/dom.js').includes('export function tabKeys(bar, pick) {'), 'arrow keys walk the tabs, from one helper');
+  ok(editor.includes('tabKeys(bar, (i) => select(i, true));') && readFile('../app/modules/dom.js').includes('export function tabKeys(bar, pick) {'), 'arrow keys walk the tabs, from one helper');
 
-  const shell = readFile('../app/shell.js');
+  const shell = readFile('../app/modules/shell.js');
   ok(!shell.includes('fieldStyle'), 'the shell offers no choice of treatments');
 }
 
 // --- Every tab bar in the app is the one design ------------------------------
 
 {
-  const relationships = readFile('../app/relationships.js');
+  const relationships = readFile('../app/modules/relationships.js');
   ok(relationships.includes("className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' }"), 'the relationship pane switches view with the same tabs');
   ok(!relationships.includes('switcher'), 'its content switcher is gone');
   ok(relationships.includes("const views = [['graph', 'Graph'], ['list', 'List']];"), 'the graph, the default view, stands first');
   const sheet = readFile('../app/style.css');
   ok(!sheet.includes('.switcher'), 'and so is its sheet');
   ok(sheet.includes('.pane-head > .tabs { flex: 1; align-self: stretch;'), "in a head the tabs stand in the name's place");
-  ok(readFile('../attributes.md').includes('#### Applicability `tab`'), 'the document tags a group as a tab');
+  ok(readFile('../notes/attributes.md').includes('#### Applicability `tab`'), 'the document tags a group as a tab');
 
   ok(sheet.includes('.pane-relationships .pane-body { display: flex; flex-direction: column; }') && sheet.includes('.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }'), "the graph's host fills its pane, so its scrollbar sits at the pane's edge");
 }
@@ -272,7 +272,7 @@ import { fakeStorage } from './helpers.js';
 // --- A safety function's required level, chosen in its standard's terms -------
 
 {
-  const doc = readFile('../attributes.md');
+  const doc = readFile('../notes/attributes.md');
   ok(doc.includes('##### Required integrity level `when standard = EN ISO 13849-1:2023`') && doc.includes('| plr | Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |'), "under ISO 13849-1 the level is chosen among the standard's own");
   ok(doc.includes('##### Required integrity level `when standard = EN IEC 62061:2021`') && doc.includes('| sil | Required integrity level | choice | SIL 1; SIL 2; SIL 3 |'), 'under IEC 62061 likewise, the two one slot');
   ok(doc.includes('| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 |') && !doc.includes('| safetyStandard |') && !doc.includes('Other standard'), "the standard is the function's own choice, not the project's, and the list holds standards alone");
@@ -280,22 +280,22 @@ import { fakeStorage } from './helpers.js';
   ok(doc.includes('| designTargets | Specific design targets | multiline | |') && !doc.includes('| failureRate |') && !doc.includes('| demandRate |') && !doc.includes('| missionTime |') && !doc.includes('Target architecture'), "what a standard asks of the design is one text in its own terms, not fields in one standard's");
   ok(!doc.includes('PL risk graph') && !doc.includes('SIL matrix') && !doc.includes('| rated |') && !doc.includes('ISO 13849-1:2023, Safety of machinery'), 'no transcription of a standard reads the level: the tool ships no table nobody has verified');
   ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article [2]"), "the requirement categories cite their source, with none of its text");
-  const editor = readFile('../app/editor.js');
+  const editor = readFile('../app/modules/editor.js');
   ok(!editor.includes('ownInto') && !readFile('../app/style.css').includes('.cell-own'), 'no free entry stands beneath a choice');
   ok(!doc.includes('### 1.9 Dependent choices') && !doc.includes('by standard'), 'the dependent choice, which this replaces, is gone from the document');
   ok(!editor.includes('followChoices') && !editor.includes('choiceValues') && !editor.includes('dependsOn'), 'and from the editor');
   ok(editor.includes("const key = sub.after ?? sub.when?.key ?? null;") && editor.includes("placeAfter(definition.key);") && editor.includes("placeAfter(null);"), "a group's sub-groups stand right after the last attribute one of them waits on");
   ok(editor.includes("if (named && group.attributes.length > 1) target.appendChild(el('div', { className: 'cell-legend', text: group.name }));"), 'a sub-group of one attribute shows no legend');
   ok(editor.includes("...(view.tone === 'none' ? [] : [statusIcon(view.tone)]),"), 'a level in no tone wears no glyph');
-  const rating = readFile('../app/rating.js');
+  const rating = readFile('../app/modules/rating.js');
   ok(!rating.includes('PL_') && !rating.includes('SIL_') && !rating.includes("'rated'"), "the dialog draws the scenario's methods alone");
 }
 
 // --- A rating shows only under its method, and what it comes to is never stored ---
 
 {
-  const editor = readFile('../app/editor.js');
-  const rating = readFile('../app/rating.js');
+  const editor = readFile('../app/modules/editor.js');
+  const rating = readFile('../app/modules/rating.js');
   ok(editor.includes("for (const { held, shown } of conditionals) held.hidden = !shown(draftValues());"), 'a change to what a group waits on shows or hides it in place, each read against the draft as the ones before it left it');
   ok(editor.includes("if (variants.at(-1) === sub && !variants.some((held) => held.when.value === '')) target.appendChild(slotHolder(code, variants, values, editing));") && editor.includes("const text = `No ${(leader?.name ?? first.when.key).toLowerCase()} chosen`;"), 'a slot holds its cell while nothing is chosen, saying so, unless a variant waits on nothing chosen and stands in for it');
   ok(readFile('../app/style.css').includes('.field-input.placeholder { color: var(--disabled); border-bottom-color: transparent; cursor: not-allowed; }'), "in an edit as Carbon's disabled field");
@@ -324,15 +324,15 @@ import { fakeStorage } from './helpers.js';
     ok(origin.includes(`\`${glyph}\``), `${glyph} has its provenance recorded`);
   }
   ok(page.includes('data-icon-path="inner-path" fill="#161616"'), "the warning glyph's mark stands on the yellow");
-  ok(readFile('../app/rating.js').includes("export function statusIcon(tone) {"), 'the status indicator is one function, shared by the card and the dialog');
+  ok(readFile('../app/modules/rating.js').includes("export function statusIcon(tone) {"), 'the status indicator is one function, shared by the card and the dialog');
   ok(!page.includes('id="i-rate"') && !origin.includes('i-rate'), 'the rating field has no glyph of its own: it trails the edit pencil');
-  ok(readFile('../app/index.html').includes('<button type="button" class="shell-action shell-action-wide" id="shell-unsaved" hidden>\n      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>\n      <span>Save to file</span>') && readFile('../app/shell.js').includes('unsavedButton.hidden = !store.dirty();'), 'the top bar offers Save to file while the file is behind the project, labelled by what it does');
+  ok(readFile('../app/index.html').includes('<button type="button" class="shell-action shell-action-wide" id="shell-unsaved" hidden>\n      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>\n      <span>Save to file</span>') && readFile('../app/modules/shell.js').includes('unsavedButton.hidden = !store.dirty();'), 'the top bar offers Save to file while the file is behind the project, labelled by what it does');
   ok(editor.includes("attributes: { type: 'hidden', 'data-key': definition.key }"), 'its parameters ride in hidden controls, read into the draft as any field');
   ok(editor.includes('const chosen = await rateDialog(dialogs, {') && editor.includes("body.dispatchEvent(new Event('input', { bubbles: true }));"), 'Rate opens the dialog, and what it returns is written to the draft and shown');
-  ok(readFile('../app/app.js').includes('  dialogs,\n'), 'the editor is given the dialogs to open');
+  ok(readFile('../app/modules/app.js').includes('  dialogs,\n'), 'the editor is given the dialogs to open');
   ok(rating.includes("if (!ESTIMATED.includes(method)) return null;") && !rating.includes('Hybrid'), "the dialog opens for the scenario's methods alone");
   ok(rating.includes("{ label: 'Apply', value: 'confirmed', kind: 'primary' }"), 'applied by its primary action, cancelled by anything else');
-  const doc = readFile('../attributes.md');
+  const doc = readFile('../notes/attributes.md');
   ok(doc.includes('#### Initial risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`'), "the document tags a rating with the project's method it waits on");
   ok(doc.includes('| initialLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |'), 'and names the method a computed value is read by');
   ok(doc.includes('| initialSeverityRationale | Severity rationale | rationale | initialSeverity |'), 'and the parameter a rationale is given for');
@@ -347,7 +347,7 @@ import { fakeStorage } from './helpers.js';
 
 {
   const page = readFile('../app/index.html');
-  const source = readFile('../app/store.js');
+  const source = readFile('../app/modules/store.js');
   const key = source.match(/const THEME_KEY = '([^']+)'/)?.[1];
   ok(typeof key === 'string', 'the store names its theme key');
   ok(page.includes(`localStorage.getItem('${key}')`), 'the inline script reads the store’s own key');
@@ -381,7 +381,7 @@ import { fakeStorage } from './helpers.js';
 
 {
   const sheet = readFile('../app/style.css');
-  const shell = readFile('../app/shell.js');
+  const shell = readFile('../app/modules/shell.js');
   ok(sheet.includes('min-width: 244px'), 'the pane floor is the toolbar: seven 32px buttons, six 2px gaps, 4px padding each side');
   ok(shell.includes('minimum: 244'), 'and the splitter stops at the same width');
 }
@@ -394,8 +394,8 @@ import { fakeStorage } from './helpers.js';
     sheet.includes('.splitter-vertical::after { inset: 0 -10px;') && sheet.includes('.splitter-horizontal::after { inset: -10px 0;'),
     'the splitters take a 24px pointer target around the 4px bar'
   );
-  const shell = readFile('../app/shell.js');
-  const menu = readFile('../app/menu.js');
+  const shell = readFile('../app/modules/shell.js');
+  const menu = readFile('../app/modules/menu.js');
   ok(shell.includes('onArrow: (step) => neighbourMenu(button, step).openIt()'), 'the arrow keys walk the open menus along the bar');
   ok(menu.includes("event.key === 'ArrowLeft' || event.key === 'ArrowRight'"), 'which the menu forwards');
   ok(shell.includes("addEventListener('dblclick', () => apply(clamp(preset)))"), 'a double click returns a pane to its preset: resizing needs no drag');
@@ -453,17 +453,17 @@ import { fakeStorage } from './helpers.js';
 // --- A view over the workspace ---------------------------------------------
 
 {
-  const views = readFile('../app/views.js');
-  const app = readFile('../app/app.js');
+  const views = readFile('../app/modules/views.js');
+  const app = readFile('../app/modules/app.js');
   const page = readFile('../app/index.html');
   const sheet = readFile('../app/style.css');
-  const shell = readFile('../app/shell.js');
-  const editor = readFile('../app/editor.js');
+  const shell = readFile('../app/modules/shell.js');
+  const editor = readFile('../app/modules/editor.js');
   ok(page.includes('<section class="pane pane-view" id="pane-view" aria-label="View" hidden>') && app.includes("pane: document.getElementById('pane-view'),"), 'the view pane stands in the workspace beside the panes');
   ok(views.includes("workspace.classList.toggle('viewing', viewing);") && sheet.includes('.workspace.viewing > :not(.pane-view) { display: none; }'), 'and takes the whole workspace while a view is open');
   ok(shell.includes("...actions.filter((offered) => offered.group === 'views').map((action) => ({ ...actionItem(action, viewButton), checked: action.checked() })),"), 'the View menu lists the views, the open one checked');
   ok(views.includes("tab.addEventListener('click', () => store.openView(view.id));") && views.includes("className: 'ctab'"), "the pane's head switches views on Carbon's contained tabs");
-  ok(views.includes("if (event.key !== 'Escape' || store.view() === null || overlay.isOpen()) return;") && readFile('../app/overlay.js').includes('isOpen: () => stack.top() !== null,') && views.includes("close.addEventListener('click', onClose);"), 'Escape, when nothing is open over the page, and the close leave the view');
+  ok(views.includes("if (event.key !== 'Escape' || store.view() === null || overlay.isOpen()) return;") && readFile('../app/modules/overlay.js').includes('isOpen: () => stack.top() !== null,') && views.includes("close.addEventListener('click', onClose);"), 'Escape, when nothing is open over the page, and the close leave the view');
   ok(views.includes("event.preventDefault();\n      onSelect(id);") && app.includes('onSelect: (id) => flows.openFromView(id),'), 'an entity in a cell is a way to the editor');
   ok(editor.includes("if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));") && app.includes('onReturn: () => flows.returnToView(),'), 'which offers the way back to the row it came from');
   ok(views.includes("const id = row.id ?? null;") && views.includes("if (back !== null && back.rowId === id) tr.classList.add('row-return');") && views.includes("row.scrollIntoView({ block: 'center' });"), 'a row names the entity it is about, marked and scrolled to on return');
@@ -474,13 +474,13 @@ import { fakeStorage } from './helpers.js';
 // --- A method carries its source --------------------------------------------
 
 {
-  const risk = readFile('../app/risk.js');
-  const editor = readFile('../app/editor.js');
+  const risk = readFile('../app/modules/risk.js');
+  const editor = readFile('../app/modules/editor.js');
   ok(!risk.includes('SOURCES') && !editor.includes('sourceHelper') && !readFile('../app/style.css').includes('.field-helper'), 'no source is looked up or shown as helper text: the method names it');
   ok(editor.includes("title: `${group.name} by ${closing.method}`,"), "the rating dialog's title carries the method, its source within it");
   ok(risk.includes("if (last && sketch(last) === sketch(branch)) {") && !risk.includes("'F1, F2'"), 'the graph is grown from its table and merged where branches agree, never drawn by hand');
   ok(risk.includes("if (word === 'negligible') return 'negligible';") && editor.includes("`${view.name}: ${view.outcome}`, '', 'outcome'));"), 'negligible is a tone of its own, and the outcome tag names the attribute it computes');
-  ok(readFile('../app/view-risk.js').includes("one per parameter of the ${method} and the rating it comes to"), "and so does the risk assessment's lead");
+  ok(readFile('../app/modules/view-risk.js').includes("one per parameter of the ${method} and the rating it comes to"), "and so does the risk assessment's lead");
 }
 
 summary('test-pins');

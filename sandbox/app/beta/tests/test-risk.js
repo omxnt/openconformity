@@ -6,15 +6,15 @@
  */
 
 import './shim.js';
-import { estimate, METHODS, ESTIMATED, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/risk.js';
-import { ATTRIBUTES, attributesFor } from '../app/attributes.js';
+import { estimate, METHODS, ESTIMATED, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/modules/risk.js';
+import { ATTRIBUTES, attributesFor } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const MATRIX_METHOD = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';
 const GRAPH_METHOD = 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)';
 const SCORING_METHOD = 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)';
 
-const document = readFile('../attributes.md');
+const document = readFile('../notes/attributes.md');
 const chapter = document.slice(document.indexOf('## 6. Risk estimation'), document.indexOf('## 7. References'));
 ok(chapter.length > 0, 'the document carries the risk estimation chapter, before the references');
 

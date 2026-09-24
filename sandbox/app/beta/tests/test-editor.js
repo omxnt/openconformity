@@ -4,8 +4,8 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/editor.js';
-import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/attributes.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/modules/editor.js';
+import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const definitions = attributesFor('ELM');

@@ -17,11 +17,11 @@ import {
   canMoveDown,
   relatedIds,
   entityMatches,
-} from '../app/queries.js';
-import { EXAMPLE_PROJECT } from '../app/example.js';
-import { loadProject } from '../app/files.js';
-import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/metamodel.js';
-import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/model.js';
+} from '../app/modules/queries.js';
+import { EXAMPLE_PROJECT } from '../app/modules/example.js';
+import { loadProject } from '../app/modules/files.js';
+import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/modules/metamodel.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** The offer as comparable rows. */

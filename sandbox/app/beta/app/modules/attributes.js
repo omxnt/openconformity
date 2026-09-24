@@ -1,6 +1,6 @@
 /**
  * The attribute definitions per entity type, transcribed from
- * `sandbox/attributes.md` — the working draft that supersedes
+ * `sandbox/app/beta/notes/attributes.md` — the working draft that supersedes
  * `docs/attributes.md` while the attribute-definition work runs, and the
  * authoritative definition for now — in the order the document records
  * the types.

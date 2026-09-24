@@ -5,8 +5,8 @@
  * test-pins. Run from this directory.
  */
 
-import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/icons.js';
-import { ENTITY_TYPES } from '../app/metamodel.js';
+import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/modules/icons.js';
+import { ENTITY_TYPES } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 deepEqual(Object.keys(TYPE_ICONS), Object.keys(ENTITY_TYPES), 'one icon per entity type, in metamodel order');

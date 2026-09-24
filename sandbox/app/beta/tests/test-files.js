@@ -5,8 +5,8 @@
  * from this directory.
  */
 
-import { SCHEMA_VERSION, toFileObject, serialise, openProject, loadProject, filenameFor } from '../app/files.js';
-import { createModel, addEntity, addFolder, updateEntity, relate, file, nodeOf, childrenOf, setProjectAttribute } from '../app/model.js';
+import { SCHEMA_VERSION, toFileObject, serialise, openProject, loadProject, filenameFor } from '../app/modules/files.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, file, nodeOf, childrenOf, setProjectAttribute } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** The identifiers of a parent's children, in sibling order. */

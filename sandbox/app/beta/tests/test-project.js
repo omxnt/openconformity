@@ -5,8 +5,8 @@
  */
 
 import './shim.js';
-import { projectSweep } from '../app/project.js';
-import { createModel, addEntity } from '../app/model.js';
+import { projectSweep } from '../app/modules/project.js';
+import { createModel, addEntity } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const MATRIX = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';

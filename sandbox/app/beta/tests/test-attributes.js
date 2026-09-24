@@ -1,14 +1,14 @@
 /**
- * Verifies the attribute transcription against `sandbox/attributes.md` —
+ * Verifies the attribute transcription against `sandbox/app/beta/notes/attributes.md` —
  * the working draft that supersedes `docs/attributes.md` while the
  * attribute-definition work runs, promoted over it when that work lands: every
  * type section, its ungrouped table, its groups, and its kinds, compared
  * definition by definition. Run from this directory.
  */
 
-import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/attributes.js';
-import { RELATIONSHIP_TYPES } from '../app/metamodel.js';
-import { ESTIMATED } from '../app/risk.js';
+import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/modules/attributes.js';
+import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
+import { ESTIMATED } from '../app/modules/risk.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
 const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'computed', 'rationale'];
@@ -17,12 +17,12 @@ const COLUMN_KINDS = ['text', 'multiline', 'date', 'choice', 'number'];
 
 /** The project's tables as §1.10 records them, read beside the types. */
 let documentProject = null;
-import { ENTITY_TYPES } from '../app/metamodel.js';
+import { ENTITY_TYPES } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the document ------------------------------------------------
 
-const document = readFile('../attributes.md');
+const document = readFile('../notes/attributes.md');
 
 /**
  * The type sections of the document: per code its name, status, ungrouped

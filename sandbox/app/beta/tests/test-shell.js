@@ -15,7 +15,7 @@ import {
   RESTORATION_DETAIL,
   PERSIST_NOTICE,
   PERSIST_DETAIL,
-} from '../app/shell.js';
+} from '../app/modules/shell.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- The effective theme -----------------------------------------------

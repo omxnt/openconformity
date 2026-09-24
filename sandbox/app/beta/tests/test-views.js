@@ -7,11 +7,11 @@
  */
 
 import './shim.js';
-import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/view-risk.js';
-import { VIEWS, asColumn, columnText, cellText, sortRows, groupEdges } from '../app/views.js';
-import { EXAMPLE_PROJECT } from '../app/example.js';
-import { loadProject } from '../app/files.js';
-import { entityLabel } from '../app/queries.js';
+import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
+import { VIEWS, asColumn, columnText, cellText, sortRows, groupEdges } from '../app/modules/views.js';
+import { EXAMPLE_PROJECT } from '../app/modules/example.js';
+import { loadProject } from '../app/modules/files.js';
+import { entityLabel } from '../app/modules/queries.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const { model } = loadProject(EXAMPLE_PROJECT);

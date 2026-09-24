@@ -8,9 +8,9 @@
  */
 
 import './shim.js';
-import { createFlows } from '../app/flows.js';
-import { createStore } from '../app/store.js';
-import { createModel, addEntity, addFolder, relate, nodeOf } from '../app/model.js';
+import { createFlows } from '../app/modules/flows.js';
+import { createStore } from '../app/modules/store.js';
+import { createModel, addEntity, addFolder, relate, nodeOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor } from './helpers.js';
 

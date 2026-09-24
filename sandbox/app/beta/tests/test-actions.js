@@ -5,10 +5,10 @@
  */
 
 import './shim.js';
-import { createActions } from '../app/actions.js';
-import { menuGroups } from '../app/menu.js';
-import { createStore } from '../app/store.js';
-import { createModel, addEntity, addFolder, relate } from '../app/model.js';
+import { createActions } from '../app/modules/actions.js';
+import { menuGroups } from '../app/modules/menu.js';
+import { createStore } from '../app/modules/store.js';
+import { createModel, addEntity, addFolder, relate } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 

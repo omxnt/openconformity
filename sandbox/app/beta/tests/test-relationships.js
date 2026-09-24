@@ -6,7 +6,7 @@
  * relationships, never the whole model. Run from this directory.
  */
 
-import { pickerCandidates, pairOptions, pickedRows } from '../app/relate.js';
+import { pickerCandidates, pairOptions, pickedRows } from '../app/modules/relate.js';
 import {
   neighbourhood,
   cappedNeighbourhood,
@@ -16,11 +16,11 @@ import {
   attachmentYs,
   doglegPoints,
   subjectHeight,
-} from '../app/graph.js';
-import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/relationships.js';
-import { filteredNeighbourhood } from '../app/graph.js';
-import { relationshipOptions } from '../app/queries.js';
-import { createModel, addEntity, addFolder, relate } from '../app/model.js';
+} from '../app/modules/graph.js';
+import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/modules/relationships.js';
+import { filteredNeighbourhood } from '../app/modules/graph.js';
+import { relationshipOptions } from '../app/modules/queries.js';
+import { createModel, addEntity, addFolder, relate } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- The union candidate set -------------------------------------------
@@ -220,7 +220,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   addEntity(model, 'HAZ');
   addEntity(model, 'HAZ');
   addEntity(model, 'ELM');
-  const { updateEntity } = await import('../app/model.js');
+  const { updateEntity } = await import('../app/modules/model.js');
   updateEntity(model, 'HAZ-001', { title: 'Zulu' });
   updateEntity(model, 'HAZ-002', { title: 'Alpha' });
   relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
