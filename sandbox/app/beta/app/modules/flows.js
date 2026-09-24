@@ -30,7 +30,7 @@ import {
   nodeOf,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, formLabel } from './queries.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated } from './queries.js';
 import { removalText } from './editor.js';
 import { VIEWS } from './views.js';
 import { projectSweep } from './project.js';
@@ -172,6 +172,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /** Rename the selected folder. A blank or unchanged name changes nothing. */
+  /** Enter the edit of what is selected, the project where nothing is. */
+  function editSelection() {
+    if (editor.editing()) return;
+    editor.beginEdit();
+  }
+
   async function renameSelection() {
     const node = nodeOf(store.model(), store.selection());
     if (!node || node.kind !== 'folder') return;
@@ -227,13 +233,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   let relatedMenu = null;
 
   /**
-   * The new-related offer: the relationships the selection can take a
-   * new entity into, each named as a form is named everywhere, the
-   * relationship and the type at the far end in reading order, so the
-   * order says which end the new entity takes and no direction word is
-   * needed. Grouped by the far type's pillar. A type whose pair with the
-   * subject admits more than one relationship offers one entry per
-   * relationship.
+   * The new-related offer: the types relatable to the selection, grouped
+   * by pillar, each with the relationship as its hint and no direction
+   * word, since the pair fixes the direction. A type whose pair with the
+   * subject admits the relationship both ways offers one entry per way,
+   * the one making the new entity the source naming the subject as what
+   * it points at.
    * @param {{ anchor?: HTMLElement, at?: { x: number, y: number } }} [invocation]
    */
   function toggleRelatedMenu(invocation = {}) {
@@ -247,11 +252,10 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
     const items = offer.flatMap(({ code, forms }) => {
       const type = ENTITY_TYPES[code];
+      const shared = { label: type.name, group: PILLARS[type.pillar], icon: TYPE_ICONS[code], pillar: type.pillar };
       return forms.map((form) => ({
-        label: formLabel(form),
-        group: PILLARS[type.pillar],
-        icon: TYPE_ICONS[code],
-        pillar: type.pillar,
+        ...shared,
+        hint: `${RELATIONSHIP_TYPES[form.typeId].label}${forms.length > 1 && form.direction === 'incoming' ? ` ${subjectId}` : ''}`,
         onPick: () => createRelated(subjectId, code, form),
       }));
     });
@@ -809,6 +813,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     createEntity,
     createRelated,
     createFolder,
+    editSelection,
     renameSelection,
     escapeEdit,
     toggleCreateMenu,

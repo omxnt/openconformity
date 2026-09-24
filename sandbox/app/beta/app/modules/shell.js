@@ -229,11 +229,11 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
 
   // Everything that changes the model, separated as the action groups
   // separate, so the menu and the toolbar cannot drift.
-  const modelGroups = ['create', 'arrange', 'delete', 'history'];
+  const modelGroups = ['edit', 'create', 'arrange', 'delete', 'history'];
   menubarMenu(editButton, 'Edit', () => {
     const items = [];
     let lastGroup = null;
-    for (const action of actions.filter((offered) => modelGroups.includes(offered.group))) {
+    for (const action of actions.filter((offered) => modelGroups.includes(offered.group) && offered.menubar !== false)) {
       if (lastGroup !== null && action.group !== lastGroup) items.push({ separator: true });
       lastGroup = action.group;
       items.push(actionItem(action, editButton));

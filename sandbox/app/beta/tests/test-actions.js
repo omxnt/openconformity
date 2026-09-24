@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -90,6 +90,7 @@ function enabledIds(actions) {
       'clear-browser-data': true,
       about: true,
       metamodel: true,
+      edit: true,
       'new-entity': true,
       'new-related': false,
       'new-folder': true,
