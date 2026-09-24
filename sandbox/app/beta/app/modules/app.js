@@ -3,6 +3,7 @@
  */
 
 import { createStore } from './store.js';
+import { createRetention } from './retention.js';
 import { createOverlay } from './overlay.js';
 import { createShell } from './shell.js';
 import { createDialogs } from './dialog.js';
@@ -14,7 +15,9 @@ import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 import { createViewsPane } from './views.js';
 
-const store = createStore({ storage: window.localStorage, session: window.sessionStorage });
+const retention = createRetention({ indexedDB: window.indexedDB, storageManager: window.navigator.storage ?? null });
+const store = createStore({ storage: window.localStorage, session: window.sessionStorage, retention });
+await store.restore();
 const overlay = createOverlay({ container: document.getElementById('overlay-root') });
 store.subscribe(() => overlay.closeMenus());
 

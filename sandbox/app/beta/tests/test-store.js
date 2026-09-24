@@ -1,13 +1,16 @@
 /**
  * Exercises the store: the landing session with no project, commit →
- * snapshot → persist → restore, the sequence-based saved pointer with
- * dirty derived from identity, rollback leaving no residue, selection
- * repair, session state beside model state, picker mode, and the blob
- * set aside on a failed restore. Run from this directory.
+ * snapshot → persist → restore through the retention, the sequence-based
+ * saved pointer with dirty derived from identity, rollback leaving no
+ * residue, selection repair, session state beside model state, picker
+ * mode, the blob set aside on a failed restore, the move of a blob the
+ * previous generation kept in web storage, and the storage nearly full.
+ * Run from this directory.
  */
 
 import './shim.js';
 import { createStore } from '../app/modules/store.js';
+import { memoryRetention, createRetention } from '../app/modules/retention.js';
 import { openProject, serialise } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, removeEntity, relate, updateEntity } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -17,16 +20,23 @@ const PROJECT_KEY = 'openconformity.project';
 const ASIDE_KEY = 'openconformity.project.aside';
 const THEME_KEY = 'openconformity.theme';
 
-/** The parsed blob a storage holds. */
-function blobIn(storage) {
-  const raw = storage.read(PROJECT_KEY);
-  return raw === null ? null : JSON.parse(raw);
+/** The blob a retention holds, once every write asked of the store has landed. */
+async function blobIn(store, retention) {
+  await store.whenPersisted();
+  return retention.records.get('project') ?? null;
 }
 
-/** A store with a fresh project open, past the landing. */
-function openStore(storage) {
-  const store = createStore({ storage });
+/** A store over the retention with a fresh project open, past the landing. */
+function openStore(retention, storage = fakeStorage()) {
+  const store = createStore({ storage, retention });
   store.replaceProject(createModel());
+  return store;
+}
+
+/** A store restored from what the retention and the storage hold. */
+async function restored(retention, storage = fakeStorage(), session = null) {
+  const store = createStore({ storage, session, retention });
+  await store.restore();
   return store;
 }
 
@@ -34,7 +44,9 @@ function openStore(storage) {
 
 {
   const storage = fakeStorage();
-  const store = createStore({ storage });
+  const retention = memoryRetention();
+  const store = createStore({ storage, retention });
+  await store.restore();
   equal(store.restoration(), 'fresh', 'no blob means a fresh session');
   equal(store.hasProject(), false, 'and a fresh session has no project');
   equal(store.dirty(), false, 'nothing is dirty');
@@ -47,16 +59,17 @@ function openStore(storage) {
   store.select('ELM-001');
   equal(store.selection(), null, 'nothing selects');
   store.markSaved();
-  equal(storage.read(PROJECT_KEY), null, 'and nothing is ever persisted from the landing');
-  equal(storage.read(ASIDE_KEY), null, 'nor set aside');
+  equal(await blobIn(store, retention), null, 'and nothing is ever persisted from the landing');
+  equal(retention.records.has('aside'), false, 'nor set aside');
 
   store.replaceProject(createModel());
   equal(store.hasProject(), true, 'creating the project is one action');
   equal(store.model().name, '', 'unconfigured, its name empty');
   equal(store.dirty(), false, 'standing saved');
-  ok(storage.read(PROJECT_KEY) !== null, 'and persisted, so the next session restores it');
+  ok((await blobIn(store, retention)) !== null, 'and persisted, so the next session restores it');
+  equal(retention.persisted, 1, 'the first write that lands asks the browser to keep the storage');
 
-  const second = createStore({ storage });
+  const second = await restored(retention, storage);
   equal(second.restoration(), 'restored', 'a restored session with a project');
   equal(second.hasProject(), true, 'skips the landing');
 }
@@ -64,8 +77,8 @@ function openStore(storage) {
 // --- Commit: record, persist, notify -----------------------------------
 
 {
-  const storage = fakeStorage();
-  const store = openStore(storage);
+  const retention = memoryRetention();
+  const store = openStore(retention);
   let notified = 0;
   store.subscribe(() => {
     notified += 1;
@@ -78,22 +91,44 @@ function openStore(storage) {
   equal(store.canUndo(), true, 'and undoable');
   equal(notified, 1, 'and everyone is told once');
 
-  const blob = blobIn(storage);
+  const blob = await blobIn(store, retention);
   equal(blob.project.entities.length, 1, 'the change is persisted on change');
   equal(blob.session.dirty, true, 'with the derived dirty boolean beside it');
 
-  const before = storage.read(PROJECT_KEY);
+  const before = retention.records.get('project');
   const refused = store.commit((model) => addEntity(model, 'XXX'));
   equal(refused.ok, false, 'a refused change reports its refusal');
   equal(store.model().nodes.size, 1, 'and touches nothing');
-  equal(storage.read(PROJECT_KEY), before, 'persists nothing');
+  await store.whenPersisted();
+  equal(retention.records.get('project'), before, 'persists nothing');
   equal(notified, 1, 'and tells no one');
+}
+
+// --- A burst of changes costs one write ----------------------------------
+
+{
+  const retention = memoryRetention();
+  const writes = [];
+  const write = retention.write;
+  retention.write = async (key, value) => {
+    writes.push(value.project.entities.length);
+    return write(key, value);
+  };
+  const store = openStore(retention);
+  await store.whenPersisted();
+  writes.length = 0;
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'ELM'));
+  await store.whenPersisted();
+  deepEqual(writes, [3], 'three changes in one burst cost one write, of the newest, the rest skipped as stale');
+  equal(retention.records.get('project').project.entities.length, 3, 'and the retention holds the newest');
 }
 
 // --- The saved pointer -------------------------------------------------
 
 {
-  const store = openStore(fakeStorage());
+  const store = openStore(memoryRetention());
   store.commit((model) => addEntity(model, 'ELM'));
   equal(store.dirty(), true, 'a change dirties');
   store.markSaved();
@@ -115,7 +150,7 @@ function openStore(storage) {
 // --- Rollback leaves no residue ----------------------------------------
 
 {
-  const store = openStore(fakeStorage());
+  const store = openStore(memoryRetention());
   store.commit((model) => addEntity(model, 'ELM'));
   store.markSaved();
   const saved = store.sequence();
@@ -140,7 +175,7 @@ function openStore(storage) {
 // --- Selection and its repair ------------------------------------------
 
 {
-  const store = openStore(fakeStorage());
+  const store = openStore(memoryRetention());
   store.commit((model) => addFolder(model, 'Zone'));
   store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
   store.commit((model) => addEntity(model, 'ELM', { parent: 'ELM-001' }));
@@ -156,7 +191,7 @@ function openStore(storage) {
   store.undo();
   equal(store.selection(), 'F-1', 'undoing the deletion does not re-select what it restores');
 
-  const rootStore = openStore(fakeStorage());
+  const rootStore = openStore(memoryRetention());
   rootStore.commit((model) => addEntity(model, 'HAZ'));
   rootStore.select('HAZ-001');
   rootStore.commit((model) => removeEntity(model, 'HAZ-001'));
@@ -167,18 +202,19 @@ function openStore(storage) {
 
 {
   const storage = fakeStorage();
-  const store = openStore(storage);
+  const retention = memoryRetention();
+  const store = openStore(retention, storage);
   store.commit((model) => addFolder(model, 'Zone'));
   store.markSaved();
 
   store.select('F-1');
   equal(store.dirty(), false, 'selecting does not dirty');
-  equal(blobIn(storage).session.selection, 'F-1', 'but persists');
+  equal((await blobIn(store, retention)).session.selection, 'F-1', 'but persists');
 
   store.setExpanded('F-1', true);
   equal(store.isExpanded('F-1'), true, 'a branch can be expanded');
   equal(store.dirty(), false, 'expanding does not mark the project unsaved');
-  deepEqual(blobIn(storage).session.expanded, ['F-1'], 'but persists');
+  deepEqual((await blobIn(store, retention)).session.expanded, ['F-1'], 'but persists');
 
   store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
   store.undo();
@@ -186,7 +222,7 @@ function openStore(storage) {
 
   store.setTheme('g100');
   equal(store.theme(), 'g100', 'a theme can be chosen');
-  equal(storage.read(THEME_KEY), 'g100', 'keyed beside the project blob');
+  equal(storage.read(THEME_KEY), 'g100', 'keyed in web storage, where the bootstrap reads it before the first paint');
   equal(store.dirty(), false, 'without dirtying');
   store.setTheme('unheard-of');
   equal(store.theme(), null, 'an unknown theme falls back to the system preference');
@@ -197,7 +233,8 @@ function openStore(storage) {
 
 {
   const storage = fakeStorage();
-  const first = openStore(storage);
+  const retention = memoryRetention();
+  const first = openStore(retention, storage);
   first.commit((model) => addFolder(model, 'Zone'));
   first.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
   first.commit((model) => updateEntity(model, 'ELM-001', { title: 'Assembly' }));
@@ -205,10 +242,11 @@ function openStore(storage) {
   first.select('ELM-001');
   first.setTheme('white');
   first.markSaved();
+  await first.whenPersisted();
 
-  const second = createStore({ storage });
+  const second = await restored(retention, storage);
   equal(second.restoration(), 'restored', 'the next session restores');
-  equal(storage.read(ASIDE_KEY), null, 'a successful restore sets nothing aside');
+  equal(retention.records.has('aside'), false, 'a successful restore sets nothing aside');
   equal(serialise(second.model()), serialise(first.model()), 'the same project, through the same serialisation the file format uses');
   equal(second.selection(), 'ELM-001', 'standing where the user stood');
   equal(second.isExpanded('F-1'), true, 'with the tree open where it was open');
@@ -225,12 +263,13 @@ function openStore(storage) {
 // --- A dirty session restores dirty ------------------------------------
 
 {
-  const storage = fakeStorage();
-  const first = openStore(storage);
+  const retention = memoryRetention();
+  const first = openStore(retention);
   first.commit((model) => addEntity(model, 'ELM'));
   equal(first.dirty(), true, 'unsaved work in the first session');
+  await first.whenPersisted();
 
-  const second = createStore({ storage });
+  const second = await restored(retention);
   equal(second.dirty(), true, 'a dirty session restores dirty');
   second.commit((model) => addEntity(model, 'HAZ'));
   second.undo();
@@ -240,57 +279,102 @@ function openStore(storage) {
 // --- A blob that fails to load is set aside ----------------------------
 
 {
-  const storage = fakeStorage({ [PROJECT_KEY]: 'not json{', [THEME_KEY]: 'g100' });
-  const store = createStore({ storage });
+  const storage = fakeStorage({ [THEME_KEY]: 'g100' });
+  const retention = memoryRetention({ initial: { project: 'not a blob' } });
+  const store = await restored(retention, storage);
   equal(store.restoration(), 'failed', 'the software states the previous session could not be restored');
   equal(store.hasProject(), false, 'and stands on the landing');
-  equal(storage.read(ASIDE_KEY), 'not json{', 'the failed blob is copied to the side key at failure time');
-  equal(storage.read(PROJECT_KEY), 'not json{', 'and the project key is not deleted either');
+  equal(retention.records.get('aside'), 'not a blob', 'the failed blob is copied to the side record at failure time');
+  equal(retention.records.get('project'), 'not a blob', 'and the project record is not deleted either');
   equal(store.theme(), 'g100', 'the theme beside it still applies');
 
   store.replaceProject(createModel());
   store.commit((model) => addEntity(model, 'ELM'));
-  ok(storage.read(PROJECT_KEY).startsWith('{'), 'the next successful persist overwrites the project key');
-  equal(storage.read(ASIDE_KEY), 'not json{', 'while the side copy survives it');
+  ok(typeof (await blobIn(store, retention)) === 'object', 'the next successful persist overwrites the project record');
+  equal(retention.records.get('aside'), 'not a blob', 'while the side copy survives it');
 
-  storage.setItem(PROJECT_KEY, 'worse json{');
-  const second = createStore({ storage });
+  retention.records.set('project', 'worse');
+  const second = await restored(retention, storage);
   equal(second.restoration(), 'failed', 'a later failure fails the restore again');
-  equal(storage.read(ASIDE_KEY), 'worse json{', 'and replaces the side copy: it survives until the next failure');
+  equal(retention.records.get('aside'), 'worse', 'and replaces the side copy: it survives until the next failure');
 }
 
 // --- A well-formed blob that fails the gates ----------------------------
 
 {
-  const raw = JSON.stringify({ project: { format: 'something-else' }, session: { dirty: true } });
-  const storage = fakeStorage({ [PROJECT_KEY]: raw });
-  const store = createStore({ storage });
+  const blob = { project: { format: 'something-else' }, session: { dirty: true } };
+  const retention = memoryRetention({ initial: { project: blob } });
+  const store = await restored(retention);
   equal(store.restoration(), 'failed', 'a blob refused by the loader fails the restore');
-  equal(storage.read(ASIDE_KEY), raw, 'and is copied to the side key too');
-  equal(storage.read(PROJECT_KEY), raw, 'with the project key untouched');
+  deepEqual(retention.records.get('aside'), blob, 'and is copied to the side record too');
+  deepEqual(retention.records.get('project'), blob, 'with the project record untouched');
   equal(typeof store.restoration(), 'string', 'the store reports a state, never a file refusal');
 }
 
 // --- A stale selection in the blob -------------------------------------
 
 {
-  const storage = fakeStorage();
-  const first = openStore(storage);
+  const retention = memoryRetention();
+  const first = openStore(retention);
   first.commit((model) => addEntity(model, 'ELM'));
   first.select('ELM-001');
-  const tampered = storage.read(PROJECT_KEY).replace('"selection":"ELM-001"', '"selection":"ELM-999"');
-  storage.setItem(PROJECT_KEY, tampered);
+  await first.whenPersisted();
+  retention.records.get('project').session.selection = 'ELM-999';
 
-  const second = createStore({ storage });
+  const second = await restored(retention);
   equal(second.restoration(), 'restored', 'the project still restores');
   equal(second.selection(), null, 'a selection no longer in the model restores as nothing');
+}
+
+// --- A blob the previous generation kept in web storage is moved over ------
+
+{
+  const donorRetention = memoryRetention();
+  const donor = openStore(donorRetention);
+  donor.commit((model) => addEntity(model, 'ELM'));
+  donor.select('ELM-001');
+  donor.markSaved();
+  await donor.whenPersisted();
+  const raw = JSON.stringify(donorRetention.records.get('project'));
+
+  const storage = fakeStorage({ [PROJECT_KEY]: raw, [ASIDE_KEY]: 'an older failed blob' });
+  const retention = memoryRetention();
+  const store = await restored(retention, storage);
+  equal(store.restoration(), 'restored', 'a session restores from the blob web storage held');
+  equal(store.selection(), 'ELM-001', 'as it stood');
+  deepEqual(retention.records.get('project'), JSON.parse(raw), 'the blob is moved to the retention');
+  equal(retention.records.get('aside'), 'an older failed blob', 'and the side copy with it');
+  equal(storage.read(PROJECT_KEY), null, 'web storage is left without the blob');
+  equal(storage.read(ASIDE_KEY), null, 'and without the side copy');
+
+  const again = await restored(retention, storage);
+  equal(again.restoration(), 'restored', 'the next session restores from the retention alone');
+  equal(again.selection(), 'ELM-001', 'as before');
+}
+
+{
+  const storage = fakeStorage({ [PROJECT_KEY]: 'not json{' });
+  const retention = memoryRetention();
+  const store = await restored(retention, storage);
+  equal(store.restoration(), 'failed', 'a blob web storage held that does not load fails the restore');
+  equal(retention.records.get('aside'), 'not json{', 'and is set aside in the retention as the text it is');
+  equal(retention.records.has('project'), false, 'never becoming the project record');
+  equal(storage.read(PROJECT_KEY), null, 'and web storage is left without it');
+}
+
+{
+  const retention = memoryRetention({ initial: { project: { project: { format: 'something-else' } } } });
+  const storage = fakeStorage({ [PROJECT_KEY]: '{"project":{}}' });
+  const store = await restored(retention, storage);
+  equal(store.restoration(), 'failed', 'a blob the retention holds is what restores, whatever web storage still holds');
+  equal(storage.read(PROJECT_KEY), '{"project":{}}', 'and web storage is not touched while the retention answers');
 }
 
 // --- Replacing the project ---------------------------------------------
 
 {
-  const storage = fakeStorage();
-  const store = openStore(storage);
+  const retention = memoryRetention();
+  const store = openStore(retention);
   store.commit((model) => addEntity(model, 'ELM'));
   store.select('ELM-001');
   store.setExpanded('ELM-001', true);
@@ -304,13 +388,13 @@ function openStore(storage) {
   equal(store.selection(), null, 'nothing selected');
   equal(store.isExpanded('ELM-001'), false, 'no branches expanded');
   equal(store.theme(), 'g100', 'and the theme untouched');
-  equal(blobIn(storage).project.name, 'Fixture project', 'the replacement is persisted');
+  equal((await blobIn(store, retention)).project.name, 'Fixture project', 'the replacement is persisted');
 }
 
 // --- Picker mode -------------------------------------------------------
 
 {
-  const store = openStore(fakeStorage());
+  const store = openStore(memoryRetention());
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.commit((model) => addEntity(model, 'HAZ'));
@@ -373,7 +457,7 @@ function openStore(storage) {
 // --- Picker repair under undo and redo ---------------------------------
 
 {
-  const store = openStore(fakeStorage());
+  const store = openStore(memoryRetention());
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.beginPicking('ELM-001');
@@ -393,18 +477,18 @@ function openStore(storage) {
 // --- Picker mode is never persisted ------------------------------------
 
 {
-  const storage = fakeStorage();
-  const store = openStore(storage);
+  const retention = memoryRetention();
+  const store = openStore(retention);
   store.commit((model) => addEntity(model, 'ELM'));
   store.beginPicking('ELM-001');
   store.commit((model) => addEntity(model, 'HAZ'));
   deepEqual(
-    Object.keys(blobIn(storage).session),
+    Object.keys((await blobIn(store, retention)).session),
     ['selection', 'expanded', 'projectCollapsed', 'dirty'],
     'the blob carries session state and no picker'
   );
 
-  const second = createStore({ storage });
+  const second = await restored(retention);
   equal(second.picker(), null, 'a restored session starts with no workflow');
 
   store.replaceProject(createModel());
@@ -414,8 +498,8 @@ function openStore(storage) {
 // --- The relationship view is one truth, never persisted ----------------
 
 {
-  const storage = fakeStorage();
-  const store = openStore(storage);
+  const retention = memoryRetention();
+  const store = openStore(retention);
   store.commit((model) => addEntity(model, 'ELM'));
   equal(store.relationshipView(), 'graph', 'the pane opens on the graph');
 
@@ -432,11 +516,11 @@ function openStore(storage) {
   equal(store.relationshipView(), 'list', 'an unknown view is refused');
 
   deepEqual(
-    Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
+    Object.keys((await blobIn(store, retention)).session),
     ['selection', 'expanded', 'projectCollapsed', 'dirty'],
     'the blob never carries it'
   );
-  const second = createStore({ storage });
+  const second = await restored(retention);
   equal(second.relationshipView(), 'graph', 'a restored session opens on the default view again');
 }
 
@@ -445,7 +529,8 @@ function openStore(storage) {
 {
   const storage = fakeStorage();
   const session = fakeStorage();
-  const store = createStore({ storage, session });
+  const retention = memoryRetention();
+  const store = createStore({ storage, session, retention });
   equal(store.view(), null, 'no project, no view');
   store.openView('risk');
   equal(store.view(), null, 'a view cannot open over no project');
@@ -467,12 +552,12 @@ function openStore(storage) {
   equal(notified, 2, 'the same or a nonsense section is nothing');
   equal(JSON.parse(session.read('openconformity.open-view')).section, 2, 'the browser session keeps the view and section');
   deepEqual(
-    Object.keys(JSON.parse(storage.read(PROJECT_KEY)).session),
+    Object.keys((await blobIn(store, retention)).session),
     ['selection', 'expanded', 'projectCollapsed', 'dirty'],
     'the blob never carries it'
   );
 
-  const second = createStore({ storage, session });
+  const second = await restored(retention, storage, session);
   deepEqual(second.view(), { id: 'risk', section: 2 }, 'a reload returns to the view');
 
   store.setViewReturn({ id: 'risk', name: 'Risk assessment', section: 2, rowId: 'SCN-002' });
@@ -492,25 +577,77 @@ function openStore(storage) {
 // --- A failing persist -------------------------------------------------
 
 {
-  const storage = fakeStorage();
-  const store = openStore(storage);
-  storage.failing = true;
+  const retention = memoryRetention();
+  const store = openStore(retention);
+  await store.whenPersisted();
+  let notified = 0;
+  store.subscribe(() => {
+    notified += 1;
+  });
+  retention.failing = true;
   const outcome = store.commit((model) => addEntity(model, 'ELM'));
   equal(outcome.ok, true, 'the change itself still lands');
   equal(store.model().nodes.size, 1, 'in the model');
+  await store.whenPersisted();
   equal(store.persistFailed(), true, 'and the failed persist is on record');
-
-  storage.failing = false;
+  equal(notified, 2, 'told once for the change and once for the failure');
   store.commit((model) => addEntity(model, 'HAZ'));
+  await store.whenPersisted();
+  equal(notified, 3, 'a second failure is not told again');
+
+  retention.failing = false;
+  store.commit((model) => addEntity(model, 'SCN'));
+  await store.whenPersisted();
   equal(store.persistFailed(), false, 'a later successful persist clears it');
-  equal(blobIn(storage).project.entities.length, 2, 'and writes the whole state');
+  equal(notified, 5, 'and the recovery is told once');
+  equal(retention.records.get('project').project.entities.length, 3, 'and writes the whole state');
+}
+
+// --- A browser without IndexedDB -------------------------------------------
+
+{
+  const retention = createRetention({ indexedDB: undefined });
+  const store = await restored(retention);
+  equal(store.restoration(), 'fresh', 'with no IndexedDB nothing restores, and the session begins fresh');
+  store.replaceProject(createModel());
+  await store.whenPersisted();
+  equal(store.persistFailed(), true, 'and the first persist is on record as refused, so the user is told to save to a file');
+  equal(await retention.estimate(), null, 'with no storage manager there is no estimate');
+  equal(await retention.persist(), false, 'and nothing to ask for persistence');
+}
+
+// --- The storage nearly full is told ------------------------------------------
+
+{
+  const retention = memoryRetention({ estimate: { usage: 900, quota: 1000 } });
+  const store = createStore({ storage: fakeStorage(), retention });
+  let notified = 0;
+  store.subscribe(() => {
+    notified += 1;
+  });
+  store.replaceProject(createModel());
+  await store.whenPersisted();
+  equal(store.storageNearlyFull(), true, 'past eight tenths of the quota the storage stands nearly full');
+  equal(notified, 2, 'told once for the project and once for the storage');
+  store.removeFromBrowser();
+  equal(store.storageNearlyFull(), false, 'removal from the browser clears it');
+}
+
+{
+  const retention = memoryRetention({ estimate: { usage: 100, quota: 1000 } });
+  const store = openStore(retention);
+  await store.whenPersisted();
+  equal(store.storageNearlyFull(), false, 'well within the quota nothing is said');
+  const none = openStore(memoryRetention());
+  await none.whenPersisted();
+  equal(none.storageNearlyFull(), false, 'nor where the browser gives no estimate');
 }
 
 // --- The project row's expansion is session state ------------------------
 
 {
-  const storage = fakeStorage();
-  const store = createStore({ storage });
+  const retention = memoryRetention();
+  const store = createStore({ storage: fakeStorage(), retention });
   equal(store.projectExpanded(), true, 'with no project the row reads open');
   store.setProjectExpanded(false);
   equal(store.projectExpanded(), true, 'and nothing changes it on the landing');
@@ -520,44 +657,45 @@ function openStore(storage) {
   store.setProjectExpanded(false);
   equal(store.projectExpanded(), false, 'collapsing holds');
   equal(store.dirty(), false, 'without marking the project unsaved');
-  equal(blobIn(storage).session.projectCollapsed, true, 'and persists with the session');
+  equal((await blobIn(store, retention)).session.projectCollapsed, true, 'and persists with the session');
 
-  const restored = createStore({ storage });
-  equal(restored.projectExpanded(), false, 'a restore honours the collapse');
+  const held = await restored(retention);
+  equal(held.projectExpanded(), false, 'a restore honours the collapse');
 
-  restored.setProjectExpanded(true);
-  equal(blobIn(storage).session.projectCollapsed, false, 'reopening persists too');
-  restored.setProjectExpanded(false);
-  restored.replaceProject(createModel());
-  equal(restored.projectExpanded(), true, 'a replaced project starts open again, whatever stood collapsed');
+  held.setProjectExpanded(true);
+  equal((await blobIn(held, retention)).session.projectCollapsed, false, 'reopening persists too');
+  held.setProjectExpanded(false);
+  held.replaceProject(createModel());
+  equal(held.projectExpanded(), true, 'a replaced project starts open again, whatever stood collapsed');
 }
 
 {
-  const storage = fakeStorage();
-  const seeded = createStore({ storage });
+  const retention = memoryRetention();
+  const seeded = createStore({ storage: fakeStorage(), retention });
   seeded.replaceProject(createModel());
-  const blob = JSON.parse(storage.read(PROJECT_KEY));
-  delete blob.session.projectCollapsed;
-  storage.setItem(PROJECT_KEY, JSON.stringify(blob));
-  const restored = createStore({ storage });
-  equal(restored.projectExpanded(), true, 'a blob from before the collapse existed restores open');
+  await seeded.whenPersisted();
+  delete retention.records.get('project').session.projectCollapsed;
+  const held = await restored(retention);
+  equal(held.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
 // --- The navigator's filter is session state ------------------------------
 
 {
-  const storage = fakeStorage();
-  const store = createStore({ storage });
+  const retention = memoryRetention();
+  const store = createStore({ storage: fakeStorage(), retention });
   store.replaceProject(createModel());
   equal(store.navigatorFilter(), '', 'the filter starts empty');
   let notified = 0;
-  store.subscribe(() => { notified += 1; });
+  store.subscribe(() => {
+    notified += 1;
+  });
   store.setNavigatorFilter('haz');
   equal(store.navigatorFilter(), 'haz', 'and holds what was typed');
   equal(notified, 1, 'notifying its panes');
   store.setNavigatorFilter('haz');
   equal(notified, 1, 'but not for no change');
-  ok(!JSON.parse(storage.read(PROJECT_KEY)).session.navigatorFilter, 'never persisted');
+  ok(!(await blobIn(store, retention)).session.navigatorFilter, 'never persisted');
   store.replaceProject(createModel());
   equal(store.navigatorFilter(), '', 'a replaced project starts unfiltered');
 }
@@ -567,19 +705,20 @@ function openStore(storage) {
 {
   const storage = fakeStorage();
   const session = fakeStorage();
-  const store = createStore({ storage, session });
+  const retention = memoryRetention();
+  const store = createStore({ storage, session, retention });
   store.replaceProject(createModel());
   store.setRelationshipView('list');
   equal(session.read('openconformity.view'), 'list', 'the choice rides the browser session');
-  ok(!JSON.parse(storage.read(PROJECT_KEY)).session.relationshipView, 'and never the project blob');
+  ok(!(await blobIn(store, retention)).session.relationshipView, 'and never the project blob');
 
-  const reloaded = createStore({ storage, session });
+  const reloaded = createStore({ storage, session, retention });
   equal(reloaded.relationshipView(), 'list', 'a reload within the session keeps it');
 
-  const fresh = createStore({ storage, session: fakeStorage() });
+  const fresh = createStore({ storage, session: fakeStorage(), retention });
   equal(fresh.relationshipView(), 'graph', 'a new session opens on the default');
 
-  const none = createStore({ storage });
+  const none = createStore({ storage, retention });
   equal(none.relationshipView(), 'graph', 'and no session store at all is just the default');
 }
 
@@ -588,7 +727,8 @@ function openStore(storage) {
 {
   const storage = fakeStorage();
   const session = fakeStorage();
-  const store = createStore({ storage, session });
+  const retention = memoryRetention();
+  const store = createStore({ storage, session, retention });
   store.replaceProject(createModel());
   equal(store.tabOf('ESR'), null, 'a type opens on its first tab');
 
@@ -602,14 +742,14 @@ function openStore(storage) {
   equal(notified, 0, 'and nothing is told: the editor showed the panel itself');
   equal(store.dirty(), false, 'nor is the project marked unsaved');
   deepEqual(JSON.parse(session.read('openconformity.tabs')), { ESR: 'Applicability' }, 'the choice rides the browser session');
-  ok(!('tabs' in JSON.parse(storage.read(PROJECT_KEY)).session), 'and never the project blob');
+  ok(!('tabs' in (await blobIn(store, retention)).session), 'and never the project blob');
 
-  equal(createStore({ storage, session }).tabOf('ESR'), 'Applicability', 'a reload within the session keeps it');
-  equal(createStore({ storage, session: fakeStorage() }).tabOf('ESR'), null, 'a new session opens on the first tab again');
+  equal(createStore({ storage, session, retention }).tabOf('ESR'), 'Applicability', 'a reload within the session keeps it');
+  equal(createStore({ storage, session: fakeStorage(), retention }).tabOf('ESR'), null, 'a new session opens on the first tab again');
 
   {
     const held = fakeStorage();
-    const first = createStore({ storage, session: held });
+    const first = createStore({ storage, session: held, retention });
     first.replaceProject(createModel());
     equal(first.consented(), false, 'a session starts asking before the editor loads');
     let told = 0;
@@ -621,28 +761,30 @@ function openStore(storage) {
     equal(told, 0, 'told to no one');
     equal(first.dirty(), false, 'and marks nothing unsaved');
     equal(held.read('openconformity.drawio-consent'), '1', 'it rides the browser session');
-    ok(!JSON.stringify(JSON.parse(storage.read(PROJECT_KEY))).includes('consent'), 'and never the project blob');
-    equal(createStore({ storage, session: held }).consented(), true, 'a reload within the session keeps it');
-    equal(createStore({ storage, session: fakeStorage() }).consented(), false, 'a new session asks again');
+    ok(!JSON.stringify(await blobIn(first, retention)).includes('consent'), 'and never the project blob');
+    equal(createStore({ storage, session: held, retention }).consented(), true, 'a reload within the session keeps it');
+    equal(createStore({ storage, session: fakeStorage(), retention }).consented(), false, 'a new session asks again');
     first.setConsented(false);
     equal(held.read('openconformity.drawio-consent'), null, 'withdrawn, it is gone from the session');
   }
   session.setItem('openconformity.tabs', '{nonsense');
-  equal(createStore({ storage, session }).tabOf('ESR'), null, 'a session holding nonsense opens on the first tab, not broken');
+  equal(createStore({ storage, session, retention }).tabOf('ESR'), null, 'a session holding nonsense opens on the first tab, not broken');
   session.setItem('openconformity.tabs', '["Applicability"]');
-  equal(createStore({ storage, session }).tabOf('ESR'), null, 'as does one holding the wrong shape');
+  equal(createStore({ storage, session, retention }).tabOf('ESR'), null, 'as does one holding the wrong shape');
 }
 
 // --- Remove from this browser forgets everything ------------------------
 
 {
-  const storage = fakeStorage({ [ASIDE_KEY]: 'an old failed blob' });
+  const storage = fakeStorage({ [ASIDE_KEY]: 'an old failed blob', [PROJECT_KEY]: 'an old blob' });
   const session = fakeStorage();
-  const store = createStore({ storage, session });
+  const retention = memoryRetention({ initial: { aside: 'a failed blob' } });
+  const store = createStore({ storage, session, retention });
   store.replaceProject(createModel());
   store.setTheme('g100');
   store.setConsented(true);
-  ok(storage.read(PROJECT_KEY) !== null && storage.read(THEME_KEY) === 'g100' && session.read('openconformity.drawio-consent') === '1', 'a browser holding a project, a set-aside copy, a theme and the consent');
+  await store.whenPersisted();
+  ok(retention.records.has('project') && retention.records.has('aside') && storage.read(THEME_KEY) === 'g100' && session.read('openconformity.drawio-consent') === '1', 'a browser holding a project, a set-aside copy, a theme, the consent, and blobs from the previous generation');
   let told = 0;
   store.subscribe(() => {
     told += 1;
@@ -653,11 +795,13 @@ function openStore(storage) {
   equal(store.theme(), null, 'the theme follows the system again');
   equal(store.consented(), false, 'the consent is withdrawn');
   equal(store.dirty(), false, 'and nothing is dirty');
-  deepEqual([storage.read(PROJECT_KEY), storage.read(ASIDE_KEY), storage.read(THEME_KEY)], [null, null, null], 'nothing of the software is left in browser storage, the set-aside copy included');
+  await store.whenPersisted();
+  equal(retention.records.size, 0, 'nothing of the software is left in the retention, the set-aside copy included');
+  deepEqual([storage.read(PROJECT_KEY), storage.read(ASIDE_KEY), storage.read(THEME_KEY)], [null, null, null], 'nor in web storage, the previous generation\'s blobs included');
   deepEqual(['openconformity.view', 'openconformity.tabs', 'openconformity.open-view', 'openconformity.drawio-consent'].map((key) => session.read(key)), [null, null, null, null], 'nor in the session');
-  equal(createStore({ storage, session }).restoration(), 'fresh', 'the next session begins fresh');
+  equal((await restored(retention, storage, session)).restoration(), 'fresh', 'the next session begins fresh');
   store.replaceProject(createModel());
-  ok(storage.read(PROJECT_KEY) !== null, 'and a new project persists again as ever');
+  ok((await blobIn(store, retention)) !== null, 'and a new project persists again as ever');
 }
 
 summary('test-store');

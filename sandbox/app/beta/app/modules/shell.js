@@ -72,6 +72,11 @@ export const RESTORATION_NOTICE = 'The previous session could not be restored.';
 export const RESTORATION_DETAIL =
   'What this browser had stored could not be read back. A copy has been set aside in browser storage.';
 
+/** The statement made while the origin's storage stands nearly full. */
+export const STORAGE_NOTICE = 'Browser storage is nearly full.';
+export const STORAGE_DETAIL =
+  'The room this browser gives the software is nearly used up. Save the project to a file, so nothing is lost if storing stops.';
+
 /** The statement made while storing the session keeps failing. */
 export const PERSIST_NOTICE = 'Changes are not being stored in this browser.';
 export const PERSIST_DETAIL =
@@ -372,6 +377,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     }
     if (store.persistFailed()) {
       notices.appendChild(notice('warning', PERSIST_NOTICE, PERSIST_DETAIL, null));
+    } else if (store.storageNearlyFull()) {
+      notices.appendChild(notice('warning', STORAGE_NOTICE, STORAGE_DETAIL, null));
     }
   }
 
