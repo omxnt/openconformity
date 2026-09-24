@@ -172,10 +172,16 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /** Rename the selected folder. A blank or unchanged name changes nothing. */
-  /** Enter the edit of what is selected, the project where nothing is. */
+  /**
+   * Edit what is selected: an entity's attributes, the project's where
+   * nothing is selected, and a folder's one attribute, its name, through
+   * the rename prompt.
+   */
   function editSelection() {
+    const node = nodeOf(store.model(), store.selection());
+    if (node?.kind === 'folder') return renameSelection();
     if (editor.editing()) return;
-    editor.beginEdit();
+    return editor.beginEdit();
   }
 
   async function renameSelection() {

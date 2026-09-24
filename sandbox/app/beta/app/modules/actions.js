@@ -138,7 +138,7 @@ export function createActions({ store, flows }) {
       group: 'edit',
       toolbar: false,
       context: true,
-      enabled: () => store.hasProject() && (store.selection() === null || selected()?.kind === 'entity'),
+      enabled: () => store.hasProject(),
       run: () => flows.editSelection(),
     },
     {
@@ -185,17 +185,6 @@ export function createActions({ store, flows }) {
         selected()?.kind === 'entity' &&
         relationshipOptions(store.model(), store.selection()).length > 0,
       run: () => flows.relateSelection(),
-    },
-    {
-      id: 'rename',
-      icon: 'i-edit',
-      label: 'Rename…',
-      group: 'arrange',
-      toolbar: false,
-      context: true,
-      menubar: false,
-      enabled: () => selected()?.kind === 'folder',
-      run: () => flows.renameSelection(),
     },
     {
       id: 'move-up',

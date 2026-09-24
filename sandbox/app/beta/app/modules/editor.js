@@ -1110,7 +1110,7 @@ export function createEditor({
       return;
     }
     if (node.kind === 'folder') {
-      renderHead(node, [headButton('Rename…', onRename)]);
+      renderHead(node, [headIconButton('Rename folder', 'i-edit', onRename)]);
       body.appendChild(
         emptyState('Folder', 'A folder groups things in the navigator and carries no attributes of its own.')
       );

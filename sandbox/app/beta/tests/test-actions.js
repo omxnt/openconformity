@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -95,7 +95,6 @@ function enabledIds(actions) {
       'new-related': false,
       'new-folder': true,
       relate: false,
-      rename: false,
       'move-up': false,
       'move-down': false,
       'move-to': false,
@@ -116,7 +115,7 @@ function enabledIds(actions) {
   equal(one['move-down'], false, 'either way');
   equal(one['move-to'], false, 'and alone at the root it has nowhere else to file');
   equal(one.undo, true, 'a change can be undone');
-  equal(one.rename, false, 'an entity is not renamed; its title is edited');
+  equal(one.edit, true, 'an entity is edited, its title among its attributes');
 
   store.commit((model) => addEntity(model, 'HAZ', { parent: null }));
   store.select('ELM-001');
@@ -135,7 +134,7 @@ function enabledIds(actions) {
   store.commit((model) => addFolder(model, 'Zone'));
   store.select('F-1');
   const folder = enabled();
-  equal(folder.rename, true, 'a selected folder can be renamed');
+  equal(folder.edit, true, 'a selected folder is edited too, its name being its one attribute');
   equal(folder.delete, true, 'and deleted');
   equal(folder.relate, false, 'never related');
   equal(folder['new-related'], false, 'nor newly related to');
