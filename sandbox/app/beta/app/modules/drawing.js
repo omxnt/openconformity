@@ -284,6 +284,17 @@ export function embeddedModel(text) {
   }
 }
 
+/**
+ * How many pages the model inside a drawing holds, 0 where there is no
+ * model. A drawing shows one page, so more than one is refused.
+ * @param {string} text
+ * @returns {number}
+ */
+export function pageCount(text) {
+  const model = embeddedModel(text);
+  return model === null ? 0 : (model.match(/<diagram(?=[\s>/])/g) ?? []).length;
+}
+
 /** A drawing as an image source: a data URL the browser renders in image mode, granting it nothing. */
 export const dataUrl = (text) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(text)}`;
 

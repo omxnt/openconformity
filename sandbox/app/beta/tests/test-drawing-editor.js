@@ -9,6 +9,7 @@ import './shim.js';
 import {
   EDITOR_ORIGIN,
   EDITOR_URL,
+  EDITOR_CONFIG,
   FRAME_SANDBOX,
   READY_PERIOD,
   EXPORT_PERIOD,
@@ -45,6 +46,7 @@ function base64Of(text) {
   return out;
 }
 const EXPORTED = `data:image/svg+xml;base64,${base64Of(fixture)}`;
+const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" content="&lt;mxfile&gt;&lt;diagram id=&quot;a&quot;/&gt;&lt;diagram id=&quot;b&quot;/&gt;&lt;/mxfile&gt;"><g/></svg>')}`;
 
 // --- The origin and the frame --------------------------------------------------
 
@@ -52,6 +54,13 @@ const EXPORTED = `data:image/svg+xml;base64,${base64Of(fixture)}`;
   equal(EDITOR_ORIGIN, 'https://embed.diagrams.net', "the editor's origin is fixed, and named to the user");
   ok(EDITOR_URL.startsWith(`${EDITOR_ORIGIN}/?embed=1&proto=json`), 'its page is on that origin in embed mode with the JSON protocol');
   ok(EDITOR_URL.includes('noSaveBtn=1') && EDITOR_URL.includes('saveAndExit=0') && EDITOR_URL.includes('noExitBtn=1') && EDITOR_URL.includes('libraries=0'), 'with none of its own Save or Exit buttons and no shape libraries');
+  ok(EDITOR_URL.includes('pages=0') && EDITOR_URL.includes('plugins=0') && EDITOR_URL.includes('configure=1'), 'no page bar, no plugins, and asking to be configured');
+  ok(EDITOR_CONFIG.suppressNewWindows === true && EDITOR_CONFIG.enableCustomLibraries === false && EDITOR_CONFIG.restrictExport === undefined, 'the configuration opens no window and no library, and does not restrict export, which would take Edit Diagram away');
+  equal(EDITOR_CONFIG.maxImageBytes, 256 * 1024, 'a picture placed in the diagram may be a quarter of the drawing size limit at most, refused on insertion rather than the diagram on Apply');
+  ok(EDITOR_CONFIG.css.includes('.geTabContainer:has(.gePageTab):not(:has(.gePageTab ~ .gePageTab)) { display: none !important; }') && EDITOR_CONFIG.css.includes('.geControlTab { display: none !important; }'), 'the page bar is hidden by style only while exactly one page tab is found, so it shows past one page and whenever the editor\'s class names change, its own page controls hidden');
+  deepEqual(EDITOR_CONFIG.hideMenuItems, ['exportAs', 'importFrom', 'print', 'embed', 'publish', 'share', 'plugins', 'configuration', 'rename'], 'hidden: import and export, print, what would publish or share, what loads code, and what names a file that is not there');
+  deepEqual(EDITOR_CONFIG.hideMenus, ['help'], 'and the help menu, whose items open windows');
+  ok(!EDITOR_CONFIG.hideMenuItems.includes('editDiagram') && !EDITOR_CONFIG.hideMenuItems.includes('pageSetup'), 'Edit Diagram and page setup stay, the one being how a diagram travels as XML');
   equal(FRAME_SANDBOX, 'allow-scripts allow-same-origin', 'the frame runs scripts on its own origin and may do nothing else');
   ok(!EDITOR_ORIGIN.includes('openconformity'), 'and that origin is never the software\'s own');
 }
@@ -131,25 +140,28 @@ function drive(drawing) {
   deepEqual(posted, [], 'and nothing posted before the editor speaks');
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${GOOD}` });
   deepEqual(events, [], 'an export before Apply is ignored');
+  session.hear({ event: 'configure' });
+  deepEqual(posted, [{ action: 'configure', config: EDITOR_CONFIG }], 'the editor asking to be configured is told what to hide');
   session.hear({ event: 'init' });
   equal(session.state(), 'editing', 'the first word from the editor opens the editing');
   ok(timers[0].cleared, 'the readiness period is over');
-  equal(posted.length, 1, 'and one message goes out');
-  deepEqual(Object.keys(posted[0]), ['action', 'xml', 'autosave'], 'the load of the drawing, with autosave for the sign of change');
-  ok(posted[0].action === 'load' && posted[0].xml.startsWith('<mxfile ') && posted[0].autosave === 1, "the drawing's own model, nothing of the project, not even the theme, nothing else");
+  equal(posted.length, 2, 'and one more message goes out');
+  deepEqual(Object.keys(posted[1]), ['action', 'xml', 'autosave'], 'the load of the drawing, with autosave for the sign of change');
+  ok(posted[1].action === 'load' && posted[1].xml.startsWith('<mxfile ') && posted[1].autosave === 1, "the drawing's own model, nothing of the project, not even the theme, nothing else");
   deepEqual(events, ['ready'], 'ready is told');
   session.hear({ event: 'init' });
-  equal(posted.length, 1, 'a second init changes nothing');
+  session.hear({ event: 'configure' });
+  equal(posted.length, 2, 'a second init or a late configure changes nothing');
   equal(session.changed(), false, 'nothing has changed yet');
   session.hear({ event: 'autosave', xml: '<mxfile>changed</mxfile>' });
   equal(session.changed(), true, 'an autosave is the sign of a change');
   deepEqual(events.at(-1), 'changed', 'and is told');
   session.hear({ event: 'openLink', href: 'https://evil.example' });
   session.hear({ event: 'exit', modified: true });
-  equal(posted.length, 1, 'links and exits are ignored');
+  equal(posted.length, 2, 'links and exits are ignored');
   ok(session.apply(), 'Apply asks for the drawing');
   equal(session.state(), 'exporting', 'and the session exports');
-  deepEqual(posted[1], { action: 'export', format: 'xmlsvg', embedImages: true, theme: 'light', keepTheme: false, spin: 'Applying' }, 'as SVG with the model inside, images embedded, in the light appearance whatever the editor shows');
+  deepEqual(posted[2], { action: 'export', format: 'xmlsvg', embedImages: true, theme: 'light', keepTheme: false, spin: 'Applying' }, 'as SVG with the model inside, images embedded, in the light appearance whatever the editor shows');
   deepEqual([timers.length, timers[1].ms], [2, EXPORT_PERIOD], 'with the export period running');
   ok(!session.apply(), 'Apply twice asks once');
   session.hear({ event: 'export', format: 'svg', data: EXPORTED, xml: '<mxfile/>' });
@@ -188,6 +200,15 @@ function drive(drawing) {
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${GOOD}` });
   deepEqual(events.at(-1), ['refuse', 'returned a diagram without its model'], 'a drawing that passes the check but carries no model is refused, since it could not be edited again');
   equal(session.state(), 'editing', 'with the editor still open');
+}
+
+{
+  const { session, events } = drive(fixture);
+  session.hear({ event: 'init' });
+  session.apply();
+  session.hear({ event: 'export', format: 'svg', data: TWO_PAGES });
+  deepEqual(events.at(-1), ['refuse', 'returned a diagram with more than one page'], 'a model of two pages is refused, since the picture would show one');
+  equal(session.state(), 'editing', 'with the editor still open to drop a page');
 }
 
 {

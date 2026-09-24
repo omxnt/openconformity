@@ -12,13 +12,41 @@
  */
 
 import { el, icon } from './dom.js';
-import { checkDrawing, embeddedModel } from './drawing.js';
+import { checkDrawing, embeddedModel, pageCount } from './drawing.js';
 
 /** The editor's origin, fixed here and named to the user before it is loaded. */
 export const EDITOR_ORIGIN = 'https://embed.diagrams.net';
 
-/** The editor's page: embed mode with the JSON protocol, no shape libraries, and none of its own Save or Exit buttons, ours standing in the dialog. */
-export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries=0&noSaveBtn=1&saveAndExit=0&noExitBtn=1&modified=0`;
+/** The editor's page: embed mode with the JSON protocol, no shape libraries, no plugins, no page bar since a drawing is one page, asking to be configured, and none of its own Save or Exit buttons, ours standing in the dialog. */
+export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries=0&plugins=0&pages=0&configure=1&noSaveBtn=1&saveAndExit=0&noExitBtn=1&modified=0`;
+
+/**
+ * What the editor is told when it asks to be configured, by one rule:
+ * nothing enters or leaves as a file, and nothing opens a window. Hidden
+ * is import and export, print and the help menu, what would publish or
+ * share the diagram (embed, publish, share), what loads code or changes
+ * what loads (plugins, the configuration dialog), and what names a file
+ * that does not exist here (rename). Page setup and Edit Diagram under
+ * Extras stay, the latter being where the model's own XML is read and
+ * pasted, the one way a diagram travels between here and draw.io. The
+ * page bar is hidden by style while the model holds one page, and shows
+ * as soon as it holds more, so a page slipped in by pasted XML can be
+ * removed before Apply, which refuses more than one; its own controls
+ * for adding pages stay hidden. The rule names the editor's own class
+ * names, which are not a documented interface, and is written so that a
+ * renamed class shows the bar rather than hides it. A picture placed in
+ * the diagram becomes data inside the model, so the editor is told to
+ * take none above a quarter of the drawing size limit, refusing it on
+ * insertion rather than the whole diagram on Apply.
+ */
+export const EDITOR_CONFIG = {
+  maxImageBytes: 256 * 1024,
+  css: '.geTabContainer:has(.gePageTab):not(:has(.gePageTab ~ .gePageTab)) { display: none !important; } .geControlTab { display: none !important; }',
+  hideMenus: ['help'],
+  hideMenuItems: ['exportAs', 'importFrom', 'print', 'embed', 'publish', 'share', 'plugins', 'configuration', 'rename'],
+  suppressNewWindows: true,
+  enableCustomLibraries: false,
+};
 
 /**
  * What the frame may do: run scripts, since the editor is one, and keep
@@ -142,9 +170,9 @@ export function decodeExport(message) {
  * it returns: loading until the editor signals ready within its period,
  * then editing, then exporting once Apply is pressed until the drawing
  * arrives within its period. What is posted is the one drawing's model
- * on ready and the export request on Apply; what is heard is init,
- * autosave as a sign of change, save as Apply, and the export; the rest
- * is ignored. An editor that never becomes ready ends the session with
+ * on ready and the export request on Apply, and the configuration when
+ * the editor asks for it; what is heard is configure, init, autosave as
+ * a sign of change, save as Apply, and the export; the rest is ignored. An editor that never becomes ready ends the session with
  * its reason. A drawing refused on return, or not returned in time, is
  * refused with its reason and the session back in editing, so the user
  * can amend the drawing and apply again.
@@ -176,7 +204,10 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
   const session = {
     hear(message) {
       if (state === 'done') return;
-      if (message.event === 'init') {
+      if (message.event === 'configure') {
+        if (state !== 'loading') return;
+        post({ action: 'configure', config: EDITOR_CONFIG });
+      } else if (message.event === 'init') {
         if (state !== 'loading') return;
         clearTimer(timer);
         state = 'editing';
@@ -202,6 +233,10 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
         }
         if (embeddedModel(text) === null) {
           refuse('returned a diagram without its model');
+          return;
+        }
+        if (pageCount(text) > 1) {
+          refuse('returned a diagram with more than one page');
           return;
         }
         state = 'done';

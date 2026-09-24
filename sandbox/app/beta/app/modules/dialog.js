@@ -25,11 +25,11 @@ export function createDialogs({ overlay, toastRegion = null }) {
    * @param {string} spec.title
    * @param {string} [spec.message]
    * @param {HTMLElement} [spec.body]
-   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean, run?: () => any }>} spec.actions  an action with `run` closes with what it resolves, or stays open when that is undefined
+   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean, run?: () => any }>} [spec.actions]  an action with `run` closes with what it resolves, or stays open when that is undefined; none makes a passive dialog, closed only by its X, Escape or a click outside
    * @param {HTMLElement} [spec.initialFocus]
    * @returns {Promise<any>}
    */
-  function open({ title, message, body, actions, initialFocus }) {
+  function open({ title, message, body, actions = [], initialFocus }) {
     return new Promise((resolve) => {
       let result = null;
       let defaultButton = null;
@@ -74,7 +74,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
             ...(message ? [el('p', { text: message })] : []),
             ...(body ? [body] : []),
           ]),
-          el('div', { className: 'dialog-actions' }, buttons),
+          ...(buttons.length > 0 ? [el('div', { className: 'dialog-actions' }, buttons)] : []),
         ]
       );
       const backdrop = el('div', { className: 'dialog-backdrop' }, [card]);

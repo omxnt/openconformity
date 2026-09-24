@@ -917,7 +917,7 @@ export function createEditor({
       dialogs.open({
         title: `Diagram of ${subject()}`,
         body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Diagram of ${subject()}` } })]),
-        actions: [{ label: 'Close', value: null, kind: 'primary', default: true }],
+        actions: [],
       });
     const hold = (held) => {
       text = held;

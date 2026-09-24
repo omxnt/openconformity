@@ -5,7 +5,7 @@
  */
 
 import './shim.js';
-import { parseXml, checkDrawing, embeddedModel, dataUrl, sizeText, DRAWING_LIMIT, DIMENSION_LIMIT } from '../app/modules/drawing.js';
+import { parseXml, checkDrawing, embeddedModel, pageCount, dataUrl, sizeText, DRAWING_LIMIT, DIMENSION_LIMIT } from '../app/modules/drawing.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const fixture = readFile('fixtures/example.drawio.svg');
@@ -51,6 +51,9 @@ const reason = (text) => {
   ok(embeddedModel(fixture).startsWith('<mxfile '), 'and carries the editor\'s model in its content attribute, decoded');
   ok(embeddedModel(fixture).includes('<mxCell id="_J7OuV8DenQBRahtQ6Ji-1"'), 'the model whole');
   equal(embeddedModel(svg('<g/>')), null, 'a drawing from elsewhere carries none');
+  equal(pageCount(fixture), 1, 'the export holds one page');
+  equal(pageCount(svg('<g/>')), 0, 'a drawing without a model holds none');
+  equal(pageCount(svg('', ' content="&lt;mxfile&gt;&lt;diagram id=&quot;a&quot;/&gt;&lt;diagram id=&quot;b&quot;&gt;&lt;/diagram&gt;&lt;/mxfile&gt;"')), 2, 'a model of two pages is counted as two');
   ok(dataUrl(fixture).startsWith('data:image/svg+xml;charset=utf-8,%3C%3Fxml'), 'shown from a data URL, the text escaped');
   equal(sizeText(fixture), `${Math.round(fixture.length / 1024)} KB`, 'its size in whole kilobytes');
   equal(sizeText('x'), '1 KB', 'never less than one');

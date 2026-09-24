@@ -622,9 +622,9 @@ body {
 /* A table or a drawing with nothing in it says so, in helper text and
    with no field around it. */
 .cell-none { margin: 0; color: var(--text-helper); }
-.drawing-large { overflow: auto; max-height: 70vh; padding: 16px; background: #ffffff; color-scheme: light; }
-.drawing-large img { display: block; }
-.dialog:has(.drawing-large) { max-width: min(1400px, 95vw); }
+.drawing-large { overflow: auto; max-height: 80vh; padding: 16px; background: #ffffff; color-scheme: light; }
+.drawing-large img { display: block; max-width: 100%; }
+.dialog:has(.drawing-large) { width: max-content; min-width: 320px; max-width: min(1400px, 95vw); }
 
 /* The external editor's frame fills a dialog sized to the pane; the
    note above it says what the editor is doing, or why it could not. */
