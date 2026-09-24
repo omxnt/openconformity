@@ -55,6 +55,8 @@ These hold whether or not an editor is ever built.
 
 ## 4. Requirements
 
+**Superseded in part.** The amendment texts in §4.2 and §4.3 were written before the consent model settled and before C-TEC-002 was re-read; the drafts to rule on are in `drawing-requirements.md`, which asks consent on every edit with a session box, keeps C-TEC-002 as written, and adds the functional requirements for import, export and templates. The compliance table below stands, except that C-TEC-002 now reads complies by letter and rationale, the surviving concern being availability, which N-OPS-004 covers.
+
 ### 4.1 Compliance
 
 Every requirement the feature touches, with the kind alone and with the embedded editor.
