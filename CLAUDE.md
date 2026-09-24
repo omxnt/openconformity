@@ -24,11 +24,14 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
     schema/         the data model schema files
     sources/        the sources in editable formats
     sandbox/        the non-published work-in-progress
-      app/          iterations of the software
-      tests/        headless tests for the software
+      app/          generations of the software
+        poc/        frozen original proof of concept
+        demo/       frozen demonstration prototype
+        beta/       the generation in development
+          app/      the software, as app/ will be when it is published
+          tests/    headless tests for the software
+          notes/    working notes and the draft documents of the generation
       site/         iterations of the project site
-      demo/         frozen demonstration prototype
-      poc/          frozen original proof of concept
 
 ## Publishing
 
@@ -62,7 +65,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
 ## Verification
 
-There is no automated verification. Run a local server with `python3 -m http.server 8000` from the directory being tested, open the page, and check the browser console shows no errors or warnings.
+Run the test suite with `./run.sh` from `sandbox/app/beta/tests`; every file must report all checks passed. Then run a local server with `python3 -m http.server 8000` from `sandbox/app/beta/app`, open the page, and check the browser console shows no errors or warnings.
 
 ## Rules
 

@@ -28,11 +28,13 @@ openconformity/
 ├── schema/         the data model schema files
 ├── sources/        the sources in editable formats
 └── sandbox/        the non-published work-in-progress
-    ├── app/        iterations of the software
-    ├── site/       iterations of the project site
-    ├── demo/       frozen demonstration prototype
-    └── poc/        frozen original proof of concept
+    ├── app/        generations of the software
+    │   ├── poc/    frozen original proof of concept
+    │   ├── demo/   frozen demonstration prototype
+    │   └── beta/   the generation in development, with its tests and notes
+    └── site/       iterations of the project site
 ```
+
 
 ## Documentation
 
