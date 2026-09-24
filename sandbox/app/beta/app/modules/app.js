@@ -89,6 +89,13 @@ createViewsPane({
 });
 
 document.addEventListener('keydown', (event) => {
+  if (!(event.metaKey || event.ctrlKey)) return;
+  const key = event.key.toLowerCase();
+  if (key === 's') {
+    event.preventDefault();
+    if (!editor.editing()) actions.find((action) => action.id === 'save')?.run({});
+    return;
+  }
   const target = event.target;
   if (
     target instanceof HTMLInputElement ||
@@ -97,7 +104,7 @@ document.addEventListener('keydown', (event) => {
   ) {
     return;
   }
-  if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
+  if (key !== 'z') return;
   event.preventDefault();
   if (event.shiftKey) flows.redo();
   else flows.undo();

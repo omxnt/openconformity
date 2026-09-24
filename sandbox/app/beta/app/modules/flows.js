@@ -742,7 +742,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   async function saveProject() {
     if (!store.hasProject()) return;
     const name = await dialogs.prompt({
-      title: 'Save project',
+      title: 'Save to file',
       label: 'Project name',
       value: store.model().name,
       confirmLabel: 'Save',

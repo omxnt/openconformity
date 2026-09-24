@@ -127,6 +127,7 @@ import { fakeStorage } from './helpers.js';
   );
 
   ok(shell.includes("const fileGroups = ['project', 'example', 'browser']"), 'the File menu parts the example and the clearing of browser data behind separators');
+  ok(shell.includes("unsavedButton.hidden = !store.dirty();") && readFile('../app/style.css').includes('.shell-action[hidden] { display: none; }'), 'the save-to-file button in the bar stands only while there are unsaved changes, its hidden attribute honoured over the display rule');
 
   const editor = readFile('../app/modules/editor.js');
   ok(
@@ -359,7 +360,7 @@ import { fakeStorage } from './helpers.js';
   ok(page.includes('data-icon-path="inner-path" fill="#161616"'), "the warning glyph's mark stands on the yellow");
   ok(readFile('../app/modules/rating.js').includes("export function statusIcon(tone) {"), 'the status indicator is one function, shared by the card and the dialog');
   ok(!page.includes('id="i-rate"') && !origin.includes('i-rate'), 'the rating field has no glyph of its own: it trails the edit pencil');
-  ok(readFile('../app/index.html').includes('<button type="button" class="shell-action shell-action-wide" id="shell-unsaved" hidden>\n      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>\n      <span>Save to file</span>') && readFile('../app/modules/shell.js').includes('unsavedButton.hidden = !store.dirty();'), 'the top bar offers Save to file while the file is behind the project, labelled by what it does');
+  ok(readFile('../app/index.html').includes('<button type="button" class="shell-action shell-action-wide" id="shell-unsaved" title="Save to file" hidden>\n      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-save"/></svg>\n      <span>Unsaved changes</span>') && readFile('../app/modules/shell.js').includes('unsavedButton.hidden = !store.dirty();'), 'the top bar signals unsaved changes while the file is behind the project, the button saying the state and its tooltip the act');
   ok(editor.includes("attributes: { type: 'hidden', 'data-key': definition.key }"), 'its parameters ride in hidden controls, read into the draft as any field');
   ok(editor.includes('const chosen = await rateDialog(dialogs, {') && editor.includes("body.dispatchEvent(new Event('input', { bubbles: true }));"), 'Rate opens the dialog, and what it returns is written to the draft and shown');
   ok(readFile('../app/modules/app.js').includes('  dialogs,\n'), 'the editor is given the dialogs to open');
