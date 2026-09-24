@@ -53,12 +53,13 @@ const NAME_AFTER = 2;
  * @returns {boolean}
  */
 /**
- * A rating as the card shows it: what it comes to and its tone — null
- * and none while a parameter is missing — and the parameters by name,
- * in order, an unset one an empty value, each with the rationale given for it.
+ * A rating as the card shows it: the name of the attribute it computes,
+ * what it comes to and its tone — null and none while a parameter is
+ * missing — and the parameters by name, in order, an unset one an empty
+ * value, each with the rationale given for it.
  * @param {Array<Object>} definitions  the rating's, the computed one and the rationales among them
  * @param {Object<string, string>} values
- * @returns {{ outcome: string|null, tone: string, parameters: Array<{ name: string, value: string, code: string, rationale: string }> }}
+ * @returns {{ name: string, outcome: string|null, tone: string, parameters: Array<{ name: string, value: string, code: string, rationale: string }> }}
  */
 export function ratingView(definitions, values) {
   const parameters = definitions.filter(isParameter);
@@ -66,6 +67,7 @@ export function ratingView(definitions, values) {
   const rationaleOf = (definition) => definitions.find((held) => isRationale(held) && held.parameter === definition.key);
   const outcome = closing ? estimate(closing.method, parameters.map((definition) => values[definition.key] ?? '')) : null;
   return {
+    name: closing?.name ?? '',
     outcome,
     tone: levelTone(outcome),
     parameters: parameters.map((definition) => {
@@ -141,6 +143,66 @@ export function setValues(definition, value) {
 export function joinSet(definition, chosen) {
   const held = new Set(chosen);
   return (definition.values ?? []).filter((item) => held.has(item)).join('; ');
+}
+
+/** A cell as a table stores it: quoted as a CSV cell is where it holds a tab, a break or a quotation mark, the marks within doubled. */
+const quoteCell = (cell) => (/[\t\n"]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell);
+
+/**
+ * A table as it is stored, read back as rows: one row per line, the
+ * cells parted by tabs in column order, a quoted cell holding what it
+ * holds, breaks and tabs among it; cells trimmed, missing cells empty,
+ * a blank line no row.
+ * @param {{ columns: Array<{ key: string }> }} definition
+ * @param {string|undefined} value
+ * @returns {string[][]}
+ */
+export function tableRows(definition, value) {
+  const text = String(value ?? '').replace(/\r\n?/g, '\n');
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  const endCell = () => {
+    row.push(cell);
+    cell = '';
+  };
+  const endRow = () => {
+    endCell();
+    if (row.some((held) => held.trim() !== '')) rows.push(row);
+    row = [];
+  };
+  for (let i = 0; i < text.length; i += 1) {
+    const held = text[i];
+    if (quoted) {
+      if (held !== '"') cell += held;
+      else if (text[i + 1] === '"') {
+        cell += '"';
+        i += 1;
+      } else quoted = false;
+    } else if (held === '"' && cell === '') quoted = true;
+    else if (held === '\t') endCell();
+    else if (held === '\n') endRow();
+    else cell += held;
+  }
+  endRow();
+  return rows.map((held) => definition.columns.map((column, i) => (held[i] ?? '').trim()));
+}
+
+/**
+ * Rows as a table is stored: one line per row, the cells parted by
+ * tabs, a cell holding a tab, a break or a quotation mark quoted; a
+ * row with every cell empty is dropped.
+ * @param {{ columns: Array<{ key: string }> }} definition
+ * @param {string[][]} rows
+ * @returns {string}
+ */
+export function joinTable(definition, rows) {
+  return rows
+    .map((row) => definition.columns.map((column, i) => String(row[i] ?? '').replace(/\r\n?/g, '\n').trim()))
+    .filter((row) => row.some((cell) => cell !== ''))
+    .map((row) => row.map(quoteCell).join('\t'))
+    .join('\n');
 }
 
 export function linkable(value) {
@@ -332,9 +394,9 @@ export function createEditor({
     return el('div', { className: 'cell-name' }, [text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]);
   }
 
-  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink. */
+  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table. */
   const takesRow = (definition) =>
-    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set';
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table';
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -392,7 +454,33 @@ export function createEditor({
       const address = value.trim();
       return el('div', { className: 'cell-value' }, [el('a', { text: address, attributes: { href: address, target: '_blank', rel: 'noopener' } })]);
     }
+    if (definition.kind === 'table') {
+      const rows = tableRows(definition, value);
+      if (rows.length === 0) return el('div', { className: 'cell-value empty', text: '–' });
+      return el('div', { className: 'cell-table' }, [
+        tableOf(definition, rows.map((row, i) => row.map((cell, c) => tableCell(definition.columns[c], cell)))),
+      ]);
+    }
     return el('div', { className: definition.kind === 'multiline' ? 'cell-value prose' : 'cell-value', text: value });
+  }
+
+  /** How wide a column is: as its values and no wider for a date, a choice or a number, brief for a text, and a multiline taking the rest. */
+  const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
+
+  /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
+  function tableOf(definition, rows, trailing = null) {
+    for (const cells of rows) cells.forEach((cell, c) => cell.classList.add(...[columnWidth(definition.columns[c])].filter(Boolean)));
+    return el('table', { className: 'data rows' }, [
+      el('thead', {}, [el('tr', {}, [el('th', { className: 'no', text: 'No.' }), ...definition.columns.map((column) => el('th', { className: columnWidth(column), text: column.name })), ...(trailing ? [el('th', { text: '' })] : [])])]),
+      el('tbody', {}, rows.map((cells, i) => el('tr', {}, [el('td', { className: 'no', text: String(i + 1) }), ...cells, ...(trailing ? [trailing(i)] : [])]))),
+    ]);
+  }
+
+  /** A cell of a table as read: a choice as a tag, a multiline as prose keeping its breaks, anything else its text, an empty one the dash. */
+  function tableCell(column, cell) {
+    if (cell === '') return el('td', { className: 'empty', text: '–' });
+    if (column.kind === 'choice') return el('td', {}, [el('span', { className: 'tag', text: cell })]);
+    return el('td', { className: column.kind === 'multiline' ? 'prose' : '', text: cell });
   }
 
   /** The cells of a run of definitions. */
@@ -409,46 +497,42 @@ export function createEditor({
   const isRating = (group) => group.attributes.some(isOutcome);
 
   /**
-   * A rating's tags: what it comes to, carrying its status where it has
-   * a tone, then the code of each parameter set, the full value on
-   * hovering it. A parameter with a rationale is underlined, and outside
-   * an edit its tag is a button whose tooltip holds the parameter and
-   * the reasoning, as the help glyph's holds the help.
+   * A rating's tags: what it comes to, carrying its status, then the
+   * code of each parameter set. Outside an edit every tag is a button
+   * whose tooltip holds what it stands for, the attribute and the
+   * outcome or the parameter and its value, as the help glyph's holds
+   * the help; a parameter with a rationale is underlined and its tooltip
+   * carries the reasoning beneath. Within an edit, where the field is a
+   * button already, a tag is a span with the browser's own tooltip.
    * @param {Object} view
    * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
    */
   function ratingTags(view, tipKey = null) {
+    /**
+     * A tag: outside an edit a button whose tooltip holds the lead, the
+     * name and value, over the text where there is one; within an edit,
+     * where the whole field is a button, a span with the browser's own.
+     */
+    const tag = (className, content, lead, text, key) => {
+      if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\n${text}` : lead } }, content);
+      const id = `rating-${tipKey}-${key}`;
+      const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, text ? [el('span', { className: 'tooltip-lead', text: lead }), el('span', { className: 'tooltip-text', text })] : [el('span', { className: 'tooltip-text', text: lead })]);
+      const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);
+      held.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') held.blur();
+      });
+      return held;
+    };
     const tags = [];
     if (view.outcome !== null) {
-      tags.push(
-        el('span', { className: 'tag outcome' }, [
-          ...(view.tone === 'none' ? [] : [statusIcon(view.tone)]),
-          el('span', { text: view.outcome }),
-        ])
-      );
+      tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], `${view.name}: ${view.outcome}`, '', 'outcome'));
     }
     view.parameters.forEach((parameter, i) => {
       if (parameter.value === '') return;
-      if (parameter.rationale === '' || tipKey === null) {
-        tags.push(el('span', { className: parameter.rationale ? 'tag reasoned' : 'tag', text: parameter.code, attributes: { title: hoverText(parameter) } }));
-        return;
-      }
-      const id = `rationale-${tipKey}-${i}`;
-      const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, [
-        el('span', { className: 'tooltip-lead', text: `${parameter.name}: ${parameter.value}` }),
-        el('span', { className: 'tooltip-text', text: parameter.rationale }),
-      ]);
-      const tag = el('button', { className: 'tag reasoned tag-trigger', attributes: { type: 'button', 'aria-describedby': id } }, [el('span', { text: parameter.code }), tip]);
-      tag.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') tag.blur();
-      });
-      tags.push(tag);
+      tags.push(tag(parameter.rationale ? 'tag reasoned' : 'tag', [el('span', { text: parameter.code })], `${parameter.name}: ${parameter.value}`, parameter.rationale, i));
     });
     return tags;
   }
-
-  /** What hovering a parameter's tag tells: its name and full value, and the rationale given for it beneath. */
-  const hoverText = (parameter) => (parameter.rationale ? `${parameter.name}: ${parameter.value}\n${parameter.rationale}` : `${parameter.name}: ${parameter.value}`);
 
   /**
    * A rating as a cell like any other: its name over its tags. In an
@@ -788,16 +872,88 @@ export function createEditor({
       input.value = value;
       return input;
     }
+    if (definition.kind === 'table') return tableControl(definition, value);
     const input = el('input', {
       className: 'field-input',
       attributes: {
         'data-key': definition.key,
-        type: definition.kind === 'hyperlink' ? 'url' : 'text',
+        type: definition.kind === 'hyperlink' ? 'url' : definition.kind === 'date' ? 'date' : 'text',
         id: `field-${definition.key}`,
       },
     });
     input.value = value;
     return input;
+  }
+
+  /**
+   * A table attribute in an edit: its rows as fields under the column
+   * names, a button at each row's end removing it and one beneath adding
+   * a row, focused on its first cell. The rows are kept as the table is
+   * stored in one hidden control carrying the key, updated as any cell
+   * changes, so the draft reads the table as it reads a set.
+   */
+  function tableControl(definition, value) {
+    const rows = tableRows(definition, value);
+    const hidden = el('input', { attributes: { type: 'hidden', 'data-key': definition.key } });
+    const wrap = el('div', { className: 'cell-table' });
+    const keep = () => {
+      hidden.value = joinTable(definition, rows);
+    };
+    const cellField = (column, r, c) => {
+      const label = `${column.name}, row ${r + 1}`;
+      let field;
+      if (column.kind === 'choice') {
+        field = el('select', { className: 'field-input', attributes: { 'aria-label': label } });
+        field.appendChild(el('option', { text: '–', attributes: { value: '' } }));
+        for (const choice of column.values ?? []) field.appendChild(el('option', { text: choice, attributes: { value: choice } }));
+        field.value = (column.values ?? []).includes(rows[r][c]) ? rows[r][c] : '';
+      } else if (column.kind === 'multiline') {
+        field = el('textarea', { className: 'field-input', attributes: { rows: '1', 'aria-label': label } });
+        field.value = rows[r][c];
+        const grow = () => {
+          field.style.height = 'auto';
+          field.style.height = `${field.scrollHeight}px`;
+        };
+        field.addEventListener('input', grow);
+        requestAnimationFrame(grow);
+      } else {
+        field = el('input', { className: 'field-input', attributes: { type: column.kind === 'date' ? 'date' : column.kind === 'number' ? 'number' : 'text', 'aria-label': label } });
+        field.value = rows[r][c];
+      }
+      for (const kind of ['input', 'change']) {
+        field.addEventListener(kind, () => {
+          rows[r][c] = field.value;
+          keep();
+        });
+      }
+      return el('td', { className: 'field' }, [field]);
+    };
+    const paint = (focusRow = -1) => {
+      keep();
+      wrap.textContent = '';
+      const table = tableOf(
+        definition,
+        rows.map((row, r) => row.map((cell, c) => cellField(definition.columns[c], r, c))),
+        (r) => {
+          const remove = el('button', { className: 'icon-button', attributes: { type: 'button', 'aria-label': `Remove row ${r + 1}` } }, [icon('i-delete')]);
+          remove.addEventListener('click', () => {
+            rows.splice(r, 1);
+            paint();
+            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+          return el('td', { className: 'remove' }, [remove]);
+        }
+      );
+      const add = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [icon('i-new-entity'), el('span', { text: 'Add row' })]);
+      add.addEventListener('click', () => {
+        rows.push(definition.columns.map(() => ''));
+        paint(rows.length - 1);
+      });
+      wrap.append(...(rows.length > 0 ? [table] : []), add, hidden);
+      if (focusRow >= 0) wrap.querySelector(`tbody tr:nth-child(${focusRow + 1}) .field-input`)?.focus();
+    };
+    paint();
+    return wrap;
   }
 
   /** The project, on the standard surface: its tabs, view fields and Edit. */

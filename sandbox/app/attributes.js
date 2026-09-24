@@ -13,7 +13,7 @@
  * attribute is the absence of its key.
  */
 
-/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'computed'|'rationale'} AttributeKind */
+/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'date'|'table'|'computed'|'rationale'} AttributeKind */
 
 /**
  * @typedef {Object} AttributeDefinition
@@ -24,6 +24,7 @@
  * @property {number} [min]  the least a number may be
  * @property {number} [max]  the greatest a number may be
  * @property {string} [method]  the estimation method a computed value is read by, from `risk.js`
+ * @property {Array<{ key: string, name: string, kind: 'text'|'multiline'|'date'|'choice'|'number', values?: string[] }>} [columns]  a table's columns, in order
  * @property {string} [help]  a sentence or two shown on the information glyph beside the name
  * @property {string} [parameter]  the parameter a rationale is given for, by key, within the same rating
  */
@@ -480,7 +481,27 @@ export const ATTRIBUTES = {
       { key: 'description', name: 'Verification procedure', kind: 'multiline', help: 'What is done in the system verification, step by step.' },
       { key: 'acceptanceCriteria', name: 'Acceptance criteria', kind: 'multiline', help: 'What counts as passing the system verification.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Result',
+        tab: true,
+        attributes: [
+          {
+            key: 'runs',
+            name: 'Runs',
+            kind: 'table',
+            columns: [
+              { key: 'date', name: 'Date', kind: 'date' },
+              { key: 'by', name: 'By', kind: 'text' },
+              { key: 'result', name: 'Result', kind: 'choice', values: ['Passed', 'Failed'] },
+              { key: 'remarks', name: 'Remarks', kind: 'multiline' },
+            ],
+            help: 'Each time the system verification was carried out, as a row: when and by whom, whether it met its acceptance criteria, and remarks, among them the record the result rests on.',
+          },
+        ],
+      },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
 };
 
@@ -526,7 +547,7 @@ export const PROJECT = {
     { key: 'organisation', name: 'Organisation', kind: 'text', help: 'Who the project is done by, or for.' },
     { key: 'description', name: 'Description', kind: 'multiline', help: 'What the project covers.' },
     { key: 'version', name: 'Version', kind: 'text', help: 'The revision this file is, as you number it.' },
-    { key: 'date', name: 'Date', kind: 'text', help: 'When this revision was made.' },
+    { key: 'date', name: 'Date', kind: 'date', help: 'When this revision was made.' },
     { key: 'author', name: 'Author', kind: 'text', help: 'Who prepared this revision.' },
     { key: 'role', name: 'Role', kind: 'text', help: 'The capacity in which the author prepared it.' },
     { key: 'changes', name: 'Changes', kind: 'multiline', help: 'What changed in this revision since the last.' },

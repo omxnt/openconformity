@@ -4,7 +4,7 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, removalText } from '../app/editor.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/editor.js';
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -60,8 +60,8 @@ equal(linkable(''), false, 'and an empty value is nothing');
   equal(firstTabName('XYZ'), 'Description', 'a type the metamodel does not know falls back');
   deepEqual(
     Object.entries(ATTRIBUTES).flatMap(([code, type]) => type.groups.filter((group) => group.tab && group.name !== 'Notes').map((group) => `${code}:${group.name}`)),
-    ['LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability'],
-    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults"
+    ['LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability', 'VER:Result'],
+    "the tabs in the model beside the notes: every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults, a verification's result"
   );
   for (const [code, type] of Object.entries(ATTRIBUTES)) {
     const last = type.groups.at(-1);
@@ -93,6 +93,21 @@ equal(linkable(''), false, 'and an empty value is nothing');
     'a verification reads its designation, title, method and who carries it out beside it, what it is carried out with, the procedure and the acceptance criteria'
   );
   deepEqual(attributesFor('REQ').find((definition) => definition.key === 'verificationMethod').values, attributesFor('VER').find((definition) => definition.key === 'method').values, "the requirement's intended method and the verification's actual one are chosen from the one list, so the two can be compared");
+  deepEqual(groups('VER'), ['Result', 'Notes'], 'a verification records what happened on a tab of its own, before its notes');
+  const runs = ATTRIBUTES.VER.groups[0].attributes[0];
+  deepEqual(
+    [ATTRIBUTES.VER.groups[0].attributes.length, runs.key, runs.kind, runs.columns.map((column) => [column.key, column.kind, column.values ?? null])],
+    [1, 'runs', 'table', [['date', 'date', null], ['by', 'text', null], ['result', 'choice', ['Passed', 'Failed']], ['remarks', 'multiline', null]]],
+    'the result is a table of runs, each when and by whom, passed or failed, and remarks; no rows while the verification is not carried out'
+  );
+  const three = { columns: [{ key: 'a' }, { key: 'b' }, { key: 'c' }] };
+  deepEqual(tableRows(three, '2026-09-01\tFailed\tTR-015\n\n 2026-09-24 \tPassed\tTR-017 \n2026-10-01'), [['2026-09-01', 'Failed', 'TR-015'], ['2026-09-24', 'Passed', 'TR-017'], ['2026-10-01', '', '']], 'a stored table reads as rows, one per line, cells parted by tabs, trimmed, missing cells empty, blank lines no rows');
+  deepEqual(tableRows(three, undefined), [], 'nothing stored is no rows');
+  equal(joinTable(three, [['2026-09-01', 'Failed', 'TR-015'], ['', '', ''], ['2026-09-24', 'Passed', ' TR-017 says\n"all stopped"\tin time ']]), '2026-09-01\tFailed\tTR-015\n2026-09-24\tPassed\t"TR-017 says\n""all stopped""\tin time"', 'rows store one per line, a row left empty dropped, a cell holding a break, a quotation mark or a tab quoted as a CSV cell is');
+  deepEqual(tableRows(three, '2026-09-24\tPassed\t"TR-017 says\n""all stopped""\tin time"\n2026-10-01\t"Failed"\tplain'), [['2026-09-24', 'Passed', 'TR-017 says\n"all stopped"\tin time'], ['2026-10-01', 'Failed', 'plain']], 'and reads back with the break, the mark and the tab within the cell');
+  const stored = [['2026-09-01', 'Failed', 'TR-015'], ['2026-09-24', 'Passed', 'Line one\nline two']];
+  deepEqual(tableRows(three, joinTable(three, stored)), stored, 'a table stored and read again is the same');
+  equal(attributesFor('PROJECT').find((definition) => definition.key === 'date').kind, 'date', "the project's date is a date, as a run's is");
   deepEqual(groups('SAF'), ['Behaviour', 'Characteristics', 'Fault handling', 'Notes'], 'then what it does, what it must achieve, what it does when it fails, and its notes, each a tab');
   deepEqual(
     ATTRIBUTES.SAF.groups[0].attributes.map((definition) => definition.key),
@@ -218,6 +233,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
   deepEqual(
     ratingView(matrix, { initialSeverity: 'Serious', initialProbability: 'Likely' }),
     {
+      name: 'Risk level',
       outcome: 'High',
       tone: 'high',
       parameters: [
@@ -225,7 +241,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
         { name: 'Probability', value: 'Likely', code: 'Likely', rationale: '' },
       ],
     },
-    'a rating reads as what it comes to, its tone, and its parameters by name, each with the code it shows and the rationale given for it'
+    'a rating reads as the attribute it computes, what it comes to, its tone, and its parameters by name, each with the code it shows and the rationale given for it'
   );
   deepEqual(
     ratingView(matrix, { initialSeverity: 'Serious', initialProbability: 'Likely', initialSeverityRationale: ' Amputation is credible at the tool ', initialProbabilityRationale: '' }).parameters.map((parameter) => parameter.rationale),
@@ -246,11 +262,12 @@ equal(linkable(''), false, 'and an empty value is nothing');
   equal(half.outcome, null, 'a rating half made comes to nothing yet');
   equal(half.tone, 'none', 'and wears no tone');
   deepEqual(half.parameters.map((parameter) => parameter.value), ['Serious', ''], 'its parameters read trimmed, the unset ones empty');
-  equal(ratingView(matrix, { initialSeverity: 'Minor', initialProbability: 'Remote' }).tone, 'none', 'negligible wears no tone');
+  equal(ratingView(matrix, { initialSeverity: 'Minor', initialProbability: 'Remote' }).tone, 'negligible', 'negligible wears its own tone, the neutral one');
   const graph = read.find((group) => group.name === 'Initial risk estimation' && group.when.value === 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)').attributes;
   deepEqual(
     ratingView(graph, { initialS: 'S2', initialF: 'F2', initialO: 'O2', initialA: 'A2' }),
     {
+      name: 'Risk index',
       outcome: 'RI 5 (highest)',
       tone: 'high',
       parameters: [
@@ -265,8 +282,8 @@ equal(linkable(''), false, 'and an empty value is nothing');
   const scoring = read.find((group) => group.name === 'Residual risk estimation' && group.when.value === 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)').attributes;
   deepEqual(
     [ratingView(scoring, { residualSeverityScore: '60', residualProbabilityScore: '40' }).outcome, ratingView(scoring, { residualSeverityScore: '10', residualProbabilityScore: '10' }).tone, ratingView(scoring, { residualSeverityScore: '95', residualProbabilityScore: '80' }).parameters.map((parameter) => parameter.code)],
-    ['RS 100 (low)', 'none', ['SS 95', 'PS 80']],
-    "under the scoring a rating reads as its total and category under the report's RS, negligible wearing no tone, the scores its codes under SS and PS"
+    ['RS 100 (low)', 'negligible', ['SS 95', 'PS 80']],
+    "under the scoring a rating reads as its total and category under the report's RS, negligible wearing the neutral tone as under the matrix, the scores its codes under SS and PS"
   );
   for (const code of ['LEG', 'HST', 'OSP', 'ESR', 'HSR', 'OSR']) {
     const applicable = attributesFor(code).find((definition) => definition.key === 'applicable');

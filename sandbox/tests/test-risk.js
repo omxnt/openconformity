@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { estimate, METHODS, ESTIMATED, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphPick, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/risk.js';
+import { estimate, METHODS, ESTIMATED, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/risk.js';
 import { ATTRIBUTES, attributesFor } from '../app/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -142,28 +142,21 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
     });
   }
   equal(checked, 24, 'for every branch of Figure 3');
+  const sketch = (node) => (node.children ? `${node.label}(${node.children.map(sketch).join(' ')})` : `${node.label}=${node.index}`);
+  equal(
+    sketch(GRAPH_TREE),
+    'Start(S1(F1, F2(O1, O2(A1, A2=1) O3(A1, A2=2))) S2(F1(O1(A1, A2=2) O2(A1=2 A2=3) O3(A1=3 A2=4)) F2(O1(A1=3 A2=4) O2(A1=4 A2=5) O3(A1=5 A2=6))))',
+    'the tree is merged as Figure 3 merges it: F1 with F2 and O1 with O2 under S1, A1 with A2 wherever the index is the same, and nowhere else'
+  );
   equal(graphPath(['S2', 'F1', '', '']).length, 3, 'a rating half made follows the graph half way');
   equal(graphPath(['', '', '', '']).length, 1, 'and one not begun stands at the start');
   deepEqual([1, 2, 3, 4, 5, 6].map(graphBand), ['lowest', 'lowest', 'medium', 'medium', 'highest', 'highest'], 'the indices band as 6.3.2 reads them');
-}
-
-// --- Picking in the graph: a branch decides its level and every single ancestor ---
-
-{
   const [S1, S2] = GRAPH_TREE.children;
   const F12 = S1.children[0];
-  const O12 = F12.children[0];
-  const [F1, F2] = S2.children;
-  const O2 = F1.children[1];
-  const none = ['', '', '', ''];
-  deepEqual(graphPick(none, [S2, F1, O2], 'A2'), ['S2', 'F1', 'O2', 'A2'], 'a leaf under single branches decides the whole rating');
-  deepEqual(graphPick(none, [S1, F12], 'O3'), ['S1', '', 'O3', ''], 'a merged ancestor is left undecided: F1 or F2 is still to pick');
-  deepEqual(graphPick(['S2', 'F1', 'O2', 'A2'], [S2], 'F2'), ['S2', 'F2', 'O2', 'A2'], 'picking a branch above keeps what stands below it');
-  deepEqual(graphPick(['S1', 'F2', 'O1', 'A1'], [S2, F1], 'O2'), ['S2', 'F1', 'O2', 'A1'], 'and moving to the other severity carries its single ancestors along');
-  ok(graphLive(none, [S2, F1]), 'with nothing chosen every branch is live');
+  const [F1] = S2.children;
+  ok(graphLive(['', '', '', ''], [S2, F1]), 'with nothing chosen every branch is live');
   ok(graphLive(['S1', '', 'O3', ''], [S1, F12]), 'under the chosen severity a merged branch is live whatever stands below');
   ok(!graphLive(['S1', '', '', ''], [S2]), 'the other severity is not');
-  ok(graphLive(['S1', 'F2', '', ''], [S1, F12, O12]), 'a merged branch carrying the chosen code keeps its subtree live');
   ok(!graphLive(['S2', 'F2', '', ''], [S2, F1]), 'and a single branch not chosen dims its subtree');
 }
 
@@ -173,7 +166,8 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   deepEqual(['High', 'RI 5 (highest)', 'RS 175 (high)'].map(levelTone), ['high', 'high', 'high'], "high, in every method's word");
   deepEqual(['Medium', '3 (medium)', '130 (medium)'].map(levelTone), ['medium', 'medium', 'medium'], 'medium');
   deepEqual(['Low', '1 (lowest)', '95 (low)'].map(levelTone), ['low', 'low', 'low'], 'low');
-  deepEqual(['Negligible', '40 (negligible)', null, '', 'Whatever was typed'].map(levelTone), ['none', 'none', 'none', 'none', 'none'], 'and none for negligible, nothing, or a typed rating');
+  deepEqual(['Negligible', 'RS 40 (negligible)'].map(levelTone), ['negligible', 'negligible'], "negligible, in the matrix's word and the score's");
+  deepEqual([null, '', 'Whatever was typed'].map(levelTone), ['none', 'none', 'none'], 'and none for nothing, or a typed rating');
 }
 
 // --- Every method names its source ---------------------------------------------

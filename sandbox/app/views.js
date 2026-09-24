@@ -129,10 +129,11 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
   /**
    * The rating's outcome as the editor shows it, a tag with the tone's
    * dot, its band word left to the dot and the hover to keep the column
-   * narrow: "6 (highest)" reads 6 with a red dot.
+   * narrow: "RI 6 (highest)" reads RI 6 with a red dot, the hover naming
+   * the attribute and the whole.
    */
   function outcomeTag(view) {
-    return el('span', { className: `tag outcome tone-${view.tone}`, attributes: { title: view.outcome } }, [
+    return el('span', { className: `tag outcome tone-${view.tone}`, attributes: { title: view.name ? `${view.name}: ${view.outcome}` : view.outcome } }, [
       ...(view.tone === 'none' ? [] : [el('span', { className: 'risk-dot' })]),
       el('span', { text: view.outcome.replace(/\s*\([^)]*\)$/, '') }),
     ]);

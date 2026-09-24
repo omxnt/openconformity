@@ -44,89 +44,39 @@ export const GRAPH = {
 /** The band an index falls in, as 6.3.2 reads them. */
 export const graphBand = (index) => (index <= 2 ? 'lowest' : index <= 4 ? 'medium' : 'highest');
 
+/** The classes of each parameter of the graph, in the report's order. */
+export const GRAPH_LEVELS = [
+  ['S1', 'S2'],
+  ['F1', 'F2'],
+  ['O1', 'O2', 'O3'],
+  ['A1', 'A2'],
+];
+
 /**
- * 6.3.2, Figure 3: the graph as the report draws it — each branch the
- * codes it takes and nothing more, branches the report merges merged,
- * each leaf the index it reaches.
+ * 6.3.2, Figure 3 as a tree, grown from the table above so the two
+ * cannot drift apart and merged as the report merges it: a branch joins
+ * the one before it where the two reach the same indices whatever is
+ * chosen below them, F1 with F2 and O1 with O2 under S1, so the tree
+ * draws no distinction the report does not make. Each branch carries
+ * the codes it takes and each leaf the index it reaches.
  */
-export const GRAPH_TREE = {
-  label: 'Start',
-  children: [
-    {
-      label: 'S1',
-      codes: ['S1'],
-      children: [
-        {
-          label: 'F1, F2',
-          codes: ['F1', 'F2'],
-          children: [
-            { label: 'O1, O2', codes: ['O1', 'O2'], children: [{ label: 'A1, A2', codes: ['A1', 'A2'], index: 1 }] },
-            { label: 'O3', codes: ['O3'], children: [{ label: 'A1, A2', codes: ['A1', 'A2'], index: 2 }] },
-          ],
-        },
-      ],
-    },
-    {
-      label: 'S2',
-      codes: ['S2'],
-      children: [
-        {
-          label: 'F1',
-          codes: ['F1'],
-          children: [
-            { label: 'O1', codes: ['O1'], children: [{ label: 'A1, A2', codes: ['A1', 'A2'], index: 2 }] },
-            {
-              label: 'O2',
-              codes: ['O2'],
-              children: [
-                { label: 'A1', codes: ['A1'], index: 2 },
-                { label: 'A2', codes: ['A2'], index: 3 },
-              ],
-            },
-            {
-              label: 'O3',
-              codes: ['O3'],
-              children: [
-                { label: 'A1', codes: ['A1'], index: 3 },
-                { label: 'A2', codes: ['A2'], index: 4 },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'F2',
-          codes: ['F2'],
-          children: [
-            {
-              label: 'O1',
-              codes: ['O1'],
-              children: [
-                { label: 'A1', codes: ['A1'], index: 3 },
-                { label: 'A2', codes: ['A2'], index: 4 },
-              ],
-            },
-            {
-              label: 'O2',
-              codes: ['O2'],
-              children: [
-                { label: 'A1', codes: ['A1'], index: 4 },
-                { label: 'A2', codes: ['A2'], index: 5 },
-              ],
-            },
-            {
-              label: 'O3',
-              codes: ['O3'],
-              children: [
-                { label: 'A1', codes: ['A1'], index: 5 },
-                { label: 'A2', codes: ['A2'], index: 6 },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
+const sketch = (node) => (node.children ? `(${node.children.map(sketch).join(' ')})` : String(node.index));
+const grow = (levels, chosen) => {
+  if (levels.length === 0) return { index: GRAPH[`${chosen[0]} ${chosen[1]}`][GRAPH_COLUMNS.indexOf(`${chosen[2]} ${chosen[3]}`)] };
+  const children = [];
+  for (const code of levels[0]) {
+    const branch = grow(levels.slice(1), [...chosen, code]);
+    const last = children.at(-1);
+    if (last && sketch(last) === sketch(branch)) {
+      last.codes.push(code);
+      last.label = last.codes.join(', ');
+    } else {
+      children.push({ label: code, codes: [code], ...branch });
+    }
+  }
+  return { children };
 };
+export const GRAPH_TREE = { label: 'Start', ...grow(GRAPH_LEVELS, []) };
 
 /**
  * The branch of the graph a rating follows: the nodes from the start,
@@ -145,24 +95,6 @@ export function graphPath(codes, tree = GRAPH_TREE) {
     node = next;
   }
   return path;
-}
-
-/**
- * The codes after a branch of the graph is picked: the code itself at
- * its level, each single-code ancestor at its own, and the rest as they
- * were. A merged ancestor decides nothing, so it is left to be picked.
- * @param {string[]} codes  S, F, O, A as they stand, '' where unset
- * @param {Array<Object>} ancestors  the nodes above the branch, from the severity down
- * @param {string} code  the code picked
- * @returns {string[]}
- */
-export function graphPick(codes, ancestors, code) {
-  const next = [...codes];
-  ancestors.forEach((ancestor, level) => {
-    if (ancestor.codes.length === 1) next[level] = ancestor.codes[0];
-  });
-  next[ancestors.length] = code;
-  return next;
 }
 
 /**
@@ -209,8 +141,10 @@ export function scoreOf(value) {
 }
 
 /**
- * The tone an estimate is shown in — high, medium, low, or none — read
- * from the report's own word for it, whichever method said it.
+ * The tone an estimate is shown in — high, medium, low, or negligible —
+ * read from the report's own word for it, whichever method said it, a
+ * level, an index's band or a score's category; none while nothing is
+ * rated or the rating is typed.
  * @param {string|null} held  an estimate, or a level on its own
  */
 export function levelTone(held) {
@@ -218,6 +152,7 @@ export function levelTone(held) {
   if (word === 'high' || word === 'highest') return 'high';
   if (word === 'medium') return 'medium';
   if (word === 'low' || word === 'lowest') return 'low';
+  if (word === 'negligible') return 'negligible';
   return 'none';
 }
 

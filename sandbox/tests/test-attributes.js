@@ -11,7 +11,9 @@ import { RELATIONSHIP_TYPES } from '../app/metamodel.js';
 import { ESTIMATED } from '../app/risk.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
-const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'computed', 'rationale'];
+const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'computed', 'rationale'];
+/** What a table's column may be. */
+const COLUMN_KINDS = ['text', 'multiline', 'date', 'choice', 'number'];
 
 /** The project's tables as §1.10 records them, read beside the types. */
 let documentProject = null;
@@ -27,6 +29,9 @@ const document = readFile('../attributes.md');
  * rows, and groups, in document order. Fenced code blocks are skipped, so
  * the template's placeholder tables are not read as content.
  */
+/** What the document's structure gets wrong, if anything, gathered as it is read. */
+const problems = [];
+
 function parseDocument(text) {
   const types = [];
   let fenced = false;
@@ -94,6 +99,13 @@ function parseDocument(text) {
       }
       if (cells.every((cell) => /^-+$/.test(cell))) continue;
       const list = (cell) => (cell ?? '').split(';').map((value) => value.trim()).filter((value) => value !== '');
+      const dotted = cells[0].match(/^(\w+)\.(\w+)$/);
+      if (dotted) {
+        const owner = table.find((held) => held.key === dotted[1] && held.kind === 'table');
+        if (!owner) problems.push(`${current.code}: a column ${cells[0]} with no table above it`);
+        else (owner.columns ??= []).push({ key: dotted[2], name: cells[1], kind: cells[2], ...(list(cells[3]).length > 0 ? { values: list(cells[3]) } : {}) });
+        continue;
+      }
       const definition = { key: cells[0], name: cells[1], kind: cells[2] };
       if (definition.kind === 'number') [definition.min, definition.max] = list(cells[3]).map(Number);
       else if (definition.kind === 'computed') definition.method = cells[3];
@@ -127,6 +139,7 @@ function parseSharedHelp(text) {
 }
 
 const documentTypes = parseDocument(document);
+deepEqual(problems, [], 'the document nests every sub-group under a group and every column under a table');
 
 // --- The project -------------------------------------------------------
 
@@ -194,6 +207,14 @@ for (const type of documentTypes) {
       const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));
       ok(group !== undefined && group.attributes.some((held) => held.key === definition.parameter && isParameter(held)), `${type.code}.${definition.key} is given for a parameter of its own rating: ${definition.parameter}`);
       ok(!('values' in definition), `${type.code}.${definition.key} offers no values of its own`);
+    } else if (definition.kind === 'table') {
+      ok(Array.isArray(definition.columns) && definition.columns.length > 0, `${type.code}.${definition.key} has columns`);
+      for (const column of definition.columns ?? []) {
+        ok(COLUMN_KINDS.includes(column.kind), `${type.code}.${definition.key}.${column.key} is a text, a multiline, a date, a choice or a number`);
+        if (column.kind === 'choice') ok(Array.isArray(column.values) && column.values.length > 0, `${type.code}.${definition.key}.${column.key} lists its values`);
+        else ok(!('values' in column), `${type.code}.${definition.key}.${column.key} carries no values`);
+      }
+      ok(!('values' in definition), `${type.code}.${definition.key} carries no values of its own`);
     } else if (definition.kind === 'computed') {
       ok(ESTIMATED.includes(definition.method), `${type.code}.${definition.key} is read by a method the software knows`);
       const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));

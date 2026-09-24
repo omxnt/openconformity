@@ -26,6 +26,8 @@ Each attribute uses one of the kinds below.
 | set | Any number of the values in the Values column, stored as those chosen separated by semicolons, in the order the column lists them |
 | hyperlink | A web address |
 | number | A whole number, kept between the least and the greatest the Values column gives |
+| date | A calendar date, stored as its year, month and day, 2026-09-24 |
+| table | Rows of columns, the columns the rows beneath it define, each keyed by the table's key, a dot and its own, and each a text, a multiline, a date, a choice or a number; stored as one line per row with the cells parted by tabs, in column order, a cell holding a tab, a break or a quotation mark quoted as a CSV cell is, a row with every cell empty dropped |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
 | rationale | The reasoning behind the parameter of the same rating whose key the Values column names, free text of any length for why its class was chosen, shown with the parameter's value (§1.8) |
 
@@ -88,11 +90,11 @@ A type that carries a reference composes its label from the reference and the ti
 
 ### 1.8 Layout
 
-The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline, a hyperlink and a set each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice or a number is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
+The editor lays a type's attributes out as Carbon lays out a form, in the order this document records them: each attribute its name over its field, two to a row. The identifier stands first, and the reference — or the designation — beside it; the title, a multiline, a hyperlink and a set each take a row to themselves. View mode is the form's read-only state, as Carbon patterns it: the same structure and spacing as the editable form, each field's ground turned transparent and its rule made subtle, so entering an edit changes what the fields afford and nothing about where they stand. Every name reads at the one size and every value at the one size; nothing in the pane is a heading, the pane's head carrying the type, the identifier and the label already. A choice reads as a tag, a set as the tags chosen — in an edit, a field saying how many and which, opening Carbon's multiselect of every value with its checkbox — and a hyperlink as a link. A date is a field with the browser's own picker, and reads as the date it holds. A table reads as its rows, numbered, under the column names, a choice in a cell as a tag, a multiline keeping its breaks, an empty cell as the dash, a date, a choice or a number column as wide as its values, a text column brief, and a multiline column taking the rest; in an edit each row's cells are fields, a multiline a text area growing as it is typed, a button at the row's end removes it, and Carbon's ghost Add beneath adds a row and focuses its first cell. A table takes a row to itself, as a multiline does. Fields are the compact 32-pixel size throughout, matching the density of the rest of the interface. A name carries Carbon's information glyph where its table gives help: a small button whose tooltip, on hover or focus, holds the sentence or two the Help column records. A name shared by several types carries the help §1.9 records once. A choice, a number or a date is given a narrow field rather than the cell's width: a field's width says what length of value is expected.
 
 A type's own attributes stand on the first tab, named for the type by the last word of its name — Legislation, Requirement, Function — and each group tagged `tab` on a tab of its own, named for the group: a tab is earned by a distinct task, such as a verdict or an estimate, or by a set of fields about a distinct concern, never by a single text and never by the identity alone. Every type closes with a Notes tab, one multiline field for what fits nowhere else, so every pane has its tab bar. The tabs are Carbon's line tabs at the navigator filter bar's height. The tab chosen stands for the rest of the browser session, by type, so the next entity of the type opens on the same tab, and choosing a tab leaves an open edit as it is: what stands on another tab is still part of the draft. A group carrying no tag stands within its tab as a legend over its cells, unless it holds a single attribute, which then stands on its own.
 
-A group that closes on a computed attribute is a rating, a cell like any other: its name, then what the rating comes to and the code of each parameter set, as tags — a code being a value's first word, and its second where the first holds no digit, or for a number the initials of its name before it, SS 95 — the parameter's name and full value shown on hovering a tag. Each parameter may carry a rationale, a `rationale` kind naming the parameter in its Values column, free text of any length for why that class was chosen; a tag whose parameter has one is underlined, and outside an edit is a button whose tooltip holds the parameter and the reasoning, shown on hovering or focusing it as the help glyph's tooltip is, so the tags stay the rating's whole face. In an edit the cell is a field that opens the rating's dialog, titled by the rating and the method, which presents the method as chapter 6 lays it out, the matrix to click, the graph to follow, the scores to enter, and beneath it a text area per parameter for its rationale, the two of a row kept the same height. What is chosen can be unchosen there: a matrix cell pressed again clears its pair, a graph code picked again clears its level and those below it, and a score is deleted. With no method chosen the slot is a text field instead, and the rating is typed.
+A group that closes on a computed attribute is a rating, a cell like any other: its name, then what the rating comes to and the code of each parameter set, as tags — a code being a value's first word, and its second where the first holds no digit, or for a number the initials of its name before it, SS 95. Outside an edit every tag is a button whose tooltip, shown on hovering or focusing it as the help glyph's tooltip is, says what the tag stands for, the parameter's name and full value or the attribute the rating computes and what it comes to, Risk level: High; within an edit, where the whole cell is a button, a tag says the same by the browser's own tooltip. What the rating comes to wears Carbon's status, error for high, warning for medium, the check for low and the check in the secondary colour for negligible, whichever method's word says so, a level, an index's band or a score's category. Each parameter may carry a rationale, a `rationale` kind naming the parameter in its Values column, free text of any length for why that class was chosen; a tag whose parameter has one is underlined, and its tooltip carries the reasoning beneath the lead, so the tags stay the rating's whole face. In an edit the cell is a field that opens the rating's dialog, titled by the rating and the method, and laid out alike for every method: each parameter as a row of its classes to press, one pressed at a time and pressed again to clear, or a field for its score with the table of its classes beneath, and under each a text area for its rationale, the parameters two to a row and the two areas of a row kept the same height; then the method's figure as chapter 6 lays it out, read-only, the matrix with the classes chosen marked and the cell they meet at, or the graph with the path they trace lit to the index it reaches; then, under the name of the attribute it computes, what the rating comes to. With no method chosen the slot is a text field instead, and the rating is typed.
 
 ### 1.9 Help
 
@@ -120,7 +122,7 @@ The project is edited under the root of the tree, on the surface an entity has: 
 | organisation | Organisation | text | | Who the project is done by, or for. |
 | description | Description | multiline | | What the project covers. |
 | version | Version | text | | The revision this file is, as you number it. |
-| date | Date | text | | When this revision was made. |
+| date | Date | date | | When this revision was made. |
 | author | Author | text | | Who prepared this revision. |
 | role | Role | text | | The capacity in which the author prepared it. |
 | changes | Changes | multiline | | What changed in this revision since the last. |
@@ -635,7 +637,7 @@ The designation is the requirement's own short name — `R1` — entered by the 
 
 ### 5.5 System Verification (VER) `draft`
 
-The designation is the verification's own short name — `V1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The verification method is the way the verification is carried out, one of the four the discipline names, and beside it the responsible party says who carries it out, a person, a department or an organisation. The verification setup holds what the verification is carried out with, the configuration of the system, the environment it stands in and the tools and instruments used, whichever the method, an analysis having its models and tools as a test has its rig. The verification procedure says what is done, and the acceptance criteria what counts as passing.
+The designation is the verification's own short name — `V1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The verification method is the way the verification is carried out, one of the four the discipline names, and beside it the responsible party says who carries it out, a person, a department or an organisation. The verification setup holds what the verification is carried out with, the configuration of the system, the environment it stands in and the tools and instruments used, whichever the method, an analysis having its models and tools as a test has its rig. The verification procedure says what is done, and the acceptance criteria what counts as passing. The result tab records what happened each time the verification was carried out, a fact rather than a judgement: one row per run, when and by whom, whether it passed or failed, and remarks, among them the record the result rests on, where it is kept rather than the record itself, which belongs in the technical file; where a run was made is the verification setup's to say, and a run made elsewhere says so in its remarks. Every run is kept, a failed one beside the run that passed after it, and the last row is the verification's result. A verification not yet carried out has no rows.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
@@ -646,6 +648,16 @@ The designation is the verification's own short name — `V1` — entered by the
 | setup | Verification setup | multiline | | The configuration, environment and tools the system verification is carried out with. |
 | description | Verification procedure | multiline | | What is done in the system verification, step by step. |
 | acceptanceCriteria | Acceptance criteria | multiline | | What counts as passing the system verification. |
+
+#### Result `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| runs | Runs | table | | Each time the system verification was carried out, as a row: when and by whom, whether it met its acceptance criteria, and remarks, among them the record the result rests on. |
+| runs.date | Date | date | | |
+| runs.by | By | text | | |
+| runs.result | Result | choice | Passed; Failed | |
+| runs.remarks | Remarks | multiline | | |
 
 #### Notes `tab`
 
@@ -659,7 +671,7 @@ An accident scenario is rated by one of the three methods ISO/TR 14121-2:2012 [1
 
 ### 6.1 Risk matrix
 
-ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity across, the probability down.
+ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity across, the probability down. The dialog shows the table with the classes chosen marked and the cell they meet at.
 
 | Probability | Catastrophic | Serious | Moderate | Minor |
 |---|---|---|---|---|
@@ -670,7 +682,7 @@ ISO/TR 14121-2:2012, 6.2.2, Table 1: the severity across, the probability down.
 
 ### 6.2 Risk graph
 
-ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, occurrence O and avoidance A across, giving a risk index RI from 1 to 6, shown with the band the second table gives it. The dialog draws the graph as the report does, each branch the codes it takes, branches the report merges merged, each leaf ending in the index it reaches, and names the codes still to pick while the path is not decided.
+ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, occurrence O and avoidance A across, giving a risk index RI from 1 to 6, shown with the band the second table gives it. The dialog draws the graph from the table above, merged as the report merges it, a branch joined to its neighbour where the two reach the same indices whatever is chosen below them, F1 with F2 and O1 with O2 under S1: severity, exposure and occurrence as the tree, eight branches, and the avoidance as two columns of cells beside it, each cell the index that branch and that class reach with the dot of its band, one cell across both where the class makes no difference, so no line crosses another and nothing draws a distinction the report does not make; each code stands on its branch as a tag, the one chosen filled, as the form shows a choice, and the path the classes chosen trace lights to the cell it reaches.
 
 | S F | O1 A1 | O1 A2 | O2 A1 | O2 A2 | O3 A1 | O3 A2 |
 |---|---|---|---|---|---|---|
@@ -687,7 +699,7 @@ ISO/TR 14121-2:2012, 6.3.2, Figures 3 and 4: severity S and exposure F down, occ
 
 ### 6.3 Numerical scoring
 
-ISO/TR 14121-2:2012, 6.4.2: the software adds the severity score SS and the probability score PS, each a whole number from 0 to 100, into the risk score RS, shown with the category the third table gives it; the first two say which class a score falls in, as the dialog lists beneath each score, the score's own class marked. The dialog takes digits alone for a score, kept within its bounds.
+ISO/TR 14121-2:2012, 6.4.2: the software adds the severity score SS and the probability score PS, each a whole number from 0 to 100, into the risk score RS, shown with the category the third table gives it; the first two say which class a score falls in, as the dialog lists beneath each score, the score's own class marked. The dialog takes digits alone for a score, kept within its bounds, with a dial to step it.
 
 | Severity score | Class |
 |---|---|

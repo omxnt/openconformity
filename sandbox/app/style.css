@@ -603,6 +603,24 @@ body {
 /* A set's tags wrap inside the slot. */
 .cell-value.tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 
+/* A table attribute: its rows under the column names on the data
+   table's styles, numbered; in an edit each cell a field filling it, the
+   row's rule serving as the fields' own, a remove at the row's end and
+   Carbon's ghost Add beneath. */
+.cell-table { display: grid; gap: 8px; justify-items: start; }  /* $spacing-03 */
+.cell-table .data { justify-self: stretch; }
+.cell-table .data th.no, .cell-table .data td.no { width: 1%; text-align: right; color: var(--text-second); font-variant-numeric: tabular-nums; }
+.cell-table .data td.field { padding: 0; vertical-align: middle; }
+.cell-table .data td.field .field-input { border-bottom-color: transparent; max-width: none; }
+.cell-table .data td.field input[type="date"].field-input { width: 12em; }
+.cell-table .data td.field select.field-input { width: auto; min-width: 9em; }
+.cell-table .data td.field textarea.field-input { resize: none; overflow: hidden; min-height: 32px; line-height: 1.42857; }
+.cell-table .data th.fit, .cell-table .data td.fit { width: 1%; white-space: nowrap; }
+.cell-table .data th.brief, .cell-table .data td.brief { width: 10em; }
+.cell-table .data td.prose { white-space: pre-wrap; }
+.cell-table .data td.remove { width: 1%; padding: 4px 8px; vertical-align: middle; }
+.cell-table .ghost-button .icon { width: 16px; height: 16px; fill: currentColor; }
+
 /* A tag carrying a rationale: underlined, and outside an edit a button
    whose tooltip holds the parameter and the reasoning, as the help
    glyph's holds the help. */
@@ -666,6 +684,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
    stretches to the width of a sentence: a field's width says what
    length of value is expected (Carbon form guidance). */
 select.field-input,
+input[type="date"].field-input,
 input[type="number"].field-input { max-width: 192px; }
 select.field-input.wide { max-width: none; }
 
@@ -728,6 +747,14 @@ select.field-input.wide { max-width: none; }
   letter-spacing: 0.32px;
   color: var(--text-second);
   margin-bottom: 8px;       /* $spacing-03 */
+}
+
+/* A note under a field, Carbon's helper text. */
+.field-note {
+  font-size: 12px;          /* $helper-text-01 */
+  letter-spacing: 0.32px;
+  color: var(--text-helper);
+  margin-top: 4px;          /* $spacing-02 */
 }
 
 .field-input {
@@ -849,22 +876,23 @@ select.field-input[size] {
 .status-icon.tone-high { color: var(--danger); }
 .status-icon.tone-medium { color: var(--support-warning); }
 .status-icon.tone-low { color: var(--support-success); }
-.status-icon.tone-none { color: var(--text-second); }
+.status-icon.tone-negligible { color: var(--text-second); }
 
 /* The dialog: wider than a question, for the matrix and the graph. */
 .dialog:has(.rating) { max-width: 800px; }
 .rating { display: grid; gap: 16px; color: var(--text); }  /* $spacing-05 */
 
-/* Carbon's status colours mark the levels: error, warning, success, and none. */
+/* Carbon's status colours mark the levels: error, warning, success, and the neutral for negligible. */
 .risk-dot { flex: none; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); }
 .tone-high .risk-dot { background: var(--danger); }
 .tone-medium .risk-dot { background: var(--support-warning); }
 .tone-low .risk-dot { background: var(--support-success); }
 
-/* A matrix: the classes as headers, a cell per pair, the one the rating stands on marked. */
+/* A matrix as the figure: the classes as headers, the chosen ones marked, a cell per pair, the one the classes meet at marked. */
 .risk-matrix { width: 100%; border-collapse: collapse; font-size: 12px; letter-spacing: 0.16px; }  /* $body-compact-01 at $label-01 size */
 .risk-matrix th { padding: 8px; font-weight: 600; text-align: left; color: var(--text-second); border-bottom: 1px solid var(--border-subtle); }
 .risk-matrix th[scope="row"] { border-bottom: none; border-right: 1px solid var(--border-subtle); white-space: nowrap; }
+.risk-matrix th.chosen { color: var(--text); }
 .risk-matrix td { padding: 2px; }
 .risk-cell {
   display: flex;
@@ -881,69 +909,82 @@ select.field-input[size] {
   text-align: left;
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
-button.risk-cell { cursor: pointer; }
-button.risk-cell:hover { background: var(--hover); }
-button.risk-cell:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-.risk-cell[aria-pressed="true"],
 .risk-cell.reached { background: var(--layer-accent); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
 
-/* A surface with a word of guidance above it, and two scores side by side. */
-.rating-surface { display: grid; gap: 16px; }  /* $spacing-05 */
-.risk-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }  /* $spacing-06 */
-.field-note {
-  font-size: 12px;          /* $helper-text-01 */
-  letter-spacing: 0.32px;
-  color: var(--text-helper);
-  margin-top: 4px;          /* $spacing-02 */
-}
+/* The parameters two to a row: the name, the control, and the rationale
+   beneath, the two areas of a row the same height. */
+.rating-parameters { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }  /* $spacing-05, $spacing-06 */
+.rating-parameter { display: grid; gap: 8px; align-content: start; }  /* $spacing-03 */
+.rating-parameter .field-label { margin-bottom: 0; }
+.rating-parameter textarea.field-input { display: block; resize: none; overflow: hidden; min-height: 64px; line-height: 1.42857; }
 
-/* The graph as the report draws it and as the picker: labels on their
-   branches, every code a button, the path decided so far in the
-   interactive colour, the codes next to pick in the link colour. Drawn
-   at its own size, the lines on pixel centres, never scaled. */
-.rating-graph { overflow-x: auto; }
-.risk-graph { display: block; font-size: 12px; letter-spacing: 0.32px; }
-.risk-graph text { fill: var(--text-second); }
-.risk-graph .risk-head { fill: var(--text); font-weight: 600; }
-.risk-graph .risk-label { fill: var(--text); }
-.risk-graph .risk-label.dim { fill: var(--text-helper); }
-.risk-graph .risk-code { cursor: pointer; }
-.risk-graph .risk-code:hover { fill: var(--link); text-decoration: underline; }
-.risk-graph .risk-code.selected { fill: var(--accent); font-weight: 600; }
-.risk-graph .risk-code.next { fill: var(--link); }
-.risk-graph .risk-code:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.risk-graph .risk-edge { fill: none; stroke: var(--border-strong); stroke-width: 1; }
-.risk-graph .risk-edge.active { stroke: var(--accent); stroke-width: 2; }
-.risk-graph .risk-leaf circle { fill: var(--layer); stroke: var(--border-strong); }
-.risk-graph .risk-leaf text { fill: var(--text); text-anchor: middle; }
-.risk-graph .risk-leaf.active circle { fill: var(--accent); stroke: var(--accent); }
-.risk-graph .risk-leaf.active text { fill: var(--text-on-color); font-weight: 600; }
+/* A parameter's classes as Carbon's content switcher: one pressed, pressed again to clear. */
+.risk-options { display: flex; flex-wrap: wrap; gap: 1px; }
+.risk-option {
+  min-height: 32px;         /* Carbon content switcher sm */
+  padding: 0 12px;          /* $spacing-04 */
+  font: inherit;
+  font-size: 12px;          /* $label-01 */
+  letter-spacing: 0.32px;
+  color: var(--text);
+  background: var(--layer);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.risk-option:hover { background: var(--hover); }
+.risk-option[aria-pressed="true"] { background: var(--inverse); color: var(--text-inverse); }
+.risk-option:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 
 /* A score's classes beneath it: the range, then the class, the score's own marked. */
 .risk-scale { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin-top: 8px; font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
 .risk-scale-range { font-variant-numeric: tabular-nums; }
 .risk-scale .own { color: var(--text); font-weight: 600; }
 
-/* The rationale beneath the surface: a text area per parameter, two to a row, the two of a row the same height. */
-.rating-rationale { display: grid; gap: 4px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }  /* $spacing-02, $spacing-04 */
-.rating-rationale .cell-legend { margin-top: 0; }
-.rating-rationale-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }  /* $spacing-06 */
-.rating-rationale-fields .field { padding: 12px 0 0; }  /* $spacing-04 */
-.rating-rationale-fields textarea.field-input { display: block; resize: none; overflow: hidden; min-height: 64px; line-height: 1.42857; }
+/* The graph, read-only: labels on their branches, the last parameter
+   as columns of cells beside the tree, the path the classes chosen
+   trace in the interactive colour to the cell it reaches. Drawn at its
+   own size, the lines on pixel centres, never scaled. */
+.rating-graph { overflow-x: auto; }
+.risk-graph { display: block; font-size: 12px; letter-spacing: 0.32px; }
+.risk-graph text { fill: var(--text-second); }
+.risk-graph .risk-head { fill: var(--text); font-weight: 600; }
+.risk-graph .risk-label { fill: var(--text); }
+.risk-graph .risk-code { fill: var(--text); }
+.risk-graph .risk-code.dim { fill: var(--text-helper); }
+.risk-graph .risk-chip { fill: var(--accent); }
+.risk-graph .risk-code.chosen { fill: var(--text-on-color); font-weight: 600; }
+.risk-graph .risk-edge { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+.risk-graph .risk-edge.active { stroke: var(--accent); stroke-width: 2; }
+.risk-graph .risk-leaf .risk-leaf-cell { fill: var(--layer); }
+.risk-graph .risk-leaf .risk-leaf-bar { fill: none; }
+.risk-graph .risk-leaf text { fill: var(--text); }
+.risk-graph .risk-leaf .risk-leaf-dot { fill: var(--border-strong); }
+.risk-graph .risk-leaf.tone-high .risk-leaf-dot { fill: var(--danger); }
+.risk-graph .risk-leaf.tone-medium .risk-leaf-dot { fill: var(--support-warning); }
+.risk-graph .risk-leaf.tone-low .risk-leaf-dot { fill: var(--support-success); }
+.risk-graph .risk-leaf.active .risk-leaf-cell { fill: var(--layer-accent); }
+.risk-graph .risk-leaf.active .risk-leaf-bar { fill: var(--accent); }
+.risk-graph .risk-leaf.active text { font-weight: 600; }
 
-/* What the rating comes to, under the surface. */
+/* What the rating comes to, last: the name of the attribute it computes over the value with its status. */
 .risk-result {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
+  display: grid;
+  gap: 4px;                 /* $spacing-02 */
   padding-top: 12px;        /* $spacing-04 */
   border-top: 1px solid var(--border-subtle);
+}
+.risk-result .field-label { margin-bottom: 0; }
+.risk-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
   font-size: 16px;          /* $heading-compact-02 */
   line-height: 1.375;
   font-weight: 600;
 }
-.risk-result.unrated { color: var(--text-helper); font-weight: 400; }
-.risk-outcome { display: inline-flex; align-items: center; gap: 8px; }  /* $spacing-03 */
+.risk-result.unrated .risk-outcome { color: var(--text-helper); font-weight: 400; }
 
 /* ---------- Relationships ---------- */
 
