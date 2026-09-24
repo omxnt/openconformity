@@ -55,8 +55,9 @@ const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.
   ok(EDITOR_URL.startsWith(`${EDITOR_ORIGIN}/?embed=1&proto=json`), 'its page is on that origin in embed mode with the JSON protocol');
   ok(EDITOR_URL.includes('noSaveBtn=1') && EDITOR_URL.includes('saveAndExit=0') && EDITOR_URL.includes('noExitBtn=1') && EDITOR_URL.includes('libraries=0'), 'with none of its own Save or Exit buttons and no shape libraries');
   ok(EDITOR_URL.includes('pages=0') && EDITOR_URL.includes('plugins=0') && EDITOR_URL.includes('configure=1'), 'no page bar, no plugins, and asking to be configured');
+  ok(EDITOR_URL.includes('drafts=0'), 'and no draft of a diagram kept in the editor\'s own storage');
   ok(EDITOR_CONFIG.suppressNewWindows === true && EDITOR_CONFIG.enableCustomLibraries === false && EDITOR_CONFIG.restrictExport === undefined, 'the configuration opens no window and no library, and does not restrict export, which would take Edit Diagram away');
-  equal(EDITOR_CONFIG.maxImageBytes, 256 * 1024, 'a picture placed in the diagram may be a quarter of the drawing size limit at most, refused on insertion rather than the diagram on Apply');
+  equal(EDITOR_CONFIG.maxImageBytes, 128 * 1024, 'a picture placed in the diagram may be an eighth of the drawing size limit at most, since it is stored twice as text a third larger, refused on insertion rather than the diagram on Apply');
   ok(EDITOR_CONFIG.css.includes('.geTabContainer:has(.gePageTab):not(:has(.gePageTab ~ .gePageTab)) { display: none !important; }') && EDITOR_CONFIG.css.includes('.geControlTab { display: none !important; }'), 'the page bar is hidden by style only while exactly one page tab is found, so it shows past one page and whenever the editor\'s class names change, its own page controls hidden');
   deepEqual(EDITOR_CONFIG.hideMenuItems, ['exportAs', 'importFrom', 'print', 'embed', 'publish', 'share', 'plugins', 'configuration', 'rename'], 'hidden: import and export, print, what would publish or share, what loads code, and what names a file that is not there');
   deepEqual(EDITOR_CONFIG.hideMenus, ['help'], 'and the help menu, whose items open windows');

@@ -265,6 +265,46 @@ export function createStore({ storage, session = null }) {
     /** Whether the last write to browser storage failed. */
     persistFailed: () => persistFailed,
 
+    /**
+     * Forget everything this browser holds of the software: the project
+     * and its set-aside copy, the theme, and the session state, so a
+     * borrowed machine keeps nothing. The session returns to the landing
+     * with no project, as a fresh one begins. A file saved by the user
+     * is not the browser's to remove.
+     */
+    removeFromBrowser() {
+      for (const key of [PROJECT_KEY, ASIDE_KEY, THEME_KEY]) {
+        try {
+          storage.removeItem(key);
+        } catch {
+          // Storage that refuses has nothing left to keep either way.
+        }
+      }
+      for (const key of [VIEW_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY]) {
+        try {
+          session?.removeItem(key);
+        } catch {
+          // A session store that refuses changes nothing.
+        }
+      }
+      model = createModel();
+      savedSequence = history.reset(model);
+      projectOpen = false;
+      selection = null;
+      expanded = new Set();
+      projectCollapsed = false;
+      navigatorFilter = '';
+      picker = null;
+      openView = null;
+      viewReturn = null;
+      theme = null;
+      consented = false;
+      relationshipView = 'graph';
+      for (const code of Object.keys(chosenTabs)) delete chosenTabs[code];
+      persistFailed = false;
+      notify();
+    },
+
     /** @param {() => void} listener  @returns {() => void} */
     subscribe(listener) {
       listeners.add(listener);

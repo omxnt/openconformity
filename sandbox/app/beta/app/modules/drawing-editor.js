@@ -17,8 +17,8 @@ import { checkDrawing, embeddedModel, pageCount } from './drawing.js';
 /** The editor's origin, fixed here and named to the user before it is loaded. */
 export const EDITOR_ORIGIN = 'https://embed.diagrams.net';
 
-/** The editor's page: embed mode with the JSON protocol, no shape libraries, no plugins, no page bar since a drawing is one page, asking to be configured, and none of its own Save or Exit buttons, ours standing in the dialog. */
-export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries=0&plugins=0&pages=0&configure=1&noSaveBtn=1&saveAndExit=0&noExitBtn=1&modified=0`;
+/** The editor's page: embed mode with the JSON protocol, no shape libraries, no plugins, no drafts kept at its origin, asking to be configured, and none of its own Save or Exit buttons, ours standing in the dialog. */
+export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries=0&plugins=0&drafts=0&pages=0&configure=1&noSaveBtn=1&saveAndExit=0&noExitBtn=1&modified=0`;
 
 /**
  * What the editor is told when it asks to be configured, by one rule:
@@ -35,12 +35,13 @@ export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries
  * for adding pages stay hidden. The rule names the editor's own class
  * names, which are not a documented interface, and is written so that a
  * renamed class shows the bar rather than hides it. A picture placed in
- * the diagram becomes data inside the model, so the editor is told to
- * take none above a quarter of the drawing size limit, refusing it on
+ * the diagram becomes data twice over, once in the model and once in
+ * the SVG, each a third larger than the file, so the editor is told to
+ * take none above an eighth of the drawing size limit, refusing it on
  * insertion rather than the whole diagram on Apply.
  */
 export const EDITOR_CONFIG = {
-  maxImageBytes: 256 * 1024,
+  maxImageBytes: 128 * 1024,
   css: '.geTabContainer:has(.gePageTab):not(:has(.gePageTab ~ .gePageTab)) { display: none !important; } .geControlTab { display: none !important; }',
   hideMenus: ['help'],
   hideMenuItems: ['exportAs', 'importFrom', 'print', 'embed', 'publish', 'share', 'plugins', 'configuration', 'rename'],

@@ -94,6 +94,18 @@ export function createActions({ store, flows }) {
       run: () => flows.loadExample(),
     },
     {
+      id: 'remove-from-browser',
+      icon: 'i-delete',
+      label: 'Remove from this browser',
+      group: 'browser',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => true,
+      danger: true,
+      run: () => flows.removeFromBrowser(),
+    },
+    {
       id: 'about',
       icon: 'i-information',
       label: 'About',

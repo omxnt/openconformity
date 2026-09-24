@@ -546,4 +546,35 @@ function flowsOver(store) {
   );
 }
 
+// --- Remove from this browser asks, then forgets ------------------------
+
+{
+  const storage = fakeStorage();
+  const store = createStore({ storage, session: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs: {
+      ...noDialogs,
+      confirm: async (question) => {
+        asked.push(question);
+        return answer;
+      },
+    },
+    editor: stubEditor(),
+    fileInput: null,
+  });
+  store.replaceProject(createModel());
+  await flows.removeFromBrowser();
+  equal(asked.length, 1, 'the removal asks first');
+  deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Remove from this browser', 'Remove', true], 'in the danger colour, with Remove as the answer');
+  ok(asked[0].message.startsWith('Everything the software keeps in this browser is removed') && asked[0].message.endsWith('A saved file is not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
+  ok(store.hasProject() && storage.read('openconformity.project') !== null, 'Cancel changes nothing');
+  answer = true;
+  await flows.removeFromBrowser();
+  ok(!store.hasProject() && storage.read('openconformity.project') === null, 'Remove forgets the project and shows the landing');
+}
+
 summary('test-flows');

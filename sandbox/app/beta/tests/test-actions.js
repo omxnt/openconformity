@@ -24,8 +24,8 @@ function enabledIds(actions) {
   const actions = createActions({ store, flows: {} });
   deepEqual(
     enabledIds(actions),
-    ['new-project', 'open', 'load-example', 'about', 'metamodel'],
-    'the no-project state offers the three ways in and the help surface — nothing that needs a project'
+    ['new-project', 'open', 'load-example', 'remove-from-browser', 'about', 'metamodel'],
+    'the no-project state offers the three ways in, the removal from this browser, and the help surface — nothing that needs a project'
   );
 }
 
@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'remove-from-browser', 'about', 'metamodel', 'new-entity', 'new-related', 'new-folder', 'relate', 'rename', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -60,8 +60,13 @@ function enabledIds(actions) {
     'and holds the example alone in its own group, behind the separator'
   );
   deepEqual(
-    actions.filter((action) => ['project', 'example'].includes(action.group)).map((action) => action.label),
-    ['New project', 'Open project…', 'Save project', 'Load example'],
+    actions.filter((action) => action.menubar && action.group === 'browser').map((action) => [action.id, action.danger]),
+    [['remove-from-browser', true]],
+    'and ends with the removal from this browser, in the danger colour, in its own group behind a separator'
+  );
+  deepEqual(
+    actions.filter((action) => ['project', 'example', 'browser'].includes(action.group)).map((action) => action.label),
+    ['New project', 'Open project…', 'Save project', 'Load example', 'Remove from this browser'],
     'named as the File menu reads, top to bottom'
   );
   deepEqual(
@@ -82,6 +87,7 @@ function enabledIds(actions) {
       open: true,
       save: true,
       'load-example': true,
+      'remove-from-browser': true,
       about: true,
       metamodel: true,
       'new-entity': true,

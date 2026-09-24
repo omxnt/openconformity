@@ -633,4 +633,31 @@ function openStore(storage) {
   equal(createStore({ storage, session }).tabOf('ESR'), null, 'as does one holding the wrong shape');
 }
 
+// --- Remove from this browser forgets everything ------------------------
+
+{
+  const storage = fakeStorage({ [ASIDE_KEY]: 'an old failed blob' });
+  const session = fakeStorage();
+  const store = createStore({ storage, session });
+  store.replaceProject(createModel());
+  store.setTheme('g100');
+  store.setConsented(true);
+  ok(storage.read(PROJECT_KEY) !== null && storage.read(THEME_KEY) === 'g100' && session.read('openconformity.drawio-consent') === '1', 'a browser holding a project, a set-aside copy, a theme and the consent');
+  let told = 0;
+  store.subscribe(() => {
+    told += 1;
+  });
+  store.removeFromBrowser();
+  equal(told, 1, 'the removal is told once');
+  equal(store.hasProject(), false, 'no project is open, as on the landing');
+  equal(store.theme(), null, 'the theme follows the system again');
+  equal(store.consented(), false, 'the consent is withdrawn');
+  equal(store.dirty(), false, 'and nothing is dirty');
+  deepEqual([storage.read(PROJECT_KEY), storage.read(ASIDE_KEY), storage.read(THEME_KEY)], [null, null, null], 'nothing of the software is left in browser storage, the set-aside copy included');
+  deepEqual(['openconformity.view', 'openconformity.tabs', 'openconformity.open-view', 'openconformity.drawio-consent'].map((key) => session.read(key)), [null, null, null, null], 'nor in the session');
+  equal(createStore({ storage, session }).restoration(), 'fresh', 'the next session begins fresh');
+  store.replaceProject(createModel());
+  ok(storage.read(PROJECT_KEY) !== null, 'and a new project persists again as ever');
+}
+
 summary('test-store');

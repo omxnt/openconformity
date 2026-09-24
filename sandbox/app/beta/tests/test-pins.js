@@ -126,7 +126,7 @@ import { fakeStorage } from './helpers.js';
     'the metamodel carries no launch mark: it leaves for no external site'
   );
 
-  ok(shell.includes("const fileGroups = ['project', 'example']"), 'the File menu parts the example behind a separator');
+  ok(shell.includes("const fileGroups = ['project', 'example', 'browser']"), 'the File menu parts the example and the removal from this browser behind separators');
 
   const editor = readFile('../app/modules/editor.js');
   ok(

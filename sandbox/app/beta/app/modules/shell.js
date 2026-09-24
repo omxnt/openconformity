@@ -210,7 +210,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
 
   // The file actions, then the example behind a separator: the way in
   // that replaces your work stands apart from the ones that save it.
-  const fileGroups = ['project', 'example'];
+  const fileGroups = ['project', 'example', 'browser'];
   menubarMenu(fileButton, 'File', () => {
     const items = [];
     let lastGroup = null;
