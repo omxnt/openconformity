@@ -433,6 +433,16 @@ When the model changes, the software shall persist the change in browser storage
 
 > *Work survives closing the software without a save, as a drawing survives closing draw.io. Browser storage is retained at the browser's and the user's discretion, and is cleared with site data, so the saved project file remains the durable record. Persisting on change, rather than on close, means a crash loses nothing either.*
 
+---
+
+#### F-SES-003 Browser removal
+
+`event driven` `draft`
+
+When the user removes the software's data from the browser, the software shall confirm first, stating what is lost, and shall then delete everything it keeps in browser storage, the project, the session state and the user's choices.
+
+> *A borrowed or shared machine must be left with nothing. The browser's own site-data clearing does the same, but from outside the software and only for those who know where to look, and clearing history alone does not reach site data at all. An action in the software makes the wipe explicit and complete. A project saved to a file is the user's and is not touched.*
+
 ### 4.3 Workspace
 
 ---
