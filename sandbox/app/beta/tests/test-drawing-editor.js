@@ -165,7 +165,7 @@ function drive(drawing) {
   session.hear({ event: 'save' });
   equal(session.state(), 'exporting', "the editor's own save is Apply");
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${HOSTILE}` });
-  deepEqual(events.at(-1), ['refuse', 'returned a drawing that holds a script element'], 'a hostile export is refused with the check\'s reason');
+  deepEqual(events.at(-1), ['refuse', 'returned a diagram that holds a script element'], 'a hostile export is refused with the check\'s reason');
   equal(session.state(), 'editing', 'and the session is back in editing, the editor still open');
   ok(session.apply(), 'so the drawing can be amended and applied again');
   session.hear({ event: 'export', format: 'svg', data: EXPORTED });
@@ -177,7 +177,7 @@ function drive(drawing) {
   session.hear({ event: 'init' });
   session.apply();
   session.hear({ event: 'export', format: 'xmlsvg', data: 'data:image/png;base64,AAAA' });
-  deepEqual(events.at(-1), ['refuse', 'returned something that is not a drawing'], 'an export that is no SVG is refused');
+  deepEqual(events.at(-1), ['refuse', 'returned something that is not a diagram'], 'an export that is no SVG is refused');
   equal(session.state(), 'editing', 'with the editor still open');
 }
 
@@ -186,7 +186,7 @@ function drive(drawing) {
   session.hear({ event: 'init' });
   session.apply();
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${GOOD}` });
-  deepEqual(events.at(-1), ['refuse', 'returned a drawing without its model'], 'a drawing that passes the check but carries no model is refused, since it could not be edited again');
+  deepEqual(events.at(-1), ['refuse', 'returned a diagram without its model'], 'a drawing that passes the check but carries no model is refused, since it could not be edited again');
   equal(session.state(), 'editing', 'with the editor still open');
 }
 
@@ -204,7 +204,7 @@ function drive(drawing) {
   session.hear({ event: 'init' });
   session.apply();
   timers[1].fn();
-  deepEqual(events.at(-1), ['refuse', 'did not return the drawing'], 'an editor silent past the export period did not return the drawing');
+  deepEqual(events.at(-1), ['refuse', 'did not return the diagram'], 'an editor silent past the export period did not return the drawing');
   equal(session.state(), 'editing', 'and the session is back in editing');
   ok(session.apply() && timers.length === 3, 'so Apply can be tried again, with a fresh period');
 }

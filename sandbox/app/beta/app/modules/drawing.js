@@ -72,7 +72,7 @@ export function parseXml(text) {
       if (name.startsWith('#x')) value = String.fromCodePoint(Number.parseInt(name.slice(2), 16));
       else if (name.startsWith('#')) value = String.fromCodePoint(Number.parseInt(name.slice(1), 10));
       else if (Object.hasOwn(ENTITIES, name)) value = ENTITIES[name];
-      else fail(`an entity the drawing may not use, ${name}`);
+      else fail(`an entity the diagram may not use, ${name}`);
       if (value === undefined || Number.isNaN(value.codePointAt(0))) fail('a numeric reference to nothing');
       out += raw.slice(from, amp) + value;
       from = end + 1;
@@ -196,7 +196,7 @@ function cssFault(css) {
   const urls = css.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi);
   for (const [, , target] of urls) {
     const held = target.trim().toLowerCase();
-    if (!held.startsWith('#') && !held.startsWith('data:')) return 'references a resource outside the drawing';
+    if (!held.startsWith('#') && !held.startsWith('data:')) return 'references a resource outside the diagram';
   }
   return null;
 }
@@ -250,8 +250,8 @@ function walk(element) {
     if (local(key) === 'href') {
       const target = attribute.value.trim().toLowerCase().replace(/\s+/g, '');
       if (/^(javascript|vbscript|data:text\/html)/.test(target)) return 'links to code';
-      if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the drawing';
-      if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the drawing';
+      if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the diagram';
+      if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the diagram';
     }
     if (local(key) === 'style') {
       const held = cssFault(attribute.value);

@@ -619,6 +619,9 @@ body {
 .drawing-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }  /* $spacing-03 */
 .drawing-size { margin-right: auto; font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
 .drawing-meta .ghost-button .icon { width: 16px; height: 16px; fill: currentColor; }
+/* A table or a drawing with nothing in it says so, in helper text and
+   with no field around it. */
+.cell-none { margin: 0; color: var(--text-helper); }
 .drawing-large { overflow: auto; max-height: 70vh; padding: 16px; background: #ffffff; color-scheme: light; }
 .drawing-large img { display: block; }
 .dialog:has(.drawing-large) { max-width: min(1400px, 95vw); }

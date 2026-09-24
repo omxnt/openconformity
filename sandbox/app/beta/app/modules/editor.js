@@ -440,11 +440,20 @@ export function createEditor({
   /**
    * A value as the view mode shows it: a choice as a tag, a followable
    * hyperlink as a link in a new tab, a multiline value as prose keeping
-   * its breaks, anything else as its text, an unset value as the dash.
+   * its breaks, anything else as its text, an unset value as the dash,
+   * except a table or a drawing, which say there is none in words.
    * @param {{ kind: string }} definition
    * @param {string|undefined} value
    */
   function valueNode(definition, value) {
+    if (definition.kind === 'drawing') return drawingCell(value, false, definition);
+    if (definition.kind === 'table') {
+      const rows = tableRows(definition, value ?? '');
+      if (rows.length === 0) return el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` });
+      return el('div', { className: 'cell-table' }, [
+        tableOf(definition, rows.map((row, i) => row.map((cell, c) => tableCell(definition.columns[c], cell)))),
+      ]);
+    }
     if (value === undefined || value === '') return el('div', { className: 'cell-value empty', text: '–' });
     if (definition.kind === 'choice') return el('div', { className: 'cell-value' }, [el('span', { className: 'tag', text: value })]);
     if (definition.kind === 'set') {
@@ -455,14 +464,6 @@ export function createEditor({
     if (definition.kind === 'hyperlink' && linkable(value)) {
       const address = value.trim();
       return el('div', { className: 'cell-value' }, [el('a', { text: address, attributes: { href: address, target: '_blank', rel: 'noopener' } })]);
-    }
-    if (definition.kind === 'drawing') return drawingCell(value, false);
-    if (definition.kind === 'table') {
-      const rows = tableRows(definition, value);
-      if (rows.length === 0) return el('div', { className: 'cell-value empty', text: '–' });
-      return el('div', { className: 'cell-table' }, [
-        tableOf(definition, rows.map((row, i) => row.map((cell, c) => tableCell(definition.columns[c], cell)))),
-      ]);
     }
     return el('div', { className: definition.kind === 'multiline' ? 'cell-value prose' : 'cell-value', text: value });
   }
@@ -891,11 +892,13 @@ export function createEditor({
 
   /**
    * A drawing in either mode: the picture on a white card, opening at
-   * full size, with its size beneath. In an edit the drawing is kept in
-   * a hidden control carrying the key, the external editor creating or
-   * editing it and Remove clearing it, so the draft reads the drawing as
-   * it reads a set. A drawing that fails the check shows why instead of
-   * a picture, and stays as it is.
+   * full size, with its size beneath, and a line saying there is none
+   * where there is none, no field around either. In an edit the drawing
+   * is kept in a hidden control carrying the key, Carbon's ghost
+   * buttons opening the external editor to create or edit it and, in
+   * the danger colour, deleting it, so the draft reads the drawing as
+   * it reads a set. A drawing that fails the check shows why instead of a
+   * picture, and stays as it is.
    * @param {string|undefined} value
    * @param {boolean} editing
    * @param {Object} [definition]  in an edit, the attribute the control carries
@@ -906,14 +909,14 @@ export function createEditor({
     const hidden = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key } }) : null;
     const body = el('div', { className: 'drawing-body' });
     const ghost = (label, glyph, onPick, danger = false) => {
-      const button = el('button', { className: `ghost-button${danger ? ' ghost-danger' : ''}`, attributes: { type: 'button' } }, [icon(glyph), el('span', { text: label })]);
-      button.addEventListener('click', onPick);
-      return button;
+      const node = el('button', { className: `ghost-button${danger ? ' ghost-danger' : ''}`, attributes: { type: 'button' } }, [icon(glyph), el('span', { text: label })]);
+      node.addEventListener('click', onPick);
+      return node;
     };
     const enlarge = () =>
       dialogs.open({
-        title: `Drawing of ${subject()}`,
-        body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } })]),
+        title: `Diagram of ${subject()}`,
+        body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Diagram of ${subject()}` } })]),
         actions: [{ label: 'Close', value: null, kind: 'primary', default: true }],
       });
     const hold = (held) => {
@@ -930,17 +933,17 @@ export function createEditor({
       if (text !== '') {
         const verdict = checkDrawing(text);
         if (verdict.ok) {
-          const open = el('button', { className: 'drawing-open', attributes: { type: 'button', 'aria-label': `Open the drawing of ${subject()} at full size` } }, [
-            el('img', { className: 'drawing-image', attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } }),
+          const open = el('button', { className: 'drawing-open', attributes: { type: 'button', 'aria-label': `Open the diagram of ${subject()} at full size` } }, [
+            el('img', { className: 'drawing-image', attributes: { src: dataUrl(text), alt: `Diagram of ${subject()}` } }),
           ]);
           open.addEventListener('click', enlarge);
           body.appendChild(el('div', { className: 'drawing-card' }, [open]));
         } else {
-          body.appendChild(el('div', { className: 'drawing-refused', text: `This drawing cannot be shown. It ${verdict.reason}.` }));
+          body.appendChild(el('div', { className: 'drawing-refused', text: `This diagram cannot be shown. It ${verdict.reason}.` }));
         }
         actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }));
-      } else {
-        body.appendChild(el('div', { className: 'cell-value empty', text: '–' }));
+      } else if (!editing) {
+        body.appendChild(el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` }));
       }
       if (editing && dialogs) {
         actions.push(
@@ -949,7 +952,7 @@ export function createEditor({
             if (held !== null) hold(held);
           })
         );
-        if (text !== '') actions.push(ghost('Remove', 'i-delete', () => hold(''), true));
+        if (text !== '') actions.push(ghost('Delete', 'i-delete', () => hold(''), true));
       }
       if (actions.length > 0) body.appendChild(el('div', { className: 'drawing-meta' }, actions));
     };

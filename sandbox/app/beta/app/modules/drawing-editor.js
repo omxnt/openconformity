@@ -192,16 +192,16 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
         clearTimer(timer);
         const text = decodeExport(message);
         if (text === null) {
-          refuse('returned something that is not a drawing');
+          refuse('returned something that is not a diagram');
           return;
         }
         const verdict = checkDrawing(text);
         if (!verdict.ok) {
-          refuse(`returned a drawing that ${verdict.reason}`);
+          refuse(`returned a diagram that ${verdict.reason}`);
           return;
         }
         if (embeddedModel(text) === null) {
-          refuse('returned a drawing without its model');
+          refuse('returned a diagram without its model');
           return;
         }
         state = 'done';
@@ -212,7 +212,7 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
     apply() {
       if (state !== 'editing') return false;
       state = 'exporting';
-      timer = setTimer(() => refuse('did not return the drawing'), EXPORT_PERIOD);
+      timer = setTimer(() => refuse('did not return the diagram'), EXPORT_PERIOD);
       post({ action: 'export', format: 'xmlsvg', embedImages: true, theme: 'light', keepTheme: false, spin: 'Applying' });
       return true;
     },
@@ -235,8 +235,8 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
 async function consent(dialogs, store) {
   const box = el('input', { attributes: { type: 'checkbox', id: 'drawio-consent-box' } });
   const body = el('div', { className: 'consent' }, [
-    el('p', { text: `The drawing editor is draw.io, loaded from ${EDITOR_ORIGIN} when you continue. Loading it is a request to that origin, and the request shows in your network.` }),
-    el('p', { text: 'The drawing being edited is handed to the editor. Nothing else of the project is.' }),
+    el('p', { text: `The diagram editor is draw.io, loaded from ${EDITOR_ORIGIN} when you continue. Loading it is a request to that origin, and the request shows in your network.` }),
+    el('p', { text: 'The diagram being edited is handed to the editor. Nothing else of the project is.' }),
     el('label', { className: 'consent-box', attributes: { for: 'drawio-consent-box' } }, [box, el('span', { className: 'checkbox' }, [icon('i-checkmark')]), el('span', { text: "Don't ask again this session" })]),
   ]);
   const picked = await dialogs.open({
@@ -272,7 +272,7 @@ export async function editDrawing({ dialogs, store, drawing, subject }) {
       sandbox: FRAME_SANDBOX,
       allow: FRAME_ALLOW,
       referrerpolicy: 'no-referrer',
-      title: `draw.io, editing the drawing of ${subject}`,
+      title: `draw.io, editing the diagram of ${subject}`,
     },
   });
   const host = el('div', { className: 'drawing-editor' }, [note, frame]);
@@ -284,16 +284,16 @@ export async function editDrawing({ dialogs, store, drawing, subject }) {
     setTimer: (fn, ms) => setTimeout(fn, ms),
     clearTimer: (timer) => clearTimeout(timer),
     onReady: () => {
-      note.textContent = foreign ? 'This drawing was not made in draw.io, so the editor opens empty. Apply replaces the drawing with what is drawn here.' : '';
+      note.textContent = foreign ? 'This diagram was not made in draw.io, so the editor opens empty. Apply replaces it with what is drawn here.' : '';
     },
     onChanged: () => {},
     onDone: (text) => settleApply?.(text),
     onRefuse: (why) => {
-      note.textContent = `The editor ${why}. The drawing is unchanged. You can apply again or cancel.`;
+      note.textContent = `The editor ${why}. The diagram is unchanged. You can apply again or cancel.`;
       settleApply?.(undefined);
     },
     onFail: (why) => {
-      note.textContent = `The editor ${why}. Nothing has been sent, and the drawing is unchanged.`;
+      note.textContent = `The editor ${why}. Nothing has been sent, and the diagram is unchanged.`;
       settleApply?.(undefined);
     },
   });
@@ -303,7 +303,7 @@ export async function editDrawing({ dialogs, store, drawing, subject }) {
   };
   window.addEventListener('message', handler);
   const picked = await dialogs.open({
-    title: `Drawing of ${subject}`,
+    title: `Diagram of ${subject}`,
     body: host,
     actions: [
       {

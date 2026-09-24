@@ -37,7 +37,7 @@ const reason = (text) => {
   equal(throws('<a><b></a>'), 'a closes b', 'a mismatched end tag is a fault');
   equal(throws('<a>'), 'an unclosed element a', 'an unclosed element is a fault');
   equal(throws('<a x=1/>'), 'an attribute x without quotes', 'an unquoted attribute is a fault');
-  equal(throws('<a>&nbsp;</a>'), 'an entity the drawing may not use, nbsp', 'an entity beyond the five is a fault');
+  equal(throws('<a>&nbsp;</a>'), 'an entity the diagram may not use, nbsp', 'an entity beyond the five is a fault');
   equal(throws('<!DOCTYPE a [<!ELEMENT a ANY>]><a/>'), 'a document type declaration with an internal subset', 'an internal subset is a fault');
   equal(throws('<a/><b/>'), 'content after the root element', 'two roots are a fault');
   equal(throws('<a><!ELEMENT b ANY></a>'), 'a declaration inside the document', 'a declaration in the body is a fault');
@@ -80,12 +80,12 @@ const reason = (text) => {
   equal(reason(svg('<rect onload="x()" width="1" height="1"/>')), 'holds an event handler', 'an event handler');
   equal(reason(svg('<a xlink:href="java\nscript:alert(1)"><rect/></a>')), 'links to code', 'a code link, even split by whitespace');
   equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to code', 'a document link');
-  equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the drawing', 'an image on the web');
-  equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the drawing', 'an image on disk');
-  equal(reason(svg('<use href="shapes.svg#a"/>')), 'references a shape outside the drawing', 'a shape from another file');
+  equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on the web');
+  equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on disk');
+  equal(reason(svg('<use href="shapes.svg#a"/>')), 'references a shape outside the diagram', 'a shape from another file');
   equal(reason(svg('<style>@import url(x.css);</style>')), 'imports a stylesheet', 'an import');
-  equal(reason(svg('<rect style="fill: url(https://x/p.png)"/>')), 'references a resource outside the drawing', 'a style attribute reaching out');
-  equal(reason(svg('<style>.a { background: url("http://x/y") }</style>')), 'references a resource outside the drawing', 'a stylesheet reaching out');
+  equal(reason(svg('<rect style="fill: url(https://x/p.png)"/>')), 'references a resource outside the diagram', 'a style attribute reaching out');
+  equal(reason(svg('<style>.a { background: url("http://x/y") }</style>')), 'references a resource outside the diagram', 'a stylesheet reaching out');
   equal(reason(svg('', ` viewBox="0 0 ${DIMENSION_LIMIT + 1} 10"`)), `declares a view beyond ${DIMENSION_LIMIT}`, 'a view too wide');
   equal(reason(`<svg xmlns="http://www.w3.org/2000/svg" width="99999px" height="10"></svg>`), `declares a width beyond ${DIMENSION_LIMIT}`, 'a width too wide');
   equal(reason('<svg xmlns="http://www.w3.org/2000/svg"><rect onClick="x"/></svg>'), 'holds an event handler', 'a handler in any case');

@@ -15,7 +15,7 @@ import { el } from './dom.js';
 export async function showAbout(dialogs, store = null) {
   const link = (href, text) =>
     el('a', { text, attributes: { href, target: '_blank', rel: 'noopener' } });
-  const consentText = () => (store?.consented() ? 'draw.io, the drawing editor: not asking before it loads this session.' : 'draw.io, the drawing editor: asks before it loads, on every edit.');
+  const consentText = () => (store?.consented() ? 'draw.io, the diagram editor: not asking before it loads this session.' : 'draw.io, the diagram editor: asks before it loads, on every edit.');
   const consentLine = el('span', { text: consentText() });
   const forget = el('button', { className: 'ghost-button about-forget', text: 'Forget', attributes: { type: 'button' } });
   forget.hidden = !store?.consented();
