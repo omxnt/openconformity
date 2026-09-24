@@ -100,13 +100,12 @@ const EXPORTED = `data:image/svg+xml;base64,${base64Of(fixture)}`;
 // --- The session, against a fake frame ------------------------------------------
 
 /** A session with everything it posts and every timer it sets in hand. */
-function drive(drawing, dark = false) {
+function drive(drawing) {
   const posted = [];
   const timers = [];
   const events = [];
   const session = createSession({
     drawing,
-    dark,
     post: (message) => posted.push(message),
     setTimer: (fn, ms) => {
       const timer = { fn, ms, cleared: false };
@@ -119,6 +118,7 @@ function drive(drawing, dark = false) {
     onReady: () => events.push('ready'),
     onChanged: () => events.push('changed'),
     onDone: (text) => events.push(['done', text]),
+    onRefuse: (why) => events.push(['refuse', why]),
     onFail: (why) => events.push(['fail', why]),
   });
   return { session, posted, timers, events };
@@ -135,8 +135,8 @@ function drive(drawing, dark = false) {
   equal(session.state(), 'editing', 'the first word from the editor opens the editing');
   ok(timers[0].cleared, 'the readiness period is over');
   equal(posted.length, 1, 'and one message goes out');
-  deepEqual(Object.keys(posted[0]), ['action', 'xml', 'autosave', 'dark'], 'the load of the drawing, with autosave for the sign of change, and the theme');
-  ok(posted[0].action === 'load' && posted[0].xml.startsWith('<mxfile ') && posted[0].autosave === 1 && posted[0].dark === false, "the drawing's own model, nothing of the project, nothing else");
+  deepEqual(Object.keys(posted[0]), ['action', 'xml', 'autosave'], 'the load of the drawing, with autosave for the sign of change');
+  ok(posted[0].action === 'load' && posted[0].xml.startsWith('<mxfile ') && posted[0].autosave === 1, "the drawing's own model, nothing of the project, not even the theme, nothing else");
   deepEqual(events, ['ready'], 'ready is told');
   session.hear({ event: 'init' });
   equal(posted.length, 1, 'a second init changes nothing');
@@ -159,14 +159,17 @@ function drive(drawing, dark = false) {
 }
 
 {
-  const { session, posted, events } = drive('', true);
+  const { session, posted, events } = drive('');
   session.hear({ event: 'init' });
-  deepEqual([posted[0].xml, posted[0].dark], ['', true], 'no drawing loads the editor empty, in the dark theme when asked');
+  equal(posted[0].xml, '', 'no drawing loads the editor empty');
   session.hear({ event: 'save' });
   equal(session.state(), 'exporting', "the editor's own save is Apply");
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${HOSTILE}` });
-  deepEqual(events.at(-1), ['fail', 'returned a drawing that holds a script element'], 'a hostile export fails the session with the check\'s reason');
-  equal(session.state(), 'done', 'and ends it');
+  deepEqual(events.at(-1), ['refuse', 'returned a drawing that holds a script element'], 'a hostile export is refused with the check\'s reason');
+  equal(session.state(), 'editing', 'and the session is back in editing, the editor still open');
+  ok(session.apply(), 'so the drawing can be amended and applied again');
+  session.hear({ event: 'export', format: 'svg', data: EXPORTED });
+  deepEqual(events.at(-1), ['done', fixture], 'and taken back once it passes');
 }
 
 {
@@ -174,7 +177,8 @@ function drive(drawing, dark = false) {
   session.hear({ event: 'init' });
   session.apply();
   session.hear({ event: 'export', format: 'xmlsvg', data: 'data:image/png;base64,AAAA' });
-  deepEqual(events.at(-1), ['fail', 'returned something that is not a drawing'], 'an export that is no SVG fails the session');
+  deepEqual(events.at(-1), ['refuse', 'returned something that is not a drawing'], 'an export that is no SVG is refused');
+  equal(session.state(), 'editing', 'with the editor still open');
 }
 
 {
@@ -182,7 +186,8 @@ function drive(drawing, dark = false) {
   session.hear({ event: 'init' });
   session.apply();
   session.hear({ event: 'export', format: 'xmlsvg', data: `data:image/svg+xml;base64,${GOOD}` });
-  deepEqual(events.at(-1), ['fail', 'returned a drawing without its model'], 'a drawing that passes the check but carries no model fails the session, since it could not be edited again');
+  deepEqual(events.at(-1), ['refuse', 'returned a drawing without its model'], 'a drawing that passes the check but carries no model is refused, since it could not be edited again');
+  equal(session.state(), 'editing', 'with the editor still open');
 }
 
 {
@@ -199,7 +204,9 @@ function drive(drawing, dark = false) {
   session.hear({ event: 'init' });
   session.apply();
   timers[1].fn();
-  deepEqual(events.at(-1), ['fail', 'did not return the drawing'], 'an editor silent past the export period did not return the drawing');
+  deepEqual(events.at(-1), ['refuse', 'did not return the drawing'], 'an editor silent past the export period did not return the drawing');
+  equal(session.state(), 'editing', 'and the session is back in editing');
+  ok(session.apply() && timers.length === 3, 'so Apply can be tried again, with a fresh period');
 }
 
 {

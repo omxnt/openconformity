@@ -945,7 +945,7 @@ export function createEditor({
       if (editing && dialogs) {
         actions.push(
           ghost(text === '' ? 'Create in draw.io' : 'Edit in draw.io', text === '' ? 'i-new-entity' : 'i-edit', async () => {
-            const held = await editDrawing({ dialogs, store, drawing: text, subject: subject(), dark: document.documentElement.dataset.theme === 'g100' });
+            const held = await editDrawing({ dialogs, store, drawing: text, subject: subject() });
             if (held !== null) hold(held);
           })
         );

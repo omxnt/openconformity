@@ -4,7 +4,32 @@ This document specifies the requirements the software is implemented and verifie
 
 ## 1. Conventions
 
-### 1.1 Characteristics
+### 1.1 Terms
+
+The requirements use the following terms with the meanings given here. Terms the metamodel defines, the entity types, relationship types, and pillars, are used as it defines them and are not repeated.
+
+| Term | Meaning |
+|---|---|
+| the software | The application these requirements specify, as delivered to a browser. |
+| the user | The person operating the software in a browser. |
+| the host | The origin that serves the software's files. Fetching the software is a request to the host. |
+| model | The entities, relationships, and attribute values a user has recorded about one product, held in memory while the software runs. |
+| project file | The single file the software writes and reads to hold a model, valid against the project schema. |
+| library file | A single file the user owns holding reusable items, valid against the library schema. |
+| template | A project file the maintainer publishes beside the software for the user to open as a starting point. |
+| attribute | A named value an entity carries, as defined for its type in the attributes document. |
+| drawing | An attribute value holding an SVG document. One the drawing editor made carries the editor's own model inside it. |
+| drawing editor | The external application the software opens to create or edit a drawing. |
+| drawing size limit | The largest drawing the software accepts, 512 kilobytes. |
+| view | A presentation of the model the software generates for reading or export, and not part of the model. |
+| browser storage | The storage a browser keeps for the software's origin, in which the software persists working state on the user's device. |
+| session storage | Browser storage that lasts for one browser session and is cleared when it ends. |
+| working state | The open project, the selection, and whatever else the software restores when it is opened again. |
+| external application | Software at another origin that the software hosts in a frame and talks to. |
+| external service | The origin an external application is served from. A function that uses one names it. |
+| user data | Anything the user enters or the software derives from it. This covers the model, its content, drawings, and the user's choices in the software. |
+
+### 1.2 Characteristics
 
 Each requirement shall be written following the INCOSE characteristics [1].
 
@@ -20,13 +45,13 @@ Each requirement shall be written following the INCOSE characteristics [1].
 | C8 | Correct | The need statement must be an accurate representation of the lifecycle concept or source from which it was transformed. The requirement statement must be an accurate representation of the need, source, or higher-level requirement from which it was transformed. |
 | C9 | Conforming | Statements and expressions of individual needs and requirements should conform to an approved standard pattern and style guide or standard for writing and managing needs and requirements. |
 
-### 1.2 Syntax
+### 1.3 Syntax
 
 Each requirement shall be written using the EARS syntax [2], and be tagged with the type of pattern which was used.
 
 | Type | Description | Syntax | Example |
 |---|---|---|---|
-| Generic | The clauses of a requirement written in EARS always appear in the same order. The EARS ruleset states that a requirement must have: Zero or many preconditions; Zero or one trigger; One system name; One or many system responses. The application of the EARS notation produces requirements in a small number of patterns, depending on the clauses that are used. | `While <optional pre-condition>, when <optional trigger>, the <system name> shall <system response>` | N/A |
+| Generic | The clauses of a requirement written in EARS always appear in the same order. The EARS ruleset states that a requirement must have zero or many preconditions, zero or one trigger, one system name, and one or many system responses. The application of the EARS notation produces requirements in a small number of patterns, depending on the clauses that are used. | `While <optional pre-condition>, when <optional trigger>, the <system name> shall <system response>` | N/A |
 | Ubiquitous | Ubiquitous requirements are always active (so there is no EARS keyword) | `The <system name> shall <system response>`| The mobile phone shall have a mass of less than XX grams. |
 | State driven | State driven requirements are active as long as the specified state remains true and are denoted by the keyword While. | `While <precondition(s)>, the <system name> shall <system response>` | While there is no card in the ATM, the ATM shall display “insert card to begin”. |
 | Event driven | Event driven requirements specify how a system must respond when a triggering event occurs and are denoted by the keyword When. | `When <trigger>, the <system name> shall <system response>`| When “mute” is selected, the laptop shall suppress all audio output. |
@@ -34,15 +59,15 @@ Each requirement shall be written using the EARS syntax [2], and be tagged with 
 | Unwanted behaviour | Unwanted behaviour requirements are used to specify the required system response to undesired situations and are denoted by the keywords If and Then. | `If <trigger>, then the <system name> shall <system response>` | If an invalid credit card number is entered, then the website shall display “please re-enter credit card details”. |
 | Complex | The simple building blocks of the EARS patterns described above can be combined to specify requirements for richer system behaviour. Requirements that include more than one EARS keyword are called Complex requirements. Complex requirements for unwanted behaviour also include the If-Then keywords. | `While <precondition(s)>, When <trigger>, the <system name> shall <system response>` | While the aircraft is on ground, when reverse thrust is commanded, the engine control system shall enable reverse thrust. |
 
-### 1.3 Rationale
+### 1.4 Rationale
 
 Each requirement shall have a rationale, see the SEBoK guidelines [3].
 
 > "The use of the rationale attribute helps communicate why the requirement is needed, any assumptions made, the source of numbers, the results of related design studies, or any other related supporting information. This supports further requirements analysis and decomposition, as well as identifying the source of any requirement value."
 
-### 1.4 Identifier
+### 1.5 Identifier
 
-Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. Once the document is issued, identifiers are append-only: a requirement that is removed is not reissued under the same identifier. While the document is in draft, identifiers may be reorganised.
+Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. Once the document is issued, identifiers are append-only, so a requirement that is removed is not reissued under the same identifier. While the document is in draft, identifiers may be reorganised.
 
 | Field | Meaning |
 |---|---|
@@ -50,7 +75,7 @@ Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. O
 | `GROUP` | The group within the requirement class. |
 | `NNN` | The sequential number within the group. |
 
-### 1.5 Status
+### 1.6 Status
 
 Each requirement shall carry a status tag.
 
@@ -59,7 +84,7 @@ Each requirement shall carry a status tag.
 | `draft` | Newly written, or still being worked on. |
 | `stable` | Settled as written, and not expected to change. |
 
-### 1.6 Template
+### 1.7 Template
 
 Each requirement shall be written using the template below.
 
@@ -157,7 +182,7 @@ The software shall be hosted on Cloudflare Pages.
 
 The metamodel shall be maintained as Mermaid text in `docs/metamodel.md`.
 
-> *Mermaid is a text format: the diagram in the document is its own source, renders wherever the document is read, and cannot drift from an exported image. Being text, it constrains no tool; any editor serves, and the repository diff shows every change to the model.*
+> *Mermaid is a text format, so the diagram in the document is its own source, renders wherever the document is read, and cannot drift from an exported image. Being text, it constrains no tool. Any editor serves, and the repository diff shows every change to the model.*
 
 ---
 
@@ -219,7 +244,7 @@ The software shall run directly from its source files, with no build step or pac
 
 The software shall organise its JavaScript as native ES modules.
 
-> *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack workable at scale: the alternatives, a single large file or global scripts, do not scale for a maintainer.*
+> *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack workable at scale. The alternatives, a single large file or global scripts, do not scale for a maintainer.*
 
 ---
 
@@ -229,7 +254,7 @@ The software shall organise its JavaScript as native ES modules.
 
 Where the software uses third-party assets, they shall be self-hosted and open-licensed.
 
-> *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers; open licensing keeps redistribution compatible with the EUPL.*
+> *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers, and open licensing keeps redistribution compatible with the EUPL.*
 
 ---
 
@@ -259,7 +284,7 @@ The software shall consist of static files only, with no server-side code.
 
 Where the software uses an external application, the application shall be separately hosted, neither included nor bundled with the software, and used only through a sandboxed frame.
 
-> *C-TEC-002 keeps third-party code out of the software's files, and an external application stays out of them: it is another application the software talks to, not a library it runs. How the frame is sandboxed is a security requirement (N-SEC-004); stating the boundary here spares the next reader the argument.*
+> *C-TEC-002 keeps third-party code out of the software's files, and an external application stays out of them. It is another application the software talks to, not a library it runs. How the frame is sandboxed is a security requirement (N-SEC-004), and stating the boundary here spares the next reader the argument.*
 
 ## 3. Graphical
 
@@ -360,7 +385,7 @@ The software shall present the panes arranged as below.
 └───────────────────┴─────────────────────────────────────┘
 ```
 
-> *The layout separates the concerns of the work: navigating the model, editing the selected entity, and working with its relationships. Each pane acts on what the navigator has selected, so the tree stays visible at full height while the editor and relationships share the column beside it.*
+> *The layout gives each concern of the work its own pane, one to navigate the model, one to edit the selected entity, and one to work with its relationships. Each pane acts on what the navigator has selected, so the tree stays visible at full height while the editor and relationships share the column beside it.*
 
 ## 4. Functional
 
@@ -406,7 +431,7 @@ When the software is opened, it shall restore the working state of the previous 
 
 When the model changes, the software shall persist the change in browser storage.
 
-> *Work survives closing the software without a save, as a drawing survives closing draw.io. Browser storage is retained at the browser's and the user's discretion, and is cleared with site data; the saved project file remains the durable record. Persisting on change, rather than on close, means a crash loses nothing either.*
+> *Work survives closing the software without a save, as a drawing survives closing draw.io. Browser storage is retained at the browser's and the user's discretion, and is cleared with site data, so the saved project file remains the durable record. Persisting on change, rather than on close, means a crash loses nothing either.*
 
 ### 4.3 Workspace
 
@@ -448,7 +473,7 @@ When an entity is selected, the software shall present its relationships in the 
 
 The software shall permit an entity to be filed at any position in the navigator tree, regardless of its type and relationships.
 
-> *The tree is the user's filing of the model, not its structure. The metamodel governs which entities exist and how they may relate; where they are placed is organisation, and two users may file the same model differently, one by machine structure and one by legislation. Any placement rule derived from the metamodel would forbid one of them.*
+> *The tree is the user's filing of the model, not its structure. The metamodel governs which entities exist and how they may relate. Where they are placed is organisation, and two users may file the same model differently, one by machine structure and one by legislation. Any placement rule derived from the metamodel would forbid one of them.*
 
 ---
 
@@ -458,7 +483,7 @@ The software shall permit an entity to be filed at any position in the navigator
 
 The software shall not create, modify, or require relationships based on an entity's position in the tree.
 
-> *Relationships are engineering judgments, made deliberately in the relationship pane. Inferring them from placement would manufacture judgments nobody made, and requiring them for placement would turn filing into modelling. Placement carries no meaning; the relationships carry all of it.*
+> *Relationships are engineering judgments, made deliberately in the relationship pane. Inferring them from placement would manufacture judgments nobody made, and requiring them for placement would turn filing into modelling. Placement carries no meaning, and the relationships carry all of it.*
 
 ---
 
@@ -468,7 +493,7 @@ The software shall not create, modify, or require relationships based on an enti
 
 The software shall permit the creation of folders at any position in the navigator tree.
 
-> *Folders are filing, not model content: they hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model. Deleting a folder removes filing, never the entities filed in it.*
+> *Folders are filing, not model content. They hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model. Deleting a folder removes filing, never the entities filed in it.*
 
 ### 4.4 Model
 
@@ -500,7 +525,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 The software shall only present and edit the attributes defined for the entity's type in `docs/attributes.md`.
 
-> *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form; which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
+> *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form. Which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
 
 ---
 
@@ -530,7 +555,7 @@ When an entity is deleted, the software shall remove the relationships it takes 
 
 When an entity that owns entities through composition is deleted, the software shall delete the owned entities.
 
-> *Composition is ownership: an owned entity is part of its owner, as an essential requirement is part of its legislation, and a part does not outlive its whole. Deleting the owner and keeping the parts would leave content whose source is gone. Relationships of other kinds do not cascade; deleting their entities severs only the relationship.*
+> *Composition is ownership. An owned entity is part of its owner, as an essential requirement is part of its legislation, and a part does not outlive its whole. Deleting the owner and keeping the parts would leave content whose source is gone. Relationships of other kinds do not cascade, and deleting their entities severs only the relationship.*
 
 ---
 
@@ -550,7 +575,7 @@ When a deletion would cascade to owned entities, the software shall require conf
 
 When undo is invoked, the software shall revert the most recent model change.
 
-> *A modelling session is a stream of small changes, and any of them can be a mistake. Undo makes every change recoverable, including a cascading deletion: the confirmation warns before the loss, undo forgives after it. A change is the same unit the software persists, a confirmed edit, a creation, or a deletion.*
+> *A modelling session is a stream of small changes, and any of them can be a mistake. Undo makes every change recoverable, including a cascading deletion. The confirmation warns before the loss, and undo forgives after it. A change is the same unit the software persists, a confirmed edit, a creation, or a deletion.*
 
 ---
 
@@ -560,7 +585,7 @@ When undo is invoked, the software shall revert the most recent model change.
 
 When redo is invoked, the software shall reapply the most recently undone model change.
 
-> *Undo is exploratory: stepping back to look is only safe if stepping forward again is possible. Redo makes undo itself mistake-proof.*
+> *Undo is exploratory, and stepping back to look is only safe if stepping forward again is possible. Redo makes undo itself mistake-proof.*
 
 ### 4.5 Views
 
@@ -572,7 +597,7 @@ When redo is invoked, the software shall reapply the most recently undone model 
 
 The software shall generate exportable views of the model.
 
-> *Views are the output of the modelling work: artefacts such as a hazard list or a requirement specification, generated from the model rather than authored beside it. Which views exist and what each contains is specified as the views are built; this requirement states the capability they decompose from.*
+> *Views are the output of the modelling work, artefacts such as a hazard list or a requirement specification, generated from the model rather than authored beside it. Which views exist and what each contains is specified as the views are built. This requirement states the capability they decompose from.*
 
 ### 4.6 Persistence
 
@@ -584,7 +609,7 @@ The software shall generate exportable views of the model.
 
 The software shall persist a project as a single local file conforming to `schema/project.schema.json`.
 
-> *A project is the user's model of one product's conformity: its entities and their relationships, following the metamodel. Saved as a single local file the user owns and controls, a project is portable, inspectable, and reloadable without any server or account. The schema is the authoritative definition of a valid project file.*
+> *A project holds the user's model of one product's conformity, the entities and their relationships, following the metamodel. Saved as a single local file the user owns and controls, a project is portable, inspectable, and reloadable without any server or account. The schema is the authoritative definition of a valid project file.*
 
 ---
 
@@ -634,7 +659,7 @@ If a project or library file records a schema version later than the software su
 
 If a project or library file is not valid against the schema of the version it records, then the software shall not open it, and shall state that the file is invalid.
 
-> *A file is valid when it conforms to the schema of its recorded version and satisfies the constraints the schema cannot express: identifiers unique, references resolving, and no cycles in ownership or filing. Validity is judged against the file's own version, not the current one, so an older file is not invalid merely for being older; it is validated as its producer wrote it, then migrated (F-PER-004). A file that fails cannot be trusted to mean what it appears to mean: opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery. On opening, the checks run in order: version newer than supported, refuse (F-PER-005); invalid against its recorded schema, refuse (F-PER-006); older version, migrate (F-PER-004).*
+> *A file is valid when it conforms to the schema of its recorded version and satisfies the constraints the schema cannot express, which are unique identifiers, resolving references, and no cycles in ownership or filing. Validity is judged against the file's own version, not the current one, so an older file is not invalid merely for being older. It is validated as its producer wrote it, then migrated (F-PER-004). A file that fails cannot be trusted to mean what it appears to mean, since opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery. On opening, the checks run in order. A version newer than supported is refused (F-PER-005), a file invalid against its recorded schema is refused (F-PER-006), and an older version is migrated (F-PER-004).*
 
 ---
 
@@ -644,7 +669,7 @@ If a project or library file is not valid against the schema of the version it r
 
 When the software migrates a file, the software shall carry all content of the source file into the migrated file, preserved as written.
 
-> *Migration changes form, never meaning. Content that has no place in the current schema is preserved as legacy rather than dropped, and is never split across or mapped into attributes that would give it a meaning its author did not state; re-judging preserved content is the user's work, and the migration notice (F-PER-009) makes it visible. Within a known version, unrecognised structure cannot occur: strict validation (F-PER-006) and the version increment rule (F-PER-008) guarantee that anything the software does not know announces itself as newer. Attribute content within a version is covered by F-PER-010.*
+> *Migration changes form, never meaning. Content that has no place in the current schema is preserved as legacy rather than dropped, and is never split across or mapped into attributes that would give it a meaning its author did not state. Re-judging preserved content is the user's work, and the migration notice (F-PER-009) makes it visible. Within a known version, unrecognised structure cannot occur, because strict validation (F-PER-006) and the version increment rule (F-PER-008) guarantee that anything the software does not know announces itself as newer. Attribute content within a version is covered by F-PER-010.*
 
 ---
 
@@ -654,7 +679,7 @@ When the software migrates a file, the software shall carry all content of the s
 
 The schema version shall be incremented with any change to the structure of the files the software writes.
 
-> *Under strict validation, older software refuses any structure it does not know. Incrementing on every structural change makes it refuse such files as newer (F-PER-005) rather than misreporting them as invalid (F-PER-006): the version is a statement about the file's producer, not only about compatibility. Increments are free; a wrong error message is not. Attribute content is validated loosely within a version (F-PER-010), so its definitions iterate without an increment; the version speaks for structure alone.*
+> *Under strict validation, older software refuses any structure it does not know. Incrementing on every structural change makes it refuse such files as newer (F-PER-005) rather than misreporting them as invalid (F-PER-006). The version is a statement about the file's producer, not only about compatibility. Increments are free, and a wrong error message is not. Attribute content is validated loosely within a version (F-PER-010), so its definitions iterate without an increment, and the version speaks for structure alone.*
 
 ---
 
@@ -664,7 +689,7 @@ The schema version shall be incremented with any change to the structure of the 
 
 When opening a file requires a migration that preserves content as legacy or leaves content unplaced, the software shall state what was preserved and what needs the user's attention.
 
-> *Mechanical migrations change form and pass silently. A migration that retires a method or cannot relocate content mechanically changes what the file means to its reader; stating it makes the change a known fact rather than a discovery. Content is never converted into new meaning: it is preserved as written, and re-judging it is the user's work.*
+> *Mechanical migrations change form and pass silently. A migration that retires a method or cannot relocate content mechanically changes what the file means to its reader, and stating it makes the change a known fact rather than a discovery. Content is never converted into new meaning. It is preserved as written, and re-judging it is the user's work.*
 
 ---
 
@@ -674,7 +699,7 @@ When opening a file requires a migration that preserves content as legacy or lea
 
 The software shall preserve attribute content it does not present, unchanged, when a file is opened and saved.
 
-> *Attributes are validated loosely within a schema version, and their definitions iterate without a version change. A key written under one revision of the definitions may not be presented by another; preserving it keeps the user's content intact until a definition presents it again or a migration places it. Unpresented content is carried, never dropped.*
+> *Attributes are validated loosely within a schema version, and their definitions iterate without a version change. A key written under one revision of the definitions may not be presented by another, and preserving it keeps the user's content intact until a definition presents it again or a migration places it. Unpresented content is carried, never dropped.*
 
 ---
 
@@ -682,31 +707,31 @@ The software shall preserve attribute content it does not present, unchanged, wh
 
 `event driven` `draft`
 
-When the user chooses a project template, the software shall fetch it from the project's own origin, sending no user data, and shall open it as it opens a project file, subject to the same checks.
+When the user chooses a project template, the software shall fetch it from the host, sending no user data, and shall open it as it opens a project file, subject to the same checks.
 
-> *A template is a project file the maintainer wrote and published beside the software, so fetching it is what fetching the software already is, a request to the project's own host carrying nothing of the user's, and it needs no consent. It can be as stale or as malformed as any other file, so it passes the same gate, version, validity, migration, and can never bypass what a file cannot. The list of templates is fetched the same way, when the user opens the choice.*
+> *A template is a project file the maintainer wrote and published beside the software, so fetching it is what fetching the software already is, a request to the host carrying nothing of the user's, and it needs no consent. It can be as stale or as malformed as any other file, so it passes the same gate of version, validity and migration, and can never bypass what a file cannot. The list of templates is fetched the same way, when the user opens the choice.*
 
 ### 4.7 Drawings
 
 ---
 
-#### F-DRW-001 Drawing import
+#### F-DRW-001 Drawing check
 
-`event driven` `draft`
+`ubiquitous` `draft`
 
-When the user imports a drawing, the software shall accept it only as an SVG document within the drawing size limit that holds no script, event handler or executable reference, and shall otherwise refuse it and state why.
+The software shall accept as a drawing only an SVG document within the drawing size limit that holds no script element, no event-handler attribute, no element that embeds a document, no link to code, and no reference that would load a resource from outside the document, and shall state why when it refuses one.
 
-> *A drawing arrives from a file or an editor and is the first attribute whose content is not typed text. Refusing rather than repairing keeps the stored drawing exactly what its author made, and a diagram never legitimately holds a script.*
+> *A drawing comes back from the drawing editor, or is already in a project file, and either way it is the first attribute whose content is not typed text. Refusing rather than repairing keeps a drawing exactly what its author made, and a diagram never legitimately holds any of the five, which are what would let markup act rather than draw. A link to a page is not among them, since an image follows no link. The same check guards a drawing in a file before it is shown (N-SEC-003). The drawing size limit is set so that a project holding dozens of drawings stays within the few megabytes a browser keeps for an origin, where the model is persisted on every change (F-SES-002). The software also refuses a drawing that declares entities or measures more than 16,384 units a side, the first because entities can expand without bound, the second because a browser cannot rasterise it.*
 
 ---
 
-#### F-DRW-002 Drawing export
+#### F-DRW-002 Drawing storage
 
-`event driven` `draft`
+`ubiquitous` `draft`
 
-When the user exports a drawing, the software shall write the drawing as stored, unchanged.
+The software shall store a drawing as the drawing editor returned it, unchanged.
 
-> *The stored SVG carries the editor's own model inside it. Written unchanged, the file opens in the editor again with nothing lost, which is what makes the round trip through a file possible.*
+> *The drawing editor returns the SVG with its own model inside. Stored unchanged, the drawing opens in the editor again with nothing lost, which is what makes it a drawing rather than a picture. The browser's own save of the image gives the same file to anyone who wants it outside the software.*
 
 ---
 
@@ -714,9 +739,11 @@ When the user exports a drawing, the software shall write the drawing as stored,
 
 `complex` `draft`
 
-Where the user has consented, when the user opens a drawing for editing, the software shall hand the drawing to the external drawing editor at the origin the software designates, and shall take back what the editor returns as the drawing, subject to the checks an imported drawing passes.
+Where the user has consented, when the user creates or edits a drawing, the software shall open the drawing editor at the origin the software designates, handing it the drawing being edited and nothing else, and shall take back what the editor returns as the drawing provided it passes the drawing check and carries the editor's own model.
 
-> *This is the function that fetches and hands data over, so it is the one that states what and where: the drawing being edited, nothing else, to one designated origin, draw.io's embed at the time of writing. Viewing a drawing never loads the editor; only an edit the user asks for does, and only after consent (N-PRV-005). What comes back is a drawing from outside and is checked as one (F-DRW-001).*
+> *This is the function that fetches and hands data over, so it is the one that states what and where. It hands the drawing being edited, nothing else, to one designated origin, draw.io's embed at the time of writing, in a frame that permits scripts and the editor's own origin and nothing else. Viewing a drawing never loads the editor. Only a creation or an edit the user asks for does, and only after consent (N-PRV-005). The editor is the only way a drawing enters. Nothing is imported from a file, so every drawing in a project is one the editor made and can open again, and what comes back is a drawing from outside, checked as one (F-DRW-001) and kept as returned (F-DRW-002). One returned without its model is refused, since it could not be edited again. A drawing refused on return is refused with the editor still open and the reason stated, so the user can amend it rather than lose it. What is taken back enters the entity's unsaved edit like any changed attribute. The entity's save commits it, cancel discards it, and the edit guard (F-MOD-004) protects it. The editor's own apply is not a save.*
+
+---
 
 ## 5. Non-functional
 
@@ -740,7 +767,7 @@ The software shall not require an account or a sign-in.
 
 The software shall load all of its resources on initial load, and shall fetch nothing further during use, except for a function the user invokes that states what it fetches and from where.
 
-> *Once loaded, the software runs from what the browser already holds, so work continues uninterrupted if the connection drops. A function that fetches is the exception, never the rule: it fetches only when the user invokes it, it says what it fetches and from where, and it fails plainly when the fetch fails (N-OPS-003). Which functions fetch, and what each may fetch, is stated with the function (F-DRW-003, F-PER-011).*
+> *Once loaded, the software runs from what the browser already holds, so work continues uninterrupted if the connection drops. A function that fetches is the exception, never the rule. It fetches only when the user invokes it, it says what it fetches and from where, and it fails plainly when the fetch fails (N-OPS-003). Which functions fetch, and what each may fetch, is stated with the function (F-DRW-003, F-PER-011).*
 
 ---
 
@@ -750,7 +777,7 @@ The software shall load all of its resources on initial load, and shall fetch no
 
 If a fetch a function makes does not succeed within its period, then the software shall state that the function is unavailable and shall leave the model unchanged.
 
-> *Offline, blocked, or the resource gone, the software says so and the user loses nothing: an editor that never signals readiness is handed no drawing, and a template that never arrives replaces no project.*
+> *Offline, blocked, or the resource gone, the software says so and the user loses nothing. An editor that never signals readiness is handed no drawing, and a template that never arrives replaces no project.*
 
 ### 5.2 Privacy
 
@@ -772,7 +799,7 @@ The software shall perform all processing on the user's device.
 
 The software shall not transmit user data to any external service, except what the user consents to hand to a named service for a function they invoke.
 
-> *The confidential data a user enters, their model and its content, stays on their device and is never sent anywhere. Fetching the software itself is an ordinary web request to the host; the user's data is not part of it. The exception is the user's own act, with the service and the data named before it and bounded to what the function states (N-PRV-005 to N-PRV-007).*
+> *The confidential data a user enters, their model and its content, stays on their device and is never sent anywhere. Fetching the software itself is an ordinary web request to the host, and the user's data is not part of it. The exception is the user's own act, with the service and the data named before it and bounded to what the function states (N-PRV-005 to N-PRV-007).*
 
 ---
 
@@ -790,7 +817,7 @@ The software shall not track, profile, or collect analytics on the user.
 
 `ubiquitous` `stable`
 
-The software shall store all project data on the user's own device.
+The software shall store all user data on the user's own device.
 
 > *The user's data lives only on their own device, whether held in the browser between sessions or saved as a file. It is never stored remotely, in an account, or on a server.*
 
@@ -802,7 +829,7 @@ The software shall store all project data on the user's own device.
 
 When the user invokes a function that hands data to an external service, the software shall obtain the user's consent first, stating the service's origin and the data handed over, unless the user has chosen during the browser session not to be asked again.
 
-> *The choice is the user's to make, with the facts in front of them: which origin, and what it receives. Asking on every invocation keeps the choice deliberate; the session box lets a user who invokes the function all afternoon make it once, with the text in front of them.*
+> *The choice is the user's to make, with the facts in front of them, which origin and what it receives. Asking on every invocation keeps the choice deliberate, and the session box lets a user who invokes the function all afternoon make it once, with the text in front of them. The statement is kept to the two facts so it is read rather than dismissed, and the control that invokes the function names the service, so the consent confirms what the user already saw.*
 
 ---
 
@@ -810,7 +837,7 @@ When the user invokes a function that hands data to an external service, the sof
 
 `ubiquitous` `draft`
 
-The software shall keep a user's choice not to be asked again in browser session storage only, never in a project or library file, and shall offer a way to withdraw it.
+The software shall keep a user's choice not to be asked again in session storage only, never in a project or library file, and shall offer a way to withdraw it.
 
 > *Consent belongs to a person at a browser for a sitting, not to a project. A file that carried it would enable the function on every device it reached, and a choice that outlived the tab would be one the user could not remember making.*
 
@@ -844,7 +871,7 @@ The software shall not execute code contained in imported data.
 
 The software shall render user-provided content as text, not as markup, drawings excepted.
 
-> *Names, values, and descriptions a user enters are shown throughout the interface. They are rendered as text, never interpreted as markup, so content such as a tag or script in an entity name cannot alter or execute within the interface. A drawing is markup by nature and is shown as an image (N-SEC-003), which grants it the same: no script, no document, no network.*
+> *Names, values, and descriptions a user enters are shown throughout the interface. They are rendered as text, never interpreted as markup, so content such as a tag or script in an entity name cannot alter or execute within the interface. A drawing is markup by nature and is shown as an image (N-SEC-003), which grants it the same, no script, no document, and no network.*
 
 ---
 
@@ -854,7 +881,7 @@ The software shall render user-provided content as text, not as markup, drawings
 
 Where an attribute holds a drawing, the software shall render it as an image that can neither execute code nor load a resource.
 
-> *A drawing is markup by nature, so the text rule cannot apply to it. Shown as an image, the browser grants it no script, no document and no network, the same guarantee text has. A drawing that fails the software's own check is not shown and is preserved unchanged.*
+> *A drawing is markup by nature, so the text rule cannot apply to it. Shown as an image, the browser grants it no script, no document and no network, the same guarantee text has. A drawing that fails the drawing check (F-DRW-001) is not shown and is preserved unchanged. The reason stands where the drawing would, so a user opening someone else's file learns why the drawing is absent rather than meeting a blank.*
 
 ---
 
@@ -862,9 +889,9 @@ Where an attribute holds a drawing, the software shall render it as an image tha
 
 `optional feature` `draft`
 
-Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting scripts and the application's own origin only, and shall accept messages only from that frame and origin, as data.
+Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting only what the application's protocol requires, and shall accept messages only from that frame and origin, as data.
 
-> *The frame cannot navigate the page, open windows, submit forms or reach the software's storage. The origin rule is what makes the sandbox hold: on the software's own origin the same permissions would let the application read the project.*
+> *The frame cannot reach the software's storage, and cannot navigate the page, open windows or submit forms unless its protocol needs one of these. Each permission granted is recorded with the function that grants it. The origin rule is what makes the sandbox hold, since on the software's own origin the same permissions would let the application read the project. Scripts and the application's own origin are the expected minimum, and what draw.io's embed needs at the time of writing.*
 
 ### 5.4 Accessibility
 
@@ -876,7 +903,7 @@ Where the software hosts an external application in its page, it shall host it i
 
 The software shall meet WCAG 2.2 Level AA [4].
 
-> *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal: a single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
+> *AA is the accessibility baseline for professional software. It is also what keeps the interface sound while minimal. A single accent on a monochrome ground works because it clears the contrast requirements, not because it is decorated.*
 
 ---
 
@@ -886,7 +913,7 @@ The software shall meet WCAG 2.2 Level AA [4].
 
 The software shall distinguish entity types by shape, not by colour alone.
 
-> *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision; a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
+> *Roughly one in twelve men has a red-green colour vision deficiency. A shape is legible under every colour vision, and a hue is not. Colour is at most a speed aid, never the sole carrier of meaning.*
 
 ---
 
@@ -896,7 +923,7 @@ The software shall distinguish entity types by shape, not by colour alone.
 
 The software shall be fully operable by keyboard.
 
-> *A modelling software is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed: it is required for users who cannot use a pointer, and it is faster for those building a large model.*
+> *A modelling software is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed. It is required for users who cannot use a pointer, and it is faster for those building a large model.*
 
 ### 5.5 Compatibility
 

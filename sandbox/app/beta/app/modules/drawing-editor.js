@@ -144,19 +144,22 @@ export function decodeExport(message) {
  * arrives within its period. What is posted is the one drawing's model
  * on ready and the export request on Apply; what is heard is init,
  * autosave as a sign of change, save as Apply, and the export; the rest
- * is ignored. A failure ends the session with its reason.
+ * is ignored. An editor that never becomes ready ends the session with
+ * its reason. A drawing refused on return, or not returned in time, is
+ * refused with its reason and the session back in editing, so the user
+ * can amend the drawing and apply again.
  * @param {Object} spec
  * @param {string} spec.drawing  the drawing as stored, '' for none
- * @param {boolean} spec.dark  whether the editor opens in its dark theme
  * @param {(message: Object) => void} spec.post
  * @param {(fn: () => void, ms: number) => any} spec.setTimer
  * @param {(timer: any) => void} spec.clearTimer
  * @param {() => void} spec.onReady
  * @param {() => void} spec.onChanged
  * @param {(text: string) => void} spec.onDone
- * @param {(why: string) => void} spec.onFail  completes "The editor …"
+ * @param {(why: string) => void} spec.onRefuse  completes "The editor …", the session still editing
+ * @param {(why: string) => void} spec.onFail  completes "The editor …", the session over
  */
-export function createSession({ drawing, dark, post, setTimer, clearTimer, onReady, onChanged, onDone, onFail }) {
+export function createSession({ drawing, post, setTimer, clearTimer, onReady, onChanged, onDone, onRefuse, onFail }) {
   let state = 'loading';
   let changed = false;
   let timer = setTimer(() => fail('could not be loaded'), READY_PERIOD);
@@ -166,6 +169,10 @@ export function createSession({ drawing, dark, post, setTimer, clearTimer, onRea
     clearTimer(timer);
     onFail(why);
   }
+  function refuse(why) {
+    state = 'editing';
+    onRefuse(why);
+  }
   const session = {
     hear(message) {
       if (state === 'done') return;
@@ -173,7 +180,7 @@ export function createSession({ drawing, dark, post, setTimer, clearTimer, onRea
         if (state !== 'loading') return;
         clearTimer(timer);
         state = 'editing';
-        post({ action: 'load', xml: embeddedModel(drawing) ?? '', autosave: 1, dark: dark === true });
+        post({ action: 'load', xml: embeddedModel(drawing) ?? '', autosave: 1 });
         onReady();
       } else if (message.event === 'autosave') {
         changed = true;
@@ -185,16 +192,16 @@ export function createSession({ drawing, dark, post, setTimer, clearTimer, onRea
         clearTimer(timer);
         const text = decodeExport(message);
         if (text === null) {
-          fail('returned something that is not a drawing');
+          refuse('returned something that is not a drawing');
           return;
         }
         const verdict = checkDrawing(text);
         if (!verdict.ok) {
-          fail(`returned a drawing that ${verdict.reason}`);
+          refuse(`returned a drawing that ${verdict.reason}`);
           return;
         }
         if (embeddedModel(text) === null) {
-          fail('returned a drawing without its model');
+          refuse('returned a drawing without its model');
           return;
         }
         state = 'done';
@@ -205,7 +212,7 @@ export function createSession({ drawing, dark, post, setTimer, clearTimer, onRea
     apply() {
       if (state !== 'editing') return false;
       state = 'exporting';
-      timer = setTimer(() => fail('did not return the drawing'), EXPORT_PERIOD);
+      timer = setTimer(() => refuse('did not return the drawing'), EXPORT_PERIOD);
       post({ action: 'export', format: 'xmlsvg', embedImages: true, theme: 'light', keepTheme: false, spin: 'Applying' });
       return true;
     },
@@ -254,10 +261,9 @@ async function consent(dialogs, store) {
  * @param {{ consented: () => boolean, setConsented: (held: boolean) => void }} spec.store
  * @param {string} spec.drawing  as stored, '' for none
  * @param {string} spec.subject  what the drawing is of, for the titles
- * @param {boolean} spec.dark
  * @returns {Promise<string|null>}
  */
-export async function editDrawing({ dialogs, store, drawing, subject, dark }) {
+export async function editDrawing({ dialogs, store, drawing, subject }) {
   if (!store.consented() && !(await consent(dialogs, store))) return null;
   const note = el('p', { className: 'drawing-editor-note', attributes: { role: 'status' } });
   const frame = el('iframe', {
@@ -274,7 +280,6 @@ export async function editDrawing({ dialogs, store, drawing, subject, dark }) {
   let settleApply = null;
   const session = createSession({
     drawing,
-    dark,
     post: (message) => frame.contentWindow?.postMessage(JSON.stringify(message), EDITOR_ORIGIN),
     setTimer: (fn, ms) => setTimeout(fn, ms),
     clearTimer: (timer) => clearTimeout(timer),
@@ -283,6 +288,10 @@ export async function editDrawing({ dialogs, store, drawing, subject, dark }) {
     },
     onChanged: () => {},
     onDone: (text) => settleApply?.(text),
+    onRefuse: (why) => {
+      note.textContent = `The editor ${why}. The drawing is unchanged. You can apply again or cancel.`;
+      settleApply?.(undefined);
+    },
     onFail: (why) => {
       note.textContent = `The editor ${why}. Nothing has been sent, and the drawing is unchanged.`;
       settleApply?.(undefined);
