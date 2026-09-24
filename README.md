@@ -35,7 +35,6 @@ openconformity/
     └── site/       iterations of the project site
 ```
 
-
 ## Documentation
 
 | Document | Contents |
