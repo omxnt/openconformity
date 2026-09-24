@@ -19,6 +19,7 @@ import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys, download } from './dom.js';
 import { entityLabel } from './queries.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
+import { editDrawing } from './drawing-editor.js';
 
 /**
  * Whether a draft differs from the entity it edits: a defined key whose
@@ -952,6 +953,17 @@ export function createEditor({
         body.appendChild(el('div', { className: 'cell-value empty', text: '–' }));
       }
       if (editing) {
+        if (dialogs) {
+          actions.push(
+            ghost('Edit in draw.io', 'i-edit', async () => {
+              const held = await editDrawing({ dialogs, store, drawing: text, subject: subject(), dark: document.documentElement.dataset.theme === 'g100' });
+              if (held !== null) {
+                note.textContent = '';
+                hold(held);
+              }
+            })
+          );
+        }
         actions.push(ghost('Import', 'i-open-project', () => picker.click()));
         if (text !== '') actions.push(ghost('Remove', 'i-delete', () => hold(''), true));
       }

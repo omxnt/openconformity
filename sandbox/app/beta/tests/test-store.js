@@ -607,6 +607,26 @@ function openStore(storage) {
   equal(createStore({ storage, session }).tabOf('ESR'), 'Applicability', 'a reload within the session keeps it');
   equal(createStore({ storage, session: fakeStorage() }).tabOf('ESR'), null, 'a new session opens on the first tab again');
 
+  {
+    const held = fakeStorage();
+    const first = createStore({ storage, session: held });
+    first.replaceProject(createModel());
+    equal(first.consented(), false, 'a session starts asking before the editor loads');
+    let told = 0;
+    first.subscribe(() => {
+      told += 1;
+    });
+    first.setConsented(true);
+    equal(first.consented(), true, 'the choice not to be asked again is held');
+    equal(told, 0, 'told to no one');
+    equal(first.dirty(), false, 'and marks nothing unsaved');
+    equal(held.read('openconformity.drawio-consent'), '1', 'it rides the browser session');
+    ok(!JSON.stringify(JSON.parse(storage.read(PROJECT_KEY))).includes('consent'), 'and never the project blob');
+    equal(createStore({ storage, session: held }).consented(), true, 'a reload within the session keeps it');
+    equal(createStore({ storage, session: fakeStorage() }).consented(), false, 'a new session asks again');
+    first.setConsented(false);
+    equal(held.read('openconformity.drawio-consent'), null, 'withdrawn, it is gone from the session');
+  }
   session.setItem('openconformity.tabs', '{nonsense');
   equal(createStore({ storage, session }).tabOf('ESR'), null, 'a session holding nonsense opens on the first tab, not broken');
   session.setItem('openconformity.tabs', '["Applicability"]');

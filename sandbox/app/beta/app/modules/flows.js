@@ -749,7 +749,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** The About dialog; its content is chrome and lives in about.js. */
   function showAbout() {
-    return aboutDialog(dialogs);
+    return aboutDialog(dialogs, store);
   }
 
   /**

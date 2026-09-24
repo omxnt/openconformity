@@ -623,6 +623,38 @@ body {
 .drawing-large img { display: block; }
 .dialog:has(.drawing-large) { max-width: min(1400px, 95vw); }
 
+/* The external editor's frame fills a dialog sized to the pane; the
+   note above it says what the editor is doing, or why it could not. */
+.drawing-editor { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; height: min(72vh, 900px); min-height: 420px; }  /* $spacing-03 */
+.drawing-editor iframe { display: block; width: 100%; height: 100%; border: 1px solid var(--border-subtle); background: #ffffff; }
+.drawing-editor-note { margin: 0; min-height: 18px; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }  /* $helper-text-01 */
+.dialog:has(.drawing-editor) { max-width: min(1400px, 96vw); }
+
+/* The consent before the editor loads: two plain sentences and the box,
+   drawn as the multiselect draws its checkboxes, over the real input
+   that keeps the keyboard and the reader. */
+.consent p { margin: 0 0 12px; }  /* $spacing-04 */
+.consent-box { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }  /* $spacing-03 */
+.consent-box input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.consent-box .checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;              /* Carbon checkbox */
+  height: 16px;
+  border: 1px solid var(--text);  /* $icon-primary */
+  border-radius: 1px;
+  color: var(--text-inverse);
+}
+.consent-box .checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
+.consent-box input:checked + .checkbox { background: var(--text); }
+.consent-box input:checked + .checkbox .icon { visibility: visible; }
+.consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
+.about-consent { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.about-forget { height: 24px; padding: 0 8px; }
+.about-forget[hidden] { display: none; }
+
 /* A table attribute: its rows under the column names on the data
    table's styles, numbered; in an edit each cell a field filling it, the
    row's rule serving as the fields' own, a remove at the row's end and

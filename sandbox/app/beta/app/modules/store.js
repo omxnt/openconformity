@@ -47,6 +47,8 @@ const THEME_KEY = 'openconformity.theme';
 /** The relationship view's key in the browser session: a reload keeps it, a new session opens on the default. */
 const VIEW_KEY = 'openconformity.view';
 
+/** The consent key in the browser session: the user's choice not to be asked before the external drawing editor loads, until the session ends. */
+const CONSENT_KEY = 'openconformity.drawio-consent';
 /** The chosen tabs' key in the browser session: the tab chosen for a type stays chosen until the session ends. */
 const TABS_KEY = 'openconformity.tabs';
 /** Session storage: the view open over the workspace, and its section, so a reload returns to it. */
@@ -103,6 +105,13 @@ export function createStore({ storage, session = null }) {
     }
   } catch {
     // A session store that refuses, or holds nonsense, changes nothing.
+  }
+  /** @type {boolean} whether the user chose not to be asked again this session before the external drawing editor loads: session state, never the file's */
+  let consented = false;
+  try {
+    consented = session?.getItem(CONSENT_KEY) === '1';
+  } catch {
+    // A session store that refuses changes nothing.
   }
   /** @type {{ id: string, section: number }|null} the view open over the workspace, session state */
   let openView = null;
@@ -555,6 +564,25 @@ export function createStore({ storage, session = null }) {
         // A session store that refuses changes nothing.
       }
       notify();
+    },
+
+    /** Whether the user chose not to be asked again this session before the external drawing editor loads. */
+    consented: () => consented,
+
+    /**
+     * Record, or withdraw, the choice not to be asked again this
+     * session. Session state like the tabs: kept for a reload within the
+     * session, gone with it, never in a file, told to no one.
+     * @param {boolean} held
+     */
+    setConsented(held) {
+      consented = held === true;
+      try {
+        if (consented) session?.setItem(CONSENT_KEY, '1');
+        else session?.removeItem(CONSENT_KEY);
+      } catch {
+        // A session store that refuses changes nothing.
+      }
     },
 
     /** The navigator's filter as typed. */

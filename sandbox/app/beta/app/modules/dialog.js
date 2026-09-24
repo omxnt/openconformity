@@ -25,7 +25,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
    * @param {string} spec.title
    * @param {string} [spec.message]
    * @param {HTMLElement} [spec.body]
-   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean }>} spec.actions
+   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean, run?: () => any }>} spec.actions  an action with `run` closes with what it resolves, or stays open when that is undefined
    * @param {HTMLElement} [spec.initialFocus]
    * @returns {Promise<any>}
    */
@@ -40,8 +40,14 @@ export function createDialogs({ overlay, toastRegion = null }) {
           text: action.label,
           attributes: { type: 'button' },
         });
-        button.addEventListener('click', () => {
-          result = action.value;
+        button.addEventListener('click', async () => {
+          if (action.run) {
+            const held = await action.run();
+            if (held === undefined) return;
+            result = held;
+          } else {
+            result = action.value;
+          }
           overlay.close(entry);
         });
         if (action.default) defaultButton = button;

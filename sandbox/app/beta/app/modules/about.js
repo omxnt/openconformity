@@ -9,11 +9,21 @@ import { el } from './dom.js';
 
 /**
  * @param {ReturnType<import('./dialog.js').createDialogs>} dialogs
+ * @param {{ consented: () => boolean, setConsented: (held: boolean) => void }} [store]  where the session's consent stands
  * @returns {Promise<void>}
  */
-export async function showAbout(dialogs) {
+export async function showAbout(dialogs, store = null) {
   const link = (href, text) =>
     el('a', { text, attributes: { href, target: '_blank', rel: 'noopener' } });
+  const consentText = () => (store?.consented() ? 'draw.io, the drawing editor: not asking before it loads this session.' : 'draw.io, the drawing editor: asks before it loads, on every edit.');
+  const consentLine = el('span', { text: consentText() });
+  const forget = el('button', { className: 'ghost-button about-forget', text: 'Forget', attributes: { type: 'button' } });
+  forget.hidden = !store?.consented();
+  forget.addEventListener('click', () => {
+    store.setConsented(false);
+    consentLine.textContent = consentText();
+    forget.hidden = true;
+  });
   await dialogs.open({
     title: 'About',
     body: el('div', { className: 'about' }, [
@@ -28,6 +38,7 @@ export async function showAbout(dialogs) {
         document.createTextNode('.'),
       ]),
       el('p', {}, [link('https://github.com/omxnt/openconformity', 'Source on GitHub')]),
+      el('p', { className: 'about-consent' }, [consentLine, forget]),
       el('p', { text: 'Third-party assets, vendored with the software:' }),
       el('ul', { className: 'doomed-list' }, [
         el('li', {}, [
