@@ -80,8 +80,8 @@ const reason = (text) => {
   equal(reason(svg('<rect onload="x()" width="1" height="1"/>')), 'holds an event handler', 'an event handler');
   equal(reason(svg('<a xlink:href="java\nscript:alert(1)"><rect/></a>')), 'links to code', 'a code link, even split by whitespace');
   equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to code', 'a document link');
-  equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the drawing, so embed images when exporting', 'an image on the web, told how to fix it');
-  equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the drawing, so embed images when exporting', 'an image on disk');
+  equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the drawing', 'an image on the web');
+  equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the drawing', 'an image on disk');
   equal(reason(svg('<use href="shapes.svg#a"/>')), 'references a shape outside the drawing', 'a shape from another file');
   equal(reason(svg('<style>@import url(x.css);</style>')), 'imports a stylesheet', 'an import');
   equal(reason(svg('<rect style="fill: url(https://x/p.png)"/>')), 'references a resource outside the drawing', 'a style attribute reaching out');

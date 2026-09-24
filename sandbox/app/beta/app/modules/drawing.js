@@ -250,7 +250,7 @@ function walk(element) {
     if (local(key) === 'href') {
       const target = attribute.value.trim().toLowerCase().replace(/\s+/g, '');
       if (/^(javascript|vbscript|data:text\/html)/.test(target)) return 'links to code';
-      if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the drawing, so embed images when exporting';
+      if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the drawing';
       if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the drawing';
     }
     if (local(key) === 'style') {

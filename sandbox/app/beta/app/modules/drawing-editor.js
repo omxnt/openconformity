@@ -233,7 +233,7 @@ async function consent(dialogs, store) {
     el('label', { className: 'consent-box', attributes: { for: 'drawio-consent-box' } }, [box, el('span', { className: 'checkbox' }, [icon('i-checkmark')]), el('span', { text: "Don't ask again this session" })]),
   ]);
   const picked = await dialogs.open({
-    title: 'Edit in draw.io',
+    title: 'Open draw.io',
     body,
     actions: [
       { label: 'Cancel', value: false, kind: 'secondary' },

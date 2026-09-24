@@ -16,7 +16,7 @@ import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
-import { el, icon, tabKeys, download } from './dom.js';
+import { el, icon, tabKeys } from './dom.js';
 import { entityLabel } from './queries.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 import { editDrawing } from './drawing-editor.js';
@@ -890,13 +890,12 @@ export function createEditor({
   }
 
   /**
-   * A drawing as read or as edited: the picture on a white card, shown
-   * as an image and nothing else, opened at full size on a click, its
-   * size and Export beneath; in an edit the card stands over a hidden
-   * control carrying the key, with Import from an SVG file and Remove
-   * beside Export, so the draft reads the drawing as it reads a set. A
-   * drawing that fails the check shows why instead of a picture, and
-   * stays exportable unchanged.
+   * A drawing in either mode: the picture on a white card, opening at
+   * full size, with its size beneath. In an edit the drawing is kept in
+   * a hidden control carrying the key, the external editor creating or
+   * editing it and Remove clearing it, so the draft reads the drawing as
+   * it reads a set. A drawing that fails the check shows why instead of
+   * a picture, and stays as it is.
    * @param {string|undefined} value
    * @param {boolean} editing
    * @param {Object} [definition]  in an edit, the attribute the control carries
@@ -904,28 +903,19 @@ export function createEditor({
   function drawingCell(value, editing, definition = null) {
     let text = value ?? '';
     const subject = () => (current ? entityLabel(current) || current.id : 'the entity');
-    const fileName = () => `${current?.id ?? 'drawing'}.svg`;
     const hidden = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key } }) : null;
-    const picker = editing ? el('input', { className: 'drawing-file', attributes: { type: 'file', accept: '.svg,image/svg+xml', hidden: '' } }) : null;
     const body = el('div', { className: 'drawing-body' });
-    const note = el('p', { className: 'field-note', attributes: { role: 'status' } });
     const ghost = (label, glyph, onPick, danger = false) => {
       const button = el('button', { className: `ghost-button${danger ? ' ghost-danger' : ''}`, attributes: { type: 'button' } }, [icon(glyph), el('span', { text: label })]);
       button.addEventListener('click', onPick);
       return button;
     };
-    const exportDrawing = () => download(fileName(), text, 'image/svg+xml');
-    const enlarge = async () => {
-      const picked = await dialogs.open({
+    const enlarge = () =>
+      dialogs.open({
         title: `Drawing of ${subject()}`,
         body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Drawing of ${subject()}` } })]),
-        actions: [
-          { label: 'Export', value: 'export', kind: 'secondary' },
-          { label: 'Close', value: null, kind: 'primary', default: true },
-        ],
+        actions: [{ label: 'Close', value: null, kind: 'primary', default: true }],
       });
-      if (picked === 'export') exportDrawing();
-    };
     const hold = (held) => {
       text = held;
       if (hidden) {
@@ -948,44 +938,23 @@ export function createEditor({
         } else {
           body.appendChild(el('div', { className: 'drawing-refused', text: `This drawing cannot be shown. It ${verdict.reason}.` }));
         }
-        actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }), ghost('Export', 'i-save', exportDrawing));
+        actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }));
       } else {
         body.appendChild(el('div', { className: 'cell-value empty', text: '–' }));
       }
-      if (editing) {
-        if (dialogs) {
-          actions.push(
-            ghost('Edit in draw.io', 'i-edit', async () => {
-              const held = await editDrawing({ dialogs, store, drawing: text, subject: subject(), dark: document.documentElement.dataset.theme === 'g100' });
-              if (held !== null) {
-                note.textContent = '';
-                hold(held);
-              }
-            })
-          );
-        }
-        actions.push(ghost('Import', 'i-open-project', () => picker.click()));
+      if (editing && dialogs) {
+        actions.push(
+          ghost(text === '' ? 'Create in draw.io' : 'Edit in draw.io', text === '' ? 'i-new-entity' : 'i-edit', async () => {
+            const held = await editDrawing({ dialogs, store, drawing: text, subject: subject(), dark: document.documentElement.dataset.theme === 'g100' });
+            if (held !== null) hold(held);
+          })
+        );
         if (text !== '') actions.push(ghost('Remove', 'i-delete', () => hold(''), true));
       }
       if (actions.length > 0) body.appendChild(el('div', { className: 'drawing-meta' }, actions));
     };
-    if (picker) {
-      picker.addEventListener('change', async () => {
-        const file = picker.files[0] ?? null;
-        picker.value = '';
-        if (!file) return;
-        const held = await file.text();
-        const verdict = checkDrawing(held);
-        if (verdict.ok) {
-          note.textContent = '';
-          hold(held);
-        } else {
-          note.textContent = `Not imported. The file ${verdict.reason}.`;
-        }
-      });
-    }
     paint();
-    return el('div', { className: 'drawing' }, [body, note, ...(picker ? [picker] : []), ...(hidden ? [hidden] : [])]);
+    return el('div', { className: 'drawing' }, [body, ...(hidden ? [hidden] : [])]);
   }
 
   /**

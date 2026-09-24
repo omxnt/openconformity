@@ -59,7 +59,7 @@ export const SHARED_HELP = {
   Link: 'Where it is published online.',
   Applicable: 'Whether it applies to this product.',
   Rationale: 'Why it applies, or why not.',
-  Drawing: 'A picture of it, imported as an SVG file and shown as an image.',
+  Drawing: 'A picture of it, drawn in draw.io and shown as an image.',
   'Initial risk estimation': 'The risk before protective measures, estimated by the method chosen or typed where none is.',
   'Residual risk estimation': 'The risk with the protective measures in place, estimated by the method chosen or typed where none is.',
   'Required integrity level': "The level the safety function must reach, in its standard's own terms.",
