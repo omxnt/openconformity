@@ -67,7 +67,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.model().name, '', 'unconfigured, its name empty');
   equal(store.dirty(), false, 'standing saved');
   ok((await blobIn(store, retention)) !== null, 'and persisted, so the next session restores it');
-  equal(retention.persisted, 1, 'the first write that lands asks the browser to keep the storage');
+  equal('persist' in retention, false, 'and the browser is never asked to mark the storage persistent, a prompt that buys little');
 
   const second = await restored(retention, storage);
   equal(second.restoration(), 'restored', 'a restored session with a project');
@@ -613,7 +613,6 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   await store.whenPersisted();
   equal(store.persistFailed(), true, 'and the first persist is on record as refused, so the user is told to save to a file');
   equal(await retention.estimate(), null, 'with no storage manager there is no estimate');
-  equal(await retention.persist(), false, 'and nothing to ask for persistence');
 }
 
 // --- The storage nearly full is told ------------------------------------------
@@ -629,8 +628,8 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   await store.whenPersisted();
   equal(store.storageNearlyFull(), true, 'past eight tenths of the quota the storage stands nearly full');
   equal(notified, 2, 'told once for the project and once for the storage');
-  store.removeFromBrowser();
-  equal(store.storageNearlyFull(), false, 'removal from the browser clears it');
+  store.clearBrowserData();
+  equal(store.storageNearlyFull(), false, 'clearing the browser data clears it');
 }
 
 {
@@ -773,7 +772,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(createStore({ storage, session, retention }).tabOf('ESR'), null, 'as does one holding the wrong shape');
 }
 
-// --- Remove from this browser forgets everything ------------------------
+// --- Clear browser data forgets everything ------------------------
 
 {
   const storage = fakeStorage({ [ASIDE_KEY]: 'an old failed blob', [PROJECT_KEY]: 'an old blob' });
@@ -789,8 +788,8 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   store.subscribe(() => {
     told += 1;
   });
-  store.removeFromBrowser();
-  equal(told, 1, 'the removal is told once');
+  store.clearBrowserData();
+  equal(told, 1, 'the clearing is told once');
   equal(store.hasProject(), false, 'no project is open, as on the landing');
   equal(store.theme(), null, 'the theme follows the system again');
   equal(store.consented(), false, 'the consent is withdrawn');

@@ -547,7 +547,7 @@ function flowsOver(store) {
   );
 }
 
-// --- Remove from this browser asks, then forgets ------------------------
+// --- Clear browser data asks, then forgets ------------------------
 
 {
   const retention = memoryRetention();
@@ -568,16 +568,16 @@ function flowsOver(store) {
     fileInput: null,
   });
   store.replaceProject(createModel());
-  await flows.removeFromBrowser();
+  await flows.clearBrowserData();
   equal(asked.length, 1, 'the removal asks first');
-  deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Remove from this browser', 'Remove', true], 'in the danger colour, with Remove as the answer');
-  ok(asked[0].message.startsWith('Everything the software keeps in this browser is removed') && asked[0].message.endsWith('A saved file is not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
+  deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Clear browser data', 'Clear', true], 'in the danger colour, with Remove as the answer');
+  ok(asked[0].message.startsWith('Everything the software keeps in this browser is cleared') && asked[0].message.endsWith('A saved file is not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
   await store.whenPersisted();
   ok(store.hasProject() && retention.records.has('project'), 'Cancel changes nothing');
   answer = true;
-  await flows.removeFromBrowser();
+  await flows.clearBrowserData();
   await store.whenPersisted();
-  ok(!store.hasProject() && retention.records.size === 0, 'Remove forgets the project and shows the landing');
+  ok(!store.hasProject() && retention.records.size === 0, 'Clear forgets the project and shows the landing');
 }
 
 summary('test-flows');

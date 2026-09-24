@@ -633,25 +633,25 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Forget the software's data in this browser: asked first, told plainly
-   * what goes, and what more goes when the open project has changes not
-   * saved to a file. The landing follows.
+   * Clear the software's data from this browser: asked first, told
+   * plainly what goes, and what more goes when the open project has
+   * changes not saved to a file. The landing follows.
    */
-  async function removeFromBrowser() {
+  async function clearBrowserData() {
     if (!(await confirmDiscard())) return;
     const message = store.dirty()
-      ? 'Everything the software keeps in this browser is removed: the project it holds between sessions, the theme, and the draw.io choice. The open project has changes that are not saved to a file, and they are lost too. A saved file is not affected.'
-      : 'Everything the software keeps in this browser is removed: the project it holds between sessions, the theme, and the draw.io choice. A saved file is not affected.';
+      ? 'Everything the software keeps in this browser is cleared: the project it holds between sessions, the theme, and the draw.io choice. The open project has changes that are not saved to a file, and they are lost too. A saved file is not affected.'
+      : 'Everything the software keeps in this browser is cleared: the project it holds between sessions, the theme, and the draw.io choice. A saved file is not affected.';
     const confirmed = await dialogs.confirm({
-      title: 'Remove from this browser',
+      title: 'Clear browser data',
       message,
-      confirmLabel: 'Remove',
+      confirmLabel: 'Clear',
       cancelLabel: 'Cancel',
       danger: true,
     });
     if (!confirmed) return;
     endEditSession();
-    store.removeFromBrowser();
+    store.clearBrowserData();
   }
 
   /**
@@ -828,7 +828,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     completeRelate,
     removeRelationship,
     newProject,
-    removeFromBrowser,
+    clearBrowserData,
     openProjectFlow,
     loadExample,
     saveProject,

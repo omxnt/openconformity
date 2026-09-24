@@ -118,7 +118,6 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   /** The chain every write and removal joins, so they land in order and can be awaited. */
   let tail = Promise.resolve();
   let lastEstimate = 0;
-  let persistenceRequested = false;
   /** @type {'list'|'graph'} the relationship pane's presentation: graph by default, a reload keeping the choice for the browser session */
   let relationshipView = 'graph';
   try {
@@ -198,8 +197,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
    * the chain; where a newer blob is queued by the time its turn comes,
    * it is skipped, so a burst of changes costs one write. A refused
    * write is on record until one succeeds, and each change of that
-   * record is told. The first write that lands asks the browser to keep
-   * the storage through storage pressure.
+   * record is told.
    */
   function persist() {
     if (!projectOpen) return;
@@ -217,10 +215,6 @@ export function createStore({ storage, session = null, retention = memoryRetenti
           if (persistFailed) {
             persistFailed = false;
             notify();
-          }
-          if (!persistenceRequested) {
-            persistenceRequested = true;
-            retention.persist().catch(() => false);
           }
           return checkQuota();
         },
@@ -403,13 +397,13 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     persistFailed: () => persistFailed,
 
     /**
-     * Forget everything this browser holds of the software: the project
+     * Clear everything this browser holds of the software: the project
      * and its set-aside copy, the theme, and the session state, so a
      * borrowed machine keeps nothing. The session returns to the landing
      * with no project, as a fresh one begins. A file saved by the user
-     * is not the browser's to remove.
+     * is not the browser's to clear.
      */
-    removeFromBrowser() {
+    clearBrowserData() {
       persistSequence += 1;
       tail = tail.then(() => retention.remove([PROJECT_RECORD, ASIDE_RECORD])).catch(() => undefined);
       for (const key of [PROJECT_KEY, ASIDE_KEY, THEME_KEY]) {

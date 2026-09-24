@@ -4,10 +4,12 @@
  * the disk rather than the few megabytes web storage allows, so a
  * project with many drawings keeps being kept. Two records live in one
  * object store, the project blob and the set-aside copy of one that
- * failed to load. The interface also asks the browser to keep the data
- * through storage pressure and reports how full the origin's storage
- * is. An in-memory twin serves the tests, and any browser without
- * IndexedDB, where every write is refused and the store says so.
+ * failed to load. The interface also reports how full the origin's
+ * storage is. It never asks the browser to mark the storage persistent:
+ * the prompt that raises in some browsers buys little, since the file
+ * is the record and the store says when storage runs short. An
+ * in-memory twin serves the tests, and any browser without IndexedDB,
+ * where every write is refused and the store says so.
  */
 
 /** The database and its one object store. */
@@ -21,14 +23,13 @@ const VERSION = 1;
  * @property {(key: string, value: unknown) => Promise<void>} write  rejects where the browser refuses
  * @property {(keys: string[]) => Promise<void>} remove
  * @property {() => Promise<{ usage: number, quota: number }|null>} estimate  how full the origin's storage is, or null where the browser does not say
- * @property {() => Promise<boolean>} persist  ask the browser to keep the origin's storage through storage pressure
  */
 
 /**
  * Retention over the browser's IndexedDB.
  * @param {Object} context
  * @param {IDBFactory|undefined} context.indexedDB  the browser's, or undefined where there is none
- * @param {{ estimate?: () => Promise<{ usage?: number, quota?: number }>, persist?: () => Promise<boolean> }|null} [context.storageManager]  navigator.storage, or null
+ * @param {{ estimate?: () => Promise<{ usage?: number, quota?: number }> }|null} [context.storageManager]  navigator.storage, or null
  * @returns {Retention}
  */
 export function createRetention({ indexedDB, storageManager = null }) {
@@ -116,14 +117,13 @@ export function createRetention({ indexedDB, storageManager = null }) {
             .then((held) => ({ usage: held?.usage ?? 0, quota: held?.quota ?? 0 }))
             .catch(() => null)
         : Promise.resolve(null),
-    persist: () => (typeof storageManager?.persist === 'function' ? storageManager.persist().catch(() => false) : Promise.resolve(false)),
   };
 }
 
 /**
  * Retention over a Map, for the tests and for a store built without a
  * browser: records readable from outside, a switch that makes writes
- * fail, a settable estimate, and a count of persistence requests.
+ * fail, and a settable estimate.
  * @param {Object} [context]
  * @param {Object<string, unknown>} [context.initial]
  * @param {{ usage: number, quota: number }|null} [context.estimate]
@@ -134,7 +134,6 @@ export function memoryRetention({ initial = {}, estimate = null } = {}) {
     failing: false,
     records,
     estimated: estimate,
-    persisted: 0,
     read: async (key) => (records.has(key) ? structuredClone(records.get(key)) : null),
     async write(key, value) {
       if (held.failing) throw new Error('quota');
@@ -144,10 +143,6 @@ export function memoryRetention({ initial = {}, estimate = null } = {}) {
       for (const key of keys) records.delete(key);
     },
     estimate: async () => held.estimated,
-    async persist() {
-      held.persisted += 1;
-      return true;
-    },
   };
   return held;
 }
