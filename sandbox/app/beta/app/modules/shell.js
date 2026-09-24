@@ -20,17 +20,6 @@ export function effectiveTheme(choice, systemPrefersDark) {
 }
 
 /**
- * The theme offer, in menu order: two states, each named and carrying
- * its glyph. The first load follows the system preference; any explicit
- * choice then owns the theme permanently. The stored values stay the
- * Carbon theme names.
- */
-export const THEME_MENU = [
-  { value: 'white', label: 'Light theme', icon: 'i-theme-light' },
-  { value: 'g100', label: 'Dark theme', icon: 'i-theme-dark' },
-];
-
-/**
  * What the shell's theme button offers: one click to the other theme,
  * wearing the glyph of the state it would switch to.
  * @param {'white'|'g100'} effective
@@ -118,21 +107,6 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   }
 
   dark.addEventListener('change', applyTheme);
-
-  /**
-   * The two theme radios, checked by what is in effect, so the offer
-   * reads the same whether the theme is chosen or still following the
-   * system.
-   */
-  function themeItems() {
-    const effective = effectiveTheme(store.theme(), dark.matches);
-    return THEME_MENU.map(({ value, label, icon }) => ({
-      label,
-      icon,
-      checked: effective === value,
-      onPick: () => store.setTheme(value),
-    }));
-  }
 
   // One click flips the theme; the button wears the state it would
   // switch to.
@@ -241,24 +215,12 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     return items;
   });
 
-  menubarMenu(viewButton, 'View', () => [
-    ...actions.filter((offered) => offered.group === 'views').map((action) => ({ ...actionItem(action, viewButton), checked: action.checked() })),
-    { separator: true },
-    {
-      label: 'Relationships as list',
-      icon: 'i-view-list',
-      checked: store.relationshipView() === 'list',
-      onPick: () => store.setRelationshipView('list'),
-    },
-    {
-      label: 'Relationships as graph',
-      icon: 'i-view-graph',
-      checked: store.relationshipView() === 'graph',
-      onPick: () => store.setRelationshipView('graph'),
-    },
-    { separator: true },
-    ...themeItems(),
-  ]);
+  // The views of the model, and nothing else: the theme has its own
+  // button in the bar and the relationship pane its own tabs, each
+  // showing its state where it acts.
+  menubarMenu(viewButton, 'View', () =>
+    actions.filter((offered) => offered.group === 'views').map((action) => ({ ...actionItem(action, viewButton), checked: action.checked() }))
+  );
 
   /** @param {string} url */
   function openLink(url) {

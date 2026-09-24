@@ -10,7 +10,6 @@ import {
   themeSwitch,
   titleFor,
   shouldWarnBeforeUnload,
-  THEME_MENU,
   RESTORATION_NOTICE,
   RESTORATION_DETAIL,
   PERSIST_NOTICE,
@@ -26,24 +25,6 @@ equal(effectiveTheme('white', true), 'white', 'a stored choice overrides the sys
 equal(effectiveTheme('g100', false), 'g100', 'in both directions');
 equal(effectiveTheme(undefined, true), 'g100', 'anything but a theme follows the system');
 equal(effectiveTheme('solarized', false), 'white', 'an unknown theme follows the system');
-
-// --- The theme menu ----------------------------------------------------
-
-deepEqual(
-  THEME_MENU.map((item) => item.value),
-  ['white', 'g100'],
-  'the theme offer is two-state: the stored values stay the Carbon names'
-);
-deepEqual(
-  THEME_MENU.map((item) => item.label),
-  ['Light theme', 'Dark theme'],
-  'presented as named themes, with no System entry: the first load follows the system, a choice then owns it'
-);
-deepEqual(
-  THEME_MENU.map((item) => item.icon),
-  ['i-theme-light', 'i-theme-dark'],
-  'each wearing its glyph: the sun, the moon'
-);
 
 // --- The one-click flip ------------------------------------------------
 
