@@ -614,8 +614,15 @@ body {
    strength. */
 .tree-row.excluded .row-title,
 .tree-row.excluded .designation { color: var(--disabled); }
-.tree-row.excluded > .icon { opacity: 0.25; }
+.tree-row.excluded > .icon,
+.tree-row.excluded .twisty { opacity: 0.25; }
 .tree-row.pick-dim { opacity: 0.25; }
+/* A row both excluded and not offered fades once, as the whole row. */
+.tree-row.pick-dim.excluded .row-title,
+.tree-row.pick-dim.excluded .designation { color: inherit; }
+.tree-row.pick-dim.excluded .designation { color: var(--text-second); }
+.tree-row.pick-dim.excluded > .icon,
+.tree-row.pick-dim.excluded .twisty { opacity: 1; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .tree-row.pick-dim:hover { background: none; }
 .tree-row.pickable { cursor: pointer; }
