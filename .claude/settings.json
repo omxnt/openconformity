@@ -1,14 +1,16 @@
 {
   "permissions": {
     "allow": [
+      "Edit(app/**)",
+      "Write(app/**)",
+      "Edit(tests/**)",
+      "Write(tests/**)",
+      "Edit(site/**)",
+      "Write(site/**)",
       "Edit(sandbox/**)",
       "Write(sandbox/**)"
     ],
     "deny": [
-      "Edit(/app/**)",
-      "Write(/app/**)",
-      "Edit(/site/**)",
-      "Write(/site/**)",
       "Edit(/docs/**)",
       "Write(/docs/**)",
       "Edit(/schema/**)",

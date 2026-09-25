@@ -23,6 +23,7 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 ```
 openconformity/
 ├── app/            the published software
+├── tests/          headless tests for the software
 ├── site/           the published project site
 ├── docs/           the project documentation
 ├── schema/         the data model schema files
@@ -30,8 +31,9 @@ openconformity/
 └── sandbox/        the non-published work-in-progress
     ├── app/        generations of the software
     │   ├── poc/    frozen original proof of concept
-    │   ├── demo/   frozen demonstration prototype
-    │   └── beta/   the generation in development, with its tests and notes
+    │   └── demo/   frozen demonstration prototype
+    ├── notes/      working notes and proposals
+    ├── gate/       the beta gate, a Cloudflare Worker
     └── site/       iterations of the project site
 ```
 

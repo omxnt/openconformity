@@ -640,13 +640,24 @@ The bar shows one button, Unsaved changes, only while the project differs from i
 
 ---
 
-### D-078 Sandbox by generation
+### D-079 Terms and plain prose in the requirements
 
-`2026-09-24` `repository`
+`2026-09-24` `documentation`
 
-The repository is organised by kind, and the sandbox groups each deployable's generations under it. The generation in development mirrors the published layout, with the software, its tests and its notes side by side, and a generation that is passed is frozen in place.
+The requirements open with a table of the terms they use, and every statement uses them. A requirement statement never names another requirement by its identifier, and only a rationale may. The requirements are written in plain sentences, without colons, semicolons or dashes as joints, except in quoted material and in a designation, and new entries in this log follow the same rule.
+
+> *A term defined once and used everywhere cannot drift, and a statement that names another requirement binds two things a reader must unpick to verify either. Punctuation that welds clauses together hides how many claims a sentence makes, and short sentences with one claim each are what a reader can check. The reviewed requirements were rewritten to this rule in one pass.*
+
+---
+
+### D-080 The beta at the root
+
+`2026-09-25` `repository`
+
+The beta generation is promoted to the root. The software is `app`, its tests are `tests` beside it, and the attributes draft is the published attributes document. The sandbox keeps the generations the project has passed, the working notes and proposals, the beta gate, and the site iterations.
 
     app/            the published software
+    tests/          headless tests for the software
     site/           the published project site
     docs/           the project documentation
     schema/         the data model schema files
@@ -655,23 +666,21 @@ The repository is organised by kind, and the sandbox groups each deployable's ge
       app/          generations of the software
         poc/        frozen original proof of concept
         demo/       frozen demonstration prototype
-        beta/       the generation in development
-          app/      the software, as app/ will be when it is published
-          tests/    headless tests for the software
-          notes/    working notes and the draft documents of the generation
+      notes/        working notes and proposals
+      gate/         the beta gate, a Cloudflare Worker
       site/         iterations of the project site
 
-> *The software and the site are two deployables, so their generations belong under each rather than beside each other. Grouping by generation shows at a glance which is frozen and which is live, and a generation folder that mirrors the root means promotion is a copy over the published directory with nothing renamed. The notes and draft documents of a generation live with it, since they are the record of how that generation was made, and a draft is moved by hand to the documentation when it lands. Supersedes D-049.*
+> *The sandbox did what D-078 built it for, and development now happens where the software is published, on the develop branch, with main as its release snapshot (D-018). The tests sit beside the software rather than inside it, since everything under app is served and the tests are not for serving, and not in the sandbox, since they belong to the software on the same branch. The frozen demo was brought level with the published copy before the root was replaced, so the record is what was live. Supersedes D-078.*
 
 ---
 
-### D-079 Terms and plain prose in the requirements
+### D-081 The beta behind one shared login
 
-`2026-09-24` `documentation`
+`2026-09-25` `architecture` `repository`
 
-The requirements open with a table of the terms they use, and every statement uses them. A requirement statement never names another requirement by its identifier, and only a rationale may. The requirements are written in plain sentences, without colons, semicolons or dashes as joints, except in quoted material and in a designation, and new entries in this log follow the same rule.
+During the beta the software at app.openconformity.org is reachable only with one login shared with the invited testers. The gate is a Cloudflare Worker doing HTTP Basic Authentication on the route in front of the Pages deployment, configured on the host with the login as its variables, and the address the host gives every Pages project is covered by a Cloudflare Access policy. The software knows nothing of the gate. The Worker's source and its settings are kept in the sandbox as a record.
 
-> *A term defined once and used everywhere cannot drift, and a statement that names another requirement binds two things a reader must unpick to verify either. Punctuation that welds clauses together hides how many claims a sentence makes, and short sentences with one claim each are what a reader can check. The reviewed requirements were rewritten to this rule in one pass.*
+> *The beta is for invited testers, and a login that travels with the invitation is what steers it to them. Basic Authentication over HTTPS is enough for that and no more, and the browser keeps the credentials for the session so the software's own requests pass unprompted. A gate written into the deployment, as a Pages Function, would put server-side code where C-TEC-007 forbids it, so the gate stands in front of the deployment instead, where removing one route ends it. Access with a one-time code per tester was weighed and would have given revocation per tester, but not one shared login. The exception in D-071 is not touched, since the gate receives what the browser sends to the host anyway and hands nothing on.*
 
 ## 3. Undecided
 
@@ -718,6 +727,31 @@ Whether the views rate in place, or ratings are made only in the editor as today
 ## 4. Superseded
 
 Entries replaced by a later decision, kept as a record of what was chosen and when.
+
+---
+
+### D-078 Sandbox by generation
+
+`2026-09-24` `repository` `superseded by D-080`
+
+The repository is organised by kind, and the sandbox groups each deployable's generations under it. The generation in development mirrors the published layout, with the software, its tests and its notes side by side, and a generation that is passed is frozen in place.
+
+    app/            the published software
+    site/           the published project site
+    docs/           the project documentation
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    sandbox/        the non-published work-in-progress
+      app/          generations of the software
+        poc/        frozen original proof of concept
+        demo/       frozen demonstration prototype
+        beta/       the generation in development
+          app/      the software, as app/ will be when it is published
+          tests/    headless tests for the software
+          notes/    working notes and the draft documents of the generation
+      site/         iterations of the project site
+
+> *The software and the site are two deployables, so their generations belong under each rather than beside each other. Grouping by generation shows at a glance which is frozen and which is live, and a generation folder that mirrors the root means promotion is a copy over the published directory with nothing renamed. The notes and draft documents of a generation live with it, since they are the record of how that generation was made, and a draft is moved by hand to the documentation when it lands. Supersedes D-049.*
 
 ---
 
