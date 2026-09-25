@@ -17,7 +17,7 @@
  */
 
 import { el, icon } from './dom.js';
-import { VERSION } from './version.js';
+import { VERSION, PHASE } from './version.js';
 
 /**
  * @param {ReturnType<import('./dialog.js').createDialogs>} dialogs
@@ -80,7 +80,7 @@ export async function showAbout(dialogs, store = null) {
           el('p', { className: 'about-meta' }, [
             el('span', { className: 'about-version', text: VERSION }),
             text(' · '),
-            text('Private beta'),
+            text(PHASE),
             text(' · '),
             link('https://github.com/omxnt/openconformity/releases', 'Release notes'),
           ]),

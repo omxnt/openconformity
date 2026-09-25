@@ -125,12 +125,12 @@ import { fakeStorage } from './helpers.js';
     !shell.includes("{ label: 'Metamodel', icon: 'i-launch'"),
     'the metamodel carries no launch mark: it leaves for no external site'
   );
-  ok(page.includes('<button type="button" class="shell-tag" id="shell-beta" title="Private beta">Beta</button>') && page.indexOf('id="shell-beta"') > page.indexOf('id="shell-theme"'), 'the beta tag closes the shell bar, after the theme, its tooltip two words');
-  ok(shell.includes("betaTag.addEventListener('click', () => aboutAction.run({ anchor: betaTag }))"), 'and a click on it opens About');
+  ok(page.includes('<button type="button" class="shell-tag" id="shell-beta"></button>') && page.indexOf('id="shell-beta"') > page.indexOf('id="shell-theme"'), 'the phase tag closes the shell bar, after the theme, its text set by the shell');
+  ok(shell.includes("betaTag.textContent = PHASE;") && shell.includes("betaTag.addEventListener('click', () => aboutAction.run({ anchor: betaTag }))"), 'the tag reads the release phase, and a click on it opens About');
   const version = readFile('../app/modules/version.js');
-  ok(/export const VERSION = '\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?';/.test(version), 'the version is one semantic version constant');
+  ok(/export const VERSION = '\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?';/.test(version) && /export const PHASE = '[A-Z][a-z]+ beta';/.test(version), 'the version and the phase are two constants in one module');
   const about = readFile('../app/modules/about.js');
-  ok(about.includes("el('span', { className: 'about-version', text: VERSION })") && about.includes("link('https://github.com/omxnt/openconformity/releases', 'Release notes')"), 'which About names on its release line, beside the link to the notes');
+  ok(about.includes("el('span', { className: 'about-version', text: VERSION })") && about.includes("text(PHASE),") && about.includes("link('https://github.com/omxnt/openconformity/releases', 'Release notes')"), 'which About names on its release line with the phase, beside the link to the notes');
   ok(about.includes("fold('Credits and references', [") && about.includes("held.hidden = true;") && about.includes("attributes: { type: 'button', 'aria-expanded': 'false' }"), 'the credits and references stand folded under one accordion heading, closed when About opens');
   ok(about.includes("['SEBoK', 'System requirement types, after the INCOSE manual', [link('https://sebokwiki.org/wiki/System_Requirements_Definition', 'sebokwiki.org')]]") && about.includes("link('https://www.iso.org/standard/57180.html', 'iso.org')"), 'the methods credit the requirement categories to SEBoK and link each standard to its publisher');
 

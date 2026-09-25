@@ -6,6 +6,7 @@
  */
 
 import { openMenu } from './menu.js';
+import { PHASE } from './version.js';
 
 /**
  * The theme in effect: the stored choice when one is set, else the system
@@ -259,6 +260,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   const betaTag = document.getElementById('shell-beta');
   const aboutAction = actions.find((action) => action.id === 'about');
   if (betaTag && aboutAction) {
+    betaTag.textContent = PHASE;
     betaTag.addEventListener('click', () => aboutAction.run({ anchor: betaTag }));
   }
 
