@@ -346,7 +346,7 @@ equal(
   relate(model, 'prm-reduces-risk-of-scn', third, scn);
   deepEqual(recordedStates(record, model, scn, 'prm-reduces-risk-of-scn').map(({ id, state }) => [id, state]), [[first, 'linked'], [second, 'deleted'], [third, 'added']], 'a measure related since the record stands after the recorded ones, added');
   deepEqual(recordedStates('', model, null, 'prm-reduces-risk-of-scn'), [], 'with no subject nothing is related');
-  deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked after the residual risk estimation.', deleted: 'Deleted after the residual risk estimation.', added: 'Related after the residual risk estimation.' }, 'the three states out of step say so, naming the rating the record was written with');
+  deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked since the residual risk estimation.', deleted: 'Deleted since the residual risk estimation.', added: 'Related since the residual risk estimation.' }, 'the three states out of step say so, naming the rating the record was written with');
 }
 
 summary('test-editor');

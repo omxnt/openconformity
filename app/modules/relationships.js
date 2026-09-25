@@ -615,7 +615,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       .map(({ id, label, state }, i) => {
         const glyph = state === 'added' ? icon('i-information') : statusIcon(state === 'deleted' ? 'high' : 'medium');
         if (state === 'added') glyph.classList.add('status-icon', 'tone-info');
-        return tooltipTag(`tag ${state}`, [glyph, el('span', { text: id })], label, words[state], i, `message-${finding.id}`);
+        return tooltipTag(`tag ${state}`, [glyph, el('span', { text: id })], { caption: id, main: label === id ? '' : label, note: words[state] }, i, `message-${finding.id}`);
       });
     const choose = () => {
       const tab = tabNameOf(finding.type, finding.definition.key);

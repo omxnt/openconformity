@@ -17,7 +17,7 @@ const elimination = groupsOf('HAZ').flatMap((group) => group.attributes).find((h
 
 equal(recordOf(['PRM-002', 'PRM-001', 'PRM-002']), 'PRM-001; PRM-002', 'a record is the identifiers once each, in order, parted by semicolons');
 equal(recordOf([]), '', 'and nothing with nothing');
-deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked after the residual risk estimation.', deleted: 'Deleted after the residual risk estimation.', added: 'Related after the residual risk estimation.' }, 'the three states out of step name the rating the record was written with');
+deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked since the residual risk estimation.', deleted: 'Deleted since the residual risk estimation.', added: 'Related since the residual risk estimation.' }, 'the three states out of step name the rating the record was written with');
 equal(changedText(measures, 'SCN'), "The protective measures have changed since the scenario's residual risk estimation.", 'and the note beneath a record names the field, the entity and the rating');
 equal(nounOf('HAZ'), 'hazard', 'an entity goes by the last word of its type');
 

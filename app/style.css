@@ -774,8 +774,11 @@ button.tag-trigger:hover, button.tag-trigger:focus-visible { background: var(--h
 button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .tag-trigger:hover .tooltip,
 .tag-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
-.tooltip-lead { display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: 0.32px; opacity: 0.75; }  /* $label-01, $spacing-02 */
-.tooltip-text { display: block; white-space: pre-wrap; }
+/* A tag's tooltip: the caption at label-01, receding; the main line at
+   body-01; the note beneath after a gap, keeping its breaks. */
+.tooltip-caption { display: block; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; opacity: 0.75; }  /* $label-01 */
+.tooltip-main { display: block; margin-top: 2px; font-weight: 600; }  /* $heading-compact-01 */
+.tooltip-note { display: block; margin-top: 8px; white-space: pre-wrap; }  /* $spacing-03 */
 /* A set in an edit: Carbon's multiselect. The field says how many are
    chosen, in the high-contrast count tag, and which; it opens a listbox
    of every value with its checkbox, drawn as Carbon draws a checkbox:

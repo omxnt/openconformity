@@ -531,7 +531,13 @@ export function createEditor({
     };
     const words = staleText(definition.recorded);
     const tags = states.map(({ id, label, state }, i) =>
-      tooltipTag(state === 'linked' ? 'tag' : `tag ${state}`, [...(state === 'linked' ? [] : [glyph(state)]), el('span', { text: id })], label, state === 'linked' ? '' : words[state], i, tipKey)
+      tooltipTag(
+        state === 'linked' ? 'tag' : `tag ${state}`,
+        [...(state === 'linked' ? [] : [glyph(state)]), el('span', { text: id })],
+        { caption: id, main: label === id ? '' : label, note: state === 'linked' ? '' : words[state] },
+        i,
+        tipKey
+      )
     );
     const held = el('div', { className: 'cell-value tags' }, tags);
     if (!states.some(({ state }) => state !== 'linked')) return held;
@@ -578,14 +584,14 @@ export function createEditor({
    * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
    */
   function ratingTags(view, tipKey = null) {
-    const tag = (className, content, lead, text, key) => tooltipTag(className, content, lead, text, key, tipKey);
+    const tag = (className, content, lines, key) => tooltipTag(className, content, lines, key, tipKey);
     const tags = [];
     if (view.outcome !== null) {
-      tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], `${view.name}: ${view.outcome}`, '', 'outcome'));
+      tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], { caption: view.name, main: view.outcome }, 'outcome'));
     }
     view.parameters.forEach((parameter, i) => {
       if (parameter.value === '') return;
-      tags.push(tag(parameter.rationale ? 'tag reasoned' : 'tag', [el('span', { text: parameter.code })], `${parameter.name}: ${parameter.value}`, parameter.rationale, i));
+      tags.push(tag(parameter.rationale ? 'tag reasoned' : 'tag', [el('span', { text: parameter.code })], { caption: parameter.name, main: parameter.value, note: parameter.rationale }, i));
     });
     return tags;
   }
