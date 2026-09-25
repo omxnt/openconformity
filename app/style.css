@@ -1123,7 +1123,7 @@ select.field-input[size] {
 .table .col-message { width: 44%; }
 .table td.tags { overflow: visible; }  /* the tags' tooltips reach past the cell */
 .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
-.head-title { padding: 0 16px; font-weight: 600; white-space: nowrap; }  /* $spacing-05, $heading-compact-01 */
+.head-title { font-weight: 600; white-space: nowrap; }  /* $heading-compact-01; the head's own padding lands it where a tab's text stands */
 .table th {
   position: sticky;
   top: 0;
