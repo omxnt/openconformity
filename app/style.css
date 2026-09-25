@@ -1448,7 +1448,7 @@ select.field-input[size] {
 .about-brand-text { display: grid; gap: 6px; color: var(--text-second); }
 .about-wordmark { height: 20px; color: var(--text); }
 .about-meta { color: var(--text-helper); }
-.about-version { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; }  /* $code-01 */
+.about-version { font: inherit; }  /* the version reads as prose in the release line, not in the mono of an identifier the model assigns */
 
 /* Carbon accordion, one item: the heading a full-width row with rules
    above and below and the chevron first, the groups beneath when open. */
