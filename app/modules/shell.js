@@ -256,6 +256,11 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   if (metamodelAction) {
     metamodelButton.addEventListener('click', () => metamodelAction.run({ anchor: metamodelButton }));
   }
+  const betaTag = document.getElementById('shell-beta');
+  const aboutAction = actions.find((action) => action.id === 'about');
+  if (betaTag && aboutAction) {
+    betaTag.addEventListener('click', () => aboutAction.run({ anchor: betaTag }));
+  }
 
   // Undo and redo are global, so they live in the shell's global-action
   // cluster: enablement and the step-counting tooltip follow the action.

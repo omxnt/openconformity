@@ -7,13 +7,17 @@
  * it loads from and the session's standing consent. The legislation the
  * model is built around. The methods its ratings follow, each by
  * designation with its clauses. The header is the mark beside the
- * wordmark, set apart by space alone.
+ * wordmark, set apart by space alone, and under it the release line,
+ * the version with a link to its notes. The groups stand folded under
+ * one accordion heading, opened on a click and closed again each time
+ * About opens.
  * Every reference is named by designation only, and every licence named
  * is one the deployment itself carries. Chrome, not flow: the flow only
  * asks for it.
  */
 
 import { el, icon } from './dom.js';
+import { VERSION } from './version.js';
 
 /**
  * @param {ReturnType<import('./dialog.js').createDialogs>} dialogs
@@ -31,6 +35,20 @@ export async function showAbout(dialogs, store = null) {
       el('h3', { className: 'about-label', text: label }),
       el('table', { className: 'about-table' }, [el('tbody', {}, rows.map((row) => el('tr', {}, row.map(cell))))]),
     ]);
+
+  /** An accordion item, closed at first: a heading with the chevron over the groups it folds. */
+  const fold = (label, groups) => {
+    const chevron = el('span', { className: 'about-fold-chevron' }, [icon('i-chevron-right')]);
+    const heading = el('button', { className: 'about-fold', attributes: { type: 'button', 'aria-expanded': 'false' } }, [chevron, el('span', { text: label })]);
+    const held = el('div', { className: 'about-credits' }, groups);
+    held.hidden = true;
+    heading.addEventListener('click', () => {
+      held.hidden = !held.hidden;
+      heading.setAttribute('aria-expanded', String(!held.hidden));
+      chevron.replaceChildren(icon(held.hidden ? 'i-chevron-right' : 'i-chevron-down'));
+    });
+    return el('div', { className: 'about-accordion' }, [heading, held]);
+  };
 
   const consentText = () => (store?.consented() ? 'From embed.diagrams.net, not asking this session' : 'From embed.diagrams.net, asked before each edit');
   const consentLine = el('span', { text: consentText() });
@@ -59,19 +77,32 @@ export async function showAbout(dialogs, store = null) {
             text(' · '),
             link('https://github.com/omxnt/openconformity', 'Source on GitHub'),
           ]),
+          el('p', { className: 'about-meta' }, [
+            el('span', { className: 'about-version', text: VERSION }),
+            text(' · '),
+            text('Private beta'),
+            text(' · '),
+            link('https://github.com/omxnt/openconformity/releases', 'Release notes'),
+          ]),
         ]),
       ]),
+      fold('Credits and references', [
       group('Design', [
         ['IBM Carbon', 'Design system, followed', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
         ['IBM Plex', 'Typeface, vendored', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
         ['Carbon Icons', 'Icon set, vendored', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
       ]),
       group('Diagrams', [['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]]]),
-      group('Legislation', [['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'EUR-Lex')]]]),
+      group('Legislation', [
+        ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
+        ['2014/30/EU', 'Electromagnetic Compatibility Directive', [link('https://eur-lex.europa.eu/eli/dir/2014/30/oj', 'eur-lex.europa.eu')]],
+      ]),
       group('Methods', [
-        ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', ''],
-        ['EN ISO 13849-1:2023', 'Required performance level of a safety function', ''],
-        ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', ''],
+        ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', [link('https://www.iso.org/standard/57180.html', 'iso.org')]],
+        ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
+        ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],
+        ['SEBoK', 'System requirement types, after the INCOSE manual', [link('https://sebokwiki.org/wiki/System_Requirements_Definition', 'sebokwiki.org')]],
+      ]),
       ]),
     ]),
   });

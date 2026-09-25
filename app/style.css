@@ -268,6 +268,26 @@ body {
 .shell-action:active:not(:disabled) { background: var(--shell-active); }
 .shell-action[aria-expanded="true"] { background: var(--shell-selected); }
 .shell-action:disabled { color: var(--shell-disabled); cursor: not-allowed; }
+
+/* Carbon tag, blue, in the g100 colours the shell wears in both themes:
+   the beta mark at the bar's end, opening About on a click. */
+.shell-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;             /* Carbon tag md */
+  margin: 0 16px 0 8px;     /* $spacing-05, $spacing-03 */
+  padding: 0 8px;           /* $spacing-03 */
+  border: 0;
+  border-radius: 24px;
+  background: #0043ce;      /* $blue-70, tag background on g100 */
+  color: #d0e2ff;           /* $blue-20, tag text on g100 */
+  font: inherit;
+  font-size: 12px;          /* $label-01 */
+  line-height: 16px;
+  letter-spacing: 0.32px;
+  cursor: pointer;
+}
+.shell-tag:hover { background: #0f62fe; }  /* $blue-60 */
 .shell-action[hidden] { display: none; }
 
 .shell-action-wide {
@@ -1346,6 +1366,32 @@ select.field-input[size] {
 .about-brand-text { display: grid; gap: 6px; color: var(--text-second); }
 .about-wordmark { height: 20px; color: var(--text); }
 .about-meta { color: var(--text-helper); }
+.about-version { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: 0.32px; }  /* $code-01 */
+
+/* Carbon accordion, one item: the heading a full-width row with rules
+   above and below and the chevron first, the groups beneath when open. */
+.about-fold {
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  width: 100%;
+  height: 40px;             /* Carbon accordion md */
+  padding: 0;
+  font: inherit;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--motion-fast) var(--motion-standard);
+}
+.about-fold:hover { background: var(--hover); }
+.about-fold-chevron { display: inline-flex; width: 16px; height: 16px; }
+.about-fold-chevron .icon { width: 16px; height: 16px; fill: currentColor; }
+.about-credits { display: grid; gap: 24px; padding-top: 16px; }  /* $spacing-06, $spacing-05 */
+.about-credits[hidden] { display: none; }
 .about-section { display: grid; gap: 8px; }  /* $spacing-03 */
 .about-label { margin: 0; font-size: 12px; line-height: 1.33; letter-spacing: 0.32px; font-weight: 400; color: var(--text-helper); }  /* $label-01 */
 .about-table { width: 100%; border-collapse: collapse; }
