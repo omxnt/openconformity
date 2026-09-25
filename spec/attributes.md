@@ -474,12 +474,13 @@ The designation is the scenario's own short name — `S1` — entered by the mod
 
 ### 4.3 Protective Measure (PRM) `draft`
 
-The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The step is the one of the three the Regulation orders in Annex III 1.1.2, under names of our own: a safe design removes the hazard or holds it back by the design itself, protection is something added that stands between a hazard that remains and the person, a guard, a device, an emergency stop, an isolation or a safety function, and information tells the user of what is left, in the instructions, on the machinery or through training and protective equipment. The test is what happens if the measure fails: in the first step nothing, since the hazard is gone, in the second the hazard reaches the person, and in the third only the person's own care stood there.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the protective measure. |
+| step | Step | choice | Safe design; Protection; Information | Which of the three risk reduction steps the measure is, a design that removes the hazard, protection against a risk that remains, or information to the user about what is left. |
 | description | Description | multiline | | What the protective measure is and how it reduces the risk. |
 
 #### Diagram `tab`

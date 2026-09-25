@@ -341,6 +341,7 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the protective measure." },
+      { key: 'step', name: 'Step', kind: 'choice', values: ['Safe design', 'Protection', 'Information'], help: 'Which of the three risk reduction steps the measure is, a design that removes the hazard, protection against a risk that remains, or information to the user about what is left.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the protective measure is and how it reduces the risk.' },
     ],
     groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
