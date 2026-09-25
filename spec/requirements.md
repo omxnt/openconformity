@@ -180,7 +180,7 @@ The software shall be hosted on Cloudflare Pages.
 
 `ubiquitous` `stable`
 
-The metamodel shall be maintained as Mermaid text in `docs/metamodel.md`.
+The metamodel shall be maintained as Mermaid text in `spec/metamodel.md`.
 
 > *Mermaid is a text format, so the diagram in the document is its own source, renders wherever the document is read, and cannot drift from an exported image. Being text, it constrains no tool. Any editor serves, and the repository diff shows every change to the model.*
 
@@ -513,7 +513,7 @@ The software shall permit the creation of folders at any position in the navigat
 
 `ubiquitous` `stable`
 
-The software shall only permit the creation of entity types defined by the metamodel in `docs/metamodel.md`.
+The software shall only permit the creation of entity types defined by the metamodel in `spec/metamodel.md`.
 
 > *The metamodel encodes the domain. Allowing an entity type it does not define would let a model express something the domain does not have. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
@@ -523,7 +523,7 @@ The software shall only permit the creation of entity types defined by the metam
 
 `ubiquitous` `stable`
 
-The software shall only permit the creation of relationships defined by the metamodel in `docs/metamodel.md`.
+The software shall only permit the creation of relationships defined by the metamodel in `spec/metamodel.md`.
 
 > *A relationship not present in the metamodel has no meaning in the domain. Enforcing this on creation is what makes a model structurally sound by construction rather than by review. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
@@ -533,7 +533,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 `ubiquitous` `stable`
 
-The software shall only present and edit the attributes defined for the entity's type in `docs/attributes.md`.
+The software shall only present and edit the attributes defined for the entity's type in `spec/attributes.md`.
 
 > *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form. Which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
 

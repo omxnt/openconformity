@@ -6,7 +6,7 @@ The openconformity project, short for open-source conformity assessment, is an i
 
 ## Status
 
-In private beta. The software is built and is being tried by invited testers, behind a shared login. The documentation is kept in step with it.
+In private beta. The software is built and is being tried by invited testers, behind a shared login. The documentation is kept in step with it. The proof of concept and the demonstration prototype that preceded the software are kept as the tags `poc` and `demo`.
 
 ## What it is
 
@@ -23,29 +23,23 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 ```
 openconformity/
 ├── app/            the published software
-├── tests/          headless tests for the software
 ├── site/           the published project site
-├── docs/           the project documentation
+├── spec/           the specification and the decisions
 ├── schema/         the data model schema files
 ├── sources/        the sources in editable formats
-└── sandbox/        the non-published work-in-progress
-    ├── app/        generations of the software
-    │   ├── poc/    frozen original proof of concept
-    │   └── demo/   frozen demonstration prototype
-    ├── notes/      working notes and proposals
-    ├── gate/       the beta gate, a Cloudflare Worker
-    └── site/       iterations of the project site
+├── tests/          headless tests for the software
+└── notes/          working notes, proposals and the beta gate
 ```
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [about.md](docs/about.md) | Why it exists and what it is |
-| [decisions.md](docs/decisions.md) | What was chosen and why |
-| [requirements.md](docs/requirements.md) | What it shall be and do |
-| [metamodel.md](docs/metamodel.md) | What a model may contain |
-| [attributes.md](docs/attributes.md) | What each entity type carries |
+| [about.md](spec/about.md) | Why it exists and what it is |
+| [decisions.md](spec/decisions.md) | What was chosen and why |
+| [requirements.md](spec/requirements.md) | What it shall be and do |
+| [metamodel.md](spec/metamodel.md) | What a model may contain |
+| [attributes.md](spec/attributes.md) | What each entity type carries |
 
 ## Disclaimer
 

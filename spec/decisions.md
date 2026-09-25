@@ -649,30 +649,6 @@ The requirements open with a table of the terms they use, and every statement us
 
 ---
 
-### D-080 The beta at the root
-
-`2026-09-25` `repository`
-
-The beta generation is promoted to the root. The software is `app`, its tests are `tests` beside it, and the attributes draft is the published attributes document. The sandbox keeps the generations the project has passed, the working notes and proposals, the beta gate, and the site iterations.
-
-    app/            the published software
-    tests/          headless tests for the software
-    site/           the published project site
-    docs/           the project documentation
-    schema/         the data model schema files
-    sources/        the sources in editable formats
-    sandbox/        the non-published work-in-progress
-      app/          generations of the software
-        poc/        frozen original proof of concept
-        demo/       frozen demonstration prototype
-      notes/        working notes and proposals
-      gate/         the beta gate, a Cloudflare Worker
-      site/         iterations of the project site
-
-> *The sandbox did what D-078 built it for, and development now happens where the software is published, on the develop branch, with main as its release snapshot (D-018). The tests sit beside the software rather than inside it, since everything under app is served and the tests are not for serving, and not in the sandbox, since they belong to the software on the same branch. The frozen demo was brought level with the published copy before the root was replaced, so the record is what was live. Supersedes D-078.*
-
----
-
 ### D-081 The beta behind one shared login
 
 `2026-09-25` `architecture` `repository`
@@ -680,6 +656,24 @@ The beta generation is promoted to the root. The software is `app`, its tests ar
 During the beta the software at app.openconformity.org is reachable only with one login shared with the invited testers. The gate is a Cloudflare Worker doing HTTP Basic Authentication on the route in front of the Pages deployment, configured on the host with the login as its variables, and the address the host gives every Pages project is covered by a Cloudflare Access policy. The software knows nothing of the gate. The Worker's source and its settings are kept in the sandbox as a record.
 
 > *The beta is for invited testers, and a login that travels with the invitation is what steers it to them. Basic Authentication over HTTPS is enough for that and no more, and the browser keeps the credentials for the session so the software's own requests pass unprompted. A gate written into the deployment, as a Pages Function, would put server-side code where C-TEC-007 forbids it, so the gate stands in front of the deployment instead, where removing one route ends it. Access with a one-time code per tester was weighed and would have given revocation per tester, but not one shared login. The exception in D-071 is not touched, since the gate receives what the browser sends to the host anyway and hands nothing on.*
+
+---
+
+### D-082 Prototypes as tags, the specification as spec
+
+`2026-09-25` `repository`
+
+The proof of concept and the demonstration prototype are kept as the tags `poc` and `demo` on the commits where each last stood, and no longer as folders. The specification and the decisions live in `spec`, and `docs` is reserved for the user documentation when it exists. Working notes, proposals and the beta gate live in `notes`, flat, with a subfolder only for a note that is several files.
+
+    app/            the published software
+    site/           the published project site
+    spec/           the specification and the decisions
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    tests/          headless tests for the software
+    notes/          working notes, proposals and the beta gate
+
+> *The branches already carry when a change goes live (D-018), and a tag carries what a frozen folder carried, the whole repository as it stood, without two megabytes of dead code in every checkout and every search. The demo folder had drifted from what was published and needed a freeze commit before it could be trusted, which a tag cannot do. The published folders are named for their hosts, and docs on GitHub means the documentation of a product, so that folder waits for docs.openconformity.org and the specification takes a name that says what it is. With the generations gone, grouping notes by deployable grouped nothing. Supersedes D-080.*
 
 ## 3. Undecided
 
@@ -726,6 +720,30 @@ Whether the views rate in place, or ratings are made only in the editor as today
 ## 4. Superseded
 
 Entries replaced by a later decision, kept as a record of what was chosen and when.
+
+---
+
+### D-080 The beta at the root
+
+`2026-09-25` `repository` `superseded by D-082`
+
+The beta generation is promoted to the root. The software is `app`, its tests are `tests` beside it, and the attributes draft is the published attributes document. The sandbox keeps the generations the project has passed, the working notes and proposals, the beta gate, and the site iterations.
+
+    app/            the published software
+    tests/          headless tests for the software
+    site/           the published project site
+    docs/           the project documentation
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    sandbox/        the non-published work-in-progress
+      app/          generations of the software
+        poc/        frozen original proof of concept
+        demo/       frozen demonstration prototype
+      notes/        working notes and proposals
+      gate/         the beta gate, a Cloudflare Worker
+      site/         iterations of the project site
+
+> *The sandbox did what D-078 built it for, and development now happens where the software is published, on the develop branch, with main as its release snapshot (D-018). The tests sit beside the software rather than inside it, since everything under app is served and the tests are not for serving, and not in the sandbox, since they belong to the software on the same branch. The frozen demo was brought level with the published copy before the root was replaced, so the record is what was live. Supersedes D-078.*
 
 ---
 
