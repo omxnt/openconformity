@@ -7,15 +7,14 @@
 1. In the Cloudflare dashboard open Workers & Pages, create a Worker named `beta-gate`, replace its code with `worker.js`, and deploy.
 2. Under the Worker's Settings, add two variables. `BETA_USER` as plain text, for example `beta`. `BETA_PASSWORD` as a secret. The gate refuses everything while either is missing.
 3. Under the Worker's Settings, open Domains & Routes, add a Route in the zone openconformity.org with the pattern `app.openconformity.org/*`. The record for app is already proxied, as every Pages custom domain is, and a route runs before Pages does. The one order Cloudflare refuses is the reverse, adding a Pages custom domain where a route already exists, which does not apply here.
-4. Cover the address Cloudflare gives the Pages project itself, since the route does not reach `*.pages.dev`. Open the Pages project, Settings, General, and enable the access policy. Then open Manage, and in the Access application remove the wildcard from the Subdomain of the public hostname and save. Enable the access policy once more, and check that two Access applications exist, one for the project's pages.dev domain and one for its preview deployments. Give both a policy that allows your own email only. Access is free for up to fifty users.
+4. Turn preview deployments off in the Pages project, under Settings, Builds and deployments, branch control, so a push to develop never builds a copy of the beta at a preview address. The project's own address, openconformity-app.pages.dev, stays open. The code is public and the gate steers testers rather than hides anything, so that address is not worth Cloudflare's Access product, which is the only lock it offers and works by email login.
 
 ## 2. Verify
 
     curl -sI https://app.openconformity.org | head -1
     curl -sI -u beta:PASSWORD https://app.openconformity.org | head -1
-    curl -sI https://PROJECT.pages.dev | head -1
 
-The first answers 401, the second 200, and the third redirects to the Access login. In a browser the prompt appears once per session, and declining it shows the closed page from `worker.js`. After signing in, open the console and check the software loads with no errors, including the draw.io editor, which lives on another origin and never sees the login.
+The first answers 401 and the second 200. In a browser the prompt appears once per session, and declining it shows the closed page from `worker.js`. After signing in, open the console and check the software loads with no errors, including the draw.io editor, which lives on another origin and never sees the login.
 
 ## 3. Run
 
