@@ -603,7 +603,20 @@ body {
    candidacy is carried by dimming alone — candidates at full strength,
    everything else receding — and a pick is filled, the selected-row
    tint under a leading check, so adjacent picks never merge. */
-.tree-row.pick-dim { opacity: 0.3; }
+/* One grey for standing back: Carbon's disabled quarter, the strength a
+   disabled control wears, for everything out of play, by decision or for
+   the moment. An excluded entity in the tree, not applicable or
+   eliminated; a tree row not offered while picking; a list row receding
+   while picking; a graph edge that is not a pick. The quarter is below
+   the contrast floor for text, which is accepted on purpose so that
+   out of play reads at a glance; an excluded row says so to a screen
+   reader, and selecting it shows everything in the editor at full
+   strength. */
+.tree-row.excluded .row-title,
+.tree-row.excluded .designation { color: var(--disabled); }
+.tree-row.excluded > .icon { opacity: 0.25; }
+.tree-row.pick-dim { opacity: 0.25; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .tree-row.pick-dim:hover { background: none; }
 .tree-row.pickable { cursor: pointer; }
 .tree-row.picked { background: var(--layer-accent); }
@@ -1238,7 +1251,7 @@ select.field-input[size] {
 /* While picking, the picks are the subject: dashed provisional edges and
    boxes stand forward, the standing neighbourhood recedes. */
 .graph.picking .graph-node:not(.pending):not(.centre),
-.graph.picking .graph-edge:not(.pending) { opacity: 0.4; }
+.graph.picking .graph-edge:not(.pending) { opacity: 0.25; }
 .graph-node.pending > rect { stroke: var(--accent); stroke-dasharray: 4 4; }
 .graph-edge.pending polyline { stroke-dasharray: 4 4; }
 .graph-edge.pending { cursor: pointer; }
@@ -1255,7 +1268,7 @@ select.field-input[size] {
   color: var(--text-helper);
   padding: 8px 16px;        /* $spacing-03, $spacing-05 */
 }
-.table tr.receded { opacity: 0.5; }
+.table tr.receded { opacity: 0.25; }
 .table tr.receded:hover td { background: none; }
 .pending-choice {
   font-size: 12px;          /* $label-01 */

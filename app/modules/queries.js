@@ -9,6 +9,25 @@ import { nodeOf, childrenOf, canRelate, canFile, deletionOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
 
 /**
+ * The decisions that set an entity out of play: the value of an attribute
+ * that excludes the entity it stands on. Applicable No excludes an act, a
+ * standard, a specification or a requirement of theirs; Eliminated Yes a
+ * hazard designed out.
+ */
+export const EXCLUSIONS = { applicable: 'No', eliminated: 'Yes' };
+
+/**
+ * Whether an entity is excluded: considered and set out of play by one of
+ * the decisions above. It stays in the model, related and selectable, and
+ * is shown as standing aside.
+ * @param {import('./model.js').Node|null|undefined} node
+ */
+export function excluded(node) {
+  if (!node || node.kind !== 'entity') return false;
+  return Object.entries(EXCLUSIONS).some(([key, value]) => node.attributes?.[key] === value);
+}
+
+/**
  * The relationship forms an entity can take part in right now: each form
  * the metamodel offers for its type, in either direction, with the
  * entities the model still allows at the far end. A form with no

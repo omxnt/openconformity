@@ -30,7 +30,7 @@ import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
 import { pickerCandidates } from './relate.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { entityLabel } from './queries.js';
+import { entityLabel, excluded } from './queries.js';
 import { el, icon } from './dom.js';
 import { openMenu } from './menu.js';
 
@@ -402,6 +402,7 @@ export function createNavigator({
     if (picked) classes.push('picked');
     if (picking.subject === row.id) classes.push('picker-subject');
     if (picking.subject !== null && !pickable && picking.subject !== row.id) classes.push('pick-dim');
+    if (excluded(row.node)) classes.push('excluded');
     const rowElement = el('div', { className: classes.join(' '), attributes });
     rowElement.style.paddingLeft = `${16 + (row.depth + 1) * 16}px`;
 
@@ -433,6 +434,7 @@ export function createNavigator({
     if (parts.title) {
       rowElement.appendChild(el('span', { className: 'row-title', text: parts.title }));
     }
+    if (excluded(row.node)) rowElement.appendChild(el('span', { className: 'visually-hidden', text: 'excluded' }));
 
     rowElement.addEventListener('click', () => {
       if (pickable) store.togglePick(row.id);

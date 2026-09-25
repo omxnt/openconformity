@@ -22,6 +22,7 @@ import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
 import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/modules/metamodel.js';
 import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/modules/model.js';
+import { excluded, EXCLUSIONS } from '../app/modules/queries.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** The offer as comparable rows. */
@@ -338,6 +339,26 @@ function offered(model, subjectId) {
   ok(entityMatches(entity, 'haz-001') && entityMatches(entity, 'moving') && entityMatches(entity, ' PARTS '), 'an entity answers a filter by its identifier or its label, case and edges aside');
   ok(entityMatches(entity, '') && entityMatches(entity, '   ') && entityMatches(entity, undefined), 'and an empty filter matches everything');
   ok(!entityMatches(entity, 'guard'), 'but not text it holds nowhere');
+}
+
+// --- Excluded entities ------------------------------------------------------
+
+{
+  const model = createModel();
+  const haz = addEntity(model, 'HAZ', { attributes: { title: 'Moving parts' } }).entity;
+  const leg = addEntity(model, 'LEG', { attributes: { title: 'An act' } }).entity;
+  const folder = addFolder(model, 'Things').folder;
+  deepEqual(EXCLUSIONS, { applicable: 'No', eliminated: 'Yes' }, 'two decisions set an entity out of play');
+  ok(!excluded(haz) && !excluded(leg), 'an entity with neither decision is in play');
+  ok(!excluded(folder) && !excluded(null), 'a folder and nothing are never excluded');
+  haz.attributes.eliminated = 'No';
+  ok(!excluded(haz), 'a hazard kept knowingly is in play');
+  haz.attributes.eliminated = 'Yes';
+  ok(excluded(haz), 'a hazard designed out is excluded');
+  leg.attributes.applicable = 'Yes';
+  ok(!excluded(leg), 'an applicable act is in play');
+  leg.attributes.applicable = 'No';
+  ok(excluded(leg), 'and one found not applicable is excluded');
 }
 
 summary('test-queries');
