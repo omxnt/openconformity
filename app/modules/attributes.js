@@ -214,9 +214,28 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the hazard." },
+      { key: 'nature', name: 'Nature', kind: 'choice', values: ['Mechanical', 'Electrical', 'Thermal', 'Noise', 'Vibration', 'Radiation', 'Substance', 'Ergonomic', 'Environmental', 'Other'], help: 'The kind of hazard it is, or Other for one the list does not name.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'Where the hazard arises and how it could cause harm.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Elimination',
+        tab: true,
+        attributes: [
+          {
+            key: 'measures',
+            name: 'Measures',
+            kind: 'entities',
+            relationship: 'prm-eliminates-haz',
+            recorded: 'Elimination',
+            help: 'The protective measures related as eliminating the hazard when Eliminated was last set, recorded by the software.',
+          },
+          { key: 'eliminated', name: 'Eliminated', kind: 'choice', values: ['Yes', 'No'], help: 'Whether the hazard has been designed out, or considered and kept.' },
+        ],
+        groups: [{ name: 'Rationale', attributes: [{ key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why the hazard counts as eliminated, or why it could not be.' }] }],
+      },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
   SCN: {
     attributes: [

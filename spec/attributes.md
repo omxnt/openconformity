@@ -29,7 +29,7 @@ Each attribute uses one of the kinds below.
 | table | Rows of columns, the columns the rows beneath it define, each keyed by the table's key, a dot and its own, and each a text, a multiline, a date, a choice or a number; stored as one line per row with the cells parted by tabs, in column order, a cell holding a tab, a break or a quotation mark quoted as a CSV cell is, a row with every cell empty dropped |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
 | rationale | The reasoning behind the parameter of the same rating whose key the Values column names, free text of any length for why its class was chosen, shown with the parameter's value (§1.8) |
-| entities | The identifiers of entities related to the entity by the relationship type the Values column names first, as they stood when the group the column names second last changed; written by the software, never typed, stored separated by semicolons in ascending order, and shown as tags marked where a relationship has since been removed, an entity deleted, or an entity related that the record does not name (§1.8) |
+| entities | The identifiers of entities related to the entity by the relationship type the Values column names first, as they stood when the attributes of the group the column names second last changed, its rationales, outcomes and records aside; written by the software, never typed, stored separated by semicolons in ascending order, and shown as tags marked where a relationship has since been removed, an entity deleted, or an entity related that the record does not name (§1.8) |
 
 ### 1.4 Groups
 
@@ -347,13 +347,27 @@ The reference is the identification number the Commission lists the body under, 
 
 ### 4.1 Single Hazard (HAZ) `draft`
 
-The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The nature is the kind of hazard it is, from a list of plain words that is also how the Regulation's Annex III walks its requirements, with Other for a hazard a list of the modeller's own names differently. The Elimination tab records the decision the Regulation's first principle asks for: whether the hazard was designed out, or considered and kept, with the rationale either way. Eliminated on the hazard is the fact and a measure that eliminates the hazard is the trace to what did it, and neither requires the other, so a hazard is marked without a measure and a measure related without the mark. The measures related as eliminating the hazard when Eliminated was last set are recorded beside it, as a scenario records the measures its residual risk was rated against, and marked where one has since been unlinked, deleted, or related after the decision, the last of which, after a No, is the sign that the decision wants revisiting.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the hazard. |
+| nature | Nature | choice | Mechanical; Electrical; Thermal; Noise; Vibration; Radiation; Substance; Ergonomic; Environmental; Other | The kind of hazard it is, or Other for one the list does not name. |
 | description | Description | multiline | | Where the hazard arises and how it could cause harm. |
+
+#### Elimination `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| measures | Measures | entities | prm-eliminates-haz; Elimination | The protective measures related as eliminating the hazard when Eliminated was last set, recorded by the software. |
+| eliminated | Eliminated | choice | Yes; No | Whether the hazard has been designed out, or considered and kept. |
+
+##### Rationale
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| rationale | Rationale | multiline | | Why the hazard counts as eliminated, or why it could not be. |
 
 #### Notes `tab`
 

@@ -300,6 +300,8 @@ export function createEditor({
   let records = [];
   /** @type {Map<string, string>} the group each key of the mounted type stands in, by name */
   let groupOfKey = new Map();
+  /** @type {Map<string, AttributeDefinition>} the definition of each key of the mounted type */
+  let definitionOfKey = new Map();
   for (const kind of ['input', 'change']) {
     body.addEventListener(kind, (event) => {
       recordFrom(event.target);
@@ -317,11 +319,13 @@ export function createEditor({
     const control = target instanceof Element ? target.closest('[data-key]') : null;
     const key = control?.dataset.key;
     if (!key || editingId === null) return;
+    const changed = definitionOfKey.get(key);
+    if (!changed || isRationale(changed) || isOutcome(changed)) return;
     const group = groupOfKey.get(key);
     const draft = fieldValues();
     const rated = groupsOf(current?.type ?? '')
       .filter((held) => held.name === group)
-      .some((held) => held.attributes.some((definition) => !isOutcome(definition) && !isRationale(definition) && (draft[definition.key] ?? '').trim() !== ''));
+      .some((held) => held.attributes.some((definition) => !isOutcome(definition) && !isRationale(definition) && definition.kind !== 'entities' && (draft[definition.key] ?? '').trim() !== ''));
     for (const { definition, input } of records) {
       if (definition.recorded !== group) continue;
       input.value = rated ? recordOf(relatedIds(store.model(), editingId, definition.relationship)) : '';
@@ -455,7 +459,7 @@ export function createEditor({
 
   /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table, a drawing. */
   const takesRow = (definition) =>
-    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing' || definition.kind === 'entities';
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing';
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -546,7 +550,7 @@ export function createEditor({
   function entitiesNode(definition, value, values, tipKey = null) {
     const written = groupsOf(current?.type ?? '')
       .filter((group) => group.name === definition.recorded)
-      .some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && (values[held.key] ?? '').trim() !== ''));
+      .some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && held.kind !== 'entities' && (values[held.key] ?? '').trim() !== ''));
     const model = store.model();
     const subject = current?.id ?? null;
     const states = written
@@ -780,6 +784,7 @@ export function createEditor({
   function mount(id, code, stored, editing) {
     const type = typeOf(code) ?? { attributes: [], groups: [] };
     groupOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, group.name])));
+    definitionOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, definition])));
     const values = { ...stored, ...projectReads(code) };
     const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);
     const ahead = id === null ? NAME_AFTER : 0;

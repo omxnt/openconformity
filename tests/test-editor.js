@@ -61,8 +61,8 @@ equal(linkable(''), false, 'and an empty value is nothing');
   equal(firstTabName('XYZ'), 'Description', 'a type the metamodel does not know falls back');
   deepEqual(
     Object.entries(ATTRIBUTES).flatMap(([code, type]) => type.groups.filter((group) => group.tab && group.name !== 'Notes').map((group) => `${code}:${group.name}`)),
-    ['ELM:Data', 'ELM:Diagram', 'ACT:Assumptions', 'TSK:Conditions', 'LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'SCN:Risk', 'PRM:Diagram', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'SAF:Diagram', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability', 'VER:Result'],
-    "the tabs in the model beside the notes: an element's data, an actor's assumptions, a task's conditions, every verdict, a scenario's risk, a safety function's behaviour, characteristics and faults, a verification's result, and a drawing on an element, a measure and a function"
+    ['ELM:Data', 'ELM:Diagram', 'ACT:Assumptions', 'TSK:Conditions', 'LEG:Applicability', 'HST:Applicability', 'OSP:Applicability', 'HAZ:Elimination', 'SCN:Risk', 'PRM:Diagram', 'SAF:Behaviour', 'SAF:Characteristics', 'SAF:Fault handling', 'SAF:Diagram', 'ESR:Guidance', 'ESR:Applicability', 'HSR:Guidance', 'HSR:Applicability', 'OSR:Guidance', 'OSR:Applicability', 'VER:Result'],
+    "the tabs in the model beside the notes: an element's data, an actor's assumptions, a task's conditions, every verdict, a hazard's elimination, a scenario's risk, a safety function's behaviour, characteristics and faults, a verification's result, and a drawing on an element, a measure and a function"
   );
   for (const [code, type] of Object.entries(ATTRIBUTES)) {
     const last = type.groups.at(-1);
