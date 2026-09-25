@@ -6,7 +6,7 @@ The openconformity project, short for open-source conformity assessment, is an i
 
 ## Status
 
-In design phase. The documentation is being written and the software is not yet built, apart from a preview that shows the intended interface with fixed example content.
+In private beta. The software is built and is being tried by invited testers, behind a shared login. The documentation is kept in step with it.
 
 ## What it is
 
@@ -16,7 +16,7 @@ Artefacts can be generated as views of the model, exported and intended as input
 
 ## Technology
 
-Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. Projects are saved as a single local JSON file. Artefacts can be exported as CSV files.
+Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. Projects are saved as a single local file, and views of the model are exported from the tool.
 
 ## Structure
 
@@ -62,5 +62,5 @@ Provided as-is, without warranty of any kind. Outputs may contain errors and sho
 ## Links
 
 - [The project site](https://openconformity.org)
-- [The demo software](https://app.openconformity.org)
+- [The beta software](https://app.openconformity.org)
 - [Follow on LinkedIn](https://www.linkedin.com/company/openconformity)
