@@ -214,7 +214,6 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the hazard." },
-      { key: 'nature', name: 'Nature', kind: 'choice', values: ['Mechanical', 'Electrical', 'Thermal', 'Noise', 'Vibration', 'Radiation', 'Substance', 'Ergonomic', 'Environmental', 'Other'], help: 'The kind of hazard it is, or Other for one the list does not name.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'Where the hazard arises and how it could cause harm.' },
     ],
     groups: [
@@ -361,6 +360,7 @@ export const ATTRIBUTES = {
       { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the protective measure." },
       { key: 'step', name: 'Step', kind: 'choice', values: ['Safe design', 'Protection', 'Information'], help: 'Which of the three risk reduction steps the measure is, a design that removes the hazard, protection against a risk that remains, or information to the user about what is left.' },
+      { key: 'kind', name: 'Kind', kind: 'text', help: 'What kind of measure it is, in your own words, such as a guard, a device, a label or training.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the protective measure is and how it reduces the risk.' },
     ],
     groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],

@@ -347,13 +347,12 @@ The reference is the identification number the Commission lists the body under, 
 
 ### 4.1 Single Hazard (HAZ) `draft`
 
-The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The nature is the kind of hazard it is, from a list of plain words that is also how the Regulation's Annex III walks its requirements, with Other for a hazard a list of the modeller's own names differently. The Elimination tab records the decision the Regulation's first principle asks for: whether the hazard was designed out, or considered and kept, with the rationale either way. Eliminated on the hazard is the fact and a measure that eliminates the hazard is the trace to what did it, and neither requires the other, so a hazard is marked without a measure and a measure related without the mark. The measures related as eliminating the hazard when Eliminated was last set are recorded beside it, as a scenario records the measures its residual risk was rated against, and marked where one has since been unlinked, deleted, or related after the decision, the last of which, after a No, is the sign that the decision wants revisiting.
+The designation is the hazard's own short name — `H1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The Elimination tab records the decision the Regulation's first principle asks for: whether the hazard was designed out, or considered and kept, with the rationale either way. Eliminated on the hazard is the fact and a measure that eliminates the hazard is the trace to what did it, and neither requires the other, so a hazard is marked without a measure and a measure related without the mark. The measures related as eliminating the hazard when Eliminated was last set are recorded beside it, as a scenario records the measures its residual risk was rated against, and marked where one has since been unlinked, deleted, or related after the decision, the last of which, after a No, is the sign that the decision wants revisiting.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the hazard. |
-| nature | Nature | choice | Mechanical; Electrical; Thermal; Noise; Vibration; Radiation; Substance; Ergonomic; Environmental; Other | The kind of hazard it is, or Other for one the list does not name. |
 | description | Description | multiline | | Where the hazard arises and how it could cause harm. |
 
 #### Elimination `tab`
@@ -488,13 +487,14 @@ The designation is the scenario's own short name — `S1` — entered by the mod
 
 ### 4.3 Protective Measure (PRM) `draft`
 
-The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The step is the one of the three the Regulation orders in Annex III 1.1.2, under names of our own: a safe design removes the hazard or holds it back by the design itself, protection is something added that stands between a hazard that remains and the person, a guard, a device, an emergency stop, an isolation or a safety function, and information tells the user of what is left, in the instructions, on the machinery or through training and protective equipment. The test is what happens if the measure fails: in the first step nothing, since the hazard is gone, in the second the hazard reaches the person, and in the third only the person's own care stood there.
+The designation is the measure's own short name — `M1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The step is the one of the three the Regulation orders in Annex III 1.1.2, under names of our own: a safe design removes the hazard or holds it back by the design itself, protection is something added that stands between a hazard that remains and the person, a guard, a device, an emergency stop, an isolation or a safety function, and information tells the user of what is left, in the instructions, on the machinery or through training and protective equipment. The test is what happens if the measure fails: in the first step nothing, since the hazard is gone, in the second the hazard reaches the person, and in the third only the person's own care stood there. The kind beside the step is the modeller's own word for what the measure is, a fixed guard, a warning label, operator training, so the finer sort a project sorts its measures by is its own and not a list's.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the protective measure. |
 | step | Step | choice | Safe design; Protection; Information | Which of the three risk reduction steps the measure is, a design that removes the hazard, protection against a risk that remains, or information to the user about what is left. |
+| kind | Kind | text | | What kind of measure it is, in your own words, such as a guard, a device, a label or training. |
 | description | Description | multiline | | What the protective measure is and how it reduces the risk. |
 
 #### Diagram `tab`
