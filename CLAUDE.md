@@ -39,8 +39,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | 2 | `spec/metamodel.md` | Governs what a model contains | The metamodel is right |
 | 3 | `spec/attributes.md` | Derived from the metamodel | The attributes are wrong |
 | 4 | `schema/project.schema.json` | Derived from the metamodel | The schema is wrong |
-| 5 | `schema/library.schema.json` | Derived from the metamodel | The schema is wrong |
-| 6 | `spec/decisions.md` | Reasoning behind the choices | The entry is out of date |
+| 5 | `spec/decisions.md` | Reasoning behind the choices | The entry is out of date |
 
 ## Documents
 
@@ -53,7 +52,6 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | `spec/decisions.md` | Decision log and rationale | Proposing something undiscussed |
 | `spec/template.md` | Document form and structure | Writing or updating a document |
 | `schema/project.schema.json` | Project file specification | Working with the project schema file |
-| `schema/library.schema.json` | Library file specification | Working with the library schema file |
 
 ## Verification
 

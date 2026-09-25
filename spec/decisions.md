@@ -695,6 +695,16 @@ Every tooltip in the interface is Carbon's, shown on hover and on keyboard focus
 
 > *Carbon gives a tooltip one job, "additional information upon hover or focus that is contextual, helpful, and nonessential", and names the primary case, "the text labels of icon-only buttons", which appear on focus because the button is in the tab order. The browser's title does none of that: it never shows on focus, comes after the browser's delay and looks like nothing else on the page. Until now the field help and the tags were Carbon's and the icon buttons, the ones used all day, were the browser's, which is the inconsistency a user notices first. One helper now gives a button its tooltip and takes its title away, so a second box cannot appear.*
 
+---
+
+### D-085 A library is a project file
+
+`2026-09-26` `architecture`
+
+A library is a project file used as a source of items to import, valid against the project schema, and there is no library schema. A built-in library is content the software ships as a data module beside the example project, legislation with its text verbatim and what the maintainer or the community write themselves, never a standard's content, loaded with the software and fetched from nowhere. A user's library is a project-shaped file they build in the tool and keep, opened through the library function, which is the Annex ZA function: standards and their requirements with the lines that cover the essential requirements. Reuse of anything else is a project file opened and continued from, as a template is.
+
+> *One shape means one schema, one loader, one validator and one migration, and a library built in the tool as a project is built. The placeholder library schema had never gained a property and is deleted, its requirement reworded. A built-in library loads with the software because the requirements ask for everything to load on the initial load, so the Regulation can be imported on a train in a tunnel; the drawing editor earns its fetch by being another application, and templates keep theirs as optional starting points. What the user's library is for is narrowed to the one use with a shape of its own, the Annex ZA mapping between a standard's clauses and the essential requirements, so that no agnostic import and no second editor is built for a case nobody has asked for. Settles the file question of U-005.*
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
@@ -703,9 +713,9 @@ The questions below are raised but not yet decided. Each stays here until it is 
 
 `2026-08-01` `product`
 
-How a library works and what it holds: which item types are reusable across projects, and how importing from a library into a project behaves.
+How importing from a library into a project behaves: what the picker offers, how an item already in the project is recognised, and which relationships travel with a pick.
 
-> *Affects the library. F-PER-002 establishes that a library is a file of its own, distinct from a project, but not what it contains or how content crosses from one into a project.*
+> *Affects the library. D-085 settles what a library is, a project file used as a source, and what each kind holds. What remains is the function: recognition by reference so nothing is copied twice and a standard's covers lines land on the project's own essential requirements, and which relationships are the standard's own facts and travel, containment and covers, against D-016's rule that judgements stay behind.*
 
 ---
 
