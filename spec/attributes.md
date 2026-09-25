@@ -359,7 +359,7 @@ The designation is the hazard's own short name — `H1` — entered by the model
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| measures | Measures | entities | prm-eliminates-haz; Elimination | The protective measures related as eliminating the hazard when Eliminated was last set, recorded by the software. |
+| measures | Protective measures | entities | prm-eliminates-haz; Elimination | The protective measures related as eliminating the hazard when Eliminated was last set, recorded by the software. |
 | eliminated | Eliminated | choice | Yes; No | Whether the hazard has been designed out, or considered and kept. |
 
 ##### Rationale

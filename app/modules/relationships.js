@@ -22,7 +22,9 @@ import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
 import { formLabel, entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
-import { el, icon, tabKeys } from './dom.js';
+import { el, icon, tabKeys, tooltipTag } from './dom.js';
+import { statusIcon } from './rating.js';
+import { findings, staleText, tabNameOf } from './records.js';
 
 /**
  * The rows the list draws: per direction, the relationships grouped by
@@ -166,6 +168,29 @@ export function presentedRows(rows, sort, filter) {
  * @param {(id: string) => void} context.onSelect
  * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
  */
+/**
+ * The messages as the pane's table shows them: the findings under the
+ * head's filter, matched on the entity's identifier and label, the
+ * record's name and the identifiers out of step, and under the chosen
+ * sort, by the entity's identifier or the message; the model's order
+ * otherwise.
+ * @param {import('./records.js').Finding[]} found
+ * @param {{ column: 'entity'|'message', direction: 'asc'|'desc' }|null} sort
+ * @param {string} filter
+ */
+export function messageRows(found, sort, filter) {
+  const needle = filter.trim().toLowerCase();
+  const rows = found.filter((finding) => {
+    if (needle === '') return true;
+    const text = [finding.id, finding.label, finding.definition.name, finding.definition.recorded, ...finding.states.map(({ id }) => id)].join(' ').toLowerCase();
+    return text.includes(needle);
+  });
+  if (sort === null) return rows;
+  const keyOf = { entity: (finding) => finding.id, message: (finding) => finding.text }[sort.column];
+  const sign = sort.direction === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => sign * keyOf(a).localeCompare(keyOf(b)));
+}
+
 export function createRelationshipsView({ store, head, body, graph, onAdd, onDone, onUnrelate, onSelect, addEnabled }) {
   /**
    * The pane's own transients, gone with the visit: a sort per table, the
@@ -178,7 +203,18 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
   const collapsed = { outgoing: false, incoming: false };
 
   const listHost = el('div', { className: 'rel-list' });
+  const messagesHost = el('div', { className: 'rel-list' });
+  /** @type {{ column: 'entity'|'message', direction: 'asc'|'desc' }|null} */
+  let messagesSort = null;
   body.appendChild(listHost);
+  body.appendChild(messagesHost);
+  for (const region of [head, body]) {
+    region.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !store.messagesOpen()) return;
+      event.preventDefault();
+      store.setMessagesOpen(false);
+    });
+  }
   body.appendChild(graph.element);
 
   /**
@@ -540,8 +576,104 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     }
   }
 
-  /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, or the graph around its subject. */
+  /**
+   * The head while the messages stand over the pane: what it is and how
+   * many, the filter, the close that hands the pane back, and the
+   * chevron.
+   * @param {number} count
+   */
+  function renderMessagesHead(count) {
+    head.textContent = '';
+    head.hidden = false;
+    head.appendChild(el('span', { className: 'head-title', text: count === 0 ? 'Messages' : `Messages (${count})` }));
+    head.appendChild(el('span', { className: 'toolbar-spacer' }));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [searchControl(), headIcon('Close the messages', 'i-close', () => store.setMessagesOpen(false)), collapseToggle()]));
+  }
+
+  function messagesHeader(label, column) {
+    const active = messagesSort !== null && messagesSort.column === column;
+    const header = el('th', {
+      attributes: { 'aria-sort': active ? (messagesSort.direction === 'asc' ? 'ascending' : 'descending') : 'none' },
+    });
+    const button = el('button', { className: 'th-sort', attributes: { type: 'button' } }, [
+      el('span', { text: label }),
+      ...(active ? [icon(messagesSort.direction === 'asc' ? 'i-move-up' : 'i-move-down')] : []),
+    ]);
+    button.addEventListener('click', () => {
+      if (!active) messagesSort = { column, direction: 'asc' };
+      else if (messagesSort.direction === 'asc') messagesSort = { column, direction: 'desc' };
+      else messagesSort = null;
+      renderBody();
+    });
+    header.appendChild(button);
+    return header;
+  }
+
+  /**
+   * One finding as a row: the entity, the entries out of step as tags
+   * with the tooltips the entity's own carry, and the message the
+   * entity shows beneath its record. Selecting it opens the entity on
+   * the tab the record stands on, and the messages stay over the pane,
+   * so the list is worked through in place.
+   * @param {import('./records.js').Finding} finding
+   */
+  function messageRow(finding) {
+    const entity = nodeOf(store.model(), finding.id);
+    const words = staleText(finding.definition.recorded);
+    const tags = finding.states
+      .filter(({ state }) => state !== 'linked')
+      .map(({ id, label, state }, i) => {
+        const glyph = state === 'added' ? icon('i-information') : statusIcon(state === 'deleted' ? 'high' : 'medium');
+        if (state === 'added') glyph.classList.add('status-icon', 'tone-info');
+        return tooltipTag(`tag ${state}`, [glyph, el('span', { text: id })], label, words[state], i, `message-${finding.id}`);
+      });
+    const choose = () => {
+      const tab = tabNameOf(finding.type, finding.definition.key);
+      if (tab) store.setTab(finding.type, tab);
+      onSelect(finding.id);
+    };
+    const rowElement = el('tr', { attributes: { tabindex: '0', 'aria-label': `Select ${finding.id}${finding.label ? `, ${finding.label}` : ''}` } });
+    rowElement.addEventListener('click', choose);
+    rowElement.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      choose();
+    });
+    rowElement.append(
+      el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entity ? endpoint(entity) : [el('span', { className: 'mono designation', text: finding.id })])]),
+      el('td', { className: 'wrap tags' }, [el('span', { className: 'cell-tags' }, tags)]),
+      el('td', { className: 'wrap', text: finding.text })
+    );
+    return rowElement;
+  }
+
+  /** The messages: every record in the model that no longer matches, one row each, whatever is selected. */
+  function renderMessages(found) {
+    messagesHost.textContent = '';
+    if (found.length === 0) {
+      messagesHost.appendChild(emptyState('Nothing to revisit', 'Every record matches what is related.'));
+      return;
+    }
+    const rows = messageRows(found, messagesSort, tableFilter);
+    if (rows.length === 0) {
+      messagesHost.appendChild(el('p', { className: 'picking-note', text: 'Nothing matches the filter.' }));
+      return;
+    }
+    messagesHost.appendChild(
+      el('table', { className: 'table' }, [
+        el('colgroup', {}, [el('col', { className: 'col-entity' }), el('col', {}), el('col', { className: 'col-message' })]),
+        el('thead', {}, [el('tr', {}, [messagesHeader('Entity', 'entity'), el('th', { text: found[0].definition.name }), messagesHeader('Message', 'message')])]),
+        el('tbody', {}, rows.map(messageRow)),
+      ])
+    );
+  }
+
+  /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, the messages, or the graph around its subject. */
   function renderBody() {
+    if (store.messagesOpen()) {
+      renderMessages(findings(store.model()));
+      return;
+    }
     const picker = store.picker();
     const subjectId = picker !== null ? picker.subject : store.selection();
     const subject = nodeOf(store.model(), subjectId);
@@ -554,6 +686,16 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     const picker = store.picker();
     const subjectId = picker !== null ? picker.subject : store.selection();
     const subject = nodeOf(store.model(), subjectId);
+    if (store.hasProject() && store.messagesOpen()) {
+      const found = findings(store.model());
+      renderMessagesHead(found.length);
+      listHost.hidden = true;
+      graph.element.hidden = true;
+      messagesHost.hidden = false;
+      renderMessages(found);
+      return;
+    }
+    messagesHost.hidden = true;
     if (!subject || subject.kind !== 'entity') {
       head.textContent = '';
       head.hidden = !store.relationshipsCollapsed();

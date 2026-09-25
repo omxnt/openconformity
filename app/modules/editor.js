@@ -16,7 +16,7 @@ import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
-import { el, icon, tabKeys } from './dom.js';
+import { el, icon, tabKeys, tooltipTag } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
 import { staleText, recordOf, recordedStates, recordWritten, changedText } from './records.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
@@ -535,7 +535,7 @@ export function createEditor({
     );
     const held = el('div', { className: 'cell-value tags' }, tags);
     if (!states.some(({ state }) => state !== 'linked')) return held;
-    return el('div', {}, [held, el('p', { className: 'cell-note', text: changedText(definition) })]);
+    return el('div', {}, [held, el('p', { className: 'cell-note', text: changedText(definition, current?.type ?? '') })]);
   }
 
   function tableOf(definition, rows, trailing = null) {
@@ -577,29 +577,6 @@ export function createEditor({
    * @param {Object} view
    * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
    */
-  /**
-   * A tag with a tooltip: outside an edit a button whose tooltip holds
-   * the lead, a name and value, over the text where there is one;
-   * within an edit, where the whole field is a button, a span with the
-   * browser's own.
-   * @param {string} className
-   * @param {Array<Node>} content
-   * @param {string} lead
-   * @param {string} text
-   * @param {string|number} key  with the tipKey, the tooltip's id
-   * @param {string|null} tipKey  null within a field, where a tag cannot be a button
-   */
-  function tooltipTag(className, content, lead, text, key, tipKey) {
-    if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\n${text}` : lead } }, content);
-    const id = `tag-${tipKey}-${key}`;
-    const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, text ? [el('span', { className: 'tooltip-lead', text: lead }), el('span', { className: 'tooltip-text', text })] : [el('span', { className: 'tooltip-text', text: lead })]);
-    const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);
-    held.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') held.blur();
-    });
-    return held;
-  }
-
   function ratingTags(view, tipKey = null) {
     const tag = (className, content, lead, text, key) => tooltipTag(className, content, lead, text, key, tipKey);
     const tags = [];

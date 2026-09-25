@@ -5,7 +5,7 @@
  */
 
 import './shim.js';
-import { recordOf, recordedStates, recordWritten, findings, checksText, sizeText, tabNameOf, changedText, staleText } from '../app/modules/records.js';
+import { recordOf, recordedStates, recordWritten, findings, messagesText, sizeText, tabNameOf, changedText, staleText, nounOf } from '../app/modules/records.js';
 import { createModel, addEntity, relate, unrelate, removeEntity } from '../app/modules/model.js';
 import { groupsOf } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -18,7 +18,8 @@ const elimination = groupsOf('HAZ').flatMap((group) => group.attributes).find((h
 equal(recordOf(['PRM-002', 'PRM-001', 'PRM-002']), 'PRM-001; PRM-002', 'a record is the identifiers once each, in order, parted by semicolons');
 equal(recordOf([]), '', 'and nothing with nothing');
 deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked after the residual risk estimation.', deleted: 'Deleted after the residual risk estimation.', added: 'Related after the residual risk estimation.' }, 'the three states out of step name the rating the record was written with');
-equal(changedText(measures), 'The protective measures have changed since the residual risk estimation.', 'and the note beneath a record names the field and the rating');
+equal(changedText(measures, 'SCN'), "The protective measures have changed since the scenario's residual risk estimation.", 'and the note beneath a record names the field, the entity and the rating');
+equal(nounOf('HAZ'), 'hazard', 'an entity goes by the last word of its type');
 
 // --- Whether a record was written ------------------------------------------
 
@@ -48,7 +49,7 @@ equal(tabNameOf('HAZ', 'title'), null, 'and the title on the first tab, which ha
 
   deepEqual(findings(model), [], 'nothing recorded, nothing found');
   equal(sizeText(model), '4 entities and 2 relationships', 'the size is the entities and the relationships');
-  equal(checksText([]), '', 'and the checks say nothing with nothing to say');
+  equal(messagesText([]), '', 'and the messages say nothing with nothing to say');
 
   model.nodes.get(haz).attributes.eliminated = 'Yes';
   model.nodes.get(haz).attributes.measures = recordOf([guard]);
@@ -60,15 +61,15 @@ equal(tabNameOf('HAZ', 'title'), null, 'and the title on the first tab, which ha
   let found = findings(model);
   deepEqual(found.map(({ id, type }) => [id, type]), [[haz, 'HAZ']], 'a measure unlinked since the decision is a finding on the hazard');
   deepEqual(found[0].states.map(({ id, state }) => [id, state]), [[guard, 'unlinked']], 'carrying the entries and their states');
-  equal(found[0].text, 'The measures have changed since the elimination.', 'and the note the tab shows');
+  equal(found[0].text, "The protective measures have changed since the hazard's elimination.", 'and the message the tab shows');
   equal(found[0].label, 'Moving parts', "with the entity's label");
-  equal(checksText(found), '1 single hazard to revisit', 'which the status bar counts by type');
+  equal(messagesText(found), '1 single hazard to revisit', 'which the status bar counts by type');
 
   relate(model, 'prm-reduces-risk-of-scn', guard, scn);
   found = findings(model);
   deepEqual(found.map(({ id }) => id), [haz, scn], 'a measure related since the rating is a finding on the scenario, in the model\'s order');
   deepEqual(found[1].states.map(({ id, state }) => [id, state]), [[interlock, 'linked'], [guard, 'added']], 'named after the recorded ones, as added');
-  equal(checksText(found), '1 single hazard and 1 accident scenario to revisit', 'the bar lists each type once');
+  equal(messagesText(found), '1 single hazard and 1 accident scenario to revisit', 'the bar lists each type once');
 
   removeEntity(model, interlock);
   found = findings(model);
@@ -76,7 +77,7 @@ equal(tabNameOf('HAZ', 'title'), null, 'and the title on the first tab, which ha
   equal(found[1].states[0].label, interlock, 'with the identifier for its label, the entity being gone');
 
   const other = addEntity(model, 'SCN', { attributes: { title: 'Second', residualRating: 'Low', measures: recordOf([guard]) } }).entity.id;
-  equal(checksText(findings(model)), '1 single hazard and 2 accident scenarios to revisit', 'and pluralises past one');
+  equal(messagesText(findings(model)), '1 single hazard and 2 accident scenarios to revisit', 'and pluralises past one');
   equal(sizeText(createModel()), '0 entities and 0 relationships', 'an empty model counts as such');
   ok(other, 'the second scenario stands');
 }

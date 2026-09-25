@@ -45,7 +45,16 @@ const flows = createFlows({
   fileInput: document.getElementById('file-input'),
 });
 const actions = createActions({ store, flows });
-createShell({ store, overlay, actions, toast: dialogs.toast, onSelect: (id) => (store.view() ? flows.openFromView(id) : flows.selectNode(id)) });
+createShell({
+  store,
+  overlay,
+  actions,
+  toast: dialogs.toast,
+  onMessages: () => {
+    if (store.view()) flows.closeView();
+    store.setMessagesOpen(true);
+  },
+});
 createNavigator({
   store,
   container: document.getElementById('navigator-body'),

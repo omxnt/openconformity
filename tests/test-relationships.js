@@ -21,7 +21,7 @@ import {
   doglegPoints,
   subjectHeight,
 } from '../app/modules/graph.js';
-import { groupedRelationships, relationshipRows, relationshipTables, presentedRows } from '../app/modules/relationships.js';
+import { groupedRelationships, relationshipRows, relationshipTables, presentedRows, messageRows } from '../app/modules/relationships.js';
 import { filteredNeighbourhood } from '../app/modules/graph.js';
 import { relationshipOptions } from '../app/modules/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/modules/model.js';
@@ -458,6 +458,25 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(filteredNeighbourhood(around, 'exposed').incoming.map((e) => e.other.id), ['ACT-001'], 'a pending pick answers by the label it carries');
   deepEqual(filteredNeighbourhood(around, 'reduces risk').incoming.map((e) => e.other.id), ['PRM-002'], "a standing relationship by its type's label");
   equal(filteredNeighbourhood(around, 'zzz').outgoing.length + filteredNeighbourhood(around, 'zzz').incoming.length, 0, 'and nothing answers what nothing holds');
+}
+
+// --- The messages table ---------------------------------------------------
+
+{
+  const finding = (id, label, name, recorded, ids) => ({ id, type: 'SCN', label, definition: { key: 'measures', name, recorded }, states: ids.map((held) => ({ id: held, label: held, state: 'unlinked' })), text: `The ${name.toLowerCase()} have changed since the ${recorded.toLowerCase()}.` });
+  const found = [
+    finding('SCN-002', 'Contact', 'Protective measures', 'Residual risk estimation', ['PRM-003']),
+    finding('HAZ-001', 'Moving parts', 'Protective measures', 'Elimination', ['PRM-001']),
+    finding('SCN-001', 'Shock', 'Protective measures', 'Residual risk estimation', ['PRM-002']),
+  ];
+  deepEqual(messageRows(found, null, '').map(({ id }) => id), ['SCN-002', 'HAZ-001', 'SCN-001'], "unsorted, the rows keep the model's order");
+  deepEqual(messageRows(found, { column: 'entity', direction: 'asc' }, '').map(({ id }) => id), ['HAZ-001', 'SCN-001', 'SCN-002'], 'sorted by entity, by identifier');
+  deepEqual(messageRows(found, { column: 'entity', direction: 'desc' }, '').map(({ id }) => id), ['SCN-002', 'SCN-001', 'HAZ-001'], 'and the other way');
+  deepEqual(messageRows(found, { column: 'message', direction: 'asc' }, '').map(({ id }) => id), ['HAZ-001', 'SCN-002', 'SCN-001'], 'by the message, ties in model order');
+  deepEqual(messageRows(found, null, 'prm-002').map(({ id }) => id), ['SCN-001'], 'the filter matches an identifier out of step');
+  deepEqual(messageRows(found, null, 'moving').map(({ id }) => id), ['HAZ-001'], "and the entity's label");
+  deepEqual(messageRows(found, null, 'elimination').map(({ id }) => id), ['HAZ-001'], 'and the group');
+  deepEqual(messageRows(found, null, 'nothing here'), [], 'or nothing');
 }
 
 summary('test-relationships');

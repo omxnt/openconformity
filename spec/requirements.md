@@ -611,7 +611,7 @@ The software shall generate exportable views of the model.
 
 ---
 
-#### F-VIE-002 Checks
+#### F-VIE-002 Messages
 
 `ubiquitous` `draft`
 

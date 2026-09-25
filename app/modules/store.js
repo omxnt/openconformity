@@ -132,6 +132,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   }
   /** Whether the relationship pane stands collapsed to its head: session state, a reload keeping it */
   let relationshipsCollapsed = false;
+  /** Whether the messages stand over the relationship pane: opened from the status bar, closed by its X or Escape, never kept across a reload. */
+  let messagesOpen = false;
   try {
     relationshipsCollapsed = session?.getItem(COLLAPSE_KEY) === 'true';
   } catch {
@@ -478,6 +480,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       theme = null;
       consented = false;
       relationshipView = 'graph';
+      messagesOpen = false;
       for (const code of Object.keys(chosenTabs)) delete chosenTabs[code];
       persistFailed = false;
       storageNearlyFull = false;
@@ -784,6 +787,21 @@ export function createStore({ storage, session = null, retention = memoryRetenti
         // A session store that refuses changes nothing.
       }
       collapseRelationships(false);
+      notify();
+    },
+
+    /** Whether the messages stand over the relationship pane. */
+    messagesOpen: () => messagesOpen,
+
+    /**
+     * Show the messages over the relationship pane, expanding it, or hand
+     * the pane back to its view.
+     * @param {boolean} open
+     */
+    setMessagesOpen(open) {
+      if (open === messagesOpen && !(open && relationshipsCollapsed)) return;
+      messagesOpen = open;
+      if (open) collapseRelationships(false);
       notify();
     },
 

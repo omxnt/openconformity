@@ -106,3 +106,26 @@ export function icon(symbolId, pillar) {
   svg.appendChild(use);
   return svg;
 }
+
+/**
+ * A tag with Carbon's tooltip: a button whose tooltip holds the lead, a
+ * name and value, over the text where there is one, shown on hover or
+ * focus and dismissed with Escape. Where a tag cannot be a button, within
+ * a field that is itself a button, a span with the browser's own.
+ * @param {string} className
+ * @param {Array<Node>} content
+ * @param {string} lead
+ * @param {string} text
+ * @param {string|number} key  with the tipKey, the tooltip's id
+ * @param {string|null} tipKey  null within a field, where a tag cannot be a button
+ */
+export function tooltipTag(className, content, lead, text, key, tipKey) {
+  if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\n${text}` : lead } }, content);
+  const id = `tag-${tipKey}-${key}`;
+  const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, text ? [el('span', { className: 'tooltip-lead', text: lead }), el('span', { className: 'tooltip-text', text })] : [el('span', { className: 'tooltip-text', text: lead })]);
+  const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);
+  held.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') held.blur();
+  });
+  return held;
+}

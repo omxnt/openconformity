@@ -7,11 +7,7 @@
 
 import { openMenu } from './menu.js';
 import { PHASE } from './version.js';
-import { el, icon } from './dom.js';
-import { ENTITY_TYPES } from './metamodel.js';
-import { TYPE_ICONS } from './icons.js';
-import { statusIcon } from './rating.js';
-import { findings, checksText, sizeText, staleText, tabNameOf } from './records.js';
+import { findings, messagesText, sizeText } from './records.js';
 
 /**
  * The theme in effect: the stored choice when one is set, else the system
@@ -84,7 +80,7 @@ export const PERSIST_DETAIL =
  * @param {Array<import('./actions.js').Action>} [context.actions]
  * @param {(title: string, message: string) => void} [context.toast]
  */
-export function createShell({ store, overlay, actions = [], toast = () => {}, onSelect = () => {} }) {
+export function createShell({ store, overlay, actions = [], toast = () => {}, onMessages = () => {} }) {
   const themeButton = document.getElementById('shell-theme');
   const themeIcon = document.getElementById('shell-theme-icon');
   const fileButton = document.getElementById('shell-file');
@@ -96,8 +92,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   const notices = document.getElementById('notices');
   const statusBar = document.getElementById('status-bar');
   const statusSize = document.getElementById('status-size');
-  const statusChecks = document.getElementById('status-checks');
-  const statusChecksText = document.getElementById('status-checks-text');
+  const statusMessages = document.getElementById('status-messages');
+  const statusMessagesText = document.getElementById('status-messages-text');
   const actionById = new Map(actions.map((action) => [action.id, action]));
   const workspace = document.getElementById('workspace');
   const navigatorPane = document.getElementById('pane-navigator');
@@ -384,106 +380,23 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     }
   }
 
-  // --- The status bar and the checks drawer ---------------------------
+  // --- The status bar --------------------------------------------------
 
-  /** @type {import('./overlay.js').Entry|null} */
-  let drawer = null;
-  /** @type {HTMLElement|null} */
-  let drawerBody = null;
+  if (statusMessages) statusMessages.addEventListener('click', () => onMessages());
 
   /**
-   * One finding as a row: the entity's glyph and label, what changed,
-   * and the entries out of step as tags. Choosing it opens the entity on
-   * the tab the record stands on, and closes the drawer.
-   * @param {import('./records.js').Finding} finding
+   * What is true right now: the model's size, and the messages while
+   * there are any, the button opening them over the relationship pane.
    */
-  function checksRow(finding) {
-    const type = ENTITY_TYPES[finding.type];
-    const words = staleText(finding.definition.recorded);
-    const tags = finding.states
-      .filter(({ state }) => state !== 'linked')
-      .map(({ id, label, state }) =>
-        el('span', { className: `tag ${state}`, attributes: { title: `${label}\n${words[state]}` } }, [
-          state === 'added' ? infoGlyph() : statusIcon(state === 'deleted' ? 'high' : 'medium'),
-          el('span', { text: id }),
-        ])
-      );
-    const row = el('button', { className: 'checks-row', attributes: { type: 'button' } }, [
-      icon(TYPE_ICONS[finding.type], type.pillar),
-      el('span', { className: 'checks-label' }, [el('span', { className: 'mono', text: finding.id }), el('span', { text: finding.label })]),
-      el('span', { className: 'checks-text', text: finding.text }),
-      el('span', { className: 'checks-tags' }, tags),
-    ]);
-    row.addEventListener('click', () => {
-      const tab = tabNameOf(finding.type, finding.definition.key);
-      if (tab) store.setTab(finding.type, tab);
-      closeDrawer();
-      onSelect(finding.id);
-    });
-    return row;
-  }
-
-  function infoGlyph() {
-    const held = icon('i-information');
-    held.classList.add('status-icon', 'tone-info');
-    return held;
-  }
-
-  function fillDrawer(found) {
-    if (!drawerBody) return;
-    drawerBody.textContent = '';
-    for (const finding of found) drawerBody.appendChild(checksRow(finding));
-  }
-
-  function closeDrawer() {
-    if (drawer) overlay.close(drawer);
-  }
-
-  function openDrawer(found) {
-    const close = el('button', { className: 'ghost-icon', attributes: { type: 'button', 'aria-label': 'Close' } }, [icon('i-close')]);
-    close.addEventListener('click', closeDrawer);
-    drawerBody = el('div', { className: 'checks-body' });
-    const element = el('div', { className: 'checks-drawer', attributes: { role: 'region', 'aria-label': 'Checks' } }, [
-      el('div', { className: 'checks-head' }, [el('span', { text: 'Checks' }), close]),
-      drawerBody,
-    ]);
-    fillDrawer(found);
-    drawer = overlay.open({
-      kind: 'panel',
-      element,
-      opener: statusChecks,
-      onClose() {
-        drawer = null;
-        drawerBody = null;
-        statusChecks.setAttribute('aria-expanded', 'false');
-      },
-    });
-    statusChecks.setAttribute('aria-expanded', 'true');
-  }
-
-  if (statusChecks) {
-    statusChecks.addEventListener('click', () => {
-      if (drawer) closeDrawer();
-      else openDrawer(findings(store.model()));
-    });
-  }
-
   function renderStatus() {
     if (!statusBar) return;
     statusBar.hidden = !store.hasProject();
-    if (statusBar.hidden) {
-      closeDrawer();
-      return;
-    }
+    if (statusBar.hidden) return;
     const model = store.model();
     statusSize.textContent = sizeText(model);
     const found = findings(model);
-    statusChecks.hidden = found.length === 0;
-    statusChecksText.textContent = checksText(found);
-    if (drawer) {
-      if (found.length === 0) closeDrawer();
-      else fillDrawer(found);
-    }
+    statusMessages.hidden = found.length === 0;
+    statusMessagesText.textContent = messagesText(found);
   }
 
   // --- Splitters -------------------------------------------------------

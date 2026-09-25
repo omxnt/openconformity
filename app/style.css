@@ -347,9 +347,9 @@ body {
 }
 
 /* The status bar: one line under the workspace, in the label type,
-   saying what is true right now. The checks stand at its right as a
+   saying what is true right now. The messages stand at its right as a
    ghost button carrying the warning glyph, shown only with something to
-   revisit. */
+   revisit, and opening the list over the relationship pane. */
 .status-bar {
   flex: none;
   display: flex;
@@ -365,7 +365,7 @@ body {
   border-top: 1px solid var(--border-subtle);
 }
 .status-bar[hidden] { display: none; }
-.status-checks {
+.status-messages {
   display: inline-flex;
   align-items: center;
   gap: 4px;                 /* $spacing-02 */
@@ -378,59 +378,10 @@ body {
   font: inherit;
   cursor: pointer;
 }
-.status-checks:hover { background: var(--hover); }
-.status-checks:active { background: var(--active); }
-.status-checks[hidden] { display: none; }
+.status-messages:hover { background: var(--hover); }
+.status-messages:active { background: var(--active); }
+.status-messages[hidden] { display: none; }
 
-/* The checks drawer: the list slid up over the lower workspace from the
-   status bar, one row per record out of step, each a button that opens
-   its entity. Closed by Escape, its X, or a row. */
-.checks-drawer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 25px;             /* above the status bar and its rule */
-  height: min(40vh, 480px);
-  display: flex;
-  flex-direction: column;
-  background: var(--layer);
-  border-top: 1px solid var(--border-subtle);
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
-}
-.checks-head {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  height: 40px;
-  padding: 0 8px 0 16px;    /* $spacing-03, $spacing-05 */
-  border-bottom: 1px solid var(--border-subtle);
-  font-weight: 600;         /* $heading-compact-01 */
-}
-.checks-head .ghost-icon { margin-left: auto; }
-.checks-body { flex: 1; overflow: auto; }
-.checks-row {
-  display: grid;
-  grid-template-columns: 16px 1fr;
-  column-gap: 8px;          /* $spacing-03 */
-  row-gap: 4px;             /* $spacing-02 */
-  align-items: center;
-  width: 100%;
-  padding: 8px 16px;        /* $spacing-03, $spacing-05 */
-  border: 0;
-  border-bottom: 1px solid var(--border-subtle);
-  background: none;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.checks-row:hover { background: var(--hover); }
-.checks-row:active { background: var(--active); }
-.checks-row .icon { grid-row: 1; }
-.checks-label { display: flex; align-items: baseline; gap: 8px; }  /* $spacing-03 */
-.checks-text { grid-column: 2; color: var(--text-second); }
-.checks-tags { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 
 .pane {
   display: flex;
@@ -1169,6 +1120,10 @@ select.field-input[size] {
 .table { border-collapse: collapse; width: 100%; table-layout: fixed; }
 .table .col-relationship { width: 24%; }
 .table .col-action { width: 48px; }
+.table .col-message { width: 44%; }
+.table td.tags { overflow: visible; }  /* the tags' tooltips reach past the cell */
+.cell-tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
+.head-title { padding: 0 16px; font-weight: 600; white-space: nowrap; }  /* $spacing-05, $heading-compact-01 */
 .table th {
   position: sticky;
   top: 0;

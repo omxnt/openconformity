@@ -677,13 +677,13 @@ The proof of concept and the demonstration prototype are kept as the tags `poc` 
 
 ---
 
-### D-083 Checks in a status bar
+### D-083 Messages over the relationship pane
 
 `2026-09-25` `product`
 
-The records that no longer match are summarised in a status bar under the workspace and listed in a drawer that slides up from it, one row per entity, a row opening the entity on the tab its record stands on. The status bar also says the model's size, and stands only while a project is open.
+The records that no longer match are summarised in a status bar under the workspace and, on its button, listed over the relationship pane as the messages: a head of their own with the count, the filter and a close, and a compact table with one row per entity, its entries out of step as tags and the message the entity shows beneath its record, in the one wording. The list stands whatever is selected, a row opens its entity on the tab its record stands on while the list stays, and the close or Escape hands the pane back to Graph or List as they were. The messages are never kept across a reload. The status bar also says the model's size, and stands only while a project is open.
 
-> *A count in a corner says that something wants a look but not what, and a bottom panel that resizes the panes adds a fourth region to a layout balanced on three floors, for a list that is usually empty. A status bar is the one place for what is true right now, and the checks are its first tenant. The drawer leaves the workspace as it is, so the loop is list, entity, list without leaving it. The list is derived wherever it is shown and never stored, and it says what the software knows without judging, which entities and what changed (F-VIE-002). A printable view can follow when the list is worth printing.*
+> *A count in a corner says that something wants a look but not what, and a fourth pane adds a region to a layout balanced on three floors, for a list that is usually empty. A status bar is the one place for what is true right now, and the messages are its first tenant. The pane that shows relationships lends its space, since the messages are relationships that changed under a record, and it already has the head, the table, the splitter and the collapse, so nothing new is drawn and Carbon's data table is what the list is. They stand over the pane rather than as a third tab beside Graph and List, because those two are about the entity you stand on and the messages are about the whole model, and a tab would put the two scopes side by side as if they were one kind of thing. A row selects while the list stays, so the list is worked through in place. A drawer over the workspace and then a tab were built first and dropped the same day. The list is derived wherever it is shown and never stored, and it says what the software knows without judging, which entities and what changed (F-VIE-002). A printable view can follow when the list is worth printing.*
 
 ## 3. Undecided
 

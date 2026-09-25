@@ -3,8 +3,8 @@
  * the entities a relationship joined to its owner when the group that
  * writes it last changed. This module reads a record against the model as
  * it stands, says whether one has been written at all, and finds every
- * record in a model that no longer matches, which is what the checks list
- * shows. Pure functions over the model and the attribute definitions.
+ * record in a model that no longer matches, which is what the messages
+ * list shows. Pure functions over the model and the attribute definitions.
  */
 
 import { nodeOf } from './model.js';
@@ -58,8 +58,11 @@ export function recordWritten(code, definition, values) {
     .some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && held.kind !== 'entities' && (values[held.key] ?? '').trim() !== ''));
 }
 
-/** What a record's cell says beneath it once the record no longer matches. */
-export const changedText = (definition) => `The ${definition.name.toLowerCase()} have changed since the ${definition.recorded.toLowerCase()}.`;
+/** The noun an entity type goes by in a sentence: the last word of its name, hazard, scenario. */
+export const nounOf = (code) => (ENTITY_TYPES[code]?.name ?? 'entity').split(' ').at(-1).toLowerCase();
+
+/** What a record's cell says beneath it once the record no longer matches, naming the entity the record belongs to. */
+export const changedText = (definition, code) => `The ${definition.name.toLowerCase()} have changed since the ${nounOf(code)}'s ${definition.recorded.toLowerCase()}.`;
 
 /**
  * The tab an attribute stands on, by the name of the tab group that
@@ -101,19 +104,19 @@ export function findings(model) {
       if (node.type !== code || !recordWritten(code, definition, node.attributes)) continue;
       const states = recordedStates(node.attributes[definition.key], model, node.id, definition.relationship);
       if (!states.some((held) => held.state !== 'linked')) continue;
-      found.push({ id: node.id, type: node.type, label: entityLabel(node), definition, states, text: changedText(definition) });
+      found.push({ id: node.id, type: node.type, label: entityLabel(node), definition, states, text: changedText(definition, code) });
     }
   }
   return found;
 }
 
 /**
- * The checks summary as the status bar says it: the entities to revisit,
+ * The messages' summary as the status bar says it: the entities to revisit,
  * counted by type, "2 accident scenarios and 1 single hazard to revisit";
  * empty with nothing to say.
  * @param {Finding[]} found
  */
-export function checksText(found) {
+export function messagesText(found) {
   /** @type {Map<string, Set<string>>} */
   const byType = new Map();
   for (const { type, id } of found) byType.set(type, new Set([...(byType.get(type) ?? []), id]));

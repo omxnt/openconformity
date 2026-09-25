@@ -514,6 +514,18 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(notified, 1, 'choosing it again is nothing');
   store.setRelationshipView('mosaic');
   equal(store.relationshipView(), 'list', 'an unknown view is refused');
+  store.setRelationshipView('checks');
+  equal(store.relationshipView(), 'list', 'and the messages are no view of the pane');
+  equal(store.messagesOpen(), false, 'the messages stand closed');
+  store.setRelationshipsCollapsed(true);
+  store.setMessagesOpen(true);
+  equal(store.messagesOpen(), true, 'opened from the status bar');
+  equal(store.relationshipsCollapsed(), false, 'which expands the pane they stand over');
+  const told = notified;
+  store.setMessagesOpen(true);
+  equal(notified, told, 'opening them again is nothing');
+  store.setMessagesOpen(false);
+  equal(store.messagesOpen(), false, 'and the X hands the pane back');
 
   deepEqual(
     Object.keys((await blobIn(store, retention)).session),

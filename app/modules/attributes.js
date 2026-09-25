@@ -223,7 +223,7 @@ export const ATTRIBUTES = {
         attributes: [
           {
             key: 'measures',
-            name: 'Measures',
+            name: 'Protective measures',
             kind: 'entities',
             relationship: 'prm-eliminates-haz',
             recorded: 'Elimination',
