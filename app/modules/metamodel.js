@@ -2,7 +2,7 @@
  * The metamodel: the entity types a model may contain and the relationship
  * types allowed between them, with composition marked on the owning kinds.
  *
- * A transcription of the class diagram in `docs/metamodel.md`, which is the
+ * A transcription of the class diagram in `spec/metamodel.md`, which is the
  * authoritative definition: each class is one entity type under its pillar,
  * and each arrow is one relationship type, in the order the diagram draws
  * them. The relationship identifiers are derived source-label-target and

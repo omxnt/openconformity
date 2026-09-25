@@ -1,6 +1,6 @@
 /**
  * Verifies the metamodel transcription against its documents: the class
- * diagram in `docs/metamodel.md` and the identifier enumeration in
+ * diagram in `spec/metamodel.md` and the identifier enumeration in
  * `schema/project.schema.json`. Run from this directory.
  */
 
@@ -15,7 +15,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the diagram -------------------------------------------------
 
-const diagram = readFile('../docs/metamodel.md');
+const diagram = readFile('../spec/metamodel.md');
 const lines = diagram.split('\n').map((line) => line.trim());
 
 const documentTypes = [];
