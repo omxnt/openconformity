@@ -410,101 +410,6 @@ h2 {
 }
 .cell p { color: var(--text-second); }
 
-/* ---------- Topics ---------- */
-
-/* Carbon Accordion: rules above and below each item, and a chevron that turns
-   when the item opens. */
-.topics { border-top: 1px solid var(--border-subtle); }
-
-.topic { border-bottom: 1px solid var(--border-subtle); }
-
-.topic summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 16px;            /* $spacing-05 */
-  padding: 16px 0;      /* $spacing-05 */
-  transition: background-color var(--motion-fast) var(--motion-standard);
-}
-.topic summary::-webkit-details-marker { display: none; }
-
-.tnum {
-  flex: none;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;      /* $code-01 */
-  letter-spacing: 0.32px;
-  color: var(--text-helper);
-  min-width: 2.2em;
-}
-
-.tt {
-  flex: 1;
-  min-width: 0;
-  font-size: 16px;      /* $heading-02 at its size */
-  line-height: 1.375;   /* 22px */
-  font-weight: 400;
-  color: var(--text);
-}
-
-/* Carbon's chevron--down, masked so it takes the colour of the row. See
-   assets/icons/ORIGIN.md. */
-.topic summary::after {
-  content: "";
-  flex: none;
-  width: 16px;   /* Carbon icon size 16 */
-  height: 16px;
-  background: var(--text-second);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E") no-repeat center / contain;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 11 3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z'/%3E%3C/svg%3E") no-repeat center / contain;
-  transition: transform var(--motion-fast) var(--motion-standard);
-}
-.topic[open] summary::after { transform: rotate(180deg); }
-
-/* Carbon Accordion answers the pointer across the whole row, not by colouring
-   the title: the heading is a disclosure, not a link somewhere else. */
-.topic summary:hover { background: var(--hover); }
-
-.td { padding: 0 32px 24px 0; }  /* $spacing-07, $spacing-06 */
-
-.rl {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 8px;             /* $spacing-03 */
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px;      /* $code-01 */
-  letter-spacing: 0.32px;
-  margin-top: 24px;     /* $spacing-06 */
-}
-/* $layer on the section's $background, the way round a Carbon surface nests.
-
-   The pair reads as one statement, so pointing anywhere along it wakes both
-   ends and the verb between them: the boxes take $layer-hover-01 and a
-   $border-strong edge, the verb comes up to $text-primary. They are surface
-   states, not the interactive border, because nothing here is a link; the
-   cursor stays an arrow to say so. */
-.rl b {
-  font-weight: 400;
-  color: var(--text);
-  background: var(--layer);
-  border: 1px solid var(--border-subtle);
-  padding: 4px 8px;     /* $spacing-02, $spacing-03 */
-  cursor: default;
-  transition:
-    background-color var(--motion-fast) var(--motion-standard),
-    border-color var(--motion-fast) var(--motion-standard);
-}
-.rl:hover b { background: var(--hover); border-color: var(--border-strong); }
-
-.rl i {
-  font-style: normal;
-  color: var(--text-second);
-  transition: color var(--motion-fast) var(--motion-standard);
-}
-.rl:hover i { color: var(--text); }
-.rl i::after { content: "\2193"; color: var(--text-helper); margin-left: 4px; }  /* $spacing-02 */
-
 /* ---------- Model ---------- */
 
 /* The heading is a child of the grid rather than of the text column, as it is
@@ -645,15 +550,8 @@ footer :focus-visible { outline-color: var(--shell-focus); }
 
   h1 { margin-bottom: 40px; }      /* $spacing-08 */
   h2 { font-size: 28px; line-height: 1.28572; margin-bottom: 32px; }  /* $heading-04, $spacing-07 */
-  .tt { font-size: 20px; line-height: 1.4; }  /* $heading-03 */
 
   .cell { padding: 32px; }  /* $spacing-07 */
-
-  /* Back to a row once there is room for one. */
-  .rl { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 0; }
-  .rl i { padding: 0 8px; }  /* $spacing-03 */
-  .rl i::before { content: "\2014"; color: var(--text-helper); margin-right: 4px; }  /* $spacing-02 */
-  .rl i::after { content: "\2192"; margin-left: 4px; }
 
   .foot { padding-top: 64px; padding-bottom: 32px; }  /* $spacing-10, $spacing-07 */
   .foot-top { row-gap: 40px; padding-bottom: 48px; }  /* $spacing-08, $spacing-09 */
@@ -696,14 +594,6 @@ footer :focus-visible { outline-color: var(--shell-focus); }
   /* Three cards to a row across fifteen columns: five each, and the sixteenth
      left open rather than stretching the row to fill it. */
   .sheet { grid-column: 1 / span 15; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-
-  /* Carbon sets no span for an Accordion: the component fills whatever it is
-     placed in, so the width is a layout decision, and what decides it is the
-     body copy inside. Measured at the widest the page gets, nine of the sixteen
-     columns puts a line at about 68 characters, inside the range that stays
-     comfortable to read. Ten would reach the high seventies and start costing
-     more in reading than it returns in balance. */
-  .topics { grid-column: 1 / span 9; }
 
   /* The prose on the first seven columns, measured at about 55 characters, and
      the graph on the last eight. Six columns would have given the shot more

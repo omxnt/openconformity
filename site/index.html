@@ -88,11 +88,10 @@
       <div class="hero-text">
         <p class="lede">
           CE marking has many inherent relationships. The essential requirements,
-          the harmonised standards, the identified hazards, and the risk reduction
-          measures all trace to one another in different ways. This project
-          attempts to develop a tool that holds all of this together as
-          one shared model, from which the engineering
-          artefacts can be exported.
+          the harmonised standards, the identified hazards and the protective
+          measures all trace to one another in different ways. The tool holds
+          all of this together in one model, from which the engineering
+          artefacts are derived.
         </p>
         <p class="note">The tool is in private beta, open to invited testers.</p>
         <div class="actions">
@@ -110,7 +109,7 @@
       <div class="hero-shot">
         <picture>
           <source data-dark srcset="assets/images/app-dark.png" media="(prefers-color-scheme: dark)">
-          <img class="shot" src="assets/images/app-light.png" width="1600" height="1057" fetchpriority="high" alt="The openconformity interface: a navigator on the left, an editor and a relationship pane on the right.">
+          <img class="shot" src="assets/images/app-light.png" width="1600" height="1024" fetchpriority="high" alt="The openconformity interface, with the navigator on the left and the editor and the relationship pane on the right.">
         </picture>
       </div>
 
@@ -167,7 +166,7 @@
 
 <section id="model">
   <div class="wrap">
-    <h2>One shared model</h2>
+    <h2>A model-based approach</h2>
 
     <div class="model-top">
 
@@ -177,7 +176,7 @@
           the metamodel describes what any model may contain. Hardcoded into the
           tool, it defines which entities exist and how they may be related to one
           another. The relationships form chains that can be followed in either
-          direction, from a system element down to a risk reduction measure, or
+          direction, from a system element down to a protective measure, or
           from that measure back to the system element.
         </p>
       </div>
@@ -188,7 +187,7 @@
       <div class="model-ex">
         <picture>
           <source data-dark srcset="assets/images/graph-dark.png" media="(prefers-color-scheme: dark)">
-          <img class="graph-shot" src="assets/images/graph-light.png" width="1850" height="504" loading="lazy" decoding="async" alt="The relationship pane in the software, showing the Single Hazard HAZ-001 Moving Parts at the centre of its neighbourhood: the System Element that exhibits it and the two Risk Reduction Measures that mitigate it on the left, the Accident Scenario it contributes to and the Essential Requirement it triggers on the right.">
+          <img class="graph-shot" src="assets/images/graph-light.png" width="2112" height="592" loading="lazy" decoding="async" alt="The relationship pane in the software, showing the single hazard HAZ-001 Moving Parts at the centre of its neighbourhood. On the left the essential requirement it triggers, the system element that exhibits it and the protective measure that eliminates it, with one more folded away. On the right the accident scenario it contributes to.">
         </picture>
       </div>
 
@@ -206,86 +205,6 @@
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <h2>How it will work</h2>
-    <div class="topics">
-
-      <details class="topic" name="workflow" open>
-        <summary><span class="tnum">01</span><span class="tt">Building the product structure</span></summary>
-        <div class="td">
-          <p>The machine is decomposed into a hierarchical set of system elements. The whole life cycle is defined as system phases, with system tasks associated with every phase. The system actors, such as operators or technicians, are related to each of the tasks. Every entity carries the attributes needed to define the machine fully.</p>
-          <div class="rl"><b>System Element</b><i>decomposes into</i><b>System Element</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">02</span><span class="tt">Scoping the applicable legislation</span></summary>
-        <div class="td">
-          <p>The directives and regulations that apply to the machinery are recorded. A machine may be subject only to the Machinery Regulation, or also to the Electromagnetic Compatibility Directive and others. The scoped legislation is then used to select the essential requirements that apply.</p>
-          <div class="rl"><b>European Legislation</b><i>defines</i><b>Essential Requirement</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">03</span><span class="tt">Identifying the single hazards</span></summary>
-        <div class="td">
-          <p>Considering the system elements, the single hazards are identified. Moving parts, live circuits, pressurised equipment, or ejected parts, each related to the system element that exhibits it.</p>
-          <div class="rl"><b>System Element</b><i>exhibits</i><b>Single Hazard</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">04</span><span class="tt">Analysing the accident scenarios</span></summary>
-        <div class="td">
-          <p>A short circuit can lead to both fire and electric shock. One hazard can lead to several accident scenarios, and one accident scenario can arise from several hazards. Both are modelled through relationships, rather than rewritten for every scenario.</p>
-          <div class="rl"><b>Single Hazard</b><i>contributes to</i><b>Accident Scenario</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">05</span><span class="tt">Selecting the essential requirements</span></summary>
-        <div class="td">
-          <p>Based on the identified hazards, the essential requirements in the applicable legislation are selected. Which requirements apply depends on the hazards the machinery exhibits.</p>
-          <div class="rl"><b>Single Hazard</b><i>triggers</i><b>Essential Requirement</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">06</span><span class="tt">Applying the harmonised standards</span></summary>
-        <div class="td">
-          <p>As part of the strategy for presumption of conformity, a harmonised standard is applied. The requirements in the standard satisfy the essential requirements in the corresponding legislation. Mapping a standard requirement to an essential requirement records the presumption of conformity.</p>
-          <div class="rl"><b>Standard Requirement</b><i>satisfies</i><b>Essential Requirement</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">07</span><span class="tt">Drafting the risk reduction measures</span></summary>
-        <div class="td">
-          <p>A risk reduction measure is described conceptually, covering one or several hazards or accident scenarios. The standard requirements are related to each measure, for traceability and to make full use of the standard. A measure may require a safety function, which is derived alongside it.</p>
-          <div class="rl"><b>Risk Reduction Measure</b><i>mitigates</i><b>Accident Scenario</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">08</span><span class="tt">Deriving the system requirements</span></summary>
-        <div class="td">
-          <p>Somewhere it needs to be stated how the machine shall be built. The system requirements are derived as shall-statements, each describing a function or quality the machine needs to fulfil. Each requirement is related to the verification activities that will show it has been met.</p>
-          <div class="rl"><b>System Requirement</b><i>derives from</i><b>Risk Reduction Measure</b></div>
-        </div>
-      </details>
-
-      <details class="topic" name="workflow">
-        <summary><span class="tnum">09</span><span class="tt">Exporting the engineering artefacts</span></summary>
-        <div class="td">
-          <p>When the engineering work has been done, the artefacts can be exported. An artefact may be a requirement specification, a hazard list, or a list of essential requirements with their mapping to the standard requirements. These views are exported as the result of the work, ready to import into whatever process or tool the user has.</p>
-        </div>
-      </details>
-
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
@@ -295,10 +214,9 @@
       <div class="foot-brand">
         <span class="foot-mark" aria-hidden="true"></span>
         <p>
-          This project is an initiative to develop a free, open-source,
-          browser-based tool for CE marking of machinery according to the
-          Machinery Regulation (EU) 2023/1230, with no commercial interests
-          behind it.
+          A free, open-source, browser-based tool for CE marking of machinery
+          under the Machinery Regulation (EU) 2023/1230, with no commercial
+          interests behind it.
         </p>
       </div>
 
