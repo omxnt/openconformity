@@ -72,7 +72,20 @@ export const ATTRIBUTES = {
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system element." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the system element is and what it does in the machinery.' },
     ],
-    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Data',
+        tab: true,
+        attributes: [
+          { key: 'manufacturer', name: 'Manufacturer', kind: 'text', help: 'Who makes the element, whether that is you, an original equipment manufacturer or a supplier.' },
+          { key: 'model', name: 'Model', kind: 'text', help: 'The type or model name the manufacturer gives it.' },
+          { key: 'datasheet', name: 'Datasheet', kind: 'hyperlink', help: 'Where the element\'s datasheet is on the web.' },
+          { key: 'characteristics', name: 'Characteristics', kind: 'multiline', help: 'The figures that matter, such as speed, force, pressure, mass and temperature, in the element\'s own terms.' },
+        ],
+      },
+      drawingTab(),
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
   ACT: {
     attributes: [

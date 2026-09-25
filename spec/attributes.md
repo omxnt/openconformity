@@ -144,13 +144,22 @@ The project is edited under the root of the tree, on the surface an entity has: 
 
 ### 2.1 System Element (ELM) `draft`
 
-The designation is the element's own short name — `E1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The designation is the element's own short name — `E1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The facts a bought-in or a designed element carries beyond what it is stand on a tab of their own: who makes it, what model it is, where its datasheet is, and the figures that matter.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the system element. |
 | description | Description | multiline | | What the system element is and what it does in the machinery. |
+
+#### Data `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| manufacturer | Manufacturer | text | | Who makes the element, whether that is you, an original equipment manufacturer or a supplier. |
+| model | Model | text | | The type or model name the manufacturer gives it. |
+| datasheet | Datasheet | hyperlink | | Where the element's datasheet is on the web. |
+| characteristics | Characteristics | multiline | | The figures that matter, such as speed, force, pressure, mass and temperature, in the element's own terms. |
 
 #### Diagram `tab`
 
