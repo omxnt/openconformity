@@ -158,7 +158,7 @@ export const ATTRIBUTES = {
   },
   CAS: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Reference', kind: 'text', help: 'The annex, module or part of the legislation the procedure follows, as cited.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the conformity assessment procedure." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the conformity assessment involves for this product.' },
     ],
@@ -166,7 +166,7 @@ export const ATTRIBUTES = {
   },
   NTB: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Reference', kind: 'text', help: 'The identification number of the notified body, as cited.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the notified body." },
       { key: 'description', name: 'Description', kind: 'multiline', help: "The role of the notified body for this product." },
     ],

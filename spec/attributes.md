@@ -284,11 +284,11 @@ The same fields as a harmonised standard, for a specification that is not harmon
 
 ### 3.4 Conformity Assessment (CAS) `draft`
 
-The designation is the procedure's own short name — `CA1`, the module it runs under where that names it — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The reference is the annex, module or part of the legislation the procedure follows, as cited, `Annex VI`, and it is the reference the label composes with the title (§1.7).
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| reference | Designation | text | |
+| reference | Reference | text | | The annex, module or part of the legislation the procedure follows, as cited. |
 | title | Title | text | | The name of the conformity assessment procedure. |
 | description | Description | multiline | | What the conformity assessment involves for this product. |
 
@@ -300,11 +300,11 @@ The designation is the procedure's own short name — `CA1`, the module it runs 
 
 ### 3.5 Notified Body (NTB) `draft`
 
-The designation is the body's own short name — `NB1`, its notified body number where it has one — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The reference is the identification number the Commission lists the body under, as cited, `0123`, and it is the reference the label composes with the title (§1.7).
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| reference | Designation | text | |
+| reference | Reference | text | | The identification number of the notified body, as cited. |
 | title | Title | text | | The name of the notified body. |
 | description | Description | multiline | | The role of the notified body for this product. |
 

@@ -75,7 +75,9 @@ equal(linkable(''), false, 'and an empty value is nothing');
     'a safety function reads what it is: its designation, title, description, and the standards that apply'
   );
   equal(ATTRIBUTES.SAF.attributes[0].name, 'Designation', 'the reference a safety function carries is its designation');
-  for (const code of ['ELM', 'ACT', 'TSK', 'PHS', 'CAS', 'NTB', 'HAZ', 'SCN', 'PRM']) {
+  deepEqual(attributesFor('CAS')[0], { key: 'reference', name: 'Reference', kind: 'text', help: 'The annex, module or part of the legislation the procedure follows, as cited.' }, 'a conformity assessment opens on the annex or module it follows, cited from the legislation');
+  deepEqual(attributesFor('NTB')[0], { key: 'reference', name: 'Reference', kind: 'text', help: 'The identification number of the notified body, as cited.' }, 'a notified body opens on the number the Commission lists it under');
+  for (const code of ['ELM', 'ACT', 'TSK', 'PHS', 'HAZ', 'SCN', 'PRM']) {
     deepEqual(attributesFor(code)[0], { key: 'reference', name: 'Designation', kind: 'text' }, `${code} opens on a designation of the modeller's own, composed into its label before the title`);
   }
   deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Notes', 'Link', 'Applicable', 'Rationale', 'Diagram', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the names shared across types, and the rating names shared across methods, carry one help each');
