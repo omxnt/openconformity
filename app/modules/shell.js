@@ -438,7 +438,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width * 0.6,
-    minimum: 244,
+    minimum: 266,
     preset: 320,
     apply: (width) => {
       workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`);

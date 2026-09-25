@@ -357,7 +357,7 @@ body {
 
 .pane-navigator {
   flex: 0 0 var(--navigator-width, 320px);
-  min-width: 244px;  /* the toolbar: seven 32px buttons, six 2px gaps, 4px padding each side */
+  min-width: 266px;  /* the toolbar: seven 32px buttons, two dividers of 1px with 8px margins, eight 2px gaps, 4px padding each side */
 }
 
 .column {
@@ -424,6 +424,7 @@ body {
   background: var(--layer);
   border-bottom: 1px solid var(--border-subtle);
 }
+.pane-toolbar > .ghost-icon { flex: none; }  /* a button keeps its 32px; the pane floor is what stops the toolbar */
 .toolbar-spacer { flex: 1; }
 .toolbar-divider {
   width: 1px;

@@ -427,8 +427,8 @@ import { fakeStorage } from './helpers.js';
 {
   const sheet = readFile('../app/style.css');
   const shell = readFile('../app/modules/shell.js');
-  ok(sheet.includes('min-width: 244px'), 'the pane floor is the toolbar: seven 32px buttons, six 2px gaps, 4px padding each side');
-  ok(shell.includes('minimum: 244'), 'and the splitter stops at the same width');
+  ok(sheet.includes('min-width: 266px') && sheet.includes('.pane-toolbar > .ghost-icon { flex: none; }'), 'the pane floor is the toolbar at its natural width, and its buttons never shrink below their 32px');
+  ok(shell.includes('minimum: 266'), 'and the splitter stops at the same width');
 }
 
 // --- The closing check: pointer targets and the menu bar keys ------------
