@@ -65,6 +65,8 @@ const THEME_KEY = 'openconformity.theme';
 
 /** The relationship view's key in the browser session: a reload keeps it, a new session opens on the default. */
 const VIEW_KEY = 'openconformity.view';
+/** Session storage: whether the relationship pane is collapsed to its head. */
+const COLLAPSE_KEY = 'openconformity.relationships-collapsed';
 
 /** The consent key in the browser session: the user's choice not to be asked before the external drawing editor loads, until the session ends. */
 const CONSENT_KEY = 'openconformity.drawio-consent';
@@ -125,6 +127,13 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   try {
     const storedView = session?.getItem(VIEW_KEY);
     if (storedView === 'list' || storedView === 'graph') relationshipView = storedView;
+  } catch {
+    // A session store that refuses changes nothing.
+  }
+  /** Whether the relationship pane stands collapsed to its head: session state, a reload keeping it */
+  let relationshipsCollapsed = false;
+  try {
+    relationshipsCollapsed = session?.getItem(COLLAPSE_KEY) === 'true';
   } catch {
     // A session store that refuses changes nothing.
   }
@@ -307,6 +316,16 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   }
 
   /** What web storage holds under a key, parsed where it parses, else as the text it is, else null. */
+  /** Set the pane's collapsed state and keep it for the session, without notifying. */
+  function collapseRelationships(collapsed) {
+    relationshipsCollapsed = collapsed;
+    try {
+      session?.setItem(COLLAPSE_KEY, String(collapsed));
+    } catch {
+      // A session store that refuses changes nothing.
+    }
+  }
+
   function legacy(key) {
     let raw = null;
     try {
@@ -438,7 +457,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
           // Storage that refuses has nothing left to keep either way.
         }
       }
-      for (const key of [VIEW_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY]) {
+      for (const key of [VIEW_KEY, COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY]) {
         try {
           session?.removeItem(key);
         } catch {
@@ -590,6 +609,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       const subject = nodeOf(model, subjectId);
       if (!subject || subject.kind !== 'entity') return;
       picker = { subject: subjectId, picks: [] };
+      collapseRelationships(false);
       notify();
     },
 
@@ -756,13 +776,29 @@ export function createStore({ storage, session = null, retention = memoryRetenti
      */
     setRelationshipView(view) {
       if (view !== 'list' && view !== 'graph') return;
-      if (view === relationshipView) return;
+      if (view === relationshipView && !relationshipsCollapsed) return;
       relationshipView = view;
       try {
         session?.setItem(VIEW_KEY, view);
       } catch {
         // A session store that refuses changes nothing.
       }
+      collapseRelationships(false);
+      notify();
+    },
+
+    /** Whether the relationship pane stands collapsed to its head. */
+    relationshipsCollapsed: () => relationshipsCollapsed,
+
+    /**
+     * Collapse the relationship pane to its head, or expand it again.
+     * Session state like the view: kept for a reload within the session,
+     * gone with it, never in a file.
+     * @param {boolean} collapsed
+     */
+    setRelationshipsCollapsed(collapsed) {
+      if (collapsed === relationshipsCollapsed) return;
+      collapseRelationships(collapsed);
       notify();
     },
 

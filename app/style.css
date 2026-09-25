@@ -349,6 +349,10 @@ body {
 
 .pane-editor { flex: 1 1 auto; min-height: 160px; }  /* the splitter reserves the same 160px */
 .pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }
+/* Collapsed, the pane is its head alone: the body goes and the editor takes the height. */
+.pane-relationships.collapsed { flex: none; min-height: 0; }
+.pane-relationships.collapsed .pane-body { display: none; }
+.splitter[hidden] { display: none; }
 
 /* A pane header is a working surface: the selection it acts for on the
    left, the actions on the right, at 32px on $layer-01 so its bottom rule
@@ -376,6 +380,8 @@ body {
 .subhead-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pane-head-actions { display: flex; align-items: center; align-self: stretch; }
 .pane-head-actions .ghost-button { align-self: stretch; height: auto; }
+.pane-collapse .icon { transition: transform var(--motion-fast) var(--motion-standard); }
+.pane-collapse[aria-expanded="false"] .icon { transform: rotate(180deg); }
 
 .pane-body { flex: 1; overflow: auto; }
 

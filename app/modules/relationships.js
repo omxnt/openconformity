@@ -268,6 +268,11 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       add.disabled = !addEnabled();
       actions.push(add);
     }
+    const collapsed = store.relationshipsCollapsed();
+    const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down', () => store.setRelationshipsCollapsed(!collapsed));
+    toggle.classList.add('pane-collapse');
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    actions.push(toggle);
     head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
   }
 

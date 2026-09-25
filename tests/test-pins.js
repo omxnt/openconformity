@@ -259,6 +259,9 @@ import { fakeStorage } from './helpers.js';
 
 {
   const relationships = readFile('../app/modules/relationships.js');
+  ok(relationships.includes("const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down'") && relationships.includes("toggle.setAttribute('aria-expanded', String(!collapsed))"), 'the pane head ends in the chevron that collapses it to the head, saying which way it points');
+  ok(readFile('../app/modules/shell.js').includes("relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed())") && readFile('../app/modules/shell.js').includes('columnSplitter.hidden = store.relationshipsCollapsed()'), 'the shell collapses the pane by class and hides the splitter with it');
+  ok(readFile('../app/style.css').includes('.pane-relationships.collapsed .pane-body { display: none; }') && readFile('../app/style.css').includes('.splitter[hidden] { display: none; }'), 'and the stylesheet drops the body and the splitter');
   ok(relationships.includes("className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' }"), 'the relationship pane switches view with the same tabs');
   ok(!relationships.includes('switcher'), 'its content switcher is gone');
   ok(relationships.includes("const views = [['graph', 'Graph'], ['list', 'List']];"), 'the graph, the default view, stands first');

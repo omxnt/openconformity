@@ -93,6 +93,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   const navigatorPane = document.getElementById('pane-navigator');
   const column = document.getElementById('workspace-column');
   const relationshipsPane = document.getElementById('pane-relationships');
+  const columnSplitter = document.getElementById('splitter-column');
 
   // --- Theme -----------------------------------------------------------
 
@@ -440,7 +441,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   });
 
   splitter({
-    splitter: document.getElementById('splitter-column'),
+    splitter: columnSplitter,
     sizeAt: (event) => column.getBoundingClientRect().bottom - event.clientY,
     size: () => relationshipsPane.getBoundingClientRect().height,
     limit: () => column.getBoundingClientRect().height - 160,
@@ -472,6 +473,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     renderNotices();
     syncShellHistory();
     unsavedButton.hidden = !store.dirty();
+    relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed());
+    columnSplitter.hidden = store.relationshipsCollapsed();
     document.title = titleFor(store.hasProject(), store.model().name);
 
     if (wasFailingToPersist && !store.persistFailed()) {

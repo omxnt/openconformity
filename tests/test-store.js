@@ -837,4 +837,47 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(retention.records.has('aside'), false, 'with the record removed as before');
 }
 
+// --- The relationship pane collapses to its head, for the session ---------
+
+{
+  const storage = fakeStorage();
+  const session = fakeStorage();
+  const retention = memoryRetention();
+  const store = createStore({ storage, session, retention });
+  store.replaceProject(createModel());
+  equal(store.relationshipsCollapsed(), false, 'the pane opens expanded');
+
+  let notified = 0;
+  store.subscribe(() => { notified += 1; });
+  store.setRelationshipsCollapsed(true);
+  equal(store.relationshipsCollapsed(), true, 'it can be collapsed');
+  equal(session.read('openconformity.relationships-collapsed'), 'true', 'and the choice rides the browser session');
+  equal(notified, 1, 'the panes are told once');
+  store.setRelationshipsCollapsed(true);
+  equal(notified, 1, 'and not again for the same state');
+  ok(!(await blobIn(store, retention)).session.relationshipsCollapsed, 'the blob never carries it');
+
+  const reloaded = createStore({ storage, session, retention });
+  equal(reloaded.relationshipsCollapsed(), true, 'a reload within the session keeps it');
+  const fresh = createStore({ storage, session: fakeStorage(), retention });
+  equal(fresh.relationshipsCollapsed(), false, 'a new session opens expanded');
+
+  store.setRelationshipView('list');
+  equal(store.relationshipsCollapsed(), false, 'choosing a view expands the pane');
+  store.setRelationshipsCollapsed(true);
+  store.setRelationshipView('list');
+  equal(store.relationshipsCollapsed(), false, 'even the view already shown');
+
+  store.setRelationshipsCollapsed(true);
+  const id = store.commit((model) => addEntity(model, 'ELM')).id ?? [...store.model().nodes.keys()].find((key) => key.startsWith('ELM'));
+  store.beginPicking(id);
+  equal(store.relationshipsCollapsed(), false, 'starting a pick expands the pane');
+  store.endPicking();
+
+  store.setRelationshipsCollapsed(true);
+  store.clearBrowserData();
+  await store.whenPersisted();
+  equal(session.read('openconformity.relationships-collapsed'), null, 'clearing browser data forgets the choice');
+}
+
 summary('test-store');
