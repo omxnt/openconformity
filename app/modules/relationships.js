@@ -22,7 +22,7 @@ import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
 import { formLabel, entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
-import { el, icon, tabKeys, tooltipTag } from './dom.js';
+import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
 import { statusIcon } from './rating.js';
 import { findings, staleText, tabNameOf } from './records.js';
 
@@ -222,8 +222,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    * focused; Escape closes and clears, so does leaving it empty.
    */
   function searchControl() {
+    const filterLabel = store.messagesOpen() ? 'Filter the messages' : 'Filter the relationships';
     if (!searchOpen) {
-      return headIcon('Filter the relationships', 'i-search', () => {
+      return headIcon(filterLabel, 'i-search', () => {
         searchOpen = true;
         render();
         head.querySelector('.head-search')?.focus();
@@ -231,7 +232,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     }
     const input = el('input', {
       className: 'field-input head-search',
-      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the relationships' },
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': filterLabel },
     });
     input.value = tableFilter;
     input.addEventListener('input', () => {
@@ -255,15 +256,11 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return input;
   }
 
-  /** A neutral icon-only head action with a tooltip, like the toolbar's. */
+  /** A neutral icon-only head action with its label as its tooltip, hanging from its end since the actions stand at the right. */
   function headIcon(label, iconId, onPick) {
-    const button = el(
-      'button',
-      { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: label, 'aria-label': label } },
-      [icon(iconId)]
-    );
+    const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
     button.addEventListener('click', onPick);
-    return button;
+    return tooltipOn(button, label, { align: 'end' });
   }
 
   /** The chevron that collapses the pane to its head, or expands it again. */
@@ -392,14 +389,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       rowElement.appendChild(el('td', { className: 'shrink' }));
       return rowElement;
     }
-    const remove = el('button', {
-      className: 'icon-button',
-      attributes: {
-        type: 'button',
-        'aria-label': `Remove the ${label} relationship with ${other.id}`,
-        title: 'Remove relationship',
-      },
-    }, [icon('i-remove-relationship')]);
+    const remove = tooltipOn(el('button', { className: 'icon-button', attributes: { type: 'button' } }, [icon('i-remove-relationship')]), 'Remove relationship', {
+      align: 'end',
+      label: `Remove the ${label} relationship with ${other.id}`,
+    });
     remove.addEventListener('click', (event) => {
       event.stopPropagation();
       onUnrelate(relationship);
@@ -447,10 +440,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       rowElement.append(subjectCell(subject), relationshipCell, otherCell);
     }
 
-    const unpick = el('button', {
-      className: 'icon-button neutral',
-      attributes: { type: 'button', 'aria-label': `Unpick ${other.id}`, title: 'Unpick' },
-    }, [icon('i-close')]);
+    const unpick = tooltipOn(el('button', { className: 'icon-button neutral', attributes: { type: 'button' } }, [icon('i-close')]), 'Unpick', { align: 'end', label: `Unpick ${other.id}` });
     unpick.addEventListener('click', () => store.togglePick(other.id));
     rowElement.appendChild(el('td', { className: 'shrink' }, [unpick]));
     return rowElement;

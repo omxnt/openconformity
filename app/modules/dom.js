@@ -129,3 +129,58 @@ export function tooltipTag(className, content, lead, text, key, tipKey) {
   });
   return held;
 }
+
+/**
+ * Carbon's tooltip on an icon-only button: its label, shown under it on
+ * hover or focus and dismissed with Escape, which is the primary use
+ * Carbon gives a tooltip. The label is also the button's accessible
+ * name, the tooltip itself hidden from assistive technology so nothing
+ * is read twice, and the browser's own title is never set. Calling it
+ * again changes the text, for a label that follows the state. The
+ * tooltip hangs from the edge asked for, and flips to the other edge
+ * when it would run past the box that clips it, as Carbon auto-aligns
+ * a tooltip, so a button at the end of its row is never cut off.
+ * @param {HTMLElement} button
+ * @param {string} text  the tooltip
+ * @param {Object} [options]
+ * @param {'start'|'end'} [options.align]  which edge of the button the tooltip hangs from; end for a button at the right of its row
+ * @param {string} [options.label]  the accessible name where it says more than the tooltip
+ */
+export function tooltipOn(button, text, { align = 'start', label = text } = {}) {
+  let tip = [...button.children].find((held) => held.classList.contains('tooltip'));
+  if (!tip) {
+    tip = el('span', { className: align === 'end' ? 'tooltip tooltip-end' : 'tooltip', attributes: { 'aria-hidden': 'true' } });
+    button.classList.add('tip-trigger');
+    button.appendChild(tip);
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') button.blur();
+    });
+    const place = () => {
+      tip.classList.toggle('tooltip-end', align === 'end');
+      const clip = clippingBox(button);
+      const box = tip.getBoundingClientRect();
+      if (align === 'end' ? box.left < clip.left : box.right > clip.right) tip.classList.toggle('tooltip-end', align !== 'end');
+    };
+    button.addEventListener('mouseenter', place);
+    button.addEventListener('focus', place);
+  }
+  tip.textContent = text;
+  button.setAttribute('aria-label', label);
+  button.removeAttribute('title');
+  return button;
+}
+
+/**
+ * The box that would clip something hanging off an element: the nearest
+ * ancestor that hides or scrolls its overflow, or the viewport.
+ * @param {Element} element
+ * @returns {{ left: number, right: number }}
+ */
+function clippingBox(element) {
+  const view = element.ownerDocument.defaultView;
+  for (let held = element.parentElement; held; held = held.parentElement) {
+    const overflow = view.getComputedStyle(held).overflowX;
+    if (overflow !== 'visible') return held.getBoundingClientRect();
+  }
+  return { left: 0, right: view.innerWidth };
+}

@@ -7,7 +7,7 @@
  * cell a way to the editor, and prints it.
  */
 
-import { el, icon } from './dom.js';
+import { el, icon, tooltipOn } from './dom.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS } from './icons.js';
 import { entityLabel } from './queries.js';
@@ -240,7 +240,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     head.appendChild(tabs);
     const print = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Print' })]);
     print.addEventListener('click', () => window.print());
-    const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: 'Close the view', 'aria-label': 'Close the view' } }, [icon('i-close')]);
+    const close = tooltipOn(el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]), 'Close the view', { align: 'end' });
     close.addEventListener('click', onClose);
     head.appendChild(el('div', { className: 'pane-head-actions' }, [print, close]));
   }

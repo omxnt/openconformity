@@ -31,7 +31,7 @@ import { pickerCandidates } from './relate.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { entityLabel, excluded } from './queries.js';
-import { el, icon } from './dom.js';
+import { el, icon, tooltipOn } from './dom.js';
 import { openMenu } from './menu.js';
 
 /**
@@ -290,8 +290,6 @@ export function createNavigator({
       const attributes = {
         type: 'button',
         'data-action': action.id,
-        title: action.label,
-        'aria-label': action.label,
       };
       if (action.menu) {
         attributes['aria-haspopup'] = 'menu';
@@ -303,6 +301,7 @@ export function createNavigator({
         [icon(action.icon)]
       );
       button.addEventListener('click', () => action.run({ anchor: button }));
+      tooltipOn(button, action.label);
       toolbar.appendChild(button);
       toolbarButtons.set(action, button);
     }
@@ -311,11 +310,7 @@ export function createNavigator({
   function syncToolbar() {
     for (const [action, button] of toolbarButtons) {
       button.disabled = !action.enabled();
-      if (action.describe) {
-        const said = action.describe();
-        button.title = said;
-        button.setAttribute('aria-label', said);
-      }
+      if (action.describe) tooltipOn(button, action.describe());
     }
   }
 

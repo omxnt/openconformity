@@ -8,6 +8,7 @@
 import { openMenu } from './menu.js';
 import { PHASE } from './version.js';
 import { findings, messagesText, sizeText } from './records.js';
+import { tooltipOn } from './dom.js';
 
 /**
  * The theme in effect: the stored choice when one is set, else the system
@@ -110,8 +111,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     document.documentElement.dataset.theme = theme;
     const offer = themeSwitch(theme);
     themeIcon.setAttribute('href', `#${offer.icon}`);
-    themeButton.setAttribute('aria-label', offer.label);
-    themeButton.setAttribute('title', offer.label);
+    tooltipOn(themeButton, offer.label, { align: 'end' });
   }
 
   dark.addEventListener('change', applyTheme);
@@ -257,10 +257,12 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {
     unsavedButton.addEventListener('click', () => saveAction.run({ anchor: unsavedButton }));
+    tooltipOn(unsavedButton, 'Save to file', { align: 'end', label: 'Unsaved changes, save to file' });
   }
   const metamodelAction = actions.find((action) => action.id === 'metamodel');
   if (metamodelAction) {
     metamodelButton.addEventListener('click', () => metamodelAction.run({ anchor: metamodelButton }));
+    tooltipOn(metamodelButton, 'Metamodel', { align: 'end' });
   }
   const betaTag = document.getElementById('shell-beta');
   const aboutAction = actions.find((action) => action.id === 'about');
@@ -284,9 +286,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   function syncShellHistory() {
     for (const { action, button } of shellHistory) {
       button.disabled = !action.enabled();
-      const said = action.describe ? action.describe() : action.label;
-      button.setAttribute('title', said);
-      button.setAttribute('aria-label', said);
+      tooltipOn(button, action.describe ? action.describe() : action.label, { align: 'end' });
     }
   }
 

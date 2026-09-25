@@ -205,10 +205,24 @@ export const ATTRIBUTES = {
   NTB: {
     attributes: [
       { key: 'reference', name: 'Reference', kind: 'text', help: 'The identification number of the notified body, as cited.' },
-      { key: 'title', name: 'Title', kind: 'text', help: "The name of the notified body." },
+      { key: 'title', name: 'Title', kind: 'text', help: 'The name of the notified body, as the declaration of conformity cites it.' },
+      { key: 'address', name: 'Address', kind: 'multiline', help: 'The address of the notified body, as the declaration of conformity cites it.' },
+      { key: 'website', name: 'Website', kind: 'hyperlink', help: "Where the notified body is on the web, or its entry in the Commission's register." },
       { key: 'description', name: 'Description', kind: 'multiline', help: "The role of the notified body for this product." },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Notification',
+        tab: true,
+        attributes: [
+          { key: 'legislation', name: 'Legislation', kind: 'text', help: 'The act the notified body is notified under, as cited.' },
+          { key: 'memberState', name: 'Member State', kind: 'text', help: 'The Member State that notified the body, as the register lists it.' },
+          { key: 'procedures', name: 'Procedures', kind: 'multiline', help: 'The conformity assessment procedures the notified body is notified for, as the register lists them.' },
+          { key: 'products', name: 'Products', kind: 'multiline', help: 'The kinds of machinery and related products the notified body may assess, as the register lists them.' },
+        ],
+      },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
   HAZ: {
     attributes: [

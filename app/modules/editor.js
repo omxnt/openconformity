@@ -16,7 +16,7 @@ import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
-import { el, icon, tabKeys, tooltipTag } from './dom.js';
+import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
 import { staleText, recordOf, recordedStates, recordWritten, changedText } from './records.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
@@ -822,15 +822,11 @@ export function createEditor({
     return button;
   }
 
-  /** An icon-only head action, neutral with a tooltip, like the toolbar's. */
+  /** An icon-only head action, neutral, its label as its tooltip hanging from its end since the actions stand at the right. */
   function headIconButton(label, iconId, onPick) {
-    const button = el(
-      'button',
-      { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: label, 'aria-label': label } },
-      [icon(iconId)]
-    );
+    const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
     button.addEventListener('click', onPick);
-    return button;
+    return tooltipOn(button, label, { align: 'end' });
   }
 
   /**

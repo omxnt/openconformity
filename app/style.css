@@ -1010,7 +1010,19 @@ select.field-input[size] {
   border-bottom: 6px solid var(--inverse);  /* Carbon's caret, 12 by 6 */
 }
 .help-trigger:hover .tooltip,
-.help-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
+.help-trigger:focus-visible .tooltip,
+.tip-trigger:hover .tooltip,
+.tip-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
+
+/* An icon-only button's label as its tooltip, Carbon's primary use of
+   one: the button is the trigger, the tooltip hangs from its start or,
+   for a button at the right of its row, from its end, the caret over
+   the button's centre either way. */
+.tip-trigger { position: relative; }
+.tip-trigger > .tooltip { left: 0; }
+.tip-trigger > .tooltip::before { left: 10px; }
+.tip-trigger > .tooltip.tooltip-end { left: auto; right: 0; }
+.tip-trigger > .tooltip.tooltip-end::before { left: auto; right: 10px; }
 
 /* A slot with nothing chosen for the attribute it waits on: Carbon's
    disabled field, saying so, holding the cell so the form keeps its

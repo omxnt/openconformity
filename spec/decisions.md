@@ -685,6 +685,16 @@ The records that no longer match are summarised in a status bar under the worksp
 
 > *A count in a corner says that something wants a look but not what, and a fourth pane adds a region to a layout balanced on three floors, for a list that is usually empty. A status bar is the one place for what is true right now, and the messages are its first tenant. The pane that shows relationships lends its space, since the messages are relationships that changed under a record, and it already has the head, the table, the splitter and the collapse, so nothing new is drawn and Carbon's data table is what the list is. They stand over the pane rather than as a third tab beside Graph and List, because those two are about the entity you stand on and the messages are about the whole model, and a tab would put the two scopes side by side as if they were one kind of thing. A row selects while the list stays, so the list is worked through in place. A drawer over the workspace and then a tab were built first and dropped the same day. The list is derived wherever it is shown and never stored, and it says what the software knows without judging, which entities and what changed (F-VIE-002). A printable view can follow when the list is worth printing.*
 
+---
+
+### D-084 One tooltip
+
+`2026-09-26` `graphical`
+
+Every tooltip in the interface is Carbon's, shown on hover and on keyboard focus and dismissed with Escape, and the browser's own title attribute is never used. An icon-only button's label is its tooltip. A tag's name and value, or its state, is its tooltip. A field's help is the tooltip on the information glyph beside its name. A long rationale stays in a tooltip while rationales stay short, and moves to a toggletip opened by a click if they do not.
+
+> *Carbon gives a tooltip one job, "additional information upon hover or focus that is contextual, helpful, and nonessential", and names the primary case, "the text labels of icon-only buttons", which appear on focus because the button is in the tab order. The browser's title does none of that: it never shows on focus, comes after the browser's delay and looks like nothing else on the page. Until now the field help and the tags were Carbon's and the icon buttons, the ones used all day, were the browser's, which is the inconsistency a user notices first. One helper now gives a button its tooltip and takes its title away, so a second box cannot appear.*
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
