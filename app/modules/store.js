@@ -110,6 +110,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let theme = null;
   /** @type {'fresh'|'restored'|'failed'} how the session began, decided by `restore` */
   let restoration = 'fresh';
+  /** Whether the copy this session's failed restore set aside still stands in the retention. */
+  let asideHeld = false;
   let persistFailed = false;
   /** Whether the origin's storage stands past the share the user is told about. */
   let storageNearlyFull = false;
@@ -345,6 +347,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
         if (restoration === 'failed') {
           try {
             await retention.write(ASIDE_RECORD, blob);
+            asideHeld = true;
           } catch {
             // The retention refused the copy; the record it came from still holds the blob.
           }
@@ -393,6 +396,28 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     /** How the session began: fresh, restored, or failed to restore. */
     restoration: () => restoration,
 
+    /** Whether the copy set aside by this session's failed restore still stands. */
+    hasAside: () => asideHeld,
+
+    /**
+     * The set-aside copy as the retention holds it, read once every
+     * queued write has landed; null where there is none or it cannot
+     * be read.
+     */
+    aside: () => tail.then(() => retention.read(ASIDE_RECORD)).catch(() => null),
+
+    /**
+     * Remove the set-aside copy. The failed restore then has nothing
+     * left to report, and the session counts as fresh.
+     */
+    discardAside() {
+      asideHeld = false;
+      restoration = 'fresh';
+      tail = tail.then(() => retention.remove([ASIDE_RECORD])).catch(() => undefined);
+      notify();
+      return tail;
+    },
+
     /** Whether the last write to browser storage failed. */
     persistFailed: () => persistFailed,
 
@@ -423,6 +448,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       model = createModel();
       savedSequence = history.reset(model);
       projectOpen = false;
+      asideHeld = false;
       selection = null;
       expanded = new Set();
       projectCollapsed = false;

@@ -658,6 +658,61 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * plainly what goes, and what more goes when the open project has
    * changes not saved to a file. The landing follows.
    */
+  /**
+   * Save the copy a failed restore set aside as a file, as the retention
+   * holds it: the project it carried where the copy has that shape, the
+   * text itself otherwise. Named through the question a save asks,
+   * prefilled with the name the copy carries where one can be read. The
+   * copy stays in the browser until it is discarded.
+   */
+  async function saveAsideCopy() {
+    const copy = await store.aside();
+    if (copy === null) {
+      dialogs.toast('No copy found', 'Nothing is set aside in browser storage.');
+      return;
+    }
+    const text = typeof copy === 'string' ? copy : JSON.stringify(copy.project ?? copy, null, 2);
+    const fallback = 'Set-aside copy';
+    const typed = await dialogs.prompt({
+      title: 'Save copy to file',
+      label: 'Name',
+      value: asideName(copy, text) ?? fallback,
+      confirmLabel: 'Save',
+      preview: (value) => `Saved to your downloads as ${filenameFor(value.trim() || fallback)}.`,
+    });
+    if (typed === null) return;
+    const filename = filenameFor(typed.trim() || fallback);
+    saveFile(filename, text, 'application/json');
+    dialogs.toast('Copy saved', `Saved to your downloads as ${filename}.`);
+  }
+
+  /** The name a set-aside copy carries, where one can be read, else null. */
+  function asideName(copy, text) {
+    const held = typeof copy === 'object' && copy !== null ? copy.project : null;
+    let name = held && typeof held === 'object' ? held.name : undefined;
+    if (typeof name !== 'string') {
+      try {
+        name = JSON.parse(text)?.name;
+      } catch {
+        name = undefined;
+      }
+    }
+    return typeof name === 'string' && name.trim() !== '' ? name : null;
+  }
+
+  /** Discard the set-aside copy, asking first. Nothing else changes. */
+  async function discardAside() {
+    const confirmed = await dialogs.confirm({
+      title: 'Discard the copy',
+      message: 'The copy set aside in browser storage is removed. Nothing else changes.',
+      confirmLabel: 'Discard',
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+    if (!confirmed) return;
+    await store.discardAside();
+  }
+
   async function clearBrowserData() {
     if (!(await confirmDiscard())) return;
     const message = store.dirty()
@@ -851,6 +906,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     removeRelationship,
     newProject,
     clearBrowserData,
+    saveAsideCopy,
+    discardAside,
     openProjectFlow,
     loadExample,
     saveProject,

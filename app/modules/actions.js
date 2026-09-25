@@ -18,6 +18,7 @@ import { VIEWS } from './views.js';
  * @property {boolean} toolbar  whether the navigator toolbar offers it
  * @property {boolean} context  whether the context menu offers it
  * @property {boolean} [menubar]  whether the shell's Project menu offers it
+ * @property {boolean} [notice]   whether the restoration notice offers it
  * @property {boolean} [menu]   whether running it opens a menu
  * @property {boolean} [danger]
  * @property {string} icon      the sprite symbol a menu draws it under
@@ -108,6 +109,31 @@ export function createActions({ store, flows }) {
       enabled: () => true,
       danger: true,
       run: () => flows.clearBrowserData(),
+    },
+    {
+      id: 'save-aside-copy',
+      icon: 'i-save',
+      label: 'Save copy',
+      group: 'aside',
+      toolbar: false,
+      context: false,
+      menubar: false,
+      notice: true,
+      enabled: () => store.hasAside(),
+      run: () => flows.saveAsideCopy(),
+    },
+    {
+      id: 'discard-aside',
+      icon: 'i-delete',
+      label: 'Discard',
+      group: 'aside',
+      toolbar: false,
+      context: false,
+      menubar: false,
+      notice: true,
+      enabled: () => store.hasAside(),
+      danger: true,
+      run: () => flows.discardAside(),
     },
     {
       id: 'about',

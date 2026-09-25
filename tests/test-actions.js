@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -48,7 +48,8 @@ function enabledIds(actions) {
     'the key hints ride on the actions the keys reach, the save one as the platform writes it'
   );
   ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');
-  ok(actions.every((action) => action.toolbar || action.context || action.menubar), 'every action appears on some surface');
+  ok(actions.every((action) => action.toolbar || action.context || action.menubar || action.notice), 'every action appears on some surface');
+  deepEqual(actions.filter((action) => action.notice).map((action) => action.id), ['save-aside-copy', 'discard-aside'], 'the restoration notice offers the two actions on the set-aside copy and nothing else');
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),
     ['new-project', 'open', 'save'],
@@ -88,6 +89,8 @@ function enabledIds(actions) {
       save: true,
       'load-example': true,
       'clear-browser-data': true,
+      'save-aside-copy': false,
+      'discard-aside': false,
       about: true,
       metamodel: true,
       edit: true,

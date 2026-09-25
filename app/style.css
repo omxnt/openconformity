@@ -297,6 +297,7 @@ body {
 .notice-warning { border-left-color: var(--support-warning); }
 .notice .icon { margin-top: 1px; }
 .notice-body { flex: 1; }
+.notice-actions { display: flex; gap: 4px; margin: -7px 0; }  /* $spacing-02; the 32px buttons ride the text's line without deepening the notice */
 .notice-title { font-weight: 600; margin-right: 8px; }  /* $heading-compact-01 */
 .notice-text { color: var(--text-second); }
 

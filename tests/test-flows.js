@@ -580,4 +580,87 @@ function flowsOver(store) {
   ok(!store.hasProject() && retention.records.size === 0, 'Clear forgets the project and shows the landing');
 }
 
+// --- The set-aside copy saves to a file and can be discarded --------------
+
+{
+  const retention = memoryRetention({ initial: { project: { project: { name: 'Old line', format: 'x' }, session: { dirty: true } } } });
+  const store = createStore({ storage: fakeStorage(), retention });
+  await store.restore();
+  equal(store.hasAside(), true, 'a failed restore leaves a copy to act on');
+  const saved = [];
+  const toasts = [];
+  const prompts = [];
+  const dialogs = {
+    prompt: async (spec) => {
+      prompts.push(spec);
+      return '';
+    },
+    confirm: async () => true,
+    toast: (title, message) => toasts.push([title, message]),
+  };
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs,
+    editor: stubEditor(),
+    fileInput: null,
+    saveFile: (filename, text, type) => saved.push({ filename, text, type }),
+  });
+
+  await flows.saveAsideCopy();
+  equal(prompts[0].title, 'Save copy to file', 'the copy is saved through the naming question');
+  equal(prompts[0].value, 'Old line', 'prefilled with the name the copy carries');
+  ok(prompts[0].preview('').includes('old-line.json') === false && prompts[0].preview('').includes('set-aside-copy.json'), 'an empty name previews the fallback');
+  equal(saved.length, 1, 'confirming downloads once');
+  equal(saved[0].filename, 'set-aside-copy.json', 'under the fallback name when the field is emptied');
+  deepEqual(JSON.parse(saved[0].text), { name: 'Old line', format: 'x' }, 'with the project the copy carried, as text');
+  equal(saved[0].type, 'application/json', 'as JSON');
+  equal(store.hasAside(), true, 'and the copy stays in the browser');
+  equal(toasts[0][0], 'Copy saved', 'the toast says so');
+
+  await flows.discardAside();
+  equal(store.hasAside(), false, 'discarding, once confirmed, lets the copy go');
+  equal(retention.records.has('aside'), false, 'and removes it from the retention');
+}
+
+{
+  const retention = memoryRetention({ initial: { project: 'plain text that is not a blob' } });
+  const store = createStore({ storage: fakeStorage(), retention });
+  await store.restore();
+  const saved = [];
+  const prompts = [];
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs: { prompt: async (spec) => { prompts.push(spec); return 'Kept'; }, toast: () => {}, confirm: async () => false },
+    editor: stubEditor(),
+    fileInput: null,
+    saveFile: (filename, text, type) => saved.push({ filename, text, type }),
+  });
+  await flows.saveAsideCopy();
+  equal(prompts[0].value, 'Set-aside copy', 'a copy with no readable name prefills the fallback');
+  equal(saved[0].text, 'plain text that is not a blob', 'and saves as the text it is');
+  equal(saved[0].filename, 'kept.json', 'under the name typed');
+  await flows.discardAside();
+  equal(store.hasAside(), true, 'declining the question keeps the copy');
+}
+
+{
+  const store = createStore({ storage: fakeStorage(), retention: memoryRetention() });
+  await store.restore();
+  const toasts = [];
+  const saved = [];
+  const flows = createFlows({
+    store,
+    overlay: {},
+    dialogs: { prompt: async () => 'x', toast: (title) => toasts.push(title), confirm: async () => true },
+    editor: stubEditor(),
+    fileInput: null,
+    saveFile: (filename, text, type) => saved.push(filename),
+  });
+  await flows.saveAsideCopy();
+  equal(saved.length, 0, 'with nothing set aside, nothing downloads');
+  equal(toasts[0], 'No copy found', 'and the toast says so');
+}
+
 summary('test-flows');

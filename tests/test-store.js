@@ -803,4 +803,38 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   ok((await blobIn(store, retention)) !== null, 'and a new project persists again as ever');
 }
 
+// --- The set-aside copy can be read back and discarded -------------------
+
+{
+  const retention = memoryRetention({ initial: { project: { project: { name: 'Old line' }, session: {} } } });
+  const store = await restored(retention, fakeStorage());
+  equal(store.restoration(), 'failed', 'a blob the software cannot load fails the restore');
+  equal(store.hasAside(), true, 'and the session says a copy stands aside');
+  deepEqual(await store.aside(), { project: { name: 'Old line' }, session: {} }, 'the copy reads back as the retention holds it');
+
+  await store.discardAside();
+  equal(store.hasAside(), false, 'discarding it ends the offer');
+  equal(retention.records.has('aside'), false, 'and removes the record');
+  equal(await store.aside(), null, 'so nothing reads back');
+  equal(store.restoration(), 'fresh', 'and the session counts as fresh from there');
+  equal(retention.records.get('project').project.name, 'Old line', 'the project record it came from is left as it was');
+}
+
+{
+  const retention = memoryRetention();
+  const store = await restored(retention, fakeStorage());
+  equal(store.hasAside(), false, 'a fresh session holds no copy');
+  equal(await store.aside(), null, 'and reads none back');
+}
+
+{
+  const retention = memoryRetention({ initial: { project: 'not a blob' } });
+  const store = await restored(retention, fakeStorage());
+  equal(store.hasAside(), true, 'a failed restore holds the copy');
+  store.clearBrowserData();
+  await store.whenPersisted();
+  equal(store.hasAside(), false, 'and clearing browser data lets go of it');
+  equal(retention.records.has('aside'), false, 'with the record removed as before');
+}
+
 summary('test-store');

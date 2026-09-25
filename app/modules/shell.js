@@ -88,6 +88,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   const metamodelButton = document.getElementById('shell-metamodel');
   const unsavedButton = document.getElementById('shell-unsaved');
   const notices = document.getElementById('notices');
+  const actionById = new Map(actions.map((action) => [action.id, action]));
   const workspace = document.getElementById('workspace');
   const navigatorPane = document.getElementById('pane-navigator');
   const column = document.getElementById('workspace-column');
@@ -285,8 +286,9 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
    * @param {string} title
    * @param {string} text
    * @param {(() => void)|null} onDismiss
+   * @param {Action[]} [buttons]  actions offered on the notice, as ghost buttons after the text
    */
-  function notice(kind, title, text, onDismiss) {
+  function notice(kind, title, text, onDismiss, buttons = []) {
     const element = document.createElement('div');
     element.className = kind === 'warning' ? 'notice notice-warning' : 'notice';
 
@@ -309,6 +311,20 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     body.append(heading, detail);
     element.appendChild(body);
 
+    if (buttons.length > 0) {
+      const row = document.createElement('div');
+      row.className = 'notice-actions';
+      for (const action of buttons) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = action.danger ? 'ghost-button ghost-danger' : 'ghost-button';
+        button.textContent = action.label;
+        button.addEventListener('click', () => action.run({}));
+        row.appendChild(button);
+      }
+      element.appendChild(row);
+    }
+
     if (onDismiss) {
       const dismiss = document.createElement('button');
       dismiss.type = 'button';
@@ -330,11 +346,18 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
   function renderNotices() {
     notices.textContent = '';
     if (store.restoration() === 'failed' && !restorationDismissed) {
+      const offered = store.hasAside() ? ['save-aside-copy', 'discard-aside'].map((id) => actionById.get(id)).filter(Boolean) : [];
       notices.appendChild(
-        notice('info', RESTORATION_NOTICE, RESTORATION_DETAIL, () => {
-          restorationDismissed = true;
-          renderNotices();
-        })
+        notice(
+          'info',
+          RESTORATION_NOTICE,
+          RESTORATION_DETAIL,
+          () => {
+            restorationDismissed = true;
+            renderNotices();
+          },
+          offered
+        )
       );
     }
     if (store.persistFailed()) {
