@@ -86,9 +86,21 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Designation', kind: 'text' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system task." },
-      { key: 'description', name: 'Description', kind: 'multiline', help: 'What is done in the system task, and on which part of the machinery.' },
+      { key: 'description', name: 'Description', kind: 'multiline', help: 'What is done in the system task.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Conditions',
+        tab: true,
+        attributes: [
+          { key: 'location', name: 'Location', kind: 'text', help: 'Where on or around the machinery the task is done.' },
+          { key: 'frequency', name: 'Frequency', kind: 'text', help: 'How often the task is done, in your own words.' },
+          { key: 'tools', name: 'Tools and equipment needed', kind: 'multiline', help: 'What is needed to do the task.' },
+          { key: 'misuse', name: 'Reasonably foreseeable misuse', kind: 'multiline', help: 'How the task is foreseeably done other than intended.' },
+        ],
+      },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
   PHS: {
     attributes: [

@@ -182,13 +182,22 @@ The designation is the actor's own short name — `A1` — entered by the modell
 
 ### 2.3 System Task (TSK) `draft`
 
-The designation is the task's own short name — `T1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The designation is the task's own short name — `T1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The conditions the task is done under stand on a tab of their own: where, how often, with what, and how it is foreseeably done other than intended, the last in the Regulation's own term.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | |
 | title | Title | text | | The name of the system task. |
-| description | Description | multiline | | What is done in the system task, and on which part of the machinery. |
+| description | Description | multiline | | What is done in the system task. |
+
+#### Conditions `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| location | Location | text | | Where on or around the machinery the task is done. |
+| frequency | Frequency | text | | How often the task is done, in your own words. |
+| tools | Tools and equipment needed | multiline | | What is needed to do the task. |
+| misuse | Reasonably foreseeable misuse | multiline | | How the task is foreseeably done other than intended. |
 
 #### Notes `tab`
 
