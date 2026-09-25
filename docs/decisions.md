@@ -12,7 +12,6 @@ The requirements and the metamodel govern. This log records the reasoning behind
 
 Each entry shall have a unique identifier, `D-NNN` for a decision and `U-NNN` for an undecided question. Entries are ordered by number, grouped loosely by theme. Identifiers are append-only, an entry is never renumbered, and a decision that changes is superseded by a new entry rather than edited. A question that is settled is removed, and its outcome recorded as a decision.
 
-
 ### 1.3 Tags
 
 Each entry carries one or more tags from the table below.
@@ -278,7 +277,6 @@ The project does not reproduce copyrighted content from harmonized standards. Th
 
 > *D-029 drew the boundary at what the OJEU publishes, which is a workable rule but not the actual constraint: the question is whether content is protected, and OJEU publication is only evidence of that. Stating the real constraint means a clear answer on a particular item, such as whether the Annex ZA correspondence tables attract protection, can relax what the project may use without rewriting the requirement. Until such an answer exists, everything beyond the OJEU lists is treated as protected. Supersedes D-029. Specified in spec.md C-PRJ-005.*
 
-
 ---
 
 ### D-039 British spelling
@@ -328,6 +326,7 @@ The navigator is independent of the metamodel. Entities and folders are placed a
 The metamodel distinguishes Essential Requirement, Harmonised Requirement, Other Requirement, and System Requirement, and a system requirement may derive from an essential requirement directly.
 
 > *An essential requirement that applies because the machinery exists rather than because of a hazard, such as instructions or the marking plate, has no measure and no standard clause behind it. Deriving a system requirement straight from the essential requirement gives it a path into the model. Settles U-002.*
+
 ---
 
 ### D-046 Protective Measure term
