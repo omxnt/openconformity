@@ -278,6 +278,19 @@ export const ATTRIBUTES = {
             attributes: [{ key: 'residualRating', name: 'Residual risk estimation', kind: 'text' }],
           },
           {
+            name: 'Protective measures',
+            attributes: [
+              {
+                key: 'measures',
+                name: 'Protective measures',
+                kind: 'entities',
+                relationship: 'prm-reduces-risk-of-scn',
+                recorded: 'Residual risk estimation',
+                help: 'The protective measures related to the scenario when its residual risk was rated, recorded by the software.',
+              },
+            ],
+          },
+          {
             name: 'Risk evaluation',
             attributes: [{ key: 'evaluation', name: 'Risk evaluation', kind: 'multiline', help: "Your judgement whether the accident scenario's residual risk is acceptable, and why." }],
           },

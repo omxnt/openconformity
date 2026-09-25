@@ -17,7 +17,7 @@ import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys } from './dom.js';
-import { entityLabel } from './queries.js';
+import { entityLabel, relatedIds } from './queries.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 import { editDrawing } from './drawing-editor.js';
 
@@ -114,6 +114,38 @@ export function removalText(entries) {
   for (const { name, value } of entries) byValue.set(value, [...(byValue.get(value) ?? []), name]);
   const listed = (names) => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`);
   return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join('; ')}.`;
+}
+
+/** What an entry out of step with the record says beneath its label, by state, given the name of the group that wrote the record. */
+export const staleText = (recorded) => ({ unlinked: `Unlinked after the ${recorded.toLowerCase()}.`, deleted: `Deleted after the ${recorded.toLowerCase()}.`, added: `Related after the ${recorded.toLowerCase()}.` });
+
+/** A record of entities as it is stored: the identifiers in ascending order, parted by semicolons. */
+export const recordOf = (ids) => [...new Set(ids)].sort().join('; ');
+
+/**
+ * The state of each entity a record names, against the model as it
+ * stands: linked while the relationship holds, unlinked where the
+ * entity stands but the relationship is gone, deleted where the entity
+ * is gone; then, after them, each entity the relationship joins now
+ * that the record does not name, added. Each with the label it has, or
+ * its identifier where it is gone.
+ * @param {string|undefined} record
+ * @param {import('./model.js').Model} model
+ * @param {string|null} subjectId
+ * @param {string} relationship  a relationship type id
+ * @returns {Array<{ id: string, label: string, state: 'linked'|'unlinked'|'deleted'|'added' }>}
+ */
+export function recordedStates(record, model, subjectId, relationship) {
+  const ids = String(record ?? '').split(';').map((held) => held.trim()).filter(Boolean);
+  const linked = new Set(subjectId === null ? [] : relatedIds(model, subjectId, relationship));
+  const named = new Set(ids);
+  const recorded = ids.map((id) => {
+    const entity = nodeOf(model, id);
+    const state = !entity ? 'deleted' : linked.has(id) ? 'linked' : 'unlinked';
+    return { id, label: entity ? entityLabel(entity) : id, state };
+  });
+  const added = [...linked].filter((id) => !named.has(id)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'added' }));
+  return [...recorded, ...added];
 }
 
 export function firstTabName(code) {
@@ -264,11 +296,36 @@ export function createEditor({
   let refreshers = [];
   /** @type {Array<{ held: HTMLElement, shown: (draft: Object<string, string>) => boolean }>} what is shown on a condition, this render, in document order */
   let conditionals = [];
+  /** @type {Array<{ definition: Object, input: HTMLInputElement }>} the records of entities the open edit keeps, refreshed when the group each waits on changes */
+  let records = [];
+  /** @type {Map<string, string>} the group each key of the mounted type stands in, by name */
+  let groupOfKey = new Map();
   for (const kind of ['input', 'change']) {
-    body.addEventListener(kind, () => {
+    body.addEventListener(kind, (event) => {
+      recordFrom(event.target);
       followConditions();
       for (const refresh of refreshers) refresh();
     });
+  }
+
+  /**
+   * Refresh every record waiting on the group the changed control
+   * stands in, from the relationships as they stand.
+   * @param {EventTarget|null} target
+   */
+  function recordFrom(target) {
+    const control = target instanceof Element ? target.closest('[data-key]') : null;
+    const key = control?.dataset.key;
+    if (!key || editingId === null) return;
+    const group = groupOfKey.get(key);
+    const draft = fieldValues();
+    const rated = groupsOf(current?.type ?? '')
+      .filter((held) => held.name === group)
+      .some((held) => held.attributes.some((definition) => !isOutcome(definition) && !isRationale(definition) && (draft[definition.key] ?? '').trim() !== ''));
+    for (const { definition, input } of records) {
+      if (definition.recorded !== group) continue;
+      input.value = rated ? recordOf(relatedIds(store.model(), editingId, definition.relationship)) : '';
+    }
   }
 
   /**
@@ -344,7 +401,7 @@ export function createEditor({
    */
   function fieldCell(definition, values, editing) {
     const value = values[definition.key];
-    const held = editing ? control(definition, value ?? '', values) : valueNode(definition, value);
+    const held = editing ? control(definition, value ?? '', values) : valueNode(definition, value, values);
     return el('div', { className: takesRow(definition) ? 'cell tall' : 'cell' }, [nameNode(definition, editing), held]);
   }
 
@@ -398,7 +455,7 @@ export function createEditor({
 
   /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table, a drawing. */
   const takesRow = (definition) =>
-    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing';
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing' || definition.kind === 'entities';
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -445,8 +502,9 @@ export function createEditor({
    * @param {{ kind: string }} definition
    * @param {string|undefined} value
    */
-  function valueNode(definition, value) {
+  function valueNode(definition, value, values = {}) {
     if (definition.kind === 'drawing') return drawingCell(value, false, definition);
+    if (definition.kind === 'entities') return entitiesNode(definition, value ?? '', values, definition.key);
     if (definition.kind === 'table') {
       const rows = tableRows(definition, value ?? '');
       if (rows.length === 0) return el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` });
@@ -472,6 +530,46 @@ export function createEditor({
   const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
 
   /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
+  /**
+   * A record of entities as tags, each its identifier with its label
+   * in the tooltip, one since unlinked wearing the warning glyph and
+   * one since deleted the error glyph, the tooltip saying which, and a
+   * line beneath saying the record no longer matches where either
+   * stands; the dash where the record is empty.
+   * Until the group that writes the record holds a value, nothing was
+   * recorded, and the field shows what is related now, unmarked.
+   * @param {{ relationship: string, name: string, recorded: string }} definition
+   * @param {string} value
+   * @param {Object<string, string>} values  the entity's, or the draft's
+   * @param {string|null} [tipKey]
+   */
+  function entitiesNode(definition, value, values, tipKey = null) {
+    const written = groupsOf(current?.type ?? '')
+      .filter((group) => group.name === definition.recorded)
+      .some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && (values[held.key] ?? '').trim() !== ''));
+    const model = store.model();
+    const subject = current?.id ?? null;
+    const states = written
+      ? recordedStates(value, model, subject, definition.relationship)
+      : (subject === null ? [] : relatedIds(model, subject, definition.relationship)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'linked' }));
+    if (states.length === 0) return el('div', { className: 'cell-value empty', text: '–' });
+    const glyph = (state) => {
+      if (state === 'added') {
+        const held = icon('i-information');
+        held.classList.add('status-icon', 'tone-info');
+        return held;
+      }
+      return statusIcon(state === 'deleted' ? 'high' : 'medium');
+    };
+    const words = staleText(definition.recorded);
+    const tags = states.map(({ id, label, state }, i) =>
+      tooltipTag(state === 'linked' ? 'tag' : `tag ${state}`, [...(state === 'linked' ? [] : [glyph(state)]), el('span', { text: id })], label, state === 'linked' ? '' : words[state], i, tipKey)
+    );
+    const held = el('div', { className: 'cell-value tags' }, tags);
+    if (!states.some(({ state }) => state !== 'linked')) return held;
+    return el('div', {}, [held, el('p', { className: 'cell-note', text: `The ${definition.name.toLowerCase()} have changed since the ${definition.recorded.toLowerCase()}.` })]);
+  }
+
   function tableOf(definition, rows, trailing = null) {
     for (const cells of rows) cells.forEach((cell, c) => cell.classList.add(...[columnWidth(definition.columns[c])].filter(Boolean)));
     return el('table', { className: 'data rows' }, [
@@ -511,22 +609,31 @@ export function createEditor({
    * @param {Object} view
    * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
    */
+  /**
+   * A tag with a tooltip: outside an edit a button whose tooltip holds
+   * the lead, a name and value, over the text where there is one;
+   * within an edit, where the whole field is a button, a span with the
+   * browser's own.
+   * @param {string} className
+   * @param {Array<Node>} content
+   * @param {string} lead
+   * @param {string} text
+   * @param {string|number} key  with the tipKey, the tooltip's id
+   * @param {string|null} tipKey  null within a field, where a tag cannot be a button
+   */
+  function tooltipTag(className, content, lead, text, key, tipKey) {
+    if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\n${text}` : lead } }, content);
+    const id = `tag-${tipKey}-${key}`;
+    const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, text ? [el('span', { className: 'tooltip-lead', text: lead }), el('span', { className: 'tooltip-text', text })] : [el('span', { className: 'tooltip-text', text: lead })]);
+    const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);
+    held.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') held.blur();
+    });
+    return held;
+  }
+
   function ratingTags(view, tipKey = null) {
-    /**
-     * A tag: outside an edit a button whose tooltip holds the lead, the
-     * name and value, over the text where there is one; within an edit,
-     * where the whole field is a button, a span with the browser's own.
-     */
-    const tag = (className, content, lead, text, key) => {
-      if (tipKey === null) return el('span', { className, attributes: { title: text ? `${lead}\n${text}` : lead } }, content);
-      const id = `rating-${tipKey}-${key}`;
-      const tip = el('span', { className: 'tooltip', attributes: { role: 'tooltip', id } }, text ? [el('span', { className: 'tooltip-lead', text: lead }), el('span', { className: 'tooltip-text', text })] : [el('span', { className: 'tooltip-text', text: lead })]);
-      const held = el('button', { className: `${className} tag-trigger`, attributes: { type: 'button', 'aria-describedby': id } }, [...content, tip]);
-      held.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') held.blur();
-      });
-      return held;
-    };
+    const tag = (className, content, lead, text, key) => tooltipTag(className, content, lead, text, key, tipKey);
     const tags = [];
     if (view.outcome !== null) {
       tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], `${view.name}: ${view.outcome}`, '', 'outcome'));
@@ -582,7 +689,7 @@ export function createEditor({
       });
       if (chosen === null) return;
       for (const input of hidden) input.value = chosen[input.dataset.key] ?? '';
-      body.dispatchEvent(new Event('input', { bubbles: true }));
+      (hidden[0] ?? body).dispatchEvent(new Event('input', { bubbles: true }));
     });
     cellElement.appendChild(groupNameNode(group.name, closing.key, `field-${closing.key}`));
     cellElement.appendChild(field);
@@ -672,6 +779,7 @@ export function createEditor({
    */
   function mount(id, code, stored, editing) {
     const type = typeOf(code) ?? { attributes: [], groups: [] };
+    groupOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, group.name])));
     const values = { ...stored, ...projectReads(code) };
     const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);
     const ahead = id === null ? NAME_AFTER : 0;
@@ -878,6 +986,19 @@ export function createEditor({
     }
     if (definition.kind === 'table') return tableControl(definition, value);
     if (definition.kind === 'drawing') return drawingCell(value, true, definition);
+    if (definition.kind === 'entities') {
+      const hidden = el('input', { attributes: { type: 'hidden', 'data-key': definition.key, id: `field-${definition.key}` } });
+      hidden.value = value;
+      const shown = el('div', { className: 'field-static' });
+      const show = (held, draft) => {
+        shown.textContent = '';
+        shown.appendChild(entitiesNode(definition, held, draft));
+      };
+      show(value, values);
+      refreshers.push(() => show(hidden.value, fieldValues()));
+      records.push({ definition, input: hidden });
+      return el('div', {}, [shown, hidden]);
+    }
     const input = el('input', {
       className: 'field-input',
       attributes: {
@@ -1087,6 +1208,7 @@ export function createEditor({
     body.textContent = '';
     refreshers = [];
     conditionals = [];
+    records = [];
     if (!store.hasProject()) {
       head.hidden = true;
       const landing = emptyState(

@@ -4,7 +4,8 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/modules/editor.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText, recordedStates, recordOf, staleText } from '../app/modules/editor.js';
+import { createModel, addEntity, relate, removeEntity, unrelate } from '../app/modules/model.js';
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -209,9 +210,10 @@ equal(linkable(''), false, 'and an empty value is nothing');
     [
       ...['Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)', ''].map((method) => `Initial risk estimation | estimationMethod = ${method}`),
       ...['Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)', ''].map((method) => `Residual risk estimation | estimationMethod = ${method}`),
+      'Protective measures',
       'Risk evaluation',
     ],
-    "the initial rating, then the residual, each read by one of the three methods under the project's choice and typed under none, then the evaluation"
+    "the initial rating, then the residual, each read by one of the three methods under the project's choice and typed under none, then the measures the residual was rated against, then the evaluation"
   );
   deepEqual(
     estimation.groups.find((group) => group.name === 'Risk evaluation').attributes,
@@ -233,7 +235,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
     ok(parameters.every((definition, i) => group.attributes[2 * i] === definition && group.attributes[2 * i + 1].key === `${definition.key}Rationale`), `the rationale keyed by its parameter with Rationale appended, under ${group.when.value}`);
   }
   deepEqual(typed.map((group) => group.attributes), [[{ key: 'initialRating', name: 'Initial risk estimation', kind: 'text' }], [{ key: 'residualRating', name: 'Residual risk estimation', kind: 'text' }]], 'with no method chosen each rating is one text, named as its slot so the shared help speaks for it');
-  ok(!estimation.groups.some((group) => group.name === 'Protective measures'), 'the measures are relationships, shown by the relationship pane and the views, not by the tab');
+  ok(estimation.groups.filter((group) => group.name === 'Protective measures').length === 1 && estimation.groups.find((group) => group.name === 'Protective measures').attributes.every((definition) => definition.kind === 'entities'), 'the measures are relationships, shown by the relationship pane and the views; the tab records only which of them the residual rating was made against');
   deepEqual(groupsOf('SCN').map((group) => group.name).slice(0, 3), ['Risk', 'Initial risk estimation', 'Initial risk estimation'], 'the groups walk in render order, sub-groups after their group');
 
   const matrix = read.find((group) => group.name === 'Initial risk estimation').attributes;
@@ -308,5 +310,42 @@ equal(
   'Estimation method under ISO/TR 14121-2; Initial risk estimation and Residual risk estimation under Risk matrix.',
   'groups under different values are told in order, one clause each'
 );
+
+// --- The measures a residual rating was made against ----------------------
+
+{
+  deepEqual(
+    ATTRIBUTES.SCN.groups[0].groups.find((group) => group.name === 'Protective measures').attributes,
+    [{ key: 'measures', name: 'Protective measures', kind: 'entities', relationship: 'prm-reduces-risk-of-scn', recorded: 'Residual risk estimation', help: 'The protective measures related to the scenario when its residual risk was rated, recorded by the software.' }],
+    'the record names the relationship it reads and the group whose change writes it'
+  );
+  equal(recordOf(['PRM-002', 'PRM-001', 'PRM-002']), 'PRM-001; PRM-002', 'a record is the identifiers once each, in order, parted as a set is');
+
+  let model = createModel();
+  const scn = addEntity(model, 'SCN').entity.id;
+  const first = addEntity(model, 'PRM', { attributes: { title: 'Fixed guard' } }).entity.id;
+  const second = addEntity(model, 'PRM', { attributes: { title: 'Interlock' } }).entity.id;
+  relate(model, 'prm-reduces-risk-of-scn', first, scn);
+  relate(model, 'prm-reduces-risk-of-scn', second, scn);
+  const record = recordOf([first, second]);
+  deepEqual(
+    recordedStates(record, model, scn, 'prm-reduces-risk-of-scn').map(({ id, state }) => [id, state]),
+    [[first, 'linked'], [second, 'linked']],
+    'while the relationships hold, every recorded measure reads as linked'
+  );
+  equal(recordedStates(record, model, scn, 'prm-reduces-risk-of-scn')[0].label, 'Fixed guard', 'each with the label the measure carries');
+  unrelate(model, 'prm-reduces-risk-of-scn', second, scn);
+  deepEqual(recordedStates(record, model, scn, 'prm-reduces-risk-of-scn').map(({ state }) => state), ['linked', 'unlinked'], 'a relationship removed since leaves its measure unlinked');
+  removeEntity(model, second);
+  const states = recordedStates(record, model, scn, 'prm-reduces-risk-of-scn');
+  deepEqual(states.map(({ state }) => state), ['linked', 'deleted'], 'a measure deleted since reads as deleted');
+  equal(states[1].label, second, 'and is named by its identifier alone, its label being gone');
+  deepEqual(recordedStates('', model, scn, 'prm-reduces-risk-of-scn').map(({ id, state }) => [id, state]), [[first, 'added']], 'an empty record lists what is related now as added, which the editor shows only once the rating that writes the record exists');
+  const third = addEntity(model, 'PRM', { attributes: { title: 'Light curtain' } }).entity.id;
+  relate(model, 'prm-reduces-risk-of-scn', third, scn);
+  deepEqual(recordedStates(record, model, scn, 'prm-reduces-risk-of-scn').map(({ id, state }) => [id, state]), [[first, 'linked'], [second, 'deleted'], [third, 'added']], 'a measure related since the record stands after the recorded ones, added');
+  deepEqual(recordedStates('', model, null, 'prm-reduces-risk-of-scn'), [], 'with no subject nothing is related');
+  deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked after the residual risk estimation.', deleted: 'Deleted after the residual risk estimation.', added: 'Related after the residual risk estimation.' }, 'the three states out of step say so, naming the rating the record was written with');
+}
 
 summary('test-editor');

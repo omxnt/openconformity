@@ -707,6 +707,11 @@ body {
    whose tooltip holds the parameter and the reasoning, as the help
    glyph's holds the help. */
 .tag.reasoned { text-decoration: underline dotted; text-underline-offset: 3px; }
+/* Helper text under a field: a gate not yet passed, or a record that no longer matches. */
+.cell-note { margin: 4px 0 0; font-size: 12px; line-height: 1.33333; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
+.cell-note[hidden] { display: none; }
+/* A record of entities in an edit: read only, shown as its tags at the field's height. */
+.field-static { display: flex; align-items: center; min-height: 32px; }
 button.tag-trigger { position: relative; border: 0; font: inherit; font-size: 12px; letter-spacing: 0.32px; cursor: default; }
 button.tag-trigger:hover, button.tag-trigger:focus-visible { background: var(--hover); }
 button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
@@ -959,6 +964,7 @@ select.field-input[size] {
 .status-icon.tone-medium { color: var(--support-warning); }
 .status-icon.tone-low { color: var(--support-success); }
 .status-icon.tone-negligible { color: var(--text-second); }
+.status-icon.tone-info { color: var(--support-info); }
 
 /* The dialog: wider than a question, for the matrix and the graph. */
 .dialog:has(.rating) { max-width: 800px; }

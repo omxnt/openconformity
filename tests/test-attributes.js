@@ -9,7 +9,7 @@ import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { ESTIMATED } from '../app/modules/risk.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
-const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'drawing', 'computed', 'rationale'];
+const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'drawing', 'computed', 'rationale', 'entities'];
 /** What a table's column may be. */
 const COLUMN_KINDS = ['text', 'multiline', 'date', 'choice', 'number'];
 
@@ -108,6 +108,7 @@ function parseDocument(text) {
       if (definition.kind === 'number') [definition.min, definition.max] = list(cells[3]).map(Number);
       else if (definition.kind === 'computed') definition.method = cells[3];
       else if (definition.kind === 'rationale') definition.parameter = cells[3];
+      else if (definition.kind === 'entities') [definition.relationship, definition.recorded] = list(cells[3]);
       else if (list(cells[3]).length > 0) definition.values = list(cells[3]);
       if (helpColumn >= 0 && (cells[helpColumn] ?? '') !== '') definition.help = cells[helpColumn];
       table.push(definition);
@@ -213,6 +214,10 @@ for (const type of documentTypes) {
         else ok(!('values' in column), `${type.code}.${definition.key}.${column.key} carries no values`);
       }
       ok(!('values' in definition), `${type.code}.${definition.key} carries no values of its own`);
+    } else if (definition.kind === 'entities') {
+      ok(Object.hasOwn(RELATIONSHIP_TYPES, definition.relationship), `${type.code}.${definition.key} records the far ends of a relationship type the metamodel defines`);
+      ok(groupsOf(type.code).some((group) => group.name === definition.recorded), `${type.code}.${definition.key} is recorded when a group of the type changes: ${definition.recorded}`);
+      ok(!('values' in definition), `${type.code}.${definition.key} offers no values of its own`);
     } else if (definition.kind === 'computed') {
       ok(ESTIMATED.includes(definition.method), `${type.code}.${definition.key} is read by a method the software knows`);
       const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));

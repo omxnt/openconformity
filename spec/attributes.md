@@ -29,6 +29,7 @@ Each attribute uses one of the kinds below.
 | table | Rows of columns, the columns the rows beneath it define, each keyed by the table's key, a dot and its own, and each a text, a multiline, a date, a choice or a number; stored as one line per row with the cells parted by tabs, in column order, a cell holding a tab, a break or a quotation mark quoted as a CSV cell is, a row with every cell empty dropped |
 | computed | A value derived from the fields beside it by the method the Values column names: shown, never stored |
 | rationale | The reasoning behind the parameter of the same rating whose key the Values column names, free text of any length for why its class was chosen, shown with the parameter's value (§1.8) |
+| entities | The identifiers of entities related to the entity by the relationship type the Values column names first, as they stood when the group the column names second last changed; written by the software, never typed, stored separated by semicolons in ascending order, and shown as tags marked where a relationship has since been removed, an entity deleted, or an entity related that the record does not name (§1.8) |
 
 ### 1.4 Groups
 
@@ -334,7 +335,7 @@ The designation is the hazard's own short name — `H1` — entered by the model
 
 ### 4.2 Accident Scenario (SCN) `draft`
 
-The designation is the scenario's own short name — `S1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The scenario is rated by the risk estimation method the project chooses (§1.10), one of the three chapter 6 transcribes from ISO/TR 14121-2, so every scenario is rated the same way: each method's parameters stand in a pair of groups waiting on the project's choice (§1.4), once for the initial risk and once for the residual risk, side by side, each parameter with a rationale of its own for why its class was chosen, and with no method chosen a pair of text fields stands in their place, the ratings then typed in whatever terms the assessment uses. What a rating comes to — its level, index or score — is computed where it is shown and never stored; a typed rating is stored as typed. The protective measures reducing the scenario's risk are its relationships, shown by the relationship pane and the risk assessment view, not by the tab. The tab closes on the risk evaluation, the modeller's own judgement whether the residual risk is adequately reduced and why. On the scenario's own tab the hazardous event and the potential consequence are the modeller's own text; what the scenario arises from is not a field but its relationships, the hazards contributing to it, the actors exposed in it and the tasks giving rise to it, which the risk assessment view lays out beside it.
+The designation is the scenario's own short name — `S1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). The scenario is rated by the risk estimation method the project chooses (§1.10), one of the three chapter 6 transcribes from ISO/TR 14121-2, so every scenario is rated the same way: each method's parameters stand in a pair of groups waiting on the project's choice (§1.4), once for the initial risk and once for the residual risk, side by side, each parameter with a rationale of its own for why its class was chosen, and with no method chosen a pair of text fields stands in their place, the ratings then typed in whatever terms the assessment uses. What a rating comes to — its level, index or score — is computed where it is shown and never stored; a typed rating is stored as typed. The protective measures reducing the scenario's risk are its relationships, shown by the relationship pane and the risk assessment view. The tab records which of them stood related when the residual risk was rated, an `entities` attribute the software writes whenever the residual rating changes in an edit, so the rating and the measures it was made against are read together, and a measure since unlinked or deleted, or one related since, is marked as such where the record is shown. Until the residual risk is rated the field shows the measures related now, unmarked. The two ratings are made in any order. The tab closes on the risk evaluation, the modeller's own judgement whether the residual risk is adequately reduced and why. On the scenario's own tab the hazardous event and the potential consequence are the modeller's own text; what the scenario arises from is not a field but its relationships, the hazards contributing to it, the actors exposed in it and the tasks giving rise to it, which the risk assessment view lays out beside it.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
@@ -424,6 +425,12 @@ The designation is the scenario's own short name — `S1` — entered by the mod
 | Key | Name | Kind | Values |
 |---|---|---|---|
 | residualRating | Residual risk estimation | text |  |
+
+##### Protective measures
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| measures | Protective measures | entities | prm-reduces-risk-of-scn; Residual risk estimation | The protective measures related to the scenario when its residual risk was rated, recorded by the software. |
 
 ##### Risk evaluation
 
