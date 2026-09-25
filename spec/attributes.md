@@ -166,13 +166,23 @@ The designation is the element's own short name — `E1` — entered by the mode
 
 ### 2.2 System Actor (ACT) `draft`
 
-The designation is the actor's own short name — `A1` — entered by the modeller, and it is the reference the label composes with the title (§1.7).
+The designation is the actor's own short name — `A1` — entered by the modeller, and it is the reference the label composes with the title (§1.7). What the role assumes of the person stands on a tab of its own, since it is true per role and not per task: what their body and mind allow, who is kept out, what they were trained in, what they can do, and how well they know the machinery.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name or role of the system actor. |
 | description | Description | multiline | | Who the system actor is and how they interact with the machinery. |
+
+#### Assumptions `tab`
+
+| Key | Name | Kind | Values | Help |
+|---|---|---|---|---|
+| abilities | Abilities | multiline | | What the role assumes the person can and cannot do in body and mind, such as sight, hearing, reach and strength. |
+| restrictions | Restrictions | multiline | | Who may not take the role, by age, health or anything else. |
+| training | Training | multiline | | What the person in the role is assumed to have been trained in. |
+| competence | Competence | multiline | | What the person in the role is assumed to be able to do. |
+| familiarity | Familiarity | multiline | | How well the person is assumed to know this or similar machinery and its hazards. |
 
 #### Notes `tab`
 

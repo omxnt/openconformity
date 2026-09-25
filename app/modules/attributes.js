@@ -80,7 +80,20 @@ export const ATTRIBUTES = {
       { key: 'title', name: 'Title', kind: 'text', help: "The name or role of the system actor." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'Who the system actor is and how they interact with the machinery.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [
+      {
+        name: 'Assumptions',
+        tab: true,
+        attributes: [
+          { key: 'abilities', name: 'Abilities', kind: 'multiline', help: 'What the role assumes the person can and cannot do in body and mind, such as sight, hearing, reach and strength.' },
+          { key: 'restrictions', name: 'Restrictions', kind: 'multiline', help: 'Who may not take the role, by age, health or anything else.' },
+          { key: 'training', name: 'Training', kind: 'multiline', help: 'What the person in the role is assumed to have been trained in.' },
+          { key: 'competence', name: 'Competence', kind: 'multiline', help: 'What the person in the role is assumed to be able to do.' },
+          { key: 'familiarity', name: 'Familiarity', kind: 'multiline', help: 'How well the person is assumed to know this or similar machinery and its hazards.' },
+        ],
+      },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    ],
   },
   TSK: {
     attributes: [
