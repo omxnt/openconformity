@@ -230,6 +230,15 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return button;
   }
 
+  /** The chevron that collapses the pane to its head, or expands it again. */
+  function collapseToggle() {
+    const collapsed = store.relationshipsCollapsed();
+    const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down', () => store.setRelationshipsCollapsed(!collapsed));
+    toggle.classList.add('pane-collapse');
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    return toggle;
+  }
+
   function renderHead(picking) {
     head.textContent = '';
     head.hidden = false;
@@ -268,11 +277,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       add.disabled = !addEnabled();
       actions.push(add);
     }
-    const collapsed = store.relationshipsCollapsed();
-    const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down', () => store.setRelationshipsCollapsed(!collapsed));
-    toggle.classList.add('pane-collapse');
-    toggle.setAttribute('aria-expanded', String(!collapsed));
-    actions.push(toggle);
+    actions.push(collapseToggle());
     head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
   }
 
@@ -550,8 +555,12 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     const subjectId = picker !== null ? picker.subject : store.selection();
     const subject = nodeOf(store.model(), subjectId);
     if (!subject || subject.kind !== 'entity') {
-      head.hidden = true;
       head.textContent = '';
+      head.hidden = !store.relationshipsCollapsed();
+      if (store.relationshipsCollapsed()) {
+        head.appendChild(el('span', { className: 'toolbar-spacer' }));
+        head.appendChild(el('div', { className: 'pane-head-actions' }, [collapseToggle()]));
+      }
       listHost.hidden = false;
       graph.element.hidden = true;
       listHost.textContent = '';

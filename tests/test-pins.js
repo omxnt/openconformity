@@ -267,9 +267,9 @@ import { fakeStorage } from './helpers.js';
 
 {
   const relationships = readFile('../app/modules/relationships.js');
-  ok(relationships.includes("const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down'") && relationships.includes("toggle.setAttribute('aria-expanded', String(!collapsed))"), 'the pane head ends in the chevron that collapses it to the head, saying which way it points');
-  ok(readFile('../app/modules/shell.js').includes("relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed())") && readFile('../app/modules/shell.js').includes('columnSplitter.hidden = store.relationshipsCollapsed()'), 'the shell collapses the pane by class and hides the splitter with it');
-  ok(readFile('../app/style.css').includes('.pane-relationships.collapsed .pane-body { display: none; }') && readFile('../app/style.css').includes('.splitter[hidden] { display: none; }'), 'and the stylesheet drops the body and the splitter');
+  ok(relationships.includes("const toggle = headIcon(collapsed ? 'Expand the pane' : 'Collapse the pane', 'i-chevron-down'") && relationships.includes("toggle.setAttribute('aria-expanded', String(!collapsed))") && relationships.includes("head.hidden = !store.relationshipsCollapsed();"), 'the pane head ends in the chevron that collapses it to the head, saying which way it points, and a collapsed pane keeps the chevron even with nothing selected');
+  ok(readFile('../app/modules/shell.js').includes("relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed())") && !readFile('../app/modules/shell.js').includes('columnSplitter.hidden'), 'the shell collapses the pane by class, the splitter staying above the head to drag it open again');
+  ok(readFile('../app/style.css').includes('.pane-relationships.collapsed .pane-body { display: none; }'), 'and the stylesheet drops the body');
   ok(relationships.includes("className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' }"), 'the relationship pane switches view with the same tabs');
   ok(!relationships.includes('switcher'), 'its content switcher is gone');
   ok(relationships.includes("const views = [['graph', 'Graph'], ['list', 'List']];"), 'the graph, the default view, stands first');
@@ -418,7 +418,7 @@ import { fakeStorage } from './helpers.js';
     'the notice covers both floors: 1000 wide, and the 332 the column needs — 48 shell, 160 editor, 4 splitter, 120 relationships'
   );
   ok(page.includes('at least 1000 pixels wide and 332 pixels tall'), 'and states both numbers');
-  ok(sheet.includes('.pane-editor { flex: 1 1 auto; min-height: 160px; }'), 'the editor floor matches the 160px the splitter reserves');
+  ok(sheet.includes('.pane-editor { flex: 1 1 0; min-height: 160px; }'), 'the editor floor matches the 160px the splitter reserves, and its zero basis lets it yield down to that floor');
   ok(sheet.includes('.pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }'), 'the relationship pane shrinks to its floor before anything overflows');
 }
 
@@ -429,6 +429,9 @@ import { fakeStorage } from './helpers.js';
   const shell = readFile('../app/modules/shell.js');
   ok(sheet.includes('min-width: 266px') && sheet.includes('.pane-toolbar > .ghost-icon { flex: none; }'), 'the pane floor is the toolbar at its natural width, and its buttons never shrink below their 32px');
   ok(shell.includes('minimum: 266'), 'and the splitter stops at the same width');
+  ok(shell.includes('const COLUMN_FLOOR = 508;') && sheet.includes('min-width: 508px;') && shell.includes('limit: () => workspace.getBoundingClientRect().width - SPLITTER - COLUMN_FLOOR'), 'the navigator grows until the column reaches its own floor, the relationship head at its widest');
+  ok(shell.includes('const EDITOR_FLOOR = 160;') && shell.includes('limit: () => column.getBoundingClientRect().height - SPLITTER - EDITOR_FLOOR'), 'and the relationship pane grows until the editor reaches its floor');
+  ok(shell.includes('const past = asked < minimum / 2;') && shell.includes('if (past !== snapped) {\n          snapped = past;\n          if (past) apply(clamp(before));\n          collapse(past);\n        }') && shell.includes('collapse: (state) => store.setRelationshipsCollapsed(state),') && shell.split('collapse: (state) =>').length === 2, 'a drag past half the minimum snaps the relationship pane closed, keeping the size it had for the reopening, and back past it snaps it open; the navigator has no such point');
 }
 
 // --- The closing check: pointer targets and the menu bar keys ------------
@@ -443,7 +446,7 @@ import { fakeStorage } from './helpers.js';
   const menu = readFile('../app/modules/menu.js');
   ok(shell.includes('onArrow: (step) => neighbourMenu(button, step).openIt()'), 'the arrow keys walk the open menus along the bar');
   ok(menu.includes("event.key === 'ArrowLeft' || event.key === 'ArrowRight'"), 'which the menu forwards');
-  ok(shell.includes("addEventListener('dblclick', () => apply(clamp(preset)))"), 'a double click returns a pane to its preset: resizing needs no drag');
+  ok(shell.includes("addEventListener('dblclick', () => {\n      if (collapsed()) collapse(false);\n      apply(clamp(preset));\n    })"), 'a double click returns a pane to its preset, opening it first where it stands collapsed: resizing needs no drag');
 }
 
 // --- The closing check: text carries AA contrast in both themes ---------

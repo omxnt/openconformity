@@ -387,27 +387,51 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
    * @param {number} spec.preset  the default size a double click returns to, so resizing needs no drag
    * @param {(size: number) => void} spec.apply
    * @param {[string, string]} spec.keys  the arrow keys that shrink and grow
+   * @param {() => boolean} [spec.collapsed]  whether the pane stands collapsed, where it can
+   * @param {(collapsed: boolean) => void} [spec.collapse]  collapse the pane or expand it: a drag past half the minimum snaps it closed, and back past the same point snaps it open
    */
-  function splitter({ splitter: element, sizeAt, size, limit, minimum, preset, apply, keys }) {
+  function splitter({ splitter: element, sizeAt, size, limit, minimum, preset, apply, keys, collapsed = () => false, collapse }) {
     const clamp = (value) => Math.min(Math.max(value, minimum), Math.max(limit(), minimum));
+    let snapped = false;
+    /** The size the pane had when the drag began, kept as its size while it stands collapsed so that reopening returns to it. */
+    let before = minimum;
 
     element.addEventListener('pointerdown', (event) => {
       element.setPointerCapture(event.pointerId);
       element.classList.add('dragging');
+      snapped = collapsed();
+      if (!snapped) before = size();
     });
     element.addEventListener('pointermove', (event) => {
       if (!element.hasPointerCapture(event.pointerId)) return;
-      apply(clamp(sizeAt(event)));
+      const asked = sizeAt(event);
+      if (collapse !== undefined) {
+        const past = asked < minimum / 2;
+        if (past !== snapped) {
+          snapped = past;
+          if (past) apply(clamp(before));
+          collapse(past);
+        }
+        if (past) return;
+      }
+      apply(clamp(asked));
     });
     element.addEventListener('pointerup', (event) => {
       element.releasePointerCapture(event.pointerId);
       element.classList.remove('dragging');
     });
-    element.addEventListener('dblclick', () => apply(clamp(preset)));
+    element.addEventListener('dblclick', () => {
+      if (collapsed()) collapse(false);
+      apply(clamp(preset));
+    });
     element.addEventListener('keydown', (event) => {
       const step = event.key === keys[0] ? -16 : event.key === keys[1] ? 16 : 0;
       if (step === 0) return;
       event.preventDefault();
+      if (collapsed()) {
+        if (step > 0) collapse(false);
+        return;
+      }
       apply(clamp(size() + step));
     });
   }
@@ -433,11 +457,18 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     }
   }
 
+  /** The editor's floor: its head, its tab bar and one row of fields. */
+  const EDITOR_FLOOR = 160;
+  /** The column's floor: the relationship pane's head at its widest, the two tabs, the filter, Done and Cancel while picking, and the chevron. */
+  const COLUMN_FLOOR = 508;
+  /** The splitters' own width. */
+  const SPLITTER = 4;
+
   splitter({
     splitter: document.getElementById('splitter-main'),
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
-    limit: () => workspace.getBoundingClientRect().width * 0.6,
+    limit: () => workspace.getBoundingClientRect().width - SPLITTER - COLUMN_FLOOR,
     minimum: 266,
     preset: 320,
     apply: (width) => {
@@ -451,8 +482,10 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     splitter: columnSplitter,
     sizeAt: (event) => column.getBoundingClientRect().bottom - event.clientY,
     size: () => relationshipsPane.getBoundingClientRect().height,
-    limit: () => column.getBoundingClientRect().height - 160,
+    limit: () => column.getBoundingClientRect().height - SPLITTER - EDITOR_FLOOR,
     minimum: 120,
+    collapsed: () => store.relationshipsCollapsed(),
+    collapse: (state) => store.setRelationshipsCollapsed(state),
     preset: 280,
     apply: (height) => {
       column.style.setProperty('--relationships-height', `${Math.round(height)}px`);
@@ -481,7 +514,6 @@ export function createShell({ store, overlay, actions = [], toast = () => {} }) 
     syncShellHistory();
     unsavedButton.hidden = !store.dirty();
     relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed());
-    columnSplitter.hidden = store.relationshipsCollapsed();
     document.title = titleFor(store.hasProject(), store.model().name);
 
     if (wasFailingToPersist && !store.persistFailed()) {

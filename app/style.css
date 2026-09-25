@@ -364,15 +364,14 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 508px;  /* the relationship pane's head at its widest: the two tabs, the filter, Done and Cancel while picking, and the chevron */
 }
 
-.pane-editor { flex: 1 1 auto; min-height: 160px; }  /* the splitter reserves the same 160px */
+.pane-editor { flex: 1 1 0; min-height: 160px; }  /* the splitter reserves the same 160px; a zero basis lets the editor yield down to it */
 .pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }
 /* Collapsed, the pane is its head alone: the body goes and the editor takes the height. */
 .pane-relationships.collapsed { flex: none; min-height: 0; }
 .pane-relationships.collapsed .pane-body { display: none; }
-.splitter[hidden] { display: none; }
 
 /* A pane header is a working surface: the selection it acts for on the
    left, the actions on the right, at 32px on $layer-01 so its bottom rule
