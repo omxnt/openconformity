@@ -130,16 +130,6 @@ No framework, no build step, no package manager, no backend, no accounts. Deploy
 
 ---
 
-### D-011 Privacy by design
-
-`2026-07-15` `architecture`
-
-No server contact, no tracking, no analytics, no data collection. All processing happens in the user's browser. No third-party assets are loaded at runtime, including fonts.
-
-> *A tool for a manufacturer's confidential product data must not transmit it. Running entirely in the browser makes leakage impossible by construction rather than by promise.*
-
----
-
 ### D-012 Single local file
 
 `2026-07-15` `architecture`
@@ -370,27 +360,6 @@ Requirements language is reserved for `requirements.md`. No other document uses 
 
 ---
 
-### D-049 Repository layout
-
-`2026-08-11` `repository`
-
-The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and work in progress is kept in a sandbox outside the deployables.
-
-    app/            the published software
-    site/           the published project site
-    docs/           the project documentation
-    schema/         the data model schema files
-    sources/        the sources in editable formats
-    sandbox/        the non-published work-in-progress
-      app/          iterations of the software
-      site/         iterations of the project site
-      demo/         frozen demonstration prototype
-      poc/          frozen original proof of concept
-
-> *Separate deployments (D-034) mean each served directory must hold everything it serves. The sandbox mirrors the deployables for work in progress and keeps the frozen versions the project has passed through, so each remains readable beside the work that replaced it. Keeping the sandbox outside the deployable directories is what stops unfinished work being published. Supersedes D-037.*
-
----
-
 ### D-050 Document set
 
 `2026-08-11` `documentation`
@@ -459,6 +428,251 @@ Content imported from a library is copied without any record of where it came fr
 
 > *Settled with the first project file schema. Extends D-015 and D-016: imported content arrives as ordinary entities, indistinguishable from those created in place. A closed project stands on what it states, and a provenance field would be a reference back to a library the project must not depend on (D-015). Ruling it out now keeps the question from returning as a schema change (D-052).*
 
+---
+
+### D-057 Deliberate edit mode
+
+`2026-08-05` `product`
+
+The editor shows an entity read-only until the user chooses to edit it. Changes apply on Save and are discarded on Cancel, and nothing typed reaches the model before then.
+
+> *Landing on an entity and touching the keyboard must not alter the model. Undo exists, but a gate before the change and a way back after it are both wanted, and neither replaces the other. A direct-editing interface built during the design system rethink was reversed the same day for this reason. A pattern from the design system does not override it. Specified as F-MOD-004.*
+
+---
+
+### D-058 Rebuilt from a plan
+
+`2026-08-18` `architecture` `repository`
+
+The software was rebuilt from scratch in the sandbox from a written plan, against the requirements, the metamodel and the schema. The demonstration prototype was frozen as a reference and never used as a seed. The plan fixed the module inventory, the build order and a vertical slice that proved the foundation before anything was added to it, and it was closed by an audit of the finished build.
+
+> *D-021 already ruled the prototypes out as a basis, since they were built by exploration and would have handed on decisions nobody made. A plan written first meant each module had one job and one owner before any code existed, and the vertical slice showed the foundation carried weight before the panes were built on it. The audit that closed the build found the six load-bearing boundaries intact, the single writer, the store as the only owner of state, the one action list, the one overlay owner, the flows as the only places that ask a question, and presentation kept out of the file format. Two things were left unbuilt on purpose, derived indexes over the model and a store-held pristine state for a fresh creation, each with the trigger that would earn it. Unused generality costs every line that carries it.*
+
+---
+
+### D-059 One model, snapshots and a saved pointer
+
+`2026-08-18` `architecture`
+
+The model is one in-memory collection of nodes carrying a kind, split into the file's arrays only when written and read. History holds snapshots of the model alone. The selection is store state, repaired after an undo to the nearest surviving ancestor. The identifier counters never move on undo or redo. Whether the project is saved derives from a pointer into history, and the pointer is a sequence number.
+
+> *One collection with a kind field means no pane tells a folder from an entity by which map it sits in, and siblings interleave in one order as the schema defines (D-053). Snapshots of the model alone keep the selection out of history, so stepping back never moves the user somewhere they did not go. Counters that roll back would reissue a number an export may already reference (D-051), so an undone creation leaves a hole instead. A sequence-based pointer survives truncation and the eviction of old entries, and deriving dirty from identity means a save, an undo and a redo agree about it without a flag to keep in step. Across sessions the derived boolean travels with the cached project, and a dirty restore seeds the pointer unreachable so no undo can pretend to reach a saved state.*
+
+---
+
+### D-060 Two gates and a set-aside cache
+
+`2026-08-18` `architecture`
+
+A file opens through two gates in order, the validator against the version the file records and then a replay through the model against the current metamodel. The checks run newer, invalid, older. The loader carries attribute content as written and seeds nothing. The cached project the browser keeps passes the same gates but is a cache. One that fails to load is set aside rather than deleted, and the software states that the previous session could not be restored.
+
+> *The validator judges a file as its producer wrote it, which is what lets an older file be migrated rather than refused (F-PER-004 to F-PER-006). The replay is a net that should never fire. Seeding on load would give content a meaning its author did not state, which F-PER-007 forbids for migration and which holds for any load. The cache can hold the only copy of unsaved work, and persisting on change promises that a crash loses nothing (F-SES-002), so a cache that fails is kept aside where it can be recovered, and an empty workspace is never left unexplained.*
+
+---
+
+### D-061 Working state and session state
+
+`2026-08-18` `architecture`
+
+The software keeps the open project, the selection, the tree's expansion and the theme between sessions. It keeps neither scroll positions nor an unconfirmed edit. Expansion and the like are a second class of state beside the model, persisted on change, never entering history and never marking the project unsaved. The theme is kept beside the project rather than inside it, and the two themes are Carbon's White and Gray 100, the default following the system preference.
+
+> *The user returns to what they left (F-SES-001). A draft that survived a restart would land in the model without the confirmation F-MOD-004 requires, so drafts do not survive. Session state in history would make undo collapse branches, and session state that dirties would make a glance at the tree an unsaved change. The theme beside the project means replacing the project does not reset it. The themes are a build choice under G-SYS-001, recorded here because no other artefact names them.*
+
+---
+
+### D-062 One overlay, one action list
+
+`2026-08-18` `architecture` `product`
+
+Menus, panels and dialogs share one overlay with one owner. Menus are exclusive, dialogs stack over panels, a commit closes menus and never dialogs, and every entry returns focus to what opened it. Every action the software offers stands in one list, from which the menu bar, the tree toolbar and the context menu are built. Toolbars stay inside their panes and the shell bar carries only what belongs to the application.
+
+> *Two menus built from two lists drift the moment one is changed, and the prototype's central script grew from exactly that. One list means the menus cannot disagree with the toolbar, and a test can prove every button reachable from the menu bar. One overlay owner means Escape and focus always have one answer. Toolbars beside their objects keep an action where the thing it acts on is, and the shell bar stays the application's, with the unsaved signal, undo and redo, the metamodel and the theme.*
+
+---
+
+### D-063 Assisted development
+
+`2026-08-18` `repository`
+
+Changes are proposed by an assistant and reviewed, committed and pushed by the maintainer, who runs every git command. A commit message is one subject line in the maintainer's voice and carries no trailer. Rulings on how the code is written are pinned by tests that read the source, kept apart from the tests that exercise behaviour.
+
+> *A solo maintainer working with an assistant needs one place where responsibility is unambiguous, and that is the commit. Nothing enters the repository unseen, and a proposed command is a proposal until the maintainer runs it. A pin that fails says a recorded ruling's expression moved, not that the software broke, which keeps the two kinds of failure apart when either happens. The working rules live in the repository's instructions file, where the assistant reads them at the start of every session.*
+
+---
+
+### D-064 Presentation state scoped to the browser session
+
+`2026-08-19` `architecture`
+
+Choices that are about the presentation and not the project, the relationship view, the splitter layout, the tab chosen per entity type and, later, a standing consent, survive a reload within a browser session and never a new session. They are kept in session storage and never in the project cache or the file.
+
+> *A reload should return the user to what they were looking at, but a fresh session should open on the defaults, and a file should carry nothing that is about one person's screen. Session storage has exactly that lifetime. The boundary is pinned so that presentation state cannot creep into the project.*
+
+---
+
+### D-065 Picking in place
+
+`2026-08-18` `product` `architecture`
+
+Relationships are added by picking in the relationship pane itself. A pick lands at once as a provisional row or edge, an ambiguity between relationship forms is settled inline, existing relationships recede while picking, and Done commits the picks as one step. Picker mode is store state holding the subject, the picks and the chosen forms, everything else being re-derived on every render, and the subject stays pinned while the selection moves.
+
+> *A side panel for picking was built and died. Picks that appear where the relationships already show need no second place to look, and additive marking, receded rows and a leading check, reads as adding rather than editing. Re-deriving the options on every render keeps the mode alive across commits, and a change that removes a pick clears it while one that removes the subject closes the workflow.*
+
+---
+
+### D-066 Relationships by direction, in one vocabulary
+
+`2026-08-19` `product`
+
+The relationship list shows two tables, Outgoing and Incoming, under those headings, each row reading as a sentence from the selected entity's point of view. The graph is the pane's default view. Wherever else the software offers a relationship from the selected entity, such as the menu that creates a related entity, it groups by the same two words.
+
+> *One table with a direction column, two tables, stacked sections and a column were each tried and lived with. Two tables under the two words carried the day because a reader wants what points out and what points in as two lists, and the sentence order, subject first for outgoing and subject last for incoming, says the direction without a badge. The menu that creates a related entity was grouped the same way on 2026-09-25, after invented headings for the same idea, and a phrase that folded the direction into the row, were rejected in favour of one vocabulary for one concept across the application.*
+
+---
+
+### D-067 Graph routing and folding
+
+`2026-09-24` `product` `graphical`
+
+Edges in the neighbourhood graph route as doglegs, a horizontal stub at each end and one slant across a shared band, labels standing upright on the horizontal. Each side of the subject is grouped by relationship type. The first entity of a group is always drawn, and a group holding more shows a line beneath it offering the rest, opened per subject and forgotten when the selection moves.
+
+> *Right-angle routes were built first, on 2026-08-18, and read badly, arrows arriving oddly and labels colliding. Doglegs, tried the same day, keep every label on one horizontal and never cross. A hundred-node neighbourhood must stay readable, and the reader looks for a kind of thing, so the fold is by relationship type. A card per group and a fixed budget of boxes were both tried and made small neighbourhoods worse, and remembering what was opened across entities confused more than it helped, so the small case looks exactly as before and the open state lives with the drawing. Extends D-009.*
+
+---
+
+### D-068 Risk estimation by the report's methods
+
+`2026-09-23` `product` `legal`
+
+An accident scenario is rated by one of three methods the project chooses in its settings, the risk matrix, the risk graph and the numerical scoring of ISO/TR 14121-2:2012, each value naming its method, its source and its clause, or by a typed rating. Each parameter is chosen from its classes, with a rationale beside it shown through its tag. The method's figure is shown read-only with the reached cell marked, and the outcome keeps the report's own notation. Only the codes and class names of a standard appear, never its descriptions.
+
+> *The three methods were transcribed and checked cell by cell against the report, which is the only way a method may ship. Its hybrid method was dropped as the one needing the most audit, and a matrix from another source was tried and rolled back the same day as a thing shoehorned where it did not belong. The report allocates a class per parameter and its graph is only the lookup, so the parameters are chosen discretely and the figure is never a picker, which merged branches would have made ambiguous. The graph is drawn merged as the report merges it, since a fully expanded tree showed granularity the method does not have and a single index column cannot be reached without crossings. Where the report's own annex disagrees with its figures, the software follows the figures. The report never abbreviates the risk level, so the software does not either. Codes and class names alone keep the software on the right side of C-PRJ-005.*
+
+---
+
+### D-069 Views derived, never stored
+
+`2026-09-24` `product`
+
+A view is derived from the model where it is shown and is never stored. It states what the model holds, and every verdict in it is the user's own field. There are six views, the risk assessment built first and the others to follow, opened from the View menu, which lists the views and nothing else, and each exports from its own head once the formats are built, print to PDF, CSV per tab and Markdown per view.
+
+> *Views are what F-VIE-001 promises, artefacts generated from the model rather than authored beside it. Storing one would make two places state the same thing. The no-report stance of D-004 holds in the views as everywhere, so a view never concludes. The View menu had also carried the relationship and theme switches as radio pairs, which the pane's tabs and the bar's button already show, so the menu was cut to the views. An Export menu in the shell would today be a menu with one line opening the same page, and earns a place only when something that is not a view needs exporting.*
+
+---
+
+### D-070 Verification results as facts
+
+`2026-09-24` `product`
+
+A system verification carries a Result tab with a table of runs, each with its date, who ran it, Passed or Failed, and remarks, one row per run so a failed run stays beside a later pass. A table and a date are attribute kinds of their own, a table stored as text rows within the same attribute map.
+
+> *An earlier stance kept results out of the tool as belonging to the user's own quality system. A result is a fact about an event, not a conclusion about conformity, so recording it does not touch D-004, and a verification without its outcome is half a record. Rows rather than one field keep the history of runs, which is what an auditor asks for. Storing the table as text needs no schema change, by the precedent that a set is a joined string. Whether a scenario also carries a verdict remains open (U-010).*
+
+---
+
+### D-071 Privacy by design, with one consented exception
+
+`2026-09-24` `architecture`
+
+No server contact, no tracking, no analytics, no data collection. All processing happens in the user's browser, and no third-party asset is loaded at runtime. The one exception is a function the user invokes that names, before it runs, the service it reaches and the data it hands over, and hands over that data and nothing else, after the user's consent. Consent is asked on every invocation unless the user chooses, for the browser session only, not to be asked again, and a fetch from the software's own host, such as a project template, is not an exception since it carries nothing of the user's.
+
+> *A tool for a manufacturer's confidential product data must not transmit it, and running in the browser makes that impossible by construction rather than by promise. That stance stands. The external diagram editor (D-073) is the one thing worth an exception, and the exception is built so that it cannot widen. The function states what and where, the requirements bind it to that (N-OPS-002, N-PRV-002, N-PRV-005 to N-PRV-007), and the consent is the user's own act with the facts in front of them each time. A choice kept per session and never in a file cannot enable the function on another device or outlive the tab. Supersedes D-011.*
+
+---
+
+### D-072 Diagrams as SVG with the model inside
+
+`2026-09-24` `product` `architecture`
+
+A system element, a protective measure and a safety function each carry one diagram on a tab named Diagram. The diagram is one string attribute holding the SVG the editor returned, with the editor's own model inside it, stored as returned and never re-serialised, and holding one page. It is shown only as an image from a data URL, and it passes the software's own check, written as its own parser, before it enters the draft and again before it is shown. Nothing enters or leaves as a file. The editor is the only way in and the browser's own saving of the image the way out. A diagram may hold up to 512 kilobytes and a picture placed in it up to 128.
+
+> *One string fits the attribute map with no schema change, and an older build carries it untouched (F-PER-010). The editor's model inside the SVG is what lets the next edit open it again, and one page is what the picture can show. An image element grants markup no script, no document and no network (N-SEC-003), and the check refuses what would let markup act rather than draw, script, handlers, embedded documents, links to code and references outside the document (F-DRW-001). Import and export were built and then removed, since a file is the one path by which arbitrary content would enter, and the editor's own Edit Diagram gives the model to anyone who wants it as text. A data URL keeps the picture on an opaque origin when opened in a new tab, where a blob URL would give it the software's own. The tab was named for the artefact after names by type, Layout, Concept and Architecture, were tried and found to tell the user what to draw. The picture cap keeps a picture, stored twice as data, under the diagram cap. Specified as F-DRW-001 and F-DRW-002.*
+
+---
+
+### D-073 draw.io embed on consent
+
+`2026-09-24` `architecture` `product`
+
+The diagram editor is draw.io's embed at embed.diagrams.net, hosted in a frame on its own origin with permission for scripts and that origin only, loaded only when the user opens it after consent, and handed the one diagram being edited. Messages from the frame are accepted only from it and its origin, as data, and what it returns is checked as any diagram is and refused with the editor still open when it fails. The editor is configured through its documented hook to keep no draft at its origin, to hide what needs a download or a window and what would publish or share, and to show its page bar only when a diagram has slipped into more than one page.
+
+> *The alternatives were weighed and recorded. A self-hosted copy would put tens of megabytes of unauditable code into the deployment and make the maintainer the one shipping its fixes. A built-in editor would be thousands of lines for a poor one. The file round trip through draw.io desktop needed no exception at all and was the assessment's own recommendation, and the maintainer ruled that an editor in the tool is worth a by-consent exception to D-011, provided the exception is bounded as D-071 states. The sandbox is what makes the frame safe, and it is safe only because the editor is on another origin, where the same permissions on the software's own origin would let it read the project (N-SEC-004). The frame cannot download or open a window, so the editor's own export and file items are hidden rather than left broken, while its Edit Diagram stays as the way a model travels as text. The page bar follows draw.io's own setting rather than a parameter, so it is hidden by style and shown again the moment a second page exists, with the refusal at Apply as the guard. A request for persistent storage and a rule restricting the editor's export were each tried and dropped, the first because it prompts the user for a benefit the file already gives, the second because it took Edit Diagram away. Specified as C-TEC-008, F-DRW-003, N-SEC-004 and N-OPS-003. Documented in the editor's embed and configuration pages [1] [2].*
+
+---
+
+### D-074 Content security policy on the page
+
+`2026-09-24` `architecture`
+
+The software's page declares a content security policy allowing its own scripts and styles, images from itself or from data, no connection, one frame origin and that the editor's, no object, no base and no form. The theme bootstrap moved from an inline script into a file for it, and the policy is pinned.
+
+> *A policy the browser enforces is a guarantee a promise is not. It turns the stack's stance of D-010 into something a reviewer can read on the page, and it means a hostile drawing or a mistaken change cannot reach out even if the check missed it. The single frame origin is the whole surface D-073 opens, stated where the browser reads it.*
+
+---
+
+### D-075 Project kept in IndexedDB
+
+`2026-09-24` `architecture`
+
+The open project is kept between sessions in the browser's IndexedDB, written as an object in one transaction after every change, with only the newest state written when changes come faster than writes. The theme stays in web storage, where the bootstrap reads it before the first paint, and presentation state stays in session storage (D-064). A project the previous generation kept in web storage is moved over once. The software warns when a write is refused and when the origin's storage passes eight tenths of its quota, and it does not ask the browser for persistent storage.
+
+> *Web storage caps an origin at a few megabytes, and a project with many diagrams outgrows it, after which the software could only warn. IndexedDB's quota is a share of the disk, and its transactions leave the previous version intact if a write fails midway. The same gesture clears both storages, so nothing changes about how a borrowed machine is left clean (F-SES-003). Persistent storage was requested once and removed the same day, since Firefox asks the user a question they cannot judge, for protection against eviction that the file as the durable record already covers. Draw.io keeps its drafts the same way, its settings in web storage, which is the usual split. Extends D-012 and D-061.*
+
+---
+
+### D-076 Clear browser data
+
+`2026-09-24` `product` `architecture`
+
+The File menu ends with an action that clears everything the software keeps in the browser, the project, its set-aside copy, the theme and the session state, after a confirmation that says what is lost, and shows the landing.
+
+> *A borrowed or shared machine must be left with nothing. The browser's own site-data clearing does the same but from outside the software and only for those who know that clearing history alone does not reach site data. An action in the software makes the wipe explicit and complete, and a saved file is the user's and is not touched. Specified as F-SES-003.*
+
+---
+
+### D-077 The save surface
+
+`2026-09-24` `product`
+
+The bar shows one button, Unsaved changes, only while the project differs from its last save to file, and it saves. The File menu offers Save to file with the platform's save shortcut, and saving always asks for the project name first, since every save is a download and there is no silent target to write back to. The software shows no status for its own keeping of the project in the browser.
+
+> *A button that appears when there is something to save and vanishes when there is not says the state by its presence, the way draw.io does it. "Save to file" names the one thing the user does and where it goes, now that the browser keeps the project by itself on every change, and a status for that automatic keeping would always read saved and say nothing, while its failure already raises a warning. The button had been visible at all times through a style rule defeating its hidden attribute, which is why it read as a duplicate of the menu entry.*
+
+---
+
+### D-078 Sandbox by generation
+
+`2026-09-24` `repository`
+
+The repository is organised by kind, and the sandbox groups each deployable's generations under it. The generation in development mirrors the published layout, with the software, its tests and its notes side by side, and a generation that is passed is frozen in place.
+
+    app/            the published software
+    site/           the published project site
+    docs/           the project documentation
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    sandbox/        the non-published work-in-progress
+      app/          generations of the software
+        poc/        frozen original proof of concept
+        demo/       frozen demonstration prototype
+        beta/       the generation in development
+          app/      the software, as app/ will be when it is published
+          tests/    headless tests for the software
+          notes/    working notes and the draft documents of the generation
+      site/         iterations of the project site
+
+> *The software and the site are two deployables, so their generations belong under each rather than beside each other. Grouping by generation shows at a glance which is frozen and which is live, and a generation folder that mirrors the root means promotion is a copy over the published directory with nothing renamed. The notes and draft documents of a generation live with it, since they are the record of how that generation was made, and a draft is moved by hand to the documentation when it lands. Supersedes D-049.*
+
+---
+
+### D-079 Terms and plain prose in the requirements
+
+`2026-09-24` `documentation`
+
+The requirements open with a table of the terms they use, and every statement uses them. A requirement statement never names another requirement by its identifier, and only a rationale may. The requirements are written in plain sentences, without colons, semicolons or dashes as joints, except in quoted material and in a designation, and new entries in this log follow the same rule.
+
+> *A term defined once and used everywhere cannot drift, and a statement that names another requirement binds two things a reader must unpick to verify either. Punctuation that welds clauses together hides how many claims a sentence makes, and short sentences with one claim each are what a reader can check. The reviewed requirements were rewritten to this rule in one pass.*
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
@@ -473,9 +687,68 @@ How a library works and what it holds: which item types are reusable across proj
 
 ---
 
+### U-010 Scenario verdict
+
+`2026-09-24` `product`
+
+Whether an accident scenario carries a field stating that its residual risk is acceptable or not, as the user's own judgment beside the rating.
+
+> *Affects the scenario and the risk assessment view. A verdict is the user's field, never the software's conclusion, as D-069 has it for every view, but whether the model should hold it at all is undecided.*
+
+---
+
+### U-011 User-defined risk method
+
+`2026-09-23` `product`
+
+Whether the project may define its own risk estimation method beside the three of D-068, named in the settings with its parameters and its rating as free text, with no function behind it.
+
+> *Affects the scenario's rating and the views. Parked with a sketch. It would let a user follow a method the software does not carry without typing the outcome alone, at the cost of a method the software cannot check.*
+
+---
+
+### U-012 Rating in the views
+
+`2026-09-23` `product`
+
+Whether the views rate in place, or ratings are made only in the editor as today.
+
+> *Affects the risk assessment view. Left to dogfooding, since nothing in the views depends on it.*
+
 ## 4. Superseded
 
 Entries replaced by a later decision, kept as a record of what was chosen and when.
+
+---
+
+### D-011 Privacy by design
+
+`2026-07-15` `architecture` `superseded by D-071`
+
+No server contact, no tracking, no analytics, no data collection. All processing happens in the user's browser. No third-party assets are loaded at runtime, including fonts.
+
+> *A tool for a manufacturer's confidential product data must not transmit it. Running entirely in the browser makes leakage impossible by construction rather than by promise.*
+
+---
+
+### D-049 Repository layout
+
+`2026-08-11` `repository` `superseded by D-078`
+
+The repository is organised by kind. Each deployable directory is self-contained, the editable design sources sit apart from the artefacts they export, and work in progress is kept in a sandbox outside the deployables.
+
+    app/            the published software
+    site/           the published project site
+    docs/           the project documentation
+    schema/         the data model schema files
+    sources/        the sources in editable formats
+    sandbox/        the non-published work-in-progress
+      app/          iterations of the software
+      site/         iterations of the project site
+      demo/         frozen demonstration prototype
+      poc/          frozen original proof of concept
+
+> *Separate deployments (D-034) mean each served directory must hold everything it serves. The sandbox mirrors the deployables for work in progress and keeps the frozen versions the project has passed through, so each remains readable beside the work that replaced it. Keeping the sandbox outside the deployable directories is what stops unfinished work being published. Supersedes D-037.*
 
 ---
 
@@ -674,4 +947,5 @@ Use cases complement the requirements in a document of their own, `use-cases.md`
 
 | No. | Reference | Link |
 |---|---|---|
-| *[1]* | *Reference*| *Link* |
+| [1] | draw.io, Embed mode | https://www.drawio.com/doc/faq/embed-mode |
+| [2] | draw.io, Configure the diagram editor | https://www.drawio.com/doc/faq/configure-diagram-editor |
