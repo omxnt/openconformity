@@ -18,6 +18,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
+import { staleText, recordOf, recordedStates, recordWritten, changedText } from './records.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 import { editDrawing } from './drawing-editor.js';
 
@@ -114,38 +115,6 @@ export function removalText(entries) {
   for (const { name, value } of entries) byValue.set(value, [...(byValue.get(value) ?? []), name]);
   const listed = (names) => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`);
   return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join('; ')}.`;
-}
-
-/** What an entry out of step with the record says beneath its label, by state, given the name of the group that wrote the record. */
-export const staleText = (recorded) => ({ unlinked: `Unlinked after the ${recorded.toLowerCase()}.`, deleted: `Deleted after the ${recorded.toLowerCase()}.`, added: `Related after the ${recorded.toLowerCase()}.` });
-
-/** A record of entities as it is stored: the identifiers in ascending order, parted by semicolons. */
-export const recordOf = (ids) => [...new Set(ids)].sort().join('; ');
-
-/**
- * The state of each entity a record names, against the model as it
- * stands: linked while the relationship holds, unlinked where the
- * entity stands but the relationship is gone, deleted where the entity
- * is gone; then, after them, each entity the relationship joins now
- * that the record does not name, added. Each with the label it has, or
- * its identifier where it is gone.
- * @param {string|undefined} record
- * @param {import('./model.js').Model} model
- * @param {string|null} subjectId
- * @param {string} relationship  a relationship type id
- * @returns {Array<{ id: string, label: string, state: 'linked'|'unlinked'|'deleted'|'added' }>}
- */
-export function recordedStates(record, model, subjectId, relationship) {
-  const ids = String(record ?? '').split(';').map((held) => held.trim()).filter(Boolean);
-  const linked = new Set(subjectId === null ? [] : relatedIds(model, subjectId, relationship));
-  const named = new Set(ids);
-  const recorded = ids.map((id) => {
-    const entity = nodeOf(model, id);
-    const state = !entity ? 'deleted' : linked.has(id) ? 'linked' : 'unlinked';
-    return { id, label: entity ? entityLabel(entity) : id, state };
-  });
-  const added = [...linked].filter((id) => !named.has(id)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'added' }));
-  return [...recorded, ...added];
 }
 
 export function firstTabName(code) {
@@ -323,12 +292,9 @@ export function createEditor({
     if (!changed || isRationale(changed) || isOutcome(changed)) return;
     const group = groupOfKey.get(key);
     const draft = fieldValues();
-    const rated = groupsOf(current?.type ?? '')
-      .filter((held) => held.name === group)
-      .some((held) => held.attributes.some((definition) => !isOutcome(definition) && !isRationale(definition) && definition.kind !== 'entities' && (draft[definition.key] ?? '').trim() !== ''));
     for (const { definition, input } of records) {
       if (definition.recorded !== group) continue;
-      input.value = rated ? recordOf(relatedIds(store.model(), editingId, definition.relationship)) : '';
+      input.value = recordWritten(current?.type ?? '', definition, draft) ? recordOf(relatedIds(store.model(), editingId, definition.relationship)) : '';
     }
   }
 
@@ -403,10 +369,10 @@ export function createEditor({
    * @param {Object<string, string>} values
    * @param {boolean} editing
    */
-  function fieldCell(definition, values, editing) {
+  function fieldCell(definition, values, editing, alone = false) {
     const value = values[definition.key];
     const held = editing ? control(definition, value ?? '', values) : valueNode(definition, value, values);
-    return el('div', { className: takesRow(definition) ? 'cell tall' : 'cell' }, [nameNode(definition, editing), held]);
+    return el('div', { className: takesRow(definition, alone) ? 'cell tall' : 'cell' }, [nameNode(definition, editing), held]);
   }
 
   /**
@@ -457,9 +423,9 @@ export function createEditor({
     return el('div', { className: 'cell-name' }, [text, ...(help ? [helpTip(definition.key, definition.name, help)] : [])]);
   }
 
-  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table, a drawing. */
-  const takesRow = (definition) =>
-    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing';
+  /** Whether an attribute takes a row to itself: the title, a multiline, a hyperlink, a set, a table, a drawing, and a record standing alone in its group. */
+  const takesRow = (definition, alone = false) =>
+    definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set' || definition.kind === 'table' || definition.kind === 'drawing' || (definition.kind === 'entities' && alone);
 
   /**
    * Carbon's icon tooltip on a name: the information glyph as a small
@@ -548,9 +514,7 @@ export function createEditor({
    * @param {string|null} [tipKey]
    */
   function entitiesNode(definition, value, values, tipKey = null) {
-    const written = groupsOf(current?.type ?? '')
-      .filter((group) => group.name === definition.recorded)
-      .some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && held.kind !== 'entities' && (values[held.key] ?? '').trim() !== ''));
+    const written = recordWritten(current?.type ?? '', definition, values);
     const model = store.model();
     const subject = current?.id ?? null;
     const states = written
@@ -571,7 +535,7 @@ export function createEditor({
     );
     const held = el('div', { className: 'cell-value tags' }, tags);
     if (!states.some(({ state }) => state !== 'linked')) return held;
-    return el('div', {}, [held, el('p', { className: 'cell-note', text: `The ${definition.name.toLowerCase()} have changed since the ${definition.recorded.toLowerCase()}.` })]);
+    return el('div', {}, [held, el('p', { className: 'cell-note', text: changedText(definition) })]);
   }
 
   function tableOf(definition, rows, trailing = null) {
@@ -711,7 +675,7 @@ export function createEditor({
     const [first] = variants;
     const leader = leaderOf(code, first.when.key);
     const text = `No ${(leader?.name ?? first.when.key).toLowerCase()} chosen`;
-    const tall = variants.some((variant) => !isRating(variant) && variant.attributes.length === 1 && takesRow(variant.attributes[0]));
+    const tall = variants.some((variant) => !isRating(variant) && variant.attributes.length === 1 && takesRow(variant.attributes[0], true));
     const cell = el('div', { className: tall ? 'cell tall' : 'cell' }, [
       groupNameNode(first.name, `slot-${first.when.key}-${first.name.toLowerCase().replaceAll(' ', '-')}`, null, SHARED_HELP[first.name] ?? (first.attributes.length === 1 ? first.attributes[0].help : undefined)),
       editing
@@ -759,7 +723,7 @@ export function createEditor({
         }
       };
       for (const definition of group.attributes) {
-        target.appendChild(fieldCell(definition, values, editing));
+        target.appendChild(fieldCell(definition, values, editing, group.attributes.length === 1));
         placeAfter(definition.key);
       }
       placeAfter(null);

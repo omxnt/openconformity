@@ -675,6 +675,16 @@ The proof of concept and the demonstration prototype are kept as the tags `poc` 
 
 > *The branches already carry when a change goes live (D-018), and a tag carries what a frozen folder carried, the whole repository as it stood, without two megabytes of dead code in every checkout and every search. The demo folder had drifted from what was published and needed a freeze commit before it could be trusted, which a tag cannot do. The published folders are named for their hosts, and docs on GitHub means the documentation of a product, so that folder waits for docs.openconformity.org and the specification takes a name that says what it is. With the generations gone, grouping notes by deployable grouped nothing. Supersedes D-080.*
 
+---
+
+### D-083 Checks in a status bar
+
+`2026-09-25` `product`
+
+The records that no longer match are summarised in a status bar under the workspace and listed in a drawer that slides up from it, one row per entity, a row opening the entity on the tab its record stands on. The status bar also says the model's size, and stands only while a project is open.
+
+> *A count in a corner says that something wants a look but not what, and a bottom panel that resizes the panes adds a fourth region to a layout balanced on three floors, for a list that is usually empty. A status bar is the one place for what is true right now, and the checks are its first tenant. The drawer leaves the workspace as it is, so the loop is list, entity, list without leaving it. The list is derived wherever it is shown and never stored, and it says what the software knows without judging, which entities and what changed (F-VIE-002). A printable view can follow when the list is worth printing.*
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

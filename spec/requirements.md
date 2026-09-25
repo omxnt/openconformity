@@ -609,6 +609,16 @@ The software shall generate exportable views of the model.
 
 > *Views are the output of the modelling work, artefacts such as a hazard list or a requirement specification, generated from the model rather than authored beside it. Which views exist and what each contains is specified as the views are built. This requirement states the capability they decompose from.*
 
+---
+
+#### F-VIE-002 Checks
+
+`ubiquitous` `draft`
+
+The software shall list the entities whose recorded relationships no longer match the model, and open each from the list.
+
+> *A record is the ground a judgement was made on, the measures a residual risk was rated against or a hazard's elimination was decided against. When one of them is since unlinked, deleted or newly related, the judgement stands on changed ground and the entity wants revisiting. The list is derived from the model wherever it is shown and never stored, so it is always current, and it says what the software knows without judging, which entities and what changed.*
+
 ### 4.6 Persistence
 
 ---

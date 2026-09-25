@@ -346,6 +346,92 @@ body {
   min-height: 0;
 }
 
+/* The status bar: one line under the workspace, in the label type,
+   saying what is true right now. The checks stand at its right as a
+   ghost button carrying the warning glyph, shown only with something to
+   revisit. */
+.status-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;                /* $spacing-05 */
+  height: 24px;
+  padding: 0 16px;          /* $spacing-05 */
+  font-size: 12px;          /* $label-01 */
+  line-height: 16px;
+  letter-spacing: 0.32px;
+  color: var(--text-second);
+  background: var(--layer);
+  border-top: 1px solid var(--border-subtle);
+}
+.status-bar[hidden] { display: none; }
+.status-checks {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;                 /* $spacing-02 */
+  height: 24px;
+  margin-left: auto;
+  padding: 0 8px;           /* $spacing-03 */
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.status-checks:hover { background: var(--hover); }
+.status-checks:active { background: var(--active); }
+.status-checks[hidden] { display: none; }
+
+/* The checks drawer: the list slid up over the lower workspace from the
+   status bar, one row per record out of step, each a button that opens
+   its entity. Closed by Escape, its X, or a row. */
+.checks-drawer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 25px;             /* above the status bar and its rule */
+  height: min(40vh, 480px);
+  display: flex;
+  flex-direction: column;
+  background: var(--layer);
+  border-top: 1px solid var(--border-subtle);
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+}
+.checks-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;                 /* $spacing-03 */
+  height: 40px;
+  padding: 0 8px 0 16px;    /* $spacing-03, $spacing-05 */
+  border-bottom: 1px solid var(--border-subtle);
+  font-weight: 600;         /* $heading-compact-01 */
+}
+.checks-head .ghost-icon { margin-left: auto; }
+.checks-body { flex: 1; overflow: auto; }
+.checks-row {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  column-gap: 8px;          /* $spacing-03 */
+  row-gap: 4px;             /* $spacing-02 */
+  align-items: center;
+  width: 100%;
+  padding: 8px 16px;        /* $spacing-03, $spacing-05 */
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.checks-row:hover { background: var(--hover); }
+.checks-row:active { background: var(--active); }
+.checks-row .icon { grid-row: 1; }
+.checks-label { display: flex; align-items: baseline; gap: 8px; }  /* $spacing-03 */
+.checks-text { grid-column: 2; color: var(--text-second); }
+.checks-tags { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
+
 .pane {
   display: flex;
   flex-direction: column;
@@ -1570,10 +1656,10 @@ select.field-input[size] {
   background: var(--background);
 }
 
-/* The supported viewport is 1000 by 332: the ruled 1000px width, and the
+/* The supported viewport is 1000 by 356: the ruled 1000px width, and the
    height the column needs — 48px shell bar, 160px editor floor, 4px
-   splitter, 120px relationships floor. */
-@media (max-width: 999.98px), (max-height: 331.98px) {
+   splitter, 120px relationships floor, 24px status bar. */
+@media (max-width: 999.98px), (max-height: 355.98px) {
   .small-viewport {
     display: flex;
     align-items: center;

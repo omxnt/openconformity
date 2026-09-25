@@ -4,7 +4,8 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText, recordedStates, recordOf, staleText } from '../app/modules/editor.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/modules/editor.js';
+import { recordedStates, recordOf, staleText } from '../app/modules/records.js';
 import { createModel, addEntity, relate, removeEntity, unrelate } from '../app/modules/model.js';
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';

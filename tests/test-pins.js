@@ -133,7 +133,8 @@ import { fakeStorage } from './helpers.js';
   ok(about.includes("el('span', { className: 'about-version', text: VERSION })") && about.includes("text(PHASE),") && about.includes("link('https://github.com/omxnt/openconformity/releases', 'Release notes')"), 'which About names on its release line with the phase, beside the link to the notes');
   const editorSource = readFile('../app/modules/editor.js');
   ok(editorSource.includes("const changed = definitionOfKey.get(key);\n    if (!changed || isRationale(changed) || isOutcome(changed)) return;"), 'a record follows the values of the group that writes it and never a rationale or an outcome, so editing a rationale after a measure was unlinked keeps the flag');
-  ok(editorSource.includes(".some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && held.kind !== 'entities' && (values[held.key] ?? '').trim() !== ''));") && editorSource.includes("relatedIds(model, subject, definition.relationship)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'linked' }))"), 'until the rating that writes a record holds a value, the field shows what is related now, unmarked, and only a written record is compared');
+  const recordsSource = readFile('../app/modules/records.js');
+  ok(recordsSource.includes(".some((group) => group.attributes.some((held) => !isOutcome(held) && !isRationale(held) && held.kind !== 'entities' && (values[held.key] ?? '').trim() !== ''));") && editorSource.includes("const written = recordWritten(current?.type ?? '', definition, values);") && editorSource.includes("input.value = recordWritten(current?.type ?? '', definition, draft) ? recordOf(") && editorSource.includes("relatedIds(model, subject, definition.relationship)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'linked' }))"), 'until the rating that writes a record holds a value, the field shows what is related now, unmarked, and only a written record is compared');
   ok(about.includes("fold('Credits and references', [") && about.includes("held.hidden = true;") && about.includes("attributes: { type: 'button', 'aria-expanded': 'false' }"), 'the credits and references stand folded under one accordion heading, closed when About opens');
   ok(about.includes("['SEBoK', 'System requirement types, after the INCOSE manual', [link('https://sebokwiki.org/wiki/System_Requirements_Definition', 'sebokwiki.org')]]") && about.includes("link('https://www.iso.org/standard/57180.html', 'iso.org')"), 'the methods credit the requirement categories to SEBoK and link each standard to its publisher');
 
@@ -417,10 +418,17 @@ import { fakeStorage } from './helpers.js';
   const sheet = readFile('../app/style.css');
   const page = readFile('../app/index.html');
   ok(
-    sheet.includes('@media (max-width: 999.98px), (max-height: 331.98px)'),
-    'the notice covers both floors: 1000 wide, and the 332 the column needs — 48 shell, 160 editor, 4 splitter, 120 relationships'
+    sheet.includes('@media (max-width: 999.98px), (max-height: 355.98px)'),
+    'the notice covers both floors: 1000 wide, and the 356 the column needs — 48 shell, 160 editor, 4 splitter, 120 relationships, 24 status bar'
   );
-  ok(page.includes('at least 1000 pixels wide and 332 pixels tall'), 'and states both numbers');
+  ok(page.includes('at least 1000 pixels wide and 356 pixels tall'), 'and states both numbers');
+  ok(page.includes('<footer class="status-bar" id="status-bar" hidden>') && sheet.includes('.status-bar {') && sheet.includes('height: 24px;\n  padding: 0 16px;'), 'the status bar stands under the workspace, one 24px line, hidden without a project');
+  const shellSource = readFile('../app/modules/shell.js');
+  ok(shellSource.includes("statusBar.hidden = !store.hasProject();") && shellSource.includes("statusSize.textContent = sizeText(model);") && shellSource.includes("statusChecks.hidden = found.length === 0;"), 'the bar says the model\'s size, and the checks only while there are any');
+  ok(shellSource.includes("kind: 'panel',\n      element,\n      opener: statusChecks,") && sheet.includes('.checks-drawer {\n  position: fixed;'), 'the checks open as a drawer over the lower workspace, an overlay panel closed by Escape, its X or a row, never a fourth pane');
+  ok(shellSource.includes("if (tab) store.setTab(finding.type, tab);\n      closeDrawer();\n      onSelect(finding.id);"), 'a row opens its entity on the tab the record stands on');
+  ok(readFile('../app/modules/app.js').includes("onSelect: (id) => (store.view() ? flows.openFromView(id) : flows.selectNode(id))"), 'and reaches it through the view when one is open');
+  ok(readFile('../app/modules/editor.js').includes("(definition.kind === 'entities' && alone)") && readFile('../app/modules/editor.js').includes("fieldCell(definition, values, editing, group.attributes.length === 1)"), 'a record takes a row where it stands alone in its group and shares one beside another attribute');
   ok(sheet.includes('.pane-editor { flex: 1 1 0; min-height: 160px; }'), 'the editor floor matches the 160px the splitter reserves, and its zero basis lets it yield down to that floor');
   ok(sheet.includes('.pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }'), 'the relationship pane shrinks to its floor before anything overflows');
 }
