@@ -36,6 +36,8 @@ import { VIEWS } from './views.js';
 import { projectSweep } from './project.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
+import { LIBRARIES } from '../library/index.js';
+import { openLibraryPicker, importInto } from './library.js';
 import { TYPE_ICONS } from './icons.js';
 import { openMenu } from './menu.js';
 import { el, download } from './dom.js';
@@ -796,6 +798,26 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * it no longer passes fails here, and fails the test that pins it,
    * before it misleads anyone.
    */
+  /**
+   * Import from a library: the picker over the workspace, then the picks
+   * copied into the project as one change, the first of them selected.
+   */
+  async function importFromLibrary() {
+    if (!store.hasProject()) return;
+    if (!(await confirmDiscard())) return;
+    const chosen = await openLibraryPicker({ dialogs, store, libraries: LIBRARIES });
+    if (!chosen) return;
+    endEditSession();
+    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, chosen.target));
+    if (!outcome.ok) {
+      toastRefusal('Import refused', outcome);
+      return;
+    }
+    const n = outcome.added.length;
+    dialogs.toast(n === 0 ? 'Nothing imported' : 'Imported', n === 0 ? 'The project already held everything picked.' : `${n} ${n === 1 ? 'entity' : 'entities'} added to the project.`);
+    if (n > 0) store.select(outcome.added[0]);
+  }
+
   async function loadExample() {
     if (!(await confirmDiscard())) return;
     if (!(await confirmDiscardProject('Discard and load the example'))) return;
@@ -910,6 +932,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     discardAside,
     openProjectFlow,
     loadExample,
+    importFromLibrary,
     saveProject,
     openMetamodel,
     showAbout,

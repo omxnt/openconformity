@@ -724,7 +724,8 @@ body {
 .consent p { margin: 0 0 12px; }  /* $spacing-04 */
 .consent-box { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }  /* $spacing-03 */
 .consent-box input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
-.consent-box .checkbox {
+.consent-box .checkbox,
+.library-row .checkbox {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -735,9 +736,35 @@ body {
   border-radius: 1px;
   color: var(--text-inverse);
 }
-.consent-box .checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
-.consent-box input:checked + .checkbox { background: var(--text); }
-.consent-box input:checked + .checkbox .icon { visibility: visible; }
+.consent-box .checkbox .icon,
+.library-row .checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
+.consent-box input:checked + .checkbox,
+.library-row input:checked + .checkbox { background: var(--text); }
+.consent-box input:checked + .checkbox .icon,
+.library-row input:checked + .checkbox .icon { visibility: visible; }
+
+/* The library picker: the library's tree with a checkbox per entity, an
+   entity the project already holds greyed at the one strength of
+   standing back and marked as in the project. */
+.dialog:has(.library) { max-width: 800px; }
+.library { display: grid; gap: 12px; color: var(--text); }  /* $spacing-04 */
+.library-source { margin: 0; color: var(--text-second); }
+.library-list { max-height: 50vh; overflow: auto; border: 1px solid var(--border-subtle); }
+.library-row { display: flex; align-items: center; gap: 8px; min-height: 32px; padding-right: 16px; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
+.library-row.folder { color: var(--text-second); }
+.library-row label { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }  /* $spacing-03 */
+.library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.library-row input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
+.library-row .row-title { overflow: hidden; text-overflow: ellipsis; }
+.library-row.present label { cursor: default; }
+.library-row.present .checkbox { opacity: 0.25; }
+.library-row.present .row-title,
+.library-row.present .designation { color: var(--disabled); }
+.library-row.present > .icon,
+.library-row.present label > .icon { opacity: 0.25; }
+.library-row .tag { margin-left: auto; }
+.library-note { margin: 0; padding: 16px; color: var(--text-second); }  /* $spacing-05 */
+.library-into { margin: 0; color: var(--text-second); }
 .consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }

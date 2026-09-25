@@ -195,9 +195,10 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     menubar.push({ button, openIt });
   }
 
-  // The file actions, then the example behind a separator: the way in
-  // that replaces your work stands apart from the ones that save it.
-  const fileGroups = ['project', 'example', 'browser'];
+  // The file actions, then the import into the open project, then the
+  // example behind a separator: the way in that replaces your work stands
+  // apart from the ones that save it or add to it.
+  const fileGroups = ['project', 'import', 'example', 'browser'];
   menubarMenu(fileButton, 'File', () => {
     const items = [];
     let lastGroup = null;

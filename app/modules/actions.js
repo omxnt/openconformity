@@ -88,6 +88,17 @@ export function createActions({ store, flows }) {
       run: () => flows.saveProject(),
     },
     {
+      id: 'import',
+      icon: 'i-import',
+      label: 'Import…',
+      group: 'import',
+      toolbar: false,
+      context: false,
+      menubar: true,
+      enabled: () => store.hasProject(),
+      run: () => flows.importFromLibrary(),
+    },
+    {
       id: 'load-example',
       icon: 'i-project',
       label: 'Load example',
