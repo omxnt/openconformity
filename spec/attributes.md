@@ -331,15 +331,14 @@ The reference is the annex, module or part of the legislation the procedure foll
 
 ### 3.5 Notified Body (NTB) `draft`
 
-The reference is the identification number the Commission lists the body under, as cited, `0123`, and it is the reference the label composes with the title (§1.7). The body's address and where it is on the web stand with it before the role it has for this product, since the declaration of conformity cites a body by name, address and number, and the address ends in the Member State that notified it. The Notification tab holds what the Commission's register says of it, the act it is notified under, the Member State that notified it, the procedures it may carry out and the products it may assess, which is what is checked before a body is engaged. A contact person, a phone number or an email belong to the engagement rather than the body and go in the notes.
+The reference is the identification number the Commission lists the body under, as cited, `0123`, and it is the reference the label composes with the title (§1.7). The body's address and its own website stand with it, since the declaration of conformity cites a body by name, address and number, and the address ends in the Member State that notified it. The body carries no description: what it is, the register says, what it does for this product, its relationship to the conformity assessment says, and who was dealt with and how it went is what the notes are for. The Notification tab holds what the Commission's register says of it, the act it is notified under, the Member State that notified it, its entry in the register, the procedures it may carry out and the products it may assess, which is what is checked before a body is engaged.
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
 | reference | Reference | text | | The identification number of the notified body, as cited. |
 | title | Title | text | | The name of the notified body, as the declaration of conformity cites it. |
 | address | Address | multiline | | The address of the notified body, as the declaration of conformity cites it. |
-| website | Website | hyperlink | | Where the notified body is on the web, or its entry in the Commission's register. |
-| description | Description | multiline | | The role of the notified body for this product. |
+| website | Website | hyperlink | | The notified body's own website. |
 
 #### Notification `tab`
 
@@ -347,6 +346,7 @@ The reference is the identification number the Commission lists the body under, 
 |---|---|---|---|---|
 | legislation | Legislation | text | | The act the notified body is notified under, as cited. |
 | memberState | Member State | text | | The Member State that notified the body, as the register lists it. |
+| register | Register | hyperlink | | The body's entry in the Commission's register of notified bodies. |
 | procedures | Procedures | multiline | | The conformity assessment procedures the notified body is notified for, as the register lists them. |
 | products | Products | multiline | | The kinds of machinery and related products the notified body may assess, as the register lists them. |
 
