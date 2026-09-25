@@ -1,583 +1,261 @@
 /**
- * A hardcoded example model: a generic machine, kept deliberately terse. It
- * exercises every entity type and every relationship the metamodel defines, so
- * the demo shows what the metamodel can express.
+ * The example project: a generic machine, kept deliberately terse,
+ * rebuilt from the demonstration's example against the current metamodel
+ * and attribute definitions. It is held in the schema's own file shape
+ * and loaded through the ordinary open path, gates and all, so it is
+ * also a living fixture of the format: a schema change that breaks it
+ * breaks a test before it breaks a user.
  *
- * The content is illustrative and holds no engineering judgement. No text from
- * any standard is reproduced: the requirements taken from a standard carry a
- * clause number and a topic, nothing more. The standard that is not harmonised
- * is a placeholder, named the way the notified body is: no real standard is
- * identified as one that carries no presumption of conformity.
+ * The content is illustrative and holds no engineering judgement. No
+ * text from any standard is reproduced: the requirements taken from a
+ * standard carry a clause number and a topic, nothing more. The
+ * specification that is not harmonised is a placeholder, named the way
+ * the notified body is: nothing real is identified as carrying no
+ * presumption of conformity.
  */
 
-import { addEntity, addFolder, addRelationship, createModel } from './model.js';
-
-/**
- * The folders the example is filed into, each named with the folder that holds
- * it. Four at the top, following the work: what the law asks, what the machine
- * is and what it carries, what can go wrong and what is done about it, and what
- * is required and checked as a result. The law stands first because it is what
- * the work answers to and the only part of it the manufacturer does not choose.
- *
- * The standards are split the way the metamodel splits them, so which of the
- * two a standard is can be read from the tree without opening it.
- * @type {Array<[string, string|null]>}
- */
-const FOLDERS = [
-  ['Legislation and standards', null],
-  ['European legislation', 'Legislation and standards'],
-  ['Conformity assessment', 'Legislation and standards'],
-  ['Harmonised standards', 'Legislation and standards'],
-  ['Other standards', 'Legislation and standards'],
-
-  ['System and hazards', null],
-  ['Elements', 'System and hazards'],
-  ['Actors', 'System and hazards'],
-  ['Phases', 'System and hazards'],
-
-  ['Risks and mitigations', null],
-  ['Accident scenarios', 'Risks and mitigations'],
-  ['Risk reduction measures', 'Risks and mitigations'],
-  ['Safety functions', 'Risks and mitigations'],
-
-  ['Requirements definition', null],
-  ['System requirements', 'Requirements definition'],
-  ['Verification activities', 'Requirements definition'],
-];
-
-/**
- * Where each entity is filed: a folder by name, or another entity by
- * identifier. Filing is free and means nothing to the metamodel, so none of
- * this is enforced — but an entity filed under another is filed there because
- * the two are bound in the model, which is how a user would keep it. The
- * requirements a legislation defines sit under that legislation, the
- * requirements a standard defines under that standard, the hazards an element
- * exhibits under that element, the tasks performed in a phase under that phase,
- * and anything that decomposes into something sits under what it came from.
- *
- * A task sits under its phase rather than in a folder of its own because every
- * task here runs in exactly one phase. A task carried out in two would have to
- * be filed under one of them, or in a folder beside them, since a thing sits in
- * one place in the tree while the model relates it to as many as it likes.
- * @type {Object<string, string>}
- */
-const FILING = {
-  // The machine, part by part, each part holding the hazards it exhibits.
-  'ELM-001': 'Elements',
-  'ELM-002': 'ELM-001',
-  'ELM-003': 'ELM-002',
-  'ELM-004': 'ELM-002',
-  'ELM-005': 'ELM-001',
-  'ELM-006': 'ELM-001',
-  'ELM-007': 'ELM-006',
-  'ELM-008': 'ELM-001',
-  'HAZ-001': 'ELM-005',
-  'HAZ-002': 'ELM-005',
-  'HAZ-003': 'ELM-002',
-  'HAZ-004': 'ELM-008',
-  'HAZ-005': 'ELM-008',
-  'HAZ-006': 'ELM-005',
-
-  // Who uses the machine, and the life of the machine they do it in, each
-  // phase holding the tasks carried out during it.
-  'ACT-001': 'Actors',
-  'ACT-002': 'Actors',
-  'ACT-003': 'Actors',
-  'PHS-001': 'Phases',
-  'PHS-002': 'Phases',
-  'PHS-003': 'Phases',
-  'PHS-004': 'Phases',
-  'TSK-001': 'PHS-002',
-  'TSK-002': 'PHS-002',
-  'TSK-003': 'PHS-003',
-  'TSK-004': 'PHS-003',
-
-  // The law, holding the essential requirements it defines.
-  'LEG-001': 'European legislation',
-  'LEG-002': 'European legislation',
-  'ESR-001': 'LEG-001',
-  'ESR-002': 'LEG-001',
-  'ESR-003': 'LEG-001',
-  'ESR-004': 'LEG-001',
-  'ESR-005': 'LEG-001',
-  'ESR-006': 'LEG-002',
-  'ESR-007': 'LEG-002',
-
-  // The assessment, holding the body it involves.
-  'CAS-001': 'Conformity assessment',
-  'CAS-002': 'Conformity assessment',
-  'NTB-001': 'CAS-002',
-
-  // Each standard, holding the requirements it defines.
-  'HST-001': 'Harmonised standards',
-  'HST-002': 'Harmonised standards',
-  'HST-003': 'Harmonised standards',
-  'HST-004': 'Harmonised standards',
-  'HSR-001': 'HST-001',
-  'HSR-002': 'HST-001',
-  'HSR-003': 'HST-002',
-  'HSR-004': 'HST-002',
-  'HSR-005': 'HST-003',
-  'HSR-006': 'HST-003',
-  'HSR-007': 'HST-004',
-  'HSR-008': 'HST-004',
-
-  'OST-001': 'Other standards',
-  'OSR-001': 'OST-001',
-
-  // What can go wrong, and what is done about it.
-  'SCN-001': 'Accident scenarios',
-  'SCN-002': 'Accident scenarios',
-  'SCN-003': 'Accident scenarios',
-  'SCN-004': 'Accident scenarios',
-  'RRM-001': 'Risk reduction measures',
-  'RRM-002': 'Risk reduction measures',
-  'RRM-003': 'Risk reduction measures',
-  'RRM-004': 'Risk reduction measures',
-  'RRM-005': 'Risk reduction measures',
-  'RRM-006': 'Risk reduction measures',
-  'SAF-001': 'Safety functions',
-  'SAF-002': 'Safety functions',
-  'SAF-003': 'SAF-002',
-  'SAF-004': 'SAF-002',
-
-  // What the machine must do, and what shows that it does.
-  'REQ-001': 'System requirements',
-  'REQ-002': 'REQ-001',
-  'REQ-003': 'REQ-001',
-  'REQ-004': 'System requirements',
-  'REQ-005': 'System requirements',
-  'VER-001': 'Verification activities',
-  'VER-002': 'Verification activities',
-  'VER-003': 'Verification activities',
-  'VER-004': 'Verification activities',
+export const EXAMPLE_PROJECT = {
+  format: 'openconformity-project',
+  schemaVersion: 1,
+  name: 'Example machine',
+  counters: {
+    LEG: 3, HST: 5, OSP: 2, CAS: 3, NTB: 2,
+    ESR: 9, HSR: 9, OSR: 2, REQ: 6, VER: 5,
+    HAZ: 7, SCN: 5, PRM: 7, SAF: 5,
+    ELM: 9, ACT: 4, TSK: 5, PHS: 5,
+    F: 17,
+  },
+  folders: [
+    { id: 'F-1', name: 'Legislation and standards', parent: null, order: 0 },
+    { id: 'F-2', name: 'European legislation', parent: 'F-1', order: 0 },
+    { id: 'F-3', name: 'Conformity assessment', parent: 'F-1', order: 1 },
+    { id: 'F-4', name: 'Harmonised standards', parent: 'F-1', order: 2 },
+    { id: 'F-5', name: 'Other specifications', parent: 'F-1', order: 3 },
+    { id: 'F-6', name: 'System and hazards', parent: null, order: 1 },
+    { id: 'F-7', name: 'Elements', parent: 'F-6', order: 0 },
+    { id: 'F-8', name: 'Actors', parent: 'F-6', order: 1 },
+    { id: 'F-9', name: 'Phases', parent: 'F-6', order: 2 },
+    { id: 'F-10', name: 'Risks and mitigations', parent: null, order: 2 },
+    { id: 'F-11', name: 'Accident scenarios', parent: 'F-10', order: 0 },
+    { id: 'F-12', name: 'Protective measures', parent: 'F-10', order: 1 },
+    { id: 'F-13', name: 'Safety functions', parent: 'F-10', order: 2 },
+    { id: 'F-14', name: 'Requirements definition', parent: null, order: 3 },
+    { id: 'F-15', name: 'System requirements', parent: 'F-14', order: 0 },
+    { id: 'F-16', name: 'System verifications', parent: 'F-14', order: 1 },
+  ],
+  entities: [
+    { id: 'LEG-001', type: 'LEG', parent: 'F-2', order: 0, attributes: { reference: '(EU) 2023/1230', title: 'Machinery Regulation', link: 'https://eur-lex.europa.eu/eli/reg/2023/1230/oj', applicable: 'Yes', rationale: 'The machine is machinery placed on the Union market, so the Regulation applies in full. It replaces Directive 2006/42/EC from 20 January 2027; machinery placed on the market before that date follows the Directive, and this project assumes placement after it.\nNo exclusion of Annex I applies to this machine.' } },
+    { id: 'ESR-001', type: 'ESR', parent: 'LEG-001', order: 0, attributes: { reference: '1.2.4.3', title: 'Emergency stop', requirement: 'Machinery shall be fitted with one or more emergency stop devices by which an actual or impending danger can be averted.', applicable: 'Yes', rationale: 'The machine has an operating position occupied while the drives can move, and none of the exemptions applies: it is neither portable hand-held nor hand-guided machinery, and stopping is not made more hazardous by an emergency stop.\nA mushroom-head device is fitted at the operating position and realised by the Emergency Stop safety function.' } },
+    { id: 'ESR-002', type: 'ESR', parent: 'LEG-001', order: 1, attributes: { reference: '1.3.7', title: 'Risks related to moving parts', requirement: 'The moving parts of machinery shall be designed and constructed in such a way as to prevent risks of contact which could lead to accidents or, where risks persist, be fitted with guards or protective devices.', applicable: 'Yes', rationale: 'The drive unit carries rotating and translating parts in the product path, and the path must stay reachable for jam clearing, so contact cannot be prevented by design alone. The residual risk is taken by guarding, which is why 1.4.2 applies below.' } },
+    { id: 'ESR-003', type: 'ESR', parent: 'LEG-001', order: 2, attributes: { reference: '1.4.2', title: 'Special requirements for guards', requirement: 'Guards shall be of robust construction, securely held in place, not give rise to additional risk, be difficult to defeat or render non-operational, and be located at an adequate distance from the danger zone.', applicable: 'Yes', rationale: 'Guarding is the measure chosen for 1.3.7, so the guard requirements bind: the fixed panels enclosing the drive area and the interlocked access door are the guards this requirement is assessed against.' } },
+    { id: 'ESR-004', type: 'ESR', parent: 'LEG-001', order: 3, attributes: { reference: '1.5.1', title: 'Electricity supply', requirement: 'Machinery with an electricity supply shall be designed, constructed and equipped in such a way that all hazards of an electrical nature are or can be prevented.', applicable: 'Yes', rationale: 'The machine is supplied with mains electricity and its cabinet holds terminals that stay live when the main switch is off, so the electrical hazards are present and this requirement is assessed in full.' } },
+    { id: 'ESR-005', type: 'ESR', parent: 'LEG-001', order: 4, attributes: { reference: '1.6.3', title: 'Isolation of energy sources', requirement: 'Machinery shall be fitted with means to isolate it from all energy sources, and such isolators shall be clearly identified and capable of being locked where reconnection could endanger persons.', applicable: 'Yes', rationale: 'Maintenance and cleaning are carried out inside the guarding, where reconnection would endanger the person working there, so a lockable isolating device is required. The drive also stores energy after the supply is removed, which the isolation procedure has to account for.' } },
+    { id: 'ESR-008', type: 'ESR', parent: 'LEG-001', order: 5, attributes: { reference: '1.5.12', title: 'Laser radiation', requirement: 'Where laser equipment is used on machinery, it shall be designed and constructed so as to prevent any accidental radiation, and its protective devices shall be such that neither the emission nor the reflected or diffused radiation is harmful to health.', applicable: 'No', rationale: 'The machine carries no laser equipment: no laser is used for sensing, marking, alignment or any other function, and none is foreseen for the configurations covered by this assessment. Nothing in the machine can emit laser radiation, so the requirement has no subject here.\nIf a laser sensor is ever fitted, this verdict is reopened.' } },
+    { id: 'LEG-002', type: 'LEG', parent: 'F-2', order: 1, attributes: { reference: '2014/30/EU', title: 'EMC Directive', link: 'https://eur-lex.europa.eu/eli/dir/2014/30/oj', applicable: 'Yes', rationale: 'The machine carries electrical equipment that can generate and is susceptible to electromagnetic disturbance, so the Directive applies alongside the Machinery Regulation.\nThe fixed installation exclusion does not apply: the machine is placed on the market as a finished product.\nOpen: whether the drive supplier’s declaration covers the installed configuration, or only the drive as a component.' } },
+    { id: 'ESR-006', type: 'ESR', parent: 'LEG-002', order: 0, attributes: { reference: '1(a)', title: 'General requirements — emission', requirement: 'Equipment shall be designed and manufactured, having regard to the state of the art, so that the electromagnetic disturbance it generates does not exceed the level above which radio and telecommunications equipment or other equipment cannot operate as intended.', applicable: 'Yes', rationale: 'The machine carries variable-speed drives and switching control gear, which are sources of conducted and radiated disturbance, so the emission requirement applies to the machine as placed on the market.' } },
+    { id: 'ESR-007', type: 'ESR', parent: 'LEG-002', order: 1, attributes: { reference: '1(b)', title: 'General requirements — immunity', requirement: 'Equipment shall be designed and manufactured, having regard to the state of the art, so that it has a level of immunity to the electromagnetic disturbance to be expected in its intended use which allows it to operate without unacceptable degradation of its intended use.', rationale: 'The safety-related control system has to keep working in the disturbance of an industrial installation, so the verdict turns on what unacceptable degradation means for the safety functions rather than on whether the requirement is met in general.\nLeft unassessed until the immunity test report is in: the open question is whether a degradation that trips the machine to a safe state counts as acceptable here.' } },
+    { id: 'CAS-001', type: 'CAS', parent: 'F-3', order: 0, attributes: { title: 'Internal Control', description: 'Assessed by the manufacturer, without a notified body.' } },
+    { id: 'CAS-002', type: 'CAS', parent: 'F-3', order: 1, attributes: { title: 'EU Type-Examination', description: 'Assessed by a notified body for the safety component.' } },
+    { id: 'NTB-001', type: 'NTB', parent: 'CAS-002', order: 0, attributes: { title: 'Notified Body', description: 'Placeholder. No real body is named in this example.' } },
+    { id: 'HST-001', type: 'HST', parent: 'F-4', order: 0, attributes: { reference: 'EN ISO 12100', title: 'Safety of machinery — General principles for design', applicable: 'Yes', rationale: 'Type A standard. The framework for the risk assessment.' } },
+    { id: 'HSR-001', type: 'HSR', parent: 'HST-001', order: 0, attributes: { reference: '5.4', title: 'Risk Estimation', applicable: 'Yes', rationale: 'How severity, exposure and avoidance combine into a risk.' } },
+    { id: 'HSR-002', type: 'HSR', parent: 'HST-001', order: 1, attributes: { reference: '6.2', title: 'Inherently Safe Design', applicable: 'Yes', rationale: 'Measures that remove a hazard by design rather than by guarding.' } },
+    { id: 'HST-002', type: 'HST', parent: 'F-4', order: 1, attributes: { reference: 'EN ISO 13849-1', title: 'Safety-related parts of control systems', applicable: 'Yes', rationale: 'Type B standard. Applied to the safety functions.' } },
+    { id: 'HSR-003', type: 'HSR', parent: 'HST-002', order: 0, attributes: { reference: '4.5', title: 'Required Performance Level', applicable: 'Yes', rationale: 'How the performance level required of a function is determined.' } },
+    { id: 'HSR-004', type: 'HSR', parent: 'HST-002', order: 1, attributes: { reference: '6.2', title: 'Category Requirements', applicable: 'Yes', rationale: 'What the designated architecture has to achieve.' } },
+    { id: 'HST-003', type: 'HST', parent: 'F-4', order: 2, attributes: { reference: 'EN ISO 14119', title: 'Interlocking devices associated with guards', applicable: 'Yes', rationale: 'Type B standard. Applied to the guard interlock.' } },
+    { id: 'HSR-005', type: 'HSR', parent: 'HST-003', order: 0, attributes: { reference: '5', title: 'Interlock Selection', applicable: 'Yes', rationale: 'How an interlocking device is chosen for a guard.' } },
+    { id: 'HSR-006', type: 'HSR', parent: 'HST-003', order: 1, attributes: { reference: '7', title: 'Prevention of Defeat', applicable: 'Yes', rationale: 'How defeat with a spare actuator is prevented.' } },
+    { id: 'HST-004', type: 'HST', parent: 'F-4', order: 3, attributes: { reference: 'EN 60204-1', title: 'Electrical equipment of machines', applicable: 'Yes', rationale: 'Type B standard. Applied to the electrical equipment.' } },
+    { id: 'HSR-007', type: 'HSR', parent: 'HST-004', order: 0, attributes: { reference: '9.2', title: 'Stop Categories', applicable: 'Yes', rationale: 'The stop categories, and when each one applies.' } },
+    { id: 'HSR-008', type: 'HSR', parent: 'HST-004', order: 1, attributes: { reference: '5.3', title: 'Supply Disconnecting Device', applicable: 'Yes', rationale: 'The device that isolates the electrical supply.' } },
+    { id: 'OSP-001', type: 'OSP', parent: 'F-5', order: 0, attributes: { title: 'Other Specification', applicable: 'Yes', rationale: 'Placeholder. A specification applied to the machine that is not harmonised to the legislation, so it carries no presumption of conformity. Nothing real is named in this example.' } },
+    { id: 'OSR-001', type: 'OSR', parent: 'OSP-001', order: 0, attributes: { title: 'Other Requirement', applicable: 'Yes', rationale: 'Placeholder. A requirement of the specification above. It supports an essential requirement rather than covering one, because the specification it comes from is not harmonised.' } },
+    { id: 'ELM-001', type: 'ELM', parent: 'F-7', order: 0, attributes: { title: 'Machine', description: 'The machinery placed on the market.' } },
+    { id: 'ELM-002', type: 'ELM', parent: 'ELM-001', order: 0, attributes: { title: 'Control System', description: 'Controls the machine and evaluates the safety inputs.' } },
+    { id: 'ELM-003', type: 'ELM', parent: 'ELM-002', order: 0, attributes: { title: 'Safety Controller', description: 'Safety-related part of the control system.' } },
+    { id: 'ELM-004', type: 'ELM', parent: 'ELM-002', order: 1, attributes: { title: 'Emergency Stop Device', description: 'Mushroom-head device at the operating position.' } },
+    { id: 'HAZ-003', type: 'HAZ', parent: 'ELM-002', order: 2, attributes: { title: 'Unexpected Start-up', description: 'Mechanical hazard. The machine starts while someone is inside the guarding.' } },
+    { id: 'ELM-005', type: 'ELM', parent: 'ELM-001', order: 1, attributes: { title: 'Drive Unit', description: 'Motor and gearbox driving the moving parts.' } },
+    { id: 'HAZ-001', type: 'HAZ', parent: 'ELM-005', order: 0, attributes: { title: 'Moving Parts', description: 'Mechanical hazard. Rotating and translating parts in the drive area.' } },
+    { id: 'HAZ-002', type: 'HAZ', parent: 'ELM-005', order: 1, attributes: { title: 'Stored Energy', description: 'Mechanical hazard. Energy held in the drive after the supply is removed.' } },
+    { id: 'HAZ-006', type: 'HAZ', parent: 'ELM-005', order: 2, attributes: { title: 'Hot Surface', description: 'Thermal hazard. Surfaces of the drive that stay hot after a run.' } },
+    { id: 'ELM-006', type: 'ELM', parent: 'ELM-001', order: 2, attributes: { title: 'Guarding', description: 'Fixed panels enclosing the drive area, with one access door.' } },
+    { id: 'ELM-007', type: 'ELM', parent: 'ELM-006', order: 0, attributes: { title: 'Interlock Switch', description: 'Coded interlocking device on the guard door.' } },
+    { id: 'ELM-008', type: 'ELM', parent: 'ELM-001', order: 3, attributes: { title: 'Electrical Cabinet', description: 'Houses the supply, the drives and the control gear.' } },
+    { id: 'HAZ-004', type: 'HAZ', parent: 'ELM-008', order: 0, attributes: { title: 'Live Parts', description: 'Electrical hazard. Terminals that stay live when the main switch is off.' } },
+    { id: 'HAZ-005', type: 'HAZ', parent: 'ELM-008', order: 1, attributes: { title: 'Short Circuit', description: 'Electrical hazard. A fault current in the electrical equipment.' } },
+    { id: 'ACT-001', type: 'ACT', parent: 'F-8', order: 0, attributes: { title: 'Operator', description: 'Runs the machine and clears jams.' } },
+    { id: 'ACT-002', type: 'ACT', parent: 'F-8', order: 1, attributes: { title: 'Maintenance Technician', description: 'Services the machine with the guards open.' } },
+    { id: 'ACT-003', type: 'ACT', parent: 'F-8', order: 2, attributes: { title: 'Cleaner', description: 'Cleans the machine after a production run.' } },
+    { id: 'PHS-001', type: 'PHS', parent: 'F-9', order: 0, attributes: { title: 'Installation', description: 'The machine is put in place and connected.' } },
+    { id: 'PHS-002', type: 'PHS', parent: 'F-9', order: 1, attributes: { title: 'Operation', description: 'The machine runs the production programme.' } },
+    { id: 'TSK-001', type: 'TSK', parent: 'PHS-002', order: 0, attributes: { title: 'Load Material', description: 'Material is fed into the machine.' } },
+    { id: 'TSK-002', type: 'TSK', parent: 'PHS-002', order: 1, attributes: { title: 'Clear Jam', description: 'A blockage in the product path is freed by hand.' } },
+    { id: 'PHS-003', type: 'PHS', parent: 'F-9', order: 2, attributes: { title: 'Maintenance', description: 'Planned service and repair.' } },
+    { id: 'TSK-003', type: 'TSK', parent: 'PHS-003', order: 0, attributes: { title: 'Replace Part', description: 'A worn part is exchanged inside the guarding.' } },
+    { id: 'TSK-004', type: 'TSK', parent: 'PHS-003', order: 1, attributes: { title: 'Clean Machine', description: 'Residue is removed from the product path.' } },
+    { id: 'PHS-004', type: 'PHS', parent: 'F-9', order: 3, attributes: { title: 'Decommissioning', description: 'The machine is taken out of service.' } },
+    { id: 'SCN-001', type: 'SCN', parent: 'F-11', order: 0, attributes: { title: 'Contact with Moving Parts', hazardousEvent: 'Operator reaches into the drive area to clear a jam. Drive starts while the hand is in the hazard zone.', consequence: 'Crushing of the hand.' } },
+    { id: 'SCN-002', type: 'SCN', parent: 'F-11', order: 1, attributes: { title: 'Electric Shock', hazardousEvent: 'Technician works in the cabinet with the supply connected. Contact with a live part.', consequence: 'Electric shock.' } },
+    { id: 'SCN-003', type: 'SCN', parent: 'F-11', order: 2, attributes: { title: 'Start-up During Maintenance', hazardousEvent: 'Technician inside the guarding with the machine not isolated. Machine restarts.', consequence: 'Crushing.' } },
+    { id: 'SCN-004', type: 'SCN', parent: 'F-11', order: 3, attributes: { title: 'Burn on Hot Surface', hazardousEvent: 'Cleaner works close to the drive after a production run. Contact with a hot surface.', consequence: 'Burn to the hand.' } },
+    { id: 'PRM-001', type: 'PRM', parent: 'F-12', order: 0, attributes: { title: 'Fixed Guard', description: 'Panels that enclose the drive area.' } },
+    { id: 'PRM-002', type: 'PRM', parent: 'F-12', order: 1, attributes: { title: 'Interlocked Guard', description: 'Access door with a coded interlock and guard locking.' } },
+    { id: 'PRM-003', type: 'PRM', parent: 'F-12', order: 2, attributes: { title: 'Emergency Stop', description: 'Device that stops the machine on demand.' } },
+    { id: 'PRM-004', type: 'PRM', parent: 'F-12', order: 3, attributes: { title: 'Energy Isolation', description: 'Lockable device that removes the electrical supply.' } },
+    { id: 'PRM-005', type: 'PRM', parent: 'F-12', order: 4, attributes: { title: 'Warning Label', description: 'Marking at the hot surface of the drive.' } },
+    { id: 'PRM-006', type: 'PRM', parent: 'F-12', order: 5, attributes: { title: 'Instructions for Use', description: 'Procedure for clearing a jam with the machine stopped.' } },
+    { id: 'SAF-001', type: 'SAF', parent: 'F-13', order: 0, attributes: { title: 'Emergency Stop', description: 'Stops all drives when an emergency stop device is operated.\nRequired performance level: PL c, category 1.\nTriggering event: Emergency stop device operated.\nSafety-related reaction: Power removed from all drives.\nDefined safe state: Drives at standstill, restart inhibited.' } },
+    { id: 'SAF-002', type: 'SAF', parent: 'F-13', order: 1, attributes: { title: 'Door Interlock', description: 'Stops the drives when the guard door is opened and prevents restart.\nRequired performance level: PL d, category 3.\nTriggering event: Guard door opened.\nSafety-related reaction: Power removed from the drives.\nDefined safe state: Drives at standstill, restart inhibited.' } },
+    { id: 'SAF-003', type: 'SAF', parent: 'SAF-002', order: 0, attributes: { title: 'Position Detection', description: 'Detects the guard door position on two channels.\nRequired performance level: PL d, category 3.\nTriggering event: Guard door leaves the closed position.\nSafety-related reaction: Both channels signal open.\nDefined safe state: Guard reported open.' } },
+    { id: 'SAF-004', type: 'SAF', parent: 'SAF-002', order: 1, attributes: { title: 'Safe Torque Off', description: 'Removes torque from the drives on two channels.\nRequired performance level: PL d, category 3.\nTriggering event: Stop demanded by the safety controller.\nSafety-related reaction: Drive enable removed on both channels.\nDefined safe state: No torque at the drives.' } },
+    { id: 'REQ-001', type: 'REQ', parent: 'F-15', order: 0, attributes: { title: 'Access Protection', description: 'The machine shall prevent access to the drive area while the drives can move.\nRationale: Access to the drive area is the common cause of the recorded scenarios.\nType: Function/Performance.' } },
+    { id: 'REQ-002', type: 'REQ', parent: 'REQ-001', order: 0, attributes: { title: 'Guard Fastening', description: 'The machine shall retain fixed guards with fasteners that stay attached to the guard.\nRationale: Loose fasteners are why a guard is left off after maintenance.\nType: Form.' } },
+    { id: 'REQ-003', type: 'REQ', parent: 'REQ-001', order: 1, attributes: { title: 'Guard Interlocking', description: 'While the drives can move, the machine shall keep the guard door locked closed.\nRationale: The drives overrun after a stop command.\nType: Function/Performance.' } },
+    { id: 'REQ-004', type: 'REQ', parent: 'F-15', order: 1, attributes: { title: 'Emergency Stop Devices', description: 'The machine shall provide an emergency stop device at each operating position.\nRationale: Required at every position occupied while the machine can move.\nType: Compliance.' } },
+    { id: 'REQ-005', type: 'REQ', parent: 'F-15', order: 2, attributes: { title: 'Supply Isolation', description: 'The machine shall provide a lockable device that isolates the electrical supply.\nRationale: Maintenance is carried out inside the guarding.\nType: Fit/Operational.' } },
+    { id: 'VER-001', type: 'VER', parent: 'F-16', order: 0, attributes: { title: 'Emergency Stop Test', description: 'Operate each emergency stop device during a cycle.\nMethod: Test.\nAcceptance criteria: All drives stop and the machine does not restart on release.' } },
+    { id: 'VER-002', type: 'VER', parent: 'F-16', order: 1, attributes: { title: 'Interlock Test', description: 'Open the guard door during a cycle.\nMethod: Test.\nAcceptance criteria: The door stays locked until standstill is reached.' } },
+    { id: 'VER-003', type: 'VER', parent: 'F-16', order: 2, attributes: { title: 'Guard Inspection', description: 'Remove each fixed guard panel.\nMethod: Inspection.\nAcceptance criteria: No fastener separates from the guard without a tool.' } },
+    { id: 'VER-004', type: 'VER', parent: 'F-16', order: 3, attributes: { title: 'Circuit Analysis', description: 'Review the safety circuit against the claimed architecture and reliability data.\nMethod: Analysis.\nAcceptance criteria: The achieved performance level is not lower than the required one.' } },
+  ],
+  relationships: [
+    { type: 'elm-decomposes-into-elm', source: 'ELM-001', target: 'ELM-002' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-001', target: 'ELM-005' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-001', target: 'ELM-006' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-001', target: 'ELM-008' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-002', target: 'ELM-003' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-002', target: 'ELM-004' },
+    { type: 'elm-decomposes-into-elm', source: 'ELM-006', target: 'ELM-007' },
+    { type: 'act-interacts-with-elm', source: 'ACT-001', target: 'ELM-001' },
+    { type: 'act-interacts-with-elm', source: 'ACT-002', target: 'ELM-001' },
+    { type: 'act-interacts-with-elm', source: 'ACT-003', target: 'ELM-001' },
+    { type: 'elm-undergoes-phs', source: 'ELM-001', target: 'PHS-001' },
+    { type: 'elm-undergoes-phs', source: 'ELM-001', target: 'PHS-002' },
+    { type: 'elm-undergoes-phs', source: 'ELM-001', target: 'PHS-003' },
+    { type: 'elm-undergoes-phs', source: 'ELM-001', target: 'PHS-004' },
+    { type: 'act-performs-tsk', source: 'ACT-001', target: 'TSK-001' },
+    { type: 'act-performs-tsk', source: 'ACT-001', target: 'TSK-002' },
+    { type: 'act-performs-tsk', source: 'ACT-002', target: 'TSK-003' },
+    { type: 'act-performs-tsk', source: 'ACT-003', target: 'TSK-004' },
+    { type: 'tsk-occurs-during-phs', source: 'TSK-001', target: 'PHS-002' },
+    { type: 'tsk-occurs-during-phs', source: 'TSK-002', target: 'PHS-002' },
+    { type: 'tsk-occurs-during-phs', source: 'TSK-003', target: 'PHS-003' },
+    { type: 'tsk-occurs-during-phs', source: 'TSK-004', target: 'PHS-003' },
+    { type: 'elm-subject-to-leg', source: 'ELM-001', target: 'LEG-001' },
+    { type: 'elm-subject-to-leg', source: 'ELM-001', target: 'LEG-002' },
+    { type: 'elm-applies-hst', source: 'ELM-001', target: 'HST-001' },
+    { type: 'elm-applies-hst', source: 'ELM-002', target: 'HST-002' },
+    { type: 'elm-applies-hst', source: 'ELM-007', target: 'HST-003' },
+    { type: 'elm-applies-hst', source: 'ELM-008', target: 'HST-004' },
+    { type: 'elm-applies-osp', source: 'ELM-002', target: 'OSP-001' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-001' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-002' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-003' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-004' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-005' },
+    { type: 'leg-contains-esr', source: 'LEG-001', target: 'ESR-008' },
+    { type: 'leg-contains-esr', source: 'LEG-002', target: 'ESR-006' },
+    { type: 'leg-contains-esr', source: 'LEG-002', target: 'ESR-007' },
+    { type: 'cas-conducted-under-leg', source: 'CAS-001', target: 'LEG-001' },
+    { type: 'cas-conducted-under-leg', source: 'CAS-002', target: 'LEG-001' },
+    { type: 'ntb-performs-cas', source: 'NTB-001', target: 'CAS-002' },
+    { type: 'hst-harmonised-under-leg', source: 'HST-001', target: 'LEG-001' },
+    { type: 'hst-harmonised-under-leg', source: 'HST-002', target: 'LEG-001' },
+    { type: 'hst-harmonised-under-leg', source: 'HST-003', target: 'LEG-001' },
+    { type: 'hst-harmonised-under-leg', source: 'HST-004', target: 'LEG-001' },
+    { type: 'hst-contains-hsr', source: 'HST-001', target: 'HSR-001' },
+    { type: 'hst-contains-hsr', source: 'HST-001', target: 'HSR-002' },
+    { type: 'hst-contains-hsr', source: 'HST-002', target: 'HSR-003' },
+    { type: 'hst-contains-hsr', source: 'HST-002', target: 'HSR-004' },
+    { type: 'hst-contains-hsr', source: 'HST-003', target: 'HSR-005' },
+    { type: 'hst-contains-hsr', source: 'HST-003', target: 'HSR-006' },
+    { type: 'hst-contains-hsr', source: 'HST-004', target: 'HSR-007' },
+    { type: 'hst-contains-hsr', source: 'HST-004', target: 'HSR-008' },
+    { type: 'osp-contains-osr', source: 'OSP-001', target: 'OSR-001' },
+    { type: 'elm-exhibits-haz', source: 'ELM-005', target: 'HAZ-001' },
+    { type: 'elm-exhibits-haz', source: 'ELM-005', target: 'HAZ-002' },
+    { type: 'elm-exhibits-haz', source: 'ELM-005', target: 'HAZ-006' },
+    { type: 'elm-exhibits-haz', source: 'ELM-002', target: 'HAZ-003' },
+    { type: 'elm-exhibits-haz', source: 'ELM-008', target: 'HAZ-004' },
+    { type: 'elm-exhibits-haz', source: 'ELM-008', target: 'HAZ-005' },
+    { type: 'haz-contributes-to-scn', source: 'HAZ-001', target: 'SCN-001' },
+    { type: 'haz-contributes-to-scn', source: 'HAZ-003', target: 'SCN-003' },
+    { type: 'haz-contributes-to-scn', source: 'HAZ-004', target: 'SCN-002' },
+    { type: 'haz-contributes-to-scn', source: 'HAZ-006', target: 'SCN-004' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-002', target: 'HAZ-001' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-005', target: 'HAZ-002' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-001', target: 'HAZ-003' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-004', target: 'HAZ-004' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-004', target: 'HAZ-005' },
+    { type: 'esr-triggered-by-haz', source: 'ESR-003', target: 'HAZ-006' },
+    { type: 'tsk-gives-rise-to-scn', source: 'TSK-002', target: 'SCN-001' },
+    { type: 'tsk-gives-rise-to-scn', source: 'TSK-003', target: 'SCN-002' },
+    { type: 'tsk-gives-rise-to-scn', source: 'TSK-003', target: 'SCN-003' },
+    { type: 'tsk-gives-rise-to-scn', source: 'TSK-004', target: 'SCN-004' },
+    { type: 'act-exposed-in-scn', source: 'ACT-001', target: 'SCN-001' },
+    { type: 'act-exposed-in-scn', source: 'ACT-002', target: 'SCN-002' },
+    { type: 'act-exposed-in-scn', source: 'ACT-002', target: 'SCN-003' },
+    { type: 'act-exposed-in-scn', source: 'ACT-003', target: 'SCN-004' },
+    { type: 'prm-eliminates-haz', source: 'PRM-001', target: 'HAZ-001' },
+    { type: 'prm-eliminates-haz', source: 'PRM-002', target: 'HAZ-001' },
+    { type: 'prm-eliminates-haz', source: 'PRM-003', target: 'HAZ-003' },
+    { type: 'prm-eliminates-haz', source: 'PRM-004', target: 'HAZ-002' },
+    { type: 'prm-eliminates-haz', source: 'PRM-004', target: 'HAZ-004' },
+    { type: 'prm-eliminates-haz', source: 'PRM-005', target: 'HAZ-006' },
+    { type: 'prm-reduces-risk-of-scn', source: 'PRM-002', target: 'SCN-001' },
+    { type: 'prm-reduces-risk-of-scn', source: 'PRM-004', target: 'SCN-002' },
+    { type: 'prm-reduces-risk-of-scn', source: 'PRM-004', target: 'SCN-003' },
+    { type: 'prm-reduces-risk-of-scn', source: 'PRM-006', target: 'SCN-004' },
+    { type: 'prm-implements-hsr', source: 'PRM-002', target: 'HSR-005' },
+    { type: 'prm-implements-hsr', source: 'PRM-002', target: 'HSR-006' },
+    { type: 'prm-implements-hsr', source: 'PRM-003', target: 'HSR-007' },
+    { type: 'prm-implements-osr', source: 'PRM-003', target: 'OSR-001' },
+    { type: 'saf-decomposes-into-saf', source: 'SAF-002', target: 'SAF-003' },
+    { type: 'saf-decomposes-into-saf', source: 'SAF-002', target: 'SAF-004' },
+    { type: 'saf-realises-prm', source: 'SAF-001', target: 'PRM-003' },
+    { type: 'saf-realises-prm', source: 'SAF-002', target: 'PRM-002' },
+    { type: 'prm-allocated-to-elm', source: 'PRM-001', target: 'ELM-006' },
+    { type: 'prm-allocated-to-elm', source: 'PRM-002', target: 'ELM-007' },
+    { type: 'prm-allocated-to-elm', source: 'PRM-003', target: 'ELM-004' },
+    { type: 'prm-allocated-to-elm', source: 'PRM-004', target: 'ELM-008' },
+    { type: 'saf-allocated-to-elm', source: 'SAF-001', target: 'ELM-003' },
+    { type: 'saf-allocated-to-elm', source: 'SAF-002', target: 'ELM-003' },
+    { type: 'saf-allocated-to-elm', source: 'SAF-003', target: 'ELM-007' },
+    { type: 'saf-allocated-to-elm', source: 'SAF-004', target: 'ELM-005' },
+    { type: 'hsr-covers-esr', source: 'HSR-002', target: 'ESR-002' },
+    { type: 'hsr-covers-esr', source: 'HSR-003', target: 'ESR-002' },
+    { type: 'hsr-covers-esr', source: 'HSR-005', target: 'ESR-003' },
+    { type: 'hsr-covers-esr', source: 'HSR-006', target: 'ESR-003' },
+    { type: 'hsr-covers-esr', source: 'HSR-007', target: 'ESR-001' },
+    { type: 'hsr-covers-esr', source: 'HSR-008', target: 'ESR-005' },
+    { type: 'osr-supports-esr', source: 'OSR-001', target: 'ESR-001' },
+    { type: 'elm-satisfies-esr', source: 'ELM-005', target: 'ESR-002' },
+    { type: 'elm-satisfies-esr', source: 'ELM-006', target: 'ESR-003' },
+    { type: 'elm-satisfies-esr', source: 'ELM-008', target: 'ESR-004' },
+    { type: 'elm-satisfies-esr', source: 'ELM-002', target: 'ESR-006' },
+    { type: 'elm-satisfies-hsr', source: 'ELM-007', target: 'HSR-005' },
+    { type: 'elm-satisfies-hsr', source: 'ELM-003', target: 'HSR-003' },
+    { type: 'elm-satisfies-osr', source: 'ELM-003', target: 'OSR-001' },
+    { type: 'req-decomposes-into-req', source: 'REQ-001', target: 'REQ-002' },
+    { type: 'req-decomposes-into-req', source: 'REQ-001', target: 'REQ-003' },
+    { type: 'req-derives-from-hsr', source: 'REQ-003', target: 'HSR-005' },
+    { type: 'req-derives-from-hsr', source: 'REQ-003', target: 'HSR-006' },
+    { type: 'req-derives-from-hsr', source: 'REQ-004', target: 'HSR-007' },
+    { type: 'req-derives-from-osr', source: 'REQ-004', target: 'OSR-001' },
+    { type: 'req-expresses-prm', source: 'REQ-002', target: 'PRM-001' },
+    { type: 'req-expresses-prm', source: 'REQ-004', target: 'PRM-003' },
+    { type: 'req-expresses-prm', source: 'REQ-005', target: 'PRM-004' },
+    { type: 'req-expresses-saf', source: 'REQ-003', target: 'SAF-002' },
+    { type: 'req-expresses-saf', source: 'REQ-004', target: 'SAF-001' },
+    { type: 'elm-satisfies-req', source: 'ELM-005', target: 'REQ-001' },
+    { type: 'elm-satisfies-req', source: 'ELM-006', target: 'REQ-002' },
+    { type: 'elm-satisfies-req', source: 'ELM-007', target: 'REQ-003' },
+    { type: 'elm-satisfies-req', source: 'ELM-004', target: 'REQ-004' },
+    { type: 'elm-satisfies-req', source: 'ELM-008', target: 'REQ-005' },
+    { type: 'ver-verifies-req', source: 'VER-001', target: 'REQ-004' },
+    { type: 'ver-verifies-req', source: 'VER-002', target: 'REQ-003' },
+    { type: 'ver-verifies-req', source: 'VER-003', target: 'REQ-002' },
+  ],
 };
-
-/** @type {Array<[string, string, Object<string, string>]>} */
-const ENTITIES = [
-  // --- System Context ---------------------------------------------------
-  ['ELM-001', 'ELM', { title: 'Machine', description: 'The machinery placed on the market.' }],
-  ['ELM-002', 'ELM', { title: 'Control System', description: 'Controls the machine and evaluates the safety inputs.' }],
-  ['ELM-003', 'ELM', { title: 'Safety Controller', description: 'Safety-related part of the control system.' }],
-  ['ELM-004', 'ELM', { title: 'Emergency Stop Device', description: 'Mushroom-head device at the operating position.' }],
-  ['ELM-005', 'ELM', { title: 'Drive Unit', description: 'Motor and gearbox driving the moving parts.' }],
-  ['ELM-006', 'ELM', { title: 'Guarding', description: 'Fixed panels enclosing the drive area, with one access door.' }],
-  ['ELM-007', 'ELM', { title: 'Interlock Switch', description: 'Coded interlocking device on the guard door.' }],
-  ['ELM-008', 'ELM', { title: 'Electrical Cabinet', description: 'Houses the supply, the drives and the control gear.' }],
-
-  ['ACT-001', 'ACT', { title: 'Operator', description: 'Runs the machine and clears jams.' }],
-  ['ACT-002', 'ACT', { title: 'Maintenance Technician', description: 'Services the machine with the guards open.' }],
-  ['ACT-003', 'ACT', { title: 'Cleaner', description: 'Cleans the machine after a production run.' }],
-
-  // The phases stand before the tasks, since each task is filed under the
-  // phase it runs in and a holder is always created first.
-  ['PHS-001', 'PHS', { title: 'Installation', description: 'The machine is put in place and connected.' }],
-  ['PHS-002', 'PHS', { title: 'Operation', description: 'The machine runs the production programme.' }],
-  ['PHS-003', 'PHS', { title: 'Maintenance', description: 'Planned service and repair.' }],
-  ['PHS-004', 'PHS', { title: 'Decommissioning', description: 'The machine is taken out of service.' }],
-
-  ['TSK-001', 'TSK', { title: 'Load Material', description: 'Material is fed into the machine.' }],
-  ['TSK-002', 'TSK', { title: 'Clear Jam', description: 'A blockage in the product path is freed by hand.' }],
-  ['TSK-003', 'TSK', { title: 'Replace Part', description: 'A worn part is exchanged inside the guarding.' }],
-  ['TSK-004', 'TSK', { title: 'Clean Machine', description: 'Residue is removed from the product path.' }],
-
-  // --- Legislative Framework -------------------------------------------
-  ['LEG-001', 'LEG', { title: 'Machinery Regulation (EU) 2023/1230', description: 'Applies to the machine as placed on the market.' }],
-  ['LEG-002', 'LEG', { title: 'EMC Directive 2014/30/EU', description: 'Applies to the electrical equipment of the machine.' }],
-
-  ['HST-001', 'HST', { title: 'EN ISO 12100 Safety of machinery — General principles for design', description: 'Type A standard. The framework for the risk assessment.' }],
-  ['HST-002', 'HST', { title: 'EN ISO 13849-1 Safety-related parts of control systems', description: 'Type B standard. Applied to the safety functions.' }],
-  ['HST-003', 'HST', { title: 'EN ISO 14119 Interlocking devices associated with guards', description: 'Type B standard. Applied to the guard interlock.' }],
-  ['HST-004', 'HST', { title: 'EN 60204-1 Electrical equipment of machines', description: 'Type B standard. Applied to the electrical equipment.' }],
-
-  ['OST-001', 'OST', { title: 'Other Standard', description: 'Placeholder. A standard applied to the machine that is not harmonised to the legislation, so it carries no presumption of conformity. No real standard is named in this example.' }],
-
-  ['CAS-001', 'CAS', { title: 'Internal Control', description: 'Assessed by the manufacturer, without a notified body.' }],
-  ['CAS-002', 'CAS', { title: 'EU Type-Examination', description: 'Assessed by a notified body for the safety component.' }],
-
-  ['NTB-001', 'NTB', { title: 'Notified Body', description: 'Placeholder. No real body is named in this example.' }],
-
-  // --- Risk Assessment --------------------------------------------------
-  ['HAZ-001', 'HAZ', { title: 'Moving Parts', group: 'Mechanical', description: 'Rotating and translating parts in the drive area.' }],
-  ['HAZ-002', 'HAZ', { title: 'Stored Energy', group: 'Mechanical', description: 'Energy held in the drive after the supply is removed.' }],
-  ['HAZ-003', 'HAZ', { title: 'Unexpected Start-up', group: 'Mechanical', description: 'The machine starts while someone is inside the guarding.' }],
-  ['HAZ-004', 'HAZ', { title: 'Live Parts', group: 'Electrical', description: 'Terminals that stay live when the main switch is off.' }],
-  ['HAZ-005', 'HAZ', { title: 'Short Circuit', group: 'Electrical', description: 'A fault current in the electrical equipment.' }],
-  ['HAZ-006', 'HAZ', { title: 'Hot Surface', group: 'Thermal', description: 'Surfaces of the drive that stay hot after a run.' }],
-
-  ['SCN-001', 'SCN', {
-    title: 'Contact with Moving Parts',
-    hazardZone: 'Drive Unit',
-    hazardousSituation: 'Operator reaches into the drive area to clear a jam.',
-    hazardousEvent: 'Drive starts while the hand is in the hazard zone.',
-    consequence: 'Crushing of the hand',
-    riskBefore: 'S3/P4',
-    riskAfter: 'S3/P1',
-  }],
-  ['SCN-002', 'SCN', {
-    title: 'Electric Shock',
-    hazardZone: 'Electrical Cabinet',
-    hazardousSituation: 'Technician works in the cabinet with the supply connected.',
-    hazardousEvent: 'Contact with a live part.',
-    consequence: 'Electric shock',
-    riskBefore: 'S4/P3',
-    riskAfter: 'S4/P1',
-  }],
-  ['SCN-003', 'SCN', {
-    title: 'Start-up During Maintenance',
-    hazardZone: 'Guarded Area',
-    hazardousSituation: 'Technician inside the guarding with the machine not isolated.',
-    hazardousEvent: 'Machine restarts.',
-    consequence: 'Crushing',
-    riskBefore: 'S4/P2',
-    riskAfter: 'S2/P1',
-  }],
-  ['SCN-004', 'SCN', {
-    title: 'Burn on Hot Surface',
-    hazardZone: 'Drive Unit',
-    hazardousSituation: 'Cleaner works close to the drive after a production run.',
-    hazardousEvent: 'Contact with a hot surface.',
-    consequence: 'Burn to the hand',
-    riskBefore: 'S2/P4',
-    riskAfter: 'S1/P2',
-  }],
-
-  ['RRM-001', 'RRM', { title: 'Fixed Guard', description: 'Panels that enclose the drive area.' }],
-  ['RRM-002', 'RRM', { title: 'Interlocked Guard', description: 'Access door with a coded interlock and guard locking.' }],
-  ['RRM-003', 'RRM', { title: 'Emergency Stop', description: 'Device that stops the machine on demand.' }],
-  ['RRM-004', 'RRM', { title: 'Energy Isolation', description: 'Lockable device that removes the electrical supply.' }],
-  ['RRM-005', 'RRM', { title: 'Warning Label', description: 'Marking at the hot surface of the drive.' }],
-  ['RRM-006', 'RRM', { title: 'Instructions for Use', description: 'Procedure for clearing a jam with the machine stopped.' }],
-
-  ['SAF-001', 'SAF', {
-    title: 'Emergency Stop',
-    performanceLevel: 'PL c',
-    category: '1',
-    briefDescription: 'Stops all drives when an emergency stop device is operated.',
-    triggeringEvent: 'Emergency stop device operated',
-    reaction: 'Power removed from all drives',
-    safeState: 'Drives at standstill, restart inhibited',
-  }],
-  ['SAF-002', 'SAF', {
-    title: 'Door Interlock',
-    performanceLevel: 'PL d',
-    category: '3',
-    briefDescription: 'Stops the drives when the guard door is opened and prevents restart.',
-    triggeringEvent: 'Guard door opened',
-    reaction: 'Power removed from the drives',
-    safeState: 'Drives at standstill, restart inhibited',
-  }],
-  ['SAF-003', 'SAF', {
-    title: 'Position Detection',
-    performanceLevel: 'PL d',
-    category: '3',
-    briefDescription: 'Detects the guard door position on two channels.',
-    triggeringEvent: 'Guard door leaves the closed position',
-    reaction: 'Both channels signal open',
-    safeState: 'Guard reported open',
-  }],
-  ['SAF-004', 'SAF', {
-    title: 'Safe Torque Off',
-    performanceLevel: 'PL d',
-    category: '3',
-    briefDescription: 'Removes torque from the drives on two channels.',
-    triggeringEvent: 'Stop demanded by the safety controller',
-    reaction: 'Drive enable removed on both channels',
-    safeState: 'No torque at the drives',
-  }],
-
-  // --- Requirements Definition -----------------------------------------
-  ['ESR-001', 'ESR', { title: '1.2.4.3 Emergency Stop', description: 'Machinery shall be fitted with an emergency stop device.' }],
-  ['ESR-002', 'ESR', { title: '1.3.7 Moving Parts', description: 'Moving parts shall prevent contact, or be guarded.' }],
-  ['ESR-003', 'ESR', { title: '1.4.2 Guards', description: 'Guards shall be robust, held in place and hard to defeat.' }],
-  ['ESR-004', 'ESR', { title: '1.5.1 Electricity', description: 'Electrically powered machinery shall prevent electrical hazards.' }],
-  ['ESR-005', 'ESR', { title: '1.6.3 Isolation of Energy Sources', description: 'Machinery shall provide a means to isolate its energy sources.' }],
-  ['ESR-006', 'ESR', { title: 'Annex I 1.1 Protection Requirements', description: 'Equipment shall not generate disturbance above the intended level.' }],
-  ['ESR-007', 'ESR', { title: 'Annex I 1.2 Immunity', description: 'Equipment shall work as intended in the presence of disturbance.' }],
-
-  ['HSR-001', 'HSR', { title: '5.4 Risk Estimation', description: 'How severity, exposure and avoidance combine into a risk.' }],
-  ['HSR-002', 'HSR', { title: '6.2 Inherently Safe Design', description: 'Measures that remove a hazard by design rather than by guarding.' }],
-  ['HSR-003', 'HSR', { title: '4.5 Required Performance Level', description: 'How the performance level required of a function is determined.' }],
-  ['HSR-004', 'HSR', { title: '6.2 Category Requirements', description: 'What the designated architecture has to achieve.' }],
-  ['HSR-005', 'HSR', { title: '5 Interlock Selection', description: 'How an interlocking device is chosen for a guard.' }],
-  ['HSR-006', 'HSR', { title: '7 Prevention of Defeat', description: 'How defeat with a spare actuator is prevented.' }],
-  ['HSR-007', 'HSR', { title: '9.2 Stop Categories', description: 'The stop categories, and when each one applies.' }],
-  ['HSR-008', 'HSR', { title: '5.3 Supply Disconnecting Device', description: 'The device that isolates the electrical supply.' }],
-
-  ['OSR-001', 'OSR', { title: 'Other Requirement', description: 'Placeholder. A requirement of the standard above. It supports an essential requirement rather than satisfying one, because the standard it comes from is not harmonised.' }],
-
-  ['REQ-001', 'REQ', {
-    title: 'Access Protection',
-    requirement: 'The machine shall prevent access to the drive area while the drives can move.',
-    rationale: 'Access to the drive area is the common cause of the recorded scenarios.',
-    type: 'Function/Performance',
-  }],
-  ['REQ-002', 'REQ', {
-    title: 'Guard Fastening',
-    requirement: 'The machine shall retain fixed guards with fasteners that stay attached to the guard.',
-    rationale: 'Loose fasteners are why a guard is left off after maintenance.',
-    type: 'Form',
-  }],
-  ['REQ-003', 'REQ', {
-    title: 'Guard Interlocking',
-    requirement: 'While the drives can move, the machine shall keep the guard door locked closed.',
-    rationale: 'The drives overrun after a stop command.',
-    type: 'Function/Performance',
-  }],
-  ['REQ-004', 'REQ', {
-    title: 'Emergency Stop Devices',
-    requirement: 'The machine shall provide an emergency stop device at each operating position.',
-    rationale: 'Required at every position occupied while the machine can move.',
-    type: 'Compliance',
-  }],
-  ['REQ-005', 'REQ', {
-    title: 'Supply Isolation',
-    requirement: 'The machine shall provide a lockable device that isolates the electrical supply.',
-    rationale: 'Maintenance is carried out inside the guarding.',
-    type: 'Fit/Operational',
-  }],
-
-  ['VER-001', 'VER', {
-    title: 'Emergency Stop Test',
-    description: 'Operate each emergency stop device during a cycle.',
-    method: 'Test',
-    criteria: 'All drives stop and the machine does not restart on release.',
-  }],
-  ['VER-002', 'VER', {
-    title: 'Interlock Test',
-    description: 'Open the guard door during a cycle.',
-    method: 'Test',
-    criteria: 'The door stays locked until standstill is reached.',
-  }],
-  ['VER-003', 'VER', {
-    title: 'Guard Inspection',
-    description: 'Remove each fixed guard panel.',
-    method: 'Inspection',
-    criteria: 'No fastener separates from the guard without a tool.',
-  }],
-  ['VER-004', 'VER', {
-    title: 'Circuit Analysis',
-    description: 'Review the safety circuit against the claimed architecture and reliability data.',
-    method: 'Analysis',
-    criteria: 'The achieved performance level is not lower than the required one.',
-  }],
-];
-
-/** @type {Array<[string, string, string]>} */
-const RELATIONSHIPS = [
-  // System Context
-  ['ELM-001', 'elm-decomposes-into-elm', 'ELM-002'],
-  ['ELM-001', 'elm-decomposes-into-elm', 'ELM-005'],
-  ['ELM-001', 'elm-decomposes-into-elm', 'ELM-006'],
-  ['ELM-001', 'elm-decomposes-into-elm', 'ELM-008'],
-  ['ELM-002', 'elm-decomposes-into-elm', 'ELM-003'],
-  ['ELM-002', 'elm-decomposes-into-elm', 'ELM-004'],
-  ['ELM-006', 'elm-decomposes-into-elm', 'ELM-007'],
-
-  ['ELM-001', 'elm-has-act', 'ACT-001'],
-  ['ELM-001', 'elm-has-act', 'ACT-002'],
-  ['ELM-001', 'elm-has-act', 'ACT-003'],
-  ['ELM-001', 'elm-has-phs', 'PHS-001'],
-  ['ELM-001', 'elm-has-phs', 'PHS-002'],
-  ['ELM-001', 'elm-has-phs', 'PHS-003'],
-  ['ELM-001', 'elm-has-phs', 'PHS-004'],
-
-  ['ACT-001', 'act-performs-tsk', 'TSK-001'],
-  ['ACT-001', 'act-performs-tsk', 'TSK-002'],
-  ['ACT-002', 'act-performs-tsk', 'TSK-003'],
-  ['ACT-003', 'act-performs-tsk', 'TSK-004'],
-
-  ['TSK-001', 'tsk-during-phs', 'PHS-002'],
-  ['TSK-002', 'tsk-during-phs', 'PHS-002'],
-  ['TSK-003', 'tsk-during-phs', 'PHS-003'],
-  ['TSK-004', 'tsk-during-phs', 'PHS-003'],
-
-  // Legislative Framework
-  ['ELM-001', 'elm-subject-to-leg', 'LEG-001'],
-  ['ELM-001', 'elm-subject-to-leg', 'LEG-002'],
-  ['ELM-001', 'elm-subject-to-hst', 'HST-001'],
-  ['ELM-002', 'elm-subject-to-hst', 'HST-002'],
-  ['ELM-007', 'elm-subject-to-hst', 'HST-003'],
-  ['ELM-008', 'elm-subject-to-hst', 'HST-004'],
-  ['ELM-002', 'elm-subject-to-ost', 'OST-001'],
-
-  ['LEG-001', 'leg-defines-esr', 'ESR-001'],
-  ['LEG-001', 'leg-defines-esr', 'ESR-002'],
-  ['LEG-001', 'leg-defines-esr', 'ESR-003'],
-  ['LEG-001', 'leg-defines-esr', 'ESR-004'],
-  ['LEG-001', 'leg-defines-esr', 'ESR-005'],
-  ['LEG-002', 'leg-defines-esr', 'ESR-006'],
-  ['LEG-002', 'leg-defines-esr', 'ESR-007'],
-  ['LEG-001', 'leg-defines-cas', 'CAS-001'],
-  ['LEG-001', 'leg-defines-cas', 'CAS-002'],
-  ['CAS-002', 'cas-involves-ntb', 'NTB-001'],
-
-  ['HST-001', 'hst-harmonised-to-leg', 'LEG-001'],
-  ['HST-002', 'hst-harmonised-to-leg', 'LEG-001'],
-  ['HST-003', 'hst-harmonised-to-leg', 'LEG-001'],
-  ['HST-004', 'hst-harmonised-to-leg', 'LEG-001'],
-
-  ['HST-001', 'hst-defines-hsr', 'HSR-001'],
-  ['HST-001', 'hst-defines-hsr', 'HSR-002'],
-  ['HST-002', 'hst-defines-hsr', 'HSR-003'],
-  ['HST-002', 'hst-defines-hsr', 'HSR-004'],
-  ['HST-003', 'hst-defines-hsr', 'HSR-005'],
-  ['HST-003', 'hst-defines-hsr', 'HSR-006'],
-  ['HST-004', 'hst-defines-hsr', 'HSR-007'],
-  ['HST-004', 'hst-defines-hsr', 'HSR-008'],
-
-  ['OST-001', 'ost-defines-osr', 'OSR-001'],
-
-  // Risk Assessment
-  ['ELM-005', 'elm-exhibits-haz', 'HAZ-001'],
-  ['ELM-005', 'elm-exhibits-haz', 'HAZ-002'],
-  ['ELM-005', 'elm-exhibits-haz', 'HAZ-006'],
-  ['ELM-002', 'elm-exhibits-haz', 'HAZ-003'],
-  ['ELM-008', 'elm-exhibits-haz', 'HAZ-004'],
-  ['ELM-008', 'elm-exhibits-haz', 'HAZ-005'],
-
-  ['HAZ-001', 'haz-contributes-to-scn', 'SCN-001'],
-  ['HAZ-003', 'haz-contributes-to-scn', 'SCN-003'],
-  ['HAZ-004', 'haz-contributes-to-scn', 'SCN-002'],
-  ['HAZ-006', 'haz-contributes-to-scn', 'SCN-004'],
-
-  ['HAZ-001', 'haz-triggers-esr', 'ESR-002'],
-  ['HAZ-002', 'haz-triggers-esr', 'ESR-005'],
-  ['HAZ-003', 'haz-triggers-esr', 'ESR-001'],
-  ['HAZ-004', 'haz-triggers-esr', 'ESR-004'],
-  ['HAZ-005', 'haz-triggers-esr', 'ESR-004'],
-  ['HAZ-006', 'haz-triggers-esr', 'ESR-003'],
-
-  ['TSK-002', 'tsk-leads-to-scn', 'SCN-001'],
-  ['TSK-003', 'tsk-leads-to-scn', 'SCN-002'],
-  ['TSK-003', 'tsk-leads-to-scn', 'SCN-003'],
-  ['TSK-004', 'tsk-leads-to-scn', 'SCN-004'],
-
-  ['ACT-001', 'act-exposed-in-scn', 'SCN-001'],
-  ['ACT-002', 'act-exposed-in-scn', 'SCN-002'],
-  ['ACT-002', 'act-exposed-in-scn', 'SCN-003'],
-  ['ACT-003', 'act-exposed-in-scn', 'SCN-004'],
-
-  ['RRM-001', 'rrm-mitigates-haz', 'HAZ-001'],
-  ['RRM-002', 'rrm-mitigates-haz', 'HAZ-001'],
-  ['RRM-003', 'rrm-mitigates-haz', 'HAZ-003'],
-  ['RRM-004', 'rrm-mitigates-haz', 'HAZ-002'],
-  ['RRM-004', 'rrm-mitigates-haz', 'HAZ-004'],
-  ['RRM-005', 'rrm-mitigates-haz', 'HAZ-006'],
-
-  ['RRM-002', 'rrm-mitigates-scn', 'SCN-001'],
-  ['RRM-004', 'rrm-mitigates-scn', 'SCN-002'],
-  ['RRM-004', 'rrm-mitigates-scn', 'SCN-003'],
-  ['RRM-006', 'rrm-mitigates-scn', 'SCN-004'],
-
-  ['RRM-002', 'rrm-implements-hsr', 'HSR-005'],
-  ['RRM-002', 'rrm-implements-hsr', 'HSR-006'],
-  ['RRM-003', 'rrm-implements-hsr', 'HSR-007'],
-  ['RRM-003', 'rrm-implements-osr', 'OSR-001'],
-
-  ['SAF-002', 'saf-decomposes-into-saf', 'SAF-003'],
-  ['SAF-002', 'saf-decomposes-into-saf', 'SAF-004'],
-  ['SAF-001', 'saf-realises-rrm', 'RRM-003'],
-  ['SAF-002', 'saf-realises-rrm', 'RRM-002'],
-
-  ['RRM-001', 'rrm-allocated-to-elm', 'ELM-006'],
-  ['RRM-002', 'rrm-allocated-to-elm', 'ELM-007'],
-  ['RRM-003', 'rrm-allocated-to-elm', 'ELM-004'],
-  ['RRM-004', 'rrm-allocated-to-elm', 'ELM-008'],
-  ['SAF-001', 'saf-allocated-to-elm', 'ELM-003'],
-  ['SAF-002', 'saf-allocated-to-elm', 'ELM-003'],
-  ['SAF-003', 'saf-allocated-to-elm', 'ELM-007'],
-  ['SAF-004', 'saf-allocated-to-elm', 'ELM-005'],
-
-  // Requirements Definition
-  ['HSR-002', 'hsr-satisfies-esr', 'ESR-002'],
-  ['HSR-003', 'hsr-satisfies-esr', 'ESR-002'],
-  ['HSR-005', 'hsr-satisfies-esr', 'ESR-003'],
-  ['HSR-006', 'hsr-satisfies-esr', 'ESR-003'],
-  ['HSR-007', 'hsr-satisfies-esr', 'ESR-001'],
-  ['HSR-008', 'hsr-satisfies-esr', 'ESR-005'],
-
-  ['OSR-001', 'osr-supports-esr', 'ESR-001'],
-
-  ['ESR-002', 'esr-allocated-to-elm', 'ELM-005'],
-  ['ESR-003', 'esr-allocated-to-elm', 'ELM-006'],
-  ['ESR-004', 'esr-allocated-to-elm', 'ELM-008'],
-  ['ESR-006', 'esr-allocated-to-elm', 'ELM-002'],
-  ['HSR-005', 'hsr-allocated-to-elm', 'ELM-007'],
-  ['HSR-003', 'hsr-allocated-to-elm', 'ELM-003'],
-  ['OSR-001', 'osr-allocated-to-elm', 'ELM-003'],
-
-  ['REQ-001', 'req-decomposes-into-req', 'REQ-002'],
-  ['REQ-001', 'req-decomposes-into-req', 'REQ-003'],
-  ['REQ-003', 'req-derives-from-hsr', 'HSR-005'],
-  ['REQ-003', 'req-derives-from-hsr', 'HSR-006'],
-  ['REQ-004', 'req-derives-from-hsr', 'HSR-007'],
-  ['REQ-004', 'req-derives-from-osr', 'OSR-001'],
-  ['REQ-002', 'req-derives-from-rrm', 'RRM-001'],
-  ['REQ-004', 'req-derives-from-rrm', 'RRM-003'],
-  ['REQ-005', 'req-derives-from-rrm', 'RRM-004'],
-  ['REQ-003', 'req-derives-from-saf', 'SAF-002'],
-  ['REQ-004', 'req-derives-from-saf', 'SAF-001'],
-
-  ['REQ-001', 'req-allocated-to-elm', 'ELM-005'],
-  ['REQ-002', 'req-allocated-to-elm', 'ELM-006'],
-  ['REQ-003', 'req-allocated-to-elm', 'ELM-007'],
-  ['REQ-004', 'req-allocated-to-elm', 'ELM-004'],
-  ['REQ-005', 'req-allocated-to-elm', 'ELM-008'],
-
-  ['VER-001', 'ver-verifies-req', 'REQ-004'],
-  ['VER-002', 'ver-verifies-req', 'REQ-003'],
-  ['VER-003', 'ver-verifies-req', 'REQ-002'],
-  ['VER-003', 'ver-verifies-rrm', 'RRM-001'],
-  ['VER-002', 'ver-verifies-rrm', 'RRM-002'],
-  ['VER-004', 'ver-verifies-saf', 'SAF-002'],
-  ['VER-001', 'ver-verifies-saf', 'SAF-001'],
-
-  ['VER-001', 'ver-allocated-to-elm', 'ELM-004'],
-  ['VER-002', 'ver-allocated-to-elm', 'ELM-007'],
-  ['VER-003', 'ver-allocated-to-elm', 'ELM-006'],
-  ['VER-004', 'ver-allocated-to-elm', 'ELM-003'],
-];
-
-/**
- * Build the example model. Relationships go through the same enforcement as
- * anything the user creates, so an example that broke the metamodel would fail
- * here rather than load.
- * @returns {import('./model.js').Model}
- */
-export function buildExampleModel() {
-  const model = createModel('Example machine');
-
-  /** @type {Map<string, string>} */
-  const folderId = new Map();
-  for (const [name, within] of FOLDERS) {
-    const holder = within === null ? null : folderId.get(within);
-    if (within !== null && holder === undefined) {
-      throw new Error(`Example model: "${name}" is filed in "${within}", which is not a folder above it.`);
-    }
-    folderId.set(name, addFolder(model, name, holder ?? null).id);
-  }
-
-  // Filing names a folder or an entity already in the model. An entity that
-  // holds another is always created first, so a name that resolves to neither
-  // is a mistake in the table rather than something to file at the top.
-  for (const [id, code, attributes] of ENTITIES) {
-    const where = FILING[id];
-    const parent = folderId.get(where) ?? (model.entities.has(where) ? where : null);
-    if (!parent) {
-      throw new Error(`Example model: ${id} is filed under "${where}", which is neither a folder nor an entity above it.`);
-    }
-    addEntity(model, code, attributes, { id, parent });
-    const number = Number.parseInt(id.split('-')[1], 10);
-    model.counters[code] = Math.max(model.counters[code] ?? 0, number);
-  }
-
-  for (const [source, type, target] of RELATIONSHIPS) {
-    const result = addRelationship(model, type, source, target);
-    if (!result.ok) {
-      throw new Error(`Example model: ${source} ${type} ${target} — ${result.reason}`);
-    }
-  }
-
-  return model;
-}

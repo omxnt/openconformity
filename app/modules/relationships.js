@@ -1,665 +1,573 @@
 /**
- * The relationship pane: the relationships of the selected entity, as a graph
- * of its closest neighbours or as a list. The two are one content in two
- * presentations, so a Carbon content switcher stands where tabs stood.
+ * The relationship pane: the selected entity's relationships as two
+ * tables, Outgoing and Incoming, each behind a compact fold and both
+ * sharing one fixed column skeleton so they can never misalign — or as
+ * the neighbourhood graph, the pane's default view, behind a toggle in
+ * the working header. Every row reads as the fact it records, the
+ * subject standing in the source or the target column as the direction
+ * has it, and carries the affordance to remove it.
  *
- * Everything here is anchored on the entity the user is standing on. Adding a
- * relationship is two choices: the relationship form the metamodel allows for
- * this entity type, chosen in a side panel, and then the entity at the other
- * end, picked straight from the navigator — the panel overlays only the right
- * edge, so the tree stays visible and becomes the picker. Both offers are
- * generated from the metamodel and the model, so a combination that is not
- * allowed is never offered, and a row the model refuses cannot be picked.
- *
- * A relationship is deleted from its row, behind a confirmation.
+ * The table is also the picker: while the store holds a picker for this
+ * pane's subject, each pick lands immediately as a provisional row in
+ * its right place — pending-styled, its ambiguity choice inline — and
+ * Done and Cancel sit in the pane head. The pane pins the picker's
+ * subject: the selection may move while picking, the tables stay. All
+ * of it is re-read from the model on every render; the chosen view is
+ * store session state, one truth for the tabs here and the View
+ * menu.
  */
 
+import { nodeOf, relationshipsOf } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
-import {
-  addRelationship,
-  availableRelationships,
-  candidatesFor,
-  labelOf,
-  relationshipsOf,
-  removeRelationship,
-} from './model.js';
-import { clear, el, icon, svg, truncate } from './dom.js';
-import { confirmDialog } from './dialog.js';
+import { pickerCandidates, pickedRows } from './relate.js';
+import { formLabel, entityLabel, entityMatches } from './queries.js';
+import { TYPE_ICONS } from './icons.js';
+import { el, icon, tabKeys } from './dom.js';
 
-// The box holds three lines of Carbon type at a 16px gutter, so its size and
-// the gaps around it come from the spacing scale rather than being trimmed to
-// fit a smaller face.
-const NODE_WIDTH = 224;
-const NODE_HEIGHT = 64;
-const ROW_GAP = 16;
-const COLUMN_GAP = 120;
-const MARGIN = 16;
-const MAX_PER_SIDE = 7;
+/**
+ * The rows the list draws: per direction, the relationships grouped by
+ * type in the order the model holds them, each with its far end resolved.
+ * @param {import('./model.js').Model} model
+ * @param {string|null} id
+ * @returns {{ outgoing: Array<{ label: string, rows: Array<{ relationship: import('./model.js').Relationship, other: import('./model.js').Entity }> }>,
+ *             incoming: Array<{ label: string, rows: Array<{ relationship: import('./model.js').Relationship, other: import('./model.js').Entity }> }> }}
+ */
+export function groupedRelationships(model, id) {
+  const { outgoing, incoming } = relationshipsOf(model, id);
+  const grouped = (relationships, farEnd) => {
+    const groups = [];
+    const held = new Map();
+    for (const relationship of relationships) {
+      if (!held.has(relationship.type)) {
+        const group = { label: RELATIONSHIP_TYPES[relationship.type].label, rows: [] };
+        held.set(relationship.type, group);
+        groups.push(group);
+      }
+      held.get(relationship.type).rows.push({
+        relationship,
+        other: /** @type {import('./model.js').Entity} */ (nodeOf(model, farEnd(relationship))),
+      });
+    }
+    return groups;
+  };
+  return {
+    outgoing: grouped(outgoing, (relationship) => relationship.target),
+    incoming: grouped(incoming, (relationship) => relationship.source),
+  };
+}
+
+/**
+ * The table's rows, in the order the grouping ruled: outgoing before
+ * incoming, each direction's relationships grouped by type in model
+ * order, every row carrying its far end resolved.
+ * @param {import('./model.js').Model} model
+ * @param {string|null} id
+ * @returns {Array<{ direction: 'outgoing'|'incoming', label: string,
+ *                   relationship: import('./model.js').Relationship, other: import('./model.js').Entity }>}
+ */
+export function relationshipRows(model, id) {
+  const groups = groupedRelationships(model, id);
+  const rows = [];
+  for (const [direction, groupList] of [['outgoing', groups.outgoing], ['incoming', groups.incoming]]) {
+    for (const group of groupList) {
+      for (const { relationship, other } of group.rows) {
+        rows.push({ direction, label: group.label, relationship, other });
+      }
+    }
+  }
+  return rows;
+}
+
+/**
+ * What the two tables hold, real rows and provisional ones together: a
+ * pick lands after the last row of its relationship group, or opens a
+ * new group at its direction's end; a pick whose pair no longer admits
+ * anything falls to the stale strip. Real rows carry their
+ * relationship; pending rows carry their pick.
+ * @param {import('./model.js').Model} model
+ * @param {string|null} subjectId
+ * @param {ReturnType<import('./store.js').createStore>['picker'] extends () => infer P ? P : never} picker
+ * @returns {{ outgoing: Array<Object>, incoming: Array<Object>, stale: Array<Object> }}
+ */
+export function relationshipTables(model, subjectId, picker) {
+  const tag = (row) => ({ ...row, kind: 'real', typeId: row.relationship.type });
+  const real = relationshipRows(model, subjectId).map(tag);
+  const tables = {
+    outgoing: real.filter((row) => row.direction === 'outgoing'),
+    incoming: real.filter((row) => row.direction === 'incoming'),
+    stale: [],
+  };
+  if (picker === null || picker.subject !== subjectId) return tables;
+
+  for (const pick of pickedRows(model, picker)) {
+    const other = nodeOf(model, pick.id);
+    if (!other || other.kind !== 'entity') continue;
+    if (pick.form === null) {
+      tables.stale.push({ kind: 'pending', direction: null, label: 'No longer possible', typeId: null, other, pick });
+      continue;
+    }
+    const row = {
+      kind: 'pending',
+      direction: pick.form.direction,
+      label: RELATIONSHIP_TYPES[pick.form.typeId].label,
+      typeId: pick.form.typeId,
+      other,
+      pick,
+    };
+    const rows = tables[row.direction];
+    let at = -1;
+    rows.forEach((held, index) => {
+      if (held.typeId === row.typeId) at = index;
+    });
+    if (at === -1) rows.push(row);
+    else rows.splice(at + 1, 0, row);
+  }
+  return tables;
+}
+
+/**
+ * One section's rows as the table presents them: filtered by the far
+ * end's designation, its title, or the relationship label, then sorted
+ * by the chosen column — or left in the grouped order while no sort is
+ * chosen. Pending rows take part like the rest.
+ * @param {Array<Object>} rows
+ * @param {{ column: 'entity'|'relationship', direction: 'asc'|'desc' }|null} sort
+ * @param {string} filter
+ * @returns {Array<Object>}
+ */
+export function presentedRows(rows, sort, filter) {
+  const query = (filter ?? '').trim().toLowerCase();
+  let held = rows;
+  if (query !== '') {
+    held = held.filter((row) => entityMatches(row.other, query) || row.label.toLowerCase().includes(query));
+  }
+  if (sort !== null) {
+    const key =
+      sort.column === 'relationship'
+        ? (row) => row.label
+        : (row) => {
+            const label = entityLabel(row.other);
+            return label ? `${row.other.id}  ${label}` : row.other.id;
+          };
+    held = [...held].sort((a, b) => key(a).localeCompare(key(b)) * (sort.direction === 'desc' ? -1 : 1));
+  }
+  return held;
+}
 
 /**
  * @param {Object} context
- * @param {HTMLElement} context.viewsEl
- * @param {HTMLElement} context.bodyEl
- * @param {HTMLElement} context.toolbarEl
- * @param {HTMLElement} context.panelEl
- * @param {() => import('./model.js').Model} context.getModel
- * @param {() => string|null} context.getEntityId
+ * @param {ReturnType<import('./store.js').createStore>} context.store
+ * @param {HTMLElement} context.head
+ * @param {HTMLElement} context.body
+ * @param {{ element: HTMLElement, render: () => void }} context.graph
+ * @param {() => void} context.onAdd
+ * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
+ * @param {(relationship: import('./model.js').Relationship) => void} context.onUnrelate
  * @param {(id: string) => void} context.onSelect
- * @param {() => void} context.onChange
- * @param {(message: string) => void} context.onMessage
- * @param {(spec: { validIds: Set<string>, onPick: (id: string) => void } | null) => void} context.setPicker
+ * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
  */
-export function createRelationshipPane(context) {
-  let view = 'graph';
-  let panelOpen = false;
+export function createRelationshipsView({ store, head, body, graph, onAdd, onDone, onUnrelate, onSelect, addEnabled }) {
+  /**
+   * The pane's own transients, gone with the visit: a sort per table, the
+   * filter behind the head's magnifier, and each table's fold.
+   * @type {{ outgoing: { column: string, direction: string }|null, incoming: { column: string, direction: string }|null }}
+   */
+  const tableSort = { outgoing: null, incoming: null };
+  let tableFilter = '';
+  let searchOpen = false;
+  const collapsed = { outgoing: false, incoming: false };
 
-  // Escape leaves the pick, unless a dialog is open and owns the key.
-  document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape' || !panelOpen) return;
-    if (document.querySelector('.overlay')) return;
-    event.preventDefault();
-    closePanel();
-  });
+  const listHost = el('div', { className: 'rel-list' });
+  body.appendChild(listHost);
+  body.appendChild(graph.element);
 
-  for (const name of ['graph', 'list']) {
-    context.viewsEl.append(
-      el('button', {
-        type: 'button',
-        class: 'switcher-option',
-        'data-view': name,
-        text: name === 'list' ? 'List' : 'Graph',
-        onclick: () => {
-          view = name;
-          render();
-        },
-      })
-    );
+  /**
+   * The head's filter, on demand: a magnifier opens a compact field,
+   * focused; Escape closes and clears, so does leaving it empty.
+   */
+  function searchControl() {
+    if (!searchOpen) {
+      return headIcon('Filter the relationships', 'i-search', () => {
+        searchOpen = true;
+        render();
+        head.querySelector('.head-search')?.focus();
+      });
+    }
+    const input = el('input', {
+      className: 'field-input head-search',
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the relationships' },
+    });
+    input.value = tableFilter;
+    input.addEventListener('input', () => {
+      tableFilter = input.value;
+      renderBody();
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      searchOpen = false;
+      tableFilter = '';
+      render();
+    });
+    input.addEventListener('blur', () => {
+      if (input.value.trim() !== '') return;
+      searchOpen = false;
+      tableFilter = '';
+      render();
+    });
+    return input;
   }
 
-  function render() {
-    // Whatever redrew this pane has moved the ground under an open pick — an
-    // undo, a deletion, a load — so the pick does not survive it.
-    closePanel();
+  /** A neutral icon-only head action with a tooltip, like the toolbar's. */
+  function headIcon(label, iconId, onPick) {
+    const button = el(
+      'button',
+      { className: 'ghost-button ghost-icon', attributes: { type: 'button', title: label, 'aria-label': label } },
+      [icon(iconId)]
+    );
+    button.addEventListener('click', onPick);
+    return button;
+  }
 
-    const model = context.getModel();
-    const entityId = context.getEntityId();
-    const entity = entityId ? model.entities.get(entityId) : null;
+  function renderHead(picking) {
+    head.textContent = '';
+    head.hidden = false;
 
-    for (const option of context.viewsEl.querySelectorAll('.switcher-option')) {
-      option.classList.toggle('selected', option.dataset.view === view);
-      option.setAttribute('aria-pressed', String(option.dataset.view === view));
+    const view = store.relationshipView();
+    const views = [['graph', 'Graph'], ['list', 'List']];
+    const tabs = el('div', { className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' } });
+    for (const [value, label] of views) {
+      const tab = el('button', {
+        className: 'tab',
+        text: label,
+        attributes: { type: 'button', role: 'tab', 'aria-selected': String(view === value), tabindex: view === value ? '0' : '-1' },
+      });
+      tab.addEventListener('click', () => store.setRelationshipView(value));
+      tabs.appendChild(tab);
+    }
+    tabKeys(tabs, (i) => {
+      store.setRelationshipView(views[i][0]);
+      head.querySelector('.tab[aria-selected="true"]')?.focus();
+    });
+    head.appendChild(tabs);
+
+    const actions = [searchControl()];
+    if (picking) {
+      const done = el('button', { className: 'form-button button-primary', text: 'Done', attributes: { type: 'button' } });
+      done.disabled = store.picker().picks.length === 0;
+      done.addEventListener('click', () => {
+        const current = store.picker();
+        if (current !== null && current.picks.length > 0) onDone(current.subject, current.picks);
+      });
+      const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
+      cancel.addEventListener('click', () => store.endPicking());
+      actions.push(done, cancel);
+    } else {
+      const add = headIcon('Add relationship', 'i-add-relationship', onAdd);
+      add.disabled = !addEnabled();
+      actions.push(add);
+    }
+    head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
+  }
+
+  function endpoint(entity) {
+    const parts = [
+      icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
+      el('span', { className: 'mono designation', text: entity.id }),
+    ];
+    const label = entityLabel(entity);
+    if (label) parts.push(el('span', { className: 'row-title', text: label }));
+    return parts;
+  }
+
+  /**
+   * Carbon's empty state: what this place holds, and the way to put the
+   * first thing in it.
+   * @param {string} title
+   * @param {string} body
+   * @param {{ label: string, icon: string, onPick: () => void }} [action]
+   */
+  function emptyState(title, body, action) {
+    const held = el('div', { className: 'empty-state' }, [
+      el('p', { className: 'empty-state-title', text: title }),
+      el('p', { className: 'empty-state-body', text: body }),
+    ]);
+    if (action) {
+      const button = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [
+        icon(action.icon),
+        el('span', { text: action.label }),
+      ]);
+      button.addEventListener('click', action.onPick);
+      held.appendChild(button);
+    }
+    return held;
+  }
+
+  /** The subject's own cell: its tinted icon, its text receding — you are here. */
+  function subjectCell(subject) {
+    const label = entityLabel(subject);
+    const parts = [
+      icon(TYPE_ICONS[subject.type], ENTITY_TYPES[subject.type].pillar),
+      el('span', { className: 'mono designation', text: subject.id }),
+    ];
+    if (label) parts.push(el('span', { className: 'row-title', text: label }));
+    return el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity cell-subject' }, parts)]);
+  }
+
+  /**
+   * A real row: the recorded fact, selecting its far end. In the default
+   * view it carries its unlink; while picking it recedes and the unlink
+   * is withheld — removals happen in the default view only.
+   */
+  function realRow(row, subject, picking) {
+    const { label, relationship, other } = row;
+    const said = entityLabel(other);
+    const rowElement = el('tr', {
+      className: picking ? 'receded' : '',
+      attributes: { tabindex: '0', 'aria-label': `Select ${other.id}${said ? `, ${said}` : ''}` },
+    });
+    rowElement.addEventListener('click', () => onSelect(other.id));
+    rowElement.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      onSelect(other.id);
+    });
+
+    const otherCell = el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, endpoint(other))]);
+    const relationshipCell = el('td', { className: 'rel-label', text: label });
+    if (row.direction === 'outgoing') {
+      rowElement.append(subjectCell(subject), relationshipCell, otherCell);
+    } else {
+      rowElement.append(otherCell, relationshipCell, subjectCell(subject));
     }
 
-    clear(context.toolbarEl);
-    clear(context.bodyEl);
+    if (picking) {
+      rowElement.appendChild(el('td', { className: 'shrink' }));
+      return rowElement;
+    }
+    const remove = el('button', {
+      className: 'icon-button',
+      attributes: {
+        type: 'button',
+        'aria-label': `Remove the ${label} relationship with ${other.id}`,
+        title: 'Remove relationship',
+      },
+    }, [icon('i-remove-relationship')]);
+    remove.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onUnrelate(relationship);
+    });
+    rowElement.appendChild(el('td', { className: 'shrink' }, [remove]));
+    return rowElement;
+  }
 
-    if (!entity) {
-      context.bodyEl.append(
-        el('div', { class: 'empty-state' }, [
-          el('p', { class: 'empty-state-title', text: 'Nothing selected' }),
-          el('p', { class: 'empty-state-body', text: 'Select an entity to see its relationships.' }),
-        ])
+  /**
+   * A provisional row: a pick where it will land, pending-styled, its
+   * ambiguity choice inline, and the unpick where the unlink would be.
+   */
+  function pendingRow(row, subject) {
+    const { other, pick } = row;
+    const rowElement = el('tr', { className: 'pending' });
+
+    const check = icon('i-checkmark');
+    check.classList.add('pick-check');
+    const otherCell = el('td', { className: 'wrap' }, [
+      el('span', { className: 'cell-entity' }, [check, ...endpoint(other)]),
+    ]);
+
+    let relationshipCell;
+    if (pick.ambiguous) {
+      const choice = el('select', {
+        className: 'field-input pending-choice',
+        attributes: { 'aria-label': `Relationship for ${other.id}` },
+      });
+      pick.options.forEach((option, index) => {
+        choice.appendChild(el('option', { text: formLabel(option), attributes: { value: String(index) } }));
+      });
+      const at = pick.options.findIndex(
+        (option) => option.typeId === pick.form?.typeId && option.direction === pick.form?.direction
+      );
+      if (at >= 0) choice.value = String(at);
+      choice.addEventListener('change', () => store.setPickChoice(other.id, pick.options[Number(choice.value)]));
+      relationshipCell = el('td', { className: 'rel-label' }, [choice]);
+    } else {
+      relationshipCell = el('td', { className: 'rel-label', text: row.label });
+    }
+
+    if (row.direction === 'incoming') {
+      rowElement.append(otherCell, relationshipCell, subjectCell(subject));
+    } else {
+      rowElement.append(subjectCell(subject), relationshipCell, otherCell);
+    }
+
+    const unpick = el('button', {
+      className: 'icon-button neutral',
+      attributes: { type: 'button', 'aria-label': `Unpick ${other.id}`, title: 'Unpick' },
+    }, [icon('i-close')]);
+    unpick.addEventListener('click', () => store.togglePick(other.id));
+    rowElement.appendChild(el('td', { className: 'shrink' }, [unpick]));
+    return rowElement;
+  }
+
+  /** A column head that sorts its own table: none, ascending, descending, none. */
+  function sortableHeader(label, column, direction) {
+    const sort = tableSort[direction];
+    const active = sort !== null && sort.column === column;
+    const header = el('th', {
+      attributes: { 'aria-sort': active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none' },
+    });
+    const button = el('button', { className: 'th-sort', attributes: { type: 'button' } }, [
+      el('span', { text: label }),
+      ...(active ? [icon(sort.direction === 'asc' ? 'i-move-up' : 'i-move-down')] : []),
+    ]);
+    button.addEventListener('click', () => {
+      if (!active) tableSort[direction] = { column, direction: 'asc' };
+      else if (sort.direction === 'asc') tableSort[direction] = { column, direction: 'desc' };
+      else tableSort[direction] = null;
+      renderBody();
+    });
+    header.appendChild(button);
+    return header;
+  }
+
+  /** The shared column skeleton, so the two tables can never misalign. */
+  function columns() {
+    return el('colgroup', {}, [
+      el('col', { className: 'col-entity' }),
+      el('col', { className: 'col-relationship' }),
+      el('col', { className: 'col-entity' }),
+      el('col', { className: 'col-action' }),
+    ]);
+  }
+
+  /**
+   * One direction's table under its fold: a compact accordion heading,
+   * then the fixed-layout table both directions share the widths of.
+   * The split carries direction; the subject stands in the source or
+   * the target column as the direction has it.
+   */
+  function section(direction, labelText, rows, subject, picking) {
+    const open = !collapsed[direction];
+    const heading = el('button', {
+      className: 'rel-fold',
+      attributes: { type: 'button', 'aria-expanded': String(open) },
+    }, [
+      icon(open ? 'i-chevron-down' : 'i-chevron-right'),
+      el('span', { text: `${labelText} (${rows.length})` }),
+    ]);
+    heading.addEventListener('click', () => {
+      collapsed[direction] = open;
+      renderBody();
+    });
+    const held = el('div', { className: 'rel-section' }, [heading]);
+    if (!open) return held;
+
+    const headers =
+      direction === 'incoming'
+        ? [sortableHeader('Source', 'entity', direction), sortableHeader('Relationship', 'relationship', direction), el('th', { text: 'Target' })]
+        : [el('th', { text: 'Source' }), sortableHeader('Relationship', 'relationship', direction), sortableHeader('Target', 'entity', direction)];
+    held.appendChild(
+      el('table', { className: 'table' }, [
+        columns(),
+        el('thead', {}, [el('tr', {}, [...headers, el('th', { className: 'shrink' })])]),
+        el('tbody', {}, rows.map((row) => (row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking)))),
+      ])
+    );
+    return held;
+  }
+
+  /** The stale strip: picks the model no longer admits, closing the list. */
+  function staleSection(rows, subject) {
+    const held = el('div', { className: 'rel-section' }, [
+      el('div', { className: 'rel-fold rel-fold-still', text: `No longer possible (${rows.length})` }),
+    ]);
+    held.appendChild(
+      el('table', { className: 'table' }, [
+        columns(),
+        el('tbody', {}, rows.map((row) => pendingRow(row, subject))),
+      ])
+    );
+    return held;
+  }
+
+  function renderList(subject, picker) {
+    listHost.textContent = '';
+    const picking = picker !== null;
+    const tables = relationshipTables(store.model(), subject.id, picker);
+    const empty = tables.outgoing.length === 0 && tables.incoming.length === 0 && tables.stale.length === 0;
+
+    if (picking) {
+      const offered = pickerCandidates(store.model(), picker).size;
+      listHost.appendChild(
+        el('p', {
+          className: 'picking-note',
+          text:
+            offered === 0
+              ? `Nothing in the model can take a relationship with ${subject.id} yet.`
+              : `${offered} ${offered === 1 ? 'row offers itself' : 'rows offer themselves'} in the navigator; the rest are dimmed. Picking again lets go.`,
+        })
+      );
+    } else if (empty) {
+      listHost.appendChild(
+        emptyState('No relationships', `${subject.id} is not related to anything yet.`, {
+          label: 'Add relationship',
+          icon: 'i-add-relationship',
+          onPick: onAdd,
+        })
       );
       return;
     }
 
-    renderToolbar(entity);
-    if (view === 'list') renderList(model, entity);
-    else renderGraph(model, entity);
-  }
-
-  // --- Creation and editing ------------------------------------------
-
-  /** @param {import('./model.js').Entity} entity */
-  function renderToolbar(entity) {
-    context.toolbarEl.append(
-      el('button', {
-        type: 'button',
-        class: 'ghost-button',
-        title: 'Add relationship',
-        'aria-label': 'Add relationship',
-        onclick: () => openAddRelationshipPanel(entity),
-      }, [icon('i-add-relationship')])
-    );
-  }
-
-  /** The two views say the same thing when there is nothing to show. */
-  /** @param {import('./model.js').Entity} entity */
-  function renderEmpty(entity) {
-    context.bodyEl.append(
-      el('div', { class: 'empty-state' }, [
-        el('p', { class: 'empty-state-title', text: 'No relationships' }),
-        el('p', { class: 'empty-state-body', text: `${entity.id} is not related to anything yet.` }),
-        el('button', { type: 'button', class: 'button with-icon', onclick: () => openAddRelationshipPanel(entity) }, [
-          icon('i-add-relationship'),
-          el('span', { text: 'Add relationship' }),
-        ]),
-      ])
-    );
-  }
-
-  /**
-   * A relationship is a triple with this entity at one end. The side panel
-   * asks for the relationship form — direction, label and far type in one
-   * row — and the entities at the far end are then picked from the
-   * navigator, which stays visible beside the panel: rows the model would
-   * refuse are dimmed, rows it would accept offer themselves. Several can be
-   * picked in one go, since one measure often mitigates several hazards, and
-   * a picked row is let go again by clicking it once more or from the list
-   * in the panel. Done makes every picked relationship at once; Cancel and
-   * Escape make none. The offers come from the metamodel and the model, so a
-   * combination that is not allowed is never offered, and completion still
-   * runs through addRelationship for every pick.
-   *
-   * @param {import('./model.js').Entity} entity
-   */
-  function openAddRelationshipPanel(entity) {
-    closePanel();
-    const model = context.getModel();
-    // Only the forms something in the model can take. A form the metamodel
-    // allows but nothing can answer is a choice that leads to an empty tree,
-    // so it is not offered here. Making the entity at the far end is what New
-    // related entity is for, and that offers every form the metamodel allows
-    // whether or not anything exists to take it yet.
-    const options = availableRelationships(entity.type).filter(
-      (option) => candidatesFor(model, option.type.id, entity.id, option.direction).length > 0
-    );
-    const panel = context.panelEl;
-    /** The targets picked so far, in the order they were picked. */
-    const picked = new Set();
-    /** The live picker handed to the tree, for re-rendering after a change. */
-    let currentSpec = null;
-
-    // The directions are headed the way the list below names them and the New
-    // related entity menu heads them, so the same word means the same thing
-    // wherever a relationship is read or made. Neither heading repeats which
-    // entity it is relative to: the tree and the bar above the editor both
-    // name that already, and the row above this one names it again. The form
-    // says the rest.
-    const group = (heading, direction) => {
-      const members = options.filter((option) => option.direction === direction);
-      if (members.length === 0) return null;
-      return el('optgroup', { label: heading }, members.map((option) =>
-        el('option', {
-          value: `${direction}:${option.type.id}`,
-          text:
-            direction === 'outgoing'
-              ? `${option.type.label} → ${ENTITY_TYPES[option.type.target].name}`
-              : `${ENTITY_TYPES[option.type.source].name} → ${option.type.label}`,
-        })
-      ));
-    };
-
-    const formSelect = el('select', { class: 'input', id: 'relationship-form' }, [
-      group('Outgoing', 'outgoing'),
-      group('Incoming', 'incoming'),
-    ].filter(Boolean));
-    const status = el('p', { class: 'pick-status', role: 'status' });
-    const note = el('p', { class: 'side-panel-note' });
-    const pickedSection = el('div', { class: 'picked-list' });
-    const doneButton = el('button', { type: 'button', class: 'button primary', text: 'Done', disabled: true, onclick: completePicks });
-
-    function chosen() {
-      const separator = formSelect.value.indexOf(':');
-      const direction = formSelect.value.slice(0, separator);
-      const type = RELATIONSHIP_TYPES[formSelect.value.slice(separator + 1)];
-      return type ? { direction, type } : null;
+    const outgoing = presentedRows(tables.outgoing, tableSort.outgoing, tableFilter);
+    const incoming = presentedRows(tables.incoming, tableSort.incoming, tableFilter);
+    const stale = presentedRows(tables.stale, null, tableFilter);
+    if (outgoing.length > 0) listHost.appendChild(section('outgoing', 'Outgoing', outgoing, subject, picking));
+    if (incoming.length > 0) listHost.appendChild(section('incoming', 'Incoming', incoming, subject, picking));
+    if (stale.length > 0) listHost.appendChild(staleSection(stale, subject));
+    if (!empty && outgoing.length + incoming.length + stale.length === 0) {
+      listHost.appendChild(el('p', { className: 'picking-note', text: 'Nothing matches the filter.' }));
     }
-
-    /**
-     * The chosen form decides what the tree offers, so changing it starts
-     * the picking over. The relationship label is used as the metamodel
-     * writes it, between the two ends it joins; "each" keeps the sentence
-     * true however many are picked.
-     */
-    function refresh() {
-      picked.clear();
-      currentSpec = null;
-      const option = chosen();
-      // Nothing was offered, so nothing can be chosen: every form the
-      // metamodel allows this entity has no entity in the model to take it.
-      if (!option) {
-        status.textContent = `Nothing in the model can take a relationship with ${entity.id} yet.`;
-        note.textContent = 'New related entity creates the entity and the relationship together.';
-        context.setPicker(null);
-        renderPicked();
-        return;
-      }
-      const far = ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source];
-      const candidates = candidatesFor(model, option.type.id, entity.id, option.direction);
-
-      status.textContent =
-        option.direction === 'outgoing'
-          ? `Select ${far.plural} in the navigator — ${entity.id} ${option.type.label} each.`
-          : `Select ${far.plural} in the navigator — each ${option.type.label} ${entity.id}.`;
-      note.textContent = `${candidates.length} ${candidates.length === 1 ? 'row offers itself' : 'rows offer themselves'}; the rest are dimmed. Picking again lets go.`;
-      currentSpec = {
-        validIds: new Set(candidates.map((candidate) => candidate.id)),
-        pickedIds: picked,
-        onPick: (id) => {
-          if (picked.has(id)) picked.delete(id);
-          else picked.add(id);
-          renderPicked();
-          context.setPicker(currentSpec);
-        },
-      };
-      context.setPicker(currentSpec);
-      renderPicked();
-    }
-
-    /** What has been picked so far, each letting go of itself. */
-    function renderPicked() {
-      clear(pickedSection);
-      pickedSection.append(el('p', { class: 'field-label', text: `Selected (${picked.size})` }));
-      for (const id of picked) {
-        const target = model.entities.get(id);
-        if (!target) continue;
-        pickedSection.append(
-          el('div', { class: 'picked-row' }, [
-            el('span', { class: 'mono', text: id }),
-            el('span', { class: 'picked-label', text: labelOf(target) }),
-            el('button', {
-              type: 'button',
-              class: 'icon-button neutral',
-              title: 'Deselect',
-              'aria-label': `Deselect ${id}`,
-              onclick: () => {
-                picked.delete(id);
-                renderPicked();
-                if (currentSpec) context.setPicker(currentSpec);
-              },
-            }, [icon('i-close')]),
-          ])
-        );
-      }
-      doneButton.disabled = picked.size === 0;
-    }
-
-    /**
-     * Done makes every picked relationship, as one step for undo. The model
-     * checks each on the way in, so the tree can never hand over something
-     * the metamodel refuses.
-     */
-    function completePicks() {
-      const option = chosen();
-      if (!option || picked.size === 0) return;
-      const failures = [];
-      for (const id of picked) {
-        const result =
-          option.direction === 'outgoing'
-            ? addRelationship(model, option.type.id, entity.id, id)
-            : addRelationship(model, option.type.id, id, entity.id);
-        if (!result.ok) failures.push(result.reason ?? 'The relationship was refused.');
-      }
-      const succeeded = picked.size - failures.length;
-      closePanel();
-      if (failures.length > 0) context.onMessage(`${failures.length} of the picked relationships were refused. ${failures[0]}`);
-      if (succeeded > 0) context.onChange();
-    }
-
-    formSelect.addEventListener('change', refresh);
-
-    clear(panel);
-    panel.append(
-      el('div', { class: 'side-panel-head' }, [
-        el('h2', { class: 'side-panel-title', text: 'Add relationship' }),
-        el('button', { type: 'button', class: 'side-panel-close', 'aria-label': 'Cancel', onclick: closePanel }, [icon('i-close')]),
-      ]),
-      // With nothing to offer there is no form to choose and nothing to pick,
-      // so the panel carries the entity and the reason and stops there.
-      el('div', { class: 'side-panel-body' }, [
-        dialogRow('Entity', el('span', { class: 'dialog-fixed', text: `${entity.id}  ${labelOf(entity)}` })),
-        options.length > 0 ? dialogRow('Relationship', formSelect) : null,
-        status,
-        note,
-        options.length > 0 ? pickedSection : null,
-      ].filter(Boolean)),
-      el('div', { class: 'side-panel-footer' }, [
-        el('button', { type: 'button', class: 'button', text: 'Cancel', onclick: closePanel }),
-        doneButton,
-      ])
-    );
-    panel.hidden = false;
-    panelOpen = true;
-    refresh();
-    if (options.length > 0) formSelect.focus();
-    else panel.querySelector('.side-panel-close')?.focus();
   }
 
-  function closePanel() {
-    if (!panelOpen) return;
-    panelOpen = false;
-    context.setPicker(null);
-    context.panelEl.hidden = true;
-    clear(context.panelEl);
+  /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, or the graph around its subject. */
+  function renderBody() {
+    const picker = store.picker();
+    const subjectId = picker !== null ? picker.subject : store.selection();
+    const subject = nodeOf(store.model(), subjectId);
+    if (!subject || subject.kind !== 'entity') return;
+    if (store.relationshipView() === 'list') renderList(subject, picker);
+    else graph.render(tableFilter);
   }
 
-  /**
-   * Removing a relationship leaves both entities in place.
-   * @param {import('./model.js').Entity} entity
-   * @param {import('./model.js').Relationship} relationship
-   * @param {import('./model.js').Entity} other
-   */
-  function requestDeleteRelationship(entity, relationship, other) {
-    const model = context.getModel();
-    const type = RELATIONSHIP_TYPES[relationship.type];
-    const source = model.entities.get(relationship.source);
-    const target = model.entities.get(relationship.target);
-
-    confirmDialog({
-      title: 'Remove relationship',
-      content: [
-        el('p', {}, [
-          'Remove ',
-          el('span', { class: 'mono', text: source?.id ?? relationship.source }),
-          ` ${type.label} `,
-          el('span', { class: 'mono', text: target?.id ?? relationship.target }),
-          '?',
-        ]),
-        el('p', { class: 'muted', text: 'Both entities stay in the model. Only the connection between them goes.' }),
-      ],
-      confirmLabel: 'Remove',
-      danger: true,
-      onConfirm: () => {
-        removeRelationship(model, relationship.id);
-        context.onChange();
-      },
-    });
-  }
-
-  /**
-   * @param {string} label
-   * @param {HTMLElement} control
-   */
-  function dialogRow(label, control) {
-    return el('div', { class: 'field' }, [
-      el(control.id ? 'label' : 'span', { class: 'field-label', for: control.id || null, text: label }),
-      control,
-    ]);
-  }
-
-  // --- List view -------------------------------------------------------
-
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Entity} entity
-   */
-  function renderList(model, entity) {
-    const { outgoing, incoming } = relationshipsOf(model, entity.id);
-    if (outgoing.length === 0 && incoming.length === 0) {
-      renderEmpty(entity);
+  function render() {
+    const picker = store.picker();
+    const subjectId = picker !== null ? picker.subject : store.selection();
+    const subject = nodeOf(store.model(), subjectId);
+    if (!subject || subject.kind !== 'entity') {
+      head.hidden = true;
+      head.textContent = '';
+      listHost.hidden = false;
+      graph.element.hidden = true;
+      listHost.textContent = '';
+      listHost.appendChild(
+        store.hasProject()
+          ? emptyState('Nothing selected', 'Select an entity to see its relationships.')
+          : emptyState('No project', 'Create or open a project to work with relationships.')
+      );
       return;
     }
 
-    const rows = [
-      ...outgoing.map((relationship) => row(model, entity, relationship, 'outgoing', relationship.target)),
-      ...incoming.map((relationship) => row(model, entity, relationship, 'incoming', relationship.source)),
-    ];
-
-    context.bodyEl.append(
-      el('table', { class: 'table' }, [
-        el('thead', {}, [
-          el('tr', {}, [
-            el('th', { text: 'Direction' }),
-            el('th', { text: 'Relationship' }),
-            el('th', { text: 'Identifier' }),
-            el('th', { text: 'Related entity' }),
-            el('th', { text: 'Entity type' }),
-            el('th', { class: 'shrink' }),
-          ]),
-        ]),
-        el('tbody', {}, rows),
-      ])
-    );
+    renderHead(picker !== null);
+    const view = store.relationshipView();
+    listHost.hidden = view !== 'list';
+    graph.element.hidden = view !== 'graph';
+    if (view === 'list') renderList(subject, picker);
+    else graph.render(tableFilter);
   }
 
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Entity} entity
-   * @param {import('./model.js').Relationship} relationship
-   * @param {'outgoing'|'incoming'} direction
-   * @param {string} otherId
-   */
-  function row(model, entity, relationship, direction, otherId) {
-    const type = RELATIONSHIP_TYPES[relationship.type];
-    const other = model.entities.get(otherId);
-    if (!other) return el('tr');
-    // The row selects what it names, so it has to be reachable by keyboard as
-    // well as by pointer; without this the list view offers an action the
-    // graph view offers and nothing else can reach (WCAG 2.1.1).
-    return el('tr', {
-      tabindex: '0',
-      'aria-label': `Select ${other.id}, ${labelOf(other)}`,
-      onclick: () => context.onSelect(other.id),
-      onkeydown: (event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        context.onSelect(other.id);
-      },
-    }, [
-      el('td', { class: 'muted' }, [
-        el('span', { class: 'arrow', text: direction === 'outgoing' ? '→' : '←', 'aria-hidden': 'true' }),
-        el('span', { text: direction }),
-      ]),
-      el('td', { text: type.label }),
-      el('td', { class: 'mono', text: other.id }),
-      el('td', { class: 'wrap', text: labelOf(other) }),
-      typeCell(other),
-      el('td', { class: 'shrink' }, [
-        el('button', {
-          type: 'button',
-          class: 'icon-button',
-          title: 'Remove relationship',
-          'aria-label': `Remove the ${type.label} relationship with ${other.id}`,
-          onclick: (event) => {
-            event.stopPropagation();
-            requestDeleteRelationship(entity, relationship, other);
-          },
-        }, [icon('i-remove-relationship')]),
-      ]),
-    ]);
-  }
+  store.subscribe(render);
+  render();
 
-  /** @param {import('./model.js').Entity} entity */
-  function typeCell(entity) {
-    const type = ENTITY_TYPES[entity.type];
-    return el('td', {}, [el('span', { class: 'cell-type' }, [icon(type.icon, type.pillar), el('span', { text: type.name })])]);
-  }
-
-  // --- Graph view ------------------------------------------------------
-
-  /**
-   * The neighbourhood of the selected entity: incoming on the left, outgoing
-   * on the right, the selection between them.
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Entity} entity
-   */
-  function renderGraph(model, entity) {
-    const { outgoing, incoming } = relationshipsOf(model, entity.id);
-    if (outgoing.length === 0 && incoming.length === 0) {
-      renderEmpty(entity);
-      return;
-    }
-
-    const left = incoming.slice(0, MAX_PER_SIDE);
-    const right = outgoing.slice(0, MAX_PER_SIDE);
-    const step = NODE_HEIGHT + ROW_GAP;
-    const lanes = Math.max(left.length, right.length, 1);
-    const overflow = incoming.length > left.length || outgoing.length > right.length;
-    const height = lanes * step - ROW_GAP + MARGIN * 2 + (overflow ? 24 : 0);
-    const width = MARGIN * 2 + NODE_WIDTH * 3 + COLUMN_GAP * 2;
-
-    const centreX = MARGIN + NODE_WIDTH + COLUMN_GAP;
-    const rightX = centreX + NODE_WIDTH + COLUMN_GAP;
-    const centreY = MARGIN + (lanes * step - ROW_GAP - NODE_HEIGHT) / 2;
-
-    const canvas = svg('svg', {
-      class: 'graph',
-      viewBox: `0 0 ${width} ${height}`,
-      width,
-      height,
-      role: 'group',
-      'aria-label': `Relationships of ${entity.id}`,
-    });
-
-    canvas.append(
-      svg('defs', {}, [
-        svg('marker', { id: 'graph-arrow', viewBox: '0 0 10 10', refX: '9', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' }, [
-          svg('path', { d: 'M0 0 10 5 0 10z', class: 'arrow-head' }),
-        ]),
-      ])
-    );
-
-    const laneY = (count, index) => MARGIN + ((lanes - count) * step) / 2 + index * step;
-
-    left.forEach((relationship, index) => {
-      const other = model.entities.get(relationship.source);
-      if (!other) return;
-      const y = laneY(left.length, index);
-      canvas.append(edge(MARGIN + NODE_WIDTH, y + NODE_HEIGHT / 2, centreX, centreY + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type]));
-      canvas.append(graphNode(other, MARGIN, y, false, { entity, relationship }));
-    });
-
-    right.forEach((relationship, index) => {
-      const other = model.entities.get(relationship.target);
-      if (!other) return;
-      const y = laneY(right.length, index);
-      canvas.append(edge(centreX + NODE_WIDTH, centreY + NODE_HEIGHT / 2, rightX, y + NODE_HEIGHT / 2, RELATIONSHIP_TYPES[relationship.type]));
-      canvas.append(graphNode(other, rightX, y, false, { entity, relationship }));
-    });
-
-    canvas.append(graphNode(entity, centreX, centreY, true));
-
-    if (incoming.length > left.length) {
-      canvas.append(svg('text', { x: MARGIN, y: height - 6, class: 'graph-more', text: `+${incoming.length - left.length} more incoming` }));
-    }
-    if (outgoing.length > right.length) {
-      canvas.append(svg('text', { x: rightX, y: height - 6, class: 'graph-more', text: `+${outgoing.length - right.length} more outgoing` }));
-    }
-
-    context.bodyEl.append(el('div', { class: 'graph-wrap' }, [canvas]));
-  }
-
-  /**
-   * Every relationship is drawn the same line. The metamodel tells one from
-   * another by its label, which the edge carries, and by nothing else.
-   * @param {number} x1
-   * @param {number} y1
-   * @param {number} x2
-   * @param {number} y2
-   * @param {import('./metamodel.js').RelationshipType} type
-   */
-  function edge(x1, y1, x2, y2, type) {
-    return svg('g', { class: 'edge' }, [
-      svg('line', { x1, y1, x2, y2, 'marker-end': 'url(#graph-arrow)' }),
-      svg('text', { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6, class: 'edge-label', text: type.label }),
-    ]);
-  }
-
-  /**
-   * @param {import('./model.js').Entity} entity
-   * @param {number} x
-   * @param {number} y
-   * @param {boolean} isCentre
-   * @param {{ entity: import('./model.js').Entity, relationship: import('./model.js').Relationship }} [edgeTo]
-   *   the centre entity and the relationship that puts this box on the
-   *   canvas, which is what the box's remove control acts on
-   */
-  function graphNode(entity, x, y, isCentre, edgeTo) {
-    const type = ENTITY_TYPES[entity.type];
-    const group = svg('g', {
-      class: `graph-node${isCentre ? ' centre' : ''}`,
-      transform: `translate(${x},${y})`,
-      tabindex: isCentre ? null : '0',
-      role: isCentre ? null : 'button',
-      'aria-label': isCentre ? null : `Select ${entity.id}, ${labelOf(entity)}`,
-    }, [
-      svg('rect', { width: NODE_WIDTH, height: NODE_HEIGHT }),
-      svg('use', { href: `#${type.icon}`, x: 16, y: 12, width: 16, height: 16, class: 'node-icon', 'data-pillar': type.pillar }),
-      svg('text', { x: 40, y: 24, class: 'node-type', text: type.name }),
-      svg('text', { x: 16, y: 42, class: 'node-id', text: entity.id }),
-      svg('text', { x: 16, y: 58, class: 'node-label', text: truncate(labelOf(entity), 27) }),
-      svg('title', { text: `${type.name} ${entity.id} — ${labelOf(entity)}` }),
-    ]);
-
-    if (!isCentre) {
-      group.addEventListener('click', () => context.onSelect(entity.id));
-      group.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          context.onSelect(entity.id);
-        }
-      });
-      if (edgeTo) group.append(removeControl(edgeTo.entity, edgeTo.relationship, entity));
-    }
-    return group;
-  }
-
-  /**
-   * The control that takes a box off the canvas by removing the relationship
-   * that put it there. It is drawn as an unlink rather than a bin, and says
-   * so on hover, because a bin sitting on an entity box would read as
-   * deleting the entity. It stands on every box rather than appearing on
-   * hover, so what can be removed is visible without hunting for it.
-   *
-   * @param {import('./model.js').Entity} anchor  the entity at the centre
-   * @param {import('./model.js').Relationship} relationship
-   * @param {import('./model.js').Entity} other
-   */
-  function removeControl(anchor, relationship, other) {
-    const type = RELATIONSHIP_TYPES[relationship.type];
-    const remove = (event) => {
-      // The box beneath is a button of its own, and it selects.
-      event.stopPropagation();
-      requestDeleteRelationship(anchor, relationship, other);
-    };
-
-    const control = svg('g', {
-      class: 'node-remove',
-      transform: `translate(${NODE_WIDTH - 28},4)`,
-      tabindex: '0',
-      role: 'button',
-      'aria-label': `Remove the ${type.label} relationship with ${other.id}`,
-    }, [
-      // A 24px square, which is the smallest target WCAG 2.2 allows (2.5.8).
-      svg('rect', { class: 'node-remove-hit', width: 24, height: 24 }),
-      svg('use', { href: '#i-remove-relationship', x: 4, y: 4, width: 16, height: 16, class: 'node-remove-icon' }),
-      svg('title', { text: 'Remove relationship' }),
-    ]);
-
-    control.addEventListener('click', remove);
-    control.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      remove(event);
-    });
-    return control;
-  }
-
-  return {
-    render,
-
-    /** Which of the two presentations is on, for the View menu. */
-    view: () => view,
-
-    /** @param {'graph'|'list'} name */
-    setView(name) {
-      if (name !== view) {
-        view = name;
-        render();
-      }
-    },
-
-    /**
-     * Start adding a relationship on the selected entity, which is what the
-     * Edit menu and the right-click menu reach. The pane's own button calls
-     * the same thing with the entity it is already standing on.
-     */
-    beginAdd() {
-      const model = context.getModel();
-      const id = context.getEntityId();
-      const entity = id ? model.entities.get(id) : null;
-      if (entity) openAddRelationshipPanel(entity);
-    },
-  };
+  return { render };
 }

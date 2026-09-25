@@ -1,9 +1,6 @@
 /**
  * The attribute definitions per entity type, transcribed from
- * `sandbox/app/beta/notes/attributes.md` — the working draft that supersedes
- * `docs/attributes.md` while the attribute-definition work runs, and the
- * authoritative definition for now — in the order the document records
- * the types.
+ * `docs/attributes.md` in the order the document records the types.
  *
  * Per type, the ungrouped definitions come first and the named groups
  * follow — a group tagged tab standing on a tab of its own — with keys

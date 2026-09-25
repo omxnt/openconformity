@@ -1,259 +1,260 @@
 /**
- * Modal dialogs and toasts.
+ * Promise-based dialogs over the overlay, so a guard reads as one awaited
+ * if. A dialog resolves with the value of the chosen action, or with null
+ * when it is dismissed — Escape, or a pointer down on the backdrop. Focus
+ * stays inside the dialog and returns to the opener when it closes.
  *
- * A dialog is for a question that must be answered before anything else
- * happens, a toast for a remark that requires nothing: it sits in the corner
- * and leaves by itself. Deletions confirm with a Carbon danger dialog, whose
- * red is the destructive-action colour and never a verdict (D-026).
+ * A toast is the other voice: a passing remark in the corner for what
+ * changes nothing and needs no answer — a refusal, a save that went
+ * through. It leaves by itself and never joins the overlay stack.
  */
 
 import { el, icon } from './dom.js';
-
-let overlay = null;
-let lastFocused = null;
-let blocking = false;
-
-/**
- * @param {Object} spec
- * @param {string} spec.title
- * @param {Array<Node|string>} spec.content
- * @param {Array<{ label: string, primary?: boolean, danger?: boolean, action?: () => void }>} [spec.actions]
- * @param {boolean} [spec.blocking]  no close button, no Escape, no click away
- */
-export function openDialog(spec) {
-  close();
-  lastFocused = document.activeElement;
-
-  const body = el('div', { class: 'dialog-body' }, spec.content);
-  const footer = el('div', { class: 'dialog-footer' });
-
-  for (const action of spec.actions ?? [{ label: 'Close', primary: true }]) {
-    footer.append(
-      el('button', {
-        type: 'button',
-        class: `button${action.primary ? ' primary' : ''}${action.danger ? ' danger' : ''}`,
-        text: action.label,
-        onclick: () => {
-          blocking = false;
-          close();
-          action.action?.();
-        },
-      })
-    );
-  }
-
-  // Carbon's modal names itself by pointing at its own heading, and the
-  // heading is a heading: it is the title of the thing on screen, so a reader
-  // moving by headings should land on it.
-  const head = el('div', { class: 'dialog-head' }, [
-    el('h2', { class: 'dialog-title', id: 'dialog-title', text: spec.title }),
-  ]);
-  if (!spec.blocking) {
-    head.append(el('button', { type: 'button', class: 'dialog-close', 'aria-label': 'Close', onclick: close }, [icon('i-close')]));
-  }
-
-  const dialog = el('div', { class: 'dialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' }, [
-    head,
-    body,
-    footer,
-  ]);
-
-  blocking = Boolean(spec.blocking);
-  overlay = el('div', {
-    class: 'overlay',
-    onclick: (event) => {
-      if (!blocking && event.target === overlay) close();
-    },
-  }, [dialog]);
-
-  document.body.append(overlay);
-  document.addEventListener('keydown', onKeyDown);
-  footer.querySelector('button')?.focus();
-}
-
-function close() {
-  if (!overlay || blocking) return;
-  overlay.remove();
-  overlay = null;
-  blocking = false;
-  document.removeEventListener('keydown', onKeyDown);
-  if (lastFocused instanceof HTMLElement) lastFocused.focus();
-  lastFocused = null;
-}
-
-/**
- * @param {KeyboardEvent} event
- */
-function onKeyDown(event) {
-  if (event.key === 'Escape' && !blocking) {
-    event.preventDefault();
-    close();
-    return;
-  }
-  if (event.key !== 'Tab' || !overlay) return;
-
-  const focusable = [...overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')];
-  if (focusable.length === 0) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (event.shiftKey && document.activeElement === first) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus();
-  }
-}
-
-/**
- * @param {string} title
- * @param {string} message
- */
-export function notify(title, message) {
-  openDialog({ title, content: [el('p', { text: message })] });
-}
 
 /** How long a toast stands before leaving on its own. */
 const TOAST_MS = 6000;
 
 /**
- * A passing remark: a Carbon toast in the corner, closed by itself or by
- * hand. Used for refusals, which change nothing and need no answer.
- * @param {string} title
- * @param {string} message
+ * @param {Object} context
+ * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
+ * @param {HTMLElement} [context.toastRegion]
  */
-export function toast(title, message) {
-  const region = document.getElementById('toasts');
-  if (!region) return;
+export function createDialogs({ overlay, toastRegion = null }) {
+  /**
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} [spec.message]
+   * @param {HTMLElement} [spec.body]
+   * @param {Array<{ label: string, value: any, kind?: 'primary'|'secondary'|'danger', default?: boolean, run?: () => any }>} [spec.actions]  an action with `run` closes with what it resolves, or stays open when that is undefined; none makes a passive dialog, closed only by its X, Escape or a click outside
+   * @param {HTMLElement} [spec.initialFocus]
+   * @returns {Promise<any>}
+   */
+  function open({ title, message, body, actions = [], initialFocus }) {
+    return new Promise((resolve) => {
+      let result = null;
+      let defaultButton = null;
 
-  const glyph = icon('i-information');
-  glyph.classList.add('toast-icon');
-  const item = el('div', { class: 'toast', role: 'status' }, [
-    glyph,
-    el('div', { class: 'toast-content' }, [
-      el('p', { class: 'toast-title', text: title }),
-      el('p', { class: 'toast-body', text: message }),
-    ]),
-  ]);
+      const buttons = actions.map((action) => {
+        const button = el('button', {
+          className: `dialog-button button-${action.kind ?? 'secondary'}`,
+          text: action.label,
+          attributes: { type: 'button' },
+        });
+        button.addEventListener('click', async () => {
+          if (action.run) {
+            const held = await action.run();
+            if (held === undefined) return;
+            result = held;
+          } else {
+            result = action.value;
+          }
+          overlay.close(entry);
+        });
+        if (action.default) defaultButton = button;
+        return button;
+      });
 
-  const timer = setTimeout(() => item.remove(), TOAST_MS);
-  item.append(
-    el('button', {
-      type: 'button',
-      class: 'toast-close',
-      'aria-label': 'Close',
-      onclick: () => {
-        clearTimeout(timer);
-        item.remove();
+      const dismiss = el('button', {
+        className: 'dialog-close',
+        attributes: { type: 'button', 'aria-label': 'Close' },
+      }, [icon('i-close')]);
+      dismiss.addEventListener('click', () => overlay.close(entry));
+
+      // Carbon's modal names itself by pointing at its own heading, and
+      // the heading is a heading: a reader moving by them lands on it.
+      const card = el(
+        'div',
+        { className: 'dialog', attributes: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dialog-title' } },
+        [
+          el('div', { className: 'dialog-head' }, [
+            el('h2', { className: 'dialog-title', text: title, attributes: { id: 'dialog-title' } }),
+            dismiss,
+          ]),
+          el('div', { className: 'dialog-body' }, [
+            ...(message ? [el('p', { text: message })] : []),
+            ...(body ? [body] : []),
+          ]),
+          ...(buttons.length > 0 ? [el('div', { className: 'dialog-actions' }, buttons)] : []),
+        ]
+      );
+      const backdrop = el('div', { className: 'dialog-backdrop' }, [card]);
+
+      backdrop.addEventListener('pointerdown', (event) => {
+        if (event.target === backdrop) overlay.close(entry);
+      });
+
+      backdrop.addEventListener('keydown', (event) => {
+        if (
+          event.key === 'Enter' &&
+          (event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement) &&
+          defaultButton
+        ) {
+          event.preventDefault();
+          defaultButton.click();
+          return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = [...card.querySelectorAll('button, input, select, textarea')].filter(
+          (control) => !control.disabled
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+
+      const entry = overlay.open({
+        kind: 'dialog',
+        element: backdrop,
+        opener: document.activeElement,
+        onClose: () => resolve(result),
+      });
+
+      const primary = buttons[buttons.length - 1];
+      const safe = primary && primary.classList.contains('button-danger') ? buttons[0] : primary;
+      (initialFocus ?? safe ?? card).focus();
+    });
+  }
+
+  /**
+   * A one-field question: resolves the entered text, or null when it is
+   * cancelled or dismissed. Enter answers with the field, the text opens
+   * selected, and a blanked field falls back to what it held.
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} spec.label
+   * @param {string} [spec.value]
+   * @param {string} [spec.confirmLabel]
+   * @param {(value: string) => string} [spec.preview]  a live line under the field, following what is typed
+   * @returns {Promise<string|null>}
+   */
+  async function prompt({ title, label, value = '', confirmLabel = 'Save', preview = null }) {
+    const input = el('input', {
+      className: 'field-input',
+      attributes: { type: 'text', id: 'prompt-field' },
+    });
+    input.value = value;
+    const parts = [
+      el('label', { className: 'field-label', text: label, attributes: { for: 'prompt-field' } }),
+      input,
+    ];
+    if (preview !== null) {
+      const note = el('p', { className: 'field-note', text: preview(input.value) });
+      input.addEventListener('input', () => {
+        note.textContent = preview(input.value);
+      });
+      parts.push(note);
+    }
+    const body = el('div', { className: 'field' }, parts);
+    const asked = open({
+      title,
+      body,
+      actions: [
+        { label: 'Cancel', value: null, kind: 'secondary' },
+        { label: confirmLabel, value: 'confirmed', kind: 'primary', default: true },
+      ],
+      initialFocus: input,
+    });
+    input.select();
+    const answer = await asked;
+    return answer === 'confirmed' ? input.value.trim() || value : null;
+  }
+
+  /**
+   * A two-way question. Escape and the backdrop answer no.
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} [spec.message]
+   * @param {HTMLElement} [spec.body]
+   * @param {string} [spec.confirmLabel]
+   * @param {string} [spec.cancelLabel]
+   * @param {boolean} [spec.danger]
+   * @returns {Promise<boolean>}
+   */
+  async function confirm({ title, message, body, confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false }) {
+    const value = await open({
+      title,
+      message,
+      body,
+      actions: [
+        { label: cancelLabel, value: false, kind: 'secondary' },
+        { label: confirmLabel, value: true, kind: danger ? 'danger' : 'primary' },
+      ],
+    });
+    return value === true;
+  }
+
+  /**
+   * A one-list question: resolves the chosen option's value, or null when
+   * cancelled or dismissed. Enter answers with the highlighted option.
+   * @param {Object} spec
+   * @param {string} spec.title
+   * @param {string} spec.label
+   * @param {Array<{ value: string, label: string }>} spec.options
+   * @param {string} [spec.value]
+   * @param {string} [spec.confirmLabel]
+   * @returns {Promise<string|null>}
+   */
+  async function choose({ title, label, options, value, confirmLabel = 'Choose' }) {
+    const select = el(
+      'select',
+      {
+        className: 'field-input',
+        attributes: { id: 'choose-field', size: String(Math.min(Math.max(options.length, 4), 24)) },
       },
-    }, [icon('i-close')])
-  );
+      options.map((option) => el('option', { text: option.label, attributes: { value: option.value } }))
+    );
+    if (value !== undefined) select.value = value;
+    const body = el('div', { className: 'field' }, [
+      el('label', { className: 'field-label', text: label, attributes: { for: 'choose-field' } }),
+      select,
+    ]);
+    const answer = await open({
+      title,
+      body,
+      actions: [
+        { label: 'Cancel', value: null, kind: 'secondary' },
+        { label: confirmLabel, value: 'confirmed', kind: 'primary', default: true },
+      ],
+      initialFocus: select,
+    });
+    return answer === 'confirmed' ? select.value : null;
+  }
 
-  region.append(item);
-}
-
-/**
- * @param {Object} spec
- * @param {string} spec.title
- * @param {Array<Node|string>} spec.content
- * @param {string} spec.confirmLabel
- * @param {boolean} [spec.danger]  the confirmation destroys something
- * @param {() => void} spec.onConfirm
- */
-export function confirmDialog(spec) {
-  openDialog({
-    title: spec.title,
-    content: spec.content,
-    actions: [
-      { label: 'Cancel' },
-      { label: spec.confirmLabel, primary: !spec.danger, danger: spec.danger, action: spec.onConfirm },
-    ],
-  });
-}
-
-/**
- * A dialog with a single text field, used to name a model.
- * @param {Object} spec
- * @param {string} spec.title
- * @param {string} spec.label
- * @param {string} spec.value
- * @param {string} spec.confirmLabel
- * @param {(value: string) => string} [spec.describe]  helper text, kept in
- *   step with what is typed, so the consequence of the name is visible before
- *   the button is pressed
- * @param {(value: string) => void} spec.onConfirm
- */
-export function promptDialog(spec) {
-  const settled = () => input.value.trim() || spec.value;
-  const confirm = () => spec.onConfirm(settled());
-  const note = spec.describe ? el('p', { class: 'dialog-note', text: spec.describe(spec.value) }) : null;
-
-  const input = el('input', {
-    class: 'input',
-    type: 'text',
-    id: 'prompt-input',
-    oninput: () => {
-      if (note) note.textContent = spec.describe(settled());
-    },
-    onkeydown: (event) => {
-      if (event.key !== 'Enter') return;
-      event.preventDefault();
-      close();
-      confirm();
-    },
-  });
-  input.value = spec.value;
-
-  openDialog({
-    title: spec.title,
-    content: [
-      el('div', { class: 'field' }, [
-        el('label', { class: 'field-label', for: 'prompt-input', text: spec.label }),
-        input,
-        note,
-      ].filter(Boolean)),
-    ],
-    actions: [
-      { label: 'Cancel' },
-      { label: spec.confirmLabel, primary: true, action: confirm },
-    ],
-  });
-
-  input.focus();
-  input.select();
-}
-
-/**
- * A dialog with a single list to pick from, used to move an entity or folder.
- * @param {Object} spec
- * @param {string} spec.title
- * @param {string} spec.label
- * @param {Array<{ value: string, label: string }>} spec.options
- * @param {string} spec.value
- * @param {string} spec.confirmLabel
- * @param {(value: string) => void} spec.onConfirm
- */
-export function chooseDialog(spec) {
-  const select = el(
-    'select',
-    { class: 'input', id: 'choose-input', size: String(Math.min(Math.max(spec.options.length, 4), 12)) },
-    spec.options.map((option) => el('option', { value: option.value, text: option.label }))
-  );
-  select.value = spec.value;
-
-  openDialog({
-    title: spec.title,
-    content: [
-      el('div', { class: 'field field-tall' }, [
-        el('label', { class: 'field-label', for: 'choose-input', text: spec.label }),
-        select,
+  /**
+   * A passing remark: told in the corner, closed by itself or by hand.
+   * @param {string} title
+   * @param {string} message
+   */
+  function toast(title, message) {
+    if (!toastRegion) return;
+    const item = el('div', { className: 'toast', attributes: { role: 'status' } }, [
+      icon('i-information'),
+      el('div', { className: 'toast-content' }, [
+        el('p', { className: 'toast-title', text: title }),
+        el('p', { className: 'toast-body', text: message }),
       ]),
-    ],
-    actions: [
-      { label: 'Cancel' },
-      { label: spec.confirmLabel, primary: true, action: () => spec.onConfirm(select.value) },
-    ],
-  });
+    ]);
+    item.querySelector('.icon').classList.add('toast-icon');
+    const timer = setTimeout(() => item.remove(), TOAST_MS);
+    const close = el(
+      'button',
+      { className: 'toast-close', attributes: { type: 'button', 'aria-label': 'Close' } },
+      [icon('i-close')]
+    );
+    close.addEventListener('click', () => {
+      clearTimeout(timer);
+      item.remove();
+    });
+    item.appendChild(close);
+    toastRegion.appendChild(item);
+  }
 
-  select.focus();
+  return { open, confirm, prompt, choose, toast };
 }

@@ -15,7 +15,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the diagram -------------------------------------------------
 
-const diagram = readFile('../../../../docs/metamodel.md');
+const diagram = readFile('../docs/metamodel.md');
 const lines = diagram.split('\n').map((line) => line.trim());
 
 const documentTypes = [];
@@ -39,7 +39,7 @@ for (const line of lines) {
 
 // --- Parse the schema --------------------------------------------------
 
-const schema = JSON.parse(readFile('../../../../schema/project.schema.json'));
+const schema = JSON.parse(readFile('../schema/project.schema.json'));
 const schemaRelationshipIds = schema.$defs.relationship.properties.type.enum;
 const schemaTypeCodes = schema.$defs.entity.properties.type.enum;
 const schemaCounterKeys = schema.properties.counters.required;

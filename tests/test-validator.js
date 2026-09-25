@@ -96,7 +96,7 @@ ok(validate([], 1).ok === false, 'an array is refused');
 
 // --- The enumerations, behaviourally -----------------------------------
 
-const schema = JSON.parse(readFile('../../../../schema/project.schema.json'));
+const schema = JSON.parse(readFile('../schema/project.schema.json'));
 const relationshipIds = schema.$defs.relationship.properties.type.enum;
 const typeCodes = schema.$defs.entity.properties.type.enum;
 const compositionIds = [

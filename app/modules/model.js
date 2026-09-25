@@ -1,516 +1,443 @@
 /**
- * The model, and the rules that hold it to the metamodel.
+ * The model, and the rules that hold it to the metamodel. Every mutation
+ * goes through this module; nothing else in the software writes to a model.
  *
- * A model is a set of entities and a set of relationships between them. Every
- * mutation goes through this module, which refuses anything the metamodel does
- * not define. Nothing else in the software writes to a model.
+ * A model holds one collection of nodes — folders and entities, told apart
+ * by their `kind` — the relationships keyed by their triple, and the
+ * counters that issue identifiers. Sibling order is collection order: the
+ * children of a parent, read in collection order, are the order the tree
+ * draws, folders and entities interleaved.
  *
- * Folders are the one thing here that the metamodel says nothing about. They
- * carry no meaning and take part in no relationship: they exist so the user can
- * group things in the navigator, the way a filing cabinet groups paper. They
- * are kept apart from the entities for that reason.
- *
- * Filing is free. Every folder and entity carries a `parent`, which is the
- * folder or entity it sits inside, or null for the top of the tree. Anything
- * nests inside anything, to any depth, and the only arrangement refused is one
- * that would put something inside itself. Where a thing sits says nothing about
- * what it is or what it is related to: the metamodel decides which entities can
- * exist and which relationships are allowed, and nothing else.
+ * Every check the interface can ask has a mutation that answers the same
+ * way: a `can*` function and its `do` return the same `{ ok, reason }`,
+ * and a mutation runs its check before it writes.
  */
 
-import {
-  ENTITY_TYPES,
-  RELATIONSHIP_TYPES,
-  relationshipsFrom,
-  relationshipsTo,
-  storedAttributesFor,
-} from './metamodel.js';
+import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
 
 /**
- * @typedef {Object} Entity
- * @property {string} id
- * @property {string} type       entity type code
- * @property {string|null} parent  the folder or entity it sits in, if any
- * @property {Object<string, string>} attributes
- *
- * @typedef {Object} Relationship
- * @property {string} id
- * @property {string} type       relationship type id
- * @property {string} source     entity id
- * @property {string} target     entity id
- *
  * @typedef {Object} Folder
  * @property {string} id
+ * @property {'folder'} kind
  * @property {string} name
- * @property {string|null} parent  the folder or entity it sits in, if any
+ * @property {string|null} parent  the node it is filed in, or null at the top
  *
- * A `Node` below means either of the two: the things the tree files.
+ * @typedef {Object} Entity
+ * @property {string} id
+ * @property {'entity'} kind
+ * @property {string} type  entity type code
+ * @property {string|null} parent  the node it is filed in, or null at the top
+ * @property {Object<string, string>} attributes
+ *
+ * @typedef {Folder|Entity} Node
+ *
+ * @typedef {Object} Relationship
+ * @property {string} type    relationship type id
+ * @property {string} source  entity id
+ * @property {string} target  entity id
  *
  * @typedef {Object} Model
  * @property {string} name
- * @property {Map<string, Entity>} entities
- * @property {Map<string, Relationship>} relationships
- * @property {Map<string, Folder>} folders
- * @property {Set<string>} relationshipKeys  one key per triple, for the duplicate check
- * @property {Object<string, number>} counters
- * @property {number} relationshipCounter
- * @property {number} folderCounter
+ * @property {Object<string, string>} attributes  the project's own values, carried like an entity's
+ * @property {Map<string, Node>} nodes
+ * @property {Map<string, Relationship>} relationships  keyed by `type source target`
+ * @property {Object<string, number>} counters  the next number to issue, per entity type code and F for folders
+ *
+ * @typedef {{ ok: true } | { ok: false, reason: string }} Outcome
  */
 
-/**
- * @param {string} name
- * @returns {Model}
- */
-export function createModel(name) {
-  return {
-    name: name || 'Untitled project',
-    entities: new Map(),
-    relationships: new Map(),
-    folders: new Map(),
-    relationshipKeys: new Set(),
-    counters: {},
-    relationshipCounter: 0,
-    folderCounter: 0,
-  };
+/** @returns {Model} */
+export function createModel() {
+  /** @type {Object<string, number>} */
+  const counters = { F: 1 };
+  for (const code of Object.keys(ENTITY_TYPES)) counters[code] = 1;
+  return { name: '', attributes: {}, nodes: new Map(), relationships: new Map(), counters };
 }
 
 /**
- * @param {Model} model
- * @param {string} code
- * @returns {string}
- */
-function nextEntityId(model, code) {
-  const next = (model.counters[code] ?? 0) + 1;
-  model.counters[code] = next;
-  return `${code}-${String(next).padStart(3, '0')}`;
-}
-
-/**
- * @param {Model} model
- * @param {string} code
- * @param {Object<string, string>} [attributes]
- * @param {Object} [options]
- * @param {string|null} [options.parent]
- * @param {string} [options.id]  only supplied when loading an existing model
- * @returns {Entity}
- */
-export function addEntity(model, code, attributes = {}, options = {}) {
-  if (!Object.hasOwn(ENTITY_TYPES, code)) throw new Error(`No such entity type: ${code}`);
-  const type = ENTITY_TYPES[code];
-
-  const entityId = options.id ?? nextEntityId(model, code);
-  /** @type {Entity} */
-  const entity = { id: entityId, type: code, parent: options.parent ?? null, attributes: {} };
-  for (const attribute of storedAttributesFor(code)) {
-    entity.attributes[attribute.key] = attributes[attribute.key] ?? '';
-  }
-  if (!entity.attributes.title) entity.attributes.title = `New ${type.name}`;
-
-  model.entities.set(entityId, entity);
-  return entity;
-}
-
-/**
- * Write a set of attribute values at once, which is what the editor commits
- * when the user saves.
- * @param {Model} model
- * @param {string} id
- * @param {Object<string, string>} values
- */
-export function updateEntity(model, id, values) {
-  const entity = model.entities.get(id);
-  if (!entity) return;
-  for (const attribute of storedAttributesFor(entity.type)) {
-    if (attribute.key in values) entity.attributes[attribute.key] = values[attribute.key];
-  }
-}
-
-/**
- * The title an entity is shown by, falling back to its identifier.
- * @param {Entity} entity
- * @returns {string}
- */
-export function labelOf(entity) {
-  const title = (entity.attributes.title ?? '').trim();
-  return title || entity.id;
-}
-
-// --- Folders -----------------------------------------------------------
-
-/**
- * @param {Model} model
- * @param {string} name
- * @param {string|null} [parent]
- * @param {string} [id]
- * @returns {Folder}
- */
-export function addFolder(model, name, parent = null, id) {
-  model.folderCounter += 1;
-  const folderId = id ?? `F-${model.folderCounter}`;
-  /** @type {Folder} */
-  const folder = { id: folderId, name: name || 'New folder', parent };
-  model.folders.set(folderId, folder);
-  return folder;
-}
-
-/**
- * @param {Model} model
- * @param {string} folderId
- * @param {string} name
- */
-export function renameFolder(model, folderId, name) {
-  const folder = model.folders.get(folderId);
-  if (folder) folder.name = name || folder.name;
-}
-
-/**
- * Deleting a folder never deletes entities. Its contents move up to where the
- * folder itself sat.
- * @param {Model} model
- * @param {string} folderId
- */
-export function removeFolder(model, folderId) {
-  const folder = model.folders.get(folderId);
-  if (!folder) return;
-  reparentChildren(model, folderId, folder.parent);
-  model.folders.delete(folderId);
-}
-
-/**
- * Move everything filed inside a node up to where that node sat, which is what
- * deleting it does to its contents.
- * @param {Model} model
- * @param {string} nodeId
- * @param {string|null} to
- */
-function reparentChildren(model, nodeId, to) {
-  for (const folder of model.folders.values()) {
-    if (folder.parent === nodeId) folder.parent = to;
-  }
-  for (const entity of model.entities.values()) {
-    if (entity.parent === nodeId) entity.parent = to;
-  }
-}
-
-// --- The tree ----------------------------------------------------------
-
-/**
- * The folder or entity with this identifier. The two are kept in separate maps
- * but file the same way, so the tree reaches them through one lookup.
+ * The node with this identifier, or null.
  * @param {Model} model
  * @param {string|null} id
- * @returns {Folder|Entity|null}
+ * @returns {Node|null}
  */
 export function nodeOf(model, id) {
-  if (!id) return null;
-  return model.folders.get(id) ?? model.entities.get(id) ?? null;
+  if (id === null || id === undefined) return null;
+  return model.nodes.get(id) ?? null;
 }
 
 /**
+ * The nodes filed in a parent, in sibling order. Pass null for the top of
+ * the tree.
  * @param {Model} model
- * @param {string|null} parent
- * @returns {Folder[]}
+ * @param {string|null} parentId
+ * @returns {Node[]}
  */
-export function childFolders(model, parent) {
-  return [...model.folders.values()].filter((folder) => folder.parent === parent);
+export function childrenOf(model, parentId) {
+  return [...model.nodes.values()].filter((node) => node.parent === parentId);
 }
 
 /**
+ * Whether a node is another node or filed anywhere beneath it. The walk
+ * upwards is guarded, so a cycle that reached the model some other way
+ * cannot hang it.
  * @param {Model} model
- * @param {string|null} parent
- * @returns {Entity[]}
- */
-export function childEntities(model, parent) {
-  return [...model.entities.values()].filter((entity) => entity.parent === parent);
-}
-
-/**
- * Whether one node sits anywhere above another. Walking upwards is guarded, so
- * a cycle that reached the model some other way cannot hang this.
- * @param {Model} model
- * @param {string} possibleAncestorId
- * @param {string} nodeId
+ * @param {string} id
+ * @param {string} containerId
  * @returns {boolean}
  */
-function isAncestor(model, possibleAncestorId, nodeId) {
+function isWithin(model, id, containerId) {
   const seen = new Set();
-  let current = nodeOf(model, nodeId);
+  let current = nodeOf(model, id);
   while (current && !seen.has(current.id)) {
-    if (current.id === possibleAncestorId) return true;
+    if (current.id === containerId) return true;
     seen.add(current.id);
     current = nodeOf(model, current.parent);
   }
   return false;
 }
 
+// --- Creation ----------------------------------------------------------
+
 /**
- * The entities filed anywhere beneath each node, counted in one pass: every
- * entity adds one to each node above it. Walking upwards is guarded, as in
- * isAncestor.
  * @param {Model} model
- * @returns {Map<string, number>}
+ * @param {string|null} parent
+ * @returns {Outcome}
  */
-export function contentCounts(model) {
-  const counts = new Map();
-  for (const entity of model.entities.values()) {
-    const seen = new Set();
-    let current = nodeOf(model, entity.parent);
-    while (current && !seen.has(current.id)) {
-      counts.set(current.id, (counts.get(current.id) ?? 0) + 1);
-      seen.add(current.id);
-      current = nodeOf(model, current.parent);
-    }
+function checkParent(model, parent) {
+  if (parent !== null && !model.nodes.has(parent)) {
+    return { ok: false, reason: 'The parent is not in the model.' };
   }
-  return counts;
+  return { ok: true };
 }
 
 /**
  * @param {Model} model
- * @param {string} nodeId
- * @returns {number}  the entities filed anywhere beneath this node
+ * @param {string} id
+ * @param {string} prefix
+ * @returns {Outcome}
  */
-export function contentCount(model, nodeId) {
-  return contentCounts(model).get(nodeId) ?? 0;
+function checkSuppliedId(model, id, prefix) {
+  if (!id.startsWith(`${prefix}-`)) {
+    return { ok: false, reason: `The identifier ${id} does not carry the type code ${prefix}.` };
+  }
+  if (model.nodes.has(id)) return { ok: false, reason: `${id} is already in the model.` };
+  return { ok: true };
 }
 
-// --- Moving ------------------------------------------------------------
-
 /**
- * Where something can be filed: inside a folder, inside an entity, or at the
- * top of the tree.
- * @typedef {{ kind: 'root'|'folder'|'entity', id: string }} MoveTarget
+ * Add an entity of a metamodel type, filed last among the parent's
+ * children. A new entity starts with no attribute keys; attributes passed
+ * in are carried verbatim. An identifier is issued from the type's counter
+ * unless one is supplied, which only the file loader does.
+ * @param {Model} model
+ * @param {string} code
+ * @param {Object} [options]
+ * @param {string|null} [options.parent]
+ * @param {string} [options.id]
+ * @param {Object<string, string>} [options.attributes]
+ * @returns {Outcome & { entity?: Entity }}
  */
+export function addEntity(model, code, options = {}) {
+  if (!Object.hasOwn(ENTITY_TYPES, code)) {
+    return { ok: false, reason: 'The metamodel defines no such entity type.' };
+  }
+  const parent = options.parent ?? null;
+  const parentCheck = checkParent(model, parent);
+  if (!parentCheck.ok) return parentCheck;
+
+  let id = options.id;
+  if (id === undefined) {
+    id = `${code}-${String(model.counters[code]).padStart(3, '0')}`;
+    model.counters[code] += 1;
+  } else {
+    const idCheck = checkSuppliedId(model, id, code);
+    if (!idCheck.ok) return idCheck;
+  }
+
+  /** @type {Entity} */
+  const entity = { id, kind: 'entity', type: code, parent, attributes: { ...(options.attributes ?? {}) } };
+  model.nodes.set(id, entity);
+  return { ok: true, entity };
+}
 
 /**
- * Whether a folder or an entity can be filed somewhere, and why not when it
- * cannot. Filing is free and a folder and an entity hold things alike, so the
- * only moves refused are one that changes nothing and one that would put
- * something inside itself.
- *
+ * Add a folder, filed last among the parent's children. A folder carries a
+ * name and nothing else, and the name cannot be empty. An identifier is
+ * issued from the folder counter unless one is supplied, which only the
+ * file loader does.
+ * @param {Model} model
+ * @param {string} name
+ * @param {Object} [options]
+ * @param {string|null} [options.parent]
+ * @param {string} [options.id]
+ * @returns {Outcome & { folder?: Folder }}
+ */
+export function addFolder(model, name, options = {}) {
+  if (typeof name !== 'string' || name === '') {
+    return { ok: false, reason: 'A folder needs a name.' };
+  }
+  const parent = options.parent ?? null;
+  const parentCheck = checkParent(model, parent);
+  if (!parentCheck.ok) return parentCheck;
+
+  let id = options.id;
+  if (id === undefined) {
+    id = `F-${model.counters.F}`;
+    model.counters.F += 1;
+  } else {
+    const idCheck = checkSuppliedId(model, id, 'F');
+    if (!idCheck.ok) return idCheck;
+  }
+
+  /** @type {Folder} */
+  const folder = { id, kind: 'folder', name, parent };
+  model.nodes.set(id, folder);
+  return { ok: true, folder };
+}
+
+// --- Editing -----------------------------------------------------------
+
+/**
+ * Write a set of attribute values at once, which is what the editor
+ * commits when the user saves. An empty value removes its key, so an
+ * entity carries only what is set.
+ * @param {Model} model
+ * @param {string} id
+ * @param {Object<string, string>} values
+ * @returns {Outcome}
+ */
+export function updateEntity(model, id, values) {
+  const node = nodeOf(model, id);
+  if (!node || node.kind !== 'entity') {
+    return { ok: false, reason: 'The entity is not in the model.' };
+  }
+  for (const [key, value] of Object.entries(values)) {
+    if (value === '') delete node.attributes[key];
+    else node.attributes[key] = value;
+  }
+  return { ok: true };
+}
+
+/**
+ * @param {Model} model
+ * @param {string} id
+ * @param {string} name
+ * @returns {Outcome}
+ */
+export function renameFolder(model, id, name) {
+  const node = nodeOf(model, id);
+  if (!node || node.kind !== 'folder') {
+    return { ok: false, reason: 'The folder is not in the model.' };
+  }
+  if (typeof name !== 'string' || name === '') {
+    return { ok: false, reason: 'A folder needs a name.' };
+  }
+  node.name = name;
+  return { ok: true };
+}
+
+// --- Filing ------------------------------------------------------------
+
+/**
+ * Whether a node can be filed in a parent, and why not when it cannot.
+ * Filing is free: anything files inside anything, to any depth, and the
+ * only arrangements refused are one that changes nothing and one that
+ * would put a node inside itself.
  * @param {Model} model
  * @param {string} nodeId
- * @param {MoveTarget} target
- * @returns {{ ok: boolean, reason?: string }}
+ * @param {string|null} parentId
+ * @returns {Outcome}
  */
-export function canMoveNode(model, nodeId, target) {
+export function canFile(model, nodeId, parentId) {
   const node = nodeOf(model, nodeId);
   if (!node) return { ok: false, reason: 'It is not in the model.' };
-
-  const to = target.kind === 'root' ? null : target.id;
-  if (to !== null && !nodeOf(model, to)) return { ok: false, reason: 'That is not in the model.' };
-  if (to === nodeId) return { ok: false, reason: 'Nothing can be filed inside itself.' };
-  if (to !== null && isAncestor(model, nodeId, to)) {
-    return { ok: false, reason: 'That would put it inside itself.' };
+  if (parentId !== null) {
+    if (!model.nodes.has(parentId)) return { ok: false, reason: 'The destination is not in the model.' };
+    if (isWithin(model, parentId, nodeId)) {
+      return { ok: false, reason: 'Nothing can be filed inside itself.' };
+    }
   }
-  return node.parent === to ? { ok: false, reason: 'It is already there.' } : { ok: true };
+  if (node.parent === parentId) return { ok: false, reason: 'It is already there.' };
+  return { ok: true };
 }
 
 /**
+ * File a node in a parent, last among the children there.
  * @param {Model} model
  * @param {string} nodeId
- * @param {MoveTarget} target
- * @returns {{ ok: boolean, reason?: string }}
+ * @param {string|null} parentId
+ * @returns {Outcome}
  */
-export function moveNode(model, nodeId, target) {
-  const check = canMoveNode(model, nodeId, target);
+export function file(model, nodeId, parentId) {
+  const check = canFile(model, nodeId, parentId);
   if (!check.ok) return check;
-  const node = nodeOf(model, nodeId);
-  node.parent = target.kind === 'root' ? null : target.id;
-  // Filed last among its kind there, so where it lands is predictable.
-  const map = model.folders.has(nodeId) ? model.folders : model.entities;
-  map.delete(nodeId);
-  map.set(nodeId, node);
+  const node = /** @type {Node} */ (nodeOf(model, nodeId));
+  node.parent = parentId;
+  model.nodes.delete(nodeId);
+  model.nodes.set(nodeId, node);
   return { ok: true };
 }
 
-// --- Order -------------------------------------------------------------
-
 /**
- * Order is the order the entities sit in the model, so moving one up or down
- * is a change to where it sits rather than a number stored on it. A file that
- * is read back keeps the order it was written in.
- * @param {Map<string, any>} map
- * @param {string} movingId
- * @param {string} referenceId
- * @param {'before'|'after'} position
- */
-function reorderMap(map, movingId, referenceId, position) {
-  const entries = [...map];
-  const from = entries.findIndex(([id]) => id === movingId);
-  if (from < 0) return;
-  const [entry] = entries.splice(from, 1);
-  const to = entries.findIndex(([id]) => id === referenceId);
-  if (to < 0) return;
-  entries.splice(position === 'after' ? to + 1 : to, 0, entry);
-  map.clear();
-  for (const [id, value] of entries) map.set(id, value);
-}
-
-/**
- * The things that sit alongside this one: filed in the same place and of the
- * same kind, in the order they are drawn. Folders are drawn above entities, so
- * the two are ordered separately.
+ * Whether a node can be placed beside another, taking that node's parent.
  * @param {Model} model
  * @param {string} nodeId
- * @returns {Array<Folder|Entity>}
+ * @param {string} targetId
+ * @returns {Outcome}
  */
-export function siblingsOf(model, nodeId) {
+export function canPlaceBeside(model, nodeId, targetId) {
   const node = nodeOf(model, nodeId);
-  if (!node) return [];
-  return model.folders.has(nodeId) ? childFolders(model, node.parent) : childEntities(model, node.parent);
-}
-
-/**
- * Move an entity or a folder one place up or down among the things it sits
- * beside.
- * @param {Model} model
- * @param {{ kind: 'entity'|'folder', id: string }} what
- * @param {-1|1} delta
- * @returns {{ ok: boolean, reason?: string }}
- */
-export function moveOrder(model, what, delta) {
-  const map = what.kind === 'entity' ? model.entities : model.folders;
-  const siblings = siblingsOf(model, what.id);
-  const index = siblings.findIndex((item) => item.id === what.id);
-  if (index < 0) return { ok: false, reason: 'It is not in the model.' };
-
-  const other = siblings[index + delta];
-  if (!other) return { ok: false, reason: delta < 0 ? 'It is already first.' : 'It is already last.' };
-
-  reorderMap(map, what.id, other.id, delta < 0 ? 'before' : 'after');
-  return { ok: true };
-}
-
-/**
- * Whether one thing can be dropped next to another, which both reorders it and,
- * when the two sit in different places, moves it to where the other one is.
- * @param {Model} model
- * @param {{ kind: 'entity'|'folder', id: string }} source
- * @param {{ kind: 'entity'|'folder', id: string }} target
- * @returns {{ ok: boolean, reason?: string }}
- */
-export function canPlaceBeside(model, source, target) {
-  if (source.id === target.id) return { ok: false, reason: 'It is already there.' };
-
-  const one = nodeOf(model, source.id);
-  const other = nodeOf(model, target.id);
-  if (!one || !other) return { ok: false, reason: 'It is not in the model.' };
-  // Sitting beside the other one means taking its parent, so refuse when that
-  // parent is inside the thing being moved.
-  if (other.parent && isAncestor(model, source.id, other.parent)) {
-    return { ok: false, reason: 'That would put it inside itself.' };
+  const target = nodeOf(model, targetId);
+  if (!node || !target) return { ok: false, reason: 'It is not in the model.' };
+  if (nodeId === targetId) return { ok: false, reason: 'It is already there.' };
+  if (target.parent !== null && isWithin(model, target.parent, nodeId)) {
+    return { ok: false, reason: 'Nothing can be filed inside itself.' };
   }
   return { ok: true };
 }
 
 /**
+ * Place a node directly before or after another, in that node's parent.
  * @param {Model} model
- * @param {{ kind: 'entity'|'folder', id: string }} source
- * @param {{ kind: 'entity'|'folder', id: string }} target
+ * @param {string} nodeId
+ * @param {string} targetId
  * @param {'before'|'after'} position
- * @returns {{ ok: boolean, reason?: string }}
+ * @returns {Outcome}
  */
-export function placeBeside(model, source, target, position) {
-  const check = canPlaceBeside(model, source, target);
+export function placeBeside(model, nodeId, targetId, position) {
+  const check = canPlaceBeside(model, nodeId, targetId);
   if (!check.ok) return check;
+  const node = /** @type {Node} */ (nodeOf(model, nodeId));
+  node.parent = /** @type {Node} */ (nodeOf(model, targetId)).parent;
 
-  nodeOf(model, source.id).parent = nodeOf(model, target.id).parent;
-  const map = source.kind === 'folder' ? model.folders : model.entities;
-  if (source.kind === target.kind) {
-    reorderMap(map, source.id, target.id, position);
-    return { ok: true };
-  }
-
-  // Across kinds there is no shared order: folders draw above entities. An
-  // entity dropped beside a folder goes first among the entities there, and a
-  // folder dropped beside an entity goes last among the folders, which is the
-  // closest either can sit to where it was dropped.
-  const siblings = siblingsOf(model, source.id).filter((sibling) => sibling.id !== source.id);
-  if (siblings.length > 0) {
-    if (source.kind === 'entity') reorderMap(map, source.id, siblings[0].id, 'before');
-    else reorderMap(map, source.id, siblings[siblings.length - 1].id, 'after');
-  }
+  const entries = [...model.nodes].filter(([id]) => id !== nodeId);
+  const at = entries.findIndex(([id]) => id === targetId);
+  entries.splice(position === 'after' ? at + 1 : at, 0, [nodeId, node]);
+  model.nodes.clear();
+  for (const [id, entry] of entries) model.nodes.set(id, entry);
   return { ok: true };
 }
 
 // --- Relationships -----------------------------------------------------
 
 /**
- * The key a triple is indexed under in `relationshipKeys`.
+ * The key a relationship is held under: its triple, which is its identity.
  * @param {string} type
  * @param {string} source
  * @param {string} target
  * @returns {string}
  */
 function relationshipKey(type, source, target) {
-  return JSON.stringify([type, source, target]);
+  return `${type} ${source} ${target}`;
+}
+
+/**
+ * The entity that owns this one through a composition relationship, or
+ * null.
+ * @param {Model} model
+ * @param {string} entityId
+ * @returns {string|null}
+ */
+function ownerOf(model, entityId) {
+  for (const relationship of model.relationships.values()) {
+    if (relationship.target === entityId && RELATIONSHIP_TYPES[relationship.type].composition) {
+      return relationship.source;
+    }
+  }
+  return null;
+}
+
+/**
+ * Whether making `sourceId` own `targetId` would close an ownership cycle:
+ * true when the source is the target or owned by it, directly or through
+ * what owns it. The walk upwards is guarded.
+ * @param {Model} model
+ * @param {string} sourceId
+ * @param {string} targetId
+ * @returns {boolean}
+ */
+function wouldOwnItself(model, sourceId, targetId) {
+  const seen = new Set();
+  let current = sourceId;
+  while (current !== null && !seen.has(current)) {
+    if (current === targetId) return true;
+    seen.add(current);
+    current = ownerOf(model, current);
+  }
+  return false;
 }
 
 /**
  * Whether a relationship can be created, and why not when it cannot. The
- * metamodel is the first gate: a triple it does not define is never allowed.
+ * metamodel is the first gate: a triple it does not define is refused. A
+ * composition is additionally refused when the target is already owned or
+ * the ownership would close a cycle.
  * @param {Model} model
- * @param {string} relationshipTypeId
+ * @param {string} typeId
  * @param {string} sourceId
  * @param {string} targetId
- * @returns {{ ok: boolean, reason?: string }}
+ * @returns {Outcome}
  */
-function canRelate(model, relationshipTypeId, sourceId, targetId) {
-  if (!Object.hasOwn(RELATIONSHIP_TYPES, relationshipTypeId)) {
+export function canRelate(model, typeId, sourceId, targetId) {
+  if (!Object.hasOwn(RELATIONSHIP_TYPES, typeId)) {
     return { ok: false, reason: 'The metamodel defines no such relationship.' };
   }
-  const type = RELATIONSHIP_TYPES[relationshipTypeId];
+  const type = RELATIONSHIP_TYPES[typeId];
 
-  const source = model.entities.get(sourceId);
-  const target = model.entities.get(targetId);
-  if (!source || !target) return { ok: false, reason: 'One of the entities is not in the model.' };
-
+  const source = nodeOf(model, sourceId);
+  const target = nodeOf(model, targetId);
+  if (!source || source.kind !== 'entity' || !target || target.kind !== 'entity') {
+    return { ok: false, reason: 'One of the entities is not in the model.' };
+  }
   if (source.type !== type.source || target.type !== type.target) {
     return {
       ok: false,
       reason: `The metamodel defines "${type.label}" from ${ENTITY_TYPES[type.source].name} to ${ENTITY_TYPES[type.target].name} only.`,
     };
   }
-
-  if (sourceId === targetId) return { ok: false, reason: 'An entity cannot be related to itself.' };
-
-  if (model.relationshipKeys.has(relationshipKey(relationshipTypeId, sourceId, targetId))) {
+  if (model.relationships.has(relationshipKey(typeId, sourceId, targetId))) {
     return { ok: false, reason: 'The relationship already exists.' };
   }
-
+  if (type.composition) {
+    if (ownerOf(model, targetId) !== null) {
+      return { ok: false, reason: 'It is already part of another entity.' };
+    }
+    if (wouldOwnItself(model, sourceId, targetId)) {
+      return { ok: false, reason: 'That would make an entity part of itself.' };
+    }
+  }
   return { ok: true };
 }
 
 /**
  * @param {Model} model
- * @param {string} relationshipTypeId
+ * @param {string} typeId
  * @param {string} sourceId
  * @param {string} targetId
- * @returns {{ ok: boolean, reason?: string, relationship?: Relationship }}
+ * @returns {Outcome & { relationship?: Relationship }}
  */
-export function addRelationship(model, relationshipTypeId, sourceId, targetId) {
-  const check = canRelate(model, relationshipTypeId, sourceId, targetId);
+export function relate(model, typeId, sourceId, targetId) {
+  const check = canRelate(model, typeId, sourceId, targetId);
   if (!check.ok) return check;
-
-  model.relationshipCounter += 1;
-  const relationshipId = `R-${model.relationshipCounter}`;
   /** @type {Relationship} */
-  const relationship = { id: relationshipId, type: relationshipTypeId, source: sourceId, target: targetId };
-  model.relationships.set(relationshipId, relationship);
-  model.relationshipKeys.add(relationshipKey(relationshipTypeId, sourceId, targetId));
+  const relationship = { type: typeId, source: sourceId, target: targetId };
+  model.relationships.set(relationshipKey(typeId, sourceId, targetId), relationship);
   return { ok: true, relationship };
 }
 
 /**
- * Removing a relationship leaves both entities in place.
+ * Remove a relationship. Both entities stay in place.
  * @param {Model} model
- * @param {string} relationshipId
+ * @param {string} typeId
+ * @param {string} sourceId
+ * @param {string} targetId
+ * @returns {Outcome}
  */
-export function removeRelationship(model, relationshipId) {
-  const relationship = model.relationships.get(relationshipId);
-  if (!relationship) return;
-  model.relationships.delete(relationshipId);
-  model.relationshipKeys.delete(relationshipKey(relationship.type, relationship.source, relationship.target));
+export function unrelate(model, typeId, sourceId, targetId) {
+  if (!model.relationships.delete(relationshipKey(typeId, sourceId, targetId))) {
+    return { ok: false, reason: 'The relationship is not in the model.' };
+  }
+  return { ok: true };
 }
 
 /**
@@ -529,201 +456,138 @@ export function relationshipsOf(model, entityId) {
   return { outgoing, incoming };
 }
 
-/**
- * The entities an entity could still be related to, per direction and
- * relationship type. `keep` is an entity that stays on offer even though it is
- * already related, so a relationship being edited can show its current end.
- * @param {Model} model
- * @param {string} relationshipTypeId
- * @param {string} entityId
- * @param {'outgoing'|'incoming'} direction
- * @param {string} [keep]
- * @returns {Entity[]}
- */
-export function candidatesFor(model, relationshipTypeId, entityId, direction, keep) {
-  const type = RELATIONSHIP_TYPES[relationshipTypeId];
-  if (!type) return [];
-  const wanted = direction === 'outgoing' ? type.target : type.source;
-  const candidates = [];
-  for (const entity of model.entities.values()) {
-    if (entity.type !== wanted) continue;
-    if (entity.id === keep) {
-      candidates.push(entity);
-      continue;
-    }
-    const check =
-      direction === 'outgoing'
-        ? canRelate(model, relationshipTypeId, entityId, entity.id)
-        : canRelate(model, relationshipTypeId, entity.id, entityId);
-    if (check.ok) candidates.push(entity);
-  }
-  return candidates;
-}
-
-/**
- * The relationship types available from the relationship pane of an entity of
- * this type, in both directions.
- *
- * Ordered by the entity type at the far end, since that is what the user is
- * looking for: the same list is read in the New related entity menu, where
- * the far type is the label, and in the panel that adds a relationship. The
- * relationship's own name breaks a tie, so a type reachable two ways is
- * listed once for each in a settled order.
- *
- * @param {string} code
- * @returns {Array<{ direction: 'outgoing'|'incoming', type: import('./metamodel.js').RelationshipType }>}
- */
-export function availableRelationships(code) {
-  const far = (option) => ENTITY_TYPES[option.direction === 'outgoing' ? option.type.target : option.type.source].name;
-  const byFarType = (one, other) => far(one).localeCompare(far(other)) || one.type.label.localeCompare(other.type.label);
-
-  return [
-    ...relationshipsFrom(code).map((type) => ({ direction: /** @type {const} */ ('outgoing'), type })).sort(byFarType),
-    ...relationshipsTo(code).map((type) => ({ direction: /** @type {const} */ ('incoming'), type })).sort(byFarType),
-  ];
-}
-
 // --- Deletion ----------------------------------------------------------
 
 /**
- * Deleting an entity removes it and every relationship that touches it. The
- * entities at the other end are left alone: no relationship in the metamodel
- * makes one entity the owner of another, so a deletion never reaches past the
- * one entity. Whatever was filed inside it moves up to where it sat, exactly as
- * for a folder.
+ * The entities a deletion removes: the entity itself and, through the
+ * composition relationships, everything it owns, transitively, in the
+ * order the ownership walk reaches them. This is the statement the
+ * cascade confirmation makes before removeEntity acts on it. Empty when
+ * the identifier names no entity.
  * @param {Model} model
  * @param {string} entityId
- * @returns {Entity | null}  the entity that was removed
+ * @returns {Entity[]}
+ */
+export function deletionOf(model, entityId) {
+  const entity = nodeOf(model, entityId);
+  if (!entity || entity.kind !== 'entity') return [];
+
+  const doomed = [];
+  const seen = new Set([entityId]);
+  const queue = [entityId];
+  while (queue.length > 0) {
+    const id = /** @type {string} */ (queue.shift());
+    doomed.push(/** @type {Entity} */ (nodeOf(model, id)));
+    for (const relationship of model.relationships.values()) {
+      if (
+        relationship.source === id &&
+        RELATIONSHIP_TYPES[relationship.type].composition &&
+        !seen.has(relationship.target)
+      ) {
+        seen.add(relationship.target);
+        queue.push(relationship.target);
+      }
+    }
+  }
+  return doomed;
+}
+
+/**
+ * Delete an entity: the entities it owns go with it, every relationship
+ * touching a removed entity goes with them, and whatever was filed inside
+ * a removed entity moves up to its nearest surviving ancestor. Entities
+ * related without composition are left in place.
+ * @param {Model} model
+ * @param {string} entityId
+ * @returns {Outcome & { removed?: Entity[] }}
  */
 export function removeEntity(model, entityId) {
-  const entity = model.entities.get(entityId);
-  if (!entity) return null;
+  const doomed = deletionOf(model, entityId);
+  if (doomed.length === 0) return { ok: false, reason: 'The entity is not in the model.' };
+  const gone = new Set(doomed.map((entity) => entity.id));
 
-  for (const [relationshipId, relationship] of model.relationships) {
-    if (relationship.source === entityId || relationship.target === entityId) {
-      removeRelationship(model, relationshipId);
+  for (const [key, relationship] of [...model.relationships]) {
+    if (gone.has(relationship.source) || gone.has(relationship.target)) {
+      model.relationships.delete(key);
     }
   }
-  reparentChildren(model, entityId, entity.parent);
-  model.entities.delete(entityId);
-  return entity;
+
+  for (const node of model.nodes.values()) {
+    if (gone.has(node.id) || node.parent === null || !gone.has(node.parent)) continue;
+    const seen = new Set();
+    let ancestorId = node.parent;
+    while (ancestorId !== null && gone.has(ancestorId) && !seen.has(ancestorId)) {
+      seen.add(ancestorId);
+      ancestorId = /** @type {Node} */ (nodeOf(model, ancestorId)).parent;
+    }
+    node.parent = ancestorId;
+  }
+
+  for (const id of gone) model.nodes.delete(id);
+  return { ok: true, removed: doomed };
 }
 
-// --- Serialisation -----------------------------------------------------
-
 /**
+ * Delete a folder. Deleting a folder removes filing, never the entities
+ * filed in it: its contents move up to where the folder itself sat.
  * @param {Model} model
- * @returns {Object}
+ * @param {string} folderId
+ * @returns {Outcome}
  */
-export function toJSON(model) {
-  return {
-    format: 'openconformity-model',
-    version: 1,
-    name: model.name,
-    folders: [...model.folders.values()].map((folder) => ({ ...folder })),
-    entities: [...model.entities.values()].map((entity) => ({
-      id: entity.id,
-      type: entity.type,
-      parent: entity.parent,
-      attributes: { ...entity.attributes },
-    })),
-    relationships: [...model.relationships.values()].map((relationship) => ({ ...relationship })),
-  };
+export function removeFolder(model, folderId) {
+  const folder = nodeOf(model, folderId);
+  if (!folder || folder.kind !== 'folder') {
+    return { ok: false, reason: 'The folder is not in the model.' };
+  }
+  for (const node of model.nodes.values()) {
+    if (node.parent === folderId) node.parent = folder.parent;
+  }
+  model.nodes.delete(folderId);
+  return { ok: true };
 }
 
-/** The highest number a counter is restored from when a file is read. */
-const COUNTER_LIMIT = 2 ** 40;
+/**
+ * Name the project, or clear its name: the schema lets a project exist
+ * before it is named.
+ * @param {Model} model
+ * @param {string} name
+ * @returns {Outcome}
+ */
+export function renameProject(model, name) {
+  if (typeof name !== 'string') return { ok: false, reason: 'A name is text.' };
+  model.name = name;
+  return { ok: true };
+}
 
 /**
- * Rebuild a model from parsed JSON. Data is treated as untrusted: entities of
- * unknown types and relationships the metamodel does not define are dropped,
- * and the reasons are returned for reporting.
- * @param {any} data
- * @returns {{ model: Model, rejected: string[] }}
+ * Set one of the project's own attribute values, like an entity's: an
+ * empty value removes the key, so the project carries only what is set.
+ * @param {Model} model
+ * @param {string} key
+ * @param {string} value
+ * @returns {Outcome}
  */
-export function fromJSON(data) {
-  const model = createModel(typeof data?.name === 'string' ? data.name : 'Untitled project');
-  const rejected = [];
+export function setProjectAttribute(model, key, value) {
+  if (typeof key !== 'string' || key === '') {
+    return { ok: false, reason: 'An attribute needs a key.' };
+  }
+  if (typeof value !== 'string') {
+    return { ok: false, reason: 'An attribute value is text.' };
+  }
+  if (value === '') delete model.attributes[key];
+  else model.attributes[key] = value;
+  return { ok: true };
+}
 
-  if (typeof data !== 'object' || data === null) {
-    return { model, rejected: ['The file does not hold a project.'] };
-  }
-  if (data.format !== 'openconformity-model') {
-    rejected.push('The file is not an openconformity project file.');
-  }
-  if (data.version !== 1) {
-    rejected.push(`The file records format version ${String(data.version)}; this software reads version 1.`);
-  }
-  for (const key of ['folders', 'entities', 'relationships']) {
-    if (!Array.isArray(data[key])) rejected.push(`The file holds no ${key} list.`);
-  }
-  if (rejected.length > 0) return { model, rejected };
+// --- Loading -----------------------------------------------------------
 
-  for (const raw of data.folders) {
-    if (typeof raw?.id !== 'string') {
-      rejected.push(`Folder ${String(raw?.id)} has no identifier.`);
-      continue;
-    }
-    if (model.folders.has(raw.id)) {
-      rejected.push(`Folder ${raw.id} appears more than once.`);
-      continue;
-    }
-    addFolder(model, String(raw.name ?? 'Folder'), typeof raw.parent === 'string' ? raw.parent : null, raw.id);
-    const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
-      model.folderCounter = Math.max(model.folderCounter, number);
-    }
-  }
-  for (const raw of data.entities) {
-    if (typeof raw?.id !== 'string' || !Object.hasOwn(ENTITY_TYPES, raw?.type)) {
-      rejected.push(`Entity ${String(raw?.id)} has no valid type.`);
-      continue;
-    }
-    if (model.entities.has(raw.id)) {
-      rejected.push(`Entity ${raw.id} appears more than once.`);
-      continue;
-    }
-    if (model.folders.has(raw.id)) {
-      rejected.push(`${raw.id} names both a folder and an entity.`);
-      continue;
-    }
-    /** @type {Object<string, string>} */
-    const attributes = {};
-    for (const attribute of storedAttributesFor(raw.type)) {
-      const value = raw.attributes?.[attribute.key];
-      attributes[attribute.key] = typeof value === 'string' ? value : '';
-    }
-    addEntity(model, raw.type, attributes, {
-      id: raw.id,
-      parent: typeof raw.parent === 'string' ? raw.parent : null,
-    });
-
-    const number = Number.parseInt(String(raw.id).split('-')[1] ?? '', 10);
-    if (Number.isFinite(number) && number < COUNTER_LIMIT) {
-      model.counters[raw.type] = Math.max(model.counters[raw.type] ?? 0, number);
-    }
-  }
-
-  // Parents are settled once both kinds are loaded, since either can hold the
-  // other. A parent that is not in the model is dropped; one that points back
-  // into its own chain is refused rather than repaired, because the tree is
-  // walked upwards in several places and such a node has nowhere for a walk to
-  // end.
-  for (const node of [...model.folders.values(), ...model.entities.values()]) {
-    if (node.parent && !nodeOf(model, node.parent)) node.parent = null;
-  }
-  for (const node of [...model.folders.values(), ...model.entities.values()]) {
-    if (isAncestor(model, node.id, node.parent)) {
-      rejected.push(`${node.id} sits inside itself.`);
-    }
-  }
-
-  for (const raw of data.relationships) {
-    const result = addRelationship(model, raw?.type, raw?.source, raw?.target);
-    if (!result.ok) {
-      rejected.push(`Relationship ${String(raw?.source)} ${String(raw?.type)} ${String(raw?.target)}: ${result.reason}`);
-    }
-  }
-
-  return { model, rejected };
+/**
+ * Install the counters a file records, replacing the issued state. The
+ * loader's final step: a file's counters are authoritative, and may exceed
+ * the next unissued number where undone creations left holes.
+ * @param {Model} model
+ * @param {Object<string, number>} counters
+ */
+export function restoreCounters(model, counters) {
+  model.counters = { ...counters };
 }

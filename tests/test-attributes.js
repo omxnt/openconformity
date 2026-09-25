@@ -1,7 +1,5 @@
 /**
- * Verifies the attribute transcription against `sandbox/app/beta/notes/attributes.md` —
- * the working draft that supersedes `docs/attributes.md` while the
- * attribute-definition work runs, promoted over it when that work lands: every
+ * Verifies the attribute transcription against `docs/attributes.md`: every
  * type section, its ungrouped table, its groups, and its kinds, compared
  * definition by definition. Run from this directory.
  */
@@ -22,7 +20,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the document ------------------------------------------------
 
-const document = readFile('../notes/attributes.md');
+const document = readFile('../docs/attributes.md');
 
 /**
  * The type sections of the document: per code its name, status, ungrouped

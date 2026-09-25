@@ -1,268 +1,135 @@
 /**
- * Menus: the bar across the top, and the popup menus that the toolbar and a
- * right click in the navigator both raise.
- *
- * Neither knows what its items do. Each is given a list of items and the
- * actions to run.
+ * Popup menus drawn from item lists, over the overlay: one open path for
+ * the theme menu, the creation offer, and the context menu. A menu knows
+ * nothing about the model — it renders labels, states, and picks.
  */
 
-import { clear, el, icon } from './dom.js';
+import { el, icon } from './dom.js';
 
 /**
  * @typedef {Object} MenuItem
  * @property {string} [label]
- * @property {string} [heading]    a non-selectable section title
- * @property {string} [iconId]
- * @property {string} [pillar]     set where the icon names an entity type, so
- *   it is drawn in that pillar's colour as it is everywhere else
- * @property {string} [shortcut]
- * @property {boolean} [separator]
+ * @property {string} [group]    a heading over consecutive items sharing it
+ * @property {string} [icon]     a sprite symbol drawn before the label
+ * @property {string} [pillar]   tints the icon with the pillar's colour
+ * @property {string} [hint]     a right-aligned hint: a key, a code, a form
+ * @property {boolean} [separator]  a rule between runs of items, not an item
+ * @property {boolean} [danger]
  * @property {boolean} [disabled]
- * @property {boolean} [danger]   destroys something, and is coloured for it
- * @property {string} [title]     why an item is greyed out, on hover
- * @property {MenuItem[]} [submenu]
- * @property {() => void} [action]
+ * @property {boolean} [checked]  renders the item as a radio entry
+ * @property {() => void} [onPick]
  */
 
 /**
- * @param {Object} context
- * @param {HTMLElement} context.barEl
- * @param {HTMLElement} context.layerEl
- * @param {Array<{ label: string, items: MenuItem[] | (() => MenuItem[]) }>} context.menus
- */
-export function createMenuBar(context) {
-  /** @type {HTMLElement|null} */
-  let open = null;
-
-  clear(context.barEl);
-  clear(context.layerEl);
-
-  for (const menu of context.menus) {
-    const dropdown = el('div', { class: 'dropdown', role: 'menu', 'aria-label': menu.label });
-    // Built when the menu opens, not before: what an item does can depend on
-    // what is selected, and a closed menu has no layout to anchor a submenu to.
-    const fill = () => {
-      clear(dropdown);
-      dropdown.append(...buildItems(typeof menu.items === 'function' ? menu.items() : menu.items, closeAll));
-    };
-
-    const button = el('button', {
-      type: 'button',
-      class: 'menubar-item',
-      text: menu.label,
-      'aria-haspopup': 'true',
-      'aria-expanded': 'false',
-      onclick: (event) => {
-        event.stopPropagation();
-        const wasOpen = open === dropdown;
-        closeAll();
-        if (!wasOpen) show(button, dropdown, fill);
-      },
-      onkeydown: (event) => {
-        if (event.key !== 'ArrowDown') return;
-        event.preventDefault();
-        if (open !== dropdown) {
-          closeAll();
-          show(button, dropdown, fill);
-        }
-        dropdown.querySelector('.menu-entry')?.focus();
-      },
-    });
-
-    dropdown.addEventListener('keydown', (event) => moveWithin(dropdown, event, () => {
-      closeAll();
-      button.focus();
-    }));
-
-    context.barEl.append(button);
-    context.layerEl.append(dropdown);
-  }
-
-  // Capture, because the navigator stops clicks from bubbling to the document
-  // and a bubbling listener would leave the menu open. Popup panels sit on the
-  // body rather than in the layer, so they are checked separately: tearing one
-  // down on pointer down would remove the entry before its own click ran.
-  document.addEventListener(
-    'pointerdown',
-    (event) => {
-      if (context.layerEl.contains(event.target) || context.barEl.contains(event.target)) return;
-      if (popups.some((panel) => panel?.contains(event.target))) return;
-      closeAll();
-    },
-    true
-  );
-
-  /**
-   * @param {HTMLElement} button
-   * @param {HTMLElement} dropdown
-   */
-  function show(button, dropdown, fill) {
-    fill();
-    const box = button.getBoundingClientRect();
-    dropdown.style.left = `${box.left}px`;
-    dropdown.style.top = `${box.bottom}px`;
-    dropdown.classList.add('open');
-    button.setAttribute('aria-expanded', 'true');
-    open = dropdown;
-  }
-
-  function closeAll() {
-    closePopupMenu();
-    for (const dropdown of context.layerEl.querySelectorAll('.dropdown')) dropdown.classList.remove('open');
-    for (const button of context.barEl.querySelectorAll('.menubar-item')) button.setAttribute('aria-expanded', 'false');
-    open = null;
-  }
-}
-
-/** Open popup panels, outermost first. A submenu is the next one along. */
-/** @type {HTMLElement[]} */
-let popups = [];
-
-/**
- * Raise a popup menu, either at a point or against an element.
- * @param {Object} spec
- * @param {MenuItem[]} spec.items
- * @param {HTMLElement} [spec.anchor]  the element to hang it under
- * @param {number} [spec.x]
- * @param {number} [spec.y]
- */
-export function openPopupMenu(spec) {
-  closePopupMenu();
-  if (spec.items.length === 0) return;
-  openPanel(spec, 0);
-}
-
-/**
- * @param {Object} spec
- * @param {MenuItem[]} spec.items
- * @param {HTMLElement} [spec.anchor]
- * @param {boolean} [spec.beside]  hang it to the right of the anchor, not below
- * @param {number} [spec.x]
- * @param {number} [spec.y]
- * @param {number} level
- */
-function openPanel(spec, level) {
-  closeFrom(level);
-  const panel = el('div', { class: 'dropdown open popup', role: 'menu' }, buildItems(spec.items, closePopupMenu, level));
-  document.body.append(panel);
-  popups[level] = panel;
-  document.removeEventListener('pointerdown', onPointerDownOutside, true);
-  document.addEventListener('pointerdown', onPointerDownOutside, true);
-
-  const box = spec.anchor?.getBoundingClientRect();
-  let left = box ? (spec.beside ? box.right - 2 : box.left) : (spec.x ?? 0);
-  let top = box ? (spec.beside ? box.top - 4 : box.bottom) : (spec.y ?? 0);
-  const size = panel.getBoundingClientRect();
-  if (spec.beside && left + size.width > window.innerWidth - 4 && box) left = box.left - size.width + 2;
-  panel.style.left = `${Math.max(4, Math.min(left, window.innerWidth - size.width - 4))}px`;
-  panel.style.top = `${Math.max(4, Math.min(top, window.innerHeight - size.height - 4))}px`;
-
-  panel.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft' && level > 0) {
-      event.preventDefault();
-      closeFrom(level);
-      popups[level - 1]?.querySelector('.menu-entry[aria-expanded="true"]')?.focus();
-      return;
-    }
-    moveWithin(panel, event, closePopupMenu);
-  });
-
-  spec.anchor?.setAttribute('aria-expanded', 'true');
-  return panel;
-}
-
-/** @param {PointerEvent} event */
-function onPointerDownOutside(event) {
-  if (popups.length === 0) return;
-  if (popups.some((panel) => panel?.contains(event.target))) return;
-  closePopupMenu();
-}
-
-/** @param {number} level */
-function closeFrom(level) {
-  for (let index = popups.length - 1; index >= level; index -= 1) {
-    popups[index]?.remove();
-    popups.length = index;
-  }
-}
-
-function closePopupMenu() {
-  if (popups.length === 0) return;
-  document.removeEventListener('pointerdown', onPointerDownOutside, true);
-  closeFrom(0);
-  popups = [];
-  for (const button of document.querySelectorAll('[aria-haspopup="true"][aria-expanded="true"]')) {
-    if (!button.classList.contains('menubar-item')) button.setAttribute('aria-expanded', 'false');
-  }
-}
-
-/**
+ * The heading groups a flat item list renders as: a heading precedes the
+ * items whose group differs from the group before them.
  * @param {MenuItem[]} items
- * @param {() => void} close
- * @param {number} [level]  which popup panel this is, for opening submenus
- * @returns {HTMLElement[]}
+ * @returns {Array<{ heading: string|null, items: MenuItem[] }>}
  */
-function buildItems(items, close, level = 0) {
-  return items.map((item) => {
-    if (item.separator) return el('div', { class: 'dropdown-separator' });
-    if (item.heading) return el('div', { class: 'menu-heading', text: item.heading });
-
-    const hasSubmenu = Array.isArray(item.submenu) && item.submenu.length > 0;
-    const entry = el('button', {
-      type: 'button',
-      class: `menu-entry${hasSubmenu ? ' has-submenu' : ''}${item.danger ? ' danger' : ''}`,
-      role: 'menuitem',
-      disabled: item.disabled,
-      title: item.title,
-      'aria-haspopup': hasSubmenu ? 'true' : null,
-      'aria-expanded': hasSubmenu ? 'false' : null,
-      onclick: () => {
-        if (hasSubmenu) {
-          openPanel({ items: item.submenu, anchor: entry, beside: true }, level + 1).querySelector('.menu-entry')?.focus();
-          return;
-        }
-        close();
-        item.action?.();
-      },
-    }, [
-      item.iconId ? icon(item.iconId, item.pillar) : el('span', { class: 'menu-entry-gap' }),
-      el('span', { class: 'menu-entry-label', text: item.label }),
-      item.shortcut ? el('span', { class: 'shortcut', text: item.shortcut }) : null,
-      hasSubmenu ? el('span', { class: 'submenu-arrow', text: '▸', 'aria-hidden': 'true' }) : null,
-    ]);
-
-    entry.addEventListener('mouseenter', () => {
-      if (item.disabled) return;
-      if (hasSubmenu) openPanel({ items: item.submenu, anchor: entry, beside: true }, level + 1);
-      else closeFrom(level + 1);
-    });
-    entry.addEventListener('keydown', (event) => {
-      if (hasSubmenu && event.key === 'ArrowRight') {
-        event.preventDefault();
-        event.stopPropagation();
-        openPanel({ items: item.submenu, anchor: entry, beside: true }, level + 1).querySelector('.menu-entry')?.focus();
-      }
-    });
-    return entry;
-  });
+export function menuGroups(items) {
+  const groups = [];
+  for (const item of items) {
+    const heading = item.group ?? null;
+    const last = groups[groups.length - 1];
+    if (last && last.heading === heading) last.items.push(item);
+    else groups.push({ heading, items: [item] });
+  }
+  return groups;
 }
 
 /**
- * @param {HTMLElement} container
- * @param {KeyboardEvent} event
- * @param {() => void} onEscape
+ * Open a menu above the page. It closes itself on a pick; Escape and the
+ * pointer are the overlay's business.
+ * @param {Object} spec
+ * @param {ReturnType<import('./overlay.js').createOverlay>} spec.overlay
+ * @param {string} spec.label   the menu's accessible name
+ * @param {MenuItem[]} spec.items
+ * @param {HTMLElement} [spec.anchor]  opens against this element, which toggles aria-expanded
+ * @param {'start'|'end'} [spec.align]  which edge of the anchor the menu shares
+ * @param {{ x: number, y: number }} [spec.at]  opens at this point instead
+ * @param {() => void} [spec.onClose]
+ * @param {(step: -1|1) => void} [spec.onArrow]  called on ArrowLeft and ArrowRight, for a menu bar to switch menus
+ * @returns {import('./overlay.js').Entry}
  */
-function moveWithin(container, event, onEscape) {
-  const entries = [...container.querySelectorAll('.menu-entry:not(:disabled)')];
-  const here = entries.indexOf(document.activeElement);
-  if (event.key === 'ArrowDown') {
-    event.preventDefault();
-    entries[(here + 1) % entries.length]?.focus();
-  } else if (event.key === 'ArrowUp') {
-    event.preventDefault();
-    entries[(here - 1 + entries.length) % entries.length]?.focus();
-  } else if (event.key === 'Escape') {
-    event.preventDefault();
-    onEscape();
+export function openMenu({ overlay, label, items, anchor = null, align = 'start', at = null, onClose = null, onArrow = null }) {
+  const menu = el('div', { className: 'dropdown', attributes: { role: 'menu', 'aria-label': label } });
+
+  // Separators split the list into runs; headings group within a run.
+  const runs = [[]];
+  for (const item of items) {
+    if (item.separator) runs.push([]);
+    else runs[runs.length - 1].push(item);
   }
+
+  runs.forEach((run, index) => {
+    if (index > 0 && run.length > 0) menu.appendChild(el('div', { className: 'dropdown-separator' }));
+    for (const group of menuGroups(run)) {
+      if (group.heading !== null) {
+        menu.appendChild(el('div', { className: 'menu-heading', text: group.heading }));
+      }
+      for (const item of group.items) {
+      const attributes = {
+        type: 'button',
+        role: item.checked === undefined ? 'menuitem' : 'menuitemradio',
+      };
+      if (item.checked !== undefined) attributes['aria-checked'] = String(item.checked);
+      const button = el('button', { className: `menu-entry${item.danger ? ' danger' : ''}`, attributes }, [
+        ...(item.icon ? [icon(item.icon, item.pillar)] : []),
+        el('span', { className: 'menu-entry-label', text: item.label }),
+        ...(item.hint ? [el('span', { className: 'menu-hint', text: item.hint })] : []),
+      ]);
+      if (item.disabled) button.disabled = true;
+      button.addEventListener('click', () => {
+        overlay.close(entry);
+        item.onPick();
+      });
+      menu.appendChild(button);
+      }
+    }
+  });
+
+  menu.addEventListener('keydown', (event) => {
+    const entries = [...menu.querySelectorAll('.menu-entry')].filter((button) => !button.disabled);
+    if (entries.length === 0) return;
+    const from = entries.indexOf(document.activeElement);
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : entries.length - 1;
+      entries[(from + step + entries.length) % entries.length].focus();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      entries[0].focus();
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      entries[entries.length - 1].focus();
+    } else if (onArrow !== null && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      event.preventDefault();
+      onArrow(event.key === 'ArrowLeft' ? -1 : 1);
+    }
+  });
+
+  const entry = overlay.open({
+    kind: 'menu',
+    element: menu,
+    opener: anchor ?? undefined,
+    onClose() {
+      if (anchor) anchor.setAttribute('aria-expanded', 'false');
+      if (onClose) onClose();
+    },
+  });
+  if (anchor) anchor.setAttribute('aria-expanded', 'true');
+
+  const wanted = at ?? {
+    x: align === 'end' ? anchor.getBoundingClientRect().right - menu.offsetWidth : anchor.getBoundingClientRect().left,
+    y: anchor.getBoundingClientRect().bottom,
+  };
+  const clampedX = Math.max(8, Math.min(wanted.x, document.documentElement.clientWidth - menu.offsetWidth - 8));
+  const clampedY = Math.max(8, Math.min(wanted.y, document.documentElement.clientHeight - menu.offsetHeight - 8));
+  menu.style.left = `${clampedX}px`;
+  menu.style.top = `${clampedY}px`;
+
+  const first = menu.querySelector('[aria-checked="true"]') ?? menu.querySelector('.menu-entry:not(:disabled)');
+  first?.focus();
+
+  return entry;
 }

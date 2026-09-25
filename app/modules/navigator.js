@@ -1,449 +1,611 @@
 /**
- * The navigator pane: the model as a tree.
+ * The navigator: the model as a tree of what is filed where, under its
+ * toolbar, headed by the project's own row. The project row is
+ * presentation only — no entity, no identifier, nothing a model
+ * operation can address — selected as the null selection, filing drops
+ * at the top of the tree, and its context menu is the background menu.
+ * The tree presents the user's filing, folders and entities interleaved
+ * in sibling order, every row under its type's icon, an entity labelled
+ * by its designation then its label — reference and title composed for
+ * the types that carry a reference, the designation alone when the entity
+ * carries neither. The pane owns its transient state: scroll and focus
+ * survive the full re-render.
  *
- * The tree is filing and nothing else. Folders and entities both hold folders
- * and entities, at any depth, in whatever arrangement the user makes. No level
- * is dictated by the metamodel, so where a thing sits says nothing about what
- * it is. What an entity is, and what it is related to, is read from its icon
- * and from the relationship pane.
+ * With no project open, the tree is the landing: one quiet line; the
+ * ways into a project live in the editor's empty state.
+ *
+ * The toolbar draws from the one action list, and the tree asks the model
+ * the same questions a drop answers: the middle of a row files into it
+ * when `canFile` allows, its edges place beside it when `canPlaceBeside`
+ * allows. Selection goes through the flows, so a selection change never
+ * bypasses the draft guard.
+ *
+ * While the store holds a picker, the candidate rows of any admissible
+ * form are picked from here: clicking one toggles the pick and moves the
+ * selection nowhere; every other row still selects. The candidate set is
+ * re-derived from the model on every render.
  */
 
+import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
+import { pickerCandidates } from './relate.js';
+import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { childEntities, childFolders, contentCounts, labelOf, nodeOf } from './model.js';
-import { clear, el, icon } from './dom.js';
+import { entityLabel } from './queries.js';
+import { el, icon } from './dom.js';
+import { openMenu } from './menu.js';
 
 /**
- * @typedef {{ kind: 'root'|'folder'|'entity', id: string }} Selection
+ * @typedef {Object} TreeRow
+ * @property {string} id
+ * @property {import('./model.js').Node} node
+ * @property {number} depth
+ * @property {boolean} hasChildren
+ * @property {boolean} expanded
  */
 
 /**
- * @param {Object} context
- * @param {HTMLElement} context.treeEl
- * @param {HTMLInputElement} context.filterEl
- * @param {() => import('./model.js').Model} context.getModel
- * @param {() => Selection} context.getSelection
- * @param {(selection: Selection) => void} context.onSelect
- * @param {(selection: Selection, x: number, y: number) => void} context.onContextMenu
- * @param {(selection: Selection) => void} context.onActivate  double click, or Enter
- * @param {(source: Selection, target: Selection) => boolean} context.canDrop
- * @param {(source: Selection, target: Selection) => void} context.onDrop
+ * The identifiers a filter query finds: an entity by its identifier, its
+ * label, or its type's name; a folder by its name. Matching reads
+ * case-insensitively.
+ * @param {import('./model.js').Model} model
+ * @param {string} query  trimmed and lowercased
+ * @returns {Set<string>}
  */
-export function createNavigator(context) {
-  const expanded = new Set(['root']);
-  let filter = '';
-  /** The per-node entity counts, taken once per render. @type {Map<string, number>} */
-  let counts = new Map();
-  /** @type {Selection|null} */
-  let dragging = null;
-  /**
-   * While set, the tree is a picker rather than a navigator: clicking a valid
-   * entity hands it over instead of selecting it, everything else is inert,
-   * and only expanding, collapsing and filtering still work, so a target can
-   * be reached wherever it is filed. `pickedIds` are the rows handed over so
-   * far, drawn as taken; handing one over again lets go of it.
-   * @type {{ validIds: Set<string>, pickedIds?: Set<string>, onPick: (id: string) => void } | null}
-   */
-  let picker = null;
-
-  context.filterEl.addEventListener('input', () => {
-    filter = context.filterEl.value.trim().toLowerCase();
-    render();
-  });
-
-  // --- Rendering -------------------------------------------------------
-
-  function render() {
-    const model = context.getModel();
-    const selection = context.getSelection();
-    const matches = filter ? matchingKeys(model, filter) : null;
-    counts = contentCounts(model);
-
-    clear(context.treeEl);
-    context.treeEl.append(
-      node({
-        key: 'root',
-        selection: { kind: 'root', id: '' },
-        iconId: 'i-project',
-        label: model.name,
-        current: selection,
-        depth: 0,
-        children: contentsOf(model, null, matches, selection, 1),
-      })
-    );
+export function matchingIds(model, query) {
+  const found = new Set();
+  for (const node of model.nodes.values()) {
+    const haystack =
+      node.kind === 'folder'
+        ? node.name
+        : `${node.id} ${entityLabel(node)} ${ENTITY_TYPES[node.type].name}`;
+    if (haystack.toLowerCase().includes(query)) found.add(node.id);
   }
+  return found;
+}
 
-  /**
-   * What sits directly inside a folder or an entity, or at the top of the tree
-   * when the parent is null: folders first, then the entities filed there.
-   * @param {import('./model.js').Model} model
-   * @param {string|null} parentId
-   * @param {Set<string>|null} matches
-   * @param {Selection} selection
-   * @param {number} depth  how far to indent the rows at this level
-   */
-  function contentsOf(model, parentId, matches, selection, depth) {
-    const folders = childFolders(model, parentId)
-      .map((folder) => folderNode(model, folder, matches, selection, depth))
-      .filter(Boolean);
+/**
+ * The rows the tree draws: every visible node, in drawing order. A node's
+ * children follow it only while it is expanded. While a filter is set,
+ * the rows are the matches and their ancestors, every branch on the way
+ * drawn open whatever the expansion holds, and nothing beneath a match
+ * unless it matches too.
+ * @param {import('./model.js').Model} model
+ * @param {(id: string) => boolean} isExpanded
+ * @param {string} [filter]
+ * @returns {TreeRow[]}
+ */
+export function treeRows(model, isExpanded, filter = '') {
+  const query = filter.trim().toLowerCase();
 
-    const entities = childEntities(model, parentId)
-      .map((entity) => entityNode(model, entity, matches, selection, depth))
-      .filter(Boolean);
-
-    return [...folders, ...entities];
-  }
-
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Folder} folder
-   * @param {Set<string>|null} matches
-   * @param {Selection} selection
-   * @param {number} depth
-   */
-  function folderNode(model, folder, matches, selection, depth) {
-    const children = contentsOf(model, folder.id, matches, selection, depth + 1);
-    if (matches && children.length === 0 && !matches.has(`folder:${folder.id}`)) return null;
-    return node({
-      key: `folder:${folder.id}`,
-      selection: { kind: 'folder', id: folder.id },
-      iconId: 'i-folder',
-      label: folder.name,
-      count: String(counts.get(folder.id) ?? 0),
-      current: selection,
-      depth,
-      children,
-    });
-  }
-
-  /**
-   * An entity holds things the same way a folder does, so it is drawn the same
-   * way: what is filed inside it hangs below it.
-   * @param {import('./model.js').Model} model
-   * @param {import('./model.js').Entity} entity
-   * @param {Set<string>|null} matches
-   * @param {Selection} selection
-   * @param {number} depth
-   */
-  function entityNode(model, entity, matches, selection, depth) {
-    const children = contentsOf(model, entity.id, matches, selection, depth + 1);
-    if (matches && children.length === 0 && !matches.has(`entity:${entity.id}`)) return null;
-    const type = ENTITY_TYPES[entity.type];
-    return node({
-      key: `entity:${entity.id}`,
-      selection: { kind: 'entity', id: entity.id },
-      id: entity.id,
-      iconId: type.icon,
-      pillar: type.pillar,
-      label: labelOf(entity),
-      title: `${type.name} ${entity.id}`,
-      current: selection,
-      depth,
-      children,
-    });
-  }
-
-  /**
-   * @param {Object} spec
-   * @param {string} spec.key
-   * @param {Selection} spec.selection
-   * @param {Selection} spec.current
-   * @param {string} [spec.id]
-   * @param {string} spec.iconId
-   * @param {string} [spec.pillar]  set on an entity row, so the icon is
-   *   coloured by the pillar its type belongs to
-   * @param {string} spec.label
-   * @param {string} [spec.count]
-   * @param {string} [spec.className]
-   * @param {string} [spec.title]
-   * @param {number} spec.depth
-   * @param {HTMLElement[]} [spec.children]
-   */
-  function node(spec) {
-    const children = spec.children ?? [];
-    const hasChildren = children.length > 0;
-    const open = hasChildren && (filter !== '' || expanded.has(spec.key));
-    const selected = spec.current.kind === spec.selection.kind && spec.current.id === spec.selection.id;
-    const pickable = Boolean(picker && spec.selection.kind === 'entity' && picker.validIds.has(spec.selection.id));
-    const picked = pickable && Boolean(picker.pickedIds?.has(spec.selection.id));
-    const pickClass = picker ? (pickable ? ` pickable${picked ? ' picked' : ''}` : ' pick-dim') : '';
-
-    // The stylesheet turns the depth into the row's left padding, so a row runs
-    // the full width of the pane whatever level it sits at.
-    const row = el('div', { class: `row${pickClass}`, title: spec.title, style: `--depth:${spec.depth}` });
-    row.append(
-      hasChildren
-        ? el('span', {
-            class: 'twisty',
-            'aria-hidden': 'true',
-            onclick: (event) => {
-              event.stopPropagation();
-              toggle(spec.key);
-            },
-          }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')])
-        : el('span', { class: 'twisty-gap', 'aria-hidden': 'true' })
-    );
-    row.append(icon(spec.iconId, spec.pillar));
-    if (spec.id) row.append(el('span', { class: 'row-id', text: spec.id }));
-    row.append(el('span', { class: `row-label${spec.className ? ` ${spec.className}` : ''}`, text: spec.label }));
-    if (spec.count !== undefined) row.append(el('span', { class: 'row-count', text: spec.count }));
-
-    const wrapper = el('div', {
-      class: `node${selected ? ' selected' : ''}`,
-      role: 'treeitem',
-      tabindex: selected ? '0' : '-1',
-      'data-key': spec.key,
-      'data-id': spec.id,
-      'aria-expanded': hasChildren ? String(open) : null,
-      'aria-selected': String(selected),
-      onclick: (event) => {
-        event.stopPropagation();
-        if (picker) {
-          if (pickable) picker.onPick(spec.selection.id);
-          return;
-        }
-        context.onSelect(spec.selection);
-      },
-      ondblclick: (event) => {
-        event.stopPropagation();
-        if (picker) return;
-        context.onActivate(spec.selection);
-      },
-      oncontextmenu: (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (picker) return;
-        context.onSelect(spec.selection);
-        context.onContextMenu(spec.selection, event.clientX, event.clientY);
-      },
-      onkeydown: (event) => onKeyDown(event, spec, hasChildren, open, pickable),
-    }, [row]);
-
-    if (hasChildren && open) {
-      wrapper.append(el('div', { class: 'children', role: 'group' }, children));
-    }
-    addDragAndDrop(wrapper, spec.selection);
-    return wrapper;
-  }
-
-  /**
-   * Anything can be dragged anywhere. Near the top or the bottom of a row it
-   * drops alongside, which is how the order is changed; across the middle of a
-   * folder it drops inside. Whether either is allowed is asked of the model, so
-   * the tree accepts exactly what the model accepts.
-   * @param {HTMLElement} wrapper
-   * @param {Selection} selection
-   */
-  function addDragAndDrop(wrapper, selection) {
-    if (picker) return;
-    if (selection.kind === 'entity' || selection.kind === 'folder') {
-      wrapper.draggable = true;
-      wrapper.addEventListener('dragstart', (event) => {
-        event.stopPropagation();
-        dragging = selection;
-        event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('text/plain', `${selection.kind}:${selection.id}`);
-        wrapper.classList.add('dragging');
-      });
-      wrapper.addEventListener('dragend', () => {
-        dragging = null;
-        wrapper.classList.remove('dragging');
-        clearDropMarks();
-      });
-    }
-
-    // A row that refuses still stops the event. Every row sits inside its
-    // parent's, so letting a refusal through would hand the drop to a row the
-    // pointer was never over, and the thing would land somewhere else entirely.
-    wrapper.addEventListener('dragover', (event) => {
-      if (!dragging) return;
-      event.stopPropagation();
-      const position = positionWithin(event, wrapper, selection);
-      if (!context.canDrop(dragging, selection, position)) {
-        clearDropMarks();
-        return;
+  if (query === '') {
+    const rows = [];
+    const walk = (parentId, depth) => {
+      for (const node of childrenOf(model, parentId)) {
+        const hasChildren = childrenOf(model, node.id).length > 0;
+        const expanded = hasChildren && isExpanded(node.id);
+        rows.push({ id: node.id, node, depth, hasChildren, expanded });
+        if (expanded) walk(node.id, depth + 1);
       }
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'move';
-      const mark = position === 'into' ? 'drop-target' : `drop-${position}`;
-      if (!wrapper.classList.contains(mark)) {
-        clearDropMarks();
-        wrapper.classList.add(mark);
-      }
-    });
-
-    wrapper.addEventListener('drop', (event) => {
-      if (!dragging) return;
-      event.stopPropagation();
-      const position = positionWithin(event, wrapper, selection);
-      if (!context.canDrop(dragging, selection, position)) return;
-      event.preventDefault();
-      const source = dragging;
-      dragging = null;
-      clearDropMarks();
-      context.onDrop(source, selection, position);
-    });
+    };
+    walk(null, 0);
+    return rows;
   }
 
-  /**
-   * @param {DragEvent} event
-   * @param {HTMLElement} wrapper
-   * @param {Selection} selection
-   * @returns {'before'|'after'|'into'}
-   */
-  function positionWithin(event, wrapper, selection) {
-    // The top of the tree only takes things inside it. A folder and an entity
-    // both take things inside or alongside, so both read the same three bands.
-    if (selection.kind === 'root') return 'into';
-    const box = wrapper.querySelector(':scope > .row').getBoundingClientRect();
-    const offset = event.clientY - box.top;
-    if (offset < box.height * 0.3) return 'before';
-    if (offset > box.height * 0.7) return 'after';
-    return 'into';
-  }
-
-  function clearDropMarks() {
-    for (const marked of context.treeEl.querySelectorAll('.drop-target, .drop-before, .drop-after')) {
-      marked.classList.remove('drop-target', 'drop-before', 'drop-after');
+  const matches = matchingIds(model, query);
+  const walk = (parentId, depth) => {
+    const rows = [];
+    for (const node of childrenOf(model, parentId)) {
+      const beneath = walk(node.id, depth + 1);
+      if (beneath.length === 0 && !matches.has(node.id)) continue;
+      rows.push(
+        { id: node.id, node, depth, hasChildren: beneath.length > 0, expanded: beneath.length > 0 },
+        ...beneath
+      );
     }
-  }
-
-  /**
-   * Collapsing a level collapses everything under it, so reopening it shows
-   * the level and not the state it was left in three levels down.
-   * @param {string} key
-   */
-  function toggle(key) {
-    if (expanded.has(key)) {
-      expanded.delete(key);
-      const branch = context.treeEl.querySelector(`.node[data-key="${CSS.escape(key)}"]`);
-      for (const descendant of branch?.querySelectorAll('.node[data-key]') ?? []) {
-        expanded.delete(descendant.dataset.key);
-      }
-    } else {
-      expanded.add(key);
-    }
-    render();
-    focusKey(key);
-  }
-
-  /**
-   * @param {KeyboardEvent} event
-   * @param {{key: string, selection: Selection}} spec
-   * @param {boolean} hasChildren
-   * @param {boolean} open
-   * @param {boolean} pickable
-   */
-  function onKeyDown(event, spec, hasChildren, open, pickable) {
-    const keys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' ', 'ContextMenu'];
-    if (!keys.includes(event.key)) return;
-    event.preventDefault();
-    event.stopPropagation();
-
-    const visible = [...context.treeEl.querySelectorAll('.node')].filter((n) => n.offsetParent !== null);
-    const here = visible.findIndex((n) => n.dataset.key === spec.key);
-
-    if (event.key === 'ArrowDown') focusNode(visible[here + 1]);
-    else if (event.key === 'ArrowUp') focusNode(visible[here - 1]);
-    else if (event.key === 'Home') focusNode(visible[0]);
-    else if (event.key === 'End') focusNode(visible[visible.length - 1]);
-    else if (event.key === 'ArrowRight') {
-      if (hasChildren && !open) toggle(spec.key);
-      else focusNode(visible[here + 1]);
-    } else if (event.key === 'ArrowLeft') {
-      if (hasChildren && open) toggle(spec.key);
-      else focusNode(visible[here]?.parentElement?.closest('.node'));
-    } else if (event.key === 'ContextMenu') {
-      if (picker) return;
-      const box = visible[here]?.getBoundingClientRect();
-      context.onContextMenu(spec.selection, box?.left ?? 0, box ? box.top + 22 : 0);
-    } else if (picker) {
-      if (pickable) picker.onPick(spec.selection.id);
-    } else {
-      context.onActivate(spec.selection);
-    }
-  }
-
-  /** @param {Element|null|undefined} node */
-  function focusNode(node) {
-    if (node instanceof HTMLElement) node.focus();
-  }
-
-  /** @param {string} key */
-  function focusKey(key) {
-    focusNode(context.treeEl.querySelector(`.node[data-key="${CSS.escape(key)}"]`));
-  }
-
-  /**
-   * @param {import('./model.js').Model} model
-   * @param {string} query
-   * @returns {Set<string>}
-   */
-  function matchingKeys(model, query) {
-    const found = new Set();
-    for (const entity of model.entities.values()) {
-      const haystack = `${entity.id} ${labelOf(entity)} ${ENTITY_TYPES[entity.type].name}`.toLowerCase();
-      if (haystack.includes(query)) found.add(`entity:${entity.id}`);
-    }
-    for (const folder of model.folders.values()) {
-      if (folder.name.toLowerCase().includes(query)) found.add(`folder:${folder.id}`);
-    }
-    return found;
-  }
-
-  // --- Interface used by the rest of the software ----------------------
-
-  return {
-    render,
-
-    /** Open the branch that holds a selection, so it is always visible. */
-    reveal(selection) {
-      const model = context.getModel();
-      const node = nodeOf(model, selection.id);
-      if (node) openParentChain(model, node.parent);
-    },
-
-    /** Open a branch without changing the selection. */
-    expand(key) {
-      expanded.add(key);
-    },
-
-    /**
-     * Turn the tree into a picker, or back into a navigator with null. Every
-     * branch holding a pickable entity is opened, so nothing on offer is
-     * hidden inside a collapsed level.
-     * @param {{ validIds: Set<string>, onPick: (id: string) => void } | null} spec
-     */
-    setPicker(spec) {
-      picker = spec;
-      if (spec) {
-        const model = context.getModel();
-        for (const id of spec.validIds) {
-          const target = nodeOf(model, id);
-          if (target) openParentChain(model, target.parent);
-        }
-      }
-      render();
-    },
-
-    focusSelected() {
-      const node = context.treeEl.querySelector('.node.selected');
-      focusNode(node);
-    },
+    return rows;
   };
+  return walk(null, 0);
+}
 
-  /**
-   * Open every branch above a node. Either kind can be a parent, so the walk
-   * looks in both maps.
-   * @param {import('./model.js').Model} model
-   * @param {string|null} parentId
-   */
-  function openParentChain(model, parentId) {
+/**
+ * Everything the pane draws, in drawing order: the project row first,
+ * always, then the tree while the project row stands open; nothing at
+ * all without a project.
+ * @param {import('./model.js').Model} model
+ * @param {(id: string) => boolean} isExpanded
+ * @param {boolean} hasProject
+ * @param {string} [filter]
+ * @param {boolean} [projectExpanded]
+ * @returns {Array<{ kind: 'project', id: null, hasChildren: boolean, expanded: boolean } | (TreeRow & { kind: 'node' })>}
+ */
+export function visibleRows(model, isExpanded, hasProject, filter = '', projectExpanded = true) {
+  if (!hasProject) return [];
+  const hasChildren = childrenOf(model, null).length > 0;
+  // A filter reveals through the collapsed root the way it reveals
+  // through any collapsed branch.
+  const open = projectExpanded || filter.trim() !== '';
+  const project = { kind: 'project', id: null, hasChildren, expanded: hasChildren && open };
+  if (!project.expanded) return [project];
+  return [project, ...treeRows(model, isExpanded, filter).map((row) => ({ kind: 'node', ...row }))];
+}
+
+/**
+ * What a row says: an entity's designation and its label when it has one,
+ * a folder's name alone.
+ * @param {import('./model.js').Node} node
+ * @returns {{ designation: string|null, title: string|null }}
+ */
+export function labelParts(node) {
+  if (node.kind === 'folder') return { designation: null, title: node.name };
+  const label = entityLabel(node);
+  return { designation: node.id, title: label || null };
+}
+
+/**
+ * The drop a pointer position over a row asks for: the edges place
+ * beside, the middle files into.
+ * @param {number} ratio  the pointer's height within the row, 0 at the top
+ * @returns {'before'|'into'|'after'}
+ */
+export function dropZone(ratio) {
+  if (ratio < 0.25) return 'before';
+  if (ratio > 0.75) return 'after';
+  return 'into';
+}
+
+/**
+ * The branches that must stand open for these identifiers to be visible:
+ * every ancestor of every one of them. While picking, the tree opens
+ * these transiently, leaving the durable expansion untouched.
+ * @param {import('./model.js').Model} model
+ * @param {Iterable<string>} ids
+ * @returns {Set<string>}
+ */
+export function revealSet(model, ids) {
+  const open = new Set();
+  for (const id of ids) {
     const seen = new Set();
-    let current = nodeOf(model, parentId);
-    while (current && !seen.has(current.id)) {
-      expanded.add(`${model.folders.has(current.id) ? 'folder' : 'entity'}:${current.id}`);
-      seen.add(current.id);
+    let current = nodeOf(model, id);
+    while (current && current.parent !== null && !seen.has(current.parent)) {
+      seen.add(current.parent);
+      open.add(current.parent);
       current = nodeOf(model, current.parent);
     }
   }
+  return open;
+}
+
+/**
+ * @param {Object} context
+ * @param {ReturnType<import('./store.js').createStore>} context.store
+ * @param {HTMLElement} context.container
+ * @param {HTMLElement} context.toolbar
+ * @param {HTMLElement} context.search       the filter bar
+ * @param {HTMLInputElement} context.filterInput
+ * @param {HTMLElement} context.filterClear
+ * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
+ * @param {Array<import('./actions.js').Action>} context.actions
+ * @param {(id: string|null) => Promise<boolean>} context.onSelect
+ * @param {(id: string|null) => void} context.onActivate
+ * @param {(id: string, parentId: string|null) => void} context.onFile
+ * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
+ */
+export function createNavigator({
+  store,
+  container,
+  toolbar,
+  search,
+  filterInput,
+  filterClear,
+  overlay,
+  actions,
+  onSelect,
+  onActivate,
+  onFile,
+  onPlace,
+}) {
+  /** The id being dragged; dataTransfer is unreadable during dragover. */
+  let draggedId = null;
+
+  /**
+   * The open-branch predicate the tree draws and walks with: the durable
+   * expansion, widened transiently while picking so nothing on offer
+   * hides inside a collapsed level.
+   * @param {ReturnType<typeof store.picker>} picker
+   * @param {Set<string>} [candidates]  passed when the caller already derived them
+   * @returns {(id: string) => boolean}
+   */
+  function openWithReveal(picker, candidates) {
+    if (picker === null) return store.isExpanded;
+    const revealed = revealSet(store.model(), candidates ?? pickerCandidates(store.model(), picker));
+    return (id) => store.isExpanded(id) || revealed.has(id);
+  }
+
+  /**
+   * The context menu: the same action list the toolbar draws from, at
+   * the pointer. Opening it on a node selects the node first, guarded —
+   * the menu opens only when the selection lands.
+   * @param {string|null} id
+   * @param {{ x: number, y: number }} at
+   */
+  async function onContextMenu(id, at) {
+    if (!(await onSelect(id))) return;
+    openMenu({
+      overlay,
+      label: 'Actions',
+      at,
+      items: actions
+        .filter((action) => action.context)
+        .map((action) => ({
+          label: action.label,
+          icon: action.icon,
+          hint: action.hint,
+          danger: action.danger,
+          disabled: !action.enabled(),
+          onPick: () => action.run({ at }),
+        })),
+    });
+  }
+
+  /** The filter as typed lives in the store, one truth for the tree, the drag guards, and the move enablements. */
+  const filter = () => store.navigatorFilter();
+
+  /** Whether dragging is off: picks own the tree's clicks, and a filtered view's neighbours are not real siblings. */
+  const dragLocked = () => store.picker() !== null || filter().trim() !== '';
+
+  filterInput.addEventListener('input', () => {
+    filterClear.hidden = filterInput.value === '';
+    store.setNavigatorFilter(filterInput.value);
+  });
+
+  // The clear action exists only while there is something to clear, and
+  // Escape is the keyboard's way to it.
+  function clearFilter() {
+    filterInput.value = '';
+    filterClear.hidden = true;
+    store.setNavigatorFilter('');
+    filterInput.focus();
+  }
+
+  filterInput.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || filterInput.value === '') return;
+    event.preventDefault();
+    event.stopPropagation();
+    clearFilter();
+  });
+  filterClear.addEventListener('click', clearFilter);
+
+  // --- The toolbar, drawn once from the action list --------------------
+
+  /** @type {Map<import('./actions.js').Action, HTMLButtonElement>} */
+  const toolbarButtons = new Map();
+  {
+    let lastGroup = null;
+    for (const action of actions.filter((offered) => offered.toolbar)) {
+      if (lastGroup !== null && action.group !== lastGroup) {
+        toolbar.appendChild(el('span', { className: 'toolbar-divider' }));
+      }
+      lastGroup = action.group;
+
+      const attributes = {
+        type: 'button',
+        'data-action': action.id,
+        title: action.label,
+        'aria-label': action.label,
+      };
+      if (action.menu) {
+        attributes['aria-haspopup'] = 'menu';
+        attributes['aria-expanded'] = 'false';
+      }
+      const button = el(
+        'button',
+        { className: `ghost-button ghost-icon${action.danger ? ' ghost-danger' : ''}`, attributes },
+        [icon(action.icon)]
+      );
+      button.addEventListener('click', () => action.run({ anchor: button }));
+      toolbar.appendChild(button);
+      toolbarButtons.set(action, button);
+    }
+  }
+
+  function syncToolbar() {
+    for (const [action, button] of toolbarButtons) {
+      button.disabled = !action.enabled();
+      if (action.describe) {
+        const said = action.describe();
+        button.title = said;
+        button.setAttribute('aria-label', said);
+      }
+    }
+  }
+
+  // --- The rows --------------------------------------------------------
+
+  function clearDropMarks(rowElement) {
+    rowElement.classList.remove('drop-target', 'drop-before', 'drop-after');
+  }
+
+  function renderProjectRow(row) {
+    const selected = store.selection() === null;
+    const attributes = {
+      role: 'treeitem',
+      'aria-level': '1',
+      'aria-selected': String(selected),
+      tabindex: selected ? '0' : '-1',
+    };
+    if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
+    const rowElement = el('div', {
+      className: `tree-row project-row${selected ? ' selected' : ''}`,
+      attributes,
+    });
+    const twisty = el('span', { className: 'twisty' });
+    if (row.hasChildren) {
+      twisty.appendChild(icon(row.expanded ? 'i-chevron-down' : 'i-chevron-right'));
+      twisty.addEventListener('click', (event) => {
+        event.stopPropagation();
+        store.setProjectExpanded(!row.expanded);
+      });
+    }
+    rowElement.appendChild(twisty);
+    rowElement.appendChild(icon(PROJECT_ICON));
+
+    const name = store.model().name.trim();
+    rowElement.appendChild(
+      name
+        ? el('span', { className: 'row-title', text: name })
+        : el('span', { className: 'row-title untitled', text: 'Untitled' })
+    );
+
+    rowElement.addEventListener('click', () => onSelect(null));
+    rowElement.addEventListener('dblclick', () => onActivate(null));
+    rowElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      onContextMenu(null, { x: event.clientX, y: event.clientY });
+    });
+    rowElement.addEventListener('dragover', (event) => {
+      if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
+      event.preventDefault();
+      event.stopPropagation();
+      rowElement.classList.add('drop-target');
+    });
+    rowElement.addEventListener('dragleave', () => clearDropMarks(rowElement));
+    rowElement.addEventListener('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearDropMarks(rowElement);
+      if (draggedId !== null) onFile(draggedId, null);
+    });
+    return rowElement;
+  }
+
+  function renderRow(row, picking) {
+    const selected = row.id === store.selection();
+    const pickable = picking.candidates.has(row.id);
+    const picked = picking.picks.has(row.id);
+    const attributes = {
+      role: 'treeitem',
+      'aria-level': String(row.depth + 2),
+      'aria-selected': String(selected),
+      tabindex: selected ? '0' : '-1',
+      'data-id': row.id,
+    };
+    if (!dragLocked()) attributes.draggable = 'true';
+    if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
+    if (pickable) attributes['aria-checked'] = String(picked);
+    if (row.node.kind === 'entity') {
+      attributes.title = `${ENTITY_TYPES[row.node.type].name} ${row.id}`;
+    }
+
+    const classes = ['tree-row'];
+    if (selected) classes.push('selected');
+    if (pickable) classes.push('pickable');
+    if (picked) classes.push('picked');
+    if (picking.subject === row.id) classes.push('picker-subject');
+    if (picking.subject !== null && !pickable && picking.subject !== row.id) classes.push('pick-dim');
+    const rowElement = el('div', { className: classes.join(' '), attributes });
+    rowElement.style.paddingLeft = `${16 + (row.depth + 1) * 16}px`;
+
+    const twisty = el('span', { className: 'twisty' });
+    if (row.hasChildren) {
+      twisty.appendChild(icon(row.expanded ? 'i-chevron-down' : 'i-chevron-right'));
+      twisty.addEventListener('click', (event) => {
+        event.stopPropagation();
+        store.setExpanded(row.id, !row.expanded);
+      });
+    }
+    rowElement.appendChild(twisty);
+
+    if (picked) {
+      const check = icon('i-checkmark');
+      check.classList.add('pick-check');
+      rowElement.appendChild(check);
+    }
+    rowElement.appendChild(
+      row.node.kind === 'folder'
+        ? icon(FOLDER_ICON)
+        : icon(TYPE_ICONS[row.node.type], ENTITY_TYPES[row.node.type].pillar)
+    );
+
+    const parts = labelParts(row.node);
+    if (parts.designation) {
+      rowElement.appendChild(el('span', { className: 'mono designation', text: parts.designation }));
+    }
+    if (parts.title) {
+      rowElement.appendChild(el('span', { className: 'row-title', text: parts.title }));
+    }
+
+    rowElement.addEventListener('click', () => {
+      if (pickable) store.togglePick(row.id);
+      else onSelect(row.id);
+    });
+    rowElement.addEventListener('dblclick', () => {
+      if (picking.subject !== null) return;
+      onActivate(row.id);
+    });
+    rowElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      onContextMenu(row.id, { x: event.clientX, y: event.clientY });
+    });
+
+    rowElement.addEventListener('dragstart', (event) => {
+      if (dragLocked()) {
+        event.preventDefault();
+        return;
+      }
+      draggedId = row.id;
+      event.dataTransfer.setData('text/plain', row.id);
+      event.dataTransfer.effectAllowed = 'move';
+    });
+    rowElement.addEventListener('dragend', () => {
+      draggedId = null;
+    });
+    rowElement.addEventListener('dragover', (event) => {
+      if (draggedId === null) return;
+      const rect = rowElement.getBoundingClientRect();
+      const zone = dropZone((event.clientY - rect.top) / rect.height);
+      const allowed =
+        zone === 'into'
+          ? canFile(store.model(), draggedId, row.id).ok
+          : canPlaceBeside(store.model(), draggedId, row.id).ok;
+      clearDropMarks(rowElement);
+      if (!allowed) return;
+      event.preventDefault();
+      event.stopPropagation();
+      rowElement.classList.add(zone === 'into' ? 'drop-target' : zone === 'before' ? 'drop-before' : 'drop-after');
+    });
+    rowElement.addEventListener('dragleave', () => clearDropMarks(rowElement));
+    rowElement.addEventListener('drop', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      clearDropMarks(rowElement);
+      if (draggedId === null) return;
+      const rect = rowElement.getBoundingClientRect();
+      const zone = dropZone((event.clientY - rect.top) / rect.height);
+      if (zone === 'into') onFile(draggedId, row.id);
+      else onPlace(draggedId, row.id, zone);
+    });
+
+    return rowElement;
+  }
+
+  // The landing keeps one quiet line; the ways in live in the editor's
+  // empty state, so the buttons exist in one place.
+  function renderLanding() {
+    container.appendChild(
+      el('div', { className: 'empty-state' }, [el('p', { className: 'empty-state-title', text: 'No project' })])
+    );
+  }
+
+  function render() {
+    const scroll = container.scrollTop;
+    const hadFocus = container.contains(document.activeElement);
+
+    container.textContent = '';
+    search.hidden = !store.hasProject();
+    if (!store.hasProject()) {
+      renderLanding();
+      syncToolbar();
+      return;
+    }
+
+    const picker = store.picker();
+    const picking = {
+      candidates: pickerCandidates(store.model(), picker),
+      picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
+      subject: picker?.subject ?? null,
+    };
+    const isOpen = openWithReveal(picker, picking.candidates);
+    const tree = el('div', { className: 'tree', attributes: { role: 'tree', 'aria-label': 'Model' } });
+    for (const row of visibleRows(store.model(), isOpen, true, filter(), store.projectExpanded())) {
+      tree.appendChild(row.kind === 'project' ? renderProjectRow(row) : renderRow(row, picking));
+    }
+    container.appendChild(tree);
+
+    container.scrollTop = scroll;
+    if (hadFocus) container.querySelector('.tree-row.selected')?.focus();
+
+    syncToolbar();
+  }
+
+  // The space below the rows files to the top of the tree, and the
+  // background context menu acts there too.
+  container.addEventListener('dragover', (event) => {
+    if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
+    event.preventDefault();
+  });
+  container.addEventListener('drop', (event) => {
+    event.preventDefault();
+    if (draggedId !== null) onFile(draggedId, null);
+  });
+  container.addEventListener('contextmenu', (event) => {
+    if (!store.hasProject()) return;
+    if (event.target !== container && event.target.closest('.tree-row')) return;
+    event.preventDefault();
+    onContextMenu(null, { x: event.clientX, y: event.clientY });
+  });
+
+  /** Run an action from the one list, exactly as its button would. */
+  function runAction(id) {
+    const action = actions.find((offered) => offered.id === id);
+    if (action && action.enabled()) action.run({});
+  }
+
+  container.addEventListener('keydown', (event) => {
+    const picker = store.picker();
+    const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter(), store.projectExpanded());
+    if (rows.length === 0) return;
+    const selection = store.selection();
+    const index = rows.findIndex((row) => row.id === selection);
+    const row = index >= 0 ? rows[index] : null;
+
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault();
+      runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (index < 0) onSelect(rows[0].id);
+      else if (rows[index + 1]) onSelect(rows[index + 1].id);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (index > 0) onSelect(rows[index - 1].id);
+    } else if (event.key === 'ArrowRight' && row) {
+      event.preventDefault();
+      if (row.hasChildren && !row.expanded) {
+        if (row.kind === 'project') store.setProjectExpanded(true);
+        else store.setExpanded(row.id, true);
+      } else if (row.expanded) {
+        onSelect(rows[index + 1].id);
+      }
+    } else if (event.key === 'ArrowLeft' && row) {
+      event.preventDefault();
+      if (row.expanded) {
+        if (row.kind === 'project') store.setProjectExpanded(false);
+        else store.setExpanded(row.id, false);
+      } else if (row.kind === 'node') {
+        onSelect(row.node.parent);
+      }
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      onSelect(rows[0].id);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      onSelect(rows[rows.length - 1].id);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      if (row === null) return;
+      event.preventDefault();
+      onActivate(row.id);
+    } else if (event.key === 'Delete') {
+      event.preventDefault();
+      runAction('delete');
+    } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      event.preventDefault();
+      const at = container.querySelector('.tree-row.selected')?.getBoundingClientRect();
+      onContextMenu(selection, { x: (at?.left ?? 0) + 24, y: at?.bottom ?? 0 });
+    }
+  });
+
+  store.subscribe(render);
+  render();
+
+  return { render };
 }
