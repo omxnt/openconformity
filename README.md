@@ -6,7 +6,7 @@ The openconformity project, short for open-source conformity assessment, is an i
 
 ## Status
 
-In private beta. The software is built and is being tried by invited testers, behind a shared login. The documentation is kept in step with it. The proof of concept and the demonstration prototype that preceded the software are kept as the tags `poc` and `demo`.
+In beta. The software is built and open to try at app.openconformity.org. The documentation is kept in step with it. The proof of concept and the demonstration prototype that preceded the software are kept as the tags `poc` and `demo`.
 
 ## What it is
 
