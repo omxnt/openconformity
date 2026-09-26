@@ -49,6 +49,10 @@ Provided as-is, without warranty of any kind. Outputs may contain errors and sho
 
 © 2026 omxnt, licensed under the [EUPL-1.2](LICENSE).
 
+## Security
+
+Vulnerabilities go by GitHub's private vulnerability reporting or to the address below, as [SECURITY.md](SECURITY.md) describes.
+
 ## Contact
 
 [info@openconformity.org](mailto:info@openconformity.org)
