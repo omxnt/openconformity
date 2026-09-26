@@ -71,6 +71,21 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(picks.size, 0, 'and checked unpicks all');
   togglePick(library.model, picks, 'LEG-001');
   equal(picks.size, 216, 'checking the act picks it and all 215 requirements');
+  picks.clear();
+  const lone = new Set();
+  togglePick(library.model, picks, 'ESR-004', true, lone);
+  deepEqual([[...picks], [...lone]], [['ESR-004'], ['ESR-004']], 'alone, a part is picked by itself, nothing beneath it, and remembered as lone');
+  equal(checkState(library.model, picks, 'ESR-004', true, lone), 'mixed', 'and shows partly checked, since what is beneath it is not');
+  deepEqual([...carriedBy(library.model, picks, true, lone)], [], 'a lone pick carries no heading, whatever the switch says');
+  deepEqual(importPlan(library.model, picks, true, lone).map((node) => node.id), ['ESR-004'], 'so the plan is the part and nothing else');
+  togglePick(library.model, picks, 'ESR-004', true, lone);
+  equal(picks.size + lone.size, 0, 'and alone again unpicks it by itself');
+  togglePick(library.model, picks, 'ESR-006', false, lone);
+  togglePick(library.model, picks, 'ESR-006', true, lone);
+  equal(picks.size, childrenOf(library.model, 'ESR-006').length, 'alone on a checked heading drops the heading and keeps its clauses');
+  togglePick(library.model, picks, 'ESR-007', true, lone);
+  togglePick(library.model, picks, 'ESR-006', false, lone);
+  equal(lone.size, 0, 'a plain pick over a lone one takes it into the cascade again');
 
   const shelves = createModel();
   const shelf = addFolder(shelves, 'Mechanical').folder;
@@ -150,13 +165,12 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(previewValue({ key: 'rating', name: 'Rating', kind: 'computed' }, 'High'), null, 'a computed value shows nowhere');
 
   const sections = previewSections(nodeOf(library.model, 'ESR-007'));
-  deepEqual(sections.map((section) => section.name), ['Requirement'], "a clause shows a section per tab that holds a value, the first named as the editor's first tab, and a catalogue's clause carries no applicability");
+  deepEqual(sections.map((section) => [section.name, section.fields.length > 0]), [['Requirement', true], ['Guidance', false], ['Applicability', false], ['Notes', false]], "a clause shows every tab of its type as a section, the first named as the editor's first tab, the empty ones empty");
   deepEqual(sections[0].fields.map((field) => field.name).slice(0, 3), ['Reference', 'Title', 'Requirement'], "with its attributes in the editor's order");
   const catalogue = createModel();
   const hazard = addEntity(catalogue, 'HAZ', { attributes: { title: 'Crushing', eliminated: 'Yes' } }).entity;
-  deepEqual(previewSections(hazard).map((section) => [section.name, section.fields.map((field) => field.value)]), [['Hazard', ['Crushing']], ['Elimination', ['Yes']]], 'a hazard eliminated shows its Elimination tab as a second section');
-  deepEqual(previewSections(addEntity(catalogue, 'HAZ', { attributes: { title: 'Shearing' } }).entity).map((section) => section.name), ['Hazard'], 'and a tab holding nothing is left out');
-  deepEqual(previewSections(addEntity(catalogue, 'HAZ').entity), [], 'an entity holding nothing shows no section');
+  deepEqual(previewSections(hazard).slice(0, 2).map((section) => [section.name, section.fields.map((field) => field.value)]), [['Hazard', ['Crushing']], ['Elimination', ['Yes']]], 'a hazard eliminated shows its Elimination tab as a second section');
+  deepEqual(previewSections(addEntity(catalogue, 'HAZ').entity).map((section) => section.fields.length), previewSections(hazard).map(() => 0), 'an entity holding nothing shows the same sections, each empty');
 }
 
 summary('test-library');

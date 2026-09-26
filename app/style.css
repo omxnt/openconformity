@@ -807,7 +807,8 @@ body {
 .library-fold-chevron .icon { width: 16px; height: 16px; fill: currentColor; }
 .library-section[hidden] { display: none; }
 .library-note { margin: 0; padding: 16px; color: var(--text-second); }  /* $spacing-05 */
-.library-into { margin: 8px 16px; color: var(--text-second); }  /* $spacing-03, $spacing-05 */
+.library-into { display: flex; justify-content: space-between; gap: 16px; margin: 8px 16px; color: var(--text-second); }  /* $spacing-03, $spacing-05 */
+.library-hint { font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
 .consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }

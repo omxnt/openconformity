@@ -95,16 +95,18 @@ function entitiesUnder(library, id) {
 /**
  * The headings a set of picks carries: every entity a pick is filed
  * under, however far up, that is not itself picked. Empty when the
- * headings are switched off.
+ * headings are switched off, and a pick made alone carries none.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {boolean} [headings]
+ * @param {Set<string>} [lone]  the picks made alone
  * @returns {Set<string>}
  */
-export function carriedBy(library, picks, headings = true) {
+export function carriedBy(library, picks, headings = true, lone = new Set()) {
   const carried = new Set();
   if (!headings) return carried;
   for (const id of picks) {
+    if (lone.has(id)) continue;
     for (let above = nodeOf(library, nodeOf(library, id)?.parent); above && above.kind === 'entity'; above = nodeOf(library, above.parent)) {
       if (!picks.has(above.id)) carried.add(above.id);
     }
@@ -122,25 +124,44 @@ export function carriedBy(library, picks, headings = true) {
  * @param {boolean} [headings]
  * @returns {'checked'|'mixed'|'none'}
  */
-export function checkState(library, picks, id, headings = true) {
+export function checkState(library, picks, id, headings = true, lone = new Set()) {
   const under = entitiesUnder(library, id);
   const picked = under.filter((held) => picks.has(held)).length;
   if (under.length > 0 && picked === under.length) return 'checked';
-  if (picked > 0 || carriedBy(library, picks, headings).has(id)) return 'mixed';
+  if (picked > 0 || carriedBy(library, picks, headings, lone).has(id)) return 'mixed';
   return 'none';
 }
 
 /**
  * Toggle a row: a checked row unpicks everything it stands for, any
- * other row picks all of it.
+ * other row picks all of it. Alone, an entity is picked or unpicked by
+ * itself, nothing beneath it touched and no heading carried, and it is
+ * remembered as lone until a plain toggle takes it.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
+ * @param {boolean} [alone]
+ * @param {Set<string>} [lone]  the picks made alone
  */
-export function togglePick(library, picks, id) {
+export function togglePick(library, picks, id, alone = false, lone = new Set()) {
+  if (alone) {
+    if (nodeOf(library, id)?.kind !== 'entity') return;
+    if (picks.has(id)) {
+      picks.delete(id);
+      lone.delete(id);
+    } else {
+      picks.add(id);
+      lone.add(id);
+    }
+    return;
+  }
   const under = entitiesUnder(library, id);
-  if (checkState(library, picks, id) === 'checked') for (const held of under) picks.delete(held);
-  else for (const held of under) picks.add(held);
+  const checked = checkState(library, picks, id) === 'checked';
+  for (const held of under) {
+    if (checked) picks.delete(held);
+    else picks.add(held);
+    lone.delete(held);
+  }
 }
 
 /**
@@ -151,8 +172,8 @@ export function togglePick(library, picks, id) {
  * @param {boolean} [headings]
  * @returns {import('./model.js').Entity[]}
  */
-export function importPlan(library, picks, headings = true) {
-  const carried = carriedBy(library, picks, headings);
+export function importPlan(library, picks, headings = true, lone = new Set()) {
+  const carried = carriedBy(library, picks, headings, lone);
   return filedBeneath(library, null).filter((node) => node.kind === 'entity' && (picks.has(node.id) || carried.has(node.id)));
 }
 
@@ -168,12 +189,13 @@ export function importPlan(library, picks, headings = true) {
  * @param {Set<string>} picks
  * @param {string|null} targetId  the node the copies are filed under, or null for the root
  * @param {boolean} [headings]  whether a pick carries the headings above it
+ * @param {Set<string>} [lone]  the picks made alone, carrying none
  * @returns {{ ok: true, added: string[], related: number } | { ok: false, reason: string }}
  */
-export function importInto(project, library, picks, targetId = null, headings = true) {
+export function importInto(project, library, picks, targetId = null, headings = true, lone = new Set()) {
   const mapping = new Map();
   const added = [];
-  for (const node of importPlan(library, picks, headings)) {
+  for (const node of importPlan(library, picks, headings, lone)) {
     let above = nodeOf(library, node.parent);
     while (above && !mapping.has(above.id)) above = nodeOf(library, above.parent);
     const parent = above ? mapping.get(above.id) : targetId;
@@ -216,8 +238,8 @@ export function previewValue(definition, value) {
 
 /**
  * What the preview shows of an entity, by the editor's tabs: a section
- * per tab with the attributes that hold a value, in the editor's order,
- * a tab whose attributes all hold nothing left out.
+ * per tab, every tab of the type whether filled or not, with the
+ * attributes that hold a value in the editor's order.
  * @param {import('./model.js').Entity} entity
  * @returns {Array<{ name: string, fields: Array<{ name: string, value: string }> }>}
  */
@@ -226,14 +248,12 @@ export function previewSections(entity) {
   const flat = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(flat)];
   const tabs = [{ name: firstTabName(entity.type), definitions: [...type.attributes, ...type.groups.filter((group) => !group.tab).flatMap(flat)] }];
   for (const group of type.groups) if (group.tab) tabs.push({ name: group.name, definitions: flat(group) });
-  return tabs
-    .map(({ name, definitions }) => ({
-      name,
-      fields: definitions
-        .map((definition) => ({ name: definition.name, value: previewValue(definition, entity.attributes?.[definition.key]) }))
-        .filter((field) => field.value !== null),
-    }))
-    .filter((section) => section.fields.length > 0);
+  return tabs.map(({ name, definitions }) => ({
+    name,
+    fields: definitions
+      .map((definition) => ({ name: definition.name, value: previewValue(definition, entity.attributes?.[definition.key]) }))
+      .filter((field) => field.value !== null),
+  }));
 }
 
 /** The tree's floor, the navigator's own, and the preview's, one sentence of a clause across; the splitter's width; the tree's preset. */
@@ -280,6 +300,8 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   let treeWidth = null;
   /** @type {Set<string>} the picked entities of the open catalogue */
   let picks = new Set();
+  /** @type {Set<string>} the picks made alone with Alt, carrying no heading */
+  let lone = new Set();
   /** Whether a pick carries the headings above it, the head's switch. */
   let headings = true;
   /** @type {Set<string>} the rows opened in the open catalogue */
@@ -306,6 +328,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   function openCatalogue(index) {
     current = index;
     picks = new Set();
+    lone = new Set();
     expanded = new Set();
     highlight = null;
     sectionsFresh = true;
@@ -364,7 +387,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
 
   function renderCount() {
     const held = libraryOf(libraries[current]);
-    const planned = held.ok ? importPlan(held.model, picks, headings).length : 0;
+    const planned = held.ok ? importPlan(held.model, picks, headings, lone).length : 0;
     count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
     const button = head.querySelector('.library-import');
     if (button) button.disabled = planned === 0;
@@ -378,8 +401,9 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     importButton.addEventListener('click', () => {
       const held = libraryOf(libraries[current]);
       if (!held.ok || picks.size === 0) return;
-      const chosen = { library: held.model, picks, headings };
+      const chosen = { library: held.model, picks, headings, lone };
       picks = new Set();
+      lone = new Set();
       onImport(chosen);
     });
     const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]);
@@ -452,7 +476,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     }
     const focusable = rows.some((row) => row.node.id === highlight) ? highlight : rows[0]?.node.id;
     for (const { node, depth, hasChildren, expanded: open } of rows) {
-      const state = checkState(library, picks, node.id, headings);
+      const state = checkState(library, picks, node.id, headings, lone);
       const attributes = {
         role: 'treeitem',
         'aria-level': String(depth + 1),
@@ -479,13 +503,18 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       const box = el('input', { attributes: { type: 'checkbox', tabindex: '-1', 'aria-label': `Pick ${node.kind === 'folder' ? node.name : node.id}` } });
       box.checked = state === 'checked';
       box.indeterminate = state === 'mixed';
+      let alone = false;
       box.addEventListener('change', () => {
-        togglePick(library, picks, node.id);
+        togglePick(library, picks, node.id, alone, lone);
+        alone = false;
         focusRow(node.id);
         renderCount();
       });
       const check = el('label', {}, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
-      check.addEventListener('click', (event) => event.stopPropagation());
+      check.addEventListener('click', (event) => {
+        event.stopPropagation();
+        alone = event.altKey;
+      });
 
       row.append(twisty, check);
       if (node.kind === 'folder') {
@@ -511,7 +540,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
           focusRow(node.id);
         } else if (event.key === ' ') {
           event.preventDefault();
-          togglePick(library, picks, node.id);
+          togglePick(library, picks, node.id, event.altKey, lone);
           focusRow(node.id);
           renderCount();
         }
@@ -542,10 +571,6 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
     preview.appendChild(el('div', { className: 'library-preview-head' }, parts));
     const sections = previewSections(node);
-    if (sections.length === 0) {
-      preview.appendChild(el('p', { className: 'library-note', text: 'No attributes are filled in.' }));
-      return;
-    }
     if (sectionsFresh) {
       openSections = new Set([sections[0].name]);
       sectionsFresh = false;
@@ -561,7 +586,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
         else openSections.add(section.name);
         renderPreview();
       });
-      const panel = el('div', { className: 'library-section' }, section.fields.map((field) => el('div', { className: 'field' }, [el('span', { className: 'field-label', text: field.name }), el('div', { className: 'field-static', text: field.value })])));
+      const panel = el('div', { className: 'library-section' }, section.fields.length === 0 ? [el('p', { className: 'library-note', text: 'Nothing is filled in.' })] : section.fields.map((field) => el('div', { className: 'field' }, [el('span', { className: 'field-label', text: field.name }), el('div', { className: 'field-static', text: field.value })])));
       panel.hidden = !open;
       preview.append(fold, panel);
     }
@@ -599,7 +624,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       },
       keys: ['ArrowLeft', 'ArrowRight'],
     });
-    body.appendChild(el('div', { className: 'library' }, [split, el('p', { className: 'library-into', text: filedText() })]));
+    body.appendChild(el('div', { className: 'library' }, [split, el('p', { className: 'library-into' }, [el('span', { text: filedText() }), el('span', { className: 'library-hint', text: 'Alt and click picks one entity alone.' })])]));
     renderList();
     renderPreview();
     list.scrollTop = scrollTop;

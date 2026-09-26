@@ -810,7 +810,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** The picks copied into the project where the selection stands, as one change the history can undo. */
   function importPicks(chosen) {
-    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, store.selection(), chosen.headings));
+    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, store.selection(), chosen.headings, chosen.lone));
     if (!outcome.ok) {
       toastRefusal('Could not import', outcome);
       return;
