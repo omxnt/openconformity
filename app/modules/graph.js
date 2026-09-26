@@ -9,11 +9,12 @@
  * the owner's end and every other form the plain arrowhead. Each side
  * stands grouped by relationship type, which binds the entity type at
  * the far end: the first of a group always draws, and where the group
- * holds more a line under it says how many and opens them beneath,
- * each with its own edge, the line then closing the block from its end
- * and a rule along the block's outer side saying what it spans. A group
- * opened stays open while its subject is selected and closes on the
- * next; nothing is remembered beyond that. While the store holds a picker for the subject, the picks ride
+ * holds more a line under it says how many and opens them beneath seven
+ * at a time, each with its own edge, the line then saying how many are
+ * left or closing the block from its end, and a rule along the block's
+ * outer side saying what it spans. A group opened stays open while its
+ * subject is selected and closes on the next; nothing is remembered
+ * beyond that. While the store holds a picker for the subject, the picks ride
  * as dashed provisional edges in their type's group, held open —
  * clicking one, or its box, lets go — and the standing neighbourhood
  * recedes until Done.
@@ -135,18 +136,22 @@ export function groupedSide(entries, direction) {
 }
 
 /**
- * Whether each group stands open: closed unless the user opened it for
- * this subject, and open regardless while a filter narrows the side or
- * the group holds a pick, so nothing asked for hides.
+ * How many members of each group show: the first alone while the group
+ * is closed, seven more for every page the user opened, every member
+ * while a filter narrows the side, and always through the last pick,
+ * so nothing asked for hides. A group is open while more than its
+ * first shows, or while it holds a pick.
  * @param {ReturnType<typeof groupedSide>} groups
- * @param {Set<string>} [opened]  the keys the user opened
+ * @param {Map<string, number>} [opened]  the pages the user opened, by group key
  * @param {boolean} [filtered]
  */
-export function openGroups(groups, opened = new Set(), filtered = false) {
-  return groups.map((group) => ({
-    ...group,
-    open: filtered || group.members.some((entry) => entry.pending === true) || opened.has(group.key),
-  }));
+export function openGroups(groups, opened = new Map(), filtered = false) {
+  return groups.map((group) => {
+    const count = group.members.length;
+    const lastPick = group.members.reduce((held, entry, index) => (entry.pending === true ? index + 1 : held), 0);
+    const shown = filtered ? count : Math.min(count, Math.max(1 + MAX_PER_SIDE * (opened.get(group.key) ?? 0), lastPick));
+    return { ...group, shown, open: shown > 1 || lastPick > 0 };
+  });
 }
 
 /**
@@ -166,7 +171,7 @@ export function sideRows(groups) {
   let height = 0;
   for (const group of groups) {
     const top = y;
-    const shown = group.open ? group.members : group.members.slice(0, 1);
+    const shown = group.members.slice(0, group.shown ?? (group.open ? group.members.length : 1));
     for (const entry of shown) {
       rows.push({ kind: 'box', group, entry, y, height: NODE_HEIGHT, mid: y + NODE_HEIGHT / 2 });
       y += NODE_HEIGHT;
@@ -235,8 +240,8 @@ export function boxSpan(side) {
   return boxes.length === 0 ? 0 : boxes.at(-1).y + boxes.at(-1).height;
 }
 
-/** What a group's strip says: how many more stand folded, or that fewer can be shown. */
-export const stripText = (group) => (group.open ? 'Show fewer' : `Show ${group.members.length - 1} more`);
+/** What a group's strip says: how many more the next page shows, or that fewer can be shown once every member does. */
+export const stripText = (group) => (group.shown < group.members.length ? `Show ${Math.min(MAX_PER_SIDE, group.members.length - group.shown)} more` : 'Show fewer');
 
 /**
  * The title line a box carries, cut to what three lines of box hold.
@@ -277,8 +282,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
 
   /** The filter the last render drew under, so a group toggling redraws under it. */
   let lastFilter = '';
-  /** The groups the user opened, for the subject they were opened on; a new subject starts closed. */
-  let opened = new Set();
+  /** The pages the user opened per group, for the subject they were opened on; a new subject starts closed. */
+  let opened = new Map();
   let openedFor = null;
   /** The strip to give focus back to after a toggle redraws it. */
   let focusKey = null;
@@ -357,8 +362,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     control.appendChild(svg('use', { href: `#${group.open ? 'i-chevron-down' : 'i-chevron-right'}`, x: '8', y: '4', width: '16', height: '16', class: 'node-chevron' }));
     control.appendChild(svgText('text', { x: '32', y: '16', class: 'node-more-text' }, stripText(group)));
     const toggle = () => {
-      if (opened.has(group.key)) opened.delete(group.key);
-      else opened.add(group.key);
+      if (group.shown < group.members.length) opened.set(group.key, (opened.get(group.key) ?? 0) + 1);
+      else opened.delete(group.key);
       focusKey = group.key;
       render(lastFilter);
     };
@@ -484,7 +489,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
 
     lastFilter = filter;
     if (openedFor !== around.subject.id) {
-      opened = new Set();
+      opened = new Map();
       openedFor = around.subject.id;
     }
     const filtered = filter.trim() !== '';

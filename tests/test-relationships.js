@@ -354,11 +354,21 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(right[0].members.map((member) => member.other.id), right[0].members.map((member) => member.other.id).sort(), 'the members by identifier');
   const left = groupedSide(around.incoming, 'incoming');
   deepEqual(left.map((group) => [group.type, group.members.length]), [['CAS', 1]], 'the sparse side groups just the same');
-  equal(openGroups(right)[0].open, false, 'a group starts closed: its first member shows, the rest fold');
-  equal(openGroups(right, new Set(['outgoing:elm-exhibits-haz']))[0].open, true, 'opened by the user, it stands open');
-  equal(openGroups(right, new Set(), true)[0].open, true, 'a filter opens every group');
-  equal(stripText(openGroups(right)[0]), 'Show 8 more', 'the strip counts what stands folded');
-  equal(stripText(openGroups(right, new Set(['outgoing:elm-exhibits-haz']))[0]), 'Show fewer', 'and offers the way back');
+  deepEqual([openGroups(right)[0].open, openGroups(right)[0].shown], [false, 1], 'a group starts closed: its first member shows, the rest fold');
+  const onePage = openGroups(right, new Map([['outgoing:elm-exhibits-haz', 1]]))[0];
+  deepEqual([onePage.open, onePage.shown], [true, 8], 'opened by the user, it shows seven more');
+  deepEqual([openGroups(right, new Map(), true)[0].open, openGroups(right, new Map(), true)[0].shown], [true, 9], 'a filter opens every group whole');
+  equal(stripText(openGroups(right)[0]), 'Show 7 more', 'the strip offers the next page');
+  equal(stripText(onePage), 'Show 1 more', 'and counts what the last page holds');
+  equal(stripText(openGroups(right, new Map([['outgoing:elm-exhibits-haz', 2]]))[0]), 'Show fewer', 'and once every member shows, offers the way back');
+  const bigModel = createModel();
+  addEntity(bigModel, 'LEG');
+  for (let count = 0; count < 215; count += 1) {
+    addEntity(bigModel, 'ESR');
+    relate(bigModel, 'leg-contains-esr', 'LEG-001', `ESR-${String(count + 1).padStart(3, '0')}`);
+  }
+  const act = groupedSide(neighbourhood(bigModel, 'LEG-001').outgoing, 'outgoing');
+  deepEqual([openGroups(act)[0].shown, openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))[0].shown, sideRows(openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))).height], [1, 22, 22 * 88], 'an act holding 215 requirements opens seven at a time, so the side never runs past what was asked for');
 }
 
 // --- The box caption (pin) ----------------------------------------------
