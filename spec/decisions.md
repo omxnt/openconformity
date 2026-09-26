@@ -707,6 +707,16 @@ A library is a project file used as a source of items to import, valid against t
 
 ---
 
+### D-086 Import where you stand, one way
+
+`2026-09-27` `product`
+
+An import copies the picked entities of a catalogue into the project under the node selected in the navigator, a folder or an entity, and at the root when the project row is selected. The picked entities travel with their filing among themselves and the relationships among them, a picked entity whose parent is not picked landing where the user stands. A relationship to anything not picked stays behind. Nothing is recognised as already in the project, and picking the same act twice gives two. Folders in a catalogue are shelves, never imported, and checking one checks what it holds. The picker is a mode over the editor's column, the catalogues as tabs, the tree with a checkbox per row and the entity under the highlight previewed beside it by its tabs as sections.
+
+> *Recognition by reference was built first and taken out. It made a second, invisible identity beside the identifier, could not tell a revised act from the same one, and greyed rows a user might well want twice. One way is simpler to explain and to undo. Relationships among the picks travel because an act owning its clauses is the catalogue's fact and without it the copies would not cascade, while a relationship to what was not picked has no other end. The navigator's selection as the target is the rule New entity already follows. Settles U-005.*
+
+---
+
 ### D-087 Freeform navigator, a folder deleting what it holds
 
 `2026-09-26` `product`
@@ -717,19 +727,39 @@ The navigator is independent of the metamodel. Entities and folders are placed a
 
 ---
 
+### D-088 Records of related measures and the flag on the tab
+
+`2026-09-27` `product`
+
+When a scenario's residual risk is rated, or a hazard's Eliminated is set, the software records the protective measures related at that time, in the entity, as the ground the judgement was made on. While the record no longer matches what is related, the measures that were removed, deleted or added since wear a glyph and say so in their tooltip, the tab the judgement stands on carries an inline notification at its top saying what changed and what to review, the entity is listed in Messages, and nothing else changes. The record is written afresh when the judgement is saved again with its value changed, or when the user presses Mark reviewed, in an edit into the draft and in view as one undoable change. There is no interlock, a residual risk can be rated without an initial one and a rating can be emptied.
+
+> *The rating is a judgement about the measures in place, and the software cannot know whether a changed set of measures changes the judgement. So it keeps the ground and points at it rather than deciding. A note under the record itself said what happened but not where to act, a helper under one field said too little for a tab whose rationale and evaluation rest on the same ground, and Carbon's inline notification is made for a section. Marking reviewed is a decision in its own right, so it is a change in the model that undo can take back, never a dismissal that hides the bar until the next visit. Interlocks between the ratings were tried and removed for reading as a broken field.*
+
+---
+
+### D-089 One voice to the user
+
+`2026-09-27` `product`
+
+The words the software says to the user follow the rules kept in notes/language.md. A dialog that asks has a question for its title and its button repeats the title's verb. One verb for one action, delete, remove, discard, clear. Consequences are counted, and composition is said as part of. A toast's title is the outcome, a refusal's is Could not and the verb. The model is the project. A relationship is added and removed, and a record's entity is added, removed or deleted since. A menu entry that asks for more before it acts carries an ellipsis, a menu of choices or a mode does not.
+
+> *The texts had been written one at a time across months and read that way, three words for one thing, metamodel words reaching the user, weight uneven from one dialog to the next. One pass over every string with a short set of rules fixed that, and the rules are kept where the next string can be checked against them. Attribute help texts follow the same rules and are held to the attributes document by the tests.*
+
+---
+
+### D-090 Modes over the panes
+
+`2026-09-27` `product`
+
+A function that takes over a region for a while is a mode. The messages stand over the relationship pane, the library picker over the editor's column with the relationship pane hidden, and the diagram editor over the whole workspace with every action of the model held still. Each has a head naming it and carrying its actions, a way out in the head and on Escape, and none is kept across a reload. While a mode is open the panes beneath keep their state and take it back when it closes.
+
+> *Dialogs cap width at Carbon's largest modal and suit a decision, not work. The messages need the pane's width, the picker needs the navigator alive beside it for where the picks land, and draw.io needs more than a column for its own chrome. One anatomy for the three means one thing to learn. The diagram editor holds the model still because a mode is not modal, and the menu bar stays live above it. Generalises D-083.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
-
-### U-005 Library
-
-`2026-08-01` `product`
-
-How importing from a library into a project behaves: what the picker offers, how an item already in the project is recognised, and which relationships travel with a pick.
-
-> *Affects the library. D-085 settles what a library is, a project file used as a source, and what each kind holds. What remains is the function: recognition by reference so nothing is copied twice and a standard's covers lines land on the project's own essential requirements, and which relationships are the standard's own facts and travel, containment and covers, against D-016's rule that judgements stay behind.*
-
----
 
 ### U-010 Scenario verdict
 
