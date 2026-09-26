@@ -12,7 +12,7 @@ import { validate } from '../app/modules/validator.js';
 import { loadProject, openProject, serialise, toFileObject } from '../app/modules/files.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { addEntity } from '../app/modules/model.js';
-import { attributesFor } from '../app/modules/attributes.js';
+import { attributesFor, groupsOf } from '../app/modules/attributes.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -161,14 +161,27 @@ if (loaded.ok) {
   const related = new Set(EXAMPLE_PROJECT.relationships.map((relationship) => relationship.type));
   deepEqual(Object.keys(RELATIONSHIP_TYPES).filter((type) => !related.has(type)), [], 'and every relationship type is used');
   const empty = [];
+  const hidden = [];
+  const shown = (group, values) => !group.when || (values[group.when.key] ?? '') === group.when.value;
   for (const code of Object.keys(ENTITY_TYPES)) {
     const entities = EXAMPLE_PROJECT.entities.filter((entity) => entity.type === code);
+    const filled = (key) => entities.some((entity) => (entity.attributes[key] ?? '') !== '');
+    const slotOf = new Map(groupsOf(code).filter((group) => group.when).flatMap((group) => group.attributes.map((definition) => [definition.key, `${group.name}/${group.when.key}`])));
+    const slotFilled = (key) => [...slotOf].some(([other, slot]) => slot === slotOf.get(key) && filled(other));
     for (const definition of attributesFor(code)) {
       if (definition.kind === 'computed' || definition.kind === 'drawing') continue;
-      if (!entities.some((entity) => (entity.attributes[definition.key] ?? '') !== '')) empty.push(`${code}.${definition.key}`);
+      if (!(slotOf.has(definition.key) ? slotFilled(definition.key) : filled(definition.key))) empty.push(`${code}.${definition.key}`);
+    }
+    for (const entity of entities) {
+      const values = { ...EXAMPLE_PROJECT.attributes, ...entity.attributes };
+      for (const group of groupsOf(code)) {
+        if (shown(group, values)) continue;
+        for (const definition of group.attributes) if ((entity.attributes[definition.key] ?? '') !== '') hidden.push(`${entity.id}.${definition.key}`);
+      }
     }
   }
-  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, drawings excepted, since one has to come out of draw.io');
+  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, drawings excepted, since one has to come out of draw.io, and a slot shown by a choice counts through whichever of its variants is filled');
+  deepEqual(hidden, [], 'and no entity holds a value under a choice it has not made, since a save would ask to clear it');
   deepEqual(attributesFor('PROJECT').filter((definition) => (EXAMPLE_PROJECT.attributes[definition.key] ?? '') === '').map((definition) => definition.key), [], "and the project's own attributes are filled");
 }
 
