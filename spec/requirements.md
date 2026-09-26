@@ -27,6 +27,8 @@ The requirements use the following terms with the meanings given here. Terms the
 | external application | Software at another origin that the software hosts in a frame and talks to. |
 | external service | The origin an external application is served from. A function that uses one names it. |
 | user data | Anything the user enters or the software derives from it. This covers the model, its content, drawings, and the user's choices in the software. |
+| library | A project file used as a source of entities to import into the open project. A catalogue is a library the software ships. |
+| record | The protective measures related to an entity when its judgement was last saved, held in the entity as the ground the judgement was made on. |
 
 ### 1.2 Characteristics
 
@@ -606,6 +608,26 @@ When redo is invoked, the software shall reapply the most recently undone model 
 
 > *Undo is exploratory, and stepping back to look is only safe if stepping forward again is possible. Redo makes undo itself mistake-proof.*
 
+---
+
+#### F-MOD-010 Library import
+
+`event driven` `draft`
+
+When the user imports picks from a catalogue, the software shall copy the picked entities into the project under the selected node, with their filing among themselves and the relationships among them.
+
+> *A catalogue is a project file used as a source, and an import is a copy where the user stands, the rule New entity already follows. The picked entities keep their filing among themselves and the relationships among them, since an act owning its clauses is the catalogue's fact and the copies would not cascade without it. A relationship to anything not picked has no other end and stays behind. Nothing is recognised as already in the project, so picking the same act twice gives two, which is simpler to explain and to undo than a second identity beside the identifier.*
+
+---
+
+#### F-MOD-011 Record of related measures
+
+`event driven` `draft`
+
+When a scenario's residual risk estimation or a hazard's elimination is saved, the software shall record the protective measures related to the entity at that time, and while the record no longer matches the related measures, shall flag the entity and offer to record them afresh.
+
+> *A rating is a judgement about the measures in place, and the software cannot know whether a changed set of measures changes the judgement. It keeps the ground the judgement was made on and points at it, in the entity, in the tab the judgement stands on, and in Messages, without deciding. Recording afresh is a decision of the user's, made by saving the judgement again with its value changed or by marking the record reviewed, and it is a change in the model that undo takes back.*
+
 ### 4.5 Views
 
 ---
@@ -648,7 +670,7 @@ The software shall persist a project as a single local file conforming to `schem
 
 The software shall read a library as a project file, valid against `schema/project.schema.json`.
 
-> *A library holds reusable items the user keeps independently of any project and imports from into projects. It is a project file used as a source, so one schema, one loader and one migration serve both, and the user builds a library in the tool as they build a project. What the library function offers from such a file, and what an import carries across, is specified with that function.*
+> *A library is a project file used as a source, so one schema, one loader and one migration serve both. The catalogues the software ships are libraries written as projects, and a library of the user's own, when that function comes, is built in the tool as a project is. What an import carries across is F-MOD-010.*
 
 ---
 
