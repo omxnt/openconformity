@@ -267,6 +267,8 @@ export function createEditor({
   let conditionals = [];
   /** @type {Array<{ definition: Object, input: HTMLInputElement }>} the records of entities the open edit keeps, refreshed when the group each waits on changes */
   let records = [];
+  /** @type {Map<string, HTMLElement[]>} the cell a record puts in question, by the name of the group that writes the record: a rating's cell, or the first parameter of the group */
+  let cellsByGroup = new Map();
   /** @type {Map<string, string>} the group each key of the mounted type stands in, by name */
   let groupOfKey = new Map();
   /** @type {Map<string, AttributeDefinition>} the definition of each key of the mounted type */
@@ -539,9 +541,34 @@ export function createEditor({
         tipKey
       )
     );
-    const held = el('div', { className: 'cell-value tags' }, tags);
-    if (!states.some(({ state }) => state !== 'linked')) return held;
-    return el('div', {}, [held, el('p', { className: 'cell-note', text: changedText(definition, current?.type ?? '') })]);
+    return el('div', { className: 'cell-value tags' }, tags);
+  }
+
+  /**
+   * Carbon's warning under the field a changed record puts in question:
+   * for every record that no longer matches, the warning glyph and the
+   * sentence saying so beneath the cell of the group the record was
+   * written for, the rating or the choice, and nothing beneath a record
+   * that still matches.
+   * @param {Object<string, string>} values  the entity's, or the draft's
+   */
+  function placeWarnings(values) {
+    for (const stale of body.querySelectorAll('.field-warning')) stale.remove();
+    const subject = current?.id ?? null;
+    for (const definition of definitionOfKey.values()) {
+      if (definition.kind !== 'entities' || !definition.recorded) continue;
+      if (!recordWritten(current?.type ?? '', definition, values)) continue;
+      const states = recordedStates(values[definition.key] ?? '', store.model(), subject, definition.relationship);
+      if (!states.some(({ state }) => state !== 'linked')) continue;
+      for (const cell of cellsByGroup.get(definition.recorded) ?? []) {
+        cell.appendChild(el('p', { className: 'field-warning' }, [statusIcon('medium'), el('span', { text: changedText(definition, current?.type ?? '') })]));
+      }
+    }
+  }
+
+  /** Remember the cell a group's record would put in question. */
+  function questioned(name, cell) {
+    cellsByGroup.set(name, [...(cellsByGroup.get(name) ?? []), cell]);
   }
 
   function tableOf(definition, rows, trailing = null) {
@@ -606,6 +633,7 @@ export function createEditor({
     const closing = group.attributes.find(isOutcome);
     const carried = group.attributes.filter((definition) => !isOutcome(definition));
     const cellElement = el('div', { className: 'cell' });
+    questioned(group.name, cellElement);
     if (!editing) {
       const tags = ratingTags(ratingView(group.attributes, values), closing.key);
       cellElement.appendChild(groupNameNode(group.name, closing.key));
@@ -705,8 +733,14 @@ export function createEditor({
           if (variants.at(-1) === sub && !variants.some((held) => held.when.value === '')) target.appendChild(slotHolder(code, variants, values, editing));
         }
       };
+      let first = true;
       for (const definition of group.attributes) {
-        target.appendChild(fieldCell(definition, values, editing, group.attributes.length === 1));
+        const cell = fieldCell(definition, values, editing, group.attributes.length === 1);
+        target.appendChild(cell);
+        if (first && isParameter(definition) && definition.kind !== 'entities') {
+          questioned(group.name, cell);
+          first = false;
+        }
         placeAfter(definition.key);
       }
       placeAfter(null);
@@ -730,6 +764,7 @@ export function createEditor({
    */
   function mount(id, code, stored, editing) {
     const type = typeOf(code) ?? { attributes: [], groups: [] };
+    cellsByGroup = new Map();
     groupOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, group.name])));
     definitionOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, definition])));
     const values = { ...stored, ...projectReads(code) };
@@ -748,6 +783,8 @@ export function createEditor({
     }
     if (panels.length > 1) body.appendChild(tabBar(code, panels));
     body.appendChild(el('div', { className: 'form' }, panels.map((panel) => panel.grid)));
+    placeWarnings(values);
+    if (editing) refreshers.push(() => placeWarnings(fieldValues()));
   }
 
   /**

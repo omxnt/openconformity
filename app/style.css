@@ -820,8 +820,9 @@ body {
    glyph's holds the help. */
 .tag.reasoned { text-decoration: underline dotted; text-underline-offset: 3px; }
 /* Helper text under a field: a gate not yet passed, or a record that no longer matches. */
-.cell-note { margin: 4px 0 0; font-size: 12px; line-height: 1.33333; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */
-.cell-note[hidden] { display: none; }
+/* Carbon's warning helper under a field: the warning glyph, then the sentence, in helper text. */
+.field-warning { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; font-size: 12px; line-height: 1.33333; letter-spacing: 0.32px; color: var(--text-helper); }  /* $spacing-02, $helper-text-01 */
+.field-warning .status-icon { flex: none; width: 16px; height: 16px; }
 /* A record of entities in an edit: read only, shown as its tags at the field's height. */
 .field-static { display: flex; align-items: center; min-height: 32px; }
 button.tag-trigger { position: relative; border: 0; font: inherit; font-size: 12px; letter-spacing: 0.32px; cursor: default; }
