@@ -24,6 +24,7 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 openconformity/
 ├── app/            the published software
 ├── site/           the published project site
+├── docs/           the user documentation, published later
 ├── specs/          the specification and the schema
 ├── sources/        the sources in editable formats
 ├── tests/          headless tests for the software

@@ -20,6 +20,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
     app/            the published software
     site/           the published project site
+    docs/           the user documentation, published later
     specs/          the specification and the schema
     sources/        the sources in editable formats
     tests/          headless tests for the software
