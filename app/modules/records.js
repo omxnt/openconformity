@@ -13,7 +13,15 @@ import { typeOf, groupsOf, isOutcome, isRationale } from './attributes.js';
 import { entityLabel, relatedIds } from './queries.js';
 
 /** What an entry out of step with the record says beneath its label, by state, given the name of the group that wrote the record. */
-export const staleText = (recorded) => ({ unlinked: `Unlinked since the ${recorded.toLowerCase()}.`, deleted: `Deleted since the ${recorded.toLowerCase()}.`, added: `Related since the ${recorded.toLowerCase()}.` });
+export const staleText = (recorded) => ({ unlinked: `Removed since the ${recorded.toLowerCase()}.`, deleted: `Deleted since the ${recorded.toLowerCase()}.`, added: `Added since the ${recorded.toLowerCase()}.` });
+
+/**
+ * What the notification at the top of a tab says once a record on it no
+ * longer matches: what changed as its title, and what to review.
+ * @param {{ name: string, recorded: string }} definition
+ * @returns {{ title: string, text: string }}
+ */
+export const reviewText = (definition) => ({ title: `The ${definition.name.toLowerCase()} changed`, text: `Review the ${definition.recorded.toLowerCase()} and what rests on it.` });
 
 /** A record of entities as it is stored: the identifiers in ascending order, parted by semicolons. */
 export const recordOf = (ids) => [...new Set(ids)].sort().join('; ');

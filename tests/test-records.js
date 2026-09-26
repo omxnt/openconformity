@@ -5,7 +5,7 @@
  */
 
 import './shim.js';
-import { recordOf, recordedStates, recordWritten, findings, messagesText, sizeText, tabNameOf, changedText, staleText, nounOf } from '../app/modules/records.js';
+import { recordOf, recordedStates, recordWritten, findings, messagesText, sizeText, tabNameOf, changedText, staleText, nounOf, reviewText } from '../app/modules/records.js';
 import { createModel, addEntity, relate, unrelate, removeEntity } from '../app/modules/model.js';
 import { groupsOf } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -17,8 +17,9 @@ const elimination = groupsOf('HAZ').flatMap((group) => group.attributes).find((h
 
 equal(recordOf(['PRM-002', 'PRM-001', 'PRM-002']), 'PRM-001; PRM-002', 'a record is the identifiers once each, in order, parted by semicolons');
 equal(recordOf([]), '', 'and nothing with nothing');
-deepEqual(staleText('Residual risk estimation'), { unlinked: 'Unlinked since the residual risk estimation.', deleted: 'Deleted since the residual risk estimation.', added: 'Related since the residual risk estimation.' }, 'the three states out of step name the rating the record was written with');
-equal(changedText(measures, 'SCN'), "The protective measures have changed since the scenario's residual risk estimation.", 'and the note beneath a record names the field, the entity and the rating');
+deepEqual(staleText('Residual risk estimation'), { unlinked: 'Removed since the residual risk estimation.', deleted: 'Deleted since the residual risk estimation.', added: 'Added since the residual risk estimation.' }, 'the three states out of step name the rating the record was written with');
+equal(changedText(measures, 'SCN'), "The protective measures have changed since the scenario's residual risk estimation.", 'and the message names the field, the entity and the rating');
+deepEqual(reviewText(measures), { title: 'The protective measures changed', text: 'Review the residual risk estimation and what rests on it.' }, "and the notification at the top of the tab says what changed and what to review");
 equal(nounOf('HAZ'), 'hazard', 'an entity goes by the last word of its type');
 
 // --- Whether a record was written ------------------------------------------

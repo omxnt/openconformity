@@ -14,6 +14,8 @@ A proposal for the words the software says to the user in dialogs, toasts, notic
 8. A notice's title states the situation in one sentence. Its detail says what to do.
 9. The model is the project when speaking to the user. In the model becomes in the project.
 10. No colons, semicolons or dashes as joints. A colon only introduces a real list.
+11. A relationship is added and removed, as the buttons say. A record's entity is added since, removed since or deleted since, never related or unlinked. Related stays as the adjective it is, in New related and in not related to anything yet.
+12. A changed record flags the tab it puts in question with an inline notification at the top, what changed as the title and what to review as the line, never a helper under one field.
 
 ## Deleting
 

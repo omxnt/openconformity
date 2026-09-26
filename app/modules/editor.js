@@ -18,7 +18,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
-import { staleText, recordOf, recordedStates, recordWritten, changedText } from './records.js';
+import { staleText, recordOf, recordedStates, recordWritten, reviewText } from './records.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 import { editDrawing } from './drawing-editor.js';
 
@@ -267,8 +267,8 @@ export function createEditor({
   let conditionals = [];
   /** @type {Array<{ definition: Object, input: HTMLInputElement }>} the records of entities the open edit keeps, refreshed when the group each waits on changes */
   let records = [];
-  /** @type {Map<string, HTMLElement[]>} the cell a record puts in question, by the name of the group that writes the record: a rating's cell, or the first parameter of the group */
-  let cellsByGroup = new Map();
+  /** @type {Map<string, HTMLElement>} the tab's grid each group stands on, by the group's name, so a record can flag the tab of the group it was written for */
+  let panelOfGroup = new Map();
   /** @type {Map<string, string>} the group each key of the mounted type stands in, by name */
   let groupOfKey = new Map();
   /** @type {Map<string, AttributeDefinition>} the definition of each key of the mounted type */
@@ -545,31 +545,35 @@ export function createEditor({
   }
 
   /**
-   * Carbon's warning under the field a changed record puts in question:
-   * for every record that no longer matches, the warning glyph and the
-   * sentence saying so beneath the cell of the group the record was
-   * written for, the rating or the choice, and nothing beneath a record
-   * that still matches.
+   * Carbon's inline notification at the top of the tab a changed record
+   * puts in question: for every record that no longer matches, the
+   * warning kind with what changed and what to review, above the cells
+   * of the tab the group the record was written for stands on, and
+   * nothing for a record that still matches.
    * @param {Object<string, string>} values  the entity's, or the draft's
    */
-  function placeWarnings(values) {
-    for (const stale of body.querySelectorAll('.field-warning')) stale.remove();
+  function placeNotices(values) {
+    for (const stale of body.querySelectorAll('.cells > .notice')) stale.remove();
     const subject = current?.id ?? null;
     for (const definition of definitionOfKey.values()) {
       if (definition.kind !== 'entities' || !definition.recorded) continue;
       if (!recordWritten(current?.type ?? '', definition, values)) continue;
       const states = recordedStates(values[definition.key] ?? '', store.model(), subject, definition.relationship);
       if (!states.some(({ state }) => state !== 'linked')) continue;
-      for (const cell of cellsByGroup.get(definition.recorded) ?? []) {
-        cell.appendChild(el('p', { className: 'field-warning' }, [statusIcon('medium'), el('span', { text: changedText(definition, current?.type ?? '') })]));
-      }
+      const grid = panelOfGroup.get(definition.recorded);
+      if (!grid) continue;
+      const words = reviewText(definition);
+      grid.prepend(
+        el('div', { className: 'notice notice-warning', attributes: { role: 'status' } }, [
+          icon('i-warning'),
+          el('div', { className: 'notice-body' }, [el('span', { className: 'notice-title', text: words.title }), el('span', { className: 'notice-text', text: words.text })]),
+        ])
+      );
     }
   }
 
-  /** Remember the cell a group's record would put in question. */
-  function questioned(name, cell) {
-    cellsByGroup.set(name, [...(cellsByGroup.get(name) ?? []), cell]);
-  }
+  /** Every group name under a group, itself first. */
+  const namesIn = (group) => [group.name, ...(group.groups ?? []).flatMap(namesIn)];
 
   function tableOf(definition, rows, trailing = null) {
     for (const cells of rows) cells.forEach((cell, c) => cell.classList.add(...[columnWidth(definition.columns[c])].filter(Boolean)));
@@ -633,7 +637,6 @@ export function createEditor({
     const closing = group.attributes.find(isOutcome);
     const carried = group.attributes.filter((definition) => !isOutcome(definition));
     const cellElement = el('div', { className: 'cell' });
-    questioned(group.name, cellElement);
     if (!editing) {
       const tags = ratingTags(ratingView(group.attributes, values), closing.key);
       cellElement.appendChild(groupNameNode(group.name, closing.key));
@@ -733,14 +736,8 @@ export function createEditor({
           if (variants.at(-1) === sub && !variants.some((held) => held.when.value === '')) target.appendChild(slotHolder(code, variants, values, editing));
         }
       };
-      let first = true;
       for (const definition of group.attributes) {
-        const cell = fieldCell(definition, values, editing, group.attributes.length === 1);
-        target.appendChild(cell);
-        if (first && isParameter(definition) && definition.kind !== 'entities') {
-          questioned(group.name, cell);
-          first = false;
-        }
+        target.appendChild(fieldCell(definition, values, editing, group.attributes.length === 1));
         placeAfter(definition.key);
       }
       placeAfter(null);
@@ -764,7 +761,7 @@ export function createEditor({
    */
   function mount(id, code, stored, editing) {
     const type = typeOf(code) ?? { attributes: [], groups: [] };
-    cellsByGroup = new Map();
+    panelOfGroup = new Map();
     groupOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, group.name])));
     definitionOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, definition])));
     const values = { ...stored, ...projectReads(code) };
@@ -775,16 +772,18 @@ export function createEditor({
     for (const group of type.groups) {
       if (!group.tab) {
         groupInto(first, code, group, values, editing, true);
+        for (const name of namesIn(group)) panelOfGroup.set(name, first);
         continue;
       }
       const grid = el('div', { className: 'cells' });
       groupInto(grid, code, group, values, editing, false);
+      for (const name of namesIn(group)) panelOfGroup.set(name, grid);
       panels.push({ name: group.name, grid });
     }
     if (panels.length > 1) body.appendChild(tabBar(code, panels));
     body.appendChild(el('div', { className: 'form' }, panels.map((panel) => panel.grid)));
-    placeWarnings(values);
-    if (editing) refreshers.push(() => placeWarnings(fieldValues()));
+    placeNotices(values);
+    if (editing) refreshers.push(() => placeNotices(fieldValues()));
   }
 
   /**
