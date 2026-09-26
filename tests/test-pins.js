@@ -266,7 +266,7 @@ import { fakeStorage } from './helpers.js';
   const styles = readFile('../app/style.css');
   ok(styles.includes('.help-trigger:hover .tooltip,\n.help-trigger:focus-visible .tooltip,\n.tip-trigger:hover .tooltip,\n.tip-trigger:focus-visible .tooltip { display: block; animation: tooltip-in 70ms var(--motion-standard) 100ms both; }') && styles.includes('max-width: 288px;'), 'shown on hover or focus, the help glyph and the icon buttons by one rule, at the tooltip width Carbon sets');
   ok(editor.includes("definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set'"), 'the title, the project name, a multiline, a hyperlink and a set each take a row');
-  ok(readFile('../notes/attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
+  ok(readFile('../notes/attributes.md').includes('the editor shows it read-only as the first cell of the type\'s own tab'), 'as the document now allows');
   ok(editor.includes('if (panels.length > 1) body.appendChild(tabBar(code, panels));'), 'and a type with no tabbed group shows no tab bar');
   ok(editor.includes('tabKeys(bar, (i) => select(i, true));') && readFile('../app/modules/dom.js').includes('export function tabKeys(bar, pick) {'), 'arrow keys walk the tabs, from one helper');
 
@@ -333,7 +333,7 @@ import { fakeStorage } from './helpers.js';
   const sheet = readFile('../app/style.css');
   ok(!sheet.includes('.switcher'), 'and so is its sheet');
   ok(sheet.includes('.pane-head > .tabs { flex: 1; align-self: stretch;'), "in a head the tabs stand in the name's place");
-  ok(readFile('../notes/attributes.md').includes('#### Applicability `tab`'), 'the document tags a group as a tab');
+  ok(readFile('../notes/attributes.md').includes('#### 3.1.2 Applicability'), 'the document heads every tab, numbered');
 
   ok(sheet.includes('.pane-relationships .pane-body { display: flex; flex-direction: column; }') && sheet.includes('.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }'), "the graph's host fills its pane, so its scrollbar sits at the pane's edge");
 }
@@ -342,13 +342,13 @@ import { fakeStorage } from './helpers.js';
 
 {
   const doc = readFile('../notes/attributes.md');
-  ok(doc.includes('##### Required integrity level `when standard = EN ISO 13849-1:2023`') && doc.includes('| plr | Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |'), "under ISO 13849-1 the level is chosen among the standard's own");
-  ok(doc.includes('##### Required integrity level `when standard = EN IEC 62061:2021`') && doc.includes('| sil | Required integrity level | choice | SIL 1; SIL 2; SIL 3 |'), 'under IEC 62061 likewise, the two one slot');
-  ok(doc.includes('| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 |') && !doc.includes('| safetyStandard |') && !doc.includes('Other standard'), "the standard is the function's own choice, not the project's, and the list holds standards alone");
-  ok(doc.includes('##### Required integrity level `when standard =`') && doc.includes('| ownLevel | Required integrity level | text | |') && !doc.includes('| ownStandard |') && doc.includes('A variant may instead wait on nothing chosen, `when key =` with no value after it'), 'with no standard chosen the level is text, by a variant waiting on nothing, and the standard itself is not entered freely');
-  ok(doc.includes('| designTargets | Specific design targets | multiline | |') && !doc.includes('| failureRate |') && !doc.includes('| demandRate |') && !doc.includes('| missionTime |') && !doc.includes('Target architecture'), "what a standard asks of the design is one text in its own terms, not fields in one standard's");
+  ok(doc.includes('##### Required integrity level `when standard = EN ISO 13849-1:2023`') && doc.includes('| Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |  | plr |'), "under ISO 13849-1 the level is chosen among the standard's own");
+  ok(doc.includes('##### Required integrity level `when standard = EN IEC 62061:2021`') && doc.includes('| Required integrity level | choice | SIL 1; SIL 2; SIL 3 |  | sil |'), 'under IEC 62061 likewise, the two one slot');
+  ok(doc.includes('| Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 |') && !doc.includes('| safetyStandard |') && !doc.includes('Other standard'), "the standard is the function's own choice, not the project's, and the list holds standards alone");
+  ok(doc.includes('##### Required integrity level `when standard =`') && doc.includes('| Required integrity level | text |  |  | ownLevel |') && !doc.includes('| ownStandard |') && doc.includes('| `when key =` | The same, holding while the attribute is unset. |'), 'with no standard chosen the level is text, by a variant waiting on nothing, and the standard itself is not entered freely');
+  ok(doc.includes('| Specific design targets | multiline |  |') && !doc.includes('| failureRate |') && !doc.includes('| demandRate |') && !doc.includes('| missionTime |') && !doc.includes('Target architecture'), "what a standard asks of the design is one text in its own terms, not fields in one standard's");
   ok(!doc.includes('PL risk graph') && !doc.includes('SIL matrix') && !doc.includes('| rated |') && !doc.includes('ISO 13849-1:2023, Safety of machinery'), 'no transcription of a standard reads the level: the tool ships no table nobody has verified');
-  ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article [2]"), "the requirement categories cite their source, with none of its text");
+  ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article gives [2]"), "the requirement categories cite their source, with none of its text");
   const editor = readFile('../app/modules/editor.js');
   ok(!editor.includes('ownInto') && !readFile('../app/style.css').includes('.cell-own'), 'no free entry stands beneath a choice');
   ok(!doc.includes('### 1.9 Dependent choices') && !doc.includes('by standard'), 'the dependent choice, which this replaces, is gone from the document');
@@ -428,8 +428,8 @@ import { fakeStorage } from './helpers.js';
   ok(rating.includes("{ label: 'Apply', value: 'confirmed', kind: 'primary' }"), 'applied by its primary action, cancelled by anything else');
   const doc = readFile('../notes/attributes.md');
   ok(doc.includes('#### Initial risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`'), "the document tags a rating with the project's method it waits on");
-  ok(doc.includes('| initialLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |'), 'and names the method a computed value is read by');
-  ok(doc.includes('| initialSeverityRationale | Severity rationale | rationale | initialSeverity |'), 'and the parameter a rationale is given for');
+  ok(doc.includes('| Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |  | initialLevel |'), 'and names the method a computed value is read by');
+  ok(doc.includes('| Severity rationale | rationale | initialSeverity |  | initialSeverityRationale |'), 'and the parameter a rationale is given for');
   ok(doc.includes('## 6. Risk estimation') && doc.indexOf('## 6. Risk estimation') < doc.indexOf('## 7. References'), 'the methods stand in their own chapter, before the references');
   const sheet = readFile('../app/style.css');
   ok(sheet.includes('.cell-group[hidden] { display: none; }') && sheet.includes('select.field-input.wide { max-width: none; }'), 'the sheet hides a waiting group and widens a long choice');

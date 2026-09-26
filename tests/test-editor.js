@@ -68,7 +68,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
   for (const [code, type] of Object.entries(ATTRIBUTES)) {
     const last = type.groups.at(-1);
     ok(last.tab === true && last.name === 'Notes', `${code} closes on a Notes tab`);
-    deepEqual(last.attributes, [{ key: 'notes', name: 'Notes', kind: 'multiline' }], `${code}'s notes are one multiline field`);
+    deepEqual(last.attributes, [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }], `${code}'s notes are one multiline field, with the one help`);
   }
 
   deepEqual(
@@ -80,9 +80,9 @@ equal(linkable(''), false, 'and an empty value is nothing');
   deepEqual(attributesFor('CAS')[0], { key: 'reference', name: 'Reference', kind: 'text', help: 'The annex, module or part of the legislation the procedure follows, as cited.' }, 'a conformity assessment opens on the annex or module it follows, cited from the legislation');
   deepEqual(attributesFor('NTB')[0], { key: 'reference', name: 'Reference', kind: 'text', help: 'The identification number of the notified body, as cited.' }, 'a notified body opens on the number the Commission lists it under');
   for (const code of ['ELM', 'ACT', 'TSK', 'PHS', 'HAZ', 'SCN', 'PRM']) {
-    deepEqual(attributesFor(code)[0], { key: 'reference', name: 'Designation', kind: 'text' }, `${code} opens on a designation of the modeller's own, composed into its label before the title`);
+    deepEqual(attributesFor(code)[0], { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' }, `${code} opens on a designation of the modeller's own, composed into its label before the title`);
   }
-  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Designation', 'Notes', 'Link', 'Applicable', 'Rationale', 'Diagram', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the names shared across types, and the rating names shared across methods, carry one help each');
+  deepEqual(Object.keys(SHARED_HELP), ['Identifier', 'Initial risk estimation', 'Residual risk estimation', 'Required integrity level'], 'the identifier, the two ratings and the level slot carry one help each, every attribute carrying its own');
   equal(attributesFor('REQ').find((definition) => definition.key === 'rationale').help, 'Why the system requirement exists.', "a system requirement's rationale says its own thing, so it carries its own help");
   equal(attributesFor('HST').find((definition) => definition.key === 'title').help, "The title of the standard, as published.", 'a harmonised standard says its title is the standard\'s');
   equal(attributesFor('ESR').find((definition) => definition.key === 'reference').help, 'The clause number of the essential requirement within the legislation.', 'an essential requirement says its reference is the clause');
@@ -115,7 +115,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
   deepEqual(groups('SAF'), ['Behaviour', 'Characteristics', 'Fault handling', 'Diagram', 'Notes'], 'then what it does, what it must achieve, what it does when it fails, its diagram, and its notes, each a tab');
   for (const code of ['ELM', 'PRM', 'SAF']) {
     const drawing = ATTRIBUTES[code].groups.find((group) => group.name === 'Diagram');
-    deepEqual(drawing, { name: 'Diagram', tab: true, attributes: [{ key: 'drawing', name: 'Diagram', kind: 'drawing' }] }, `${code} carries the one Diagram tab, named for the artefact, before its notes`);
+    deepEqual(drawing, { name: 'Diagram', tab: true, attributes: [{ key: 'drawing', name: 'Diagram', kind: 'drawing', help: 'A diagram of it, made in draw.io and shown as an image.' }] }, `${code} carries the one Diagram tab, named for the artefact, before its notes`);
     equal(ATTRIBUTES[code].groups.indexOf(drawing), ATTRIBUTES[code].groups.length - 2, `${code}'s drawing stands right before its notes`);
   }
   deepEqual(

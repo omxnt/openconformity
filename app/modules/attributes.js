@@ -44,31 +44,25 @@
 
 /** @type {Object<string, TypeAttributes>} */
 /**
- * The help a name shared by several types carries on every cell of that
- * name, recorded once, as §1.9 of the document has it; a definition's
- * own help stands instead where it has one.
+ * The help a name carries where it names a rating or a slot rather than
+ * an attribute, and the identifier's, recorded once as §1.7 of the
+ * document has it.
  * @type {Object<string, string>}
  */
 export const SHARED_HELP = {
   Identifier: "Assigned by the tool from the entity type's code and a running number, never changed and never reused.",
-  Designation: 'A short name of your own, shown in the label before the title.',
-  Notes: 'Anything worth keeping that no field holds, such as how something was assessed.',
-  Link: 'Where it is published online.',
-  Applicable: 'Whether it applies to this product.',
-  Rationale: 'Why it applies, or why not.',
-  Diagram: 'A diagram of it, made in draw.io and shown as an image.',
   'Initial risk estimation': 'The risk before protective measures, estimated by the method chosen or typed where none is.',
   'Residual risk estimation': 'The risk with the protective measures in place, estimated by the method chosen or typed where none is.',
   'Required integrity level': "The level the safety function must reach, in its standard's own terms.",
 };
 
 /** The Diagram tab three types carry: one drawing, held as SVG text and shown as an image. */
-const drawingTab = () => ({ name: 'Diagram', tab: true, attributes: [{ key: 'drawing', name: 'Diagram', kind: 'drawing' }] });
+const drawingTab = () => ({ name: 'Diagram', tab: true, attributes: [{ key: 'drawing', name: 'Diagram', kind: 'drawing', help: 'A diagram of it, made in draw.io and shown as an image.' }] });
 
 export const ATTRIBUTES = {
   ELM: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system element." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the system element is and what it does in the machinery.' },
     ],
@@ -84,12 +78,12 @@ export const ATTRIBUTES = {
         ],
       },
       drawingTab(),
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   ACT: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name or role of the system actor." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'Who the system actor is and how they interact with the machinery.' },
     ],
@@ -105,12 +99,12 @@ export const ATTRIBUTES = {
           { key: 'familiarity', name: 'Familiarity', kind: 'multiline', help: 'How well the person is assumed to know this or similar machinery and its hazards.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   TSK: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system task." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What is done in the system task.' },
     ],
@@ -125,36 +119,36 @@ export const ATTRIBUTES = {
           { key: 'misuse', name: 'Reasonably foreseeable misuse', kind: 'multiline', help: 'How the task is foreseeably done other than intended.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   PHS: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system phase." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What happens to the machinery in the system phase.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
   },
   LEG: {
     attributes: [
       { key: 'reference', name: 'Reference', kind: 'text', help: "The official number of the legislation, as cited." },
       { key: 'title', name: 'Title', kind: 'text', help: "The title of the legislation." },
-      { key: 'link', name: 'Link', kind: 'hyperlink' },
+      { key: 'link', name: 'Link', kind: 'hyperlink', help: 'Where it is published online.' },
     ],
     groups: [
       {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
       {
         name: 'Notes',
         tab: true,
-        attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }],
+        attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }],
       },
     ],
   },
@@ -162,36 +156,36 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Reference', kind: 'text', help: "The designation of the standard, as cited." },
       { key: 'title', name: 'Title', kind: 'text', help: "The title of the standard, as published." },
-      { key: 'link', name: 'Link', kind: 'hyperlink' },
+      { key: 'link', name: 'Link', kind: 'hyperlink', help: 'Where it is published online.' },
     ],
     groups: [
       {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   OSP: {
     attributes: [
       { key: 'reference', name: 'Reference', kind: 'text', help: "The number or designation of the specification, as cited." },
       { key: 'title', name: 'Title', kind: 'text', help: "The title of the specification." },
-      { key: 'link', name: 'Link', kind: 'hyperlink' },
+      { key: 'link', name: 'Link', kind: 'hyperlink', help: 'Where it is published online.' },
     ],
     groups: [
       {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   CAS: {
@@ -200,7 +194,7 @@ export const ATTRIBUTES = {
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the conformity assessment procedure." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the conformity assessment involves for this product.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
   },
   NTB: {
     attributes: [
@@ -221,12 +215,12 @@ export const ATTRIBUTES = {
           { key: 'products', name: 'Products', kind: 'multiline', help: 'The kinds of machinery and related products the notified body may assess, as the register lists them.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   HAZ: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the hazard." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'Where the hazard arises and how it could cause harm.' },
     ],
@@ -247,12 +241,12 @@ export const ATTRIBUTES = {
         ],
         groups: [{ name: 'Rationale', attributes: [{ key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why the hazard counts as eliminated, or why it could not be.' }] }],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   SCN: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the accident scenario." },
       { key: 'hazardousEvent', name: 'Hazardous event', kind: 'multiline', help: 'What goes wrong in the accident scenario and sets the harm in motion.' },
       { key: 'consequence', name: 'Potential consequence', kind: 'multiline', help: 'The harm the accident scenario could result in.' },
@@ -366,22 +360,22 @@ export const ATTRIBUTES = {
           },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   PRM: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the protective measure." },
       { key: 'step', name: 'Step', kind: 'choice', values: ['Safe design', 'Protection', 'Information'], help: 'Which of the three risk reduction steps the measure belongs to.' },
       { key: 'kind', name: 'Kind', kind: 'text', help: 'What kind of measure it is, in your own words, such as a guard, a device, a label or training.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the protective measure is and how it reduces the risk.' },
     ],
-    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
   },
   SAF: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the safety function." },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the safety function is for.' },
     ],
@@ -459,7 +453,7 @@ export const ATTRIBUTES = {
         ],
       },
       drawingTab(),
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   ESR: {
@@ -482,14 +476,14 @@ export const ATTRIBUTES = {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
       {
         name: 'Notes',
         tab: true,
-        attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }],
+        attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }],
       },
     ],
   },
@@ -513,11 +507,11 @@ export const ATTRIBUTES = {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   OSR: {
@@ -540,27 +534,27 @@ export const ATTRIBUTES = {
         name: 'Applicability',
         tab: true,
         attributes: [
-          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'] },
-          { key: 'rationale', name: 'Rationale', kind: 'multiline' },
+          { key: 'applicable', name: 'Applicable', kind: 'choice', values: ['Yes', 'No'], help: 'Whether it applies to this product.' },
+          { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why it applies, or why not.' },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
   REQ: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system requirement." },
       { key: 'type', name: 'Type', kind: 'choice', values: ['Function/Performance', 'Fit/Operational', 'Form', 'Quality', 'Compliance'], help: 'The kind of requirement, from what the system does to what it must comply with.' },
       { key: 'verificationMethod', name: 'Verification method', kind: 'choice', values: ['Inspection', 'Analysis', 'Demonstration', 'Test'], help: 'How the system requirement is to be verified.' },
       { key: 'description', name: 'Requirement', kind: 'multiline', help: 'What the system must do or be.' },
       { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why the system requirement exists.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] }],
+    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
   },
   VER: {
     attributes: [
-      { key: 'reference', name: 'Designation', kind: 'text' },
+      { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the system verification." },
       { key: 'method', name: 'Verification method', kind: 'choice', values: ['Inspection', 'Analysis', 'Demonstration', 'Test'], help: 'How the system verification is carried out.' },
       { key: 'responsible', name: 'Responsible party', kind: 'text', help: 'Who carries out the system verification, whether a person, a department or an organisation.' },
@@ -587,7 +581,7 @@ export const ATTRIBUTES = {
           },
         ],
       },
-      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+      { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },
 };
@@ -621,7 +615,7 @@ export function typeOf(code) {
 }
 
 /**
- * The project's own attributes, as §1.10 of the document has them: the
+ * The project's own attributes, as §1.8 of the document has them: the
  * project and its revision on the first tab, the methods every scenario
  * and safety function reads through its project attributes, and the
  * notes. The name is the model's own and stands among the first, as a
@@ -653,7 +647,7 @@ export const PROJECT = {
         },
       ],
     },
-    { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline' }] },
+    { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
   ],
 };
 

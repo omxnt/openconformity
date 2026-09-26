@@ -814,6 +814,56 @@ The scenario's Risk evaluation field, the modeller's own judgement whether the r
 
 ---
 
+### D-097 The editor's tabs and labels
+
+`2026-09-28` `product`
+
+A type's own attributes stand on its first tab, named by the last word of the type's name, and every type ends with a Notes tab. A group earns a tab by a distinct task, such as a verdict or an estimate, or by a set of fields about one concern, never by a single field and never by the identity alone. An entity is labelled by its reference and its title with a space between, or by its title alone. An entity set out of play by a decision, Applicable No or Eliminated Yes, stays in the model and is shown in the one grey the interface uses for everything out of play, Carbon's disabled strength.
+
+> *Recorded from the attributes document when its prose was cut to the tables. A first tab named for the type reads as the thing itself, and a Notes tab on every type gives every pane its tab bar and a place for what fits nowhere. The reference's own citation form is the label's delimiter, so nothing is bracketed. The grey stands below the contrast floor for text on purpose, so out of play reads at a glance, the row staying selectable and the editor showing it at full strength.*
+
+---
+
+### D-098 The rating's face
+
+`2026-09-28` `product`
+
+A rating shows as a cell of tags, what it comes to and the code of each parameter chosen. A code is a value's first word, or its second where the first holds no digit, and for a number the initials of its name before it. What the rating comes to wears Carbon's status colours, error for high, warning for medium, the check for low and the check in the secondary colour for negligible, whichever method's word says so. A parameter with a rationale is underlined, and its tooltip carries the reasoning beneath the parameter's name and value.
+
+> *Recorded from the attributes document. Tags keep the rating's whole face on one line, the tooltip carries what a tag stands for, and the rationale rides with its parameter rather than in a field of its own, so the rating is read as one.*
+
+---
+
+### D-099 The safety function's tabs
+
+`2026-09-28` `product`
+
+A sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. Fault handling is self-contained, the faults to be detected, the means of detection, the reaction with the state it brings the machinery to, the two times, the indication, the recovery and the power disturbances. What a standard requires of the design beyond the level stands in one text, the specific design targets, in the standard's own terms. The functional safety standard is the function's own choice, and the required integrity level is chosen in the one slot beside it under one name, whichever standard's term it is.
+
+> *Recorded from the attributes document. The state a fault brings the machinery to stays within the reaction because reactions differ by fault, and a list of reactions carries its states line by line. Power disturbances stand alone because the function cannot react to a lost supply by its own logic, where a lost communication is a fault like any other. Design targets differ from standard to standard and are complete for none of them as fields, so fields that fit one standard and not the next were not made. A machine designed to one standard commonly holds a subsystem designed to another, so the standard is not the project's. Another standard is named in the design targets or the notes until it earns a place in the list.*
+
+---
+
+### D-100 The protective measure's step
+
+`2026-09-28` `product`
+
+A measure belongs to one of the three steps the Regulation orders in Annex III 1.1.2, under names of our own. Safe design removes the hazard or holds it back by the design itself, protection is something added that stands between a remaining hazard and the person, and information tells the user of what is left. The kind beside the step is the modeller's own word for what the measure is.
+
+> *Recorded from the attributes document. The test that sorts a measure is what happens if it fails. In the first step nothing, since the hazard is gone. In the second the hazard reaches the person. In the third only the person's own care stood there. The finer sort a project sorts its measures by is its own and not a list's, so the kind is text.*
+
+---
+
+### D-101 The notified body's notification
+
+`2026-09-28` `product`
+
+A notified body carries its address and its own website beside its number and name, and a Notification tab holding what the Commission's register says of it, the act it is notified under, the Member State that notified it, its entry in the register, the procedures it may carry out and the products it may assess. It carries no description.
+
+> *Recorded from the attributes document. The declaration of conformity cites a body by name, address and number, and the address ends in the Member State that notified it. What the body is, the register says. What it does for this product, its relationship to the conformity assessment says. Who was dealt with and how it went is what the notes are for. The Notification tab is what is checked before a body is engaged.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

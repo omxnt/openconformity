@@ -7,13 +7,14 @@
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/modules/attributes.js';
 import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { ESTIMATED } from '../app/modules/risk.js';
+import { firstTabName } from '../app/modules/editor.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
 const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'drawing', 'computed', 'rationale', 'entities'];
 /** What a table's column may be. */
 const COLUMN_KINDS = ['text', 'multiline', 'date', 'choice', 'number'];
 
-/** The project's tables as §1.10 records them, read beside the types. */
+/** The project's tables as §1.8 records them, read beside the types. */
 let documentProject = null;
 import { ENTITY_TYPES } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -23,9 +24,10 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 const document = readFile('../notes/attributes.md');
 
 /**
- * The type sections of the document: per code its name, status, ungrouped
- * rows, and groups, in document order. Fenced code blocks are skipped, so
- * the template's placeholder tables are not read as content.
+ * The type sections of the document: per code its name, the rows of its
+ * first tab as its own attributes, and every later tab as a group tagged
+ * tab with its groups beneath, in document order. Fenced code blocks are
+ * skipped, so the template's placeholder tables are not read as content.
  */
 /** What the document's structure gets wrong, if anything, gathered as it is read. */
 const problems = [];
@@ -35,8 +37,8 @@ function parseDocument(text) {
   let fenced = false;
   let current = null;
   let table = null;
-  /** where the table being read keeps its help, -1 where it has none */
-  let helpColumn = -1;
+  /** where the table being read keeps each column, by header */
+  let columns = {};
 
   for (const raw of text.split('\n')) {
     const line = raw.trim();
@@ -46,15 +48,15 @@ function parseDocument(text) {
     }
     if (fenced) continue;
 
-    const heading = line.match(/^### [\d.]+ (.+) \((\w+)\) `(\w+)`$/);
+    const heading = line.match(/^### [\d.]+ (.+) \((\w+)\)$/);
     if (heading) {
-      current = { code: heading[2], name: heading[1], status: heading[3], attributes: [], groups: [] };
+      current = { code: heading[2], name: heading[1], attributes: [], groups: [] };
       table = current.attributes;
       types.push(current);
       continue;
     }
     if (/^### [\d.]+ Project$/.test(line)) {
-      current = { code: 'PROJECT', name: 'Project', status: 'draft', attributes: [], groups: [] };
+      current = { code: 'PROJECT', name: 'Project', attributes: [], groups: [] };
       table = current.attributes;
       documentProject = current;
       continue;
@@ -66,51 +68,56 @@ function parseDocument(text) {
     }
     if (!current) continue;
 
-    const group = line.match(/^(####|#####) (.+?)((?: `[^`]+`)*)$/);
-    if (group) {
+    const tab = line.match(/^#### [\d.]+ (.+?)((?: `[^`]+`)*)$/);
+    const group = line.match(/^##### (.+?)((?: `[^`]+`)*)$/);
+    if (tab || group) {
       table = [];
       const tags = {};
-      for (const [, tag] of group[3].matchAll(/`([^`]+)`/g)) {
+      for (const [, tag] of (tab ?? group)[2].matchAll(/`([^`]+)`/g)) {
         const when = tag.match(/^when (\w+) =(?: (.+))?$/);
         const after = tag.match(/^after (\w+)$/);
-        if (tag === 'tab') tags.tab = true;
-        else if (when) tags.when = { key: when[1], value: when[2] ?? '' };
+        if (when) tags.when = { key: when[1], value: when[2] ?? '' };
         else if (after) tags.after = after[1];
         else tags.tag = tag;
       }
-      const held = { name: group[2], ...tags, attributes: table };
-      if (group[1] === '#####') {
-        const parent = current.groups.at(-1);
-        if (!parent) problems.push(`${current.code}: a sub-group "${held.name}" with no group above it`);
-        else (parent.groups ??= []).push(held);
+      if (tab && !current.first) {
+        current.first = tab[1];
+        table = current.attributes;
+        if (Object.keys(tags).length > 0) problems.push(`${current.code}: the first tab carries a tag`);
+      } else if (tab) {
+        current.groups.push({ name: tab[1], tab: true, ...tags, attributes: table });
       } else {
-        current.groups.push(held);
+        const parent = current.groups.at(-1);
+        if (!parent) problems.push(`${current.code}: a group "${group[1]}" on the first tab`);
+        else (parent.groups ??= []).push({ name: group[1], ...tags, attributes: table });
       }
       continue;
     }
 
     if (line.startsWith('|')) {
       const cells = line.split('|').slice(1, -1).map((cell) => cell.trim());
-      if (cells[0] === 'Key') {
-        helpColumn = cells.indexOf('Help');
+      if (cells[0] === 'Attribute') {
+        columns = Object.fromEntries(cells.map((name, i) => [name, i]));
+        if (!('Kind' in columns && 'Values' in columns && 'Help' in columns && 'Key' in columns)) problems.push(`${current.code}: a table without the five columns`);
         continue;
       }
       if (cells.every((cell) => /^-+$/.test(cell))) continue;
-      const list = (cell) => (cell ?? '').split(';').map((value) => value.trim()).filter((value) => value !== '');
-      const dotted = cells[0].match(/^(\w+)\.(\w+)$/);
+      const cell = (name) => cells[columns[name]] ?? '';
+      const list = (text) => text.split(';').map((value) => value.trim()).filter((value) => value !== '');
+      const dotted = cell('Key').match(/^(\w+)\.(\w+)$/);
       if (dotted) {
         const owner = table.find((held) => held.key === dotted[1] && held.kind === 'table');
-        if (!owner) problems.push(`${current.code}: a column ${cells[0]} with no table above it`);
-        else (owner.columns ??= []).push({ key: dotted[2], name: cells[1], kind: cells[2], ...(list(cells[3]).length > 0 ? { values: list(cells[3]) } : {}) });
+        if (!owner) problems.push(`${current.code}: a column ${cell('Key')} with no table above it`);
+        else (owner.columns ??= []).push({ key: dotted[2], name: cell('Attribute'), kind: cell('Kind'), ...(list(cell('Values')).length > 0 ? { values: list(cell('Values')) } : {}) });
         continue;
       }
-      const definition = { key: cells[0], name: cells[1], kind: cells[2] };
-      if (definition.kind === 'number') [definition.min, definition.max] = list(cells[3]).map(Number);
-      else if (definition.kind === 'computed') definition.method = cells[3];
-      else if (definition.kind === 'rationale') definition.parameter = cells[3];
-      else if (definition.kind === 'entities') [definition.relationship, definition.recorded] = list(cells[3]);
-      else if (list(cells[3]).length > 0) definition.values = list(cells[3]);
-      if (helpColumn >= 0 && (cells[helpColumn] ?? '') !== '') definition.help = cells[helpColumn];
+      const definition = { key: cell('Key'), name: cell('Attribute'), kind: cell('Kind') };
+      if (definition.kind === 'number') [definition.min, definition.max] = list(cell('Values')).map(Number);
+      else if (definition.kind === 'computed') definition.method = cell('Values');
+      else if (definition.kind === 'rationale') definition.parameter = cell('Values');
+      else if (definition.kind === 'entities') [definition.relationship, definition.recorded] = list(cell('Values'));
+      else if (list(cell('Values')).length > 0) definition.values = list(cell('Values'));
+      if (cell('Help') !== '') definition.help = cell('Help');
       table.push(definition);
     }
   }
@@ -118,7 +125,7 @@ function parseDocument(text) {
 }
 
 /**
- * §1.9's table: the help a shared name carries, by name.
+ * §1.7's table: the help a rating, a slot and the identifier carry, by name.
  * @param {string} text
  * @returns {Object<string, string>}
  */
@@ -138,7 +145,8 @@ function parseSharedHelp(text) {
 }
 
 const documentTypes = parseDocument(document);
-deepEqual(problems, [], 'the document nests every sub-group under a group and every column under a table');
+deepEqual(problems, [], 'the document nests every group under a tab and every column under a table, and every table has its five columns');
+for (const type of [...documentTypes, documentProject]) equal(type.first, firstTabName(type.code), `${type.code}'s first tab is headed as the editor names it, by the last word of the type's name`);
 
 // --- The project -------------------------------------------------------
 
@@ -154,7 +162,7 @@ for (const definition of attributesFor('PROJECT')) {
 
 // --- The shared help ---------------------------------------------------
 
-deepEqual(SHARED_HELP, parseSharedHelp(document), 'the help a shared name carries matches §1.9, name for name');
+deepEqual(SHARED_HELP, parseSharedHelp(document), 'the help a rating, a slot and the identifier carry matches §1.7, name for name');
 const everyGroup = (type) => type.groups.flatMap((group) => [group, ...(group.groups ?? [])]);
 const isRating = (group) => group.attributes.some((definition) => definition.kind === 'computed');
 for (const name of Object.keys(SHARED_HELP)) {
