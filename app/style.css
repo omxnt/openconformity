@@ -761,14 +761,6 @@ body {
 .library-list { flex: 1; min-height: 0; overflow: auto; padding: 8px 0; }  /* $spacing-03 */
 .library-preview { flex: 1; min-height: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
 .library-count { color: var(--text-second); }
-/* Carbon's content switcher, small, the choice of what a pick brings: joined segments, the pressed one filled. */
-.pick-mode { display: inline-flex; align-self: center; margin-right: 8px; }  /* $spacing-03 */
-.pick-mode-item { height: 24px; padding: 0 12px; font: inherit; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); background: none; border: 1px solid var(--border-strong); border-right-width: 0; cursor: pointer; white-space: nowrap; transition: background-color var(--motion-fast) var(--motion-standard), color var(--motion-fast) var(--motion-standard); }  /* $spacing-04, $label-01 */
-.pick-mode-item:first-child { border-radius: 12px 0 0 12px; }
-.pick-mode-item:last-child { border-right-width: 1px; border-radius: 0 12px 12px 0; }
-.pick-mode-item:hover { color: var(--text); background: var(--hover); }
-.pick-mode-item[aria-pressed="true"] { color: var(--text-on-color); background: var(--button-secondary); border-color: var(--button-secondary); }
-.pick-mode-item:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .library-row { display: flex; align-items: center; gap: 8px; height: var(--row); padding-right: 16px; white-space: nowrap; cursor: default; }  /* $spacing-03, $spacing-05 */
 .library-row:hover { background: var(--hover); }
 .library-row.highlighted { background: var(--layer-accent); }
