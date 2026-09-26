@@ -75,6 +75,9 @@ const TABS_KEY = 'openconformity.tabs';
 /** Session storage: the view open over the workspace, and its section, so a reload returns to it. */
 const OPEN_VIEW_KEY = 'openconformity.open-view';
 
+/** Session storage: the splitter positions, the navigator's width and the relationship pane's height, so a reload keeps the layout. */
+const LAYOUT_KEY = 'openconformity.layout';
+
 /** The two Carbon themes; null follows the system preference. */
 const THEMES = ['white', 'g100'];
 
@@ -121,62 +124,74 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let persistSequence = 0;
   /** The chain every write and removal joins, so they land in order and can be awaited. */
   let tail = Promise.resolve();
+
+  /** What the session holds under a key, null where it holds nothing or refuses. */
+  function sessionRead(key) {
+    try {
+      return session?.getItem(key) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Keep a value in the session under a key, or drop the key for null. A session store that refuses changes nothing. */
+  function sessionWrite(key, value) {
+    try {
+      if (value === null) session?.removeItem(key);
+      else session?.setItem(key, value);
+    } catch {
+      // A session store that refuses changes nothing.
+    }
+  }
   let lastEstimate = 0;
   /** @type {'list'|'graph'} the relationship pane's presentation: graph by default, a reload keeping the choice for the browser session */
   let relationshipView = 'graph';
-  try {
-    const storedView = session?.getItem(VIEW_KEY);
+  {
+    const storedView = sessionRead(VIEW_KEY);
     if (storedView === 'list' || storedView === 'graph') relationshipView = storedView;
-  } catch {
-    // A session store that refuses changes nothing.
   }
   /** Whether the relationship pane stands collapsed to its head: session state, a reload keeping it */
-  let relationshipsCollapsed = false;
+  let relationshipsCollapsed = sessionRead(COLLAPSE_KEY) === 'true';
   /** Whether the messages stand over the relationship pane: opened from the status bar, closed by its X or Escape, never kept across a reload. */
   let messagesOpen = false;
   /** Whether the library picker stands over the editor pane: opened from the toolbar, closed by its X or Escape, never kept across a reload. */
   let libraryOpen = false;
   /** Whether the diagram editor stands over the whole workspace: opened from a diagram in an edit, closed by Apply or Cancel, never kept across a reload. */
   let drawingOpen = false;
-  try {
-    relationshipsCollapsed = session?.getItem(COLLAPSE_KEY) === 'true';
-  } catch {
-    // A session store that refuses changes nothing.
-  }
   /** @type {Object<string, string>} the tab chosen per entity type, by name: session state, a reload keeping it */
   const chosenTabs = {};
   try {
-    const storedTabs = JSON.parse(session?.getItem(TABS_KEY) ?? '{}');
+    const storedTabs = JSON.parse(sessionRead(TABS_KEY) ?? '{}');
     if (storedTabs && typeof storedTabs === 'object' && !Array.isArray(storedTabs)) {
       for (const [code, name] of Object.entries(storedTabs)) if (typeof name === 'string') chosenTabs[code] = name;
     }
   } catch {
-    // A session store that refuses, or holds nonsense, changes nothing.
+    // A session holding nonsense changes nothing.
   }
   /** @type {boolean} whether the user chose not to be asked again this session before the external drawing editor loads: session state, never the file's */
-  let consented = false;
-  try {
-    consented = session?.getItem(CONSENT_KEY) === '1';
-  } catch {
-    // A session store that refuses changes nothing.
-  }
+  let consented = sessionRead(CONSENT_KEY) === '1';
   /** @type {{ id: string, section: number }|null} the view open over the workspace, session state */
   let openView = null;
   try {
-    const stored = JSON.parse(session?.getItem(OPEN_VIEW_KEY) ?? 'null');
+    const stored = JSON.parse(sessionRead(OPEN_VIEW_KEY) ?? 'null');
     if (stored && typeof stored.id === 'string') openView = { id: stored.id, section: Number.isInteger(stored.section) ? stored.section : 0 };
   } catch {
-    // A session store that refuses, or holds nonsense, changes nothing.
+    // A session holding nonsense changes nothing.
+  }
+  /** @type {Object<string, number>} the splitter positions dragged this browser session, by pane */
+  let layout = {};
+  try {
+    const stored = JSON.parse(sessionRead(LAYOUT_KEY) ?? '{}');
+    if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
+      for (const [pane, size] of Object.entries(stored)) if (Number.isFinite(size)) layout[pane] = size;
+    }
+  } catch {
+    // A session holding nonsense changes nothing.
   }
   /** @type {{ id: string, name: string, section: number, rowId: string }|null} the view an entity was chosen from, for the way back; never stored */
   let viewReturn = null;
   function keepOpenView() {
-    try {
-      if (openView === null) session?.removeItem(OPEN_VIEW_KEY);
-      else session?.setItem(OPEN_VIEW_KEY, JSON.stringify(openView));
-    } catch {
-      // A session store that refuses changes nothing.
-    }
+    sessionWrite(OPEN_VIEW_KEY, openView === null ? null : JSON.stringify(openView));
   }
   /** The navigator's filter as typed: session state, never persisted, one truth for the tree and every enablement. */
   let navigatorFilter = '';
@@ -323,11 +338,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   /** Set the pane's collapsed state and keep it for the session, without notifying. */
   function collapseRelationships(collapsed) {
     relationshipsCollapsed = collapsed;
-    try {
-      session?.setItem(COLLAPSE_KEY, String(collapsed));
-    } catch {
-      // A session store that refuses changes nothing.
-    }
+    sessionWrite(COLLAPSE_KEY, String(collapsed));
   }
 
   /** What web storage holds under a key, parsed where it parses, else as the text it is, else null. */
@@ -462,13 +473,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
           // Storage that refuses has nothing left to keep either way.
         }
       }
-      for (const key of [VIEW_KEY, COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY]) {
-        try {
-          session?.removeItem(key);
-        } catch {
-          // A session store that refuses changes nothing.
-        }
-      }
+      for (const key of [VIEW_KEY, COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY, LAYOUT_KEY]) sessionWrite(key, null);
+      layout = {};
       model = createModel();
       savedSequence = history.reset(model);
       projectOpen = false;
@@ -749,11 +755,21 @@ export function createStore({ storage, session = null, retention = memoryRetenti
      */
     setTab(code, name) {
       chosenTabs[code] = name;
-      try {
-        session?.setItem(TABS_KEY, JSON.stringify(chosenTabs));
-      } catch {
-        // A session store that refuses changes nothing.
-      }
+      sessionWrite(TABS_KEY, JSON.stringify(chosenTabs));
+    },
+
+    /** The splitter positions kept for the browser session, by pane. */
+    layout: () => ({ ...layout }),
+
+    /**
+     * Keep a splitter position for the browser session, never in the
+     * project blob. No surface but the splitter shows it, so nothing is
+     * notified.
+     * @param {Object<string, number>} part
+     */
+    setLayout(part) {
+      for (const [pane, size] of Object.entries(part)) if (Number.isFinite(size)) layout[pane] = size;
+      sessionWrite(LAYOUT_KEY, JSON.stringify(layout));
     },
 
 
@@ -815,11 +831,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       if (view !== 'list' && view !== 'graph') return;
       if (view === relationshipView && !relationshipsCollapsed) return;
       relationshipView = view;
-      try {
-        session?.setItem(VIEW_KEY, view);
-      } catch {
-        // A session store that refuses changes nothing.
-      }
+      sessionWrite(VIEW_KEY, view);
       collapseRelationships(false);
       notify();
     },
@@ -893,12 +905,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
      */
     setConsented(held) {
       consented = held === true;
-      try {
-        if (consented) session?.setItem(CONSENT_KEY, '1');
-        else session?.removeItem(CONSENT_KEY);
-      } catch {
-        // A session store that refuses changes nothing.
-      }
+      sessionWrite(CONSENT_KEY, consented ? '1' : null);
     },
 
     /** The navigator's filter as typed. */

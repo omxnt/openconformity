@@ -4,7 +4,9 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, and prints it.
+ * cell a way to the editor, and prints it. The cell kinds no view
+ * produces yet, a choice, choices, a mark and lines, are scaffolding
+ * for the views the proposal lists, kept and tested until they land.
  */
 
 import { el, icon, tooltipOn } from './dom.js';

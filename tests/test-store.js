@@ -708,6 +708,21 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(held.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
+// --- The splitter layout is session state (F-SES-001) ------------------------
+
+{
+  const session = fakeStorage();
+  const store = createStore({ storage: fakeStorage(), session });
+  deepEqual(store.layout(), {}, 'nothing dragged, nothing kept');
+  store.setLayout({ navigator: 320 });
+  store.setLayout({ relationships: 240, nonsense: 'wide' });
+  deepEqual(store.layout(), { navigator: 320, relationships: 240 }, 'each pane keeps its last size, a size that is no number ignored');
+  deepEqual(createStore({ storage: fakeStorage(), session }).layout(), { navigator: 320, relationships: 240 }, 'a reload within the session keeps the layout');
+  deepEqual(createStore({ storage: fakeStorage() }).layout(), {}, 'a new session starts from the presets');
+  store.clearBrowserData();
+  deepEqual([store.layout(), createStore({ storage: fakeStorage(), session }).layout(), session.getItem('openconformity.layout')], [{}, {}, null], 'clearing the stored data forgets it');
+}
+
 // --- The navigator's filter is session state (no requirement) ------------------------
 
 {

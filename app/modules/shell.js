@@ -357,27 +357,6 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
 
   // --- Splitters -------------------------------------------------------
 
-  // The splitter positions survive a reload within the browser session,
-  // never across sessions and never in the project blob.
-  const LAYOUT_KEY = 'openconformity.layout';
-
-  function readLayout() {
-    try {
-      return JSON.parse(document.defaultView.sessionStorage.getItem(LAYOUT_KEY)) ?? {};
-    } catch {
-      return {};
-    }
-  }
-
-  /** @param {Object<string, number>} part */
-  function saveLayout(part) {
-    try {
-      document.defaultView.sessionStorage.setItem(LAYOUT_KEY, JSON.stringify({ ...readLayout(), ...part }));
-    } catch {
-      // A session store that refuses changes nothing.
-    }
-  }
-
   /** The editor's floor: its head, its tab bar and one row of fields. */
   const EDITOR_FLOOR = 160;
   /** The column's floor: the relationship pane's head at its widest, the two tabs, the filter, Done and Cancel while picking, and the chevron. */
@@ -394,7 +373,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     preset: 320,
     apply: (width) => {
       workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`);
-      saveLayout({ navigator: Math.round(width) });
+      store.setLayout({ navigator: Math.round(width) });
     },
     keys: ['ArrowLeft', 'ArrowRight'],
   });
@@ -410,13 +389,13 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     preset: 280,
     apply: (height) => {
       column.style.setProperty('--relationships-height', `${Math.round(height)}px`);
-      saveLayout({ relationships: Math.round(height) });
+      store.setLayout({ relationships: Math.round(height) });
     },
     keys: ['ArrowDown', 'ArrowUp'],
   });
 
   {
-    const layout = readLayout();
+    const layout = store.layout();
     if (Number.isFinite(layout.navigator)) {
       workspace.style.setProperty('--navigator-width', `${layout.navigator}px`);
     }
