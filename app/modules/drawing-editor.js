@@ -272,7 +272,7 @@ async function consent(dialogs, store) {
   const box = el('input', { attributes: { type: 'checkbox', id: 'drawio-consent-box' } });
   const body = el('div', { className: 'consent' }, [
     el('p', { text: `The diagram editor is draw.io, loaded from ${EDITOR_ORIGIN} when you continue. Loading it is a request to that origin, and the request shows in your network.` }),
-    el('p', { text: 'The diagram being edited is handed to the editor. Nothing else of the project is.' }),
+    el('p', { text: 'Only the diagram being edited is sent to draw.io. Nothing else in the project leaves the browser.' }),
     el('label', { className: 'consent-box', attributes: { for: 'drawio-consent-box' } }, [box, el('span', { className: 'checkbox' }, [icon('i-checkmark')]), el('span', { text: "Don't ask again this session" })]),
   ]);
   const picked = await dialogs.open({
@@ -350,7 +350,7 @@ export async function editDrawing({ dialogs, store, drawing, subject }) {
           if (session.state() === 'editing' && session.changed()) {
             const sure = await dialogs.open({
               title: 'Discard the changes?',
-              message: 'What was drawn in the editor has not been applied.',
+              message: 'The changes to the diagram are lost.',
               actions: [
                 { label: 'Keep editing', value: false, kind: 'secondary' },
                 { label: 'Discard', value: true, kind: 'danger' },

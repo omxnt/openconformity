@@ -105,7 +105,7 @@ function isWithin(model, id, containerId) {
  */
 function checkParent(model, parent) {
   if (parent !== null && !model.nodes.has(parent)) {
-    return { ok: false, reason: 'The parent is not in the model.' };
+    return { ok: false, reason: 'The parent is not in the project.' };
   }
   return { ok: true };
 }
@@ -209,7 +209,7 @@ export function addFolder(model, name, options = {}) {
 export function updateEntity(model, id, values) {
   const node = nodeOf(model, id);
   if (!node || node.kind !== 'entity') {
-    return { ok: false, reason: 'The entity is not in the model.' };
+    return { ok: false, reason: 'The entity is not in the project.' };
   }
   for (const [key, value] of Object.entries(values)) {
     if (value === '') delete node.attributes[key];
@@ -227,7 +227,7 @@ export function updateEntity(model, id, values) {
 export function renameFolder(model, id, name) {
   const node = nodeOf(model, id);
   if (!node || node.kind !== 'folder') {
-    return { ok: false, reason: 'The folder is not in the model.' };
+    return { ok: false, reason: 'The folder is not in the project.' };
   }
   if (typeof name !== 'string' || name === '') {
     return { ok: false, reason: 'A folder needs a name.' };
@@ -250,11 +250,11 @@ export function renameFolder(model, id, name) {
  */
 export function canFile(model, nodeId, parentId) {
   const node = nodeOf(model, nodeId);
-  if (!node) return { ok: false, reason: 'It is not in the model.' };
+  if (!node) return { ok: false, reason: 'It is not in the project.' };
   if (parentId !== null) {
-    if (!model.nodes.has(parentId)) return { ok: false, reason: 'The destination is not in the model.' };
+    if (!model.nodes.has(parentId)) return { ok: false, reason: 'The destination is not in the project.' };
     if (isWithin(model, parentId, nodeId)) {
-      return { ok: false, reason: 'Nothing can be filed inside itself.' };
+      return { ok: false, reason: 'Nothing can be moved into itself.' };
     }
   }
   if (node.parent === parentId) return { ok: false, reason: 'It is already there.' };
@@ -288,10 +288,10 @@ export function file(model, nodeId, parentId) {
 export function canPlaceBeside(model, nodeId, targetId) {
   const node = nodeOf(model, nodeId);
   const target = nodeOf(model, targetId);
-  if (!node || !target) return { ok: false, reason: 'It is not in the model.' };
+  if (!node || !target) return { ok: false, reason: 'It is not in the project.' };
   if (nodeId === targetId) return { ok: false, reason: 'It is already there.' };
   if (target.parent !== null && isWithin(model, target.parent, nodeId)) {
-    return { ok: false, reason: 'Nothing can be filed inside itself.' };
+    return { ok: false, reason: 'Nothing can be moved into itself.' };
   }
   return { ok: true };
 }
@@ -387,7 +387,7 @@ export function canRelate(model, typeId, sourceId, targetId) {
   const source = nodeOf(model, sourceId);
   const target = nodeOf(model, targetId);
   if (!source || source.kind !== 'entity' || !target || target.kind !== 'entity') {
-    return { ok: false, reason: 'One of the entities is not in the model.' };
+    return { ok: false, reason: 'One of the entities is not in the project.' };
   }
   if (source.type !== type.source || target.type !== type.target) {
     return {
@@ -403,7 +403,7 @@ export function canRelate(model, typeId, sourceId, targetId) {
       return { ok: false, reason: 'It is already part of another entity.' };
     }
     if (wouldOwnItself(model, sourceId, targetId)) {
-      return { ok: false, reason: 'That would make an entity part of itself.' };
+      return { ok: false, reason: 'That would make it part of itself.' };
     }
   }
   return { ok: true };
@@ -435,7 +435,7 @@ export function relate(model, typeId, sourceId, targetId) {
  */
 export function unrelate(model, typeId, sourceId, targetId) {
   if (!model.relationships.delete(relationshipKey(typeId, sourceId, targetId))) {
-    return { ok: false, reason: 'The relationship is not in the model.' };
+    return { ok: false, reason: 'The relationship is not in the project.' };
   }
   return { ok: true };
 }
@@ -549,7 +549,7 @@ function purge(model, gone) {
  */
 export function removeEntity(model, entityId) {
   const entity = nodeOf(model, entityId);
-  if (!entity || entity.kind !== 'entity') return { ok: false, reason: 'The entity is not in the model.' };
+  if (!entity || entity.kind !== 'entity') return { ok: false, reason: 'The entity is not in the project.' };
   const doomed = deletionOf(model, entityId);
   purge(model, new Set(doomed.map((held) => held.id)));
   return { ok: true, removed: doomed };
@@ -567,7 +567,7 @@ export function removeEntity(model, entityId) {
 export function removeFolder(model, folderId) {
   const folder = nodeOf(model, folderId);
   if (!folder || folder.kind !== 'folder') {
-    return { ok: false, reason: 'The folder is not in the model.' };
+    return { ok: false, reason: 'The folder is not in the project.' };
   }
   const doomed = deletionOf(model, folderId);
   purge(model, new Set([folderId, ...filedBeneath(model, folderId).map((held) => held.id), ...doomed.map((held) => held.id)]));

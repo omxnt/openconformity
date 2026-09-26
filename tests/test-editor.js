@@ -308,7 +308,7 @@ equal(removalText([{ name: 'Initial risk estimation', value: 'Risk matrix' }, { 
 equal(removalText([{ name: 'A', value: 'X' }, { name: 'B', value: 'X' }, { name: 'C', value: 'X' }]), 'A, B and C under X.', 'three are listed with commas and an and');
 equal(
   removalText([{ name: 'Estimation method', value: 'ISO/TR 14121-2' }, { name: 'Initial risk estimation', value: 'Risk matrix' }, { name: 'Residual risk estimation', value: 'Risk matrix' }]),
-  'Estimation method under ISO/TR 14121-2; Initial risk estimation and Residual risk estimation under Risk matrix.',
+  'Estimation method under ISO/TR 14121-2, and Initial risk estimation and Residual risk estimation under Risk matrix.',
   'groups under different values are told in order, one clause each'
 );
 

@@ -153,7 +153,7 @@ if (loaded.ok) {
   await flows.loadExample();
   store.commit((model) => addEntity(model, 'ELM'));
   await flows.loadExample();
-  deepEqual(answers, ['Unsaved changes'], 'over unsaved work the question comes first');
+  deepEqual(answers, ['Replace the project?'], 'over unsaved work the question comes first');
   equal(store.model().nodes.size, 92, 'and declining it leaves the project untouched');
 }
 

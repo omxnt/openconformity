@@ -641,7 +641,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
   function renderMessages(found) {
     messagesHost.textContent = '';
     if (found.length === 0) {
-      messagesHost.appendChild(emptyState('Nothing to revisit', 'Every record matches what is related.'));
+      messagesHost.appendChild(emptyState('Nothing to revisit', 'Every record still matches its relationships.'));
       return;
     }
     const rows = messageRows(found, messagesSort, tableFilter);

@@ -187,8 +187,8 @@ export function moveTargets(model, id) {
 
 /**
  * What the confirmation says before a deletion: for an entity, what goes
- * with it and what is severed; for a folder, what is filed in it, what
- * those entities own elsewhere, and what is severed.
+ * with it and what is removed; for a folder, what is in it, what is part
+ * of those entities elsewhere, and what is removed.
  * @param {import('./model.js').Model} model
  * @param {string} id
  * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
@@ -200,27 +200,29 @@ export function deletionQuestion(model, id) {
   const severed = [...model.relationships.values()].filter(
     (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
   ).length;
-  const relationships = `${severed} relationship${severed === 1 ? '' : 's'}`;
   const entities = (n) => `${n} ${n === 1 ? 'entity' : 'entities'}`;
+  const verb = (n) => (n === 1 ? 'is' : 'are');
+  const removed = severed > 0 ? `, and ${severed} ${severed === 1 ? 'relationship' : 'relationships'} ${verb(severed)} removed` : '';
   if (node && node.kind === 'folder') {
     const title = `Delete the folder ${node.name}?`;
-    if (doomed.length === 0) return { title, message: `${node.name} holds no entity.`, doomed };
+    if (doomed.length === 0) return { title, message: 'The folder holds no entities.', doomed };
     const beneath = new Set(filedBeneath(model, id).map((held) => held.id));
     const held = doomed.filter((entity) => beneath.has(entity.id)).length;
     const owned = doomed.length - held;
-    const message = `Deleting ${node.name} also deletes the ${entities(held)} filed in it${owned > 0 ? ` and ${entities(owned)} they own elsewhere` : ''}${severed > 0 ? `${owned > 0 ? ',' : ''} and severs ${relationships}` : ''}:`;
-    return { title, message, doomed };
+    const parts = owned > 0 ? ` and ${entities(owned)} that ${verb(owned)} part of them` : '';
+    return { title, message: `The ${entities(held)} in the folder${parts} ${verb(doomed.length)} deleted with it${removed}:`, doomed };
   }
   if (doomed.length === 1) {
     return {
       title: `Delete ${id}?`,
-      message: severed === 0 ? `${id} takes part in no relationship.` : `Deleting ${id} severs ${relationships}.`,
+      message: severed === 0 ? `${id} has no relationships.` : `Its ${severed} ${severed === 1 ? 'relationship is' : 'relationships are'} removed with it.`,
       doomed,
     };
   }
+  const parts = doomed.length - 1;
   return {
     title: `Delete ${doomed.length} entities?`,
-    message: `Deleting ${id} also deletes everything it contains through composition and severs ${relationships}:`,
+    message: `The ${entities(parts)} that ${verb(parts)} part of ${id} ${verb(parts)} deleted with it${removed}:`,
     doomed,
   };
 }

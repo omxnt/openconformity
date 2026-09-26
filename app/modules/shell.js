@@ -63,17 +63,17 @@ export function shouldWarnBeforeUnload(dirty, persistFailed) {
 /** The statement made when the stored session cannot be read back. */
 export const RESTORATION_NOTICE = 'The previous session could not be restored.';
 export const RESTORATION_DETAIL =
-  'What this browser had stored could not be read back. A copy has been set aside in browser storage.';
+  'The stored project could not be read back, and a copy was set aside in browser storage.';
 
 /** The statement made while the origin's storage stands nearly full. */
 export const STORAGE_NOTICE = 'Browser storage is nearly full.';
 export const STORAGE_DETAIL =
-  'The room this browser gives the software is nearly used up. Save the project to a file, so nothing is lost if storing stops.';
+  'Save the project to a file so nothing is lost if storing stops.';
 
 /** The statement made while storing the session keeps failing. */
 export const PERSIST_NOTICE = 'Changes are not being stored in this browser.';
 export const PERSIST_DETAIL =
-  'The last attempt to store the session failed. Save the project to a file so nothing is lost.';
+  'Save the project to a file so nothing is lost.';
 
 /**
  * @param {Object} context
@@ -484,7 +484,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     document.title = titleFor(store.hasProject(), store.model().name);
 
     if (wasFailingToPersist && !store.persistFailed()) {
-      toast('Autosave working again', 'The project is being kept in this browser once more.');
+      toast('Storing works again', 'The project is stored in this browser again.');
     }
     wasFailingToPersist = store.persistFailed();
   }

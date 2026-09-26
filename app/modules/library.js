@@ -482,13 +482,13 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     const held = libraryOf(libraries[current]);
     const node = held.ok ? nodeOf(held.model, highlight) : null;
     if (!node) {
-      preview.appendChild(el('p', { className: 'library-note', text: 'Select a row to see what it holds.' }));
+      preview.appendChild(el('p', { className: 'library-note', text: 'Select a row to see its attributes.' }));
       return;
     }
     if (node.kind === 'folder') {
       preview.append(
         el('div', { className: 'library-preview-head' }, [icon(FOLDER_ICON), el('span', { text: node.name })]),
-        el('p', { className: 'library-note', text: 'Check the folder to pick everything filed in it.' })
+        el('p', { className: 'library-note', text: 'Check the folder to pick everything in it.' })
       );
       return;
     }
@@ -499,7 +499,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     preview.appendChild(el('div', { className: 'library-preview-head' }, parts));
     const sections = previewSections(node);
     if (sections.length === 0) {
-      preview.appendChild(el('p', { className: 'library-note', text: 'Its attributes hold nothing.' }));
+      preview.appendChild(el('p', { className: 'library-note', text: 'No attributes are filled in.' }));
       return;
     }
     for (const section of sections) {

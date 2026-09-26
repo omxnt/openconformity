@@ -264,7 +264,7 @@ function offered(model, subjectId) {
   equal(question.title, 'Delete 2 entities?', 'the title counts the entities the cascade takes');
   equal(
     question.message,
-    'Deleting ELM-001 also deletes everything it contains through composition and severs 2 relationships:',
+    'The 1 entity that is part of ELM-001 is deleted with it, and 2 relationships are removed:',
     'the message counts every relationship touching the cascade — the composition included'
   );
   deepEqual(question.doomed.map((entity) => entity.id), ['ELM-001', 'ELM-002'], 'over the entities it lists');
@@ -272,7 +272,7 @@ function offered(model, subjectId) {
   unrelate(model, 'act-interacts-with-elm', 'ACT-001', 'ELM-002');
   equal(
     deletionQuestion(model, 'ELM-001').message,
-    'Deleting ELM-001 also deletes everything it contains through composition and severs 1 relationship:',
+    'The 1 entity that is part of ELM-001 is deleted with it, and 1 relationship is removed:',
     'one severed relationship reads in the singular'
   );
 }
@@ -283,24 +283,24 @@ function offered(model, subjectId) {
   addEntity(model, 'HAZ');
   const alone = deletionQuestion(model, 'HAZ-001');
   equal(alone.title, 'Delete HAZ-001?', 'an entity owning nothing is asked about by its identifier');
-  equal(alone.message, 'HAZ-001 takes part in no relationship.', 'and says when nothing is severed');
+  equal(alone.message, 'HAZ-001 has no relationships.', 'and says when nothing is removed');
   equal(alone.doomed.length, 1, 'it alone goes');
   relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
   {
     const filed = createModel();
     const zone = addFolder(filed, 'Zone').folder;
     const empty = deletionQuestion(filed, zone.id);
-    deepEqual([empty.title, empty.message, empty.doomed], ['Delete the folder Zone?', 'Zone holds no entity.', []], 'an empty folder is asked about by its name');
+    deepEqual([empty.title, empty.message, empty.doomed], ['Delete the folder Zone?', 'The folder holds no entities.', []], 'an empty folder is asked about by its name');
     addEntity(filed, 'LEG', { parent: zone.id });
     addEntity(filed, 'ESR', { parent: 'LEG-001' });
     addEntity(filed, 'ESR');
     relate(filed, 'leg-contains-esr', 'LEG-001', 'ESR-002');
     const question = deletionQuestion(filed, zone.id);
     equal(question.title, 'Delete the folder Zone?', 'a folder with content too');
-    equal(question.message, 'Deleting Zone also deletes the 2 entities filed in it and 1 entity they own elsewhere, and severs 1 relationship:', 'the message counts what is filed in it, what those own elsewhere and what is severed');
+    equal(question.message, 'The 2 entities in the folder and 1 entity that is part of them are deleted with it, and 1 relationship is removed:', 'the message counts what is filed in it, what those own elsewhere and what is severed');
     deepEqual(question.doomed.map((entity) => entity.id), ['LEG-001', 'ESR-001', 'ESR-002'], 'over the entities it lists');
   }
-  equal(deletionQuestion(model, 'HAZ-001').message, 'Deleting HAZ-001 severs 1 relationship.', 'or counts what is severed, in the singular');
+  equal(deletionQuestion(model, 'HAZ-001').message, 'Its 1 relationship is removed with it.', 'or counts what is removed, in the singular');
 }
 
 // --- The label a reference-bearing type composes --------------------------

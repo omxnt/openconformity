@@ -93,7 +93,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   const invalid = openProject(readFile('fixtures/duplicate-id.json'));
   equal(invalid.ok, false, 'an invalid file is refused');
   equal(invalid.code, 'invalid', 'as invalid');
-  ok(invalid.statement.includes('not opened'), 'stating it was not opened');
+  ok(invalid.statement.includes('not a valid project file'), 'stating it is not a valid project file');
   ok(Array.isArray(invalid.problems) && invalid.problems.length > 0, 'carrying what the validator found');
 
   equal(openProject('nonsense{').code, 'invalid', 'text that is not JSON is invalid');

@@ -474,7 +474,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       element.appendChild(
         el('p', {
           className: 'picking-note',
-          text: 'Picked relationships land as dashed edges; click one to let go. The rest recede until Done.',
+          text: 'Picked relationships show as dashed edges. Click one to let it go.',
         })
       );
     }
@@ -600,7 +600,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       element.appendChild(
         el('p', {
           className: 'picking-note',
-          text: `${pend.ambiguous} ${pend.ambiguous === 1 ? 'pick offers' : 'picks offer'} more than one relationship — choose it in the List view.`,
+          text: `${pend.ambiguous} ${pend.ambiguous === 1 ? 'pick can be' : 'picks can be'} more than one relationship. Choose which in the List view.`,
         })
       );
     }

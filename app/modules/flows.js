@@ -70,8 +70,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     return dialogs.confirm({
       title: 'Discard the changes?',
       message: fresh
-        ? 'The new entity has never been saved. Discarding removes it.'
-        : 'The edited attributes have not been saved.',
+        ? 'The new entity was never saved and is removed with the changes.'
+        : 'The changes to the attributes are lost.',
       confirmLabel: 'Discard',
       cancelLabel: 'Keep editing',
       danger: true,
@@ -136,7 +136,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       (offered) => offered.typeId === form.typeId && offered.direction === form.direction
     );
     if (!admissible) {
-      dialogs.toast('Relationship refused', 'The model no longer allows that relationship.');
+      dialogs.toast('Could not add the relationship', 'The metamodel does not allow it.');
       return;
     }
 
@@ -317,7 +317,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @param {string|null} parentId
    */
   function fileNode(id, parentId) {
-    toastRefusal('Move refused', store.commit((model) => file(model, id, parentId)));
+    toastRefusal('Could not move', store.commit((model) => file(model, id, parentId)));
   }
 
   /**
@@ -327,7 +327,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @param {'before'|'after'} position
    */
   function placeNode(id, targetId, position) {
-    toastRefusal('Move refused', store.commit((model) => placeBeside(model, id, targetId, position)));
+    toastRefusal('Could not move', store.commit((model) => placeBeside(model, id, targetId, position)));
   }
 
   /** Change places with the sibling above. */
@@ -372,7 +372,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     });
     if (value === null) return;
     const target = targets[Number(value)];
-    if (target) toastRefusal('Move refused', store.commit((model) => file(model, id, target.parentId)));
+    if (target) toastRefusal('Could not move', store.commit((model) => file(model, id, target.parentId)));
   }
 
   /**
@@ -467,8 +467,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const sweep = projectSweep(store.model(), values);
     if (sweep.count > 0) {
       const confirmed = await dialogs.confirm({
-        title: 'Remove what is no longer chosen?',
-        message: `Saving removes ${sweep.text}.`,
+        title: 'Clear values that no longer apply?',
+        message: `Saving clears ${sweep.text}.`,
         confirmLabel: 'Save',
         cancelLabel: 'Keep editing',
         danger: true,
@@ -539,8 +539,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   async function confirmRemoval(entries) {
     return dialogs.confirm({
-      title: 'Remove what is no longer chosen?',
-      message: `Saving removes ${removalText(entries)}`,
+      title: 'Clear values that no longer apply?',
+      message: `Saving clears ${removalText(entries)}`,
       confirmLabel: 'Save',
       cancelLabel: 'Keep editing',
       danger: true,
@@ -593,7 +593,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     });
     if (related < picks.length) {
       const dropped = picks.length - related;
-      dialogs.toast('Relationships refused', `${dropped} of the picked relationships could no longer be made.`);
+      dialogs.toast(`Could not add ${dropped} ${dropped === 1 ? 'relationship' : 'relationships'}`, `The metamodel no longer allows ${dropped === 1 ? 'it' : 'them'}.`);
     }
     store.endPicking();
   }
@@ -606,7 +606,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   async function removeRelationship(relationship) {
     const confirmed = await dialogs.confirm({
       title: 'Remove the relationship?',
-      message: `${relationship.source} ${RELATIONSHIP_TYPES[relationship.type].label} ${relationship.target}. Both entities stay.`,
+      message: `${relationship.source} ${RELATIONSHIP_TYPES[relationship.type].label} ${relationship.target}. Both entities are kept.`,
       confirmLabel: 'Remove',
       danger: true,
     });
@@ -622,8 +622,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   async function confirmDiscardProject(confirmLabel) {
     if (!store.dirty()) return true;
     return dialogs.confirm({
-      title: 'Unsaved changes',
-      message: 'This project has changes that are not saved to a file. Replacing it loses them.',
+      title: 'Replace the project?',
+      message: 'The open project has changes that are not saved to a file. They are lost when it is replaced.',
       confirmLabel,
       cancelLabel: 'Cancel',
       danger: true,
@@ -663,16 +663,16 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const text = typeof copy === 'string' ? copy : JSON.stringify(copy.project ?? copy, null, 2);
     const fallback = 'Set-aside copy';
     const typed = await dialogs.prompt({
-      title: 'Save copy to file',
+      title: 'Save the copy',
       label: 'Name',
       value: asideName(copy, text) ?? fallback,
       confirmLabel: 'Save',
-      preview: (value) => `Saved to your downloads as ${filenameFor(value.trim() || fallback)}.`,
+      preview: (value) => `The file is saved to your downloads as ${filenameFor(value.trim() || fallback)}.`,
     });
     if (typed === null) return;
     const filename = filenameFor(typed.trim() || fallback);
     saveFile(filename, text, 'application/json');
-    dialogs.toast('Copy saved', `Saved to your downloads as ${filename}.`);
+    dialogs.toast('Copy saved', `The file is saved to your downloads as ${filename}.`);
   }
 
   /** The name a set-aside copy carries, where one can be read, else null. */
@@ -692,7 +692,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   /** Discard the set-aside copy, asking first. Nothing else changes. */
   async function discardAside() {
     const confirmed = await dialogs.confirm({
-      title: 'Discard the copy',
+      title: 'Discard the copy?',
       message: 'The copy set aside in browser storage is removed. Nothing else changes.',
       confirmLabel: 'Discard',
       cancelLabel: 'Cancel',
@@ -705,8 +705,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   async function clearBrowserData() {
     if (!(await confirmDiscard())) return;
     const message = store.dirty()
-      ? 'Everything the software keeps in this browser is cleared: the project it holds between sessions, the theme, and the draw.io choice. The open project has changes that are not saved to a file, and they are lost too. A saved file is not affected.'
-      : 'Everything the software keeps in this browser is cleared: the project it holds between sessions, the theme, and the draw.io choice. A saved file is not affected.';
+      ? 'This clears everything openconformity keeps in this browser, the project held between sessions, the theme and the draw.io choice. The open project has unsaved changes, and they are lost too. Files you saved are not affected.'
+      : 'This clears everything openconformity keeps in this browser, the project held between sessions, the theme and the draw.io choice. Files you saved are not affected.';
     const confirmed = await dialogs.confirm({
       title: 'Clear browser data',
       message,
@@ -742,7 +742,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       ? el('ul', { className: 'doomed-list' }, result.problems.map((problem) => el('li', { text: problem })))
       : null;
     await dialogs.open({
-      title: result.code === 'newer' ? 'Written by a newer version' : 'Not a valid project file',
+      title: 'The file could not be opened',
       message: result.statement,
       body,
       actions: [{ label: 'Close', value: null, kind: 'secondary' }],
@@ -770,8 +770,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.replaceProject(result.model);
     if (result.notices.length > 0) {
       await dialogs.open({
-        title: 'The file was migrated',
-        message: 'Opening this file changed its form. What follows was preserved as written and needs your attention:',
+        title: 'The file was updated',
+        message: 'The file came from an earlier version and was brought up to date. Check the following, which was kept as written:',
         body: el('ul', { className: 'doomed-list' }, result.notices.map((notice) => el('li', { text: notice }))),
         actions: [{ label: 'Close', value: null, kind: 'secondary' }],
       });
@@ -800,7 +800,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   function importPicks(chosen) {
     const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, store.selection()));
     if (!outcome.ok) {
-      toastRefusal('Import refused', outcome);
+      toastRefusal('Could not import', outcome);
       return;
     }
     const n = outcome.added.length;
@@ -839,7 +839,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       label: 'Project name',
       value: store.model().name,
       confirmLabel: 'Save',
-      preview: (typed) => `Saved to your downloads as ${filenameFor(typed.trim() || store.model().name)}.`,
+      preview: (typed) => `The file is saved to your downloads as ${filenameFor(typed.trim() || store.model().name)}.`,
     });
     if (name === null) return;
     if (name !== store.model().name) {
@@ -849,7 +849,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const filename = filenameFor(store.model().name);
     saveFile(filename, serialise(store.model()), 'application/json');
     store.markSaved();
-    dialogs.toast('Project saved', `Saved to your downloads as ${filename}.`);
+    dialogs.toast('Project saved', `The file is saved to your downloads as ${filename}.`);
   }
 
   /**

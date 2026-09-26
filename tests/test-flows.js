@@ -217,7 +217,7 @@ function flowsOver(store) {
 
   flows.fileNode('ELM-001', null);
   equal(toasts.length, 1, 'a refused move is told in passing');
-  equal(toasts[0][0], 'Move refused', 'named for what it is');
+  equal(toasts[0][0], 'Could not move', 'named for what it is');
   ok(toasts[0][1].length > 0, 'with the model’s own reason');
 
   toasts.length = 0;
@@ -234,12 +234,12 @@ function flowsOver(store) {
   equal(store.picker(), null, 'and Done ends the picking: the panel is gone, the flow closes the mode');
   deepEqual(
     toasts.pop(),
-    ['Relationships refused', '1 of the picked relationships could no longer be made.'],
+    ['Could not add 1 relationship', 'The metamodel no longer allows it.'],
     'and the shortfall is told in passing'
   );
 
   await flows.createRelated('ELM-001', 'ELM', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });
-  deepEqual(toasts.pop()?.[0], 'Relationship refused', 'an inadmissible new-related form is told too');
+  deepEqual(toasts.pop()?.[0], 'Could not add the relationship', 'an inadmissible new-related form is told too');
 }
 
 // --- The project saves like an entity -----------------------------------
@@ -332,7 +332,7 @@ function flowsOver(store) {
   deepEqual(saved.map((held) => held.filename), ['mixer-line.json'], 'the download fires, named for the project');
   equal(saved[0].type, 'application/json', 'as JSON');
   equal(store.dirty(), false, 'the saved pointer moves');
-  deepEqual(toasts.pop(), ['Project saved', 'Saved to your downloads as mixer-line.json.'], 'and the toast confirms');
+  deepEqual(toasts.pop(), ['Project saved', 'The file is saved to your downloads as mixer-line.json.'], 'and the toast confirms');
 
   dialogs.prompt = async () => null;
   store.commit((model) => addEntity(model, 'HAZ'));
@@ -364,7 +364,7 @@ function flowsOver(store) {
 
   store.select('HAZ-001');
   await flows.deleteSelection();
-  deepEqual(asked.pop(), ['Delete HAZ-001?', 'Deleting HAZ-001 severs 1 relationship.', 'Delete'], 'a single entity is asked about by its identifier and what it severs');
+  deepEqual(asked.pop(), ['Delete HAZ-001?', 'Its 1 relationship is removed with it.', 'Delete'], 'a single entity is asked about by its identifier and what is removed with it');
   ok(nodeOf(store.model(), 'HAZ-001') !== null, 'declining keeps it');
   answer = true;
   await flows.deleteSelection();
@@ -373,7 +373,7 @@ function flowsOver(store) {
   store.select('F-1');
   answer = false;
   await flows.deleteSelection();
-  deepEqual(asked.pop(), ['Delete the folder Zone?', 'Zone holds no entity.', 'Delete'], 'a folder is asked about by its name and what it holds');
+  deepEqual(asked.pop(), ['Delete the folder Zone?', 'The folder holds no entities.', 'Delete'], 'a folder is asked about by its name and what it holds');
   ok(nodeOf(store.model(), 'F-1') !== null, 'declining keeps the folder');
   answer = true;
   await flows.deleteSelection();
@@ -410,7 +410,7 @@ function flowsOver(store) {
   const relationship = { type: 'haz-contributes-to-scn', source: 'HAZ-001', target: 'SCN-001' };
 
   await flows.removeRelationship(relationship);
-  deepEqual(asked.pop(), ['Remove the relationship?', 'HAZ-001 contributes to SCN-001. Both entities stay.', 'Remove', true], 'the question states the fact as it reads');
+  deepEqual(asked.pop(), ['Remove the relationship?', 'HAZ-001 contributes to SCN-001. Both entities are kept.', 'Remove', true], 'the question states the fact as it reads');
   equal(store.model().relationships.size, 1, 'declining keeps it');
   answer = true;
   await flows.removeRelationship(relationship);
@@ -514,11 +514,11 @@ function flowsOver(store) {
   ok('initialSeverity' in nodeOf(store.model(), 'SCN-001').attributes, 'the matrix rating stays under the matrix');
 
   equal(await flows.saveProjectEdit({ name: 'Mixer', estimationMethod: '' }), false, 'clearing the method over a rated scenario asks, and declining saves nothing');
-  deepEqual(asked, [['Remove what is no longer chosen?', 'Saving removes what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).']], 'the question counts what goes and names the old choice');
+  deepEqual(asked, [['Clear values that no longer apply?', 'Saving clears what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).']], 'the question counts what goes and names the old choice');
   equal(store.model().attributes.estimationMethod, 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'the choice is unchanged');
   answer = true;
   equal(await flows.saveProjectEdit({ name: 'Mixer', estimationMethod: '' }), true, 'accepting saves');
-  equal(asked.at(-1)[1], 'Saving removes what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'the one choice changed, told');
+  equal(asked.at(-1)[1], 'Saving clears what 1 accident scenario holds under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'the one choice changed, told');
   deepEqual(Object.keys(nodeOf(store.model(), 'SCN-001').attributes), [], 'the matrix rating is gone');
   deepEqual(Object.keys(nodeOf(store.model(), 'SAF-001').attributes), ['standard', 'plr'], "a function's level follows its own standard, not the project's, so the project's save leaves it");
   ok(!('estimationMethod' in store.model().attributes) || store.model().attributes.estimationMethod === '', 'under no choice, the ratings now typed');
@@ -542,7 +542,7 @@ function flowsOver(store) {
   equal(await flows.confirmRemoval([{ name: 'Initial risk estimation', value: 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)' }, { name: 'Residual risk estimation', value: 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)' }]), false, 'the answer is the dialog\'s');
   deepEqual(
     [asked[0].title, asked[0].message, asked[0].confirmLabel, asked[0].cancelLabel, asked[0].danger],
-    ['Remove what is no longer chosen?', 'Saving removes Initial risk estimation and Residual risk estimation under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'Save', 'Keep editing', true],
+    ['Clear values that no longer apply?', 'Saving clears Initial risk estimation and Residual risk estimation under Risk matrix (ISO/TR 14121-2:2012, 6.2.2).', 'Save', 'Keep editing', true],
     'the question names the groups by the value they stood under, Save being the destructive answer'
   );
 }
@@ -571,7 +571,7 @@ function flowsOver(store) {
   await flows.clearBrowserData();
   equal(asked.length, 1, 'the removal asks first');
   deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Clear browser data', 'Clear', true], 'in the danger colour, with Remove as the answer');
-  ok(asked[0].message.startsWith('Everything the software keeps in this browser is cleared') && asked[0].message.endsWith('A saved file is not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
+  ok(asked[0].message.startsWith('This clears everything openconformity keeps in this browser') && asked[0].message.endsWith('Files you saved are not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
   await store.whenPersisted();
   ok(store.hasProject() && retention.records.has('project'), 'Cancel changes nothing');
   answer = true;
@@ -608,7 +608,7 @@ function flowsOver(store) {
   });
 
   await flows.saveAsideCopy();
-  equal(prompts[0].title, 'Save copy to file', 'the copy is saved through the naming question');
+  equal(prompts[0].title, 'Save the copy', 'the copy is saved through the naming question');
   equal(prompts[0].value, 'Old line', 'prefilled with the name the copy carries');
   ok(prompts[0].preview('').includes('old-line.json') === false && prompts[0].preview('').includes('set-aside-copy.json'), 'an empty name previews the fallback');
   equal(saved.length, 1, 'confirming downloads once');

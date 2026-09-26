@@ -129,7 +129,7 @@ function refusal(code, statement, problems) {
   return problems ? { ok: false, code, statement, problems } : { ok: false, code, statement };
 }
 
-const INVALID_STATEMENT = 'The file is not a valid project file, and was not opened.';
+const INVALID_STATEMENT = 'The file is not a valid project file.';
 
 /**
  * Gate 2: rebuild the model by replaying the file through the model
@@ -195,13 +195,13 @@ function buildModel(data) {
  */
 export function loadProject(data) {
   if (!isPlainObject(data) || data.format !== FILE_FORMAT) {
-    return refusal('invalid', 'The file is not an openconformity project file, and was not opened.');
+    return refusal('invalid', 'The file is not an openconformity project file.');
   }
   if (!Number.isInteger(data.schemaVersion)) {
-    return refusal('invalid', 'The file does not record a schema version, and was not opened.');
+    return refusal('invalid', 'The file does not say which version wrote it.');
   }
   if (data.schemaVersion > SCHEMA_VERSION) {
-    return refusal('newer', 'The file was written by a newer version of this software, and was not opened.');
+    return refusal('newer', 'The file was written by a newer version of this software.');
   }
 
   const judged = validate(data, data.schemaVersion);
@@ -212,7 +212,7 @@ export function loadProject(data) {
   while (working.schemaVersion < SCHEMA_VERSION) {
     const step = MIGRATIONS[working.schemaVersion];
     if (!step) {
-      return refusal('invalid', `No migration from schema version ${working.schemaVersion} exists.`);
+      return refusal('invalid', `The file's version, ${working.schemaVersion}, cannot be brought up to date.`);
     }
     const migrated = step(working);
     working = migrated.data;

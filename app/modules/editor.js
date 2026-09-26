@@ -114,7 +114,7 @@ export function removalText(entries) {
   const byValue = new Map();
   for (const { name, value } of entries) byValue.set(value, [...(byValue.get(value) ?? []), name]);
   const listed = (names) => (names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`);
-  return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join('; ')}.`;
+  return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join(', and ')}.`;
 }
 
 export function firstTabName(code) {
@@ -1008,7 +1008,7 @@ export function createEditor({
           open.addEventListener('click', enlarge);
           body.appendChild(el('div', { className: 'drawing-card' }, [open]));
         } else {
-          body.appendChild(el('div', { className: 'drawing-refused', text: `This diagram cannot be shown. It ${verdict.reason}.` }));
+          body.appendChild(el('div', { className: 'drawing-refused', text: `The diagram cannot be shown because it ${verdict.reason}.` }));
         }
         actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }));
       } else if (!editing) {
@@ -1183,7 +1183,7 @@ export function createEditor({
     if (node.kind === 'folder') {
       renderHead(node, [headIconButton('Rename folder', 'i-edit', onRename)]);
       body.appendChild(
-        emptyState('Folder', 'A folder groups things in the navigator and carries no attributes of its own.')
+        emptyState('Folder', 'A folder groups entities in the navigator and has no attributes.')
       );
       return;
     }

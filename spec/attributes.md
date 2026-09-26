@@ -372,7 +372,7 @@ The designation is the hazard's own short name — `H1` — entered by the model
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| measures | Protective measures | entities | prm-eliminates-haz; Elimination | The protective measures related as eliminating the hazard when Eliminated was last set, recorded by the software. |
+| measures | Protective measures | entities | prm-eliminates-haz; Elimination | The protective measures related to the hazard when Eliminated was last set, recorded by the software. |
 | eliminated | Eliminated | choice | Yes; No | Whether the hazard has been designed out, or considered and kept. |
 
 ##### Rationale
@@ -506,7 +506,7 @@ The designation is the measure's own short name — `M1` — entered by the mode
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the protective measure. |
-| step | Step | choice | Safe design; Protection; Information | Which of the three risk reduction steps the measure is, a design that removes the hazard, protection against a risk that remains, or information to the user about what is left. |
+| step | Step | choice | Safe design; Protection; Information | Which of the three risk reduction steps the measure belongs to. |
 | kind | Kind | text | | What kind of measure it is, in your own words, such as a guard, a device, a label or training. |
 | description | Description | multiline | | What the protective measure is and how it reduces the risk. |
 
@@ -542,14 +542,14 @@ The designation is the function's own short name — `SF1` — entered by the mo
 | reaction | Safety-related reaction | multiline | | What the safety function does when triggered to reach the safe state. |
 | safeState | Intended safe state | multiline | | The state the safety function brings the machinery to. |
 | feedback | Operator feedback | multiline | | How the safety function makes itself known to the operator, such as lights, messages or sounds. |
-| muting | Muting or override | multiline | | Whether and how the safety function can be suspended, muted or overridden, and under what conditions. |
+| muting | Muting or override | multiline | | Whether, how and when the safety function can be suspended, muted or overridden. |
 | restart | Restart conditions | multiline | | What must hold before the safety function resets and operation resumes. |
 
 #### Characteristics `tab`
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 | The standard the safety function is designed to, which sets the levels offered, or none to type the level freely. |
+| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 | The standard the safety function is designed to, which sets the levels offered. |
 | designTargets | Specific design targets | multiline | | What the standard requires of the safety function's design beyond the level, such as a structure, a fault tolerance, a failure rate or a software level, in its own terms. |
 | responseTime | Response time | text | | How long from a demand to the safety function's output. |
 | stoppingTime | Stopping time | text | | How long from the safety function's output until hazardous motion has stopped. |
@@ -583,11 +583,11 @@ The designation is the function's own short name — `SF1` — entered by the mo
 |---|---|---|---|---|
 | faultsDetected | Faults to be detected | multiline | | Which faults in the safety function's parts must not go unnoticed. |
 | detectionMeans | Means of detection | multiline | | How those faults are found and how often, such as by monitoring, checks or tests. |
-| faultHandling | Fault reaction | multiline | | What the safety function does once a fault is found and the state it brings the machinery to, for any fault or fault by fault. |
+| faultHandling | Fault reaction | multiline | | What the safety function does once a fault is found and the state it brings the machinery to. |
 | faultDetectionTime | Fault detection time | text | | How long from a fault occurring to its detection. |
 | faultReactionTime | Fault reaction time | text | | How long from detection until the machinery reaches the state the reaction brings it to, stopping included. |
 | faultIndication | Fault indication | multiline | | How a found fault is made known. |
-| faultRecovery | Fault recovery | multiline | | Whether a fault latches or clears itself, when and how it may be reset, and how the safety function returns to service. |
+| faultRecovery | Fault recovery | multiline | | Whether a fault latches or clears itself, and how the safety function is reset and returns to service. |
 | powerDisturbances | Power disturbances | multiline | | What the safety function does when its supply goes, returns or fluctuates. |
 
 #### Diagram `tab`
@@ -705,7 +705,7 @@ The designation is the requirement's own short name — `R1` — entered by the 
 |---|---|---|---|---|
 | reference | Designation | text | | |
 | title | Title | text | | The name of the system requirement. |
-| type | Type | choice | Function/Performance; Fit/Operational; Form; Quality; Compliance | The kind of requirement, whether what the system does and how well, how it fits and operates with its surroundings, its physical form, its qualities, or what it must comply with. |
+| type | Type | choice | Function/Performance; Fit/Operational; Form; Quality; Compliance | The kind of requirement, from what the system does to what it must comply with. |
 | verificationMethod | Verification method | choice | Inspection; Analysis; Demonstration; Test | How the system requirement is to be verified. |
 | description | Requirement | multiline | | What the system must do or be. |
 | rationale | Rationale | multiline | | Why the system requirement exists. |
@@ -734,7 +734,7 @@ The designation is the verification's own short name — `V1` — entered by the
 
 | Key | Name | Kind | Values | Help |
 |---|---|---|---|---|
-| runs | Runs | table | | Each time the system verification was carried out, as a row: when and by whom, whether it met its acceptance criteria, and remarks, among them the record the result rests on. |
+| runs | Runs | table | | Each time the verification was carried out, with when, by whom, whether it passed, and remarks. |
 | runs.date | Date | date | | |
 | runs.by | By | text | | |
 | runs.result | Result | choice | Passed; Failed | |
