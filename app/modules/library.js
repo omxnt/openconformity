@@ -437,7 +437,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       box.indeterminate = state === 'mixed';
       box.addEventListener('change', () => {
         togglePick(library, picks, node.id);
-        renderList();
+        focusRow(node.id);
         renderCount();
       });
       const check = el('label', {}, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
