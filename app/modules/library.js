@@ -353,18 +353,39 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     return input;
   }
 
+  /** The entities among the rows shown, what the head's box picks or clears. */
+  function shownEntities() {
+    const held = libraryOf(libraries[current]);
+    return held.ok ? libraryRows(held.model, filter, expanded).map(({ node }) => node).filter((node) => node.kind === 'entity').map((node) => node.id) : [];
+  }
+
   function renderCount() {
     const held = libraryOf(libraries[current]);
     const planned = held.ok ? importPlan(held.model, picks).length : 0;
     count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
     const button = head.querySelector('.library-import');
     if (button) button.disabled = planned === 0;
+    const shown = shownEntities();
+    const onShown = shown.filter((id) => picks.has(id)).length;
+    const state = shown.length > 0 && onShown === shown.length ? 'checked' : onShown > 0 ? 'mixed' : 'none';
+    const all = head.querySelector('.head-all');
+    if (all) {
+      all.setAttribute('aria-checked', state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false');
+      all.querySelector('.checkbox').className = `checkbox${state === 'checked' ? ' on' : state === 'mixed' ? ' mixed' : ''}`;
+    }
   }
 
   function renderHead() {
     head.textContent = '';
     head.hidden = false;
-    count = el('span', { className: 'library-count' });
+    count = el('span', { className: 'head-count' });
+    const all = el('button', { className: 'head-all', attributes: { type: 'button', role: 'checkbox', 'aria-checked': 'false', 'aria-label': 'Pick all shown' } }, [el('span', { className: 'checkbox' }, [icon('i-checkmark')]), count]);
+    all.addEventListener('click', () => {
+      const shown = shownEntities();
+      if (shown.length > 0 && shown.every((id) => picks.has(id))) for (const id of shown) picks.delete(id);
+      else for (const id of shown) picks.add(id);
+      renderList();
+    });
     const importButton = el('button', { className: 'form-button button-primary library-import', text: 'Import', attributes: { type: 'button' } });
     importButton.addEventListener('click', () => {
       const held = libraryOf(libraries[current]);
@@ -378,7 +399,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     tooltipOn(close, 'Close the library', { align: 'end' });
     head.append(
       el('span', { className: 'head-title', text: 'Import from library' }),
-      count,
+      all,
       el('span', { className: 'toolbar-spacer' }),
       el('div', { className: 'pane-head-actions' }, [searchControl(), importButton, close])
     );

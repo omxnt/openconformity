@@ -759,7 +759,11 @@ body {
 .library-side-head { display: flex; align-items: center; flex: none; height: 32px; padding: 0 16px; font-weight: 600; background: var(--layer); border-bottom: 1px solid var(--border-subtle); }  /* $spacing-07, $spacing-05, $heading-compact-01 */
 .library-list { flex: 1; min-height: 0; overflow: auto; padding: 8px 0; }  /* $spacing-03 */
 .library-preview { flex: 1; min-height: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
-.library-count { color: var(--text-second); }
+/* The select-all box in a picker's head, with the count beside it: what is shown picked or cleared as one. */
+.head-all { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; font: inherit; letter-spacing: inherit; color: var(--text-second); background: none; border: 0; cursor: pointer; white-space: nowrap; }  /* $spacing-03 */
+.head-all:hover { background: var(--hover); }
+.head-all:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.head-count { color: var(--text-second); }
 .library-row { display: flex; align-items: center; gap: 8px; height: var(--row); padding-right: 16px; white-space: nowrap; cursor: default; }  /* $spacing-03, $spacing-05 */
 .library-row:hover { background: var(--hover); }
 .library-row.highlighted { background: var(--layer-accent); }
@@ -767,9 +771,9 @@ body {
 .library-row.folder .row-title { color: var(--text-second); }
 .library-row .pick { position: relative; display: flex; align-items: center; cursor: pointer; }
 .library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
-.library-row .checkbox.mixed { background: var(--text); }
-.library-row .checkbox.mixed .icon { display: none; }
-.library-row .checkbox.mixed::after { content: ''; display: block; width: 8px; height: 2px; background: var(--layer); }
+.checkbox.mixed { background: var(--text); }
+.checkbox.mixed .icon { display: none; }
+.checkbox.mixed::after { content: ''; display: block; width: 8px; height: 2px; background: var(--layer); }
 .library-row .row-title { overflow: hidden; text-overflow: ellipsis; }
 .library-preview-head { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 8px 16px 0; }  /* $spacing-03, $spacing-05, $spacing-07 */
 .library-preview .field-static { align-items: flex-start; white-space: pre-wrap; }
