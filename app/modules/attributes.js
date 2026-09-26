@@ -367,7 +367,7 @@ export const ATTRIBUTES = {
     attributes: [
       { key: 'reference', name: 'Designation', kind: 'text', help: 'A short name of your own, shown in the label before the title.' },
       { key: 'title', name: 'Title', kind: 'text', help: "The name of the protective measure." },
-      { key: 'step', name: 'Step', kind: 'choice', values: ['Safe design', 'Protection', 'Information'], help: 'Which of the three risk reduction steps the measure belongs to.' },
+      { key: 'step', name: 'Step', kind: 'choice', values: ['1. Safe design', '2. Protection', '3. Information'], help: 'Which of the three risk reduction steps the measure belongs to.' },
       { key: 'kind', name: 'Kind', kind: 'text', help: 'What kind of measure it is, in your own words, such as a guard, a device, a label or training.' },
       { key: 'description', name: 'Description', kind: 'multiline', help: 'What the protective measure is and how it reduces the risk.' },
     ],
