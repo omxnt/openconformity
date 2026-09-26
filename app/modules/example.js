@@ -28,10 +28,10 @@ export const EXAMPLE_PROJECT = {
     "designation": "EX-1",
     "organisation": "openconformity",
     "description": "The example machine that ships with the software: a small production machine with a drive unit behind guarding, an interlocked access door and an emergency stop, assessed under the Machinery Regulation. Every entity type and relationship the metamodel offers is used, and every field holds something, so the example shows what goes where and serves as a fixture for testing. The content is illustrative and carries no engineering judgement about any real machine.",
-    "version": "2",
-    "date": "2026-09-27",
-    "author": "openconformity",
-    "role": "Maintainer",
+    "version": "1.0",
+    "date": "2026-09-26",
+    "author": "Claude Code",
+    "role": "Coding assistant",
     "changes": "Every attribute filled and every relationship type used. The scenarios rated by the risk matrix. The safety functions, requirements and verifications moved from their descriptions into their own fields.",
     "estimationMethod": "Risk matrix (ISO/TR 14121-2:2012, 6.2.2)",
     "notes": "Reload the example from the File menu at any time to see it as shipped."
@@ -1158,7 +1158,7 @@ export const EXAMPLE_PROJECT = {
         "residualRating": "Low",
         "measures": "PRM-006",
         "evaluation": "The residual risk is acceptable. A burn is minor and the marking and the instructions make it unlikely.",
-        "notes": "Rated by the risk matrix chosen in the project settings. The other methods hold values too, so the project can switch methods and see every field."
+        "notes": "Rated by the risk matrix chosen in the project settings. The warning marking was related after the residual risk was rated, so this scenario carries a message to revisit. It is left so on purpose, to show the messages."
       }
     },
     {
@@ -2264,6 +2264,11 @@ export const EXAMPLE_PROJECT = {
       "type": "cas-assesses-elm",
       "source": "CAS-002",
       "target": "ELM-003"
+    },
+    {
+      "type": "prm-reduces-risk-of-scn",
+      "source": "PRM-005",
+      "target": "SCN-004"
     }
   ]
 };

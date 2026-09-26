@@ -44,7 +44,7 @@ if (loaded.ok) {
   equal(EXAMPLE_PROJECT.name, 'Example machine', 'the example is the demo machine');
   equal(EXAMPLE_PROJECT.folders.length, 16, 'sixteen folders');
   equal(EXAMPLE_PROJECT.entities.length, 75, 'seventy-five entities');
-  equal(EXAMPLE_PROJECT.relationships.length, 143, 'a hundred and forty-three relationships');
+  equal(EXAMPLE_PROJECT.relationships.length, 144, 'a hundred and forty-four relationships');
 
   const typesUsed = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));
   for (const code of Object.keys(ENTITY_TYPES)) {
