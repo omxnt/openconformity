@@ -748,7 +748,7 @@ When opening a file requires a migration that preserves content as legacy or lea
 
 `ubiquitous` `stable`
 
-The software shall preserve attribute content it does not present, unchanged, when a file is opened and saved.
+The software shall preserve attribute content it does not present, unchanged, when a file is opened and saved, and shall state on opening that it does so.
 
 > *Attributes are validated loosely within a schema version, and their definitions iterate without a version change. A key written under one revision of the definitions may not be presented by another, and preserving it keeps the user's content intact until a definition presents it again or a migration places it. Unpresented content is carried, never dropped.*
 
@@ -943,6 +943,16 @@ Where an attribute holds a drawing, the software shall render it as an image tha
 Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting only what the application's protocol requires, and shall accept messages only from that frame and origin, as data.
 
 > *The frame cannot reach the software's storage, and cannot navigate the page, open windows or submit forms unless its protocol needs one of these. Each permission granted is recorded with the function that grants it. The origin rule is what makes the sandbox hold, since on the software's own origin the same permissions would let the application read the project. Scripts and the application's own origin are the expected minimum, and what draw.io's embed needs at the time of writing.*
+
+---
+
+#### N-SEC-005 No hidden content
+
+`ubiquitous` `draft`
+
+The software shall write no project file holding attribute content that the choices in force do not present, and shall state on opening any content it keeps without presenting it.
+
+> *A file holds nothing its author cannot see in the software. A project cleared to serve as a template, or handed to someone else, must not carry what was written under a choice since changed, since a reader of the file would find it where the author could not. A change of the risk estimation method clears every rating made under the old one, and a change of a safety function's standard clears the old level, each after a warning, and a file that arrives holding such content is cleared on opening after the same warning. Content the software does not know is kept (F-PER-010), because deleting it would destroy what a newer revision wrote, and it is stated on opening so nothing in the file is unknown to its owner.*
 
 ### 5.4 Accessibility
 

@@ -784,31 +784,41 @@ Save to file asks for the file's name, prefilled from the project's name as the 
 
 ---
 
+### D-094 No hidden content
+
+`2026-09-28` `product` `architecture`
+
+A project holds nothing its author cannot see in the software. A choice that hides a group clears what the group held, at the save that changes the choice on the entity, at the save of the project for a choice the entities read from it, and on opening a file that arrives holding such values, each after a question naming what is cleared. Content no definition of this revision presents is kept as written and stated when the file is opened. Ratings are not kept across a change of the risk estimation method. Trying another method means saving the project and opening a copy.
+
+> *A project cleared to serve as a template, or handed to someone else, must not carry what was written under a choice since changed, since a reader of the file would find it where the author could not. Keeping the old method's ratings for a switch back was proposed and rejected for that reason. A file the software did not write in this revision can hold such values, as the example once did, and the schema checks structure and not the choices in force, so the check runs on opening and the same question is asked. Unknown content is kept because deleting it would destroy what a newer revision wrote, and stating it keeps the file known to its owner, as F-PER-009 does for a migration. Specified as N-SEC-005 and the clause added to F-PER-010.*
+
+---
+
+### D-095 No user-defined risk method
+
+`2026-09-28` `product`
+
+The project chooses one of the three risk estimation methods of D-068 or none, and with none chosen the ratings are typed as text. No method of the user's own is defined in the settings.
+
+> *A method the software cannot check would offer parameters it could not rate, and the free text rating already serves the assessment that follows a method the software does not carry. Closes U-011.*
+
+---
+
+### D-096 The risk evaluation is the verdict
+
+`2026-09-28` `product`
+
+The scenario's Risk evaluation field, the modeller's own judgement whether the residual risk is acceptable and why, is the verdict on the scenario. No separate yes or no stands beside the rating.
+
+> *The judgement and its reason belong together in one place, and a choice beside the text would say less than the text does. Closes U-010.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
 
-### U-010 Scenario verdict
-
-`2026-09-24` `product`
-
-Whether an accident scenario carries a field stating that its residual risk is acceptable or not, as the user's own judgment beside the rating.
-
-> *Affects the scenario and the risk assessment view. A verdict is the user's field, never the software's conclusion, as D-069 has it for every view, but whether the model should hold it at all is undecided.*
-
----
-
-### U-011 User-defined risk method
-
-`2026-09-23` `product`
-
-Whether the project may define its own risk estimation method beside the three of D-068, named in the settings with its parameters and its rating as free text, with no function behind it.
-
-> *Affects the scenario's rating and the views. Parked with a sketch. It would let a user follow a method the software does not carry without typing the outcome alone, at the cost of a method the software cannot check.*
-
----
-
-### U-012 Diagrams off per project
+### U-013 Diagrams off per project
 
 `2026-09-27` `product`
 

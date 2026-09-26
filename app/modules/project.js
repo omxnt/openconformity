@@ -4,7 +4,8 @@
  * the project's choice, so changing a choice on the project removes what
  * every entity held under the old one. This module says what a save of
  * the project would remove, for the question asked before it and the
- * commit after.
+ * commit after, and what a file holds that no choice in force presents
+ * or no definition knows, for the question and the notice on opening.
  */
 
 import { ATTRIBUTES, attributesFor, groupsOf, isOutcome } from './attributes.js';
@@ -50,4 +51,74 @@ export function projectSweep(model, values) {
   }
   const entities = [...swept].map(([id, keys]) => ({ id, keys: [...keys] }));
   return { entities, count: swept.size, text: parts.join(' and ') };
+}
+
+/**
+ * What a file holds under choices not in force: for every entity, the
+ * keys of the groups of its type waiting on a choice, its own or the
+ * project's, that stands on another value, where the entity still holds
+ * any of them. The count is the entities holding something; the lines
+ * say so, one per type and the value the content stood under.
+ * @param {import('./model.js').Model} model
+ * @returns {{ entities: Array<{ id: string, keys: string[] }>, count: number, lines: string[] }}
+ */
+export function hiddenContent(model) {
+  const entities = [];
+  /** @type {Map<string, number>} entities holding something, per type and value */
+  const held = new Map();
+  for (const node of model.nodes.values()) {
+    if (node.kind !== 'entity') continue;
+    const values = { ...model.attributes, ...node.attributes };
+    const keys = new Set();
+    const under = new Set();
+    for (const group of groupsOf(node.type)) {
+      if (!group.when || (values[group.when.key] ?? '').trim() === group.when.value) continue;
+      for (const definition of group.attributes) {
+        if (isOutcome(definition) || (node.attributes[definition.key] ?? '') === '') continue;
+        keys.add(definition.key);
+        under.add(group.when.value || `no ${leaderName(node.type, group.when.key)}`);
+      }
+    }
+    if (keys.size === 0) continue;
+    entities.push({ id: node.id, keys: [...keys] });
+    for (const value of under) {
+      const line = `${node.type}\u0000${value}`;
+      held.set(line, (held.get(line) ?? 0) + 1);
+    }
+  }
+  const lines = [...held].map(([line, count]) => {
+    const [code, value] = line.split('\u0000');
+    return `${count} ${plural(ENTITY_TYPES[code].name.toLowerCase(), count)} under ${value}`;
+  });
+  return { entities, count: entities.length, lines };
+}
+
+/**
+ * What a file holds that no definition of this revision presents: for
+ * the project and for every entity, the attribute keys none of its
+ * type's definitions name, where they hold a value. The project comes
+ * first, as null.
+ * @param {import('./model.js').Model} model
+ * @returns {Array<{ id: string|null, keys: string[] }>}
+ */
+export function unknownContent(model) {
+  const found = [];
+  const strange = (code, attributes) => {
+    const known = new Set(attributesFor(code).map((definition) => definition.key));
+    return Object.keys(attributes).filter((key) => !known.has(key) && (attributes[key] ?? '') !== '');
+  };
+  const project = strange('PROJECT', model.attributes);
+  if (project.length > 0) found.push({ id: null, keys: project });
+  for (const node of model.nodes.values()) {
+    if (node.kind !== 'entity') continue;
+    const keys = strange(node.type, node.attributes);
+    if (keys.length > 0) found.push({ id: node.id, keys });
+  }
+  return found;
+}
+
+/** The name of the attribute a group waits on: the type's own, or the project's where the type has none. */
+function leaderName(code, key) {
+  const leader = attributesFor(code).find((definition) => definition.key === key) ?? attributesFor('PROJECT').find((definition) => definition.key === key);
+  return (leader?.name ?? key).toLowerCase();
 }

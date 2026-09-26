@@ -11,8 +11,9 @@ import './shim.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, updateEntity, renameProject } from '../app/modules/model.js';
+import { serialise } from '../app/modules/files.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
-import { fakeStorage, stubEditor } from './helpers.js';
+import { fakeStorage, stubEditor, fakeDocument } from './helpers.js';
 import { memoryRetention } from '../app/modules/retention.js';
 
 /** Dialogs that fail the test if anything asks: these flows must not prompt. */
@@ -297,6 +298,50 @@ function flowsOver(store) {
   const flows = createFlows({ store, overlay: {}, dialogs: noDialogs, editor, fileInput: null });
   await flows.escapeEdit();
   equal(ended, 0, 'with no edit open, Escape passes by');
+}
+
+// --- A file holding hidden or unknown content is cleared and stated on opening
+
+{
+  const held = createModel();
+  held.attributes.estimationMethod = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';
+  held.attributes.budget = '12';
+  addEntity(held, 'SCN', { attributes: { title: 'Fall', initialSeverity: 'Serious', initialS: 'S2' } });
+  addEntity(held, 'SAF', { attributes: { title: 'Stop', standard: 'EN ISO 13849-1:2023', plr: 'PL c', sil: 'SIL 2', colour: 'red' } });
+  const text = serialise(held);
+  const fileInput = { files: [{ text: async () => text }], value: '', onchange: null, oncancel: null, click() { this.onchange?.(); } };
+  globalThis.document = fakeDocument();
+  const run = async (answer) => {
+    const store = createStore({ storage: fakeStorage() });
+    const asked = [];
+    const opened = [];
+    const dialogs = {
+      confirm: async (question) => { asked.push(question); return answer; },
+      open: async (spec) => { opened.push(spec); return null; },
+      toast: () => {},
+    };
+    const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput, saveFile: () => {} });
+    await flows.openProjectFlow();
+    return { store, asked, opened };
+  };
+  const declined = await run(false);
+  equal(declined.asked[0].title, 'Clear values that no longer apply?', 'a file holding values under choices not in force raises the clearing question before it opens');
+  deepEqual([...declined.asked[0].body.querySelectorAll('li')].map((li) => li.textContent), ['1 accident scenario under Risk graph (ISO/TR 14121-2:2012, 6.3.2)', '1 safety function under EN IEC 62061:2021'], 'listing what is held, by type and the value it stood under');
+  equal(declined.asked[0].confirmLabel, 'Clear and open', 'the primary action names both');
+  equal(declined.store.hasProject(), false, 'and declining opens nothing');
+  equal(declined.opened.length, 0, 'and states nothing');
+  const accepted = await run(true);
+  equal(accepted.store.hasProject(), true, 'confirming opens the file');
+  deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SCN-001').attributes), ['title', 'initialSeverity'], 'with the hidden rating cleared and the shown one kept');
+  deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SAF-001').attributes), ['title', 'standard', 'plr', 'colour'], 'the hidden level cleared, the unknown key kept');
+  equal(accepted.opened[0].title, 'The file holds content this version does not show', 'then the unknown content is stated');
+  deepEqual([...accepted.opened[0].body.querySelectorAll('li')].map((li) => li.textContent), ['Project  budget', 'SAF-001  Stop  colour'], 'by where it sits, the project first');
+  const clean = createModel();
+  addEntity(clean, 'ELM', { attributes: { title: 'Drive' } });
+  fileInput.files = [{ text: async () => serialise(clean) }];
+  const quiet = await run(false);
+  equal(quiet.asked.length + quiet.opened.length, 0, 'a file holding neither asks and states nothing');
+  delete globalThis.document;
 }
 
 // --- Save asks every time, and cancel costs nothing ----------------------

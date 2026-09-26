@@ -34,7 +34,7 @@ import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, d
 import { recordOf } from './records.js';
 import { removalText } from './editor.js';
 import { VIEWS } from './views.js';
-import { projectSweep } from './project.js';
+import { projectSweep, hiddenContent, unknownContent } from './project.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
 import { importInto } from './library.js';
@@ -765,9 +765,10 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Open a project file: the questions, the picker, the gates, and — when
-   * a migration preserved content or left it unplaced — the statement of
-   * what needs the user's attention.
+   * Open a project file: the questions, the picker, the gates, the
+   * clearing of what the file holds under choices not in force, and the
+   * statements of what a migration preserved or left unplaced and of
+   * what this version does not present.
    */
   async function openProjectFlow() {
     if (!(await confirmDiscard())) return;
@@ -780,6 +781,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       await presentRefusal(result);
       return;
     }
+    if (!(await clearHidden(result.model))) return;
 
     endEditSession();
     store.replaceProject(result.model);
@@ -791,6 +793,49 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
         actions: [{ label: 'Close', value: null, kind: 'secondary' }],
       });
     }
+    await stateUnknown(result.model);
+  }
+
+  /**
+   * Ask before a file holding values under choices not in force is
+   * opened, listing them by type and the value they stood under, and
+   * clear them from the model on confirmation. Declining opens nothing.
+   * @param {import('./model.js').Model} model
+   * @returns {Promise<boolean>}
+   */
+  async function clearHidden(model) {
+    const hidden = hiddenContent(model);
+    if (hidden.count === 0) return true;
+    const confirmed = await dialogs.confirm({
+      title: 'Clear values that no longer apply?',
+      message: 'The file holds values under choices not in force, which the software does not show. Opening the file clears them, and saving writes the file without them.',
+      body: el('ul', { className: 'doomed-list' }, hidden.lines.map((line) => el('li', { text: line }))),
+      confirmLabel: 'Clear and open',
+      danger: true,
+    });
+    if (!confirmed) return false;
+    for (const { id, keys } of hidden.entities) {
+      const node = nodeOf(model, id);
+      for (const key of keys) delete node.attributes[key];
+    }
+    return true;
+  }
+
+  /**
+   * State, once a file is open, the content it holds that this version
+   * does not present, by where it sits, kept as written.
+   * @param {import('./model.js').Model} model
+   */
+  async function stateUnknown(model) {
+    const unknown = unknownContent(model);
+    if (unknown.length === 0) return;
+    const where = ({ id, keys }) => `${id === null ? 'Project' : designated(nodeOf(model, id))}  ${keys.join(', ')}`;
+    await dialogs.open({
+      title: 'The file holds content this version does not show',
+      message: 'It is kept as written and saved with the project. Where it sits:',
+      body: el('ul', { className: 'doomed-list' }, unknown.map((entry) => el('li', { className: 'mono', text: where(entry) }))),
+      actions: [{ label: 'Close', value: null, kind: 'secondary' }],
+    });
   }
 
   /**
@@ -837,8 +882,10 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       await presentRefusal(result);
       return;
     }
+    if (!(await clearHidden(result.model))) return;
     endEditSession();
     store.replaceProject(result.model);
+    await stateUnknown(result.model);
   }
 
   /**

@@ -28,3 +28,40 @@ export function fakeStorage(initial = {}) {
 export function stubEditor() {
   return { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false };
 }
+
+/**
+ * A document for the dialog bodies a flow builds: elements holding a
+ * class, a text, attributes and children, found again by tag.
+ * @returns {{ createElement: (tag: string) => Object }}
+ */
+export function fakeDocument() {
+  const make = (tag) => {
+    const element = {
+      tag,
+      className: '',
+      textContent: '',
+      attributes: {},
+      children: [],
+      setAttribute(name, value) {
+        element.attributes[name] = value;
+      },
+      appendChild(child) {
+        element.children.push(child);
+        return child;
+      },
+      querySelectorAll(selector) {
+        const found = [];
+        const walk = (node) => {
+          for (const child of node.children) {
+            if (child.tag === selector) found.push(child);
+            walk(child);
+          }
+        };
+        walk(element);
+        return found;
+      },
+    };
+    return element;
+  };
+  return { createElement: make };
+}
