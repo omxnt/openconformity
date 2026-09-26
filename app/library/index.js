@@ -1,8 +1,8 @@
 /**
- * The built-in libraries: content the software ships and imports from,
+ * The built-in catalogues: content the software ships and imports from,
  * each a project file used as a source, loaded with the software and
- * fetched from nowhere. One entry per library, in the order the picker
- * offers them, each with the date its content stands at.
+ * fetched from nowhere. One entry per catalogue, in the order the picker
+ * offers them as tabs, each with the date its content stands at.
  */
 
 import { STAND_IN_LIBRARY } from './stand-in.js';
@@ -16,4 +16,4 @@ import { STAND_IN_LIBRARY } from './stand-in.js';
  */
 
 /** @type {Library[]} */
-export const LIBRARIES = [{ id: 'stand-in', name: 'Stand-in legislation', date: '2026-09-26', project: STAND_IN_LIBRARY }];
+export const LIBRARIES = [{ id: 'legislation', name: 'European legislation', date: '2026-09-26', project: STAND_IN_LIBRARY }];

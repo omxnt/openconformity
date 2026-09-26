@@ -743,28 +743,30 @@ body {
 .consent-box input:checked + .checkbox .icon,
 .library-row input:checked + .checkbox .icon { visibility: visible; }
 
-/* The library picker: the library's tree with a checkbox per entity, an
-   entity the project already holds greyed at the one strength of
-   standing back and marked as in the project. */
-.library { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px 0 0; color: var(--text); }  /* $spacing-04, $spacing-05 */
-.library-source { margin: 0 16px; color: var(--text-second); }  /* $spacing-05 */
-.library-list { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+/* The library picker: the catalogues as tabs, the open one's tree with a
+   checkbox per row on the left, the highlighted entity's sheet on the
+   right. A partly picked row shows Carbon's indeterminate bar. */
+.library { flex: 1; min-height: 0; display: flex; flex-direction: column; color: var(--text); }
+.library-source { margin: 8px 16px; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }  /* $spacing-03, $spacing-05, $label-01 */
+.library-split { flex: 1; min-height: 0; display: flex; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+.library-list { flex: 0 0 40%; min-width: 0; overflow: auto; padding: 8px 0; border-right: 1px solid var(--border-subtle); }  /* $spacing-03 */
+.library-preview { flex: 1; min-width: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
 .library-count { color: var(--text-second); }
-.library-row { display: flex; align-items: center; gap: 8px; min-height: 32px; padding-right: 16px; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
-.library-row.folder { color: var(--text-second); }
-.library-row label { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }  /* $spacing-03 */
+.library-row { display: flex; align-items: center; gap: 8px; height: var(--row); padding-right: 16px; white-space: nowrap; cursor: default; }  /* $spacing-03, $spacing-05 */
+.library-row:hover { background: var(--hover); }
+.library-row.highlighted { background: var(--layer-accent); }
+.library-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.library-row.folder .row-title { color: var(--text-second); }
+.library-row label { position: relative; display: flex; align-items: center; cursor: pointer; }
 .library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
-.library-row input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
+.library-row .checkbox.mixed { background: var(--text); }
+.library-row .checkbox.mixed .icon { display: none; }
+.library-row .checkbox.mixed::after { content: ''; display: block; width: 8px; height: 2px; background: var(--layer); }
 .library-row .row-title { overflow: hidden; text-overflow: ellipsis; }
-.library-row.present label { cursor: default; }
-.library-row.present .checkbox { opacity: 0.25; }
-.library-row.present .row-title,
-.library-row.present .designation { color: var(--disabled); }
-.library-row.present > .icon,
-.library-row.present label > .icon { opacity: 0.25; }
-.library-row .tag { margin-left: auto; }
+.library-preview-head { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 8px 16px 0; }  /* $spacing-03, $spacing-05, $spacing-07 */
+.library-preview .field-static { align-items: flex-start; white-space: pre-wrap; }
 .library-note { margin: 0; padding: 16px; color: var(--text-second); }  /* $spacing-05 */
-.library-into { margin: 0 16px 16px; color: var(--text-second); }  /* $spacing-05 */
+.library-into { margin: 8px 16px; color: var(--text-second); }  /* $spacing-03, $spacing-05 */
 .consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }

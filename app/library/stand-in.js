@@ -10,12 +10,14 @@
 import { EXAMPLE_PROJECT } from '../modules/example.js';
 
 const KEPT = new Set(['LEG', 'ESR']);
+const entities = EXAMPLE_PROJECT.entities.filter((entity) => KEPT.has(entity.type)).map((entity) => ({ ...entity, parent: entity.type === 'LEG' ? null : entity.parent }));
+const ids = new Set(entities.map((entity) => entity.id));
 
-/** @type {Object} a project file holding the example's legislation at its root, each act's requirements beneath it */
+/** @type {Object} a project file holding the example's legislation at its root, each act's requirements beneath it and owned by it */
 export const STAND_IN_LIBRARY = {
   ...EXAMPLE_PROJECT,
   name: 'Stand-in legislation',
   folders: [],
-  entities: EXAMPLE_PROJECT.entities.filter((entity) => KEPT.has(entity.type)).map((entity) => ({ ...entity, parent: entity.type === 'LEG' ? null : entity.parent })),
-  relationships: [],
+  entities,
+  relationships: EXAMPLE_PROJECT.relationships.filter((relationship) => ids.has(relationship.source) && ids.has(relationship.target)),
 };

@@ -1,185 +1,203 @@
 /**
- * The library function: a library is a project file used as a source of
- * items, and an import copies what is picked into the open project. The
- * pure part reads a library against the project, recognising by
- * reference what the project already holds, planning what a pick brings
- * with it and copying it in; the picker puts that over the editor pane.
+ * The library function: a catalogue is a project file used as a source
+ * of entities, and an import copies what is picked into the open project
+ * where the user stands in the tree. The pure part reads a catalogue as
+ * rows under a filter and an expansion, keeps the picks as a set with the
+ * checked state of every row derived from it, plans what an import copies
+ * and copies it; the pane puts that over the editor pane with a preview.
  *
- * Recognition is by reference alone, since imports carry no provenance
- * (D-056): an act by the year and number at the core of its citation, a
- * standard or a specification by its designation, and a requirement of
- * theirs by its owner's key together with its own clause. A pick brings
- * the entities that contain it, so nothing lands orphaned, and lands them
- * under the project's own where the project already holds them. Entities
- * and their containment travel; relationships do not (D-016).
+ * An import is one way. Nothing is recognised as already in the project,
+ * and picking the same act twice gives two. The picked entities travel
+ * with their filing among themselves and the relationships among them.
+ * A relationship to anything not picked stays behind, since its other
+ * end is not there. Folders are the catalogue's shelves. They never
+ * travel, and checking one checks what it holds.
  */
 
-import { nodeOf, childrenOf, addEntity } from './model.js';
+import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js';
 import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
+import { attributesFor } from './attributes.js';
+import { setValues } from './editor.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
 
-/** The types recognised by their own reference, and the types recognised by their owner's together with their own. */
-const CITED = new Set(['LEG', 'HST', 'OSP']);
-const OWNED = { ESR: 'LEG', HSR: 'HST', OSR: 'OSP' };
-
 /**
- * The core of an entity's reference: for an act the year and the number
- * as `2023/1230`, whichever way the citation writes them; for a standard
- * or a specification its designation with its spacing and case
- * flattened. Null where there is nothing to join on.
- * @param {import('./model.js').Entity} entity
- * @returns {string|null}
+ * Whether a node answers a filter: an entity as the navigator matches
+ * it, a folder by its name.
+ * @param {import('./model.js').Node} node
+ * @param {string} filter
+ * @returns {boolean}
  */
-export function referenceCore(entity) {
-  const reference = String(entity.attributes?.reference ?? '').trim();
-  if (reference === '') return null;
-  if (entity.type === 'LEG') {
-    const found = reference.match(/(\d+)\s*\/\s*(\d+)/);
-    return found ? `${found[1]}/${found[2]}` : null;
-  }
-  return reference.replace(/\s+/g, ' ').toLowerCase();
+function nodeMatches(node, filter) {
+  if (node.kind === 'entity') return entityMatches(node, filter);
+  return node.name.toLowerCase().includes(filter.trim().toLowerCase());
 }
 
 /**
- * The key an entity is recognised by across files, or null for a type
- * or an entity that has none.
- * @param {import('./model.js').Model} model
- * @param {import('./model.js').Node|null|undefined} node
- * @returns {string|null}
+ * @typedef {Object} LibraryRow
+ * @property {import('./model.js').Node} node
+ * @property {number} depth
+ * @property {boolean} hasChildren
+ * @property {boolean} expanded
  */
-export function joinKey(model, node) {
-  if (!node || node.kind !== 'entity') return null;
-  if (CITED.has(node.type)) {
-    const core = referenceCore(node);
-    return core ? `${node.type}:${core}` : null;
-  }
-  const ownerType = OWNED[node.type];
-  if (!ownerType) return null;
-  const owner = nodeOf(model, node.parent);
-  if (!owner || owner.kind !== 'entity' || owner.type !== ownerType) return null;
-  const ownerKey = joinKey(model, owner);
-  const clause = String(node.attributes?.reference ?? '').trim().toLowerCase();
-  return ownerKey && clause ? `${ownerKey}/${node.type}:${clause}` : null;
-}
 
 /**
- * What the project already holds of a library: for each entity of the
- * library, the identifier of the project's entity with the same key, or
- * null.
- * @param {import('./model.js').Model} project
- * @param {import('./model.js').Model} library
- * @returns {Map<string, string|null>}
- */
-export function presence(project, library) {
-  /** @type {Map<string, string>} */
-  const held = new Map();
-  for (const node of project.nodes.values()) {
-    const key = joinKey(project, node);
-    if (key && !held.has(key)) held.set(key, node.id);
-  }
-  const found = new Map();
-  for (const node of library.nodes.values()) {
-    if (node.kind !== 'entity') continue;
-    const key = joinKey(library, node);
-    found.set(node.id, key ? (held.get(key) ?? null) : null);
-  }
-  return found;
-}
-
-/**
- * A library's tree as rows, depth first in filing order, each node with
- * its depth; under a filter, an entity that matches with everything
- * beneath it, and every node above it, so the tree keeps its shape
- * around what matches and a matching act shows its clauses.
+ * A catalogue's tree as the rows it shows: depth first in filing order,
+ * a node's children only where it is expanded. Under a filter every
+ * node that matches with everything beneath it, and every node above a
+ * match, all expanded, so the tree keeps its shape around what matches.
  * @param {import('./model.js').Model} library
  * @param {string} [filter]
- * @returns {Array<{ node: import('./model.js').Node, depth: number }>}
+ * @param {Set<string>} [expanded]
+ * @returns {LibraryRow[]}
  */
-export function libraryRows(library, filter = '') {
+export function libraryRows(library, filter = '', expanded = new Set()) {
+  const filtering = filter.trim() !== '';
   const rows = [];
   const walk = (parentId, depth, keepAll) => {
     let kept = false;
     for (const node of childrenOf(library, parentId)) {
       const start = rows.length;
-      rows.push({ node, depth });
-      const matches = keepAll || (node.kind === 'entity' && entityMatches(node, filter));
-      const below = walk(node.id, depth + 1, matches);
-      if (!matches && !below) rows.splice(start, rows.length - start);
+      const hasChildren = childrenOf(library, node.id).length > 0;
+      const matches = keepAll || nodeMatches(node, filter);
+      const open = hasChildren && (filtering || expanded.has(node.id));
+      rows.push({ node, depth, hasChildren, expanded: open });
+      const below = open ? walk(node.id, depth + 1, matches) : false;
+      if (filtering && !matches && !below) rows.splice(start, rows.length - start);
       else kept = true;
     }
     return kept;
   };
-  walk(null, 0, filter.trim() === '');
+  walk(null, 0, !filtering);
   return rows;
 }
 
 /**
- * What an import of the picked entities copies: the picks and every
- * entity that contains one, in the library's tree order, each once.
+ * The entities a row stands for when checked: an entity itself and
+ * every entity filed beneath it, a folder every entity filed in it.
  * @param {import('./model.js').Model} library
- * @param {Iterable<string>} pickedIds
+ * @param {string} id
+ * @returns {string[]}
+ */
+function entitiesUnder(library, id) {
+  const node = nodeOf(library, id);
+  if (!node) return [];
+  const beneath = filedBeneath(library, id).filter((held) => held.kind === 'entity').map((held) => held.id);
+  return node.kind === 'entity' ? [id, ...beneath] : beneath;
+}
+
+/**
+ * How a row's checkbox stands for a set of picks: checked when every
+ * entity it stands for is picked, mixed when some are, none otherwise.
+ * @param {import('./model.js').Model} library
+ * @param {Set<string>} picks
+ * @param {string} id
+ * @returns {'checked'|'mixed'|'none'}
+ */
+export function checkState(library, picks, id) {
+  const under = entitiesUnder(library, id);
+  const picked = under.filter((held) => picks.has(held)).length;
+  if (under.length === 0 || picked === 0) return 'none';
+  return picked === under.length ? 'checked' : 'mixed';
+}
+
+/**
+ * Toggle a row: a checked row unpicks everything it stands for, any
+ * other row picks all of it.
+ * @param {import('./model.js').Model} library
+ * @param {Set<string>} picks
+ * @param {string} id
+ */
+export function togglePick(library, picks, id) {
+  const under = entitiesUnder(library, id);
+  if (checkState(library, picks, id) === 'checked') for (const held of under) picks.delete(held);
+  else for (const held of under) picks.add(held);
+}
+
+/**
+ * What an import copies: the picked entities in the catalogue's filing
+ * order. Folders never travel.
+ * @param {import('./model.js').Model} library
+ * @param {Set<string>} picks
  * @returns {import('./model.js').Entity[]}
  */
-export function importPlan(library, pickedIds) {
-  const wanted = new Set();
-  for (const id of pickedIds) {
-    for (let held = nodeOf(library, id); held && held.kind === 'entity'; held = nodeOf(library, held.parent)) wanted.add(held.id);
-  }
-  return libraryRows(library).map(({ node }) => node).filter((node) => node.kind === 'entity' && wanted.has(node.id));
+export function importPlan(library, picks) {
+  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && picks.has(node.id));
 }
 
 /**
  * Copy the picked entities into the project: each with its attributes,
- * under the project's own entity where the project already holds the one
- * that contains it, under the copy of it where that was copied too, and
- * under the target otherwise. Entities the project already holds are not
- * copied again. Identifiers are the project's own, issued as it issues
- * them.
+ * filed under the copy of the nearest picked entity above it, and under
+ * the target where none is picked above it. Then every relationship of
+ * the catalogue between two picked entities, between their copies.
+ * Identifiers are the project's own, issued as it issues them.
  * @param {import('./model.js').Model} project
  * @param {import('./model.js').Model} library
- * @param {Iterable<string>} pickedIds
- * @param {string|null} targetId  the folder to file the top of the copies under, or null for the root
- * @returns {{ ok: true, added: string[], kept: string[] } | { ok: false, reason: string }}
+ * @param {Set<string>} picks
+ * @param {string|null} targetId  the node the copies are filed under, or null for the root
+ * @returns {{ ok: true, added: string[], related: number } | { ok: false, reason: string }}
  */
-export function importInto(project, library, pickedIds, targetId = null) {
-  const present = presence(project, library);
+export function importInto(project, library, picks, targetId = null) {
   const mapping = new Map();
   const added = [];
-  const kept = [];
-  for (const node of importPlan(library, pickedIds)) {
-    const existing = present.get(node.id);
-    if (existing) {
-      mapping.set(node.id, existing);
-      kept.push(existing);
-      continue;
-    }
-    const above = nodeOf(library, node.parent);
-    const parent = above && above.kind === 'entity' ? (mapping.get(above.id) ?? targetId) : targetId;
+  for (const node of importPlan(library, picks)) {
+    let above = nodeOf(library, node.parent);
+    while (above && !mapping.has(above.id)) above = nodeOf(library, above.parent);
+    const parent = above ? mapping.get(above.id) : targetId;
     const result = addEntity(project, node.type, { parent, attributes: { ...node.attributes } });
     if (!result.ok) return result;
     mapping.set(node.id, result.entity.id);
     added.push(result.entity.id);
   }
-  return { ok: true, added, kept };
+  let related = 0;
+  for (const relationship of library.relationships.values()) {
+    if (!mapping.has(relationship.source) || !mapping.has(relationship.target)) continue;
+    const result = relate(project, relationship.type, mapping.get(relationship.source), mapping.get(relationship.target));
+    if (!result.ok) return result;
+    related += 1;
+  }
+  return { ok: true, added, related };
+}
+
+/**
+ * What an entity's attribute shows in the preview, or null for one that
+ * holds nothing or shows nowhere: a set as its values, a table as its
+ * row count, the rest as stored.
+ * @param {import('./attributes.js').AttributeDefinition} definition
+ * @param {unknown} value
+ * @returns {string|null}
+ */
+export function previewValue(definition, value) {
+  if (value === undefined || value === null || value === '') return null;
+  if (definition.kind === 'computed' || definition.kind === 'entities' || definition.kind === 'drawing') return null;
+  if (definition.kind === 'set') {
+    const chosen = setValues(definition, value);
+    return chosen.length > 0 ? chosen.join(', ') : null;
+  }
+  if (definition.kind === 'table') {
+    const rows = Array.isArray(value) ? value.length : 0;
+    return rows > 0 ? `${rows} ${rows === 1 ? 'row' : 'rows'}` : null;
+  }
+  return String(value);
 }
 
 /**
  * The picker as a mode of the editor pane, with the navigator alive
- * beside it: the head carries the title with what a pick would import,
- * the filter, the Import button and the close; the body the library's
- * tree with a checkbox per entity, the ones the project already holds
- * greyed and unpickable. Opened from the toolbar, closed by its X or
- * Escape, never kept across a reload. Renders only while open, and
- * leaves the pane to the editor otherwise.
+ * beside it. The head carries the title with what a pick would import,
+ * the filter, the Import button and the close. The body carries the
+ * catalogues as tabs, the open catalogue's tree with a checkbox per
+ * row on the left, and on the right the entity under the highlight as
+ * a sheet of what its attributes hold. The copies land where the
+ * navigator's selection stands. Opened from the toolbar, closed by its
+ * X or Escape, never kept across a reload.
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head  the editor pane's head
  * @param {HTMLElement} context.body  the editor pane's body
  * @param {import('../library/index.js').Library[]} context.libraries
- * @param {(chosen: { library: import('./model.js').Model, picks: string[], target: string|null }) => void} context.onImport
+ * @param {(chosen: { library: import('./model.js').Model, picks: Set<string> }) => void} context.onImport
  * @param {() => void} context.onClose
  */
 export function createLibraryPane({ store, head, body, libraries, onImport, onClose }) {
@@ -195,8 +213,14 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
 
   let current = 0;
   let filter = '';
-  const picks = new Set();
+  /** @type {Set<string>} the picked entities of the open catalogue */
+  let picks = new Set();
+  /** @type {Set<string>} the rows opened in the open catalogue */
+  let expanded = new Set();
+  /** @type {string|null} the row the preview shows */
+  let highlight = null;
   let list = null;
+  let preview = null;
   let count = null;
   let shown = false;
 
@@ -208,19 +232,25 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     });
   }
 
-  function targetOf() {
-    const selected = nodeOf(store.model(), store.selection());
-    return selected && selected.kind === 'folder' ? selected : null;
+  function openCatalogue(index) {
+    current = index;
+    picks = new Set();
+    expanded = new Set();
+    highlight = null;
+    render();
   }
 
-  function plannedCount(library) {
-    const present = presence(store.model(), library);
-    return importPlan(library, picks).filter((node) => !present.get(node.id)).length;
+  function targetText() {
+    const selected = nodeOf(store.model(), store.selection());
+    if (!selected) return 'the root of the project';
+    if (selected.kind === 'folder') return `the folder ${selected.name}`;
+    const label = entityLabel(selected);
+    return label ? `${selected.id} ${label}` : selected.id;
   }
 
   function renderCount() {
     const held = libraryOf(libraries[current]);
-    const planned = held.ok ? plannedCount(held.model) : 0;
+    const planned = held.ok ? importPlan(held.model, picks).length : 0;
     count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
     const button = head.querySelector('.library-import');
     if (button) button.disabled = planned === 0;
@@ -232,7 +262,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     count = el('span', { className: 'library-count' });
     const search = el('input', {
       className: 'field-input head-search',
-      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the library' },
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the catalogue' },
     });
     search.value = filter;
     search.addEventListener('input', () => {
@@ -243,8 +273,8 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     importButton.addEventListener('click', () => {
       const held = libraryOf(libraries[current]);
       if (!held.ok || picks.size === 0) return;
-      const chosen = { library: held.model, picks: [...picks], target: targetOf()?.id ?? null };
-      picks.clear();
+      const chosen = { library: held.model, picks };
+      picks = new Set();
       onImport(chosen);
     });
     const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]);
@@ -258,79 +288,150 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     );
   }
 
-  function renderSources() {
-    if (libraries.length < 2) return el('p', { className: 'library-source', text: `${libraries[0].name}, as of ${libraries[0].date}` });
-    const tabs = el('div', { className: 'tabs', attributes: { role: 'tablist', 'aria-label': 'Library' } });
+  function renderTabs() {
+    const tabs = el('div', { className: 'tabs', attributes: { role: 'tablist', 'aria-label': 'Catalogues' } });
     libraries.forEach((entry, i) => {
       const tab = el('button', {
         className: 'tab',
         text: entry.name,
         attributes: { type: 'button', role: 'tab', 'aria-selected': String(i === current), tabindex: i === current ? '0' : '-1' },
       });
-      tab.addEventListener('click', () => {
-        current = i;
-        picks.clear();
-        render();
-      });
+      tab.addEventListener('click', () => openCatalogue(i));
       tabs.appendChild(tab);
     });
     tabKeys(tabs, (i) => {
-      current = i;
-      picks.clear();
-      render();
+      openCatalogue(i);
       body.querySelector('.tab[aria-selected="true"]')?.focus();
     });
     return tabs;
+  }
+
+  /** The row above or below a row among the rows shown, wrapping at neither end. */
+  function rowBeside(id, step) {
+    const rows = [...list.querySelectorAll('.library-row')];
+    const at = rows.findIndex((row) => row.dataset.id === id);
+    return rows[Math.min(rows.length - 1, Math.max(0, at + step))] ?? null;
+  }
+
+  function focusRow(id) {
+    highlight = id;
+    renderList();
+    renderPreview();
+    list.querySelector(`.library-row[data-id="${id}"]`)?.focus();
   }
 
   function renderList() {
     list.textContent = '';
     const held = libraryOf(libraries[current]);
     if (!held.ok) {
-      list.appendChild(el('p', { className: 'library-note', text: held.statement ?? 'The library could not be read.' }));
+      list.appendChild(el('p', { className: 'library-note', text: held.statement ?? 'The catalogue could not be read.' }));
       renderCount();
       return;
     }
     const library = held.model;
-    const present = presence(store.model(), library);
-    const rows = libraryRows(library, filter);
+    const rows = libraryRows(library, filter, expanded);
     if (rows.length === 0) {
-      list.appendChild(el('p', { className: 'library-note', text: filter.trim() === '' ? 'The library is empty.' : 'Nothing matches the filter.' }));
+      list.appendChild(el('p', { className: 'library-note', text: filter.trim() === '' ? 'The catalogue is empty.' : 'Nothing matches the filter.' }));
     }
-    for (const { node, depth } of rows) {
-      const row = el('div', { className: 'library-row' });
+    const focusable = rows.some((row) => row.node.id === highlight) ? highlight : rows[0]?.node.id;
+    for (const { node, depth, hasChildren, expanded: open } of rows) {
+      const state = checkState(library, picks, node.id);
+      const attributes = {
+        role: 'treeitem',
+        'aria-level': String(depth + 1),
+        'aria-checked': state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false',
+        'aria-selected': String(node.id === highlight),
+        tabindex: node.id === focusable ? '0' : '-1',
+        'data-id': node.id,
+      };
+      if (hasChildren) attributes['aria-expanded'] = String(open);
+      const row = el('div', { className: `library-row${node.kind === 'folder' ? ' folder' : ''}${node.id === highlight ? ' highlighted' : ''}`, attributes });
       row.style.paddingLeft = `${16 + depth * 16}px`;
-      if (node.kind === 'folder') {
-        row.classList.add('folder');
-        row.append(icon(FOLDER_ICON), el('span', { text: node.name }));
-        list.appendChild(row);
-        continue;
+
+      const twisty = el('span', { className: 'twisty' });
+      if (hasChildren) {
+        twisty.appendChild(icon(open ? 'i-chevron-down' : 'i-chevron-right'));
+        twisty.addEventListener('click', (event) => {
+          event.stopPropagation();
+          if (open) expanded.delete(node.id);
+          else expanded.add(node.id);
+          renderList();
+        });
       }
-      const already = present.get(node.id);
-      const box = el('input', { attributes: { type: 'checkbox', 'aria-label': `Pick ${node.id}` } });
-      box.checked = picks.has(node.id);
-      if (already) {
-        box.disabled = true;
-        picks.delete(node.id);
-        row.classList.add('present');
-      }
+
+      const box = el('input', { attributes: { type: 'checkbox', tabindex: '-1', 'aria-label': `Pick ${node.kind === 'folder' ? node.name : node.id}` } });
+      box.checked = state === 'checked';
+      box.indeterminate = state === 'mixed';
       box.addEventListener('change', () => {
-        if (box.checked) picks.add(node.id);
-        else picks.delete(node.id);
+        togglePick(library, picks, node.id);
+        renderList();
         renderCount();
       });
-      const label = el('label', {}, [
-        box,
-        el('span', { className: 'checkbox' }, [icon('i-checkmark')]),
-        icon(TYPE_ICONS[node.type], ENTITY_TYPES[node.type].pillar),
-        el('span', { className: 'mono designation', text: node.id }),
-        el('span', { className: 'row-title', text: entityLabel(node) }),
-      ]);
-      row.appendChild(label);
-      if (already) row.appendChild(el('span', { className: 'tag', text: 'In the project' }));
+      const check = el('label', {}, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
+      check.addEventListener('click', (event) => event.stopPropagation());
+
+      row.append(twisty, check);
+      if (node.kind === 'folder') {
+        row.append(icon(FOLDER_ICON), el('span', { className: 'row-title', text: node.name }));
+      } else {
+        row.append(icon(TYPE_ICONS[node.type], ENTITY_TYPES[node.type].pillar), el('span', { className: 'mono designation', text: node.id }));
+        const label = entityLabel(node);
+        if (label) row.appendChild(el('span', { className: 'row-title', text: label }));
+      }
+      row.addEventListener('click', () => focusRow(node.id));
+      row.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          const beside = rowBeside(node.id, event.key === 'ArrowDown' ? 1 : -1);
+          if (beside) focusRow(beside.dataset.id);
+        } else if (event.key === 'ArrowRight' && hasChildren && !open) {
+          event.preventDefault();
+          expanded.add(node.id);
+          focusRow(node.id);
+        } else if (event.key === 'ArrowLeft' && hasChildren && open) {
+          event.preventDefault();
+          expanded.delete(node.id);
+          focusRow(node.id);
+        } else if (event.key === ' ') {
+          event.preventDefault();
+          togglePick(library, picks, node.id);
+          focusRow(node.id);
+          renderCount();
+        }
+      });
       list.appendChild(row);
     }
     renderCount();
+  }
+
+  function renderPreview() {
+    preview.textContent = '';
+    const held = libraryOf(libraries[current]);
+    const node = held.ok ? nodeOf(held.model, highlight) : null;
+    if (!node) {
+      preview.appendChild(el('p', { className: 'library-note', text: 'Select a row to see what it holds.' }));
+      return;
+    }
+    if (node.kind === 'folder') {
+      preview.append(
+        el('div', { className: 'library-preview-head' }, [icon(FOLDER_ICON), el('span', { text: node.name })]),
+        el('p', { className: 'library-note', text: 'Check the folder to pick everything filed in it.' })
+      );
+      return;
+    }
+    const type = ENTITY_TYPES[node.type];
+    const parts = [icon(TYPE_ICONS[node.type], type.pillar), el('span', { className: 'subhead-kind', text: type.name }), el('span', { className: 'mono designation', text: node.id })];
+    const label = entityLabel(node);
+    if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
+    preview.appendChild(el('div', { className: 'library-preview-head' }, parts));
+    const fields = [];
+    for (const definition of attributesFor(node.type)) {
+      const value = previewValue(definition, node.attributes?.[definition.key]);
+      if (value === null) continue;
+      fields.push(el('div', { className: 'field' }, [el('span', { className: 'field-label', text: definition.name }), el('div', { className: 'field-static', text: value })]));
+    }
+    if (fields.length === 0) fields.push(el('p', { className: 'library-note', text: 'Its attributes hold nothing.' }));
+    preview.append(...fields);
   }
 
   function render() {
@@ -341,16 +442,18 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     const scrollTop = list?.scrollTop ?? 0;
     renderHead();
     body.textContent = '';
-    list = el('div', { className: 'library-list', attributes: { role: 'group', 'aria-label': 'The library' } });
-    const target = targetOf();
+    list = el('div', { className: 'library-list', attributes: { role: 'tree', 'aria-label': 'The catalogue' } });
+    preview = el('div', { className: 'library-preview' });
     body.appendChild(
       el('div', { className: 'library' }, [
-        renderSources(),
-        list,
-        el('p', { className: 'library-into', text: `Into ${target ? `the folder ${target.name}` : 'the root of the project'}` }),
+        renderTabs(),
+        el('p', { className: 'library-source', text: `As of ${libraries[current].date}` }),
+        el('div', { className: 'library-split' }, [list, preview]),
+        el('p', { className: 'library-into', text: `Into ${targetText()}` }),
       ])
     );
     renderList();
+    renderPreview();
     list.scrollTop = scrollTop;
     if (!shown) {
       shown = true;

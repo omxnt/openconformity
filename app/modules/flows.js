@@ -796,15 +796,17 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.setLibraryOpen(true);
   }
 
-  /** The picks copied into the project as one change the history can undo. */
+  /** The picks copied into the project where the selection stands, as one change the history can undo. */
   function importPicks(chosen) {
-    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, chosen.target));
+    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, store.selection()));
     if (!outcome.ok) {
       toastRefusal('Import refused', outcome);
       return;
     }
     const n = outcome.added.length;
-    dialogs.toast(n === 0 ? 'Nothing imported' : 'Imported', n === 0 ? 'The project already held everything picked.' : `${n} ${n === 1 ? 'entity' : 'entities'} added to the project.`);
+    const r = outcome.related;
+    dialogs.toast('Imported', `${n} ${n === 1 ? 'entity' : 'entities'}${r > 0 ? ` and ${r} ${r === 1 ? 'relationship' : 'relationships'}` : ''} added to the project.`);
+    if (store.selection() !== null) store.setExpanded(store.selection(), true);
   }
 
   function closeLibrary() {
