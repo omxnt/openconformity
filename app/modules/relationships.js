@@ -23,6 +23,7 @@ import { pickerCandidates, pickedRows } from './relate.js';
 import { formLabel, entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS } from './icons.js';
 import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
+import { columnGroup, columnHandles } from './columns.js';
 import { statusIcon } from './rating.js';
 import { findings, staleText, tabNameOf } from './records.js';
 
@@ -467,14 +468,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return header;
   }
 
-  /** The shared column skeleton, so the two tables can never misalign. */
+  /** The shared column skeleton, so the two tables can never misalign: the source, the relationship, the target taking what is left, and the action. */
+  const LIST_COLUMNS = ['30%', '24%', 'auto', '48px'];
   function columns() {
-    return el('colgroup', {}, [
-      el('col', { className: 'col-entity' }),
-      el('col', { className: 'col-relationship' }),
-      el('col', { className: 'col-entity' }),
-      el('col', { className: 'col-action' }),
-    ]);
+    return columnGroup('relationships', LIST_COLUMNS);
   }
 
   /**
@@ -503,13 +500,13 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       direction === 'incoming'
         ? [sortableHeader('Source', 'entity', direction), sortableHeader('Relationship', 'relationship', direction), el('th', { text: 'Target' })]
         : [el('th', { text: 'Source' }), sortableHeader('Relationship', 'relationship', direction), sortableHeader('Target', 'entity', direction)];
-    held.appendChild(
-      el('table', { className: 'table' }, [
-        columns(),
-        el('thead', {}, [el('tr', {}, [...headers, el('th', { className: 'shrink' })])]),
-        el('tbody', {}, rows.map((row) => (row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking)))),
-      ])
-    );
+    const table = el('table', { className: 'table' }, [
+      columns(),
+      el('thead', {}, [el('tr', {}, [...headers, el('th', { className: 'shrink' })])]),
+      el('tbody', {}, rows.map((row) => (row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking)))),
+    ]);
+    held.appendChild(table);
+    columnHandles(table, 'relationships', [0, 1]);
     return held;
   }
 
@@ -580,6 +577,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     head.appendChild(el('div', { className: 'pane-head-actions' }, [searchControl(), headIcon('Close the messages', 'i-close', () => store.setMessagesOpen(false)), collapseToggle()]));
   }
 
+  /** The messages' columns: the entity, the record, and the message taking what is left. */
+  const MESSAGE_COLUMNS = ['28%', '18%', 'auto'];
+
   function messagesHeader(label, column) {
     const active = messagesSort !== null && messagesSort.column === column;
     const header = el('th', {
@@ -649,12 +649,13 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       messagesHost.appendChild(el('p', { className: 'picking-note', text: 'Nothing matches the filter.' }));
       return;
     }
-    messagesHost.appendChild(
-      el('table', { className: 'table messages' }, [
-        el('thead', {}, [el('tr', {}, [messagesHeader('Entity', 'entity'), el('th', { text: found[0].definition.name }), messagesHeader('Message', 'message')])]),
-        el('tbody', {}, rows.map(messageRow)),
-      ])
-    );
+    const table = el('table', { className: 'table messages' }, [
+      columnGroup('messages', MESSAGE_COLUMNS),
+      el('thead', {}, [el('tr', {}, [messagesHeader('Entity', 'entity'), el('th', { text: found[0].definition.name }), messagesHeader('Message', 'message')])]),
+      el('tbody', {}, rows.map(messageRow)),
+    ]);
+    messagesHost.appendChild(table);
+    columnHandles(table, 'messages', [0, 1]);
   }
 
   /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, the messages, or the graph around its subject. */

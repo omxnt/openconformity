@@ -187,7 +187,9 @@ import { fakeStorage } from './helpers.js';
 
 {
   const relationships = readFile('../app/modules/relationships.js');
-  ok(relationships.includes("el('colgroup', {}, ["), 'the two direction tables share one fixed column skeleton');
+  ok(relationships.includes("return columnGroup('relationships', LIST_COLUMNS);") && relationships.includes("columnHandles(table, 'relationships', [0, 1]);") && relationships.includes("columnHandles(table, 'messages', [0, 1]);"), 'the two direction tables share one column skeleton, and the list and the messages take resize handles on their heads');
+  ok(readFile('../app/modules/columns.js').includes("import { splitter } from './splitter.js';") && readFile('../app/modules/columns.js').includes("const dragged = new Map();") && !readFile('../app/modules/columns.js').includes('Storage'), 'the handles are the one splitter the workspace has, and the widths live for the session in memory');
+  ok(!readFile('../app/modules/navigator.js').includes('attributes.title'), 'a tree row carries no browser tooltip, one tooltip anatomy everywhere and none on the tree');
   ok(relationships.includes("className: 'rel-fold'"), 'each behind its compact fold');
   ok(!relationships.includes('rel-arrow'), 'the direction arrow column is gone: the split carries direction');
   ok(relationships.includes("const actions = [searchControl()];") && relationships.includes('graph.render(tableFilter)') && readFile('../app/modules/graph.js').includes('const merged = filteredNeighbourhood('), 'the filter serves both views: the list, and the graph narrowed around its subject');

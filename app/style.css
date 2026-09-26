@@ -1209,13 +1209,8 @@ select.field-input[size] {
    column skeleton shared by both direction tables so they can never
    misalign. The head stays put while the pane body scrolls. */
 .table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-.table .col-relationship { width: 24%; }
-.table .col-action { width: 48px; }
-.table .col-message { width: 44%; }
 .table td.tags { overflow: visible; }  /* the tags' tooltips reach past the cell */
-.table.messages { table-layout: auto; }  /* the entity and its measures take the width they hold, the message the rest, wrapping first */
-.table.messages td:first-child { white-space: nowrap; }
-.table.messages .cell-entity .row-title { flex: none; }
+.splitter.col-splitter { position: absolute; top: 0; right: 0; bottom: 0; background: transparent; }  /* the handle at a column head's right edge, the sticky head its containing block, drawn only under the pointer */
 .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 .head-title { font-weight: 600; white-space: nowrap; }  /* $heading-compact-01; the head's own padding lands it where a tab's text stands */
 .table th {
