@@ -67,7 +67,7 @@ function enabledIds(actions) {
   );
   deepEqual(
     actions.filter((action) => ['project', 'example', 'browser'].includes(action.group)).map((action) => action.label),
-    ['New project', 'Open project…', 'Save to file', 'Load example', 'Clear browser data'],
+    ['New project', 'Open project…', 'Save to file…', 'Load example', 'Clear browser data'],
     'named as the File menu reads, top to bottom'
   );
   deepEqual(

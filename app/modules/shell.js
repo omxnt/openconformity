@@ -130,7 +130,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
    */
   function actionItem(action, anchor) {
     return {
-      label: action.label,
+      label: action.describe ? action.describe() : action.label,
       icon: action.icon,
       hint: action.hint,
       danger: action.danger,
@@ -257,7 +257,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {
     unsavedButton.addEventListener('click', () => saveAction.run({ anchor: unsavedButton }));
-    tooltipOn(unsavedButton, 'Save to file', { align: 'end', label: 'Unsaved changes, save to file' });
+    tooltipOn(unsavedButton, 'Save to file…', { align: 'end', label: 'Unsaved changes, save to file' });
   }
   const metamodelAction = actions.find((action) => action.id === 'metamodel');
   if (metamodelAction) {

@@ -23,7 +23,7 @@ import { VIEWS } from './views.js';
  * @property {boolean} [danger]
  * @property {string} icon      the sprite symbol a menu draws it under
  * @property {string} [hint]    the right-aligned key hint a menu shows
- * @property {() => string} [describe]  a tooltip naming what it would act on
+ * @property {() => string} [describe]  the words for its tooltip and its menu entry, naming what it would act on
  * @property {() => boolean} enabled
  * @property {(invocation: { anchor?: HTMLElement, at?: { x: number, y: number } }) => void} run
  */
@@ -78,7 +78,7 @@ export function createActions({ store, flows }) {
     {
       id: 'save',
       icon: 'i-save',
-      label: 'Save to file',
+      label: 'Save to file…',
       hint: SAVE_HINT,
       group: 'project',
       toolbar: false,
@@ -181,7 +181,7 @@ export function createActions({ store, flows }) {
     {
       id: 'new-related',
       icon: 'i-new-related',
-      label: 'New related…',
+      label: 'New related',
       group: 'create',
       toolbar: true,
       context: true,
@@ -193,7 +193,7 @@ export function createActions({ store, flows }) {
     {
       id: 'new-folder',
       icon: 'i-new-folder',
-      label: 'New folder',
+      label: 'New folder…',
       group: 'create',
       toolbar: true,
       context: true,
@@ -203,7 +203,7 @@ export function createActions({ store, flows }) {
     {
       id: 'import',
       icon: 'i-import',
-      label: 'Import from library…',
+      label: 'Import from library',
       group: 'create',
       toolbar: true,
       context: false,
@@ -213,7 +213,7 @@ export function createActions({ store, flows }) {
     {
       id: 'relate',
       icon: 'i-add-relationship',
-      label: 'Relate…',
+      label: 'Add relationship',
       group: 'create',
       toolbar: false,
       context: true,
@@ -257,7 +257,7 @@ export function createActions({ store, flows }) {
     {
       id: 'delete',
       icon: 'i-delete',
-      label: 'Delete',
+      label: 'Delete entity',
       group: 'delete',
       toolbar: true,
       context: true,

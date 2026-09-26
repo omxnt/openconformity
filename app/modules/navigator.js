@@ -237,7 +237,7 @@ export function createNavigator({
       items: actions
         .filter((action) => action.context)
         .map((action) => ({
-          label: action.label,
+          label: action.describe ? action.describe() : action.label,
           icon: action.icon,
           hint: action.hint,
           danger: action.danger,
