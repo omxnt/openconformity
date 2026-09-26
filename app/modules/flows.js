@@ -841,9 +841,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   /**
    * Load the bundled example project. It rides with the software as a
    * file-shaped object and goes through the same gates as a file the
-   * user picked, so the example cannot drift from the format: a schema
-   * it no longer passes fails here, and fails the test that pins it,
-   * before it misleads anyone.
+   * user picked.
    */
   /**
    * Import from a library: the picker over the editor pane, opened once
@@ -913,8 +911,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /**
    * The metamodel diagram, exported for each theme and carried with the
-   * software, so it opens without a network and in the colours the user
-   * is already in.
+   * software, opened in the theme the page is in.
    */
   function openMetamodel() {
     const dark = document.documentElement.dataset.theme === 'g100';

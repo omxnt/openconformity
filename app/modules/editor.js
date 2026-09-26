@@ -40,8 +40,7 @@ export function draftChanged(definitions, attributes, values) {
 
 /**
  * The project's field set: the name, mapped to the model's own name
- * rather than the attribute bag, and nothing else until
- * `notes/attributes.md` gains its Project section.
+ * rather than the attribute bag.
  */
 const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text', help: "The project's name, which the saved file is named after." }];
 /** How many of the project's own attributes stand before its name on the first tab: the designation and the organisation. */
@@ -125,8 +124,8 @@ export function firstTabName(code) {
 
 /**
  * The values a set holds, as the definition lists them: what is stored
- * is read, trimmed, and kept only where the definition offers it, so a
- * set always joins back in the one canonical order.
+ * is read, trimmed, and kept only where the definition offers it, in
+ * the definition's order.
  * @param {{ values?: string[] }} definition
  * @param {string|undefined} value
  * @returns {string[]}
@@ -213,9 +212,8 @@ export function linkable(value) {
 }
 
 /**
- * The ways into a project, offered from the editor's no-project state —
- * the one place the buttons live. A test pins this table to the action
- * list, so the two cannot drift.
+ * The ways into a project, offered from the editor's no-project state,
+ * the one place the buttons live.
  */
 export const LANDING_OFFER = [
   { id: 'new-project', icon: 'i-new-project', label: 'New project' },
@@ -698,8 +696,8 @@ export function createEditor({
 
   /**
    * A slot's holder: the cell shown while no variant of the slot holds,
-   * saying that nothing is chosen for the attribute they wait on — as a
-   * disabled field in an edit — so the form keeps its shape.
+   * saying that nothing is chosen for the attribute they wait on, as a
+   * disabled field in an edit.
    */
   function slotHolder(code, variants, values, editing) {
     const [first] = variants;
@@ -722,10 +720,9 @@ export function createEditor({
    * A group's cells into a grid: a rating as its cell; otherwise a legend
    * where the group is named within its tab and holds more than one
    * attribute, its own cells, and its sub-groups in their order — after
-   * the last of its attributes any of them waits on, so what a choice
-   * governs stands under the choice, or after all its attributes when
-   * none does. A group waiting on a condition is wrapped, so it can be
-   * shown or hidden as one; sub-groups sharing a name and a condition's
+   * the last of its attributes any of them waits on, or after all its
+   * attributes when none does. A group waiting on a condition is wrapped
+   * and shown or hidden as one; sub-groups sharing a name and a condition's
    * attribute are one slot, given its holder after the last of them
    * unless one of them waits on nothing chosen and so stands in for it.
    */
@@ -880,7 +877,7 @@ export function createEditor({
     return button;
   }
 
-  /** An icon-only head action, neutral, its label as its tooltip hanging from its end since the actions stand at the right. */
+  /** An icon-only head action, neutral, its label as its tooltip hanging from its end. */
   function headIconButton(label, iconId, onPick) {
     const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
     button.addEventListener('click', onPick);
@@ -1017,8 +1014,7 @@ export function createEditor({
    * where there is none, no field around either. In an edit the drawing
    * is kept in a hidden control carrying the key, Carbon's ghost
    * buttons opening the external editor to create or edit it and, in
-   * the danger colour, deleting it, so the draft reads the drawing as
-   * it reads a set. A drawing that fails the check shows why instead of a
+   * the danger colour, deleting it. A drawing that fails the check shows why instead of a
    * picture, and stays as it is.
    * @param {string|undefined} value
    * @param {boolean} editing
@@ -1086,7 +1082,7 @@ export function createEditor({
    * names, a button at each row's end removing it and one beneath adding
    * a row, focused on its first cell. The rows are kept as the table is
    * stored in one hidden control carrying the key, updated as any cell
-   * changes, so the draft reads the table as it reads a set.
+   * changes.
    */
   function tableControl(definition, value) {
     const rows = tableRows(definition, value);

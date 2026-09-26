@@ -2,16 +2,14 @@
  * Undo and redo: a list of model snapshots with a cursor. The entry at the
  * cursor is what is on screen; undo steps the cursor back, redo steps it
  * forward, and a change recorded after an undo drops everything ahead of
- * the cursor, so the two walk a line rather than a tree.
+ * the cursor.
  *
  * A snapshot holds the model's content — its name, nodes, and
- * relationships — copied object by object with its strings reused, and never the counters: undo and
- * redo roll back content, not the next number to issue, so an undone
- * creation leaves a hole in the numbering rather than a number that
- * returns on a different entity.
+ * relationships — copied object by object with its strings reused, and
+ * never the counters: undo and redo roll back content, not the next
+ * number to issue.
  *
- * Each entry carries a sequence number that is never reused, so a pointer
- * held at an entry stays valid under truncation and depth eviction.
+ * Each entry carries a sequence number that is never reused.
  */
 
 /** How many steps back the arrows reach. */
@@ -43,9 +41,7 @@ function contentOf(model) {
 
 /**
  * A copy of content that shares no object with the original but reuses
- * every string as it is: a string cannot change, so a snapshot need not
- * copy an attribute's text, and fifty snapshots of a project full of
- * drawings hold each drawing once.
+ * every string as it is.
  * @param {Content} content
  * @returns {Content}
  */

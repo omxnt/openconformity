@@ -9,8 +9,7 @@
  * An import is one way. Nothing is recognised as already in the project,
  * and picking the same act twice gives two. The picked entities travel
  * with their filing among themselves and the relationships among them.
- * A relationship to anything not picked stays behind, since its other
- * end is not there. The picks are a tree's: checking a row checks it
+ * A relationship to anything not picked stays behind. The picks are a tree's: checking a row checks it
  * and everything beneath it, unchecking one beneath leaves the row
  * partly checked, and only what is checked travels, a partly checked
  * heading saying what is beneath it and nothing more. Alt and click,
@@ -53,7 +52,7 @@ function nodeMatches(node, filter) {
  * A catalogue's tree as the rows it shows: depth first in filing order,
  * a node's children only where it is expanded. Under a filter every
  * node that matches with everything beneath it, and every node above a
- * match, all expanded, so the tree keeps its shape around what matches.
+ * match, all expanded.
  * @param {import('./model.js').Model} library
  * @param {string} [filter]
  * @param {Set<string>} [expanded]
@@ -96,7 +95,7 @@ function entitiesUnder(library, id) {
 
 /**
  * How a row's checkbox stands for a set of picks. For an entity,
- * checked when it is picked, so the check says it travels, mixed when
+ * checked when it is picked, mixed when
  * it is not but something beneath it is, none otherwise. For a folder,
  * checked when everything in it is picked, mixed when some of it is.
  * @param {import('./model.js').Model} library

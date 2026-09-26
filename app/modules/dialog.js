@@ -1,6 +1,5 @@
 /**
- * Promise-based dialogs over the overlay, so a guard reads as one awaited
- * if. A dialog resolves with the value of the chosen action, or with null
+ * Promise-based dialogs over the overlay. A dialog resolves with the value of the chosen action, or with null
  * when it is dismissed — Escape, or a pointer down on the backdrop. Focus
  * stays inside the dialog and returns to the opener when it closes.
  *

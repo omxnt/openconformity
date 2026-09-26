@@ -211,7 +211,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   });
 
   // Everything that changes the model, separated as the action groups
-  // separate, so the menu and the toolbar cannot drift.
+  // separate.
   const modelGroups = ['edit', 'create', 'arrange', 'delete', 'history'];
   menubarMenu(editButton, 'Edit', () => {
     const items = [];

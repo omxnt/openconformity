@@ -155,8 +155,7 @@ export function openGroups(groups, opened = new Set(), filtered = false) {
  * is open, then, where the group holds more, the strip that opens or
  * closes it. Every box stands one ROW_GAP below the last, whatever
  * group it is in, and a strip lives inside the gap beneath its group's
- * last box, so the boxes keep an even step and their edges an even fan
- * however the groups fold. A box row carries where its edge attaches, a
+ * last box. A box row carries where its edge attaches, a
  * strip row where its block began.
  * @param {ReturnType<typeof openGroups>} groups
  * @returns {{ rows: Array<{ kind: 'box'|'strip', group: Object, entry?: Object, y: number, height: number, mid?: number, top?: number }>, height: number }}
@@ -187,8 +186,7 @@ const ATTACH_PAD = 10;
 
 /**
  * Where a row's edge attaches along the subject: the row's middle mapped
- * from its side's span onto the subject's, so a side fans the same way
- * whatever its rows' heights, and no two of its edges cross.
+ * from its side's span onto the subject's.
  * @param {number} mid  the row's middle, from the side's top
  * @param {number} span  the side's height
  * @param {number} height  the subject's
@@ -217,10 +215,8 @@ export function doglegPoints(x1, y1, bendA, bendB, x2, y2) {
 }
 
 /**
- * The subject box grows modestly with its busiest side, so the
- * attachment points keep room, and stops growing at MAX_PER_SIDE: past
- * that the attachments fan within it, the subject being one thing
- * whatever its neighbours count.
+ * The subject box grows modestly with its busiest side and stops
+ * growing at MAX_PER_SIDE, past which the attachments fan within it.
  * @param {number} busiest  the larger side's edge count
  * @returns {number}
  */
@@ -382,8 +378,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
 
   /**
    * The control that takes a box off the canvas by removing the
-   * relationship that put it there: an unlink, never a bin, so it cannot
-   * read as deleting the entity.
+   * relationship that put it there, drawn as an unlink and not a bin.
    * @param {import('./model.js').Relationship} relationship
    * @param {import('./model.js').Entity} other
    */
@@ -422,8 +417,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
    * One orthogonal edge, drawn source to target: out of the box, down or
    * up the channel, into the far box. The label rides the neighbour-side
    * horizontal, upright; a composition carries the filled diamond at the
-   * owner's end — the drawn start, since the source owns — and every
-   * other form the plain arrowhead.
+   * owner's end, the drawn start, and every other form the plain
+   * arrowhead.
    * @param {{ x1: number, y1: number, channel: number, x2: number, y2: number,
    *           label: string, composition: boolean, labelSide: 'start'|'end',
    *           pending?: boolean, unpickId?: string|null }} spec
@@ -497,9 +492,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     const rightSide = sideRows(openGroups(groupedSide(merged.outgoing, 'outgoing'), opened, filtered));
     const boxes = (side) => side.rows.filter((row) => row.kind === 'box').length;
     const subjectH = subjectHeight(Math.max(boxes(leftSide), boxes(rightSide)));
-    // Each side is centred by its boxes alone, so a lone box faces the
-    // subject dead level whether or not a strip hangs beneath it, and
-    // its edges spread over that same span, symmetric about the middle.
+    // Each side is centred by its boxes alone, a strip beneath them not
+    // counted, and its edges spread over that same span.
     const leftSpan = boxSpan(leftSide);
     const rightSpan = boxSpan(rightSide);
     const columnH = Math.max(leftSpan, rightSpan, subjectH);

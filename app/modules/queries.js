@@ -70,9 +70,7 @@ export function formLabel(form) {
  * The types a new related entity could take, with every relationship the
  * metamodel admits between the subject and a new entity of that type. A
  * composition whose new entity would be a second owner of the subject is
- * left out; nothing else narrows, because a new entity has no
- * relationships to collide with. In metamodel order, so a menu groups by
- * pillar.
+ * left out; nothing else narrows. In metamodel order.
  * @param {import('./model.js').Model} model
  * @param {string} subjectId
  * @returns {Array<{ code: string, forms: Array<{ typeId: string, direction: 'outgoing'|'incoming' }> }>}

@@ -2,8 +2,7 @@
  * Gate 1 of opening a file: a hand-transcription of the project file
  * schema, kept per schema version, judging a parsed file against the
  * version it records. The V1_* tables are the frozen schema-version-1
- * contract: deliberate copies, never deduplicated against metamodel.js,
- * so a later metamodel cannot change how a version-1 file is judged.
+ * contract: deliberate copies, never deduplicated against metamodel.js.
  *
  * The checks cover the schema's keywords first, and on a structurally
  * sound file the prose constraints its description states: unique

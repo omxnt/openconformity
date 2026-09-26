@@ -139,14 +139,12 @@ export function tooltipTag(className, content, { caption, main = '', note = '' }
 
 /**
  * Carbon's tooltip on an icon-only button: its label, shown under it on
- * hover or focus and dismissed with Escape, which is the primary use
- * Carbon gives a tooltip. The label is also the button's accessible
- * name, the tooltip itself hidden from assistive technology so nothing
- * is read twice, and the browser's own title is never set. Calling it
+ * hover or focus and dismissed with Escape. The label is also the
+ * button's accessible name, the tooltip itself hidden from assistive
+ * technology, and the browser's own title is never set. Calling it
  * again changes the text, for a label that follows the state. The
  * tooltip hangs from the edge asked for, and flips to the other edge
- * when it would run past the box that clips it, as Carbon auto-aligns
- * a tooltip, so a button at the end of its row is never cut off.
+ * when it would run past the box that clips it.
  * @param {HTMLElement} button
  * @param {string} text  the tooltip
  * @param {Object} [options]

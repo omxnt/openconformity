@@ -1,14 +1,10 @@
 /**
  * The browser's retention of the open project between sessions: one
- * small asynchronous interface over IndexedDB, whose quota is a share of
- * the disk rather than the few megabytes web storage allows, so a
- * project with many drawings keeps being kept. Two records live in one
+ * small asynchronous interface over IndexedDB. Two records live in one
  * object store, the project blob and the set-aside copy of one that
  * failed to load. The interface also reports how full the origin's
- * storage is. It never asks the browser to mark the storage persistent:
- * the prompt that raises in some browsers buys little, since the file
- * is the record and the store says when storage runs short. An
- * in-memory twin serves the tests, and any browser without IndexedDB,
+ * storage is. It never asks the browser to mark the storage persistent.
+ * An in-memory twin serves the tests, and any browser without IndexedDB,
  * where every write is refused and the store says so.
  */
 

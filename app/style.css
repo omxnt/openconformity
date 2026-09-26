@@ -49,7 +49,7 @@
   --hover:  #E8E8E8;  /* $background-hover, $layer-hover-01, $field-hover-01 */
   --active: #C6C6C6;  /* $background-active, $layer-active-01, gray-30 */
 
-  /* Pillar colour on entity type icons (D-043). Never the interactive blue. */
+  /* Pillar colour on entity type icons. Never the interactive blue. */
   --pillar-system:       #9F1853;  /* magenta-70 */
   --pillar-legislative:  #8A3FFC;  /* purple-60 */
   --pillar-risk:         #8E6A00;  /* yellow-60 */
@@ -104,7 +104,7 @@
   --hover:  #353535;  /* g100 $background-hover, $layer-hover-01 */
   --active: #525252;  /* g100 $background-active, $layer-active-01, gray-70 */
 
-  /* Pillar colour, taken lighter on a dark ground (D-043). */
+  /* Pillar colour, taken lighter on a dark ground. */
   --pillar-system:       #EE5396;  /* g100 magenta-50 */
   --pillar-legislative:  #A56EFF;  /* g100 purple-50 */
   --pillar-risk:         #F1C21B;  /* g100 yellow-30, $support-warning */

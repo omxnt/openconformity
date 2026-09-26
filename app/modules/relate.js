@@ -4,8 +4,8 @@
  * relationship each pick means is inferred from the pair — silently
  * when the pair admits exactly one, through an inline choice when it
  * admits more. The mode — the pinned subject and the picks — is store
- * state; everything here is re-derived from the model on every render,
- * so the workflow survives commits and renders alike. The relationship
+ * state; everything here is re-derived from the model on every render.
+ * The relationship
  * pane renders it: the picks land in the table as provisional rows.
  */
 

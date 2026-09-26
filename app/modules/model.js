@@ -78,8 +78,7 @@ export function childrenOf(model, parentId) {
 
 /**
  * Whether a node is another node or filed anywhere beneath it. The walk
- * upwards is guarded, so a cycle that reached the model some other way
- * cannot hang it.
+ * upwards is guarded against a cycle.
  * @param {Model} model
  * @param {string} id
  * @param {string} containerId
@@ -199,8 +198,7 @@ export function addFolder(model, name, options = {}) {
 
 /**
  * Write a set of attribute values at once, which is what the editor
- * commits when the user saves. An empty value removes its key, so an
- * entity carries only what is set.
+ * commits when the user saves. An empty value removes its key.
  * @param {Model} model
  * @param {string} id
  * @param {Object<string, string>} values
@@ -589,7 +587,7 @@ export function renameProject(model, name) {
 
 /**
  * Set one of the project's own attribute values, like an entity's: an
- * empty value removes the key, so the project carries only what is set.
+ * empty value removes the key.
  * @param {Model} model
  * @param {string} key
  * @param {string} value

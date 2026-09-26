@@ -1,8 +1,7 @@
-// The theme is set before the stylesheet loads, so the first paint is
-// already in the right one: the stored choice, else the system
-// preference. The key and the values are the store's (modules/store.js).
-// A file rather than an inline script, so the page's content security
-// policy can allow the software's own scripts and nothing else.
+// The theme is set before the stylesheet loads: the stored choice, else
+// the system preference. The key and the values are the store's
+// (modules/store.js). A file rather than an inline script, under the
+// page's content security policy.
 document.documentElement.dataset.theme = (function chooseTheme() {
   try {
     var stored = localStorage.getItem('openconformity.theme');

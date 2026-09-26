@@ -17,8 +17,7 @@
  * The toolbar draws from the one action list, and the tree asks the model
  * the same questions a drop answers: the middle of a row files into it
  * when `canFile` allows, its edges place beside it when `canPlaceBeside`
- * allows. Selection goes through the flows, so a selection change never
- * bypasses the draft guard.
+ * allows. Selection goes through the flows.
  *
  * While the store holds a picker, the candidate rows of any admissible
  * form are picked from here: clicking one toggles the pick and moves the
@@ -508,7 +507,7 @@ export function createNavigator({
   }
 
   // The landing keeps one quiet line; the ways in live in the editor's
-  // empty state, so the buttons exist in one place.
+  // empty state.
   function renderLanding() {
     container.appendChild(
       el('div', { className: 'empty-state' }, [el('p', { className: 'empty-state-title', text: 'No project' })])

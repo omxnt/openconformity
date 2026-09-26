@@ -53,11 +53,10 @@ export const GRAPH_LEVELS = [
 ];
 
 /**
- * 6.3.2, Figure 3 as a tree, grown from the table above so the two
- * cannot drift apart and merged as the report merges it: a branch joins
- * the one before it where the two reach the same indices whatever is
- * chosen below them, F1 with F2 and O1 with O2 under S1, so the tree
- * draws no distinction the report does not make. Each branch carries
+ * 6.3.2, Figure 3 as a tree, grown from the table above and merged as
+ * the report merges it: a branch joins the one before it where the two
+ * reach the same indices whatever is chosen below them, F1 with F2 and
+ * O1 with O2 under S1. Each branch carries
  * the codes it takes and each leaf the index it reaches.
  */
 const sketch = (node) => (node.children ? `(${node.children.map(sketch).join(' ')})` : String(node.index));

@@ -257,7 +257,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return input;
   }
 
-  /** A neutral icon-only head action with its label as its tooltip, hanging from its end since the actions stand at the right. */
+  /** A neutral icon-only head action with its label as its tooltip, hanging from its end. */
   function headIcon(label, iconId, onPick) {
     const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
     button.addEventListener('click', onPick);
@@ -471,7 +471,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return header;
   }
 
-  /** The shared column skeleton, so the two tables can never misalign: the source, the relationship, the target taking what is left, and the action. */
+  /** The column skeleton both tables share: the source, the relationship, the target taking what is left, and the action. */
   const LIST_COLUMNS = ['30%', '24%', 'auto', '48px'];
   function columns() {
     return columnGroup('relationships', LIST_COLUMNS);
@@ -604,8 +604,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    * One finding as a row: the entity, the entries out of step as tags
    * with the tooltips the entity's own carry, and the message the
    * entity shows beneath its record. Selecting it opens the entity on
-   * the tab the record stands on, and the messages stay over the pane,
-   * so the list is worked through in place.
+   * the tab the record stands on, and the messages stay over the pane.
    * @param {import('./records.js').Finding} finding
    */
   function messageRow(finding) {

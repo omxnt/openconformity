@@ -448,8 +448,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
 
     /**
      * Clear everything this browser holds of the software: the project
-     * and its set-aside copy, the theme, and the session state, so a
-     * borrowed machine keeps nothing. The session returns to the landing
+     * and its set-aside copy, the theme, and the session state. The
+     * session returns to the landing
      * with no project, as a fresh one begins. A file saved by the user
      * is not the browser's to clear.
      */
@@ -534,8 +534,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     },
 
     /**
-     * Step back and drop what was stepped off, so a collapsed change
-     * leaves no residue: no entry, no redo. False at the bottom.
+     * Step back and drop what was stepped off: no entry, no redo. False
+     * at the bottom.
      * @returns {boolean}
      */
     rollback() {

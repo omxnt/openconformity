@@ -36,12 +36,9 @@ export const EDITOR_URL = `${EDITOR_ORIGIN}/?embed=1&proto=json&spin=1&libraries
  * as soon as it holds more, so a page slipped in by pasted XML can be
  * removed before Apply, which refuses more than one; its own controls
  * for adding pages stay hidden. The rule names the editor's own class
- * names, which are not a documented interface, and is written so that a
- * renamed class shows the bar rather than hides it. A picture placed in
- * the diagram becomes data twice over, once in the model and once in
- * the SVG, each a third larger than the file, so the editor is told to
- * take none above an eighth of the drawing size limit, refusing it on
- * insertion rather than the whole diagram on Apply.
+ * names, which are not a documented interface, and a renamed class
+ * shows the bar rather than hides it. The editor takes no picture above
+ * an eighth of the drawing size limit, refusing it on insertion.
  */
 export const EDITOR_CONFIG = {
   maxImageBytes: 128 * 1024,
@@ -53,12 +50,9 @@ export const EDITOR_CONFIG = {
 };
 
 /**
- * What the frame may do: run scripts, since the editor is one, and keep
- * its own origin, since the editor fetches its stencils from there and
- * an opaque origin would refuse them and give its messages no origin to
- * check. Nothing else: no navigation of the page, no popups, no forms,
- * no downloads, no modals. The pairing is safe only because the editor
- * is on another origin.
+ * What the frame may do: run scripts and keep its own origin. Nothing
+ * else: no navigation of the page, no popups, no forms, no downloads,
+ * no modals.
  */
 export const FRAME_SANDBOX = 'allow-scripts allow-same-origin';
 

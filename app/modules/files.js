@@ -8,9 +8,9 @@
  * integers per parent; array order carries no meaning.
  *
  * On opening, the format and the recorded version are read first, then the
- * checks run in order: a newer version refuses as newer (F-PER-005), an
- * invalid file refuses as invalid (F-PER-006), an older version migrates
- * through the chain (F-PER-004). The rebuilt model then replays through
+ * checks run in order: a newer version refuses as newer, an invalid file
+ * refuses as invalid, an older version migrates through the chain. The
+ * rebuilt model then replays through
  * the model module against the current metamodel, a net behind the
  * validator. The loader carries attribute content verbatim: no seeding,
  * and no default titles. A file is parsed as data, never evaluated as

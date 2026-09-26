@@ -2,12 +2,7 @@
  * Drawings: an SVG held as text in an attribute, checked before it is
  * accepted and before it is shown, and shown only as an image. The check
  * is the software's own reading of the text through a small strict XML
- * parser, so that what a drawing holds is known before any browser
- * parses it, and so the same rule runs in the tests as in the page. What
- * keeps a drawing harmless is the image, which the browser grants no
- * script, no document and no network; the check keeps the stored
- * drawing clean, and refuses rather than repairs, so what is stored is
- * exactly what its author made.
+ * parser. It refuses rather than repairs.
  */
 
 /** The most characters a drawing may hold. */

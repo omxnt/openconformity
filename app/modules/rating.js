@@ -203,15 +203,13 @@ function matrixFigure(parameters, state) {
 /**
  * A graph drawn for all but its last parameter, and that one as columns:
  * each branch a line with its codes above it as tags, side by side on a
- * merged branch, the one chosen filled, a parent running straight into its middle
- * child, so a junction reads as one line branching; each branch's row
+ * merged branch, the one chosen filled, a parent running straight into
+ * its middle child; each branch's row
  * ending in a cell per class of the last parameter, holding the index
  * that branch and that class reach, with the dot of its band, one cell
- * across the classes a merged leaf takes, so no line ever crosses
- * another and no cell draws a distinction the graph does not make; the
- * path the classes chosen trace in the interactive colour, to the cell
- * it reaches. The figure is drawn at its own size, the lines on pixel
- * centres, so nothing is scaled.
+ * across the classes a merged leaf takes; the path the classes chosen
+ * trace in the interactive colour, to the cell it reaches. The figure
+ * is drawn at its own size, the lines on pixel centres.
  * @param {{ name: string, tree: Object, headings: string[], leafOutcome: (leaf: Object) => string, leafTone: (leaf: Object) => string }} spec
  */
 function graphFigure(spec, parameters, state) {
