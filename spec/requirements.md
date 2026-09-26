@@ -504,6 +504,16 @@ The software shall permit the creation of folders at any position in the navigat
 
 > *Folders are filing, not model content. They hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model. Deleting a folder removes filing, never the entities filed in it.*
 
+---
+
+#### F-WSP-007 Folder deletion
+
+`event driven` `draft`
+
+When a folder is deleted, the software shall delete every folder and entity filed in it, at any depth.
+
+> *A folder holds what the user filed in it and nothing lands there otherwise, so deleting the folder is deleting its content. Each entity in it is deleted as any entity is, its relationships severed and what it owns through composition taken with it wherever that is filed, and the confirmation lists all of it first. Between entities, filing carries no ownership, and what is merely filed beneath a deleted entity moves up a level.*
+
 ### 4.4 Model
 
 ---

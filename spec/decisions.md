@@ -311,7 +311,7 @@ Entity type icons carry a colour by pillar, from Carbon's palette, with one valu
 
 ### D-044 Freeform navigator
 
-`2026-08-11` `product`
+`2026-08-11` `product` `superseded by D-087`
 
 The navigator is independent of the metamodel. Entities and folders are placed anywhere in the tree, and placement carries no meaning: it neither creates nor requires a relationship. The metamodel continues to govern which entities exist and how they may relate.
 
@@ -704,6 +704,18 @@ Every tooltip in the interface is Carbon's, shown on hover and on keyboard focus
 A library is a project file used as a source of items to import, valid against the project schema, and there is no library schema. A built-in library is content the software ships as a data module beside the example project, legislation with its text verbatim and what the maintainer or the community write themselves, never a standard's content, loaded with the software and fetched from nowhere. A user's library is a project-shaped file they build in the tool and keep, opened through the library function, which is the Annex ZA function: standards and their requirements with the lines that cover the essential requirements. Reuse of anything else is a project file opened and continued from, as a template is.
 
 > *One shape means one schema, one loader, one validator and one migration, and a library built in the tool as a project is built. The placeholder library schema had never gained a property and is deleted, its requirement reworded. A built-in library loads with the software because the requirements ask for everything to load on the initial load, so the Regulation can be imported on a train in a tunnel; the drawing editor earns its fetch by being another application, and templates keep theirs as optional starting points. What the user's library is for is narrowed to the one use with a shape of its own, the Annex ZA mapping between a standard's clauses and the essential requirements, so that no agnostic import and no second editor is built for a case nobody has asked for. Settles the file question of U-005.*
+
+---
+
+### D-087 Freeform navigator, a folder deleting what it holds
+
+`2026-09-26` `product`
+
+The navigator is independent of the metamodel. Entities and folders are placed anywhere in the tree, and placement carries no meaning between entities. It neither creates nor requires a relationship, and what is merely filed beneath a deleted entity moves up a level. A folder holds what is filed in it, and deleting the folder deletes that, folders and entities at any depth, each entity as any deletion goes, with what it owns through composition wherever filed and its relationships severed. The metamodel continues to govern which entities exist and how they may relate.
+
+> *The tree is filing rather than structure between entities, since New related files the new entity beneath its subject for convenience and a measure filed beneath one scenario may protect against others. Filing owning would be a second, invisible ownership beside composition, and the two would disagree. A folder is different. Nothing lands in one unless the user files it there, it means nothing but holding, and every file manager has taught that deleting the folder deletes its content. The confirmation lists all of it first, and undo brings it back. Replaces D-044, whose other points stand.*
+
+---
 
 ## 3. Undecided
 
