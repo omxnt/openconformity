@@ -32,6 +32,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { entityLabel, excluded } from './queries.js';
 import { el, icon, tooltipOn } from './dom.js';
 import { openMenu } from './menu.js';
+import { emptyState } from './pane.js';
 
 /**
  * @typedef {Object} TreeRow
@@ -509,9 +510,7 @@ export function createNavigator({
   // The landing keeps one quiet line; the ways in live in the editor's
   // empty state.
   function renderLanding() {
-    container.appendChild(
-      el('div', { className: 'empty-state' }, [el('p', { className: 'empty-state-title', text: 'No project' })])
-    );
+    container.appendChild(emptyState('No project'));
   }
 
   function render() {

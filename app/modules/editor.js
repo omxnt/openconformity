@@ -16,11 +16,12 @@ import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
-import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
+import { el, icon, tabKeys, tooltipTag } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
 import { staleText, recordOf, recordedStates, recordWritten, reviewText } from './records.js';
 import { checkDrawing, dataUrl, sizeText } from './drawing.js';
 import { editDrawing } from './drawing-editor.js';
+import { headIcon, emptyState, notice } from './pane.js';
 
 /**
  * The project's field set: the name, mapped to the model's own name
@@ -178,13 +179,6 @@ export function createEditor({
    * @param {string} title
    * @param {string} text
    */
-  function emptyState(title, text) {
-    return el('div', { className: 'empty-state' }, [
-      el('p', { className: 'empty-state-title', text: title }),
-      el('p', { className: 'empty-state-body', text }),
-    ]);
-  }
-
   /**
    * One attribute as a cell: its name over its value — or, in an edit,
    * over its field — two cells to a row, a multiline one taking the row
@@ -390,13 +384,7 @@ export function createEditor({
           onReview(current.id, definition);
         }
       });
-      grid.prepend(
-        el('div', { className: 'notice notice-warning', attributes: { role: 'status' } }, [
-          icon('i-warning'),
-          el('div', { className: 'notice-body' }, [el('span', { className: 'notice-title', text: words.title }), el('span', { className: 'notice-text', text: words.text })]),
-          el('div', { className: 'notice-actions' }, [review]),
-        ])
-      );
+      grid.prepend(notice('warning', words.title, words.text, { actions: [review], role: 'status' }));
     }
   }
 
@@ -682,13 +670,6 @@ export function createEditor({
     return button;
   }
 
-  /** An icon-only head action, neutral, its label as its tooltip hanging from its end. */
-  function headIconButton(label, iconId, onPick) {
-    const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
-    button.addEventListener('click', onPick);
-    return tooltipOn(button, label, { align: 'end' });
-  }
-
   /**
    * Save and Cancel in the head, exactly as the relationship pane's Done
    * and Cancel sit in its head: primary and ghost at the head's 32px.
@@ -957,7 +938,7 @@ export function createEditor({
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [headIconButton('Edit attributes', 'i-edit', beginEdit)]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [headIcon('Edit attributes', 'i-edit', beginEdit)]));
     mount(null, 'PROJECT', projectValues(), false);
   }
 
@@ -976,7 +957,7 @@ export function createEditor({
   function renderView(node) {
     current = node;
     const back = store.viewReturn();
-    const actions = [headIconButton('Edit attributes', 'i-edit', beginEdit)];
+    const actions = [headIcon('Edit attributes', 'i-edit', beginEdit)];
     if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));
     renderHead(node, actions);
     mount(node.id, node.type, node.attributes, false);
@@ -1040,7 +1021,7 @@ export function createEditor({
       return;
     }
     if (node.kind === 'folder') {
-      renderHead(node, [headIconButton('Rename folder', 'i-edit', onRename)]);
+      renderHead(node, [headIcon('Rename folder', 'i-edit', onRename)]);
       body.appendChild(
         emptyState('Folder', 'A folder groups entities in the navigator and has no attributes.')
       );

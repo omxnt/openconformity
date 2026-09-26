@@ -8,7 +8,8 @@
 import { openMenu } from './menu.js';
 import { PHASE } from './version.js';
 import { findings, messagesText, sizeText } from './records.js';
-import { tooltipOn } from './dom.js';
+import { el, tooltipOn } from './dom.js';
+import { notice as paneNotice } from './pane.js';
 import { splitter } from './splitter.js';
 
 /**
@@ -303,58 +304,12 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
    * @param {Action[]} [buttons]  actions offered on the notice, as ghost buttons after the text
    */
   function notice(kind, title, text, onDismiss, buttons = []) {
-    const element = document.createElement('div');
-    element.className = kind === 'warning' ? 'notice notice-warning' : 'notice';
-
-    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    icon.setAttribute('class', 'icon');
-    icon.setAttribute('aria-hidden', 'true');
-    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-    use.setAttribute('href', kind === 'warning' ? '#i-warning' : '#i-information');
-    icon.appendChild(use);
-    element.appendChild(icon);
-
-    const body = document.createElement('div');
-    body.className = 'notice-body';
-    const heading = document.createElement('span');
-    heading.className = 'notice-title';
-    heading.textContent = title;
-    const detail = document.createElement('span');
-    detail.className = 'notice-text';
-    detail.textContent = text;
-    body.append(heading, detail);
-    element.appendChild(body);
-
-    if (buttons.length > 0) {
-      const row = document.createElement('div');
-      row.className = 'notice-actions';
-      for (const action of buttons) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = action.danger ? 'ghost-button ghost-danger' : 'ghost-button';
-        button.textContent = action.label;
-        button.addEventListener('click', () => action.run({}));
-        row.appendChild(button);
-      }
-      element.appendChild(row);
-    }
-
-    if (onDismiss) {
-      const dismiss = document.createElement('button');
-      dismiss.type = 'button';
-      dismiss.className = 'notice-dismiss';
-      dismiss.setAttribute('aria-label', 'Dismiss');
-      const cross = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      cross.setAttribute('class', 'icon');
-      cross.setAttribute('aria-hidden', 'true');
-      const glyph = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-      glyph.setAttribute('href', '#i-close');
-      cross.appendChild(glyph);
-      dismiss.appendChild(cross);
-      dismiss.addEventListener('click', onDismiss);
-      element.appendChild(dismiss);
-    }
-    return element;
+    const actions = buttons.map((action) => {
+      const button = el('button', { className: action.danger ? 'ghost-button ghost-danger' : 'ghost-button', text: action.label, attributes: { type: 'button' } });
+      button.addEventListener('click', () => action.run({}));
+      return button;
+    });
+    return paneNotice(kind, title, text, { actions, onDismiss });
   }
 
   function renderNotices() {

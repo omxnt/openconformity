@@ -18,14 +18,14 @@
  */
 
 import { nodeOf, relationshipsOf } from './model.js';
-import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
+import { RELATIONSHIP_TYPES } from './metamodel.js';
 import { pickerCandidates, pickedRows } from './relate.js';
 import { formLabel, entityLabel, entityMatches } from './queries.js';
-import { TYPE_ICONS } from './icons.js';
 import { el, icon, tabKeys, tooltipTag, tooltipOn } from './dom.js';
 import { columnGroup, columnHandles } from './columns.js';
 import { statusIcon } from './rating.js';
 import { findings, staleText, tabNameOf } from './records.js';
+import { headIcon, headSearch, emptyState, entityParts } from './pane.js';
 
 /**
  * The rows the list draws: per direction, the relationships grouped by
@@ -224,44 +224,25 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    */
   function searchControl() {
     const filterLabel = store.messagesOpen() ? 'Filter the messages' : 'Filter the relationships';
-    if (!searchOpen) {
-      return headIcon(filterLabel, 'i-search', () => {
+    return headSearch({
+      open: searchOpen,
+      label: filterLabel,
+      value: tableFilter,
+      onOpen: () => {
         searchOpen = true;
         render();
         head.querySelector('.head-search')?.focus();
-      });
-    }
-    const input = el('input', {
-      className: 'field-input head-search',
-      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': filterLabel },
+      },
+      onChange: (value) => {
+        tableFilter = value;
+        renderBody();
+      },
+      onClose: () => {
+        searchOpen = false;
+        tableFilter = '';
+        render();
+      },
     });
-    input.value = tableFilter;
-    input.addEventListener('input', () => {
-      tableFilter = input.value;
-      renderBody();
-    });
-    input.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      searchOpen = false;
-      tableFilter = '';
-      render();
-    });
-    input.addEventListener('blur', () => {
-      if (input.value.trim() !== '') return;
-      searchOpen = false;
-      tableFilter = '';
-      render();
-    });
-    return input;
-  }
-
-  /** A neutral icon-only head action with its label as its tooltip, hanging from its end. */
-  function headIcon(label, iconId, onPick) {
-    const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
-    button.addEventListener('click', onPick);
-    return tooltipOn(button, label, { align: 'end' });
   }
 
   /** The chevron that collapses the pane to its head, or expands it again. */
@@ -318,48 +299,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     head.appendChild(el('div', { className: 'pane-head-actions' }, actions));
   }
 
-  function endpoint(entity) {
-    const parts = [
-      icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar),
-      el('span', { className: 'mono designation', text: entity.id }),
-    ];
-    const label = entityLabel(entity);
-    if (label) parts.push(el('span', { className: 'row-title', text: label }));
-    return parts;
-  }
-
-  /**
-   * Carbon's empty state: what this place holds, and the way to put the
-   * first thing in it.
-   * @param {string} title
-   * @param {string} body
-   * @param {{ label: string, icon: string, onPick: () => void }} [action]
-   */
-  function emptyState(title, body, action) {
-    const held = el('div', { className: 'empty-state' }, [
-      el('p', { className: 'empty-state-title', text: title }),
-      ...(body ? [el('p', { className: 'empty-state-body', text: body })] : []),
-    ]);
-    if (action) {
-      const button = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [
-        icon(action.icon),
-        el('span', { text: action.label }),
-      ]);
-      button.addEventListener('click', action.onPick);
-      held.appendChild(button);
-    }
-    return held;
-  }
-
-  /** The subject's own cell: its tinted icon, its text receding — you are here. */
+  /** The subject's own cell: its tinted icon, its text receding, you are here. */
   function subjectCell(subject) {
-    const label = entityLabel(subject);
-    const parts = [
-      icon(TYPE_ICONS[subject.type], ENTITY_TYPES[subject.type].pillar),
-      el('span', { className: 'mono designation', text: subject.id }),
-    ];
-    if (label) parts.push(el('span', { className: 'row-title', text: label }));
-    return el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity cell-subject' }, parts)]);
+    return el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity cell-subject' }, entityParts(subject))]);
   }
 
   /**
@@ -381,7 +323,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       onSelect(other.id);
     });
 
-    const otherCell = el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, endpoint(other))]);
+    const otherCell = el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entityParts(other))]);
     const relationshipCell = el('td', { className: 'rel-label', text: label });
     if (row.direction === 'outgoing') {
       rowElement.append(subjectCell(subject), relationshipCell, otherCell);
@@ -416,7 +358,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     const check = icon('i-checkmark');
     check.classList.add('pick-check');
     const otherCell = el('td', { className: 'wrap' }, [
-      el('span', { className: 'cell-entity' }, [check, ...endpoint(other)]),
+      el('span', { className: 'cell-entity' }, [check, ...entityParts(other)]),
     ]);
 
     let relationshipCell;
@@ -630,7 +572,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       choose();
     });
     rowElement.append(
-      el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entity ? endpoint(entity) : [el('span', { className: 'mono designation', text: finding.id })])]),
+      el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entity ? entityParts(entity) : [el('span', { className: 'mono designation', text: finding.id })])]),
       el('td', { className: 'wrap tags' }, [el('span', { className: 'cell-tags' }, tags)]),
       el('td', { className: 'wrap', text: finding.text })
     );

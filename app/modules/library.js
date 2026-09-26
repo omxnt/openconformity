@@ -29,6 +29,7 @@ import { APPLE } from './dom.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
 import { splitter } from './splitter.js';
+import { headSearch } from './pane.js';
 
 /**
  * Whether a node answers a filter: an entity as the navigator matches
@@ -316,41 +317,26 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
    * focused; Escape closes and clears, so does leaving it empty.
    */
   function searchControl() {
-    if (!searchOpen) {
-      const open = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-search')]);
-      open.addEventListener('click', () => {
+    return headSearch({
+      open: searchOpen,
+      label: 'Filter the catalogue',
+      value: filter,
+      onOpen: () => {
         searchOpen = true;
         renderHead();
         head.querySelector('.head-search')?.focus();
-      });
-      return tooltipOn(open, 'Filter the catalogue', { align: 'end' });
-    }
-    const input = el('input', {
-      className: 'field-input head-search',
-      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the catalogue' },
+      },
+      onChange: (value) => {
+        filter = value;
+        renderList();
+      },
+      onClose: () => {
+        searchOpen = false;
+        filter = '';
+        renderHead();
+        renderList();
+      },
     });
-    input.value = filter;
-    input.addEventListener('input', () => {
-      filter = input.value;
-      renderList();
-    });
-    input.addEventListener('keydown', (event) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      searchOpen = false;
-      filter = '';
-      renderHead();
-      renderList();
-    });
-    input.addEventListener('blur', () => {
-      if (input.value.trim() !== '') return;
-      searchOpen = false;
-      filter = '';
-      renderHead();
-      renderList();
-    });
-    return input;
   }
 
   /** The entities among the rows shown, what the head's box picks or clears. */
