@@ -1243,6 +1243,7 @@ export function createEditor({
   }
 
   function beginEdit() {
+    if (store.libraryOpen()) store.setLibraryOpen(false);
     const id = store.selection();
     const node = nodeOf(store.model(), id);
     if (id === null && store.hasProject()) {
