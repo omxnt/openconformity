@@ -63,7 +63,6 @@
   --support-info: #0043CE;  /* $support-info, blue-70 */
   --support-warning: #F1C21B;  /* $support-warning, yellow-30 */
   --support-success: #24A148;  /* $support-success, green-50 */
-  --toggle-off:      #8D8D8D;  /* $toggle-off, gray-50 */
 
   --button-disabled: #C6C6C6;  /* $button-disabled, gray-30 */
   --on-color-disabled: #8D8D8D;  /* $text-on-color-disabled, gray-50 */
@@ -119,7 +118,6 @@
   --support-info: #4589FF;  /* g100 $support-info, blue-50 */
   --support-warning: #F1C21B;  /* g100 $support-warning, yellow-30 */
   --support-success: #42BE65;  /* g100 $support-success, green-40 */
-  --toggle-off:      #6F6F6F;  /* g100 $toggle-off, gray-60 */
 
   --button-disabled: #525252;  /* g100 $button-disabled, gray-70 */
   --on-color-disabled: #8D8D8D;  /* g100 $text-on-color-disabled, gray-50 */
@@ -763,14 +761,14 @@ body {
 .library-list { flex: 1; min-height: 0; overflow: auto; padding: 8px 0; }  /* $spacing-03 */
 .library-preview { flex: 1; min-height: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
 .library-count { color: var(--text-second); }
-/* Carbon's toggle, small: a 32 by 16 track, the knob sliding to the accent when on, the label after it. */
-.toggle { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; margin-right: 4px; font: inherit; letter-spacing: inherit; color: var(--text); background: none; border: 0; cursor: pointer; }  /* $spacing-03, $spacing-02 */
-.toggle-track { position: relative; width: 32px; height: 16px; border-radius: 8px; background: var(--toggle-off); transition: background-color var(--motion-fast) var(--motion-standard); }
-.toggle-knob { position: absolute; top: 3px; left: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--text-on-color); transition: transform var(--motion-fast) var(--motion-standard); }
-.toggle[aria-checked="true"] .toggle-track { background: var(--support-success); }
-.toggle[aria-checked="true"] .toggle-knob { transform: translateX(16px); }
-.toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-.toggle-label { font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }  /* $label-01 */
+/* Carbon's content switcher, small, the choice of what a pick brings: joined segments, the pressed one filled. */
+.pick-mode { display: inline-flex; align-self: center; margin-right: 8px; }  /* $spacing-03 */
+.pick-mode-item { height: 24px; padding: 0 12px; font: inherit; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); background: none; border: 1px solid var(--border-strong); border-right-width: 0; cursor: pointer; white-space: nowrap; transition: background-color var(--motion-fast) var(--motion-standard), color var(--motion-fast) var(--motion-standard); }  /* $spacing-04, $label-01 */
+.pick-mode-item:first-child { border-radius: 12px 0 0 12px; }
+.pick-mode-item:last-child { border-right-width: 1px; border-radius: 0 12px 12px 0; }
+.pick-mode-item:hover { color: var(--text); background: var(--hover); }
+.pick-mode-item[aria-pressed="true"] { color: var(--text-on-color); background: var(--button-secondary); border-color: var(--button-secondary); }
+.pick-mode-item:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .library-row { display: flex; align-items: center; gap: 8px; height: var(--row); padding-right: 16px; white-space: nowrap; cursor: default; }  /* $spacing-03, $spacing-05 */
 .library-row:hover { background: var(--hover); }
 .library-row.highlighted { background: var(--layer-accent); }

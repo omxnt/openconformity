@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { libraryRows, checkState, togglePick, carriedBy, importPlan, importInto, previewValue, previewSections } from '../app/modules/library.js';
+import { libraryRows, checkState, togglePick, carriedBy, importPlan, importInto, previewValue, previewSections, PICK_MODES } from '../app/modules/library.js';
 import { LIBRARIES, catalogueOf } from '../app/library/index.js';
 import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
@@ -48,44 +48,48 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
 // --- The picks ------------------------------------------------------------------
 
 {
+  deepEqual(PICK_MODES, ['headings', 'beneath', 'alone'], 'a pick brings its headings, what is beneath only, or the one entity');
   const picks = new Set();
+  const bare = new Set();
   equal(checkState(library.model, picks, 'LEG-001'), 'none', 'nothing picked, nothing checked');
-  togglePick(library.model, picks, 'ESR-007');
+  togglePick(library.model, picks, 'ESR-007', 'headings', bare);
   deepEqual([...picks], ['ESR-007'], 'checking a clause picks it');
-  equal(checkState(library.model, picks, 'ESR-006'), 'mixed', 'and its heading stands partly checked');
-  equal(checkState(library.model, picks, 'LEG-001'), 'mixed', 'as does the act, carried as a heading');
-  deepEqual([...carriedBy(library.model, picks)].sort(), ['ESR-001', 'ESR-004', 'ESR-005', 'ESR-006', 'LEG-001'], 'a pick carries every heading above it');
-  deepEqual([...carriedBy(library.model, picks, false)], [], 'or none with the headings switched off');
-  equal(checkState(library.model, picks, 'LEG-001', false), 'mixed', 'the act stays partly checked either way, since a pick stands beneath it');
-  equal(checkState(library.model, picks, 'ESR-004', false), 'mixed', 'as does every heading over the pick');
-  equal(checkState(library.model, picks, 'ESR-007'), 'checked', 'the clause fully');
-  togglePick(library.model, picks, 'ESR-006');
-  equal(checkState(library.model, picks, 'ESR-006'), 'checked', 'checking a partly checked heading picks all of it');
+  equal(checkState(library.model, picks, 'ESR-006', bare), 'mixed', 'and its heading stands partly checked');
+  equal(checkState(library.model, picks, 'LEG-001', bare), 'mixed', 'as does the act, carried as a heading');
+  deepEqual([...carriedBy(library.model, picks, bare)].sort(), ['ESR-001', 'ESR-004', 'ESR-005', 'ESR-006', 'LEG-001'], 'a pick with headings carries every heading above it');
+  togglePick(library.model, picks, 'ESR-006', 'headings', bare);
+  equal(checkState(library.model, picks, 'ESR-006', bare), 'checked', 'checking a partly checked heading picks all of it');
   equal(picks.size, 1 + childrenOf(library.model, 'ESR-006').length, 'the heading and every clause beneath it');
-  togglePick(library.model, picks, 'ESR-007');
-  equal(checkState(library.model, picks, 'ESR-006'), 'mixed', 'unchecking one clause leaves the heading partly checked');
+  togglePick(library.model, picks, 'ESR-007', 'headings', bare);
+  equal(checkState(library.model, picks, 'ESR-006', bare), 'mixed', 'unchecking one clause leaves the heading partly checked');
   ok(picks.has('ESR-006'), 'and the heading itself still picked');
-  togglePick(library.model, picks, 'ESR-006');
-  equal(checkState(library.model, picks, 'ESR-006'), 'checked', 'partly checked checks all again');
-  togglePick(library.model, picks, 'ESR-006');
+  togglePick(library.model, picks, 'ESR-006', 'headings', bare);
+  equal(checkState(library.model, picks, 'ESR-006', bare), 'checked', 'partly checked checks all again');
+  togglePick(library.model, picks, 'ESR-006', 'headings', bare);
   equal(picks.size, 0, 'and checked unpicks all');
-  togglePick(library.model, picks, 'LEG-001');
+  togglePick(library.model, picks, 'LEG-001', 'headings', bare);
   equal(picks.size, 216, 'checking the act picks it and all 215 requirements');
   picks.clear();
-  const lone = new Set();
-  togglePick(library.model, picks, 'ESR-004', true, lone);
-  deepEqual([[...picks], [...lone]], [['ESR-004'], ['ESR-004']], 'alone, a part is picked by itself, nothing beneath it, and remembered as lone');
-  equal(checkState(library.model, picks, 'ESR-004', true, lone), 'mixed', 'and shows partly checked, since what is beneath it is not');
-  deepEqual([...carriedBy(library.model, picks, true, lone)], [], 'a lone pick carries no heading, whatever the switch says');
-  deepEqual(importPlan(library.model, picks, true, lone).map((node) => node.id), ['ESR-004'], 'so the plan is the part and nothing else');
-  togglePick(library.model, picks, 'ESR-004', true, lone);
-  equal(picks.size + lone.size, 0, 'and alone again unpicks it by itself');
-  togglePick(library.model, picks, 'ESR-006', false, lone);
-  togglePick(library.model, picks, 'ESR-006', true, lone);
+
+  togglePick(library.model, picks, 'ESR-006', 'beneath', bare);
+  equal(picks.size, 1 + childrenOf(library.model, 'ESR-006').length, 'beneath only picks the heading and what is beneath it');
+  deepEqual([...carriedBy(library.model, picks, bare)], [], 'and carries nothing above');
+  equal(checkState(library.model, picks, 'ESR-005', bare), 'mixed', 'though the heading over it still reads partly checked, since a pick stands beneath it');
+  togglePick(library.model, picks, 'ESR-006', 'beneath', bare);
+  equal(picks.size + bare.size, 0, 'and unpicks the same');
+
+  togglePick(library.model, picks, 'ESR-004', 'alone', bare);
+  deepEqual([[...picks], [...bare]], [['ESR-004'], ['ESR-004']], 'alone, a part is picked by itself, nothing beneath it, carrying nothing');
+  equal(checkState(library.model, picks, 'ESR-004', bare), 'mixed', 'and shows partly checked, since what is beneath it is not');
+  deepEqual(importPlan(library.model, picks, bare).map((node) => node.id), ['ESR-004'], 'so the plan is the part and nothing else');
+  togglePick(library.model, picks, 'ESR-004', 'alone', bare);
+  equal(picks.size + bare.size, 0, 'and alone again unpicks it by itself');
+  togglePick(library.model, picks, 'ESR-006', 'headings', bare);
+  togglePick(library.model, picks, 'ESR-006', 'alone', bare);
   equal(picks.size, childrenOf(library.model, 'ESR-006').length, 'alone on a checked heading drops the heading and keeps its clauses');
-  togglePick(library.model, picks, 'ESR-007', true, lone);
-  togglePick(library.model, picks, 'ESR-006', false, lone);
-  equal(lone.size, 0, 'a plain pick over a lone one takes it into the cascade again');
+  togglePick(library.model, picks, 'ESR-007', 'alone', bare);
+  togglePick(library.model, picks, 'ESR-006', 'headings', bare);
+  equal(bare.size, 0, 'a pick with headings over a bare one takes it into the cascade again');
 
   const shelves = createModel();
   const shelf = addFolder(shelves, 'Mechanical').folder;
@@ -101,7 +105,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
 // --- The plan and the copy ----------------------------------------------------------
 
 {
-  deepEqual(importPlan(library.model, new Set(['ESR-008', 'ESR-006', 'ESR-007']), false).map((node) => node.id), ['ESR-006', 'ESR-007', 'ESR-008'], 'alone, the plan is the picks in filing order, whatever the order picked');
+  deepEqual(importPlan(library.model, new Set(['ESR-008', 'ESR-006', 'ESR-007']), new Set(['ESR-006', 'ESR-007', 'ESR-008'])).map((node) => node.id), ['ESR-006', 'ESR-007', 'ESR-008'], 'bare, the plan is the picks in filing order, whatever the order picked');
   deepEqual(importPlan(library.model, new Set(['ESR-007'])).map((node) => node.id), ['LEG-001', 'ESR-001', 'ESR-004', 'ESR-005', 'ESR-006', 'ESR-007'], 'with the headings, a picked clause brings the chain above it, the act first');
 
   const project = createModel();
@@ -116,7 +120,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(nodeOf(project, 'ESR-002').attributes.reference, 'Part A', 'with their attributes');
   ok([...project.relationships.values()].some((held) => held.type === 'leg-contains-esr' && held.source === 'LEG-001' && held.target === 'ESR-002'), 'the copy of the act owns the copy of the part');
 
-  const again = importInto(project, library.model, new Set(['ESR-004']), 'LEG-001', false);
+  const again = importInto(project, library.model, new Set(['ESR-004']), 'LEG-001', new Set(['ESR-004']));
   ok(again.ok && again.added.length === 1 && again.related === 0, 'a part picked alone lands where the user stands, with no relationship to bring');
   equal(nodeOf(project, again.added[0]).parent, 'LEG-001', "under the project's act, since that is what was selected");
 
@@ -145,7 +149,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   relate(catalogue, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
 
   const project = createModel();
-  const outcome = importInto(project, catalogue, new Set(['ELM-001', 'ELM-003']), null, false);
+  const outcome = importInto(project, catalogue, new Set(['ELM-001', 'ELM-003']), null, new Set(['ELM-001', 'ELM-003']));
   ok(outcome.ok, 'a pick with an unpicked entity between succeeds');
   deepEqual(outcome.added, ['ELM-001', 'ELM-002'], 'alone, the two picked elements, the shelf never');
   equal(nodeOf(project, 'ELM-002').parent, 'ELM-001', 'the lower lands under the copy of the nearest copied entity above it');
