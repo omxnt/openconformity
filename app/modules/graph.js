@@ -444,7 +444,15 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       ),
     ]);
     if (pending && unpickId !== null) {
+      group.setAttribute('tabindex', '0');
+      group.setAttribute('role', 'button');
+      group.setAttribute('aria-label', `Unpick ${unpickId}`);
       group.addEventListener('click', () => store.togglePick(unpickId));
+      group.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        store.togglePick(unpickId);
+      });
       group.appendChild(svgText('title', {}, 'Unpick'));
     }
     return group;
