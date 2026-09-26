@@ -274,7 +274,7 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
 async function consent(dialogs, store) {
   const box = el('input', { attributes: { type: 'checkbox', id: 'drawio-consent-box' } });
   const body = el('div', { className: 'consent' }, [
-    el('p', { text: `Diagrams are created and edited in draw.io, a third-party service embedded in openconformity. By continuing, you load the editor from ${EDITOR_ORIGIN.replace('https://', '')}. The diagram you edit will be sent to draw.io, since draw.io provides the editor.` }),
+    el('p', { text: `Diagrams are created and edited in draw.io, a third-party service embedded in this app. By continuing, you load the editor from ${EDITOR_ORIGIN.replace('https://', '')}. The diagram you edit will be sent to draw.io, since draw.io provides the editor.` }),
     el('label', { className: 'consent-box', attributes: { for: 'drawio-consent-box' } }, [box, el('span', { className: 'checkbox' }, [icon('i-checkmark')]), el('span', { text: "Don't ask again this session" })]),
   ]);
   const picked = await dialogs.open({
