@@ -387,9 +387,6 @@ export function createNavigator({
     if (!dragLocked()) attributes.draggable = 'true';
     if (row.hasChildren) attributes['aria-expanded'] = String(row.expanded);
     if (pickable) attributes['aria-checked'] = String(picked);
-    if (row.node.kind === 'entity') {
-      attributes.title = `${ENTITY_TYPES[row.node.type].name} ${row.id}`;
-    }
 
     const classes = ['tree-row'];
     if (selected) classes.push('selected');
