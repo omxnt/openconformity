@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { libraryRows, checkState, togglePick, importPlan, importInto, previewValue, previewSections } from '../app/modules/library.js';
+import { libraryRows, checkState, togglePick, carriedBy, importPlan, importInto, previewValue, previewSections } from '../app/modules/library.js';
 import { LIBRARIES, catalogueOf } from '../app/library/index.js';
 import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
@@ -53,7 +53,11 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   togglePick(library.model, picks, 'ESR-007');
   deepEqual([...picks], ['ESR-007'], 'checking a clause picks it');
   equal(checkState(library.model, picks, 'ESR-006'), 'mixed', 'and its heading stands partly checked');
-  equal(checkState(library.model, picks, 'LEG-001'), 'mixed', 'as does the act');
+  equal(checkState(library.model, picks, 'LEG-001'), 'mixed', 'as does the act, carried as a heading');
+  deepEqual([...carriedBy(library.model, picks)].sort(), ['ESR-001', 'ESR-004', 'ESR-005', 'ESR-006', 'LEG-001'], 'a pick carries every heading above it');
+  deepEqual([...carriedBy(library.model, picks, false)], [], 'or none with the headings switched off');
+  equal(checkState(library.model, picks, 'LEG-001', false), 'mixed', 'the act stays partly checked either way, since a pick stands beneath it');
+  equal(checkState(library.model, picks, 'ESR-004', false), 'mixed', 'as does every heading over the pick');
   equal(checkState(library.model, picks, 'ESR-007'), 'checked', 'the clause fully');
   togglePick(library.model, picks, 'ESR-006');
   equal(checkState(library.model, picks, 'ESR-006'), 'checked', 'checking a partly checked heading picks all of it');
@@ -82,8 +86,8 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
 // --- The plan and the copy ----------------------------------------------------------
 
 {
-  deepEqual(importPlan(library.model, new Set(['ESR-008', 'ESR-006', 'ESR-007'])).map((node) => node.id), ['ESR-006', 'ESR-007', 'ESR-008'], 'the plan is the picks in filing order, whatever the order picked');
-  deepEqual(importPlan(library.model, new Set(['ESR-007'])).map((node) => node.id), ['ESR-007'], 'a picked clause brings nothing above it');
+  deepEqual(importPlan(library.model, new Set(['ESR-008', 'ESR-006', 'ESR-007']), false).map((node) => node.id), ['ESR-006', 'ESR-007', 'ESR-008'], 'alone, the plan is the picks in filing order, whatever the order picked');
+  deepEqual(importPlan(library.model, new Set(['ESR-007'])).map((node) => node.id), ['LEG-001', 'ESR-001', 'ESR-004', 'ESR-005', 'ESR-006', 'ESR-007'], 'with the headings, a picked clause brings the chain above it, the act first');
 
   const project = createModel();
   const folder = addFolder(project, 'Legislation').folder;
@@ -97,9 +101,17 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(nodeOf(project, 'ESR-002').attributes.reference, 'Part A', 'with their attributes');
   ok([...project.relationships.values()].some((held) => held.type === 'leg-contains-esr' && held.source === 'LEG-001' && held.target === 'ESR-002'), 'the copy of the act owns the copy of the part');
 
-  const again = importInto(project, library.model, new Set(['ESR-004']), 'LEG-001');
+  const again = importInto(project, library.model, new Set(['ESR-004']), 'LEG-001', false);
   ok(again.ok && again.added.length === 1 && again.related === 0, 'a part picked alone lands where the user stands, with no relationship to bring');
   equal(nodeOf(project, again.added[0]).parent, 'LEG-001', "under the project's act, since that is what was selected");
+
+  const chained = createModel();
+  const withHeadings = importInto(chained, library.model, new Set(['ESR-007']), null);
+  equal(withHeadings.added.length, 6, 'with the headings a clause brings its chain, the act, the annex, the part and three headings');
+  const clause = [...chained.nodes.values()].find((node) => node.attributes?.reference === '1.1.1.');
+  equal(nodeOf(chained, clause.parent).attributes.reference, '1.1.', 'and lands under its heading as the catalogue files it');
+  equal(nodeOf(chained, withHeadings.added[0]).parent, null, 'the act at the root');
+  equal(withHeadings.related, 5, 'the act owning each copied requirement');
 
   const twice = importInto(project, library.model, new Set(['LEG-001']), null);
   ok(twice.ok, 'the same act again is copied again');
@@ -118,12 +130,14 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   relate(catalogue, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
 
   const project = createModel();
-  const outcome = importInto(project, catalogue, new Set(['ELM-001', 'ELM-003']), null);
+  const outcome = importInto(project, catalogue, new Set(['ELM-001', 'ELM-003']), null, false);
   ok(outcome.ok, 'a pick with an unpicked entity between succeeds');
-  deepEqual(outcome.added, ['ELM-001', 'ELM-002'], 'the two picked elements, the shelf never');
-  equal(nodeOf(project, 'ELM-002').parent, 'ELM-001', 'the lower lands under the copy of the nearest picked entity above it');
+  deepEqual(outcome.added, ['ELM-001', 'ELM-002'], 'alone, the two picked elements, the shelf never');
+  equal(nodeOf(project, 'ELM-002').parent, 'ELM-001', 'the lower lands under the copy of the nearest copied entity above it');
   equal(outcome.related, 0, 'the relationships to what was not picked stay behind');
   equal(nodeOf(project, 'ELM-002').attributes.title, 'Guard', 'and it is the guard');
+  const carried = importInto(createModel(), catalogue, new Set(['ELM-001', 'ELM-003']), null);
+  deepEqual([carried.added.length, carried.related], [3, 1], 'with the headings the one between is carried, and the relationship to it travels');
 }
 
 // --- The preview ------------------------------------------------------------------------

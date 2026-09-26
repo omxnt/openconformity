@@ -10,8 +10,11 @@
  * and picking the same act twice gives two. The picked entities travel
  * with their filing among themselves and the relationships among them.
  * A relationship to anything not picked stays behind, since its other
- * end is not there. Folders are the catalogue's shelves. They never
- * travel, and checking one checks what it holds.
+ * end is not there. A pick carries the headings above it, the entities
+ * it is filed under, so a clause lands under its headings as the
+ * catalogue files it, unless the user switches the headings off and
+ * lets a pick stand alone. Folders are the catalogue's shelves. They
+ * never travel, and checking one checks what it holds.
  */
 
 import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js';
@@ -90,18 +93,41 @@ function entitiesUnder(library, id) {
 }
 
 /**
+ * The headings a set of picks carries: every entity a pick is filed
+ * under, however far up, that is not itself picked. Empty when the
+ * headings are switched off.
+ * @param {import('./model.js').Model} library
+ * @param {Set<string>} picks
+ * @param {boolean} [headings]
+ * @returns {Set<string>}
+ */
+export function carriedBy(library, picks, headings = true) {
+  const carried = new Set();
+  if (!headings) return carried;
+  for (const id of picks) {
+    for (let above = nodeOf(library, nodeOf(library, id)?.parent); above && above.kind === 'entity'; above = nodeOf(library, above.parent)) {
+      if (!picks.has(above.id)) carried.add(above.id);
+    }
+  }
+  return carried;
+}
+
+/**
  * How a row's checkbox stands for a set of picks: checked when every
- * entity it stands for is picked, mixed when some are, none otherwise.
+ * entity it stands for is picked, mixed when some are or when the row
+ * is a heading carried by a pick beneath it, none otherwise.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
+ * @param {boolean} [headings]
  * @returns {'checked'|'mixed'|'none'}
  */
-export function checkState(library, picks, id) {
+export function checkState(library, picks, id, headings = true) {
   const under = entitiesUnder(library, id);
   const picked = under.filter((held) => picks.has(held)).length;
-  if (under.length === 0 || picked === 0) return 'none';
-  return picked === under.length ? 'checked' : 'mixed';
+  if (under.length > 0 && picked === under.length) return 'checked';
+  if (picked > 0 || carriedBy(library, picks, headings).has(id)) return 'mixed';
+  return 'none';
 }
 
 /**
@@ -118,32 +144,36 @@ export function togglePick(library, picks, id) {
 }
 
 /**
- * What an import copies: the picked entities in the catalogue's filing
- * order. Folders never travel.
+ * What an import copies: the picked entities and the headings they
+ * carry, in the catalogue's filing order. Folders never travel.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
+ * @param {boolean} [headings]
  * @returns {import('./model.js').Entity[]}
  */
-export function importPlan(library, picks) {
-  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && picks.has(node.id));
+export function importPlan(library, picks, headings = true) {
+  const carried = carriedBy(library, picks, headings);
+  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && (picks.has(node.id) || carried.has(node.id)));
 }
 
 /**
- * Copy the picked entities into the project: each with its attributes,
- * filed under the copy of the nearest picked entity above it, and under
- * the target where none is picked above it. Then every relationship of
- * the catalogue between two picked entities, between their copies.
- * Identifiers are the project's own, issued as it issues them.
+ * Copy the picked entities and the headings they carry into the
+ * project: each with its attributes, filed under the copy of the nearest
+ * copied entity above it, and under the target where none is copied
+ * above it. Then every relationship of the catalogue between two copied
+ * entities, between their copies. Identifiers are the project's own,
+ * issued as it issues them.
  * @param {import('./model.js').Model} project
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string|null} targetId  the node the copies are filed under, or null for the root
+ * @param {boolean} [headings]  whether a pick carries the headings above it
  * @returns {{ ok: true, added: string[], related: number } | { ok: false, reason: string }}
  */
-export function importInto(project, library, picks, targetId = null) {
+export function importInto(project, library, picks, targetId = null, headings = true) {
   const mapping = new Map();
   const added = [];
-  for (const node of importPlan(library, picks)) {
+  for (const node of importPlan(library, picks, headings)) {
     let above = nodeOf(library, node.parent);
     while (above && !mapping.has(above.id)) above = nodeOf(library, above.parent);
     const parent = above ? mapping.get(above.id) : targetId;
@@ -219,8 +249,8 @@ const TREE_PRESET = 400;
  * body carries, on the left under the catalogues as tabs, the open
  * catalogue's tree with a checkbox per row, and on the right under a
  * Preview head the entity under the highlight as a sheet of what its
- * attributes hold, by the editor's tabs as folds, all closed until
- * opened, the two halves split by a splitter kept for the session. The
+ * attributes hold, by the editor's tabs as folds, the first open until
+ * closed, the two halves split by a splitter kept for the session. The
  * copies are filed where the navigator's selection stands. While open, the picker takes the whole column, the
  * relationship pane and its splitter hidden. Opened from the toolbar,
  * closed by its X or Escape, never kept across a reload.
@@ -250,12 +280,16 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   let treeWidth = null;
   /** @type {Set<string>} the picked entities of the open catalogue */
   let picks = new Set();
+  /** Whether a pick carries the headings above it, the head's switch. */
+  let headings = true;
   /** @type {Set<string>} the rows opened in the open catalogue */
   let expanded = new Set();
   /** @type {string|null} the row the preview shows */
   let highlight = null;
   /** @type {Set<string>} the preview's open sections */
   let openSections = new Set();
+  /** Whether the highlight moved since the sections were last opened, so the first opens afresh. */
+  let sectionsFresh = true;
   let list = null;
   let preview = null;
   let count = null;
@@ -274,7 +308,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     picks = new Set();
     expanded = new Set();
     highlight = null;
-    openSections = new Set();
+    sectionsFresh = true;
     render();
   }
 
@@ -330,7 +364,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
 
   function renderCount() {
     const held = libraryOf(libraries[current]);
-    const planned = held.ok ? importPlan(held.model, picks).length : 0;
+    const planned = held.ok ? importPlan(held.model, picks, headings).length : 0;
     count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
     const button = head.querySelector('.library-import');
     if (button) button.disabled = planned === 0;
@@ -344,18 +378,28 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     importButton.addEventListener('click', () => {
       const held = libraryOf(libraries[current]);
       if (!held.ok || picks.size === 0) return;
-      const chosen = { library: held.model, picks };
+      const chosen = { library: held.model, picks, headings };
       picks = new Set();
       onImport(chosen);
     });
     const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]);
     close.addEventListener('click', onClose);
     tooltipOn(close, 'Close the library', { align: 'end' });
+    const toggle = el('button', {
+      className: 'toggle',
+      attributes: { type: 'button', role: 'switch', 'aria-checked': String(headings), id: 'library-headings' },
+    }, [el('span', { className: 'toggle-track' }, [el('span', { className: 'toggle-knob' })]), el('span', { className: 'toggle-label', text: 'Headings' })]);
+    toggle.addEventListener('click', () => {
+      headings = !headings;
+      renderHead();
+      renderList();
+    });
+    tooltipOn(toggle, 'A pick brings the headings above it', { align: 'end', label: 'Headings' });
     head.append(
       el('span', { className: 'head-title', text: 'Import from library' }),
       count,
       el('span', { className: 'toolbar-spacer' }),
-      el('div', { className: 'pane-head-actions' }, [searchControl(), importButton, close])
+      el('div', { className: 'pane-head-actions' }, [toggle, searchControl(), importButton, close])
     );
     renderCount();
   }
@@ -386,7 +430,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   }
 
   function focusRow(id) {
-    if (id !== highlight) openSections = new Set();
+    if (id !== highlight) sectionsFresh = true;
     highlight = id;
     renderList();
     renderPreview();
@@ -408,7 +452,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     }
     const focusable = rows.some((row) => row.node.id === highlight) ? highlight : rows[0]?.node.id;
     for (const { node, depth, hasChildren, expanded: open } of rows) {
-      const state = checkState(library, picks, node.id);
+      const state = checkState(library, picks, node.id, headings);
       const attributes = {
         role: 'treeitem',
         'aria-level': String(depth + 1),
@@ -501,6 +545,10 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     if (sections.length === 0) {
       preview.appendChild(el('p', { className: 'library-note', text: 'No attributes are filled in.' }));
       return;
+    }
+    if (sectionsFresh) {
+      openSections = new Set([sections[0].name]);
+      sectionsFresh = false;
     }
     for (const section of sections) {
       const open = openSections.has(section.name);
