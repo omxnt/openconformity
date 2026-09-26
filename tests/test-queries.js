@@ -335,7 +335,7 @@ function offered(model, subjectId) {
 
 {
   const model = loadProject(EXAMPLE_PROJECT).model;
-  deepEqual(relatedIds(model, 'SCN-001', 'prm-reduces-risk-of-scn'), ['PRM-002'], 'the measures reducing a scenario, from its end of the relationship');
+  deepEqual(relatedIds(model, 'SCN-001', 'prm-reduces-risk-of-scn'), ['PRM-001', 'PRM-002', 'PRM-003'], 'the measures reducing a scenario, from its end of the relationship');
   deepEqual(relatedIds(model, 'PRM-004', 'prm-reduces-risk-of-scn'), ['SCN-002', 'SCN-003'], 'and the scenarios a measure reduces, from its end, in order');
   deepEqual(relatedIds(model, 'SCN-001', 'haz-contributes-to-scn'), ['HAZ-001'], 'any type the entity takes part in');
   deepEqual(relatedIds(model, 'SCN-001', 'saf-realises-prm'), [], 'nothing where it does not');

@@ -67,8 +67,8 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(cell('Tasks', 'Arises from'), { entities: ['TSK-002'] }, 'the tasks giving rise to it');
   equal(at(columns, 'Hazardous event'), -1, "and nothing of the scenario's own prose, which the editor holds");
   deepEqual(cell('Rating', 'Initial risk estimation'), '', 'an unrated initial risk, typed since the example chooses no method, and empty');
-  deepEqual(cell('Protective measures', 'Risk reduction'), { entities: ['PRM-002'] }, 'the measures reducing its risk');
-  deepEqual(cell('Safety functions', 'Risk reduction'), { entities: ['SAF-002'] }, 'the safety functions realising them');
+  deepEqual(cell('Protective measures', 'Risk reduction'), { entities: ['PRM-001', 'PRM-002', 'PRM-003'] }, 'the measures reducing its risk');
+  deepEqual(cell('Safety functions', 'Risk reduction'), { entities: ['SAF-001', 'SAF-002'] }, 'the safety functions realising them');
   equal(at(columns, 'System requirements', 'Risk reduction'), -1, 'and no requirements or verifications, which are traceability for other views');
   deepEqual(cell('Rating', 'Residual risk estimation'), '', 'an unrated residual risk likewise');
   equal(at(columns, 'Risk evaluation', 'Residual risk estimation'), -1, 'and no evaluation, the editor holding it');

@@ -43,8 +43,8 @@ if (loaded.ok) {
 {
   equal(EXAMPLE_PROJECT.name, 'Example machine', 'the example is the demo machine');
   equal(EXAMPLE_PROJECT.folders.length, 16, 'sixteen folders');
-  equal(EXAMPLE_PROJECT.entities.length, 75, 'seventy-five entities');
-  equal(EXAMPLE_PROJECT.relationships.length, 144, 'a hundred and forty-four relationships');
+  equal(EXAMPLE_PROJECT.entities.length, 91, 'ninety-one entities');
+  equal(EXAMPLE_PROJECT.relationships.length, 166, 'a hundred and sixty-six relationships');
 
   const typesUsed = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));
   for (const code of Object.keys(ENTITY_TYPES)) {
@@ -150,7 +150,7 @@ if (loaded.ok) {
   store.commit((model) => addEntity(model, 'ELM'));
   await flows.loadExample();
   deepEqual(answers, ['Replace the project?'], 'over unsaved work the question comes first');
-  equal(store.model().nodes.size, 92, 'and declining it leaves the project untouched');
+  equal(store.model().nodes.size, 108, 'and declining it leaves the project untouched');
 }
 
 // --- The example is complete against the metamodel ------------------------
