@@ -936,8 +936,9 @@ select.field-input.wide { max-width: none; }
   transition: background-color var(--motion-fast) var(--motion-standard);
 }
 .form-button.button-primary { background: var(--button-primary); color: var(--text-on-color); }
-.form-button.button-primary:hover { background: var(--button-primary-hover); }
-.form-button.button-primary:active { background: var(--button-primary-active); }
+.form-button.button-primary:hover:not(:disabled) { background: var(--button-primary-hover); }
+.form-button.button-primary:active:not(:disabled) { background: var(--button-primary-active); }
+.form-button.button-primary:disabled { background: var(--button-disabled); color: var(--on-color-disabled); cursor: not-allowed; }
 .pane-head-actions .form-button { align-self: center; margin-right: 4px; }  /* $spacing-02 */
 
 .field { padding: 12px 16px 0; }  /* $spacing-04, $spacing-05 */
