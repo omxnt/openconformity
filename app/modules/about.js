@@ -92,7 +92,10 @@ export async function showAbout(dialogs, store = null) {
         ['IBM Plex', 'Typeface, vendored', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
         ['Carbon Icons', 'Icon set, vendored', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
       ]),
-      group('Diagrams', [['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]]]),
+      group('Diagrams', [
+        ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com'), link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use')]],
+        ['JGraph Ltd', 'Maker and trademark holder of draw.io, not affiliated', [link('https://www.drawio.com/trust/', 'Privacy')]],
+      ]),
       group('Legislation', [
         ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
         ['2014/30/EU', 'Electromagnetic Compatibility Directive', [link('https://eur-lex.europa.eu/eli/dir/2014/30/oj', 'eur-lex.europa.eu')]],
