@@ -798,6 +798,16 @@ Whether the project may define its own risk estimation method beside the three o
 
 ---
 
+### U-012 Diagrams off per project
+
+`2026-09-27` `product`
+
+Whether a project may turn its diagrams off in its settings, so that no entity has a Diagram tab, nothing offers the editor and no consent is asked, for a project that never wants the external service loaded.
+
+> *Affects the three types carrying a diagram and the project's settings. Built once as a choice the Diagram tab waits on and taken out the same day. A choice on the project sweeps what every entity holds under its old value when it changes (attributes §1.4), so turning diagrams off would have deleted every drawing. If it comes back, the tab must wait on the setting without the sweep touching the drawing, which the file must keep (F-PER-010).*
+
+---
+
 ### U-012 Rating in the views
 
 `2026-09-23` `product`

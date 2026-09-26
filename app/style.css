@@ -722,10 +722,11 @@ body {
 .drawing-editor-note { margin: 0; padding: 8px 16px; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); background: var(--layer); border-bottom: 1px solid var(--border-subtle); }  /* $spacing-03, $spacing-05, $helper-text-01 */
 .drawing-editor-note:empty { display: none; }
 
-/* The consent before the editor loads: two plain sentences and the box,
-   drawn as the multiselect draws its checkboxes, over the real input
-   that keeps the keyboard and the reader. */
-.consent p { margin: 0 0 12px; }  /* $spacing-04 */
+/* The consent before the editor loads: one paragraph, wrapped so its
+   last line is not one word, and the box, drawn as the multiselect
+   draws its checkboxes, over the real input that keeps the keyboard
+   and the reader. */
+.consent p { margin: 0 0 12px; text-wrap: pretty; }  /* $spacing-04 */
 .consent-box { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }  /* $spacing-03 */
 .consent-box input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .checkbox {

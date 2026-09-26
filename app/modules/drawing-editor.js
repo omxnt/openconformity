@@ -267,15 +267,14 @@ export function createSession({ drawing, post, setTimer, clearTimer, onReady, on
 }
 
 /**
- * The consent asked before the editor loads: what it is, where it comes
- * from, what is handed to it, and the box not to be asked again this
- * session. Resolves whether to go on.
+ * The consent asked before the editor loads: what draw.io is, where it
+ * is loaded from, what is sent to it, and the box not to be asked again
+ * this session. Resolves whether to go on.
  */
 async function consent(dialogs, store) {
   const box = el('input', { attributes: { type: 'checkbox', id: 'drawio-consent-box' } });
   const body = el('div', { className: 'consent' }, [
-    el('p', { text: `The diagram editor is draw.io, loaded from ${EDITOR_ORIGIN} when you continue. Loading it is a request to that origin, and the request shows in your network.` }),
-    el('p', { text: 'Only the diagram being edited is sent to draw.io. Nothing else in the project leaves the browser.' }),
+    el('p', { text: `Diagrams are created and edited in draw.io, a third-party service embedded in this software. The editor is loaded from ${EDITOR_ORIGIN.replace('https://', '')}. The diagram being edited is sent to draw.io.` }),
     el('label', { className: 'consent-box', attributes: { for: 'drawio-consent-box' } }, [box, el('span', { className: 'checkbox' }, [icon('i-checkmark')]), el('span', { text: "Don't ask again this session" })]),
   ]);
   const picked = await dialogs.open({
