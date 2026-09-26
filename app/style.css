@@ -837,7 +837,7 @@ button.tag-trigger { position: relative; border: 0; font: inherit; font-size: 12
 button.tag-trigger:hover, button.tag-trigger:focus-visible { background: var(--hover); }
 button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .tag-trigger:hover .tooltip,
-.tag-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
+.tag-trigger:focus-visible .tooltip { display: block; animation: tooltip-in 70ms var(--motion-standard) 100ms both; }
 /* A tag's tooltip: the caption at label-01, receding; the main line at
    body-01; the note beneath after a gap, keeping its breaks. */
 .tooltip-caption { display: block; font-size: 12px; line-height: 16px; letter-spacing: 0.32px; opacity: 0.75; }  /* $label-01 */
@@ -1064,10 +1064,9 @@ select.field-input[size] {
   font-weight: 400;
   text-align: left;
   white-space: normal;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 70ms var(--motion-standard);
+  display: none;  /* not laid out until shown, so a hidden tooltip past an edge never widens what scrolls */
 }
+@keyframes tooltip-in { from { opacity: 0; } to { opacity: 1; } }
 .tooltip::before {
   content: '';
   position: absolute;
@@ -1080,7 +1079,7 @@ select.field-input[size] {
 .help-trigger:hover .tooltip,
 .help-trigger:focus-visible .tooltip,
 .tip-trigger:hover .tooltip,
-.tip-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }
+.tip-trigger:focus-visible .tooltip { display: block; animation: tooltip-in 70ms var(--motion-standard) 100ms both; }
 
 /* An icon-only button's label as its tooltip, Carbon's primary use of
    one: the button is the trigger, the tooltip hangs from its start or,
