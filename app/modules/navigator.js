@@ -254,6 +254,8 @@ export function createNavigator({
   const dragLocked = () => store.picker() !== null || filter().trim() !== '';
   /** @type {{ subject: string, id: string, picked: boolean }|null} the row last toggled by a plain click and what it became, the anchor whose act a Shift+click applies to a range */
   let lastPick = null;
+  /** @type {string|null} the selection at the last render, so a render after the selection moved puts the focus on it */
+  let lastSelection = null;
 
   /** The pickable rows shown between two rows, both included, in the tree's order. */
   function pickableBetween(fromId, toId) {
@@ -540,9 +542,12 @@ export function createNavigator({
     container.appendChild(tree);
 
     container.scrollTop = scroll;
+    const selected = store.selection();
+    const moved = selected !== lastSelection;
+    lastSelection = selected;
     if (hadFocus) {
-      const again = focusedId === null ? null : container.querySelector(`.tree-row[data-id="${focusedId}"]`);
-      (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: true });
+      const again = focusedId === null || moved ? null : container.querySelector(`.tree-row[data-id="${focusedId}"]`);
+      (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: moved ? false : true });
     }
 
     syncToolbar();

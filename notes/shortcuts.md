@@ -1,10 +1,10 @@
 # Shortcuts
 
-The keys and modified clicks the software answers to, one table per place, with the key as an Apple keyboard writes it and as a Windows or Linux keyboard writes it. N-ACC-003 requires full keyboard operability, and every action below has a keyboard path.
+The keys and modified clicks the software answers to, one table per place, with the key as a Mac keyboard writes it and as a PC keyboard writes it. N-ACC-003 requires full keyboard operability, and every action below has a keyboard path.
 
 ## 1. Everywhere
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | ⌘S | Ctrl S | Saves the open edit, or the project to a file |
 | ⌘Enter | Ctrl Enter | Finishes what is open. Saves an edit, relates the picks, applies a diagram. |
@@ -16,7 +16,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 2. The menu bar
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | Enter, Space, ↓ | Enter, Space, ↓ | Opens the focused menu |
 | ← → | ← → | Walks the menus along the bar, open or not |
@@ -26,7 +26,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 3. The tree
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | ↑ ↓ | ↑ ↓ | Moves the selection |
 | → | → | Opens the row, or moves into it |
@@ -42,7 +42,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 4. Picking relationships
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | Click, Space | Click, Space | Picks or unpicks the row |
 | ⇧click | Shift click | Applies the last click to the range |
@@ -53,7 +53,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 5. The editor
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | Enter, F2 on a row | Enter, F2 on a row | Begins the edit |
 | ⌘S, ⌘Enter | Ctrl S, Ctrl Enter | Saves the edit, from a text area too |
@@ -64,7 +64,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 6. The library
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | ↑ ↓ | ↑ ↓ | Moves the highlight, the preview following |
 | → ← | → ← | Opens and closes the row |
@@ -75,7 +75,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 ## 7. Dialogs and the rest
 
-| Mac | Windows, Linux | Does |
+| Mac | PC | Does |
 |---|---|---|
 | Enter in a dialog | Enter in a dialog | The primary action, unless the focus is in a text area |
 | Escape in a dialog | Escape in a dialog | Cancel |
