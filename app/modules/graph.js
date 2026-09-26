@@ -13,8 +13,7 @@
  * at a time, each with its own edge, the line then saying how many are
  * left or closing the block from its end. A group opened stays open
  * while its subject is selected and closes on the next; nothing is
- * remembered beyond that. The canvas takes the width its pane gives,
- * the columns spreading with it. While the store holds a picker for the subject, the picks ride
+ * remembered beyond that. While the store holds a picker for the subject, the picks ride
  * as dashed provisional edges in their type's group, held open —
  * clicking one, or its box, lets go — and the standing neighbourhood
  * recedes until Done.
@@ -270,14 +269,10 @@ const NODE_HEIGHT = 64;
 const ROW_GAP = 24;
 // A group's strip fills the gap under its last shown box.
 const STRIP_HEIGHT = ROW_GAP;
-// The gap between columns at the least: the longest relationship label
-// sits over the guaranteed horizontal with the channel zone reserved.
-// It grows with the pane, up to a limit past which the slant is flat.
+// The gap is the static worst case: the longest relationship label sits
+// over the guaranteed horizontal with the channel zone reserved.
 const COLUMN_GAP = 176;
-const COLUMN_GAP_MAX = 480;
 const MARGIN = 16;
-// The host's own padding, taken off its width before the columns spread.
-const HOST_PADDING = 16;
 // The dogleg's stubs: a long horizontal at the neighbour, room for the
 // longest label, and a short one at the subject.
 const NEIGHBOUR_STUB = 112;
@@ -299,15 +294,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
   let openedFor = null;
   /** The strip to give focus back to after a toggle redraws it. */
   let focusKey = null;
-
-  if (typeof ResizeObserver === 'function') {
-    let lastWidth = 0;
-    new ResizeObserver(() => {
-      if (element.clientWidth === lastWidth || element.hidden) return;
-      lastWidth = element.clientWidth;
-      if (element.querySelector('.graph')) render(lastFilter);
-    }).observe(element);
-  }
 
   /**
    * @param {import('./model.js').Entity} entity
@@ -518,11 +504,9 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     const leftSpan = boxSpan(leftSide);
     const rightSpan = boxSpan(rightSide);
     const columnH = Math.max(leftSpan, rightSpan, subjectH);
-    const available = element.clientWidth - 2 * HOST_PADDING;
-    const columnGap = Math.max(COLUMN_GAP, Math.min(COLUMN_GAP_MAX, Math.floor((available - MARGIN * 2 - NODE_WIDTH * 3) / 2)));
-    const width = MARGIN * 2 + NODE_WIDTH * 3 + columnGap * 2;
-    const centreX = MARGIN + NODE_WIDTH + columnGap;
-    const rightX = centreX + NODE_WIDTH + columnGap;
+    const width = MARGIN * 2 + NODE_WIDTH * 3 + COLUMN_GAP * 2;
+    const centreX = MARGIN + NODE_WIDTH + COLUMN_GAP;
+    const rightX = centreX + NODE_WIDTH + COLUMN_GAP;
     const centreY = MARGIN + (columnH - subjectH) / 2;
     const leftTop = MARGIN + (columnH - leftSpan) / 2;
     const rightTop = MARGIN + (columnH - rightSpan) / 2;
