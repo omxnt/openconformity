@@ -27,12 +27,12 @@ function unrated() {
 const model = unrated();
 const labelOf = (id) => entityLabel(model.nodes.get(id));
 
-// --- The registry ---------------------------------------------------------
+// --- The registry (F-VIE-001) ---------------------------------------------
 
 deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function']], 'the first view is the risk assessment, built by a function of the model');
 equal(RISK_VIEW.build, buildRiskView, 'registered under its builder');
 
-// --- The risk assessment over the example ----------------------------------
+// --- The risk assessment over the example (F-VIE-001) ----------------------
 
 /** The index of a column by its text and, where it has one, its group. */
 const at = (columns, name, group = null) => columns.map(asColumn).findIndex((column) => column.text === name && (column.group ?? null) === group);
@@ -75,7 +75,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   equal(view.sections[3].tables[0].rows.map((held) => held.id).join(' '), 'SCN-002 SCN-003 SCN-004', 'Maintenance holds the scenarios its tasks give rise to, in id order');
 }
 
-// --- Rated scenarios spread over parameter columns --------------------------
+// --- Rated scenarios spread over parameter columns (F-VIE-001) --------------
 
 {
   const rated = unrated();
@@ -121,7 +121,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   ok(buildRiskView(typed).sections[0].lead.includes('typed with no method chosen'), 'and the lead says so');
 }
 
-// --- The renderer's pure parts ---------------------------------------------
+// --- The renderer's pure parts (F-VIE-001) ---------------------------------
 
 equal(columnText('Scenario'), 'Scenario', 'a bare column is its name');
 equal(columnText({ text: 'S', title: 'Severity', group: 'Initial risk estimation' }), 'Initial risk estimation · Severity', 'a grouped column exports its group and full name');

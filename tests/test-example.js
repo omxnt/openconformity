@@ -19,7 +19,7 @@ import { createStore } from '../app/modules/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor } from './helpers.js';
 
-// --- The example passes the gates a user's file passes ------------------
+// --- The example passes the gates a user's file passes (F-PER-001, F-PER-006) ---
 
 const loaded = loadProject(EXAMPLE_PROJECT);
 {
@@ -29,7 +29,7 @@ const loaded = loadProject(EXAMPLE_PROJECT);
   deepEqual(loaded.notices, [], 'with nothing migrated and nothing to flag');
 }
 
-// --- It is held in canonical form and round-trips byte-stable -----------
+// --- It is held in canonical form and round-trips byte-stable (F-PER-001) ---
 
 if (loaded.ok) {
   deepEqual(toFileObject(loaded.model), EXAMPLE_PROJECT, 'the shipped object is the canonical file form: what saving the example would write');
@@ -39,7 +39,7 @@ if (loaded.ok) {
   equal(serialise(reopened.model), text, 'byte-stable through a round trip');
 }
 
-// --- What the example holds ---------------------------------------------
+// --- What the example holds (pin) ---------------------------------------
 
 {
   equal(EXAMPLE_PROJECT.name, 'Example project', 'the example is the demo machine');
@@ -69,7 +69,7 @@ if (loaded.ok) {
   );
 }
 
-// --- The assessment shows all three verdict states ------------------------
+// --- The assessment shows all three verdict states (pin) ------------------
 
 {
   const verdicts = EXAMPLE_PROJECT.entities
@@ -97,7 +97,7 @@ if (loaded.ok) {
   }
 }
 
-// --- The counters stand ready to issue ----------------------------------
+// --- The counters stand ready to issue (pin) ----------------------------
 
 if (loaded.ok) {
   for (const code of Object.keys(ENTITY_TYPES)) {
@@ -109,7 +109,7 @@ if (loaded.ok) {
   }
 }
 
-// --- The load flow: the third way in ------------------------------------
+// --- The load flow: the third way in (pin) ------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -155,7 +155,7 @@ if (loaded.ok) {
   equal(store.model().nodes.size, 108, 'and declining it leaves the project untouched');
 }
 
-// --- The example is complete against the metamodel ------------------------
+// --- The example is complete against the metamodel (F-MOD-001, F-MOD-002, F-MOD-003, N-SEC-005) ---
 
 {
   const used = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));

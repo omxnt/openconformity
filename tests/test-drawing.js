@@ -17,7 +17,7 @@ const reason = (text) => {
   return verdict.ok ? 'accepted' : verdict.reason;
 };
 
-// --- The parser --------------------------------------------------------------
+// --- The parser (F-DRW-001, N-SEC-001) ---------------------------------------
 
 {
   const { root, instructions } = parseXml('<?xml version="1.0"?><!-- note --><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><a b="1&#xA;2" c=\'x &amp; y\'><!-- inner --><b/><![CDATA[<raw>]]>text &lt;here&gt;<c d="e"></c></a>');
@@ -44,7 +44,7 @@ const reason = (text) => {
   equal(throws('text'), 'no root element', 'text alone is a fault');
 }
 
-// --- A real export is accepted, and carries its model ------------------------
+// --- A real export is accepted, and carries its model (F-DRW-001, F-DRW-002) ---
 
 {
   deepEqual(checkDrawing(fixture), { ok: true }, "draw.io's own export passes, DOCTYPE, foreignObject, PNG fallbacks and all");
@@ -59,7 +59,7 @@ const reason = (text) => {
   equal(sizeText('x'), '1 KB', 'never less than one');
 }
 
-// --- What is accepted ----------------------------------------------------------
+// --- What is accepted (F-DRW-001) ----------------------------------------------
 
 {
   equal(reason(svg('<rect width="5" height="5" fill="url(#g)"/><a xlink:href="https://example.org"><text>link</text></a>')), 'accepted', 'a local paint reference and a web link on a shape are fine');
@@ -69,7 +69,7 @@ const reason = (text) => {
   equal(reason(`<?xml version="1.0"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">${svg('<g/>')}`), 'accepted', 'a declaration and a DOCTYPE without a subset are fine');
 }
 
-// --- What is refused, and why ------------------------------------------------
+// --- What is refused, and why (F-DRW-001, N-SEC-003) -------------------------
 
 {
   equal(reason(''), 'holds nothing', 'nothing');

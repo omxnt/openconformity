@@ -19,7 +19,7 @@ let documentProject = null;
 import { ENTITY_TYPES } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- Parse the document ------------------------------------------------
+// --- Parse the document (F-MOD-003) ------------------------------------
 
 const document = readFile('../notes/attributes.md');
 
@@ -165,7 +165,7 @@ const documentTypes = parseDocument(document);
 deepEqual(problems, [], 'the document nests every group under a tab, every variant under a slot with its when tag, and every column under a table, and every table has its five columns');
 for (const type of [...documentTypes, documentProject]) equal(type.first, firstTabName(type.code), `${type.code}'s first tab is headed as the editor names it, by the last word of the type's name`);
 
-// --- The project -------------------------------------------------------
+// --- The project (F-MOD-003) -------------------------------------------
 
 ok(documentProject !== null, 'the document has its Project section');
 deepEqual(PROJECT.attributes, documentProject?.attributes, "the project's own definitions match the document");
@@ -177,7 +177,7 @@ for (const definition of attributesFor('PROJECT')) {
   ok(typeof (definition.help ?? SHARED_HELP[definition.name]) === 'string', `PROJECT.${definition.key} explains itself`);
 }
 
-// --- The shared help ---------------------------------------------------
+// --- The shared help (F-MOD-003) ---------------------------------------
 
 deepEqual(SHARED_HELP, parseSharedHelp(document), 'the help a rating, a slot and the identifier carry matches §1.7, name for name');
 const everyGroup = (type) => type.groups.flatMap((group) => [group, ...(group.groups ?? [])]);
@@ -198,7 +198,7 @@ for (const type of documentTypes) {
   }
 }
 
-// --- The transcription -------------------------------------------------
+// --- The transcription (F-MOD-003) -------------------------------------
 
 equal(documentTypes.length, 18, 'the document specifies 18 types');
 deepEqual(
@@ -267,7 +267,7 @@ for (const type of documentTypes) {
   }
 }
 
-// --- Lookups -----------------------------------------------------------
+// --- Lookups (F-MOD-003) -----------------------------------------------
 
 for (const type of documentTypes) {
   deepEqual(

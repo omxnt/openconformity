@@ -42,7 +42,7 @@ function flowsOver(store) {
   });
 }
 
-// --- The landing: one action to a project ------------------------------
+// --- The landing: one action to a project (F-APP-002) ------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -54,7 +54,7 @@ function flowsOver(store) {
   equal(store.dirty(), false, 'standing saved');
 }
 
-// --- A pristine creation collapses on cancel ---------------------------
+// --- A pristine creation collapses on cancel (F-MOD-001, F-MOD-004) ----
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -76,7 +76,7 @@ function flowsOver(store) {
   equal(store.model().nodes.size, 0, 'to the empty project');
 }
 
-// --- A saved-once entity survives cancel -------------------------------
+// --- A saved-once entity survives cancel (F-MOD-004) -------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -90,7 +90,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001').attributes.title, 'Kept', 'with what was saved');
 }
 
-// --- The collapse falls back to one step when history moved ------------
+// --- The collapse falls back to one step when history moved (F-MOD-008) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -106,7 +106,7 @@ function flowsOver(store) {
   ok(nodeOf(store.model(), 'ELM-001') !== null, 'removed as one step: one undo restores it');
 }
 
-// --- New related: one entry, and cancel removes both -------------------
+// --- New related: one entry, and cancel removes both (F-MOD-001, F-MOD-002) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -140,7 +140,7 @@ function flowsOver(store) {
   equal(store.canRedo(), false, 'with no residue');
 }
 
-// --- Activation and the pointerless filing path ------------------------
+// --- Activation and the pointerless filing path (F-WSP-004, N-ACC-003) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -192,7 +192,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'cancelling moves nothing');
 }
 
-// --- Refusals are told in passing ---------------------------------------
+// --- Refusals are told in passing (pin) ---------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -243,7 +243,7 @@ function flowsOver(store) {
   deepEqual(toasts.pop()?.[0], 'Could not add the relationship', 'an inadmissible new-related form is told too');
 }
 
-// --- The project saves like an entity -----------------------------------
+// --- The project saves like an entity (F-MOD-004) -----------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -257,7 +257,7 @@ function flowsOver(store) {
   deepEqual(store.model().attributes, {}, 'the bag with it');
 }
 
-// --- Escape leaves the edit, asking only when it costs -------------------
+// --- Escape leaves the edit, asking only when it costs (F-MOD-004) -------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -300,7 +300,7 @@ function flowsOver(store) {
   equal(ended, 0, 'with no edit open, Escape passes by');
 }
 
-// --- A file holding hidden or unknown content is cleared and stated on opening
+// --- A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {
   const held = createModel();
@@ -344,7 +344,7 @@ function flowsOver(store) {
   delete globalThis.document;
 }
 
-// --- Save asks every time, and cancel costs nothing ----------------------
+// --- Save asks every time, and cancel costs nothing (F-PER-001) ----------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -393,7 +393,7 @@ function flowsOver(store) {
   equal(saved.at(-1).filename, 'mixer-line.json', 'and saves under it unchanged');
 }
 
-// --- A changed record marked reviewed -------------------------------------
+// --- A changed record marked reviewed (F-MOD-011) -------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -414,7 +414,7 @@ function flowsOver(store) {
   equal(toasts.length, 0, 'with nothing to toast');
 }
 
-// --- Every deletion asks first ------------------------------------------
+// --- Every deletion asks first (F-MOD-005, F-MOD-007, F-WSP-007) --------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -461,7 +461,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001'), null, 'a pristine creation collapses without a question');
 }
 
-// --- Removing a relationship asks first ----------------------------------
+// --- Removing a relationship asks first (pin) ----------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -490,7 +490,7 @@ function flowsOver(store) {
   ok(nodeOf(store.model(), 'HAZ-001') !== null && nodeOf(store.model(), 'SCN-001') !== null, 'and both entities stay');
 }
 
-// --- Cancel asks like Escape when the draft is dirty ---------------------
+// --- Cancel asks like Escape when the draft is dirty (F-MOD-004) ---------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -514,7 +514,7 @@ function flowsOver(store) {
   equal(ended, 1, 'accepting discards the draft');
 }
 
-// --- A view opens over the workspace and keeps the way back --------------
+// --- A view opens over the workspace and keeps the way back (F-VIE-001) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -561,7 +561,7 @@ function flowsOver(store) {
   equal(store.selection(), 'SCN-002', 'choosing from no open view does nothing');
 }
 
-// --- Saving the project sweeps what entities held under the old choice ---
+// --- Saving the project sweeps what entities held under the old choice (N-SEC-005) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -598,7 +598,7 @@ function flowsOver(store) {
   ok('initialSeverity' in nodeOf(store.model(), 'SCN-001').attributes && store.model().attributes.estimationMethod === 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)', 'one undo brings the choice and the ratings back together');
 }
 
-// --- A save that removes what a choice no longer shows asks first --------
+// --- A save that removes what a choice no longer shows asks first (N-SEC-005) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -619,7 +619,7 @@ function flowsOver(store) {
   );
 }
 
-// --- Clear browser data asks, then forgets ------------------------
+// --- Clear browser data asks, then forgets (F-SES-003) ------------
 
 {
   const retention = memoryRetention();
@@ -652,7 +652,7 @@ function flowsOver(store) {
   ok(!store.hasProject() && retention.records.size === 0, 'Clear forgets the project and shows the landing');
 }
 
-// --- The set-aside copy saves to a file and can be discarded --------------
+// --- The set-aside copy saves to a file and can be discarded (F-SES-001) ---
 
 {
   const retention = memoryRetention({ initial: { project: { project: { name: 'Old line', format: 'x' }, session: { dirty: true } } } });

@@ -12,6 +12,8 @@ import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
+// --- The catalogues the software ships (F-PER-002) -------------------------
+
 ok(LIBRARIES.length >= 1 && LIBRARIES[0].name === 'European legislation' && LIBRARIES[0].date === '2026-09-26', 'the first catalogue is European legislation, dated as the library project is');
 const library = loadProject(LIBRARIES[0].project);
 ok(library.ok, 'the catalogue passes the gates a project file passes');
@@ -26,7 +28,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   deepEqual([b.folders.map((f) => [f.id, f.parent]), b.entities.map((e) => [e.id, e.parent]), b.relationships.length], [[['F-3', null]], [['HAZ-002', 'F-3'], ['ELM-001', null]], 1], 'a nested folder stays a shelf inside it, and the relationship between two of its entities travels');
 }
 
-// --- The rows -----------------------------------------------------------------
+// --- The rows (pin) -----------------------------------------------------------
 
 {
   deepEqual(libraryRows(library.model).map(({ node, depth, hasChildren, expanded }) => [node.id, depth, hasChildren, expanded]), [['LEG-001', 0, true, false]], 'the tree starts collapsed at its root, the act a row with a chevron');
@@ -45,7 +47,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   deepEqual(libraryRows(shelves, 'mech').map(({ node }) => node.id), [shelf.id, 'HAZ-001'], 'and matches by its name, keeping what it holds');
 }
 
-// --- The picks ------------------------------------------------------------------
+// --- The picks (F-MOD-010) ------------------------------------------------------
 
 {
   const picks = new Set();
@@ -95,7 +97,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(checkState(createModel(), held, 'F-9'), 'none', 'a row that is not there is none');
 }
 
-// --- The plan and the copy ----------------------------------------------------------
+// --- The plan and the copy (F-MOD-010) ----------------------------------------------
 
 {
   deepEqual(importPlan(library.model, new Set(['ESR-008', 'ESR-006', 'ESR-007'])).map((node) => node.id), ['ESR-006', 'ESR-007', 'ESR-008'], 'the plan is the picks in filing order, whatever the order picked');
@@ -152,7 +154,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(nodeOf(project, 'ELM-002').attributes.title, 'Guard', 'and it is the guard');
 }
 
-// --- The preview ------------------------------------------------------------------------
+// --- The preview (pin) ------------------------------------------------------------------
 
 {
   equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, 'Crushing'), 'Crushing', 'a text shows as stored');

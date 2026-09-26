@@ -23,7 +23,7 @@ function kinds(stack) {
   return stack.entries().map((entry) => entry.kind);
 }
 
-// --- One stack ---------------------------------------------------------
+// --- One stack (pin) ---------------------------------------------------
 
 {
   const stack = createOverlayStack();
@@ -35,7 +35,7 @@ function kinds(stack) {
   deepEqual(kinds(stack), ['menu'], 'and stands in the stack');
 }
 
-// --- Menus are exclusive -----------------------------------------------
+// --- Menus are exclusive (pin) -----------------------------------------
 
 {
   const stack = createOverlayStack();
@@ -55,7 +55,7 @@ function kinds(stack) {
   equal(stack.top(), dialog, 'with the dialog on top');
 }
 
-// --- A commit closes menus and never dialogs ---------------------------
+// --- A commit closes menus and never dialogs (pin) ---------------------
 
 {
   const stack = createOverlayStack();
@@ -73,7 +73,7 @@ function kinds(stack) {
   equal(menu.closed, 1, 'closing the menus twice closes nothing twice');
 }
 
-// --- Escape goes to the top entry --------------------------------------
+// --- Escape goes to the top entry (N-ACC-003) --------------------------
 
 {
   const stack = createOverlayStack();
@@ -88,7 +88,7 @@ function kinds(stack) {
   equal(menu.closed + dialog.closed + panel.closed, 3, 'each closed exactly once');
 }
 
-// --- Closing ------------------------------------------------------------
+// --- Closing (pin) ------------------------------------------------------
 
 {
   const stack = createOverlayStack();
@@ -102,7 +102,7 @@ function kinds(stack) {
   equal(panel.closed, 1, 'and does not close it twice');
 }
 
-// --- The opener rides with its entry ------------------------------------
+// --- The opener rides with its entry (N-ACC-003) ------------------------
 
 {
   const stack = createOverlayStack();

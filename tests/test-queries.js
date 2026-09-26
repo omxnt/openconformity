@@ -34,7 +34,7 @@ function offered(model, subjectId) {
   }));
 }
 
-// --- The offer follows the metamodel and the model ----------------------
+// --- The offer follows the metamodel and the model (F-MOD-002) ----------
 
 {
   const model = createModel();
@@ -72,7 +72,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- Composition narrows the offer --------------------------------------
+// --- Composition narrows the offer (F-MOD-002) --------------------------
 
 {
   const model = createModel();
@@ -116,7 +116,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The full surface --------------------------------------------------
+// --- The full surface (F-MOD-002) --------------------------------------
 
 {
   const model = createModel();
@@ -136,7 +136,7 @@ function offered(model, subjectId) {
   }
 }
 
-// --- The form label and the designation ----------------------------------
+// --- The form label and the designation (pin) ----------------------------
 
 {
   equal(
@@ -159,7 +159,7 @@ function offered(model, subjectId) {
   equal(designated(nodeOf(model, 'ELM-001')), 'ELM-001', 'a blank title is no title');
 }
 
-// --- The new-related offer ---------------------------------------------
+// --- The new-related offer (F-MOD-001, F-MOD-002) ----------------------
 
 {
   const model = createModel();
@@ -196,7 +196,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The move predicates -----------------------------------------------
+// --- The move predicates (F-WSP-004) -----------------------------------
 
 {
   const model = createModel();
@@ -217,7 +217,7 @@ function offered(model, subjectId) {
   equal(canMoveUp(model, null), false, 'nor does no selection');
 }
 
-// --- Every legal destination -------------------------------------------
+// --- Every legal destination (F-WSP-004) -------------------------------
 
 {
   const model = createModel();
@@ -250,7 +250,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The cascade question counts what it takes -------------------------
+// --- The cascade question counts what it takes (F-MOD-007, F-WSP-007) ---
 
 {
   const model = createModel();
@@ -303,7 +303,7 @@ function offered(model, subjectId) {
   equal(deletionQuestion(model, 'HAZ-001').message, 'Its 1 relationship is removed with it.', 'or counts what is removed, in the singular');
 }
 
-// --- The label a reference-bearing type composes --------------------------
+// --- The label a reference-bearing type composes (pin) --------------------
 
 {
   const model = createModel();
@@ -346,7 +346,7 @@ function offered(model, subjectId) {
   equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
 }
 
-// --- A filter's one rule ---------------------------------------------------
+// --- A filter's one rule (F-WSP-001) ---------------------------------------
 
 {
   const entity = { id: 'HAZ-001', kind: 'entity', type: 'HAZ', attributes: { title: 'Moving Parts' } };
@@ -355,7 +355,7 @@ function offered(model, subjectId) {
   ok(!entityMatches(entity, 'guard'), 'but not text it holds nowhere');
 }
 
-// --- Excluded entities ------------------------------------------------------
+// --- Excluded entities (pin) ------------------------------------------------
 
 {
   const model = createModel();

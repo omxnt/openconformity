@@ -30,7 +30,7 @@ function childIds(model, parentId) {
   return childrenOf(model, parentId).map((node) => node.id);
 }
 
-// --- Creation ----------------------------------------------------------
+// --- Creation (F-MOD-001) ----------------------------------------------
 
 {
   const model = createModel();
@@ -55,7 +55,7 @@ function childIds(model, parentId) {
   equal(filed.entity.parent, 'ELM-001', 'an entity can be created inside another node');
 }
 
-// --- Creation from a file ----------------------------------------------
+// --- Creation from a file (F-PER-010) ----------------------------------
 
 {
   const model = createModel();
@@ -73,7 +73,7 @@ function childIds(model, parentId) {
   refused(addFolder(model, 'Wrong', { id: 'ELM-001' }), 'a folder identifier of another code is refused');
 }
 
-// --- Folders -----------------------------------------------------------
+// --- Folders (F-WSP-006) -----------------------------------------------
 
 {
   const model = createModel();
@@ -93,7 +93,7 @@ function childIds(model, parentId) {
   refused(renameFolder(model, entity.id, 'X'), 'renaming an entity as a folder is refused');
 }
 
-// --- Updates -----------------------------------------------------------
+// --- Updates (F-MOD-004) -----------------------------------------------
 
 {
   const model = createModel();
@@ -110,7 +110,7 @@ function childIds(model, parentId) {
   deepEqual(Object.keys(nodeOf(model, 'ELM-001').attributes), [], 'the entity carries only what is set');
 }
 
-// --- Filing ------------------------------------------------------------
+// --- Filing (F-WSP-004, F-WSP-005) -------------------------------------
 
 {
   const model = createModel();
@@ -151,7 +151,7 @@ function childIds(model, parentId) {
   deepEqual(childIds(model, null), [zone.id, b.id], 'a filed node lands last among its new siblings');
 }
 
-// --- Sibling order -----------------------------------------------------
+// --- Sibling order (F-WSP-004) -----------------------------------------
 
 {
   const model = createModel();
@@ -186,7 +186,7 @@ function childIds(model, parentId) {
   equal(did.ok, false, 'placeBeside agrees with canPlaceBeside');
 }
 
-// --- Relationships -----------------------------------------------------
+// --- Relationships (F-MOD-002, F-MOD-005) ------------------------------
 
 {
   const model = createModel();
@@ -224,7 +224,7 @@ function childIds(model, parentId) {
   allowed(canRelate(model, 'elm-exhibits-haz', elm.id, haz.id), 'and could be created again');
 }
 
-// --- Folder deletion ---------------------------------------------------
+// --- Folder deletion (F-WSP-007) ---------------------------------------
 
 {
   const model = createModel();
@@ -248,7 +248,7 @@ function childIds(model, parentId) {
   allowed(removeFolder(model, outer.id), 'an empty folder is deleted too');
 }
 
-// --- The project's own attributes ---------------------------------------
+// --- The project's own attributes (pin) ---------------------------------
 
 {
   const model = createModel();

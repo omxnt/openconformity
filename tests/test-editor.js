@@ -10,6 +10,8 @@ import { createModel, addEntity, relate, removeEntity, unrelate } from '../app/m
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
+// --- The draft against the entity (F-MOD-004) ------------------------------
+
 const definitions = attributesFor('ELM');
 
 equal(draftChanged(definitions, {}, {}), false, 'an empty draft over an empty entity is clean');
@@ -26,7 +28,7 @@ equal(
 );
 equal(draftChanged([], { title: 'Mixer' }, {}), false, 'with no definitions there is nothing to change');
 
-// --- A hyperlink is presented as a link only when it is a web address ----
+// --- A hyperlink is presented as a link only when it is a web address (N-SEC-002) ---
 
 equal(linkable('https://eur-lex.europa.eu/eli/reg/2023/1230/oj'), true, 'an https address is followable');
 equal(linkable('http://example.org'), true, 'so is http');
@@ -36,7 +38,7 @@ equal(linkable('mailto:info@openconformity.org'), false, 'nor is any other schem
 equal(linkable('eur-lex.europa.eu'), false, 'a bare host is text until it says its scheme');
 equal(linkable(''), false, 'and an empty value is nothing');
 
-// --- What a type's form holds ---------------------------------------------
+// --- What a type's form holds (F-MOD-003, F-WSP-002) ----------------------
 
 {
   deepEqual(
@@ -302,7 +304,7 @@ equal(linkable(''), false, 'and an empty value is nothing');
   }
 }
 
-// --- what a save removes, as the notice tells it ---
+// --- what a save removes, as the notice tells it (N-SEC-005) ---
 equal(removalText([{ name: 'Integrity level', value: 'EN ISO 13849-1' }]), 'Integrity level under EN ISO 13849-1.', 'one group under one value');
 equal(removalText([{ name: 'Initial risk estimation', value: 'Risk matrix' }, { name: 'Residual risk estimation', value: 'Risk matrix' }]), 'Initial risk estimation and Residual risk estimation under Risk matrix.', 'two groups under one value are joined by and');
 equal(removalText([{ name: 'A', value: 'X' }, { name: 'B', value: 'X' }, { name: 'C', value: 'X' }]), 'A, B and C under X.', 'three are listed with commas and an and');
@@ -312,7 +314,7 @@ equal(
   'groups under different values are told in order, one clause each'
 );
 
-// --- The measures a residual rating was made against ----------------------
+// --- The measures a residual rating was made against (F-MOD-011) ----------
 
 {
   deepEqual(

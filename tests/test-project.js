@@ -13,6 +13,8 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 const MATRIX = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';
 const GRAPH = 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)';
 
+// --- What saving the project sweeps (N-SEC-005) ----------------------------
+
 const model = createModel();
 model.attributes.estimationMethod = MATRIX;
 addEntity(model, 'SCN', { attributes: { initialSeverity: 'Serious', initialSeverityRationale: 'Credible', initialProbability: 'Likely', evaluation: 'Fine.' } });
@@ -45,7 +47,7 @@ deepEqual(projectSweep(model, same), { entities: [], count: 0, text: '' }, 'the 
 ok(projectSweep(model, { ...same, version: '2', description: 'x' }).count === 0, 'the revision fields sweep nothing');
 ok(projectSweep(model, { ...same, estimationMethod: '' }).entities.every((held) => held.id.startsWith('SCN')), 'a safety function waits on nothing of the project, so no save of the project touches it');
 
-// --- What a file holds under choices not in force ---------------------------
+// --- What a file holds under choices not in force (N-SEC-005) ---------------
 
 {
   deepEqual(hiddenContent(createModel()), { entities: [], count: 0, lines: [] }, 'an empty project holds nothing hidden');
@@ -66,7 +68,7 @@ ok(projectSweep(model, { ...same, estimationMethod: '' }).entities.every((held) 
   equal(hiddenContent(unrated).count, 0, 'with no method chosen the typed rating is the one in force');
 }
 
-// --- What no definition presents ------------------------------------------
+// --- What no definition presents (F-PER-010) ------------------------------
 
 {
   deepEqual(unknownContent(createModel()), [], 'an empty project holds nothing unknown');

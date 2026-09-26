@@ -14,7 +14,7 @@ function childIds(model, parentId) {
   return childrenOf(model, parentId).map((node) => node.id);
 }
 
-// --- Loading the valid fixture -----------------------------------------
+// --- Loading the valid fixture (F-PER-001, F-PER-010) ------------------
 
 const fixtureText = readFile('fixtures/valid.json');
 const opened = openProject(fixtureText);
@@ -34,7 +34,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(model.relationships.size, 4, 'every relationship is replayed');
 }
 
-// --- Round-trip stability ----------------------------------------------
+// --- Round-trip stability (F-PER-001, F-PER-003) -----------------------
 
 {
   const second = serialise(opened.model);
@@ -62,7 +62,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   deepEqual(written.entities[1].attributes, { legacy: 'kept as written' }, 'an unpresented key is written back unchanged');
 }
 
-// --- Round-trip from a built model -------------------------------------
+// --- Round-trip from a built model (F-PER-001) -------------------------
 
 {
   const model = createModel();
@@ -82,7 +82,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   deepEqual(reopened.model.counters, { ...model.counters }, 'the counters survive');
 }
 
-// --- The gates, in order -----------------------------------------------
+// --- The gates, in order (F-PER-004, F-PER-005, F-PER-006) -------------
 
 {
   const newer = openProject(readFile('fixtures/newer-version.json'));
@@ -106,7 +106,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(loadProject({ format: 'openconformity-project', schemaVersion: 999 }).code, 'newer', 'any later version refuses as newer');
 }
 
-// --- The filename ------------------------------------------------------
+// --- The filename (pin) ------------------------------------------------
 
 {
   equal(filenameFor(''), 'untitled.json', 'an unnamed project saves as untitled');
@@ -117,7 +117,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(filenameFor('café'), 'cafe.json', 'diacritics fold to their letters');
 }
 
-// --- The blob path -----------------------------------------------------
+// --- The blob path (F-SES-001) -----------------------------------------
 
 {
   const asBlobProject = loadProject(toFileObject(opened.model));
@@ -125,7 +125,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(serialise(asBlobProject.model), serialise(opened.model), 'and rebuilds the same model');
 }
 
-// --- The project's attribute bag rides the file -------------------------
+// --- The project's attribute bag rides the file (F-PER-001) -------------
 
 {
   const model = createModel();

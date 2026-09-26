@@ -27,7 +27,7 @@ import { relationshipOptions } from '../app/modules/queries.js';
 import { createModel, addEntity, addFolder, relate } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The union candidate set -------------------------------------------
+// --- The union candidate set (F-MOD-002) -------------------------------
 
 {
   const model = createModel();
@@ -51,7 +51,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   ok(!pickerCandidates(model, picker).has('F-1'), 'a folder is never a candidate');
 }
 
-// --- What a pair means -------------------------------------------------
+// --- What a pair means (F-MOD-002) -------------------------------------
 
 {
   const model = createModel();
@@ -77,7 +77,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(pairOptions(model, 'ELM-001', 'HAZ-001'), [], 'a relationship that exists empties its pair');
 }
 
-// --- The grouped list --------------------------------------------------
+// --- The grouped list (F-WSP-003) --------------------------------------
 
 {
   const model = createModel();
@@ -120,7 +120,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(relationshipRows(model, null), [], 'nor does no selection');
 }
 
-// --- The picks as the table lands them -----------------------------------
+// --- The picks as the table lands them (F-MOD-002) -----------------------
 
 {
   const model = createModel();
@@ -160,7 +160,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(stale[0].form, null, 'a pick whose pair no longer admits anything carries no form');
 }
 
-// --- The tables, real and provisional together ----------------------------
+// --- The tables, real and provisional together (F-WSP-003) ----------------
 
 {
   const model = createModel();
@@ -216,7 +216,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
 }
 
-// --- The presented rows: sort and filter over the grouped order -----------
+// --- The presented rows: sort and filter over the grouped order (F-WSP-003) ---
 
 {
   const model = createModel();
@@ -273,7 +273,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
 }
 
-// --- The picks as provisional neighbours -----------------------------------
+// --- The picks as provisional neighbours (F-WSP-003) -----------------------
 
 {
   const model = createModel();
@@ -306,7 +306,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual([gone.outgoing, gone.incoming], [[], []], 'a stale pick stays off the canvas: the list carries it');
 }
 
-// --- The neighbourhood -------------------------------------------------
+// --- The neighbourhood (F-WSP-003) -------------------------------------
 
 {
   const model = createModel();
@@ -334,7 +334,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
 }
 
-// --- The graph caps a side at seven ------------------------------------
+// --- The graph caps a side at seven (pin) ------------------------------
 
 {
   const model = createModel();
@@ -361,7 +361,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(stripText(openGroups(right, new Set(['outgoing:elm-exhibits-haz']))[0]), 'Show fewer', 'and offers the way back');
 }
 
-// --- The box caption ----------------------------------------------------
+// --- The box caption (pin) ----------------------------------------------
 
 {
   const model = createModel();
@@ -374,7 +374,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(caption(entity).length, 27, 'at twenty-seven characters');
 }
 
-// --- The orthogonal layout ------------------------------------------------
+// --- The orthogonal layout (pin) ------------------------------------------
 
 {
   equal(attachmentY(32, 64, 64), 32, 'a lone row attaches at the middle of the subject');
@@ -397,7 +397,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 }
 
-// --- The groups: the first always shows, a pick holds its group open ----------
+// --- The groups: the first always shows, a pick holds its group open (pin) ----
 
 {
   const real = Array.from({ length: 9 }, (unused, index) => ({ relationship: { type: 'elm-exhibits-haz' }, other: { id: `HAZ-00${index}`, type: 'HAZ' } }));
@@ -438,7 +438,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual([lone.rows.length, lone.height], [1, 64], 'a group of one is a box and nothing more, as the graph always drew it');
 }
 
-// --- The graph narrows to a filter, the subject staying ------------------------
+// --- The graph narrows to a filter, the subject staying (F-WSP-003) ------------
 
 {
   const subject = { id: 'SCN-001', kind: 'entity', type: 'SCN', attributes: { title: 'Contact with Moving Parts' } };
@@ -460,7 +460,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(filteredNeighbourhood(around, 'zzz').outgoing.length + filteredNeighbourhood(around, 'zzz').incoming.length, 0, 'and nothing answers what nothing holds');
 }
 
-// --- The messages table ---------------------------------------------------
+// --- The messages table (F-VIE-002) ---------------------------------------
 
 {
   const finding = (id, label, name, recorded, ids) => ({ id, type: 'SCN', label, definition: { key: 'measures', name, recorded }, states: ids.map((held) => ({ id: held, label: held, state: 'unlinked' })), text: `The ${name.toLowerCase()} have changed since the ${recorded.toLowerCase()}.` });

@@ -10,7 +10,7 @@ import { createHistory } from '../app/modules/history.js';
 import { createModel, addEntity, updateEntity, relate, nodeOf, setProjectAttribute } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The line ----------------------------------------------------------
+// --- The line (F-MOD-008, F-MOD-009) -----------------------------------
 
 {
   let model = createModel();
@@ -36,7 +36,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.canRedo(), false, 'and the top is reached again');
 }
 
-// --- Counters outside snapshots ----------------------------------------
+// --- Counters outside snapshots (F-MOD-008, F-MOD-009) -----------------
 
 {
   let model = createModel();
@@ -56,7 +56,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(Object.keys(model.counters).length, 19, 'every counter rides across undo and redo');
 }
 
-// --- Name and relationships travel with the snapshot -------------------
+// --- Name and relationships travel with the snapshot (F-MOD-008, F-MOD-009) ---
 
 {
   let model = createModel();
@@ -77,7 +77,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(model.relationships.size, 1, 'intact');
 }
 
-// --- Truncation --------------------------------------------------------
+// --- Truncation (F-MOD-008) --------------------------------------------
 
 {
   let model = createModel();
@@ -95,7 +95,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), recorded, 'the cursor stands at the new entry');
 }
 
-// --- Depth eviction ----------------------------------------------------
+// --- Depth eviction (pin) ----------------------------------------------
 
 {
   let model = createModel();
@@ -115,7 +115,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), 10, 'the oldest surviving entry keeps its own sequence');
 }
 
-// --- Rollback ----------------------------------------------------------
+// --- Rollback (pin) ----------------------------------------------------
 
 {
   let model = createModel();
@@ -138,7 +138,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   ok(recorded > dropped, 'a dropped sequence is never reused');
 }
 
-// --- Depth -------------------------------------------------------------
+// --- Depth (pin) -------------------------------------------------------
 
 {
   let model = createModel();
@@ -153,7 +153,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(history.depth(), { back: 1, forward: 1 }, 'an undo trades a step back for a step forward');
 }
 
-// --- Reset -------------------------------------------------------------
+// --- Reset (pin) -------------------------------------------------------
 
 {
   let model = createModel();
@@ -168,7 +168,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), seeded, 'and the cursor stands on it');
 }
 
-// --- The entries are nobody else's -------------------------------------
+// --- The entries are nobody else's (F-MOD-008) -------------------------
 
 {
   const model = createModel();
@@ -191,7 +191,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(nodeOf(history.undo(again), 'ELM-001').attributes.title, 'Mixer', 'a change made to a restored model does not reach the entry');
 }
 
-// --- Snapshots carry the project's attributes ---------------------------
+// --- Snapshots carry the project's attributes (F-MOD-008, F-MOD-009) ----
 
 {
   const model = createModel();

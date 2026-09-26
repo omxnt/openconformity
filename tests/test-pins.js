@@ -19,7 +19,7 @@ import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/modules/icons.js';
 import { ok, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 
-// --- Pane headers are working surfaces or nothing ----------------------
+// --- Pane headers are working surfaces or nothing (G-SYS-005) ----------
 
 {
   const page = readFile('../app/index.html');
@@ -29,7 +29,7 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- Compliance: the licences ride with the software --------------------
+// --- Compliance: the licences ride with the software (C-PRJ-003, C-TEC-005) ---
 
 {
   ok(readFile('../app/LICENSE.txt').includes('EUROPEAN UNION PUBLIC LICENCE v. 1.2'), 'the EUPL-1.2 text is reachable at LICENSE.txt');
@@ -37,7 +37,7 @@ import { fakeStorage } from './helpers.js';
   ok(readFile('../app/assets/icons/LICENSE.txt').includes('Apache License'), 'the Apache licence rides with the icons');
 }
 
-// --- The help surface and the chrome ------------------------------------
+// --- The help surface and the chrome (pin) ------------------------------
 
 {
   const page = readFile('../app/index.html');
@@ -54,7 +54,7 @@ import { fakeStorage } from './helpers.js';
   );
 }
 
-// --- The bundled metamodel exports --------------------------------------
+// --- The bundled metamodel exports (N-OPS-002) --------------------------
 
 {
   for (const theme of ['light', 'dark']) {
@@ -68,7 +68,7 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- The file surface stays on the baseline ----------------------------
+// --- The file surface stays on the baseline (F-PER-001) ----------------
 
 {
   const page = readFile('../app/index.html');
@@ -82,7 +82,7 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- The ways into a project live in the editor's empty state ------------
+// --- The ways into a project live in the editor's empty state (F-APP-002) ---
 
 {
   const editor = readFile('../app/modules/editor.js');
@@ -93,7 +93,7 @@ import { fakeStorage } from './helpers.js';
   ok(!navigator.includes('landing-'), 'and the navigator landing carries no buttons: they live in one place');
 }
 
-// --- Every glyph drawn is in the sprite, with its provenance -------------
+// --- Every glyph drawn is in the sprite, with its provenance (C-TEC-005, G-SYS-004) ---
 
 {
   const page = readFile('../app/index.html');
@@ -109,7 +109,7 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- The dogfooding batch: what the review ordered -----------------------
+// --- The dogfooding batch: what the review ordered (pin) -----------------
 
 {
   const shell = readFile('../app/modules/shell.js');
@@ -156,7 +156,7 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.table th {\n  position: sticky;'), 'the relationship table head stays put while the body scrolls');
 }
 
-// --- The second dogfooding batch -----------------------------------------
+// --- The second dogfooding batch (pin) -----------------------------------
 
 {
   const page = readFile('../app/index.html');
@@ -188,7 +188,7 @@ import { fakeStorage } from './helpers.js';
   }
 }
 
-// --- The fourth dogfooding batch -----------------------------------------
+// --- The fourth dogfooding batch (pin) -----------------------------------
 
 {
   const relationships = readFile('../app/modules/relationships.js');
@@ -211,7 +211,7 @@ import { fakeStorage } from './helpers.js';
   );
 }
 
-// --- The editor lays attributes out as cells, its groups as tabs ------------
+// --- The editor lays attributes out as cells, its groups as tabs (G-SYS-001) ---
 
 {
   const sheet = readFile('../app/style.css');
@@ -274,7 +274,7 @@ import { fakeStorage } from './helpers.js';
   ok(!shell.includes('fieldStyle'), 'the shell offers no choice of treatments');
 }
 
-// --- Every tab bar in the app is the one design ------------------------------
+// --- Every tab bar in the app is the one design (G-SYS-001) ------------------
 
 {
   const relationships = readFile('../app/modules/relationships.js');
@@ -338,7 +338,7 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.pane-relationships .pane-body { display: flex; flex-direction: column; }') && sheet.includes('.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }'), "the graph's host fills its pane, so its scrollbar sits at the pane's edge");
 }
 
-// --- A safety function's required level, chosen in its standard's terms -------
+// --- A safety function's required level, chosen in its standard's terms (C-PRJ-005, F-MOD-003) ---
 
 {
   const doc = readFile('../notes/attributes.md');
@@ -360,7 +360,7 @@ import { fakeStorage } from './helpers.js';
   ok(!rating.includes('PL_') && !rating.includes('SIL_') && !rating.includes("'rated'"), "the dialog draws the scenario's methods alone");
 }
 
-// --- A rating shows only under its method, and what it comes to is never stored ---
+// --- A rating shows only under its method, and what it comes to is never stored (N-SEC-005) ---
 
 {
   const editor = readFile('../app/modules/editor.js');
@@ -437,7 +437,7 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.tone-high .risk-dot { background: var(--danger); }') && sheet.includes('--support-success:'), "the levels take Carbon's status colours");
 }
 
-// --- The pre-paint theme script speaks the store's literals --------------
+// --- The pre-paint theme script speaks the store's literals (pin) --------
 
 {
   const page = readFile('../app/theme.js');
@@ -457,7 +457,7 @@ import { fakeStorage } from './helpers.js';
   ok(page.includes(`? '${themes[1]}' : '${themes[0]}'`), 'and its system fallback lands on the same pair');
 }
 
-// --- The closing check: the exact minimum viewport ----------------------
+// --- The closing check: the exact minimum viewport (F-APP-001, N-CMP-001) ---
 
 {
   const sheet = readFile('../app/style.css');
@@ -482,7 +482,7 @@ import { fakeStorage } from './helpers.js';
   ok(sheet.includes('.pane-relationships { flex: 0 1 var(--relationships-height, 280px); min-height: 120px; }'), 'the relationship pane shrinks to its floor before anything overflows');
 }
 
-// --- The closing check: the navigator holds its toolbar -----------------
+// --- The closing check: the navigator holds its toolbar (pin) -----------
 
 {
   const sheet = readFile('../app/style.css');
@@ -494,7 +494,7 @@ import { fakeStorage } from './helpers.js';
   ok(readFile('../app/modules/splitter.js').includes('const past = asked < minimum / 2;') && readFile('../app/modules/splitter.js').includes('if (past !== snapped) {\n        snapped = past;\n        if (past) apply(clamp(before));\n        collapse(past);\n      }') && shell.includes('collapse: (state) => store.setRelationshipsCollapsed(state),') && shell.split('collapse: (state) =>').length === 2, 'a drag past half the minimum snaps the relationship pane closed, keeping the size it had for the reopening, and back past it snaps it open; the navigator has no such point');
 }
 
-// --- The closing check: pointer targets and the menu bar keys ------------
+// --- The closing check: pointer targets and the menu bar keys (N-ACC-001, N-ACC-003) ---
 
 {
   const sheet = readFile('../app/style.css');
@@ -509,7 +509,7 @@ import { fakeStorage } from './helpers.js';
   ok(readFile('../app/modules/splitter.js').includes("addEventListener('dblclick', () => {\n    if (collapsed()) collapse(false);\n    apply(clamp(preset));\n  })"), 'a double click returns a pane to its preset, opening it first where it stands collapsed: resizing needs no drag');
 }
 
-// --- The closing check: text carries AA contrast in both themes ---------
+// --- The closing check: text carries AA contrast in both themes (N-ACC-001) ---
 
 {
   const sheet = readFile('../app/style.css');
@@ -558,7 +558,7 @@ import { fakeStorage } from './helpers.js';
   );
 }
 
-// --- A view over the workspace ---------------------------------------------
+// --- A view over the workspace (F-VIE-001) ---------------------------------
 
 {
   const views = readFile('../app/modules/views.js');
@@ -579,7 +579,7 @@ import { fakeStorage } from './helpers.js';
   ok(views.includes("held.setAttribute('aria-sort', sort.direction === 'asc' ? 'ascending' : 'descending');") && views.includes("const next = sort?.column !== i ? 'asc' : sort.direction === 'asc' ? 'desc' : null;"), 'a column head sorts up, down, then not at all');
 }
 
-// --- A method carries its source --------------------------------------------
+// --- A method carries its source (C-PRJ-005) --------------------------------
 
 {
   const risk = readFile('../app/modules/risk.js');

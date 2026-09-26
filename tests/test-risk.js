@@ -14,6 +14,8 @@ const MATRIX_METHOD = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';
 const GRAPH_METHOD = 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)';
 const SCORING_METHOD = 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)';
 
+// --- The methods and their source (C-PRJ-005, F-MOD-003) -------------------
+
 const document = readFile('../notes/attributes.md');
 const chapter = document.slice(document.indexOf('## 6. Risk estimation'), document.indexOf('## 7. References'));
 ok(chapter.length > 0, 'the document carries the risk estimation chapter, before the references');
@@ -57,7 +59,7 @@ deepEqual(
 deepEqual(METHODS, [MATRIX_METHOD, GRAPH_METHOD, SCORING_METHOD], "three methods ship, the report's examples, each naming the report and its clause");
 ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hybrid tool is not transcribed");
 
-// --- Risk matrix, 6.2.2 Table 1 ---------------------------------------------
+// --- Risk matrix, 6.2.2 Table 1 (F-MOD-003) ---------------------------------
 
 {
   const [table] = tablesOf('6.1 Risk matrix');
@@ -80,7 +82,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   equal(estimate('Hybrid tool', ['Se 4', 'Fr 2', 'Pr 1', 'Av 1']), null, 'a method not known reads nothing');
 }
 
-// --- Risk graph, 6.3.2 Figures 3 and 4 --------------------------------------
+// --- Risk graph, 6.3.2 Figures 3 and 4 (F-MOD-003) --------------------------
 
 {
   const [table, bands] = tablesOf('6.2 Risk graph');
@@ -106,7 +108,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   ok(JSON.stringify(GRAPH_TREE).split('"label":"').slice(1).every((held) => /^(Start|[SFOA]\d(, [SFOA]\d)*)"/.test(held)), 'the drawn graph carries the codes alone');
 }
 
-// --- Numerical scoring, 6.4.2 Table 2 ---------------------------------------
+// --- Numerical scoring, 6.4.2 Table 2 (F-MOD-003) ---------------------------
 
 {
   const [severityClasses, probabilityClasses, table] = tablesOf('6.3 Numerical scoring');
@@ -127,7 +129,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   deepEqual(['95', ' 7 ', '', 'Se 4', '-1', '1.5'].map(scoreOf), [95, 7, NaN, NaN, NaN, NaN], 'a score is a whole number and nothing else');
 }
 
-// --- The graph as drawn agrees with the graph as tabled ------------------------
+// --- The graph as drawn agrees with the graph as tabled (pin) ------------------
 
 {
   let checked = 0;
@@ -160,7 +162,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   ok(!graphLive(['S2', 'F2', '', ''], [S2, F1]), 'and a single branch not chosen dims its subtree');
 }
 
-// --- A level's tone, whichever method said it -------------------------------------
+// --- A level's tone, whichever method said it (pin) -------------------------------
 
 {
   deepEqual(['High', 'RI 5 (highest)', 'RS 175 (high)'].map(levelTone), ['high', 'high', 'high'], "high, in every method's word");
@@ -170,7 +172,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   deepEqual([null, '', 'Whatever was typed'].map(levelTone), ['none', 'none', 'none'], 'and none for nothing, or a typed rating');
 }
 
-// --- Every method names its source ---------------------------------------------
+// --- Every method names its source (C-PRJ-005) ---------------------------------
 
 ok(METHODS.every((method) => /^\w[\w ]+ \(ISO\/TR 14121-2:2012, 6\.\d\.2\)$/.test(method)), 'each method names the report, its year and the clause its example stands in, as a citation after its name, so the choice reads as one wherever it is shown');
 deepEqual(ESTIMATED, METHODS, "the estimator knows the project's three methods and no more");

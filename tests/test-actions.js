@@ -17,7 +17,7 @@ function enabledIds(actions) {
   return actions.filter((action) => action.enabled()).map((action) => action.id);
 }
 
-// --- The landing offers the three ways in and the help surface ----------
+// --- The landing offers the three ways in and the help surface (F-APP-002) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -29,7 +29,7 @@ function enabledIds(actions) {
   );
 }
 
-// --- The action list against a live store ------------------------------
+// --- The action list against a live store (F-MOD-001, F-MOD-005, F-MOD-008, F-MOD-009, N-ACC-003) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -156,7 +156,7 @@ function enabledIds(actions) {
   equal(enabled().redo, true, 'an undone change can be redone');
 }
 
-// --- Menu grouping -----------------------------------------------------
+// --- Menu grouping (pin) -----------------------------------------------
 
 {
   deepEqual(menuGroups([]), [], 'no items, no groups');
@@ -186,7 +186,7 @@ function enabledIds(actions) {
   );
 }
 
-// --- Nothing acts while a diagram is open ------------------------------------
+// --- Nothing acts while a diagram is open (F-DRW-003) ------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -199,7 +199,7 @@ function enabledIds(actions) {
   ok(actions.find((action) => action.id === 'new-entity').enabled(), 'and acts again once it closes');
 }
 
-// --- The toolbar's shape ---------------------------------------------------
+// --- The toolbar's shape (pin) ---------------------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -211,7 +211,7 @@ function enabledIds(actions) {
   );
 }
 
-// --- Reorder stands down while the tree is filtered ------------------------
+// --- Reorder stands down while the tree is filtered (F-WSP-001) ------------
 
 {
   const store = createStore({ storage: fakeStorage() });

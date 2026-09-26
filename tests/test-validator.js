@@ -36,7 +36,7 @@ function mutated(change) {
   return copy;
 }
 
-// --- The fixtures ------------------------------------------------------
+// --- The fixtures (F-PER-006) ------------------------------------------
 
 equal(validate(valid, 1).ok, true, 'the valid fixture passes');
 equal(validate(JSON.parse(readFile('fixtures/null-parent.json')), 1).ok, true, 'a null parent passes: the pattern applies to strings only');
@@ -54,7 +54,7 @@ refusedOver(JSON.parse(readFile('fixtures/counter-behind.json')), 'counter does 
 equal(validate(valid, 99).ok, false, 'an unknown schema version has no transcription');
 equal(validate(valid, 0).ok, false, 'nor does version 0');
 
-// --- Keyword mutations -------------------------------------------------
+// --- Keyword mutations (F-PER-006, N-SEC-001) --------------------------
 
 refusedOver(mutated((data) => delete data.name), 'has no name', 'a missing required key is refused');
 refusedOver(mutated((data) => { data.extra = 1; }), 'extra', 'an unknown root key is refused');
@@ -94,7 +94,7 @@ ok(validate('text', 1).ok === false, 'a file that is not an object is refused');
 ok(validate(null, 1).ok === false, 'null is refused');
 ok(validate([], 1).ok === false, 'an array is refused');
 
-// --- The enumerations, behaviourally -----------------------------------
+// --- The enumerations, behaviourally (F-MOD-001, F-MOD-002) ------------
 
 const schema = JSON.parse(readFile('../specs/project.schema.json'));
 const relationshipIds = schema.$defs.relationship.properties.type.enum;
@@ -186,7 +186,7 @@ for (const id of relationshipIds) {
   );
 }
 
-// --- The project's attribute bag ----------------------------------------
+// --- The project's attribute bag (F-PER-001) ----------------------------
 
 {
   const bagged = JSON.parse(readFile('fixtures/valid-attributes.json'));
