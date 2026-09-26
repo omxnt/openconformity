@@ -181,7 +181,7 @@ The software shall be hosted on Cloudflare Pages.
 
 `ubiquitous` `stable`
 
-The metamodel shall be maintained as Mermaid text in `spec/metamodel.md`.
+The metamodel shall be maintained as Mermaid text in `specs/metamodel.md`.
 
 > *Mermaid is a text format, so the diagram in the document is its own source, renders wherever the document is read, and cannot drift from an exported image. Being text, it constrains no tool. Any editor serves, and the repository diff shows every change to the model.*
 
@@ -524,7 +524,7 @@ When a folder is deleted, the software shall delete every folder and entity file
 
 `ubiquitous` `stable`
 
-The software shall only permit the creation of entity types defined by the metamodel in `spec/metamodel.md`.
+The software shall only permit the creation of entity types defined by the metamodel in `specs/metamodel.md`.
 
 > *The metamodel encodes the domain. Allowing an entity type it does not define would let a model express something the domain does not have. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
@@ -534,7 +534,7 @@ The software shall only permit the creation of entity types defined by the metam
 
 `ubiquitous` `stable`
 
-The software shall only permit the creation of relationships defined by the metamodel in `spec/metamodel.md`.
+The software shall only permit the creation of relationships defined by the metamodel in `specs/metamodel.md`.
 
 > *A relationship not present in the metamodel has no meaning in the domain. Enforcing this on creation is what makes a model structurally sound by construction rather than by review. The referenced diagram is the authoritative definition, transcribed by the implementation.*
 
@@ -544,7 +544,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 `ubiquitous` `stable`
 
-The software shall only present and edit the attributes defined for the entity's type in `spec/attributes.md`.
+The software shall only present and edit the attributes defined for the entity's type in `notes/attributes.md`.
 
 > *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form. Which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
 
@@ -658,7 +658,7 @@ The software shall list the entities whose recorded relationships no longer matc
 
 `ubiquitous` `stable`
 
-The software shall persist a project as a single local file conforming to `schema/project.schema.json`.
+The software shall persist a project as a single local file conforming to `specs/project.schema.json`.
 
 > *A project holds the user's model of one product's conformity, the entities and their relationships, following the metamodel. Saved as a single local file the user owns and controls, a project is portable, inspectable, and reloadable without any server or account. The schema is the authoritative definition of a valid project file.*
 
@@ -668,7 +668,7 @@ The software shall persist a project as a single local file conforming to `schem
 
 `ubiquitous` `draft`
 
-The software shall read a library as a project file, valid against `schema/project.schema.json`.
+The software shall read a library as a project file, valid against `specs/project.schema.json`.
 
 > *A library is a project file used as a source, so one schema, one loader and one migration serve both. The catalogues the software ships are libraries written as projects, and a library of the user's own, when that function comes, is built in the tool as a project is. What an import carries across is F-MOD-010.*
 
