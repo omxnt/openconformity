@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { libraryRows, checkState, togglePick, importPlan, importInto, previewValue } from '../app/modules/library.js';
+import { libraryRows, checkState, togglePick, importPlan, importInto, previewValue, previewSections } from '../app/modules/library.js';
 import { LIBRARIES } from '../app/library/index.js';
 import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
@@ -118,6 +118,15 @@ ok(library.model.relationships.size > 0 && [...library.model.relationships.value
   equal(previewValue({ key: 'technologies', name: 'Technologies', kind: 'set', values: ['Mechanical', 'Hydraulic', 'Electrical'] }, 'Electrical;Mechanical'), 'Mechanical, Electrical', 'a set as its values in the order defined');
   equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [] }, [{}, {}]), '2 rows', 'a table as its row count');
   equal(previewValue({ key: 'rating', name: 'Rating', kind: 'computed' }, 'High'), null, 'a computed value shows nowhere');
+
+  const sections = previewSections(nodeOf(library.model, 'ESR-002'));
+  deepEqual(sections.map((section) => section.name), ['Requirement', 'Applicability'], "a clause shows a section per tab that holds a value, the first named as the editor's first tab");
+  deepEqual(sections[0].fields.map((field) => field.name).slice(0, 3), ['Reference', 'Title', 'Requirement'], "with its attributes in the editor's order");
+  const catalogue = createModel();
+  const hazard = addEntity(catalogue, 'HAZ', { attributes: { title: 'Crushing', eliminated: 'Yes' } }).entity;
+  deepEqual(previewSections(hazard).map((section) => [section.name, section.fields.map((field) => field.value)]), [['Hazard', ['Crushing']], ['Elimination', ['Yes']]], 'a hazard eliminated shows its Elimination tab as a second section');
+  deepEqual(previewSections(addEntity(catalogue, 'HAZ', { attributes: { title: 'Shearing' } }).entity).map((section) => section.name), ['Hazard'], 'and a tab holding nothing is left out');
+  deepEqual(previewSections(addEntity(catalogue, 'HAZ').entity), [], 'an entity holding nothing shows no section');
 }
 
 summary('test-library');

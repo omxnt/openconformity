@@ -18,8 +18,8 @@ import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js'
 import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { attributesFor } from './attributes.js';
-import { setValues } from './editor.js';
+import { typeOf } from './attributes.js';
+import { setValues, firstTabName } from './editor.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
 
@@ -184,14 +184,38 @@ export function previewValue(definition, value) {
 }
 
 /**
+ * What the preview shows of an entity, by the editor's tabs: a section
+ * per tab with the attributes that hold a value, in the editor's order,
+ * a tab whose attributes all hold nothing left out.
+ * @param {import('./model.js').Entity} entity
+ * @returns {Array<{ name: string, fields: Array<{ name: string, value: string }> }>}
+ */
+export function previewSections(entity) {
+  const type = typeOf(entity.type) ?? { attributes: [], groups: [] };
+  const flat = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(flat)];
+  const tabs = [{ name: firstTabName(entity.type), definitions: [...type.attributes, ...type.groups.filter((group) => !group.tab).flatMap(flat)] }];
+  for (const group of type.groups) if (group.tab) tabs.push({ name: group.name, definitions: flat(group) });
+  return tabs
+    .map(({ name, definitions }) => ({
+      name,
+      fields: definitions
+        .map((definition) => ({ name: definition.name, value: previewValue(definition, entity.attributes?.[definition.key]) }))
+        .filter((field) => field.value !== null),
+    }))
+    .filter((section) => section.fields.length > 0);
+}
+
+/**
  * The picker as a mode of the editor pane, with the navigator alive
  * beside it. The head carries the title with what a pick would import,
  * the filter, the Import button and the close. The body carries the
  * catalogues as tabs, the open catalogue's tree with a checkbox per
  * row on the left, and on the right the entity under the highlight as
- * a sheet of what its attributes hold. The copies land where the
- * navigator's selection stands. Opened from the toolbar, closed by its
- * X or Escape, never kept across a reload.
+ * a sheet of what its attributes hold, by the editor's tabs as folds,
+ * all closed until opened. The copies land where the navigator's
+ * selection stands. While open, the picker takes the whole column, the
+ * relationship pane and its splitter hidden. Opened from the toolbar,
+ * closed by its X or Escape, never kept across a reload.
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head  the editor pane's head
@@ -219,6 +243,8 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   let expanded = new Set();
   /** @type {string|null} the row the preview shows */
   let highlight = null;
+  /** @type {Set<string>} the preview's open sections */
+  let openSections = new Set();
   let list = null;
   let preview = null;
   let count = null;
@@ -237,6 +263,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     picks = new Set();
     expanded = new Set();
     highlight = null;
+    openSections = new Set();
     render();
   }
 
@@ -314,6 +341,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   }
 
   function focusRow(id) {
+    if (id !== highlight) openSections = new Set();
     highlight = id;
     renderList();
     renderPreview();
@@ -424,17 +452,30 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     const label = entityLabel(node);
     if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
     preview.appendChild(el('div', { className: 'library-preview-head' }, parts));
-    const fields = [];
-    for (const definition of attributesFor(node.type)) {
-      const value = previewValue(definition, node.attributes?.[definition.key]);
-      if (value === null) continue;
-      fields.push(el('div', { className: 'field' }, [el('span', { className: 'field-label', text: definition.name }), el('div', { className: 'field-static', text: value })]));
+    const sections = previewSections(node);
+    if (sections.length === 0) {
+      preview.appendChild(el('p', { className: 'library-note', text: 'Its attributes hold nothing.' }));
+      return;
     }
-    if (fields.length === 0) fields.push(el('p', { className: 'library-note', text: 'Its attributes hold nothing.' }));
-    preview.append(...fields);
+    for (const section of sections) {
+      const open = openSections.has(section.name);
+      const fold = el('button', { className: 'library-fold', attributes: { type: 'button', 'aria-expanded': String(open) } }, [
+        el('span', { className: 'library-fold-chevron' }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')]),
+        el('span', { text: section.name }),
+      ]);
+      fold.addEventListener('click', () => {
+        if (open) openSections.delete(section.name);
+        else openSections.add(section.name);
+        renderPreview();
+      });
+      const panel = el('div', { className: 'library-section' }, section.fields.map((field) => el('div', { className: 'field' }, [el('span', { className: 'field-label', text: field.name }), el('div', { className: 'field-static', text: field.value })])));
+      panel.hidden = !open;
+      preview.append(fold, panel);
+    }
   }
 
   function render() {
+    body.closest('.column')?.classList.toggle('library-open', store.libraryOpen() && store.hasProject());
     if (!store.libraryOpen()) {
       shown = false;
       return;
