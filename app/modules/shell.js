@@ -195,10 +195,9 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     menubar.push({ button, openIt });
   }
 
-  // The file actions, then the import into the open project, then the
-  // example behind a separator: the way in that replaces your work stands
-  // apart from the ones that save it or add to it.
-  const fileGroups = ['project', 'import', 'example', 'browser'];
+  // The file actions, then the example behind a separator: the way in
+  // that replaces your work stands apart from the ones that save it.
+  const fileGroups = ['project', 'example', 'browser'];
   menubarMenu(fileButton, 'File', () => {
     const items = [];
     let lastGroup = null;
@@ -494,7 +493,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width - SPLITTER - COLUMN_FLOOR,
-    minimum: 266,
+    minimum: 300,
     preset: 320,
     apply: (width) => {
       workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`);

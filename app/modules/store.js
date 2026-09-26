@@ -134,6 +134,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let relationshipsCollapsed = false;
   /** Whether the messages stand over the relationship pane: opened from the status bar, closed by its X or Escape, never kept across a reload. */
   let messagesOpen = false;
+  /** Whether the library picker stands over the editor pane: opened from the toolbar, closed by its X or Escape, never kept across a reload. */
+  let libraryOpen = false;
   try {
     relationshipsCollapsed = session?.getItem(COLLAPSE_KEY) === 'true';
   } catch {
@@ -481,6 +483,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       consented = false;
       relationshipView = 'graph';
       messagesOpen = false;
+      libraryOpen = false;
       for (const code of Object.keys(chosenTabs)) delete chosenTabs[code];
       persistFailed = false;
       storageNearlyFull = false;
@@ -787,6 +790,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
         // A session store that refuses changes nothing.
       }
       collapseRelationships(false);
+      notify();
+    },
+
+    /** Whether the library picker stands over the editor pane. */
+    libraryOpen: () => libraryOpen,
+
+    /**
+     * Show the library picker over the editor pane, or hand the pane back
+     * to the editor.
+     * @param {boolean} open
+     */
+    setLibraryOpen(open) {
+      if (open === libraryOpen) return;
+      libraryOpen = open;
       notify();
     },
 

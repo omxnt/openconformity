@@ -14,6 +14,8 @@ import { createGraphView } from './graph.js';
 import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 import { createViewsPane } from './views.js';
+import { createLibraryPane } from './library.js';
+import { LIBRARIES } from '../library/index.js';
 
 const retention = createRetention({ indexedDB: window.indexedDB, storageManager: window.navigator.storage ?? null });
 const store = createStore({ storage: window.localStorage, session: window.sessionStorage, retention });
@@ -85,6 +87,14 @@ createRelationshipsView({
   onUnrelate: (relationship) => flows.removeRelationship(relationship),
   onSelect: (id) => flows.selectNode(id),
   addEnabled: () => relateAction.enabled(),
+});
+createLibraryPane({
+  store,
+  head: document.getElementById('editor-head'),
+  body: document.getElementById('editor-body'),
+  libraries: LIBRARIES,
+  onImport: (chosen) => flows.importPicks(chosen),
+  onClose: () => flows.closeLibrary(),
 });
 createViewsPane({
   store,

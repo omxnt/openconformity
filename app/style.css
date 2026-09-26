@@ -394,7 +394,7 @@ body {
 
 .pane-navigator {
   flex: 0 0 var(--navigator-width, 320px);
-  min-width: 266px;  /* the toolbar: seven 32px buttons, two dividers of 1px with 8px margins, eight 2px gaps, 4px padding each side */
+  min-width: 300px;  /* the toolbar: eight 32px buttons, two dividers of 1px with 8px margins, nine 2px gaps, 4px padding each side */
 }
 
 .column {
@@ -746,10 +746,10 @@ body {
 /* The library picker: the library's tree with a checkbox per entity, an
    entity the project already holds greyed at the one strength of
    standing back and marked as in the project. */
-.dialog:has(.library) { max-width: 800px; }
-.library { display: grid; gap: 12px; color: var(--text); }  /* $spacing-04 */
-.library-source { margin: 0; color: var(--text-second); }
-.library-list { max-height: 50vh; overflow: auto; border: 1px solid var(--border-subtle); }
+.library { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px 0 0; color: var(--text); }  /* $spacing-04, $spacing-05 */
+.library-source { margin: 0 16px; color: var(--text-second); }  /* $spacing-05 */
+.library-list { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+.library-count { color: var(--text-second); }
 .library-row { display: flex; align-items: center; gap: 8px; min-height: 32px; padding-right: 16px; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
 .library-row.folder { color: var(--text-second); }
 .library-row label { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }  /* $spacing-03 */
@@ -764,7 +764,7 @@ body {
 .library-row.present label > .icon { opacity: 0.25; }
 .library-row .tag { margin-left: auto; }
 .library-note { margin: 0; padding: 16px; color: var(--text-second); }  /* $spacing-05 */
-.library-into { margin: 0; color: var(--text-second); }
+.library-into { margin: 0 16px 16px; color: var(--text-second); }  /* $spacing-05 */
 .consent-box input:focus-visible + .checkbox { outline: 2px solid var(--focus); outline-offset: 1px; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }

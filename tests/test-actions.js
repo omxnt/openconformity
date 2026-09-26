@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'import', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'import', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -54,11 +54,6 @@ function enabledIds(actions) {
     actions.filter((action) => action.menubar && action.group === 'project').map((action) => action.id),
     ['new-project', 'open', 'save'],
     'the File menu leads with the file actions'
-  );
-  deepEqual(
-    actions.filter((action) => action.menubar && action.group === 'import').map((action) => action.id),
-    ['import'],
-    'then the import into the open project, in a group of its own'
   );
   deepEqual(
     actions.filter((action) => action.menubar && action.group === 'example').map((action) => action.id),
@@ -92,7 +87,6 @@ function enabledIds(actions) {
       'new-project': true,
       open: true,
       save: true,
-      import: true,
       'load-example': true,
       'clear-browser-data': true,
       'save-aside-copy': false,
@@ -103,6 +97,7 @@ function enabledIds(actions) {
       'new-entity': true,
       'new-related': false,
       'new-folder': true,
+      import: true,
       relate: false,
       'move-up': false,
       'move-down': false,
@@ -198,8 +193,8 @@ function enabledIds(actions) {
   const actions = createActions({ store, flows: {} });
   deepEqual(
     actions.filter((action) => action.toolbar).map((action) => action.id),
-    ['new-entity', 'new-related', 'new-folder', 'move-up', 'move-down', 'move-to', 'delete'],
-    'the tree toolbar holds the tree actions: relating lives in the relationship pane, undo and redo in the shell'
+    ['new-entity', 'new-related', 'new-folder', 'import', 'move-up', 'move-down', 'move-to', 'delete'],
+    'the tree toolbar holds the tree actions and the import from a library: relating lives in the relationship pane, undo and redo in the shell'
   );
 }
 

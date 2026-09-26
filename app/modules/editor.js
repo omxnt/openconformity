@@ -1152,6 +1152,7 @@ export function createEditor({
       editingProject = false;
     }
 
+    if (store.libraryOpen() && store.hasProject()) return;
     head.textContent = '';
     body.textContent = '';
     refreshers = [];

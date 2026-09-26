@@ -3,7 +3,7 @@
  * items, and an import copies what is picked into the open project. The
  * pure part reads a library against the project, recognising by
  * reference what the project already holds, planning what a pick brings
- * with it and copying it in; the picker puts that in a dialog.
+ * with it and copying it in; the picker puts that over the editor pane.
  *
  * Recognition is by reference alone, since imports carry no provenance
  * (D-056): an act by the year and number at the core of its citation, a
@@ -19,7 +19,7 @@ import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { loadProject } from './files.js';
-import { el, icon, tabKeys } from './dom.js';
+import { el, icon, tabKeys, tooltipOn } from './dom.js';
 
 /** The types recognised by their own reference, and the types recognised by their owner's together with their own. */
 const CITED = new Set(['LEG', 'HST', 'OSP']);
@@ -167,20 +167,22 @@ export function importInto(project, library, pickedIds, targetId = null) {
 }
 
 /**
- * The picker: a dialog over the workspace listing a library's tree with a
- * checkbox per entity, the ones the project already holds greyed and
- * unpickable, a filter, and Import. Resolves to what was chosen, or null.
+ * The picker as a mode of the editor pane, with the navigator alive
+ * beside it: the head carries the title with what a pick would import,
+ * the filter, the Import button and the close; the body the library's
+ * tree with a checkbox per entity, the ones the project already holds
+ * greyed and unpickable. Opened from the toolbar, closed by its X or
+ * Escape, never kept across a reload. Renders only while open, and
+ * leaves the pane to the editor otherwise.
  * @param {Object} context
- * @param {ReturnType<import('./dialog.js').createDialogs>} context.dialogs
  * @param {ReturnType<import('./store.js').createStore>} context.store
+ * @param {HTMLElement} context.head  the editor pane's head
+ * @param {HTMLElement} context.body  the editor pane's body
  * @param {import('../library/index.js').Library[]} context.libraries
- * @returns {Promise<{ library: import('./model.js').Model, picks: string[], target: string|null }|null>}
+ * @param {(chosen: { library: import('./model.js').Model, picks: string[], target: string|null }) => void} context.onImport
+ * @param {() => void} context.onClose
  */
-export async function openLibraryPicker({ dialogs, store, libraries }) {
-  const project = store.model();
-  const selected = nodeOf(project, store.selection());
-  const target = selected && selected.kind === 'folder' ? selected : null;
-
+export function createLibraryPane({ store, head, body, libraries, onImport, onClose }) {
   /** @type {Map<string, { ok: boolean, model?: import('./model.js').Model, statement?: string }>} */
   const loaded = new Map();
   const libraryOf = (entry) => {
@@ -194,20 +196,69 @@ export async function openLibraryPicker({ dialogs, store, libraries }) {
   let current = 0;
   let filter = '';
   const picks = new Set();
+  let list = null;
+  let count = null;
+  let shown = false;
 
-  const body = el('div', { className: 'library' });
-  const list = el('div', { className: 'library-list', attributes: { role: 'group', 'aria-label': 'The library' } });
-  const count = el('span', { className: 'library-count' });
-  const search = el('input', {
-    className: 'field-input',
-    attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the library' },
-  });
-  search.addEventListener('input', () => {
-    filter = search.value;
-    renderList();
-  });
+  for (const region of [head, body]) {
+    region.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !store.libraryOpen()) return;
+      event.preventDefault();
+      onClose();
+    });
+  }
 
-  function renderTabs() {
+  function targetOf() {
+    const selected = nodeOf(store.model(), store.selection());
+    return selected && selected.kind === 'folder' ? selected : null;
+  }
+
+  function plannedCount(library) {
+    const present = presence(store.model(), library);
+    return importPlan(library, picks).filter((node) => !present.get(node.id)).length;
+  }
+
+  function renderCount() {
+    const held = libraryOf(libraries[current]);
+    const planned = held.ok ? plannedCount(held.model) : 0;
+    count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
+    const button = head.querySelector('.library-import');
+    if (button) button.disabled = planned === 0;
+  }
+
+  function renderHead() {
+    head.textContent = '';
+    head.hidden = false;
+    count = el('span', { className: 'library-count' });
+    const search = el('input', {
+      className: 'field-input head-search',
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the library' },
+    });
+    search.value = filter;
+    search.addEventListener('input', () => {
+      filter = search.value;
+      renderList();
+    });
+    const importButton = el('button', { className: 'form-button button-primary library-import', text: 'Import', attributes: { type: 'button' } });
+    importButton.addEventListener('click', () => {
+      const held = libraryOf(libraries[current]);
+      if (!held.ok || picks.size === 0) return;
+      const chosen = { library: held.model, picks: [...picks], target: targetOf()?.id ?? null };
+      picks.clear();
+      onImport(chosen);
+    });
+    const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]);
+    close.addEventListener('click', onClose);
+    tooltipOn(close, 'Close the library', { align: 'end' });
+    head.append(
+      el('span', { className: 'head-title', text: 'Import from library' }),
+      count,
+      el('span', { className: 'toolbar-spacer' }),
+      el('div', { className: 'pane-head-actions' }, [search, importButton, close])
+    );
+  }
+
+  function renderSources() {
     if (libraries.length < 2) return el('p', { className: 'library-source', text: `${libraries[0].name}, as of ${libraries[0].date}` });
     const tabs = el('div', { className: 'tabs', attributes: { role: 'tablist', 'aria-label': 'Library' } });
     libraries.forEach((entry, i) => {
@@ -234,15 +285,14 @@ export async function openLibraryPicker({ dialogs, store, libraries }) {
 
   function renderList() {
     list.textContent = '';
-    const entry = libraries[current];
-    const held = libraryOf(entry);
+    const held = libraryOf(libraries[current]);
     if (!held.ok) {
       list.appendChild(el('p', { className: 'library-note', text: held.statement ?? 'The library could not be read.' }));
-      count.textContent = '';
+      renderCount();
       return;
     }
     const library = held.model;
-    const present = presence(project, library);
+    const present = presence(store.model(), library);
     const rows = libraryRows(library, filter);
     if (rows.length === 0) {
       list.appendChild(el('p', { className: 'library-note', text: filter.trim() === '' ? 'The library is empty.' : 'Nothing matches the filter.' }));
@@ -261,12 +311,13 @@ export async function openLibraryPicker({ dialogs, store, libraries }) {
       box.checked = picks.has(node.id);
       if (already) {
         box.disabled = true;
+        picks.delete(node.id);
         row.classList.add('present');
       }
       box.addEventListener('change', () => {
         if (box.checked) picks.add(node.id);
         else picks.delete(node.id);
-        renderCount(library);
+        renderCount();
       });
       const label = el('label', {}, [
         box,
@@ -279,37 +330,36 @@ export async function openLibraryPicker({ dialogs, store, libraries }) {
       if (already) row.appendChild(el('span', { className: 'tag', text: 'In the project' }));
       list.appendChild(row);
     }
-    renderCount(library);
-  }
-
-  function renderCount(library) {
-    const planned = importPlan(library, picks).filter((node) => !presence(project, library).get(node.id)).length;
-    count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
+    renderCount();
   }
 
   function render() {
+    if (!store.libraryOpen()) {
+      shown = false;
+      return;
+    }
+    const scrollTop = list?.scrollTop ?? 0;
+    renderHead();
     body.textContent = '';
-    body.append(renderTabs(), search, list, el('p', { className: 'library-into' }, [count, el('span', { text: ` · Into ${target ? `the folder ${target.name}` : 'the root of the project'}` })]));
+    list = el('div', { className: 'library-list', attributes: { role: 'group', 'aria-label': 'The library' } });
+    const target = targetOf();
+    body.appendChild(
+      el('div', { className: 'library' }, [
+        renderSources(),
+        list,
+        el('p', { className: 'library-into', text: `Into ${target ? `the folder ${target.name}` : 'the root of the project'}` }),
+      ])
+    );
     renderList();
+    list.scrollTop = scrollTop;
+    if (!shown) {
+      shown = true;
+      head.querySelector('.head-search')?.focus();
+    }
   }
+
+  store.subscribe(render);
   render();
 
-  const answer = await dialogs.open({
-    title: 'Import',
-    body,
-    actions: [
-      { label: 'Cancel', value: null, kind: 'secondary' },
-      {
-        label: 'Import',
-        kind: 'primary',
-        run: () => {
-          const held = libraryOf(libraries[current]);
-          if (!held.ok || picks.size === 0) return undefined;
-          return { library: held.model, picks: [...picks], target: target?.id ?? null };
-        },
-      },
-    ],
-    initialFocus: search,
-  });
-  return answer ?? null;
+  return { render };
 }

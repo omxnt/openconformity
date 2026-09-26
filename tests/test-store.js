@@ -526,6 +526,14 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(notified, told, 'opening them again is nothing');
   store.setMessagesOpen(false);
   equal(store.messagesOpen(), false, 'and the X hands the pane back');
+  equal(store.libraryOpen(), false, 'the library picker stands closed');
+  store.setLibraryOpen(true);
+  equal(store.libraryOpen(), true, 'opened from the toolbar');
+  const heard = notified;
+  store.setLibraryOpen(true);
+  equal(notified, heard, 'opening it again is nothing');
+  store.setLibraryOpen(false);
+  equal(store.libraryOpen(), false, 'and the X hands the editor pane back');
 
   deepEqual(
     Object.keys((await blobIn(store, retention)).session),
