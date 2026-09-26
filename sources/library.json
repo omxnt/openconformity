@@ -1,16 +1,7 @@
-/**
- * The library project the software ships, a copy of sources/app-library.json
- * in the project file's shape: each folder at its root is a catalogue the
- * picker offers as a tab. Regenerated from the source when it changes,
- * never edited here. The legislation's text is the Official Journal's,
- * as the source records it.
- */
-
-/** @type {Object} */
-export const APP_LIBRARY = {
+{
   "format": "openconformity-project",
   "schemaVersion": 1,
-  "name": "app-library",
+  "name": "library",
   "attributes": {
     "organisation": "openconformity",
     "description": "This library project contains the pre-shipped catalogues with entities for openconformity.",
@@ -19,7 +10,7 @@ export const APP_LIBRARY = {
     "author": "omxnt",
     "role": "Maintainer",
     "changes": "Library project created.",
-    "designation": "app-library.json"
+    "designation": "library.json"
   },
   "counters": {
     "LEG": 2,
@@ -3472,4 +3463,4 @@ export const APP_LIBRARY = {
       "target": "ESR-224"
     }
   ]
-};
+}

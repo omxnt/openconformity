@@ -5,7 +5,7 @@
  * folders' order, each with the date the library project carries.
  */
 
-import { APP_LIBRARY } from './app-library.js';
+import { LIBRARY } from './data.js';
 
 /**
  * @typedef {Object} Library
@@ -39,6 +39,6 @@ export function catalogueOf(project, folderId) {
 }
 
 /** @type {Library[]} */
-export const LIBRARIES = APP_LIBRARY.folders
+export const LIBRARIES = LIBRARY.folders
   .filter((folder) => folder.parent === null)
-  .map((folder) => ({ id: folder.id, name: folder.name, date: APP_LIBRARY.attributes?.date ?? '', project: catalogueOf(APP_LIBRARY, folder.id) }));
+  .map((folder) => ({ id: folder.id, name: folder.name, date: LIBRARY.attributes?.date ?? '', project: catalogueOf(LIBRARY, folder.id) }));
