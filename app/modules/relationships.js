@@ -307,8 +307,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       cancel.addEventListener('click', () => store.endPicking());
       actions.push(done, cancel);
     } else {
-      const add = headIcon('Add relationship', 'i-add-relationship', onAdd);
-      add.disabled = !addEnabled();
+      const can = addEnabled();
+      const add = headIcon(can ? 'Add relationship' : 'Nothing to relate to', 'i-add-relationship', onAdd);
+      add.disabled = !can;
       actions.push(add);
     }
     actions.push(collapseToggle());
@@ -543,11 +544,9 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       );
     } else if (empty) {
       listHost.appendChild(
-        emptyState('No relationships', `${subject.id} is not related to anything yet.`, {
-          label: 'Add relationship',
-          icon: 'i-add-relationship',
-          onPick: onAdd,
-        })
+        addEnabled()
+          ? emptyState('No relationships', `${subject.id} is not related to anything yet.`, { label: 'Add relationship', icon: 'i-add-relationship', onPick: onAdd })
+          : emptyState('No relationships', `Nothing in the project can relate to ${subject.id} yet.`)
       );
       return;
     }
