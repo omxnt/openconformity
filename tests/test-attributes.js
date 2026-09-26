@@ -39,6 +39,8 @@ function parseDocument(text) {
   let table = null;
   /** where the table being read keeps each column, by header */
   let columns = {};
+  /** the slot whose variants are being read, its name and the heading's own group until a variant replaces it */
+  let slot = null;
 
   for (const raw of text.split('\n')) {
     const line = raw.trim();
@@ -70,10 +72,11 @@ function parseDocument(text) {
 
     const tab = line.match(/^#### [\d.]+ (.+?)((?: `[^`]+`)*)$/);
     const group = line.match(/^##### (.+?)((?: `[^`]+`)*)$/);
-    if (tab || group) {
+    const variant = line.match(/^###### (.+?)((?: `[^`]+`)*)$/);
+    if (tab || group || variant) {
       table = [];
       const tags = {};
-      for (const [, tag] of (tab ?? group)[2].matchAll(/`([^`]+)`/g)) {
+      for (const [, tag] of (tab ?? group ?? variant)[2].matchAll(/`([^`]+)`/g)) {
         const when = tag.match(/^when (\w+) =(?: (.+))?$/);
         const after = tag.match(/^after (\w+)$/);
         if (when) tags.when = { key: when[1], value: when[2] ?? '' };
@@ -86,10 +89,24 @@ function parseDocument(text) {
         if (Object.keys(tags).length > 0) problems.push(`${current.code}: the first tab carries a tag`);
       } else if (tab) {
         current.groups.push({ name: tab[1], tab: true, ...tags, attributes: table });
-      } else {
+        slot = null;
+      } else if (group) {
         const parent = current.groups.at(-1);
         if (!parent) problems.push(`${current.code}: a group "${group[1]}" on the first tab`);
         else (parent.groups ??= []).push({ name: group[1], ...tags, attributes: table });
+        slot = { name: group[1], held: parent?.groups?.at(-1) ?? null };
+      } else {
+        const parent = current.groups.at(-1);
+        if (!slot || !parent) problems.push(`${current.code}: a variant "${variant[1]}" under no slot`);
+        else {
+          if (slot.held) {
+            if (slot.held.attributes.length > 0 || Object.keys(slot.held).length > 2) problems.push(`${current.code}: the slot "${slot.name}" holds a table or a tag of its own`);
+            parent.groups.splice(parent.groups.indexOf(slot.held), 1);
+            slot.held = null;
+          }
+          if (!tags.when) problems.push(`${current.code}: the variant "${variant[1]}" of "${slot.name}" carries no when tag`);
+          parent.groups.push({ name: slot.name, ...tags, attributes: table });
+        }
       }
       continue;
     }
@@ -131,7 +148,7 @@ function parseDocument(text) {
  */
 function parseSharedHelp(text) {
   const lines = text.split('\n');
-  const start = lines.findIndex((line) => /^### [\d.]+ Help$/.test(line));
+  const start = lines.findIndex((line) => /^### [\d.]+ Shared help$/.test(line));
   /** @type {Object<string, string>} */
   const help = {};
   for (const line of lines.slice(start + 1)) {
@@ -145,7 +162,7 @@ function parseSharedHelp(text) {
 }
 
 const documentTypes = parseDocument(document);
-deepEqual(problems, [], 'the document nests every group under a tab and every column under a table, and every table has its five columns');
+deepEqual(problems, [], 'the document nests every group under a tab, every variant under a slot with its when tag, and every column under a table, and every table has its five columns');
 for (const type of [...documentTypes, documentProject]) equal(type.first, firstTabName(type.code), `${type.code}'s first tab is headed as the editor names it, by the last word of the type's name`);
 
 // --- The project -------------------------------------------------------
