@@ -10,7 +10,7 @@
 import './shim.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
-import { createModel, addEntity, addFolder, relate, nodeOf } from '../app/modules/model.js';
+import { createModel, addEntity, addFolder, relate, nodeOf, updateEntity } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor } from './helpers.js';
 import { memoryRetention } from '../app/modules/retention.js';
@@ -340,6 +340,27 @@ function flowsOver(store) {
   equal(saved.length, 1, 'cancel downloads nothing');
   equal(store.dirty(), true, 'moves no pointer');
   equal(store.model().name, 'Mixer line', 'and renames nothing');
+}
+
+// --- A changed record marked reviewed -------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const flows = createFlows({ store, overlay: {}, dialogs: { toast: (...held) => toasts.push(held) }, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addEntity(model, 'PRM'));
+  store.commit((model) => addEntity(model, 'PRM'));
+  store.commit((model) => relate(model, 'prm-eliminates-haz', 'PRM-001', 'HAZ-001'));
+  store.commit((model) => updateEntity(model, 'HAZ-001', { eliminated: 'Yes', measures: 'PRM-001' }));
+  store.commit((model) => relate(model, 'prm-eliminates-haz', 'PRM-002', 'HAZ-001'));
+  const definition = { key: 'measures', relationship: 'prm-eliminates-haz' };
+  ok(flows.markReviewed('HAZ-001', definition), 'a changed record is marked reviewed');
+  equal(nodeOf(store.model(), 'HAZ-001').attributes.measures, 'PRM-001; PRM-002', 'which writes it afresh from what is related now');
+  await flows.undo();
+  equal(nodeOf(store.model(), 'HAZ-001').attributes.measures, 'PRM-001', 'and undo brings the old record back');
+  equal(toasts.length, 0, 'with nothing to toast');
 }
 
 // --- Every deletion asks first ------------------------------------------

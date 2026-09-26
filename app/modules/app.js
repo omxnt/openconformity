@@ -38,6 +38,7 @@ const editor = createEditor({
   onReturn: () => flows.returnToView(),
   onEscape: () => flows.escapeEdit(),
   onAction: (id) => actions.find((action) => action.id === id)?.run({}),
+  onReview: (id, definition) => flows.markReviewed(id, definition),
 });
 const flows = createFlows({
   store,

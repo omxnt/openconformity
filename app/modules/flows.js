@@ -30,7 +30,8 @@ import {
   nodeOf,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated } from './queries.js';
+import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
+import { recordOf } from './records.js';
 import { removalText } from './editor.js';
 import { VIEWS } from './views.js';
 import { projectSweep } from './project.js';
@@ -401,6 +402,17 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @param {Object<string, string>} values
    * @returns {boolean}
    */
+  /**
+   * The review of a changed record: the record written afresh from what
+   * is related now, as one change the history can undo.
+   * @param {string} id
+   * @param {{ key: string, relationship: string }} definition
+   */
+  function markReviewed(id, definition) {
+    const value = recordOf(relatedIds(store.model(), id, definition.relationship));
+    return toastRefusal('Could not mark reviewed', store.commit((model) => updateEntity(model, id, { [definition.key]: value })));
+  }
+
   function saveEdit(id, values) {
     if (id === null) {
       return store.commit((model) => {
@@ -927,6 +939,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     discardAside,
     openProjectFlow,
     loadExample,
+    markReviewed,
     importFromLibrary,
     importPicks,
     closeLibrary,

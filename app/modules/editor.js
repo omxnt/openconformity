@@ -228,6 +228,7 @@ export const LANDING_OFFER = [
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
+ * @param {(id: string, definition: Object) => void} [context.onReview]  a changed record marked reviewed in view: written afresh from what is related now
  * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
  * @param {(values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveProject]  the project's draft, asked about first where it removes what entities hold
  * @param {(entries: Array<{ name: string, value: string }>) => Promise<boolean>} [context.onRemoval]  asks before a save removes what hidden groups still hold
@@ -249,6 +250,7 @@ export function createEditor({
   onRemoval = async () => true,
   onEscape = () => {},
   onAction = () => {},
+  onReview = () => {},
   dialogs = null,
   overlay = null,
 }) {
@@ -563,10 +565,22 @@ export function createEditor({
       const grid = panelOfGroup.get(definition.recorded);
       if (!grid) continue;
       const words = reviewText(definition);
+      const review = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Mark reviewed' })]);
+      review.addEventListener('click', () => {
+        if (mode === 'edit') {
+          const record = records.find((held) => held.definition.key === definition.key);
+          if (!record) return;
+          record.input.value = recordOf(relatedIds(store.model(), editingId, definition.relationship));
+          record.input.dispatchEvent(new Event('input', { bubbles: true }));
+        } else if (current) {
+          onReview(current.id, definition);
+        }
+      });
       grid.prepend(
         el('div', { className: 'notice notice-warning', attributes: { role: 'status' } }, [
           icon('i-warning'),
           el('div', { className: 'notice-body' }, [el('span', { className: 'notice-title', text: words.title }), el('span', { className: 'notice-text', text: words.text })]),
+          el('div', { className: 'notice-actions' }, [review]),
         ])
       );
     }
