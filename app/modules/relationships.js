@@ -297,23 +297,8 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
 
     const actions = [searchControl()];
     if (picking) {
-      const current = store.picker();
-      const shown = [...pickerCandidates(store.model(), current)].filter((id) => entityMatches(nodeOf(store.model(), id), store.navigatorFilter()));
-      const picked = new Set(current.picks.map((pick) => pick.id));
-      const onShown = shown.filter((id) => picked.has(id)).length;
-      const state = shown.length > 0 && onShown === shown.length ? 'checked' : onShown > 0 ? 'mixed' : 'none';
-      const all = el('button', {
-        className: 'head-all',
-        attributes: { type: 'button', role: 'checkbox', 'aria-checked': state === 'checked' ? 'true' : state === 'mixed' ? 'mixed' : 'false', 'aria-label': 'Pick all shown' },
-      }, [
-        el('span', { className: `checkbox${state === 'checked' ? ' on' : state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')]),
-        el('span', { className: 'head-count', text: picked.size === 0 ? 'Nothing picked' : `${picked.size} picked` }),
-      ]);
-      all.addEventListener('click', () => {
-        if (state === 'checked') store.unpickAll(shown);
-        else store.pickAll(shown);
-      });
-      actions.unshift(all);
+      const picked = store.picker().picks.length;
+      actions.unshift(el('span', { className: 'head-count', text: picked === 0 ? 'Nothing picked' : `${picked} picked` }));
       const done = el('button', { className: 'form-button button-primary', text: 'Done', attributes: { type: 'button' } });
       done.disabled = store.picker().picks.length === 0;
       done.addEventListener('click', () => {
