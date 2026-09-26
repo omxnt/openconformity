@@ -14,7 +14,17 @@ import { loadProject } from '../app/modules/files.js';
 import { entityLabel } from '../app/modules/queries.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-const { model } = loadProject(EXAMPLE_PROJECT);
+/** The example with no method chosen and no scenario rated, the state these checks describe; the shipped example itself is rated by the risk matrix. */
+function unrated() {
+  const held = loadProject(EXAMPLE_PROJECT).model;
+  held.attributes.estimationMethod = '';
+  for (const node of held.nodes.values()) {
+    if (node.kind !== 'entity' || node.type !== 'SCN') continue;
+    for (const key of Object.keys(node.attributes)) if (/^(initial|residual)/.test(key)) delete node.attributes[key];
+  }
+  return held;
+}
+const model = unrated();
 const labelOf = (id) => entityLabel(model.nodes.get(id));
 
 // --- The registry ---------------------------------------------------------
@@ -32,7 +42,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   equal(view.title, 'Risk assessment', 'titled for print');
   deepEqual(
     view.sections.map((section) => [section.name, section.tables[0].rows.length]),
-    [['All scenarios (4)', 4], ['Installation (0)', 0], ['Operation (1)', 1], ['Maintenance (3)', 3], ['Decommissioning (0)', 0]],
+    [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]],
     'every scenario on the first tab, then each phase holding the scenarios its tasks give rise to, each tab counting its rows in its name'
   );
   ok(view.sections.every((section) => typeof section.lead === 'string' && section.lead.length > 0), 'each section says what it holds');
@@ -68,7 +78,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
 // --- Rated scenarios spread over parameter columns --------------------------
 
 {
-  const rated = loadProject(EXAMPLE_PROJECT).model;
+  const rated = unrated();
   Object.assign(rated.attributes, { estimationMethod: 'Risk graph (ISO/TR 14121-2:2012, 6.3.2)' });
   Object.assign(rated.nodes.get('SCN-001').attributes, {
     initialS: 'S2', initialF: 'F2', initialO: 'O3', initialA: 'A2', initialSRationale: 'Amputation is credible at the tool',
@@ -104,7 +114,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(ratingColumns('Initial risk estimation', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)').map((column) => column.text), ['SS', 'PS', 'Rating'], "and one whose values are numbers by the initials of the name, as the report abbreviates them");
   deepEqual(ratingCells(rated.nodes.get('SCN-001'), 'Initial risk estimation', 'No such method'), [{ outcome: null }], 'and an empty outcome');
   deepEqual(ratingColumns('Initial risk estimation', ''), [{ text: 'Rating', group: 'Initial risk estimation' }], 'with no method chosen the typed rating is one column, wide enough for words');
-  const typed = loadProject(EXAMPLE_PROJECT).model;
+  const typed = unrated();
   Object.assign(typed.nodes.get('SCN-001').attributes, { initialRating: ' Tolerable ' });
   deepEqual(ratingCells(typed.nodes.get('SCN-001'), 'Initial risk estimation', ''), ['Tolerable'], 'holding what was typed, trimmed');
   deepEqual(ratingCells(typed.nodes.get('SCN-002'), 'Initial risk estimation', ''), [''], 'or nothing');
@@ -118,7 +128,7 @@ equal(columnText({ text: 'S', title: 'Severity', group: 'Initial risk estimation
 equal(columnText({ text: 'V1', sub: 'Emergency Stop Test', group: 'Test' }), 'Test · V1 · Emergency Stop Test', 'a sub-line follows');
 
 equal(cellText('plain', labelOf), 'plain', 'text is itself');
-equal(cellText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 Contact with Moving Parts; HAZ-001 Moving Parts', 'entities read as identifier and label');
+equal(cellText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts; HAZ-001 H-1 Moving Parts', 'entities read as identifier and label');
 equal(cellText({ code: 'S2', title: 'Severity: S2' }, labelOf), 'S2', 'a parameter is its code');
 equal(cellText({ outcome: { outcome: '6 (highest)', tone: 'high', parameters: [] } }, labelOf), '6 (highest)', 'a rating is its outcome');
 equal(cellText({ outcome: null }, labelOf), '', 'an unrated one is empty');

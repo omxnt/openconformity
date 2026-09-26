@@ -44,7 +44,7 @@ if (loaded.ok) {
   equal(EXAMPLE_PROJECT.name, 'Example machine', 'the example is the demo machine');
   equal(EXAMPLE_PROJECT.folders.length, 16, 'sixteen folders');
   equal(EXAMPLE_PROJECT.entities.length, 75, 'seventy-five entities');
-  equal(EXAMPLE_PROJECT.relationships.length, 136, 'a hundred and thirty-six relationships');
+  equal(EXAMPLE_PROJECT.relationships.length, 143, 'a hundred and forty-three relationships');
 
   const typesUsed = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));
   for (const code of Object.keys(ENTITY_TYPES)) {
@@ -52,11 +52,7 @@ if (loaded.ok) {
   }
 
   const formsUsed = new Set(EXAMPLE_PROJECT.relationships.map((relationship) => relationship.type));
-  deepEqual(
-    Object.keys(RELATIONSHIP_TYPES).filter((id) => !formsUsed.has(id)),
-    ['req-derives-from-esr', 'ver-verifies-esr', 'ver-verifies-hsr', 'ver-verifies-osr', 'cas-assesses-elm'],
-    'five relationship forms have no instance: the demo content never expressed them, and the example adds no judgement of its own'
-  );
+  deepEqual(Object.keys(RELATIONSHIP_TYPES).filter((id) => !formsUsed.has(id)), [], 'every relationship form has an instance');
 
   ok(
     EXAMPLE_PROJECT.entities.every((entity) => {
@@ -155,6 +151,25 @@ if (loaded.ok) {
   await flows.loadExample();
   deepEqual(answers, ['Replace the project?'], 'over unsaved work the question comes first');
   equal(store.model().nodes.size, 92, 'and declining it leaves the project untouched');
+}
+
+// --- The example is complete against the metamodel ------------------------
+
+{
+  const used = new Set(EXAMPLE_PROJECT.entities.map((entity) => entity.type));
+  deepEqual(Object.keys(ENTITY_TYPES).filter((code) => !used.has(code)), [], 'every entity type of the metamodel appears in the example');
+  const related = new Set(EXAMPLE_PROJECT.relationships.map((relationship) => relationship.type));
+  deepEqual(Object.keys(RELATIONSHIP_TYPES).filter((type) => !related.has(type)), [], 'and every relationship type is used');
+  const empty = [];
+  for (const code of Object.keys(ENTITY_TYPES)) {
+    const entities = EXAMPLE_PROJECT.entities.filter((entity) => entity.type === code);
+    for (const definition of attributesFor(code)) {
+      if (definition.kind === 'computed' || definition.kind === 'drawing') continue;
+      if (!entities.some((entity) => (entity.attributes[definition.key] ?? '') !== '')) empty.push(`${code}.${definition.key}`);
+    }
+  }
+  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, drawings excepted, since one has to come out of draw.io');
+  deepEqual(attributesFor('PROJECT').filter((definition) => (EXAMPLE_PROJECT.attributes[definition.key] ?? '') === '').map((definition) => definition.key), [], "and the project's own attributes are filled");
 }
 
 summary('test-example');
