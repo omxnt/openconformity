@@ -766,7 +766,7 @@ body {
 .library-row.highlighted { background: var(--layer-accent); }
 .library-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .library-row.folder .row-title { color: var(--text-second); }
-.library-row label { position: relative; display: flex; align-items: center; cursor: pointer; }
+.library-row .pick { position: relative; display: flex; align-items: center; cursor: pointer; }
 .library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .library-row .checkbox.mixed { background: var(--text); }
 .library-row .checkbox.mixed .icon { display: none; }

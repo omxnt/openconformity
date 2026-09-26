@@ -12,10 +12,11 @@
  * A relationship to anything not picked stays behind, since its other
  * end is not there. The picks are a tree's: checking a row checks it
  * and everything beneath it, unchecking one beneath leaves the row
- * partly checked, and whatever is checked or partly checked travels, so
- * a clause lands under its headings as the catalogue files it. Alt and
- * click checks one entity by itself. Folders are the catalogue's
- * shelves. They never travel, and checking one checks what it holds.
+ * partly checked, and only what is checked travels, a partly checked
+ * heading saying what is beneath it and nothing more. Alt and click,
+ * Option on a Mac, checks one entity without what is beneath it.
+ * Folders are the catalogue's shelves. They never travel, and checking
+ * one checks what it holds.
  */
 
 import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js';
@@ -94,34 +95,21 @@ function entitiesUnder(library, id) {
 }
 
 /**
- * The headings a set of picks carries: every entity a pick is filed
- * under, however far up, that is not itself picked. They travel with
- * the picks, partly checked, so the structure holds.
- * @param {import('./model.js').Model} library
- * @param {Set<string>} picks
- * @returns {Set<string>}
- */
-export function carriedBy(library, picks) {
-  const carried = new Set();
-  for (const id of picks) {
-    for (let above = nodeOf(library, nodeOf(library, id)?.parent); above && above.kind === 'entity'; above = nodeOf(library, above.parent)) {
-      if (!picks.has(above.id)) carried.add(above.id);
-    }
-  }
-  return carried;
-}
-
-/**
- * How a row's checkbox stands for a set of picks: checked when every
- * entity it stands for is picked, mixed when some are, none otherwise.
+ * How a row's checkbox stands for a set of picks. For an entity,
+ * checked when it is picked, so the check says it travels, mixed when
+ * it is not but something beneath it is, none otherwise. For a folder,
+ * checked when everything in it is picked, mixed when some of it is.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
  * @returns {'checked'|'mixed'|'none'}
  */
 export function checkState(library, picks, id) {
+  const node = nodeOf(library, id);
+  if (!node) return 'none';
   const under = entitiesUnder(library, id);
   const picked = under.filter((held) => picks.has(held)).length;
+  if (node.kind === 'entity') return picks.has(id) ? 'checked' : picked > 0 ? 'mixed' : 'none';
   if (under.length > 0 && picked === under.length) return 'checked';
   return picked > 0 ? 'mixed' : 'none';
 }
@@ -129,7 +117,7 @@ export function checkState(library, picks, id) {
 /**
  * Toggle a row as a tree does: a checked row unpicks everything it
  * stands for, any other row picks all of it. Alone, the one entity is
- * picked or unpicked by itself, nothing beneath it touched.
+ * picked or unpicked without what is beneath it.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
@@ -151,22 +139,21 @@ export function togglePick(library, picks, id, alone = false) {
 }
 
 /**
- * What an import copies: the picked entities and the headings they
- * carry, in the catalogue's filing order. Folders never travel.
+ * What an import copies: the picked entities in the catalogue's filing
+ * order, and nothing else. Folders never travel, nor does a heading
+ * that is only partly checked.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @returns {import('./model.js').Entity[]}
  */
 export function importPlan(library, picks) {
-  const carried = carriedBy(library, picks);
-  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && (picks.has(node.id) || carried.has(node.id)));
+  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && picks.has(node.id));
 }
 
 /**
- * Copy the picked entities and the headings they carry into the
- * project: each with its attributes, filed under the copy of the nearest
- * copied entity above it, and under the target where none is copied
- * above it. Then every relationship of the catalogue between two copied
+ * Copy the picked entities into the project: each with its attributes,
+ * filed under the copy of the nearest picked entity above it, and under
+ * the target where none is picked above it. Then every relationship of the catalogue between two copied
  * entities, between their copies. Identifiers are the project's own,
  * issued as it issues them.
  * @param {import('./model.js').Model} project
@@ -238,6 +225,9 @@ export function previewSections(entity) {
       .filter((field) => field.value !== null),
   }));
 }
+
+/** The modifier that picks one entity as the platform names it, Option on Apple's keyboards and Alt elsewhere. */
+const ALT_KEY = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '') ? 'Option' : 'Alt';
 
 /** The tree's floor, the navigator's own, and the preview's, one sentence of a clause across; the splitter's width; the tree's preset. */
 const TREE_FLOOR = 300;
@@ -470,20 +460,17 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       const box = el('input', { attributes: { type: 'checkbox', tabindex: '-1', 'aria-label': `Pick ${node.kind === 'folder' ? node.name : node.id}` } });
       box.checked = state === 'checked';
       box.indeterminate = state === 'mixed';
-      let alone = false;
-      box.addEventListener('change', () => {
-        togglePick(library, picks, node.id, alone);
-        alone = false;
+      const check = el('span', { className: 'pick' }, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
+      check.addEventListener('click', (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        togglePick(library, picks, node.id, event.altKey);
         focusRow(node.id);
         renderCount();
       });
-      const check = el('label', {}, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
-      check.addEventListener('click', (event) => {
-        event.stopPropagation();
-        alone = event.altKey;
-      });
 
       row.append(twisty, check);
+      box.addEventListener('click', (event) => event.preventDefault());
       if (node.kind === 'folder') {
         row.append(icon(FOLDER_ICON), el('span', { className: 'row-title', text: node.name }));
       } else {
@@ -491,7 +478,13 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
         const label = entityLabel(node);
         if (label) row.appendChild(el('span', { className: 'row-title', text: label }));
       }
-      row.addEventListener('click', () => focusRow(node.id));
+      row.addEventListener('click', (event) => {
+        if (event.altKey && node.kind === 'entity') {
+          togglePick(library, picks, node.id, true);
+          renderCount();
+        }
+        focusRow(node.id);
+      });
       row.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
           event.preventDefault();
@@ -591,7 +584,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       },
       keys: ['ArrowLeft', 'ArrowRight'],
     });
-    body.appendChild(el('div', { className: 'library' }, [split, el('p', { className: 'library-into' }, [el('span', { text: filedText() }), el('span', { className: 'library-hint', text: 'Alt and click picks one entity by itself.' })])]));
+    body.appendChild(el('div', { className: 'library' }, [split, el('p', { className: 'library-into' }, [el('span', { text: filedText() }), el('span', { className: 'library-hint', text: `${ALT_KEY} and click picks one entity without what is beneath it.` })])]));
     renderList();
     renderPreview();
     list.scrollTop = scrollTop;
