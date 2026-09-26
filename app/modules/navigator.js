@@ -252,6 +252,17 @@ export function createNavigator({
 
   /** Whether dragging is off: picks own the tree's clicks, and a filtered view's neighbours are not real siblings. */
   const dragLocked = () => store.picker() !== null || filter().trim() !== '';
+  /** @type {{ subject: string, id: string }|null} the row last picked by a plain click, the anchor a Shift+click picks a range from */
+  let lastPick = null;
+
+  /** The pickable rows shown between two rows, both included, in the tree's order. */
+  function pickableBetween(fromId, toId) {
+    const ids = [...container.querySelectorAll('.tree-row.pickable')].map((row) => row.dataset.id);
+    const a = ids.indexOf(fromId);
+    const b = ids.indexOf(toId);
+    if (a < 0 || b < 0) return [];
+    return ids.slice(Math.min(a, b), Math.max(a, b) + 1);
+  }
 
   filterInput.addEventListener('input', () => {
     filterClear.hidden = filterInput.value === '';
@@ -428,9 +439,18 @@ export function createNavigator({
     }
     if (excluded(row.node)) rowElement.appendChild(el('span', { className: 'visually-hidden', text: 'excluded' }));
 
-    rowElement.addEventListener('click', () => {
-      if (pickable) store.togglePick(row.id);
-      else onSelect(row.id);
+    rowElement.addEventListener('mousedown', (event) => {
+      if (pickable && event.shiftKey) event.preventDefault();
+    });
+    rowElement.addEventListener('click', (event) => {
+      if (!pickable) {
+        onSelect(row.id);
+        return;
+      }
+      const anchor = lastPick !== null && lastPick.subject === picking.subject && lastPick.id !== row.id ? lastPick.id : null;
+      if (event.shiftKey && anchor !== null) store.pickAll(pickableBetween(anchor, row.id));
+      else store.togglePick(row.id);
+      lastPick = { subject: picking.subject, id: row.id };
     });
     rowElement.addEventListener('dblclick', () => {
       if (picking.subject !== null) return;
@@ -493,6 +513,7 @@ export function createNavigator({
   function render() {
     const scroll = container.scrollTop;
     const hadFocus = container.contains(document.activeElement);
+    const focusedId = hadFocus ? document.activeElement.closest('.tree-row')?.dataset.id ?? null : null;
 
     container.textContent = '';
     search.hidden = !store.hasProject();
@@ -516,7 +537,10 @@ export function createNavigator({
     container.appendChild(tree);
 
     container.scrollTop = scroll;
-    if (hadFocus) container.querySelector('.tree-row.selected')?.focus();
+    if (hadFocus) {
+      const again = focusedId === null ? null : container.querySelector(`.tree-row[data-id="${focusedId}"]`);
+      (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: true });
+    }
 
     syncToolbar();
   }

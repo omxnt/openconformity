@@ -636,6 +636,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     },
 
     /**
+     * Pick every entity named that is not yet picked, as one change: a
+     * range picked with Shift.
+     * @param {string[]} ids
+     */
+    pickAll(ids) {
+      if (picker === null) return;
+      const held = new Set(picker.picks.map((pick) => pick.id));
+      const fresh = ids.filter((id) => !held.has(id));
+      if (fresh.length === 0) return;
+      for (const id of fresh) picker.picks.push({ id, form: null });
+      notify();
+    },
+
+    /**
      * Choose the relationship a pick means, where its pair admits more
      * than one.
      * @param {string} id

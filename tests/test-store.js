@@ -411,6 +411,8 @@ async function restored(retention, storage = fakeStorage(), session = null) {
 
   store.togglePick('HAZ-001');
   store.togglePick('HAZ-002');
+  store.pickAll(['HAZ-001', 'HAZ-002']);
+  equal(store.picker().picks.length, 2, 'a range already picked adds nothing');
   deepEqual(
     store.picker().picks,
     [{ id: 'HAZ-001', form: null }, { id: 'HAZ-002', form: null }],
