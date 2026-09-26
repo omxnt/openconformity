@@ -125,7 +125,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(retention.records.get('project').project.entities.length, 3, 'and the retention holds the newest');
 }
 
-// --- The saved pointer (pin) -------------------------------------------
+// --- The saved pointer (no requirement) -------------------------------------------
 
 {
   const store = openStore(memoryRetention());
@@ -147,7 +147,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.dirty(), true, 'and no reachable entry is the saved one any more');
 }
 
-// --- Rollback leaves no residue (pin) ----------------------------------
+// --- Rollback leaves no residue (no requirement) ----------------------------------
 
 {
   const store = openStore(memoryRetention());
@@ -172,7 +172,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.model().nodes.size, 0, 'where the project stands empty');
 }
 
-// --- Selection and its repair (pin) ------------------------------------
+// --- Selection and its repair (no requirement) ------------------------------------
 
 {
   const store = openStore(memoryRetention());
@@ -370,7 +370,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(storage.read(PROJECT_KEY), '{"project":{}}', 'and web storage is not touched while the retention answers');
 }
 
-// --- Replacing the project (pin) ---------------------------------------
+// --- Replacing the project (no requirement) ---------------------------------------
 
 {
   const retention = memoryRetention();
@@ -391,7 +391,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal((await blobIn(store, retention)).project.name, 'Fixture project', 'the replacement is persisted');
 }
 
-// --- Picker mode (pin) -------------------------------------------------
+// --- Picker mode (no requirement) -------------------------------------------------
 
 {
   const store = openStore(memoryRetention());
@@ -459,7 +459,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.picker(), null, 'ending a closed workflow is nothing');
 }
 
-// --- Picker repair under undo and redo (pin) ---------------------------
+// --- Picker repair under undo and redo (no requirement) ---------------------------
 
 {
   const store = openStore(memoryRetention());
@@ -500,7 +500,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.picker(), null, 'replacing the project closes the workflow');
 }
 
-// --- The relationship view is one truth, never persisted (pin) ----------
+// --- The relationship view is one truth, never persisted (no requirement) ----------
 
 {
   const retention = memoryRetention();
@@ -708,7 +708,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(held.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
-// --- The navigator's filter is session state (pin) ------------------------
+// --- The navigator's filter is session state (no requirement) ------------------------
 
 {
   const retention = memoryRetention();
@@ -867,7 +867,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(retention.records.has('aside'), false, 'with the record removed as before');
 }
 
-// --- The relationship pane collapses to its head, for the session (pin) ---
+// --- The relationship pane collapses to its head, for the session (no requirement) ---
 
 {
   const storage = fakeStorage();

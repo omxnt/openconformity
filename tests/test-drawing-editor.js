@@ -83,7 +83,7 @@ const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.
   equal(acceptMessage({ source: null, origin: EDITOR_ORIGIN, data: '{"event":"init"}' }, null), null, 'and nothing is heard while there is no frame');
 }
 
-// --- Decoding an export (pin) ------------------------------------------------------
+// --- Decoding an export (no requirement) ------------------------------------------------------
 
 {
   deepEqual(bytesOfBase64('aGk='), [104, 105], 'base64 decodes');

@@ -156,7 +156,7 @@ function enabledIds(actions) {
   equal(enabled().redo, true, 'an undone change can be redone');
 }
 
-// --- Menu grouping (pin) -----------------------------------------------
+// --- Menu grouping (no requirement) -----------------------------------------------
 
 {
   deepEqual(menuGroups([]), [], 'no items, no groups');
@@ -199,7 +199,7 @@ function enabledIds(actions) {
   ok(actions.find((action) => action.id === 'new-entity').enabled(), 'and acts again once it closes');
 }
 
-// --- The toolbar's shape (pin) ---------------------------------------------
+// --- The toolbar's shape (no requirement) ---------------------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });

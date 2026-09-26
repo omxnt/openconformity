@@ -143,7 +143,7 @@ function drawn(model, expanded) {
   deepEqual(filtered.slice(1).map((row) => row.id), ['F-1', 'ELM-001', 'HAZ-001'], 'with the filtered tree beneath it');
 }
 
-// --- The transient reveal (pin) ----------------------------------------
+// --- The transient reveal (no requirement) ----------------------------------------
 
 {
   const model = createModel();

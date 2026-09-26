@@ -23,7 +23,7 @@ function kinds(stack) {
   return stack.entries().map((entry) => entry.kind);
 }
 
-// --- One stack (pin) ---------------------------------------------------
+// --- One stack (no requirement) ---------------------------------------------------
 
 {
   const stack = createOverlayStack();
@@ -35,7 +35,7 @@ function kinds(stack) {
   deepEqual(kinds(stack), ['menu'], 'and stands in the stack');
 }
 
-// --- Menus are exclusive (pin) -----------------------------------------
+// --- Menus are exclusive (no requirement) -----------------------------------------
 
 {
   const stack = createOverlayStack();
@@ -55,7 +55,7 @@ function kinds(stack) {
   equal(stack.top(), dialog, 'with the dialog on top');
 }
 
-// --- A commit closes menus and never dialogs (pin) ---------------------
+// --- A commit closes menus and never dialogs (no requirement) ---------------------
 
 {
   const stack = createOverlayStack();
@@ -88,7 +88,7 @@ function kinds(stack) {
   equal(menu.closed + dialog.closed + panel.closed, 3, 'each closed exactly once');
 }
 
-// --- Closing (pin) ------------------------------------------------------
+// --- Closing (no requirement) ------------------------------------------------------
 
 {
   const stack = createOverlayStack();

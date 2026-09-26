@@ -335,7 +335,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
 }
 
-// --- A group pages by five, the subject growing to twenty (pin) ---------
+// --- A group pages by five, the subject growing to twenty (no requirement) ---------
 
 {
   const model = createModel();
@@ -372,7 +372,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual([openGroups(act)[0].shown, openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))[0].shown, sideRows(openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))).height], [1, 16, 16 * 88], 'an act holding 215 requirements opens five at a time, so the side never runs past what was asked for');
 }
 
-// --- The box caption (pin) ----------------------------------------------
+// --- The box caption (no requirement) ----------------------------------------------
 
 {
   const model = createModel();
@@ -385,7 +385,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(caption(entity).length, 27, 'at twenty-seven characters');
 }
 
-// --- The orthogonal layout (pin) ------------------------------------------
+// --- The orthogonal layout (no requirement) ------------------------------------------
 
 {
   equal(attachmentY(32, 64, 64), 32, 'a lone row attaches at the middle of the subject');
@@ -408,7 +408,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 }
 
-// --- The groups: the first always shows, a pick holds its group open (pin) ----
+// --- The groups: the first always shows, a pick holds its group open (no requirement) ----
 
 {
   const real = Array.from({ length: 9 }, (unused, index) => ({ relationship: { type: 'elm-exhibits-haz' }, other: { id: `HAZ-00${index}`, type: 'HAZ' } }));

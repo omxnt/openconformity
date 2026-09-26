@@ -39,7 +39,7 @@ if (loaded.ok) {
   equal(serialise(reopened.model), text, 'byte-stable through a round trip');
 }
 
-// --- What the example holds (pin) ---------------------------------------
+// --- What the example holds (no requirement) ---------------------------------------
 
 {
   equal(EXAMPLE_PROJECT.name, 'Example project', 'the example is the demo machine');
@@ -69,7 +69,7 @@ if (loaded.ok) {
   );
 }
 
-// --- The assessment shows all three verdict states (pin) ------------------
+// --- The assessment shows all three verdict states (no requirement) ------------------
 
 {
   const verdicts = EXAMPLE_PROJECT.entities
@@ -97,7 +97,7 @@ if (loaded.ok) {
   }
 }
 
-// --- The counters stand ready to issue (pin) ----------------------------
+// --- The counters stand ready to issue (no requirement) ----------------------------
 
 if (loaded.ok) {
   for (const code of Object.keys(ENTITY_TYPES)) {
@@ -109,7 +109,7 @@ if (loaded.ok) {
   }
 }
 
-// --- The load flow: the third way in (pin) ------------------------------
+// --- The load flow: the third way in (no requirement) ------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });

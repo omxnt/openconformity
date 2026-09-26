@@ -106,7 +106,7 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(loadProject({ format: 'openconformity-project', schemaVersion: 999 }).code, 'newer', 'any later version refuses as newer');
 }
 
-// --- The filename (pin) ------------------------------------------------
+// --- The filename (no requirement) ------------------------------------------------
 
 {
   equal(filenameFor(''), 'untitled.json', 'an unnamed project saves as untitled');

@@ -17,7 +17,7 @@ import {
 } from '../app/modules/shell.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The effective theme (pin) -----------------------------------------
+// --- The effective theme (no requirement) -----------------------------------------
 
 equal(effectiveTheme(null, false), 'white', 'no choice on a light system is White');
 equal(effectiveTheme(null, true), 'g100', 'no choice on a dark system is Gray 100');
@@ -26,7 +26,7 @@ equal(effectiveTheme('g100', false), 'g100', 'in both directions');
 equal(effectiveTheme(undefined, true), 'g100', 'anything but a theme follows the system');
 equal(effectiveTheme('solarized', false), 'white', 'an unknown theme follows the system');
 
-// --- The one-click flip (pin) ------------------------------------------
+// --- The one-click flip (no requirement) ------------------------------------------
 
 deepEqual(
   themeSwitch('white'),
@@ -46,7 +46,7 @@ ok(RESTORATION_DETAIL.includes('set aside'), 'and that a copy of the stored blob
 ok(PERSIST_NOTICE.includes('not being stored'), 'the persist notice states changes are not being stored');
 ok(PERSIST_DETAIL.includes('Save the project'), 'and points at the file as the durable copy');
 
-// --- The tab title (pin) -----------------------------------------------
+// --- The tab title (no requirement) -----------------------------------------------
 
 equal(titleFor(false, ''), 'openconformity', 'the landing titles the software');
 equal(titleFor(true, ''), 'openconformity', 'an unnamed project titles the software');

@@ -192,7 +192,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'cancelling moves nothing');
 }
 
-// --- Refusals are told in passing (pin) ---------------------------------
+// --- Refusals are told in passing (no requirement) ---------------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -461,7 +461,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001'), null, 'a pristine creation collapses without a question');
 }
 
-// --- Removing a relationship asks first (pin) ----------------------------
+// --- Removing a relationship asks first (no requirement) ----------------------------
 
 {
   const store = createStore({ storage: fakeStorage() });

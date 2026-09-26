@@ -89,7 +89,7 @@ documentArrows.forEach((arrow, index) => {
   equal(transcribed?.composition, arrow.composition, `${derivedIds[index]} composition matches the arrow kind`);
 });
 
-// --- Directional lookups (pin) -----------------------------------------
+// --- Directional lookups (no requirement) -----------------------------------------
 
 for (const code of Object.keys(ENTITY_TYPES)) {
   deepEqual(

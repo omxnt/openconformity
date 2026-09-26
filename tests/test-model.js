@@ -248,7 +248,7 @@ function childIds(model, parentId) {
   allowed(removeFolder(model, outer.id), 'an empty folder is deleted too');
 }
 
-// --- The project's own attributes (pin) ---------------------------------
+// --- The project's own attributes (no requirement) ---------------------------------
 
 {
   const model = createModel();

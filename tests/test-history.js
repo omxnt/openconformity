@@ -95,7 +95,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), recorded, 'the cursor stands at the new entry');
 }
 
-// --- Depth eviction (pin) ----------------------------------------------
+// --- Depth eviction (no requirement) ----------------------------------------------
 
 {
   let model = createModel();
@@ -115,7 +115,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), 10, 'the oldest surviving entry keeps its own sequence');
 }
 
-// --- Rollback (pin) ----------------------------------------------------
+// --- Rollback (no requirement) ----------------------------------------------------
 
 {
   let model = createModel();
@@ -138,7 +138,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   ok(recorded > dropped, 'a dropped sequence is never reused');
 }
 
-// --- Depth (pin) -------------------------------------------------------
+// --- Depth (no requirement) -------------------------------------------------------
 
 {
   let model = createModel();
@@ -153,7 +153,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(history.depth(), { back: 1, forward: 1 }, 'an undo trades a step back for a step forward');
 }
 
-// --- Reset (pin) -------------------------------------------------------
+// --- Reset (no requirement) -------------------------------------------------------
 
 {
   let model = createModel();

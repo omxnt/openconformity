@@ -129,7 +129,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   deepEqual(['95', ' 7 ', '', 'Se 4', '-1', '1.5'].map(scoreOf), [95, 7, NaN, NaN, NaN, NaN], 'a score is a whole number and nothing else');
 }
 
-// --- The graph as drawn agrees with the graph as tabled (pin) ------------------
+// --- The graph as drawn agrees with the graph as tabled (no requirement) ------------------
 
 {
   let checked = 0;
@@ -162,7 +162,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
   ok(!graphLive(['S2', 'F2', '', ''], [S2, F1]), 'and a single branch not chosen dims its subtree');
 }
 
-// --- A level's tone, whichever method said it (pin) -------------------------------
+// --- A level's tone, whichever method said it (no requirement) -------------------------------
 
 {
   deepEqual(['High', 'RI 5 (highest)', 'RS 175 (high)'].map(levelTone), ['high', 'high', 'high'], "high, in every method's word");

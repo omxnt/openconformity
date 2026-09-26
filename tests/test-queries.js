@@ -136,7 +136,7 @@ function offered(model, subjectId) {
   }
 }
 
-// --- The form label and the designation (pin) ----------------------------
+// --- The form label and the designation (no requirement) ----------------------------
 
 {
   equal(
@@ -303,7 +303,7 @@ function offered(model, subjectId) {
   equal(deletionQuestion(model, 'HAZ-001').message, 'Its 1 relationship is removed with it.', 'or counts what is removed, in the singular');
 }
 
-// --- The label a reference-bearing type composes (pin) --------------------
+// --- The label a reference-bearing type composes (no requirement) --------------------
 
 {
   const model = createModel();
@@ -355,7 +355,7 @@ function offered(model, subjectId) {
   ok(!entityMatches(entity, 'guard'), 'but not text it holds nowhere');
 }
 
-// --- Excluded entities (pin) ------------------------------------------------
+// --- Excluded entities (no requirement) ------------------------------------------------
 
 {
   const model = createModel();

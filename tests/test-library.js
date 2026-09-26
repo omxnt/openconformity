@@ -28,7 +28,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   deepEqual([b.folders.map((f) => [f.id, f.parent]), b.entities.map((e) => [e.id, e.parent]), b.relationships.length], [[['F-3', null]], [['HAZ-002', 'F-3'], ['ELM-001', null]], 1], 'a nested folder stays a shelf inside it, and the relationship between two of its entities travels');
 }
 
-// --- The rows (pin) -----------------------------------------------------------
+// --- The rows (no requirement) -----------------------------------------------------------
 
 {
   deepEqual(libraryRows(library.model).map(({ node, depth, hasChildren, expanded }) => [node.id, depth, hasChildren, expanded]), [['LEG-001', 0, true, false]], 'the tree starts collapsed at its root, the act a row with a chevron');
@@ -154,7 +154,7 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(nodeOf(project, 'ELM-002').attributes.title, 'Guard', 'and it is the guard');
 }
 
-// --- The preview (pin) ------------------------------------------------------------------
+// --- The preview (no requirement) ------------------------------------------------------------------
 
 {
   equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, 'Crushing'), 'Crushing', 'a text shows as stored');
