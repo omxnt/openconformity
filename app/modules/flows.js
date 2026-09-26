@@ -723,7 +723,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       ? 'This clears everything openconformity keeps in this browser, the project held between sessions, the theme, and whether draw.io asks before opening. The open project has unsaved changes, and they are lost too. Files you saved are not affected.'
       : 'This clears everything openconformity keeps in this browser, the project held between sessions, the theme, and whether draw.io asks before opening. Files you saved are not affected.';
     const confirmed = await dialogs.confirm({
-      title: 'Clear browser data',
+      title: 'Clear stored data',
       message,
       confirmLabel: 'Clear',
       cancelLabel: 'Cancel',

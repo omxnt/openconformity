@@ -642,7 +642,7 @@ function flowsOver(store) {
   store.replaceProject(createModel());
   await flows.clearBrowserData();
   equal(asked.length, 1, 'the removal asks first');
-  deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Clear browser data', 'Clear', true], 'in the danger colour, with Remove as the answer');
+  deepEqual([asked[0].title, asked[0].confirmLabel, asked[0].danger], ['Clear stored data', 'Clear', true], 'in the danger colour, with Remove as the answer');
   ok(asked[0].message.startsWith('This clears everything openconformity keeps in this browser') && asked[0].message.endsWith('Files you saved are not affected.') && !asked[0].message.includes('not saved'), 'saying what goes, and that a saved file stays, with nothing unsaved to warn of');
   await store.whenPersisted();
   ok(store.hasProject() && retention.records.has('project'), 'Cancel changes nothing');

@@ -447,6 +447,10 @@ body {
 .empty-state-title { font-weight: 600; }  /* $heading-compact-01 */
 .empty-state-body { margin-top: 4px; color: var(--text-second); }  /* $spacing-02 */
 .empty-state .ghost-button { margin-top: 16px; height: 32px; padding: 0 12px; }  /* $spacing-05 */
+.landing .empty-state-body { margin-top: 12px; line-height: 1.42857; text-wrap: pretty; }  /* $spacing-04, $body-01 */
+.landing .empty-state-body + .empty-state-body { margin-top: 12px; }
+.landing .empty-state-body a { color: var(--link); }
+.landing .ghost-button { margin-top: 24px; }  /* $spacing-06 */
 
 /* ---------- Toolbar ---------- */
 

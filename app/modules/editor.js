@@ -1208,10 +1208,16 @@ export function createEditor({
     records = [];
     if (!store.hasProject()) {
       head.hidden = true;
-      const landing = emptyState(
-        'No project',
-        'Create a project, open one saved as a file, or look around the example. Everything stays in this browser until you save it to a file.'
-      );
+      const landing = el('div', { className: 'empty-state landing' }, [
+        el('p', { className: 'empty-state-title', text: 'Welcome to openconformity' }),
+        el('p', { className: 'empty-state-body', text: 'Start a new project, open one you saved earlier, or load the example to see how a model is built.' }),
+        el('p', { className: 'empty-state-body', text: 'The software is in beta. It runs entirely in your browser, and your work is kept there between sessions. A beta can still lose it, so save your project to a file often, and keep the files you save.' }),
+        el('p', { className: 'empty-state-body' }, [
+          el('span', { text: 'Bug reports and suggestions are welcome at ' }),
+          el('a', { text: 'info@openconformity.org', attributes: { href: 'mailto:info@openconformity.org' } }),
+          el('span', { text: '.' }),
+        ]),
+      ]);
       for (const offer of LANDING_OFFER) {
         const button = el(
           'button',

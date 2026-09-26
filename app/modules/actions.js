@@ -109,7 +109,7 @@ export function createActions({ store, flows }) {
     {
       id: 'clear-browser-data',
       icon: 'i-delete',
-      label: 'Clear browser data',
+      label: 'Clear stored data',
       group: 'browser',
       toolbar: false,
       context: false,

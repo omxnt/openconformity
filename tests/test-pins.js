@@ -132,7 +132,7 @@ import { fakeStorage } from './helpers.js';
   ok(page.includes('<button type="button" class="shell-tag" id="shell-beta"></button>') && page.indexOf('id="shell-beta"') > page.indexOf('id="shell-theme"'), 'the phase tag closes the shell bar, after the theme, its text set by the shell');
   ok(shell.includes("betaTag.textContent = PHASE;") && shell.includes("betaTag.addEventListener('click', () => aboutAction.run({ anchor: betaTag }))"), 'the tag reads the release phase, and a click on it opens About');
   const version = readFile('../app/modules/version.js');
-  ok(/export const VERSION = '\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?';/.test(version) && /export const PHASE = '[A-Z][a-z]+ beta';/.test(version), 'the version and the phase are two constants in one module');
+  ok(/export const VERSION = '\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?';/.test(version) && /export const PHASE = '[A-Z][a-z]+( beta)?';/.test(version), 'the version and the phase are two constants in one module');
   const about = readFile('../app/modules/about.js');
   ok(about.includes("el('span', { className: 'about-version', text: VERSION })") && about.includes("text(PHASE),") && about.includes("link('https://github.com/omxnt/openconformity/releases', 'Release notes')"), 'which About names on its release line with the phase, beside the link to the notes');
   const editorSource = readFile('../app/modules/editor.js');

@@ -338,7 +338,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
   function emptyState(title, body, action) {
     const held = el('div', { className: 'empty-state' }, [
       el('p', { className: 'empty-state-title', text: title }),
-      el('p', { className: 'empty-state-body', text: body }),
+      ...(body ? [el('p', { className: 'empty-state-body', text: body })] : []),
     ]);
     if (action) {
       const button = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [
@@ -699,7 +699,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       listHost.appendChild(
         store.hasProject()
           ? emptyState('Nothing selected', 'Select an entity to see its relationships.')
-          : emptyState('No project', 'Create or open a project to work with relationships.')
+          : emptyState('No project', '')
       );
       return;
     }
