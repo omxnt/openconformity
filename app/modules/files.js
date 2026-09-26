@@ -19,7 +19,7 @@
 
 import { ENTITY_TYPES } from './metamodel.js';
 import { createModel, addEntity, addFolder, relate, renameProject, restoreCounters, childrenOf } from './model.js';
-import { validate } from './validator.js';
+import { validate, isPlainObject } from './validator.js';
 
 /** The schema version this software writes. */
 export const SCHEMA_VERSION = 1;
@@ -237,12 +237,4 @@ export function openProject(text) {
     return refusal('invalid', INVALID_STATEMENT);
   }
   return loadProject(data);
-}
-
-/**
- * @param {unknown} value
- * @returns {boolean}
- */
-function isPlainObject(value) {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

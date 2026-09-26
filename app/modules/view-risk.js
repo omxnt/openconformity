@@ -21,7 +21,7 @@
 
 import { ATTRIBUTES, isParameter } from './attributes.js';
 import { entityLabel, relatedIds } from './queries.js';
-import { ratingView, initials } from './editor.js';
+import { ratingView, initials } from './fields.js';
 
 /** The rating group of a name under an estimation method, or undefined. */
 function ratingGroup(name, method) {

@@ -8,7 +8,8 @@
 
 import { nodeOf } from './model.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
-import { VIEWS } from './views.js';
+import { VIEWS } from './view-registry.js';
+import { APPLE } from './dom.js';
 
 /**
  * @typedef {Object} Action
@@ -29,8 +30,7 @@ import { VIEWS } from './views.js';
  * @property {(invocation: { anchor?: HTMLElement, at?: { x: number, y: number } }) => void} run
  */
 
-/** The save shortcut as the platform writes it, the command key on Apple's, Ctrl elsewhere. */
-const APPLE = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '');
+/** The shortcuts as the platform writes them, the command key on Apple's, Ctrl elsewhere. */
 const SAVE_HINT = APPLE ? '⌘S' : 'Ctrl S';
 /** The other key hints as the platform writes them: undo and redo, delete, and the moves. */
 const UNDO_HINT = APPLE ? '⌘Z' : 'Ctrl Z';

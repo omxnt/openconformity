@@ -34,8 +34,9 @@ import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
 import { pickedRows } from './relate.js';
 import { recordOf } from './records.js';
-import { removalText } from './editor.js';
-import { VIEWS } from './views.js';
+import { removalText } from './fields.js';
+import { VIEWS } from './view-registry.js';
+import { plural } from './text.js';
 import { projectSweep, hiddenContent, unknownContent } from './project.js';
 import { serialise, openProject, loadProject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
@@ -582,7 +583,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     });
     if (related < picks.length) {
       const dropped = picks.length - related;
-      dialogs.toast(`Could not add ${dropped} ${dropped === 1 ? 'relationship' : 'relationships'}`, `The metamodel no longer allows ${dropped === 1 ? 'it' : 'them'}.`);
+      dialogs.toast(`Could not add ${plural(dropped, 'relationship')}`, `The metamodel no longer allows ${dropped === 1 ? 'it' : 'them'}.`);
     }
     store.endPicking();
   }
@@ -832,7 +833,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     }
     const n = outcome.added.length;
     const r = outcome.related;
-    dialogs.toast('Imported', `${n} ${n === 1 ? 'entity' : 'entities'}${r > 0 ? ` and ${r} ${r === 1 ? 'relationship' : 'relationships'}` : ''} added to the project.`);
+    dialogs.toast('Imported', `${plural(n, 'entity')}${r > 0 ? ` and ${plural(r, 'relationship')}` : ''} added to the project.`);
     if (store.selection() !== null) store.setExpanded(store.selection(), true);
   }
 

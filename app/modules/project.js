@@ -8,10 +8,9 @@
  * or no definition knows, for the question and the notice on opening.
  */
 
-import { ATTRIBUTES, attributesFor, groupsOf, isOutcome } from './attributes.js';
+import { ATTRIBUTES, attributesFor, groupsOf, isOutcome, leaderOf, groupShown } from './attributes.js';
 import { ENTITY_TYPES } from './metamodel.js';
-
-const plural = (name, count) => (count === 1 ? name : `${name}s`);
+import { plural } from './text.js';
 
 /**
  * What saving the project with these values removes: for every
@@ -46,7 +45,7 @@ export function projectSweep(model, values) {
         swept.set(node.id, bag);
         held += 1;
       }
-      if (held > 0) parts.push(`what ${held} ${plural(ENTITY_TYPES[code].name.toLowerCase(), held)} ${held === 1 ? 'holds' : 'hold'} under ${before || `no ${leader.name.toLowerCase()}`}`);
+      if (held > 0) parts.push(`what ${plural(held, ENTITY_TYPES[code].name.toLowerCase())} ${held === 1 ? 'holds' : 'hold'} under ${before || `no ${leader.name.toLowerCase()}`}`);
     }
   }
   const entities = [...swept].map(([id, keys]) => ({ id, keys: [...keys] }));
@@ -72,7 +71,7 @@ export function hiddenContent(model) {
     const keys = new Set();
     const under = new Set();
     for (const group of groupsOf(node.type)) {
-      if (!group.when || (values[group.when.key] ?? '').trim() === group.when.value) continue;
+      if (groupShown(group, values)) continue;
       for (const definition of group.attributes) {
         if (isOutcome(definition) || (node.attributes[definition.key] ?? '') === '') continue;
         keys.add(definition.key);
@@ -88,7 +87,7 @@ export function hiddenContent(model) {
   }
   const lines = [...held].map(([line, count]) => {
     const [code, value] = line.split('\u0000');
-    return `${count} ${plural(ENTITY_TYPES[code].name.toLowerCase(), count)} under ${value}`;
+    return `${plural(count, ENTITY_TYPES[code].name.toLowerCase())} under ${value}`;
   });
   return { entities, count: entities.length, lines };
 }
@@ -117,8 +116,5 @@ export function unknownContent(model) {
   return found;
 }
 
-/** The name of the attribute a group waits on: the type's own, or the project's where the type has none. */
-function leaderName(code, key) {
-  const leader = attributesFor(code).find((definition) => definition.key === key) ?? attributesFor('PROJECT').find((definition) => definition.key === key);
-  return (leader?.name ?? key).toLowerCase();
-}
+/** The name of the attribute a group waits on, lowercased for a sentence. */
+const leaderName = (code, key) => (leaderOf(code, key)?.name ?? key).toLowerCase();

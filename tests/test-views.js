@@ -8,7 +8,8 @@
 
 import './shim.js';
 import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
-import { VIEWS, asColumn, columnText, cellText, sortRows, groupEdges } from '../app/modules/views.js';
+import { asColumn, columnText, cellText, sortRows, groupEdges } from '../app/modules/views.js';
+import { VIEWS } from '../app/modules/view-registry.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
 import { entityLabel } from '../app/modules/queries.js';

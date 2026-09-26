@@ -7,7 +7,7 @@
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/modules/attributes.js';
 import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { METHODS } from '../app/modules/risk.js';
-import { firstTabName } from '../app/modules/editor.js';
+import { firstTabName } from '../app/modules/fields.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
 const ATTRIBUTE_KINDS = ['text', 'multiline', 'choice', 'set', 'hyperlink', 'number', 'date', 'table', 'drawing', 'computed', 'rationale', 'entities'];

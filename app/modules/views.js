@@ -1,6 +1,6 @@
 /**
- * The views: the registry of what the model can be read as, and the pane
- * that shows the open one over the whole workspace. A view is a pure
+ * The views pane, showing the open view over the whole workspace, and
+ * the pure parts a view's description is read with. A view is a pure
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
@@ -11,10 +11,7 @@ import { el, icon, tooltipOn } from './dom.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS } from './icons.js';
 import { entityLabel } from './queries.js';
-import { RISK_VIEW } from './view-risk.js';
-
-/** Every view, in menu and tab order. */
-export const VIEWS = [RISK_VIEW];
+import { VIEWS } from './view-registry.js';
 
 /** A column as an object, a bare name being its text. */
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);

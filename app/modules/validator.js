@@ -105,7 +105,7 @@ const V1_RELATIONSHIP_KEYS = ['type', 'source', 'target'];
  * @param {unknown} value
  * @returns {boolean}
  */
-function isPlainObject(value) {
+export function isPlainObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 

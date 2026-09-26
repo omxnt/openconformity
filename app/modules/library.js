@@ -22,8 +22,10 @@ import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js'
 import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { typeOf } from './attributes.js';
-import { setValues, firstTabName } from './editor.js';
+import { typeOf, groupAttributes } from './attributes.js';
+import { setValues, firstTabName } from './fields.js';
+import { plural } from './text.js';
+import { APPLE } from './dom.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
 import { splitter } from './splitter.js';
@@ -200,7 +202,7 @@ export function previewValue(definition, value) {
   }
   if (definition.kind === 'table') {
     const rows = Array.isArray(value) ? value.length : 0;
-    return rows > 0 ? `${rows} ${rows === 1 ? 'row' : 'rows'}` : null;
+    return rows > 0 ? plural(rows, 'row') : null;
   }
   return String(value);
 }
@@ -214,9 +216,8 @@ export function previewValue(definition, value) {
  */
 export function previewSections(entity) {
   const type = typeOf(entity.type) ?? { attributes: [], groups: [] };
-  const flat = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(flat)];
-  const tabs = [{ name: firstTabName(entity.type), definitions: [...type.attributes, ...type.groups.filter((group) => !group.tab).flatMap(flat)] }];
-  for (const group of type.groups) if (group.tab) tabs.push({ name: group.name, definitions: flat(group) });
+  const tabs = [{ name: firstTabName(entity.type), definitions: [...type.attributes, ...type.groups.filter((group) => !group.tab).flatMap(groupAttributes)] }];
+  for (const group of type.groups) if (group.tab) tabs.push({ name: group.name, definitions: groupAttributes(group) });
   return tabs.map(({ name, definitions }) => ({
     name,
     fields: definitions
@@ -226,7 +227,7 @@ export function previewSections(entity) {
 }
 
 /** The modifier that picks one entity as the platform names it, Option on Apple's keyboards and Alt elsewhere. */
-const ALT_KEY = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '') ? 'Option' : 'Alt';
+const ALT_KEY = APPLE ? 'Option' : 'Alt';
 
 /** The tree's floor, the navigator's own, and the preview's, one sentence of a clause across; the splitter's width; the tree's preset. */
 const TREE_FLOOR = 300;
@@ -361,7 +362,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
   function renderCount() {
     const held = libraryOf(libraries[current]);
     const planned = held.ok ? importPlan(held.model, picks).length : 0;
-    count.textContent = planned === 0 ? 'Nothing picked' : `${planned} ${planned === 1 ? 'entity' : 'entities'} to import`;
+    count.textContent = planned === 0 ? 'Nothing picked' : `${plural(planned, 'entity')} to import`;
     const button = head.querySelector('.library-import');
     if (button) button.disabled = planned === 0;
     const shown = shownEntities();

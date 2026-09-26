@@ -587,7 +587,7 @@ export const ATTRIBUTES = {
 };
 
 /** A group's definitions in render order: its own table, then each sub-group's. */
-const groupAttributes = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(groupAttributes)];
+export const groupAttributes = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(groupAttributes)];
 
 /**
  * Every group of a type in render order, sub-groups following their group.
@@ -597,6 +597,25 @@ const groupAttributes = (group) => [...group.attributes, ...(group.groups ?? [])
 export function groupsOf(code) {
   const walk = (group) => [group, ...(group.groups ?? []).flatMap(walk)];
   return (typeOf(code)?.groups ?? []).flatMap(walk);
+}
+
+/**
+ * The attribute a group waits on: the type's own of that key, or the
+ * project's where the type has none.
+ * @param {string} code
+ * @param {string} key
+ */
+export function leaderOf(code, key) {
+  return attributesFor(code).find((definition) => definition.key === key) ?? attributesFor('PROJECT').find((definition) => definition.key === key);
+}
+
+/**
+ * Whether a group's condition holds, or that it has none.
+ * @param {{ when?: { key: string, value: string } }} group
+ * @param {Object<string, string>} values
+ */
+export function groupShown(group, values) {
+  return !group.when || (values[group.when.key] ?? '').trim() === group.when.value;
 }
 
 /** Whether a definition closes a rating: computed, never stored. */

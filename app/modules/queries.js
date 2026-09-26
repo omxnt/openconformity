@@ -7,6 +7,7 @@
 
 import { nodeOf, childrenOf, canRelate, canFile, deletionOf, filedBeneath } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
+import { plural } from './text.js';
 
 /**
  * The decisions that set an entity out of play: the value of an attribute
@@ -198,9 +199,9 @@ export function deletionQuestion(model, id) {
   const severed = [...model.relationships.values()].filter(
     (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
   ).length;
-  const entities = (n) => `${n} ${n === 1 ? 'entity' : 'entities'}`;
+  const entities = (n) => plural(n, 'entity');
   const verb = (n) => (n === 1 ? 'is' : 'are');
-  const removed = severed > 0 ? `, and ${severed} ${severed === 1 ? 'relationship' : 'relationships'} ${verb(severed)} removed` : '';
+  const removed = severed > 0 ? `, and ${plural(severed, 'relationship')} ${verb(severed)} removed` : '';
   if (node && node.kind === 'folder') {
     const title = `Delete the folder ${node.name}?`;
     if (doomed.length === 0) return { title, message: 'The folder holds no entities.', doomed };

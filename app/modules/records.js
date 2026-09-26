@@ -9,6 +9,7 @@
 
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
+import { plural, listed } from './text.js';
 import { typeOf, groupsOf, isOutcome, isRationale } from './attributes.js';
 import { entityLabel, relatedIds } from './queries.js';
 
@@ -133,8 +134,7 @@ export function messagesText(found) {
     return `${ids.size} ${ids.size === 1 ? name : `${name}s`}`;
   });
   if (parts.length === 0) return '';
-  const listed = parts.length < 2 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
-  return `${listed} to revisit`;
+  return `${listed(parts)} to revisit`;
 }
 
 /**
@@ -145,6 +145,5 @@ export function messagesText(found) {
 export function sizeText(model) {
   const entities = [...model.nodes.values()].filter((node) => node.kind === 'entity').length;
   const relationships = model.relationships.size;
-  const count = (n, noun) => `${n} ${n === 1 ? noun : `${noun}s`}`;
-  return `${count(entities, 'entity').replace('entitys', 'entities')} and ${count(relationships, 'relationship')}`;
+  return `${plural(entities, 'entity')} and ${plural(relationships, 'relationship')}`;
 }
