@@ -22,6 +22,7 @@ import { typeOf } from './attributes.js';
 import { setValues, firstTabName } from './editor.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
+import { splitter } from './splitter.js';
 
 /**
  * Whether a node answers a filter: an entity as the navigator matches
@@ -205,15 +206,22 @@ export function previewSections(entity) {
     .filter((section) => section.fields.length > 0);
 }
 
+/** The tree's floor, the navigator's own, and the preview's, one sentence of a clause across; the splitter's width; the tree's preset. */
+const TREE_FLOOR = 300;
+const PREVIEW_FLOOR = 320;
+const SPLITTER = 4;
+const TREE_PRESET = 400;
+
 /**
  * The picker as a mode of the editor pane, with the navigator alive
  * beside it. The head carries the title with what a pick would import,
- * the filter, the Import button and the close. The body carries the
- * catalogues as tabs, the open catalogue's tree with a checkbox per
- * row on the left, and on the right the entity under the highlight as
- * a sheet of what its attributes hold, by the editor's tabs as folds,
- * all closed until opened. The copies land where the navigator's
- * selection stands. While open, the picker takes the whole column, the
+ * the filter behind its magnifier, the Import button and the close. The
+ * body carries, on the left under the catalogues as tabs, the open
+ * catalogue's tree with a checkbox per row, and on the right under a
+ * Preview head the entity under the highlight as a sheet of what its
+ * attributes hold, by the editor's tabs as folds, all closed until
+ * opened, the two halves split by a splitter kept for the session. The
+ * copies are filed where the navigator's selection stands. While open, the picker takes the whole column, the
  * relationship pane and its splitter hidden. Opened from the toolbar,
  * closed by its X or Escape, never kept across a reload.
  * @param {Object} context
@@ -237,6 +245,9 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
 
   let current = 0;
   let filter = '';
+  let searchOpen = false;
+  /** @type {number|null} the tree's width once the splitter has been dragged */
+  let treeWidth = null;
   /** @type {Set<string>} the picked entities of the open catalogue */
   let picks = new Set();
   /** @type {Set<string>} the rows opened in the open catalogue */
@@ -267,12 +278,54 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     render();
   }
 
-  function targetText() {
+  function filedText() {
     const selected = nodeOf(store.model(), store.selection());
-    if (!selected) return 'the root of the project';
-    if (selected.kind === 'folder') return `the folder ${selected.name}`;
+    if (!selected) return 'Filed at the root of the project';
+    if (selected.kind === 'folder') return `Filed in the folder ${selected.name}`;
     const label = entityLabel(selected);
-    return label ? `${selected.id} ${label}` : selected.id;
+    return `Filed under ${label ? `${selected.id} ${label}` : selected.id}`;
+  }
+
+  /**
+   * The head's filter, on demand: a magnifier opens a compact field,
+   * focused; Escape closes and clears, so does leaving it empty.
+   */
+  function searchControl() {
+    if (!searchOpen) {
+      const open = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-search')]);
+      open.addEventListener('click', () => {
+        searchOpen = true;
+        renderHead();
+        head.querySelector('.head-search')?.focus();
+      });
+      return tooltipOn(open, 'Filter the catalogue', { align: 'end' });
+    }
+    const input = el('input', {
+      className: 'field-input head-search',
+      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the catalogue' },
+    });
+    input.value = filter;
+    input.addEventListener('input', () => {
+      filter = input.value;
+      renderList();
+    });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      searchOpen = false;
+      filter = '';
+      renderHead();
+      renderList();
+    });
+    input.addEventListener('blur', () => {
+      if (input.value.trim() !== '') return;
+      searchOpen = false;
+      filter = '';
+      renderHead();
+      renderList();
+    });
+    return input;
   }
 
   function renderCount() {
@@ -287,15 +340,6 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     head.textContent = '';
     head.hidden = false;
     count = el('span', { className: 'library-count' });
-    const search = el('input', {
-      className: 'field-input head-search',
-      attributes: { type: 'search', placeholder: 'Filter', autocomplete: 'off', 'aria-label': 'Filter the catalogue' },
-    });
-    search.value = filter;
-    search.addEventListener('input', () => {
-      filter = search.value;
-      renderList();
-    });
     const importButton = el('button', { className: 'form-button button-primary library-import', text: 'Import', attributes: { type: 'button' } });
     importButton.addEventListener('click', () => {
       const held = libraryOf(libraries[current]);
@@ -311,8 +355,9 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       el('span', { className: 'head-title', text: 'Import from library' }),
       count,
       el('span', { className: 'toolbar-spacer' }),
-      el('div', { className: 'pane-head-actions' }, [search, importButton, close])
+      el('div', { className: 'pane-head-actions' }, [searchControl(), importButton, close])
     );
+    renderCount();
   }
 
   function renderTabs() {
@@ -485,20 +530,34 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     body.textContent = '';
     list = el('div', { className: 'library-list', attributes: { role: 'tree', 'aria-label': 'The catalogue' } });
     preview = el('div', { className: 'library-preview' });
-    body.appendChild(
-      el('div', { className: 'library' }, [
-        renderTabs(),
-        el('p', { className: 'library-source', text: `As of ${libraries[current].date}` }),
-        el('div', { className: 'library-split' }, [list, preview]),
-        el('p', { className: 'library-into', text: `Into ${targetText()}` }),
-      ])
-    );
+    const tree = el('div', { className: 'library-side library-tree' }, [renderTabs(), list]);
+    if (treeWidth !== null) tree.style.flexBasis = `${treeWidth}px`;
+    const sheet = el('div', { className: 'library-side' }, [el('div', { className: 'library-side-head', text: 'Preview' }), preview]);
+    const divider = el('div', {
+      className: 'splitter splitter-vertical',
+      attributes: { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': 'Resize the catalogue', tabindex: '0' },
+    });
+    const split = el('div', { className: 'library-split' }, [tree, divider, sheet]);
+    splitter({
+      splitter: divider,
+      sizeAt: (event) => event.clientX - split.getBoundingClientRect().left,
+      size: () => tree.getBoundingClientRect().width,
+      limit: () => split.getBoundingClientRect().width - SPLITTER - PREVIEW_FLOOR,
+      minimum: TREE_FLOOR,
+      preset: TREE_PRESET,
+      apply: (width) => {
+        treeWidth = Math.round(width);
+        tree.style.flexBasis = `${treeWidth}px`;
+      },
+      keys: ['ArrowLeft', 'ArrowRight'],
+    });
+    body.appendChild(el('div', { className: 'library' }, [split, el('p', { className: 'library-into', text: filedText() })]));
     renderList();
     renderPreview();
     list.scrollTop = scrollTop;
     if (!shown) {
       shown = true;
-      head.querySelector('.head-search')?.focus();
+      list.querySelector('.library-row[tabindex="0"]')?.focus();
     }
   }
 
