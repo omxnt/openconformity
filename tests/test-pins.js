@@ -227,7 +227,7 @@ import { fakeStorage } from './helpers.js';
   ok(multiselect.includes("kind: 'menu',\n    element: list,\n    opener: anchor,"), 'stacked on the overlay as a menu is, so it closes as one and hands focus back');
   ok(editorSource.includes("hidden.value = joinSet(definition, chosen);") && editorSource.includes("hidden.dispatchEvent(new Event('input', { bubbles: true }));"), 'a toggle rewrites the hidden control the draft reads, and tells the form');
   ok(readFile('../app/modules/app.js').includes('  overlay,\n'), 'the editor is given the overlay to open it on');
-  ok(readFile('../spec/attributes.md').includes('| set | Any number of the values in the Values column'), 'the document defines the set kind');
+  ok(readFile('../notes/attributes.md').includes('| set | Any number of the values in the Values column'), 'the document defines the set kind');
   ok(sheet.includes('.cell-group { display: contents; }'), 'a conditional group lays its cells on the grid itself');
   ok(sheet.includes('.tag {') && readFile('../app/modules/editor.js').includes("if (definition.kind === 'choice') return el('div', { className: 'cell-value' }, [el('span', { className: 'tag', text: value })]);"), "a choice reads as Carbon's tag");
   const editorSheet = sheet.slice(sheet.indexOf('/* ---------- Editor ---------- */'), sheet.indexOf('/* ---------- Rating ---------- */'));
@@ -262,7 +262,7 @@ import { fakeStorage } from './helpers.js';
   const styles = readFile('../app/style.css');
   ok(styles.includes('.help-trigger:hover .tooltip,\n.help-trigger:focus-visible .tooltip,\n.tip-trigger:hover .tooltip,\n.tip-trigger:focus-visible .tooltip { visibility: visible; opacity: 1; transition-delay: 100ms; }') && styles.includes('max-width: 288px;'), 'shown on hover or focus, the help glyph and the icon buttons by one rule, at the tooltip width Carbon sets');
   ok(editor.includes("definition.key === 'title' || definition.key === 'name' || definition.kind === 'multiline' || definition.kind === 'hyperlink' || definition.kind === 'set'"), 'the title, the project name, a multiline, a hyperlink and a set each take a row');
-  ok(readFile('../spec/attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
+  ok(readFile('../notes/attributes.md').includes('The editor shows it as the first cell of the type\'s own tab'), 'as the document now allows');
   ok(editor.includes('if (panels.length > 1) body.appendChild(tabBar(code, panels));'), 'and a type with no tabbed group shows no tab bar');
   ok(editor.includes('tabKeys(bar, (i) => select(i, true));') && readFile('../app/modules/dom.js').includes('export function tabKeys(bar, pick) {'), 'arrow keys walk the tabs, from one helper');
 
@@ -315,7 +315,7 @@ import { fakeStorage } from './helpers.js';
   const sheet = readFile('../app/style.css');
   ok(!sheet.includes('.switcher'), 'and so is its sheet');
   ok(sheet.includes('.pane-head > .tabs { flex: 1; align-self: stretch;'), "in a head the tabs stand in the name's place");
-  ok(readFile('../spec/attributes.md').includes('#### Applicability `tab`'), 'the document tags a group as a tab');
+  ok(readFile('../notes/attributes.md').includes('#### Applicability `tab`'), 'the document tags a group as a tab');
 
   ok(sheet.includes('.pane-relationships .pane-body { display: flex; flex-direction: column; }') && sheet.includes('.graph-host { flex: 1 1 auto; min-height: 0; padding: 16px; overflow: auto; }'), "the graph's host fills its pane, so its scrollbar sits at the pane's edge");
 }
@@ -323,7 +323,7 @@ import { fakeStorage } from './helpers.js';
 // --- A safety function's required level, chosen in its standard's terms -------
 
 {
-  const doc = readFile('../spec/attributes.md');
+  const doc = readFile('../notes/attributes.md');
   ok(doc.includes('##### Required integrity level `when standard = EN ISO 13849-1:2023`') && doc.includes('| plr | Required integrity level | choice | PL a; PL b; PL c; PL d; PL e |'), "under ISO 13849-1 the level is chosen among the standard's own");
   ok(doc.includes('##### Required integrity level `when standard = EN IEC 62061:2021`') && doc.includes('| sil | Required integrity level | choice | SIL 1; SIL 2; SIL 3 |'), 'under IEC 62061 likewise, the two one slot');
   ok(doc.includes('| standard | Functional safety standard | choice | EN ISO 13849-1:2023; EN IEC 62061:2021 |') && !doc.includes('| safetyStandard |') && !doc.includes('Other standard'), "the standard is the function's own choice, not the project's, and the list holds standards alone");
@@ -408,7 +408,7 @@ import { fakeStorage } from './helpers.js';
   ok(readFile('../app/modules/app.js').includes('  dialogs,\n'), 'the editor is given the dialogs to open');
   ok(rating.includes("if (!ESTIMATED.includes(method)) return null;") && !rating.includes('Hybrid'), "the dialog opens for the scenario's methods alone");
   ok(rating.includes("{ label: 'Apply', value: 'confirmed', kind: 'primary' }"), 'applied by its primary action, cancelled by anything else');
-  const doc = readFile('../spec/attributes.md');
+  const doc = readFile('../notes/attributes.md');
   ok(doc.includes('#### Initial risk estimation `when estimationMethod = Risk matrix (ISO/TR 14121-2:2012, 6.2.2)`'), "the document tags a rating with the project's method it waits on");
   ok(doc.includes('| initialLevel | Risk level | computed | Risk matrix (ISO/TR 14121-2:2012, 6.2.2) |'), 'and names the method a computed value is read by');
   ok(doc.includes('| initialSeverityRationale | Severity rationale | rationale | initialSeverity |'), 'and the parameter a rationale is given for');

@@ -741,7 +741,7 @@ When a scenario's residual risk is rated, or a hazard's Eliminated is set, the s
 
 `2026-09-27` `product`
 
-The words the software says to the user follow the rules kept in notes/language.md. A dialog that asks has a question for its title and its button repeats the title's verb. One verb for one action, delete, remove, discard, clear. Consequences are counted, and composition is said as part of. A toast's title is the outcome, a refusal's is Could not and the verb. The model is the project. A relationship is added and removed, and a record's entity is added, removed or deleted since. A menu entry that asks for more before it acts carries an ellipsis, a menu of choices or a mode does not.
+The words the software says to the user follow the rules kept in notes/proposals/language.md. A dialog that asks has a question for its title and its button repeats the title's verb. One verb for one action, delete, remove, discard, clear. Consequences are counted, and composition is said as part of. A toast's title is the outcome, a refusal's is Could not and the verb. The model is the project. A relationship is added and removed, and a record's entity is added, removed or deleted since. A menu entry that asks for more before it acts carries an ellipsis, a menu of choices or a mode does not.
 
 > *The texts had been written one at a time across months and read that way, three words for one thing, metamodel words reaching the user, weight uneven from one dialog to the next. One pass over every string with a short set of rules fixed that, and the rules are kept where the next string can be checked against them. Attribute help texts follow the same rules and are held to the attributes document by the tests.*
 
@@ -754,6 +754,23 @@ The words the software says to the user follow the rules kept in notes/language.
 A function that takes over a region for a while is a mode. The messages stand over the relationship pane, the library picker over the editor's column with the relationship pane hidden, and the diagram editor over the whole workspace with every action of the model held still. Each has a head naming it and carrying its actions, a way out in the head and on Escape, and none is kept across a reload. While a mode is open the panes beneath keep their state and take it back when it closes.
 
 > *Dialogs cap width at Carbon's largest modal and suit a decision, not work. The messages need the pane's width, the picker needs the navigator alive beside it for where the picks land, and draw.io needs more than a column for its own chrome. One anatomy for the three means one thing to learn. The diagram editor holds the model still because a mode is not modal, and the menu bar stays live above it. Generalises D-083.*
+
+---
+
+### D-091 The specification in one folder
+
+`2026-09-27` `repository`
+
+The specification stands alone in `specs`, the requirements, the metamodel and the schema, and nothing else. What is written about the project rather than being it stands in `notes`, the background, the decisions, the attributes while they still move, and the document template at its top, and under `proposals` and `gate` what is in flight. Every folder at the root is named in the plural for the several files it holds.
+
+    app/            the published software
+    site/           the published project site
+    specs/          the specification and the schema
+    sources/        the sources in editable formats
+    tests/          headless tests for the software
+    notes/          the decisions and the working notes
+
+> *The schema is a governing document like the others and stands beside them in the precedence table, and a folder for one file was one folder too many. The decisions are not a specification, the specification has precedence over them, and the background and the template are about the project rather than part of it, so they left the folder. Notes keeps its name, since these are the notes that last, and what is in flight stands one level down, where a reader finds the record above the working material. The attributes document is derived and changes with every field, so it stays a note until it is frozen, which also lets the whole specification folder be guarded as one. A docs folder is kept for a documentation site later. Amends the layout in D-082, whose point about the prototypes stands.*
 
 ---
 

@@ -1,7 +1,7 @@
 /**
  * Verifies the metamodel transcription against its documents: the class
- * diagram in `spec/metamodel.md` and the identifier enumeration in
- * `schema/project.schema.json`. Run from this directory.
+ * diagram in `specs/metamodel.md` and the identifier enumeration in
+ * `specs/project.schema.json`. Run from this directory.
  */
 
 import {
@@ -15,7 +15,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the diagram -------------------------------------------------
 
-const diagram = readFile('../spec/metamodel.md');
+const diagram = readFile('../specs/metamodel.md');
 const lines = diagram.split('\n').map((line) => line.trim());
 
 const documentTypes = [];
@@ -39,7 +39,7 @@ for (const line of lines) {
 
 // --- Parse the schema --------------------------------------------------
 
-const schema = JSON.parse(readFile('../schema/project.schema.json'));
+const schema = JSON.parse(readFile('../specs/project.schema.json'));
 const schemaRelationshipIds = schema.$defs.relationship.properties.type.enum;
 const schemaTypeCodes = schema.$defs.entity.properties.type.enum;
 const schemaCounterKeys = schema.properties.counters.required;

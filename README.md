@@ -24,22 +24,21 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 openconformity/
 ├── app/            the published software
 ├── site/           the published project site
-├── spec/           the specification and the decisions
-├── schema/         the data model schema files
+├── specs/          the specification and the schema
 ├── sources/        the sources in editable formats
 ├── tests/          headless tests for the software
-└── notes/          working notes, proposals and the beta gate
+└── notes/          the decisions and the working notes
 ```
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [about.md](spec/about.md) | Why it exists and what it is |
-| [decisions.md](spec/decisions.md) | What was chosen and why |
-| [requirements.md](spec/requirements.md) | What it shall be and do |
-| [metamodel.md](spec/metamodel.md) | What a model may contain |
-| [attributes.md](spec/attributes.md) | What each entity type carries |
+| [about.md](notes/about.md) | Why it exists and what it is |
+| [decisions.md](notes/decisions.md) | What was chosen and why |
+| [requirements.md](specs/requirements.md) | What it shall be and do |
+| [metamodel.md](specs/metamodel.md) | What a model may contain |
+| [attributes.md](notes/attributes.md) | What each entity type carries |
 
 ## Disclaimer
 

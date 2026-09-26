@@ -7,7 +7,7 @@
  * parameters in the order the document lists them and returns what the
  * rating comes to as text, under the abbreviation the report gives it,
  * RI for the graph's index and RS for the score, or null while a
- * parameter is missing or unreadable. The tables are chapter 6 of `spec/attributes.md`,
+ * parameter is missing or unreadable. The tables are chapter 6 of `notes/attributes.md`,
  * transcribed and checked against the report; nothing here is stored,
  * an estimate being computed wherever it is shown.
  */

@@ -20,11 +20,10 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
     app/            the published software
     site/           the published project site
-    spec/           the specification and the decisions
-    schema/         the data model schema files
+    specs/          the specification and the schema
     sources/        the sources in editable formats
     tests/          headless tests for the software
-    notes/          working notes, proposals and the beta gate
+    notes/          the decisions and the working notes
 
 ## Publishing
 
@@ -35,23 +34,23 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
 | # | Document | Authority | On disagreement |
 |---|---|---|---|
-| 1 | `spec/requirements.md` | Governs what the software does | The requirements are right |
-| 2 | `spec/metamodel.md` | Governs what a model contains | The metamodel is right |
-| 3 | `spec/attributes.md` | Derived from the metamodel | The attributes are wrong |
-| 4 | `schema/project.schema.json` | Derived from the metamodel | The schema is wrong |
-| 5 | `spec/decisions.md` | Reasoning behind the choices | The entry is out of date |
+| 1 | `specs/requirements.md` | Governs what the software does | The requirements are right |
+| 2 | `specs/metamodel.md` | Governs what a model contains | The metamodel is right |
+| 3 | `specs/project.schema.json` | Derived from the metamodel | The schema is wrong |
+| 4 | `notes/attributes.md` | Derived from the metamodel | The attributes are wrong |
+| 5 | `notes/decisions.md` | Reasoning behind the choices | The entry is out of date |
 
 ## Documents
 
 | File | What it is | Read when |
 |---|---|---|
-| `spec/about.md` | Background, principles, and scope | Needing context on the project |
-| `spec/requirements.md` | Requirements specification | Building or changing the software |
-| `spec/metamodel.md` | Entity types and relationships | Working with entities or relationships |
-| `spec/attributes.md` | Attributes per entity type | Working with entity attributes |
-| `spec/decisions.md` | Decision log and rationale | Proposing something undiscussed |
-| `spec/template.md` | Document form and structure | Writing or updating a document |
-| `schema/project.schema.json` | Project file specification | Working with the project schema file |
+| `notes/about.md` | Background, principles, and scope | Needing context on the project |
+| `specs/requirements.md` | Requirements specification | Building or changing the software |
+| `specs/metamodel.md` | Entity types and relationships | Working with entities or relationships |
+| `notes/attributes.md` | Attributes per entity type | Working with entity attributes |
+| `notes/decisions.md` | Decision log and rationale | Proposing something undiscussed |
+| `notes/template.md` | Document form and structure | Writing or updating a document |
+| `specs/project.schema.json` | Project file specification | Working with the project schema file |
 
 ## Verification
 

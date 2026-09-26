@@ -41,7 +41,7 @@ export function draftChanged(definitions, attributes, values) {
 /**
  * The project's field set: the name, mapped to the model's own name
  * rather than the attribute bag, and nothing else until
- * `spec/attributes.md` gains its Project section.
+ * `notes/attributes.md` gains its Project section.
  */
 const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text', help: "The project's name, which the saved file is named after." }];
 /** How many of the project's own attributes stand before its name on the first tab: the designation and the organisation. */

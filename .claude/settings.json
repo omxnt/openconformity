@@ -5,26 +5,20 @@
       "Write(**)"
     ],
     "deny": [
-      "Edit(/spec/requirements.md)",
-      "Write(/spec/requirements.md)",
-      "Edit(/spec/metamodel.md)",
-      "Write(/spec/metamodel.md)",
-      "Edit(/schema/project.schema.json)",
-      "Write(/schema/project.schema.json)",
+      "Edit(/specs/**)",
+      "Write(/specs/**)",
+      "Edit(/sources/**)",
+      "Write(/sources/**)",
+      "Edit(/.claude/**)",
+      "Write(/.claude/**)",
+      "Edit(/.git/**)",
+      "Write(/.git/**)",
       "Edit(/CLAUDE.md)",
       "Write(/CLAUDE.md)",
       "Edit(/README.md)",
       "Write(/README.md)",
       "Edit(/LICENSE)",
-      "Write(/LICENSE)",
-      "Edit(/sources/visual-assets.fig)",
-      "Write(/sources/visual-assets.fig)",
-      "Edit(/sources/linkedin.png)",
-      "Write(/sources/linkedin.png)",
-      "Edit(/.claude/**)",
-      "Write(/.claude/**)",
-      "Edit(/.git/**)",
-      "Write(/.git/**)"
+      "Write(/LICENSE)"
     ],
     "defaultMode": "default"
   }
