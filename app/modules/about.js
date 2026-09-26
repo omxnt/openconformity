@@ -93,8 +93,8 @@ export async function showAbout(dialogs, store = null) {
         ['Carbon Icons', 'Icon set, vendored', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
       ]),
       group('Diagrams', [
-        ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com'), link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use')]],
-        ['JGraph Ltd', 'Maker and trademark holder of draw.io, not affiliated', [link('https://www.drawio.com/trust/', 'Privacy')]],
+        ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]],
+        ['JGraph Ltd', 'Maker and trademark holder, not affiliated', [link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use'), link('https://www.drawio.com/trust/', 'Privacy')]],
       ]),
       group('Legislation', [
         ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
