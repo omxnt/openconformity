@@ -15,6 +15,7 @@ import { createFlows } from './flows.js';
 import { createActions } from './actions.js';
 import { createViewsPane } from './views.js';
 import { createLibraryPane } from './library.js';
+import { createDrawingSurface } from './drawing-editor.js';
 import { LIBRARIES } from '../library/index.js';
 
 const retention = createRetention({ indexedDB: window.indexedDB, storageManager: window.navigator.storage ?? null });
@@ -24,8 +25,16 @@ const overlay = createOverlay({ container: document.getElementById('overlay-root
 store.subscribe(() => overlay.closeMenus());
 
 const dialogs = createDialogs({ overlay, toastRegion: document.getElementById('toasts') });
+const drawingSurface = createDrawingSurface({
+  workspace: document.getElementById('workspace'),
+  pane: document.getElementById('pane-drawing'),
+  head: document.getElementById('drawing-head'),
+  body: document.getElementById('drawing-body'),
+  store,
+});
 const editor = createEditor({
   dialogs,
+  drawingSurface,
   overlay,
   store,
   head: document.getElementById('editor-head'),
@@ -109,7 +118,7 @@ createViewsPane({
 });
 
 document.addEventListener('keydown', (event) => {
-  if (!(event.metaKey || event.ctrlKey)) return;
+  if (!(event.metaKey || event.ctrlKey) || store.drawingOpen()) return;
   const key = event.key.toLowerCase();
   if (key === 's') {
     event.preventDefault();

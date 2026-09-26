@@ -534,6 +534,11 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(notified, heard, 'opening it again is nothing');
   store.setLibraryOpen(false);
   equal(store.libraryOpen(), false, 'and the X hands the editor pane back');
+  equal(store.drawingOpen(), false, 'the diagram editor stands closed');
+  store.setDrawingOpen(true);
+  equal(store.drawingOpen(), true, 'opened from a diagram in an edit');
+  store.setDrawingOpen(false);
+  equal(store.drawingOpen(), false, 'and Apply or Cancel hands the workspace back');
 
   deepEqual(
     Object.keys((await blobIn(store, retention)).session),

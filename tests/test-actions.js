@@ -186,6 +186,19 @@ function enabledIds(actions) {
   );
 }
 
+// --- Nothing acts while a diagram is open ------------------------------------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const actions = createActions({ store, flows: {} });
+  store.replaceProject(createModel());
+  ok(actions.find((action) => action.id === 'new-entity').enabled(), 'with a project open a new entity can be made');
+  store.setDrawingOpen(true);
+  ok(actions.every((action) => !action.enabled()), 'while a diagram is open over the workspace every action stands disabled');
+  store.setDrawingOpen(false);
+  ok(actions.find((action) => action.id === 'new-entity').enabled(), 'and acts again once it closes');
+}
+
 // --- The toolbar's shape ---------------------------------------------------
 
 {

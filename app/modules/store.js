@@ -136,6 +136,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let messagesOpen = false;
   /** Whether the library picker stands over the editor pane: opened from the toolbar, closed by its X or Escape, never kept across a reload. */
   let libraryOpen = false;
+  /** Whether the diagram editor stands over the whole workspace: opened from a diagram in an edit, closed by Apply or Cancel, never kept across a reload. */
+  let drawingOpen = false;
   try {
     relationshipsCollapsed = session?.getItem(COLLAPSE_KEY) === 'true';
   } catch {
@@ -484,6 +486,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       relationshipView = 'graph';
       messagesOpen = false;
       libraryOpen = false;
+      drawingOpen = false;
       for (const code of Object.keys(chosenTabs)) delete chosenTabs[code];
       persistFailed = false;
       storageNearlyFull = false;
@@ -790,6 +793,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
         // A session store that refuses changes nothing.
       }
       collapseRelationships(false);
+      notify();
+    },
+
+    /** Whether the diagram editor stands over the whole workspace. */
+    drawingOpen: () => drawingOpen,
+
+    /**
+     * Show the diagram editor over the workspace, or hand the workspace
+     * back to its panes.
+     * @param {boolean} open
+     */
+    setDrawingOpen(open) {
+      if (open === drawingOpen) return;
+      drawingOpen = open;
       notify();
     },
 

@@ -40,7 +40,8 @@ const SAVE_HINT = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(nav
 export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
 
-  return [
+  /** @type {Action[]} */
+  const actions = [
     ...VIEWS.map((view) => ({
       id: `view-${view.id}`,
       icon: 'i-view-list',
@@ -298,4 +299,7 @@ export function createActions({ store, flows }) {
       run: () => flows.redo(),
     },
   ];
+  // While a diagram is open over the workspace nothing may change the
+  // model beneath it, so every action stands disabled until Apply or Cancel.
+  return actions.map((action) => ({ ...action, enabled: () => !store.drawingOpen() && action.enabled() }));
 }

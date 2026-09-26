@@ -713,10 +713,13 @@ body {
 
 /* The external editor's frame fills a dialog sized to the pane; the
    note above it says what the editor is doing, or why it could not. */
-.drawing-editor { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; height: min(72vh, 900px); min-height: 420px; }  /* $spacing-03 */
+/* The diagram editor over the whole workspace: the note, then draw.io's frame taking the rest. */
+.workspace.drawing > :not(.pane-drawing) { display: none; }
+.pane-drawing { flex: 1; min-width: 0; }
+.pane-drawing .pane-body { display: flex; flex-direction: column; padding: 8px 16px 16px; }  /* $spacing-03, $spacing-05 */
+.drawing-editor { flex: 1; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }  /* $spacing-03 */
 .drawing-editor iframe { display: block; width: 100%; height: 100%; border: 1px solid var(--border-subtle); background: #ffffff; }
 .drawing-editor-note { margin: 0; min-height: 18px; font-size: 12px; letter-spacing: 0.32px; color: var(--text-second); }  /* $helper-text-01 */
-.dialog:has(.drawing-editor) { max-width: min(1400px, 96vw); }
 
 /* The consent before the editor loads: two plain sentences and the box,
    drawn as the multiselect draws its checkboxes, over the real input

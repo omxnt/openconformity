@@ -8,7 +8,10 @@
  * is accepted only from its frame and its origin, as data, or dropped.
  * The session's states, what they post and what they make of what they
  * hear are pure, so a test drives them against a fake frame; the frame
- * itself, the dialogs and the listener are built here and nowhere else.
+ * itself, the surface it stands on, the dialogs and the listener are
+ * built here and nowhere else. The frame stands over the whole
+ * workspace while it is open, under a head with Apply and Cancel, the
+ * panes hidden beneath it and every action of the model held still.
  */
 
 import { el, icon } from './dom.js';
@@ -288,6 +291,52 @@ async function consent(dialogs, store) {
 }
 
 /**
+ * The surface the editor stands on: the pane over the whole workspace,
+ * shown with a head naming the diagram and carrying Cancel and Apply,
+ * the body holding the note and the frame, hidden again when the edit
+ * ends. One is made in the app and handed to every edit.
+ * @param {Object} spec
+ * @param {HTMLElement} spec.workspace
+ * @param {HTMLElement} spec.pane
+ * @param {HTMLElement} spec.head
+ * @param {HTMLElement} spec.body
+ * @param {{ setDrawingOpen: (open: boolean) => void }} spec.store
+ */
+export function createDrawingSurface({ workspace, pane, head, body, store }) {
+  return {
+    /**
+     * @param {{ title: string, content: HTMLElement, onApply: () => void, onCancel: () => void }} spec
+     */
+    open({ title, content, onApply, onCancel }) {
+      head.textContent = '';
+      body.textContent = '';
+      const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
+      cancel.addEventListener('click', onCancel);
+      const apply = el('button', { className: 'form-button button-primary', text: 'Apply', attributes: { type: 'button' } });
+      apply.addEventListener('click', onApply);
+      head.append(el('span', { className: 'head-title', text: title }), el('span', { className: 'toolbar-spacer' }), el('div', { className: 'pane-head-actions' }, [cancel, apply]));
+      body.appendChild(content);
+      pane.hidden = false;
+      workspace.classList.add('drawing');
+      store.setDrawingOpen(true);
+      pane.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        onCancel();
+      });
+      apply.focus();
+    },
+    close() {
+      pane.hidden = true;
+      workspace.classList.remove('drawing');
+      head.textContent = '';
+      body.textContent = '';
+      store.setDrawingOpen(false);
+    },
+  };
+}
+
+/**
  * Edit a drawing in the external editor. Resolves the drawing the
  * editor returned, checked, or null when the user cancelled, declined,
  * or the editor failed; the model is never touched here, the caller
@@ -295,11 +344,12 @@ async function consent(dialogs, store) {
  * @param {Object} spec
  * @param {ReturnType<import('./dialog.js').createDialogs>} spec.dialogs
  * @param {{ consented: () => boolean, setConsented: (held: boolean) => void }} spec.store
+ * @param {ReturnType<typeof createDrawingSurface>} spec.surface  the pane over the workspace the frame stands on
  * @param {string} spec.drawing  as stored, '' for none
  * @param {string} spec.subject  what the drawing is of, for the titles
  * @returns {Promise<string|null>}
  */
-export async function editDrawing({ dialogs, store, drawing, subject }) {
+export async function editDrawing({ dialogs, store, surface, drawing, subject }) {
   if (!store.consented() && !(await consent(dialogs, store))) return null;
   const note = el('p', { className: 'drawing-editor-note', attributes: { role: 'status' } });
   const frame = el('iframe', {
@@ -338,47 +388,43 @@ export async function editDrawing({ dialogs, store, drawing, subject }) {
     if (message !== null) session.hear(message);
   };
   window.addEventListener('message', handler);
-  const picked = await dialogs.open({
-    title: `Diagram of ${subject}`,
-    body: host,
-    actions: [
-      {
-        label: 'Cancel',
-        value: null,
-        kind: 'secondary',
-        run: async () => {
-          if (session.state() === 'editing' && session.changed()) {
-            const sure = await dialogs.open({
-              title: 'Discard the changes?',
-              message: 'The changes to the diagram are lost.',
-              actions: [
-                { label: 'Keep editing', value: false, kind: 'secondary' },
-                { label: 'Discard', value: true, kind: 'danger' },
-              ],
-            });
-            if (sure !== true) return undefined;
-          }
-          session.cancel();
-          return null;
-        },
+  const picked = await new Promise((resolve) => {
+    let asking = false;
+    surface.open({
+      title: `Diagram of ${subject}`,
+      content: host,
+      onCancel: async () => {
+        if (asking) return;
+        if (session.state() === 'editing' && session.changed()) {
+          asking = true;
+          const sure = await dialogs.open({
+            title: 'Discard the changes?',
+            message: 'The changes to the diagram are lost.',
+            actions: [
+              { label: 'Keep editing', value: false, kind: 'secondary' },
+              { label: 'Discard', value: true, kind: 'danger' },
+            ],
+          });
+          asking = false;
+          if (sure !== true) return;
+        }
+        session.cancel();
+        resolve(null);
       },
-      {
-        label: 'Apply',
-        value: 'apply',
-        kind: 'primary',
-        run: () =>
-          new Promise((settle) => {
-            if (session.state() === 'loading') {
-              note.textContent = 'The editor is still loading.';
-              settle(undefined);
-              return;
-            }
-            settleApply = settle;
-            if (!session.apply()) settle(undefined);
-          }),
+      onApply: () => {
+        if (session.state() === 'loading') {
+          note.textContent = 'The editor is still loading.';
+          return;
+        }
+        settleApply = (text) => {
+          settleApply = null;
+          if (text !== undefined) resolve(text);
+        };
+        if (!session.apply()) settleApply = null;
       },
-    ],
+    });
   });
+  surface.close();
   window.removeEventListener('message', handler);
   session.cancel();
   return typeof picked === 'string' ? picked : null;

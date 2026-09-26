@@ -228,6 +228,7 @@ export const LANDING_OFFER = [
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
+ * @param {ReturnType<import('./drawing-editor.js').createDrawingSurface>} [context.drawingSurface]  the pane over the workspace a diagram is edited on
  * @param {(id: string, definition: Object) => void} [context.onReview]  a changed record marked reviewed in view: written afresh from what is related now
  * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
  * @param {(values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveProject]  the project's draft, asked about first where it removes what entities hold
@@ -252,6 +253,7 @@ export function createEditor({
   onAction = () => {},
   onReview = () => {},
   dialogs = null,
+  drawingSurface = null,
   overlay = null,
 }) {
   /** @type {Object|null} the entity on the surface, this render */
@@ -1064,10 +1066,10 @@ export function createEditor({
       } else if (!editing) {
         body.appendChild(el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` }));
       }
-      if (editing && dialogs) {
+      if (editing && dialogs && drawingSurface) {
         actions.push(
           ghost(text === '' ? 'Create in draw.io' : 'Edit in draw.io', text === '' ? 'i-new-entity' : 'i-edit', async () => {
-            const held = await editDrawing({ dialogs, store, drawing: text, subject: subject() });
+            const held = await editDrawing({ dialogs, store, surface: drawingSurface, drawing: text, subject: subject() });
             if (held !== null) hold(held);
           })
         );
