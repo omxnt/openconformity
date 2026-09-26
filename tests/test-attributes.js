@@ -6,7 +6,7 @@
 
 import { ATTRIBUTES, attributesFor, groupsOf, SHARED_HELP, PROJECT, typeOf, isParameter } from '../app/modules/attributes.js';
 import { RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
-import { ESTIMATED } from '../app/modules/risk.js';
+import { METHODS } from '../app/modules/risk.js';
 import { firstTabName } from '../app/modules/editor.js';
 
 /** The closed list of kinds, as plan §5.9 rules it. */
@@ -244,7 +244,7 @@ for (const type of documentTypes) {
       ok(groupsOf(type.code).some((group) => group.name === definition.recorded), `${type.code}.${definition.key} is recorded when a group of the type changes: ${definition.recorded}`);
       ok(!('values' in definition), `${type.code}.${definition.key} offers no values of its own`);
     } else if (definition.kind === 'computed') {
-      ok(ESTIMATED.includes(definition.method), `${type.code}.${definition.key} is read by a method the software knows`);
+      ok(METHODS.includes(definition.method), `${type.code}.${definition.key} is read by a method the software knows`);
       const group = groupsOf(type.code).find((held) => held.attributes.includes(definition));
       ok(group !== undefined && group.attributes.some(isParameter), `${type.code}.${definition.key} has parameters beside it to read`);
     } else {

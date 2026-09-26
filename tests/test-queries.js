@@ -141,12 +141,12 @@ function offered(model, subjectId) {
 {
   equal(
     formLabel({ typeId: 'elm-exhibits-haz', direction: 'outgoing' }),
-    'exhibits — Single Hazard',
+    'exhibits · Single Hazard',
     'an outgoing form reads label first, far type after'
   );
   equal(
     formLabel({ typeId: 'elm-exhibits-haz', direction: 'incoming' }),
-    'System Element — exhibits',
+    'System Element · exhibits',
     'an incoming form reads the far type first'
   );
 

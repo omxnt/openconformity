@@ -314,14 +314,12 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       expanded = new Set(openIds.filter((id) => model.nodes.has(id)));
       projectCollapsed = blob.session?.projectCollapsed === true;
       projectOpen = true;
-      if (openView !== null && Number.isInteger(openView.section) === false) openView = null;
       return true;
     } catch {
       return false;
     }
   }
 
-  /** What web storage holds under a key, parsed where it parses, else as the text it is, else null. */
   /** Set the pane's collapsed state and keep it for the session, without notifying. */
   function collapseRelationships(collapsed) {
     relationshipsCollapsed = collapsed;
@@ -332,6 +330,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     }
   }
 
+  /** What web storage holds under a key, parsed where it parses, else as the text it is, else null. */
   function legacy(key) {
     let raw = null;
     try {
@@ -808,7 +807,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
 
     /**
      * Choose the relationship pane's presentation. One truth for the
-     * pane's tabs and the View menu; never persisted.
+     * pane's tabs and the View menu, kept for the browser session and
+     * never in the project blob.
      * @param {'list'|'graph'} view
      */
     setRelationshipView(view) {

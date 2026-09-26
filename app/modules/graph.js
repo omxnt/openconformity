@@ -329,7 +329,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     group.appendChild(svgText('text', { x: '16', y: '42', class: 'node-id' }, entity.id));
     group.appendChild(svgText('text', { x: '16', y: '58', class: 'node-label' }, caption(entity)));
     const label = entityLabel(entity);
-    group.appendChild(svgText('title', {}, `${type.name} ${entity.id}${label ? ` — ${label}` : ''}`));
+    group.appendChild(svgText('title', {}, `${type.name} ${entity.id}${label ? `, ${label}` : ''}`));
 
     if (!centre) {
       const act = () => (pending ? store.togglePick(entity.id) : onSelect(entity.id));
@@ -416,10 +416,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     return control;
   }
 
-  /**
-   * @param {number} x1 @param {number} y1 @param {number} x2 @param {number} y2
-   * @param {string} label
-   */
   /**
    * One orthogonal edge, drawn source to target: out of the box, down or
    * up the channel, into the far box. The label rides the neighbour-side

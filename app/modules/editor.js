@@ -47,14 +47,6 @@ const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text', help: "The pr
 const NAME_AFTER = 2;
 
 /**
- * Whether a hyperlink value may be presented as a link. Only the web
- * schemes are followed: anything else — a `javascript:` value above all
- * — renders as the text it is, so rendering can never arm what a user
- * typed or a file carried.
- * @param {string} value
- * @returns {boolean}
- */
-/**
  * A rating as the card shows it: the name of the attribute it computes,
  * what it comes to and its tone — null and none while a parameter is
  * missing — and the parameters by name, in order, an unset one an empty
@@ -98,11 +90,6 @@ export function codeShown(value, definition = null) {
 }
 
 /**
- * The first tab's name: the type's own noun, the last word of its name —
- * Legislation, Requirement, Function.
- * @param {string} code
- */
-/**
  * What a save removes, as the question before it tells it: the groups by
  * the value they stood under, in order, as "A and B under X; C under Y."
  * @param {Array<{ name: string, value: string }>} entries
@@ -116,6 +103,11 @@ export function removalText(entries) {
   return `${[...byValue].map(([value, names]) => `${listed(names)} under ${value}`).join(', and ')}.`;
 }
 
+/**
+ * The first tab's name: the type's own noun, the last word of its name,
+ * Legislation, Requirement, Function.
+ * @param {string} code
+ */
 export function firstTabName(code) {
   if (code === 'PROJECT') return 'Project';
   return (ENTITY_TYPES[code]?.name ?? 'Description').split(' ').at(-1);
@@ -207,6 +199,13 @@ export function joinTable(definition, rows) {
     .join('\n');
 }
 
+/**
+ * Whether a hyperlink value may be presented as a link. Only the web
+ * schemes are followed, anything else, a `javascript:` value above all,
+ * renders as the text it is.
+ * @param {string} value
+ * @returns {boolean}
+ */
 export function linkable(value) {
   return /^https?:\/\/\S/i.test((value ?? '').trim());
 }
@@ -228,7 +227,9 @@ export const LANDING_OFFER = [
  * @param {HTMLElement} context.body
  * @param {ReturnType<import('./drawing-editor.js').createDrawingSurface>} [context.drawingSurface]  the pane over the workspace a diagram is edited on
  * @param {(id: string, definition: Object) => void} [context.onReview]  a changed record marked reviewed in view: written afresh from what is related now
- * @param {(id: string|null, values: Object<string, string>) => boolean} context.onSave
+ * @param {ReturnType<import('./dialog.js').createDialogs>} [context.dialogs]  the dialogs a rating, a drawing and a table open
+ * @param {{ isOpen: () => boolean }} [context.overlay]  the overlay a multiselect stacks on
+ * @param {(id: string, values: Object<string, string>) => boolean} context.onSave
  * @param {(values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveProject]  the project's draft, asked about first where it removes what entities hold
  * @param {(entries: Array<{ name: string, value: string }>) => Promise<boolean>} [context.onRemoval]  asks before a save removes what hidden groups still hold
  * @param {() => void} context.onCancel
@@ -242,7 +243,7 @@ export function createEditor({
   head,
   body,
   onSave,
-  onSaveProject = (values) => onSave(null, values),
+  onSaveProject = () => true,
   onCancel,
   onRename,
   onReturn = () => {},
@@ -453,8 +454,6 @@ export function createEditor({
     return trigger;
   }
 
-  /** The identifier's help, as the document has it. */
-
   /**
    * The identifier as the first cell: generated and read only, so it is
    * in the field's read-only state in either mode, beside the reference,
@@ -503,7 +502,6 @@ export function createEditor({
   /** How wide a column is: as its values and no wider for a date, a choice or a number, brief for a text, and a multiline taking the rest. */
   const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
 
-  /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
   /**
    * A record of entities as tags, each its identifier with its label
    * in the tooltip, one since unlinked wearing the warning glyph and
@@ -589,6 +587,7 @@ export function createEditor({
   /** Every group name under a group, itself first. */
   const namesIn = (group) => [group.name, ...(group.groups ?? []).flatMap(namesIn)];
 
+  /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
   function tableOf(definition, rows, trailing = null) {
     for (const cells of rows) cells.forEach((cell, c) => cell.classList.add(...[columnWidth(definition.columns[c])].filter(Boolean)));
     return el('table', { className: 'data rows' }, [
@@ -841,11 +840,6 @@ export function createEditor({
     return bar;
   }
 
-  /**
-   * Keep each conditional group following the attribute it waits on: a
-   * change shows or hides it in place. Wired once per edit, after the
-   * form is in the pane.
-   */
   /**
    * Show or hide each conditional in document order, reading the draft
    * afresh for each: a group hidden by one condition drops out of the

@@ -50,7 +50,7 @@ ok(PERSIST_DETAIL.includes('Save the project'), 'and points at the file as the d
 
 equal(titleFor(false, ''), 'openconformity', 'the landing titles the software');
 equal(titleFor(true, ''), 'openconformity', 'an unnamed project titles the software');
-equal(titleFor(true, 'Mixer line'), 'Mixer line — openconformity', 'a named project titles the tab');
+equal(titleFor(true, 'Mixer line'), 'Mixer line · openconformity', 'a named project titles the tab');
 equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
 equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
 

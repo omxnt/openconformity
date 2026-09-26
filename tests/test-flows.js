@@ -249,7 +249,7 @@ function flowsOver(store) {
   const store = createStore({ storage: fakeStorage() });
   const flows = flowsOver(store);
   store.replaceProject(createModel());
-  equal(flows.saveEdit(null, { name: '  Mixer line  ', description: 'A machine' }), true, 'the project draft applies');
+  equal(await flows.saveProjectEdit({ name: '  Mixer line  ', description: 'A machine' }), true, 'the project draft applies');
   equal(store.model().name, 'Mixer line', 'the name goes to the model itself, trimmed');
   deepEqual(store.model().attributes, { description: 'A machine' }, 'everything else goes to the attribute bag');
   store.undo();

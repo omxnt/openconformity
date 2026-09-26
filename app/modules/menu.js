@@ -68,22 +68,21 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
         menu.appendChild(el('div', { className: 'menu-heading', text: group.heading }));
       }
       for (const item of group.items) {
-      const attributes = {
-        type: 'button',
-        role: item.checked === undefined ? 'menuitem' : 'menuitemradio',
-      };
-      if (item.checked !== undefined) attributes['aria-checked'] = String(item.checked);
-      const button = el('button', { className: `menu-entry${item.danger ? ' danger' : ''}`, attributes }, [
-        ...(item.icon ? [icon(item.icon, item.pillar)] : []),
-        el('span', { className: 'menu-entry-label', text: item.label }),
-        ...(item.hint ? [el('span', { className: 'menu-hint', text: item.hint })] : []),
-      ]);
-      if (item.disabled) button.disabled = true;
-      button.addEventListener('click', () => {
-        overlay.close(entry);
-        item.onPick();
-      });
-      menu.appendChild(button);
+        const attributes = {
+          type: 'button',
+          role: item.checked === undefined ? 'menuitem' : 'menuitemradio',
+        };
+        if (item.checked !== undefined) attributes['aria-checked'] = String(item.checked);
+        const button = el('button', { className: `menu-entry${item.danger ? ' danger' : ''}`, attributes }, [
+          ...(item.icon ? [icon(item.icon, item.pillar)] : []),
+          el('span', { className: 'menu-entry-label', text: item.label }),
+          ...(item.hint ? [el('span', { className: 'menu-hint', text: item.hint })] : []),
+        ]);
+        if (item.disabled) button.disabled = true;
+        button.addEventListener('click', () => {
+          overlay.close(entry);
+          item.onPick();
+        });
       }
     }
   });

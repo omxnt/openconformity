@@ -25,6 +25,7 @@ import { VIEWS } from './views.js';
  * @property {string} [hint]    the right-aligned key hint a menu shows
  * @property {() => string} [describe]  the words for its tooltip and its menu entry, naming what it would act on
  * @property {() => boolean} enabled
+ * @property {() => boolean} [checked]  whether a view action is the one open, a menu marking it
  * @property {(invocation: { anchor?: HTMLElement, at?: { x: number, y: number } }) => void} run
  */
 

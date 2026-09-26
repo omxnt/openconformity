@@ -19,9 +19,6 @@ export const SCORING_METHOD = 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)';
 /** The methods, in the order the project's choice offers them. */
 export const METHODS = [MATRIX_METHOD, GRAPH_METHOD, SCORING_METHOD];
 
-/** Every method an estimate can be read by. */
-export const ESTIMATED = [...METHODS];
-
 /** 6.2.2, Table 1: the level by probability down and severity across. */
 export const MATRIX_SEVERITY = ['Catastrophic', 'Serious', 'Moderate', 'Minor'];
 export const MATRIX_PROBABILITY = ['Very likely', 'Likely', 'Unlikely', 'Remote'];

@@ -217,6 +217,24 @@ export function updateEntity(model, id, values) {
 }
 
 /**
+ * Remove named attribute keys from an entity, as a save clears what a
+ * choice no longer shows, or an opening clears what a file held under
+ * a choice not in force.
+ * @param {Model} model
+ * @param {string} id
+ * @param {string[]} keys
+ * @returns {Outcome}
+ */
+export function removeAttributes(model, id, keys) {
+  const node = nodeOf(model, id);
+  if (!node || node.kind !== 'entity') {
+    return { ok: false, reason: 'The entity is not in the project.' };
+  }
+  for (const key of keys) delete node.attributes[key];
+  return { ok: true };
+}
+
+/**
  * @param {Model} model
  * @param {string} id
  * @param {string} name

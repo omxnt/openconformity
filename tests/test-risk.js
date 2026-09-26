@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { estimate, METHODS, ESTIMATED, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/modules/risk.js';
+import { estimate, METHODS, GRAPH, GRAPH_COLUMNS, GRAPH_TREE, graphPath, graphLive, graphBand, SCORING_CLASSES, scoreOf, levelTone, MATRIX, MATRIX_SEVERITY, MATRIX_PROBABILITY } from '../app/modules/risk.js';
 import { ATTRIBUTES, attributesFor } from '../app/modules/attributes.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -175,6 +175,5 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
 // --- Every method names its source (C-PRJ-005) ---------------------------------
 
 ok(METHODS.every((method) => /^\w[\w ]+ \(ISO\/TR 14121-2:2012, 6\.\d\.2\)$/.test(method)), 'each method names the report, its year and the clause its example stands in, as a citation after its name, so the choice reads as one wherever it is shown');
-deepEqual(ESTIMATED, METHODS, "the estimator knows the project's three methods and no more");
 
 summary('test-risk');

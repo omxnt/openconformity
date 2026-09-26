@@ -44,7 +44,7 @@ export function themeSwitch(effective) {
  */
 export function titleFor(hasProject, name) {
   const trimmed = name.trim();
-  return hasProject && trimmed ? `${trimmed} — openconformity` : 'openconformity';
+  return hasProject && trimmed ? `${trimmed} · openconformity` : 'openconformity';
 }
 
 /**

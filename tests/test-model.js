@@ -22,6 +22,7 @@ import {
   relationshipsOf,
   removeFolder,
   setProjectAttribute,
+  removeAttributes,
 } from '../app/modules/model.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
@@ -108,6 +109,16 @@ function childIds(model, parentId) {
   deepEqual(nodeOf(model, 'ELM-001').attributes, { title: 'Mixer' }, 'an emptied value removes its key');
   allowed(updateEntity(model, 'ELM-001', { title: '' }), 'the last value can be emptied');
   deepEqual(Object.keys(nodeOf(model, 'ELM-001').attributes), [], 'the entity carries only what is set');
+}
+
+// --- Removing keys (N-SEC-005) ----------------------------------------------
+
+{
+  const model = createModel();
+  addEntity(model, 'SCN', { attributes: { title: 'Fall', initialS: 'S2', residualRating: 'Low' } });
+  deepEqual(removeAttributes(model, 'SCN-001', ['initialS', 'residualRating', 'never']), { ok: true }, 'named keys are removed, an absent one passing');
+  deepEqual(nodeOf(model, 'SCN-001').attributes, { title: 'Fall' }, 'and the rest stands');
+  deepEqual(removeAttributes(model, 'SCN-009', ['title']), { ok: false, reason: 'The entity is not in the project.' }, 'an entity not in the project is refused');
 }
 
 // --- Filing (F-WSP-004, F-WSP-005) -------------------------------------

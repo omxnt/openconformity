@@ -63,7 +63,7 @@ export function relationshipOptions(model, subjectId) {
 export function formLabel(form) {
   const type = RELATIONSHIP_TYPES[form.typeId];
   const other = ENTITY_TYPES[form.direction === 'outgoing' ? type.target : type.source].name;
-  return form.direction === 'outgoing' ? `${type.label} — ${other}` : `${other} — ${type.label}`;
+  return form.direction === 'outgoing' ? `${type.label} · ${other}` : `${other} · ${type.label}`;
 }
 
 /**
@@ -129,12 +129,6 @@ export function entityMatches(entity, filter) {
 }
 
 /**
- * How an entity reads in a list: its identifier, then its label when it
- * carries one.
- * @param {import('./model.js').Entity} entity
- * @returns {string}
- */
-/**
  * The entities one relationship type joins to an entity, whichever end
  * it stands on, by id in order.
  * @param {import('./model.js').Model} model
@@ -152,6 +146,12 @@ export function relatedIds(model, id, type) {
   return [...new Set(held)].sort();
 }
 
+/**
+ * How an entity reads in a list: its identifier, then its label when it
+ * carries one.
+ * @param {import('./model.js').Entity} entity
+ * @returns {string}
+ */
 export function designated(entity) {
   const label = entityLabel(entity);
   return label ? `${entity.id}  ${label}` : entity.id;

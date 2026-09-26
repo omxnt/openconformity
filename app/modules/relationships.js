@@ -158,18 +158,6 @@ export function presentedRows(rows, sort, filter) {
 }
 
 /**
- * @param {Object} context
- * @param {ReturnType<import('./store.js').createStore>} context.store
- * @param {HTMLElement} context.head
- * @param {HTMLElement} context.body
- * @param {{ element: HTMLElement, render: () => void }} context.graph
- * @param {() => void} context.onAdd
- * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
- * @param {(relationship: import('./model.js').Relationship) => void} context.onUnrelate
- * @param {(id: string) => void} context.onSelect
- * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
- */
-/**
  * The messages as the pane's table shows them: the findings under the
  * head's filter, matched on the entity's identifier and label, the
  * record's name and the identifiers out of step, and under the chosen
@@ -192,6 +180,18 @@ export function messageRows(found, sort, filter) {
   return [...rows].sort((a, b) => sign * keyOf(a).localeCompare(keyOf(b)));
 }
 
+/**
+ * @param {Object} context
+ * @param {ReturnType<import('./store.js').createStore>} context.store
+ * @param {HTMLElement} context.head
+ * @param {HTMLElement} context.body
+ * @param {{ element: HTMLElement, render: () => void }} context.graph
+ * @param {() => void} context.onAdd
+ * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
+ * @param {(relationship: import('./model.js').Relationship) => void} context.onUnrelate
+ * @param {(id: string) => void} context.onSelect
+ * @param {() => boolean} context.addEnabled  the relate action's own enablement: no surface re-derives it
+ */
 export function createRelationshipsView({ store, head, body, graph, onAdd, onDone, onUnrelate, onSelect, addEnabled }) {
   /**
    * The pane's own transients, gone with the visit: a sort per table, the

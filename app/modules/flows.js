@@ -19,9 +19,10 @@ import {
   removeEntity,
   removeFolder,
   renameFolder,
-  renameProject as nameProject,
+  renameProject,
   setProjectAttribute,
   updateEntity,
+  removeAttributes,
   relate,
   unrelate,
   file,
@@ -31,6 +32,7 @@ import {
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
+import { pickedRows } from './relate.js';
 import { recordOf } from './records.js';
 import { removalText } from './editor.js';
 import { VIEWS } from './views.js';
@@ -94,7 +96,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     }
   }
 
-  /** The editor's Cancel: the fresh entity leaves with the session. */
   /**
    * Leave the open edit by its Cancel: a clean draft cancels silently, a
    * dirty one gets the standard discard question.
@@ -173,7 +174,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.select(outcome.folder.id);
   }
 
-  /** Rename the selected folder. A blank or unchanged name changes nothing. */
   /**
    * Edit what is selected: an entity's attributes, the project's where
    * nothing is selected, and a folder's one attribute, its name, through
@@ -186,6 +186,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     return editor.beginEdit();
   }
 
+  /** Rename the selected folder. A blank or unchanged name changes nothing. */
   async function renameSelection() {
     const node = nodeOf(store.model(), store.selection());
     if (!node || node.kind !== 'folder') return;
@@ -394,15 +395,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Apply a confirmed draft. A null identifier is the project itself:
-   * the name goes to the model's own name, everything else to the
-   * project's attribute bag. The first save of a pristine creation makes
-   * it an ordinary entity: from here on, Cancel keeps it.
-   * @param {string|null} id
-   * @param {Object<string, string>} values
-   * @returns {boolean}
-   */
-  /**
    * The review of a changed record: the record written afresh from what
    * is related now, as one change the history can undo.
    * @param {string} id
@@ -413,19 +405,15 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     return toastRefusal('Could not mark reviewed', store.commit((model) => updateEntity(model, id, { [definition.key]: value })));
   }
 
+  /**
+   * Apply an entity's confirmed draft. The first save of a pristine
+   * creation makes it an ordinary entity: from here on, Cancel keeps it.
+   * The project's own draft goes through saveProjectEdit.
+   * @param {string} id
+   * @param {Object<string, string>} values
+   * @returns {boolean}
+   */
   function saveEdit(id, values) {
-    if (id === null) {
-      return store.commit((model) => {
-        const named = nameProject(model, (values.name ?? model.name).trim());
-        if (!named.ok) return named;
-        for (const [key, value] of Object.entries(values)) {
-          if (key === 'name') continue;
-          const set = setProjectAttribute(model, key, value);
-          if (!set.ok) return set;
-        }
-        return { ok: true };
-      }).ok;
-    }
     const outcome = store.commit((model) => updateEntity(model, id, values));
     if (outcome.ok && freshCreation !== null && freshCreation.id === id) freshCreation = null;
     return outcome.ok;
@@ -488,7 +476,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       if (!confirmed) return false;
     }
     return store.commit((model) => {
-      const named = nameProject(model, (values.name ?? model.name).trim());
+      const named = renameProject(model, (values.name ?? model.name).trim());
       if (!named.ok) return named;
       for (const [key, value] of Object.entries(values)) {
         if (key === 'name') continue;
@@ -496,8 +484,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
         if (!set.ok) return set;
       }
       for (const { id, keys } of sweep.entities) {
-        const node = nodeOf(model, id);
-        for (const key of keys) delete node.attributes[key];
+        const removed = removeAttributes(model, id, keys);
+        if (!removed.ok) return removed;
       }
       return { ok: true };
     }).ok;
@@ -585,20 +573,9 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   function completeRelate(subjectId, picks) {
     let related = 0;
     store.commit((model) => {
-      for (const pick of picks) {
-        const options = relationshipOptions(model, subjectId)
-          .filter((option) => option.candidates.some((candidate) => candidate.id === pick.id))
-          .map((option) => ({ typeId: option.type.id, direction: option.direction }));
-        const form =
-          pick.form !== null &&
-          options.some((option) => option.typeId === pick.form.typeId && option.direction === pick.form.direction)
-            ? pick.form
-            : options[0];
-        if (!form) continue;
-        const outcome =
-          form.direction === 'outgoing'
-            ? relate(model, form.typeId, subjectId, pick.id)
-            : relate(model, form.typeId, pick.id, subjectId);
+      for (const { id, form } of pickedRows(model, { subject: subjectId, picks })) {
+        if (form === null) continue;
+        const outcome = form.direction === 'outgoing' ? relate(model, form.typeId, subjectId, id) : relate(model, form.typeId, id, subjectId);
         if (outcome.ok) related += 1;
       }
       return related > 0 ? { ok: true } : { ok: false, reason: 'Nothing could be related.' };
@@ -654,11 +631,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.replaceProject(createModel());
   }
 
-  /**
-   * Clear the software's data from this browser: asked first, told
-   * plainly what goes, and what more goes when the open project has
-   * changes not saved to a file. The landing follows.
-   */
   /**
    * Save the copy a failed restore set aside as a file, as the retention
    * holds it: the project it carried where the copy has that shape, the
@@ -717,6 +689,11 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     await store.discardAside();
   }
 
+  /**
+   * Clear the software's data from this browser: asked first, told
+   * plainly what goes, and what more goes when the open project has
+   * changes not saved to a file. The landing follows.
+   */
   async function clearBrowserData() {
     if (!(await confirmDiscard())) return;
     const message = store.dirty()
@@ -814,10 +791,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       danger: true,
     });
     if (!confirmed) return false;
-    for (const { id, keys } of hidden.entities) {
-      const node = nodeOf(model, id);
-      for (const key of keys) delete node.attributes[key];
-    }
+    for (const { id, keys } of hidden.entities) removeAttributes(model, id, keys);
     return true;
   }
 
@@ -838,11 +812,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     });
   }
 
-  /**
-   * Load the bundled example project. It rides with the software as a
-   * file-shaped object and goes through the same gates as a file the
-   * user picked.
-   */
   /**
    * Import from a library: the picker over the editor pane, opened once
    * any edit in progress is settled, and left open to work through.
@@ -871,6 +840,11 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.setLibraryOpen(false);
   }
 
+  /**
+   * Load the bundled example project. It rides with the software as a
+   * file-shaped object and goes through the same gates as a file the
+   * user picked.
+   */
   async function loadExample() {
     if (!(await confirmDiscard())) return;
     if (!(await confirmDiscardProject('Discard and load the example'))) return;

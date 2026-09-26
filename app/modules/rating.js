@@ -13,7 +13,7 @@ import { isOutcome, isRationale } from './attributes.js';
 import {
   estimate,
   levelTone,
-  ESTIMATED,
+  METHODS,
   codeOf,
   scoreOf,
   MATRIX_METHOD,
@@ -346,7 +346,7 @@ const FIGURES = {
  * @returns {Promise<Object<string, string>|null>}
  */
 export async function rateDialog(dialogs, { title, method, definitions, values }) {
-  if (!ESTIMATED.includes(method)) return null;
+  if (!METHODS.includes(method)) return null;
   const parameters = definitions.filter((definition) => !isOutcome(definition) && !isRationale(definition));
   const rationales = definitions.filter(isRationale);
   const state = Object.fromEntries([...parameters, ...rationales].map((definition) => [definition.key, values[definition.key] ?? '']));
