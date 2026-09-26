@@ -13,6 +13,7 @@ import { loadProject, openProject, serialise, toFileObject } from '../app/module
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
 import { addEntity } from '../app/modules/model.js';
 import { attributesFor, groupsOf } from '../app/modules/attributes.js';
+import { checkDrawing, embeddedModel } from '../app/modules/drawing.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -41,7 +42,8 @@ if (loaded.ok) {
 // --- What the example holds ---------------------------------------------
 
 {
-  equal(EXAMPLE_PROJECT.name, 'Example machine', 'the example is the demo machine');
+  equal(EXAMPLE_PROJECT.name, 'Example project', 'the example is the demo machine');
+  deepEqual(EXAMPLE_PROJECT, JSON.parse(readFile('../sources/example.json')), 'and the module is a copy of sources/example.json, saved from the software');
   equal(EXAMPLE_PROJECT.folders.length, 16, 'sixteen folders');
   equal(EXAMPLE_PROJECT.entities.length, 91, 'ninety-one entities');
   equal(EXAMPLE_PROJECT.relationships.length, 166, 'a hundred and sixty-six relationships');
@@ -126,7 +128,7 @@ if (loaded.ok) {
   equal(store.hasProject(), false, 'the landing has no project');
   await flows.loadExample();
   equal(store.hasProject(), true, 'loading the example is one action from the landing, no question asked');
-  equal(store.model().name, 'Example machine', 'and what is open is the example');
+  equal(store.model().name, 'Example project', 'and what is open is the example');
   equal(store.dirty(), false, 'freshly loaded, nothing is unsaved');
 }
 
@@ -169,7 +171,7 @@ if (loaded.ok) {
     const slotOf = new Map(groupsOf(code).filter((group) => group.when).flatMap((group) => group.attributes.map((definition) => [definition.key, `${group.name}/${group.when.key}`])));
     const slotFilled = (key) => [...slotOf].some(([other, slot]) => slot === slotOf.get(key) && filled(other));
     for (const definition of attributesFor(code)) {
-      if (definition.kind === 'computed' || definition.kind === 'drawing') continue;
+      if (definition.kind === 'computed') continue;
       if (!(slotOf.has(definition.key) ? slotFilled(definition.key) : filled(definition.key))) empty.push(`${code}.${definition.key}`);
     }
     for (const entity of entities) {
@@ -180,8 +182,10 @@ if (loaded.ok) {
       }
     }
   }
-  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, drawings excepted, since one has to come out of draw.io, and a slot shown by a choice counts through whichever of its variants is filled');
+  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, and a slot shown by a choice counts through whichever of its variants is filled');
   deepEqual(hidden, [], 'and no entity holds a value under a choice it has not made, since a save would ask to clear it');
+  const refused = EXAMPLE_PROJECT.entities.filter((entity) => entity.attributes.drawing).map((entity) => [entity.id, checkDrawing(entity.attributes.drawing).ok && embeddedModel(entity.attributes.drawing) !== null]).filter(([, fine]) => !fine);
+  deepEqual(refused, [], 'and every drawing passes the check and carries the editor\'s model, so each is shown and can be edited again');
   deepEqual(attributesFor('PROJECT').filter((definition) => (EXAMPLE_PROJECT.attributes[definition.key] ?? '') === '').map((definition) => definition.key), [], "and the project's own attributes are filled");
 }
 

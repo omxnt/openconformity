@@ -1,26 +1,4 @@
-/**
- * The example project: a small production machine with a drive unit
- * behind guarding, an interlocked access door and an emergency stop,
- * assessed under the Machinery Regulation. Every entity type and every
- * relationship type of the metamodel is used, and every attribute of
- * every type holds a value somewhere, so the example shows what goes
- * where and serves as a fixture for testing, held to the metamodel by
- * the tests. It is held in the schema's own file shape and loaded
- * through the ordinary open path, gates and all, so a schema change
- * that breaks it breaks a test before it breaks a user. Its source is
- * sources/example.json, saved from the software, and this module is a
- * copy of it.
- *
- * The content is illustrative and holds no engineering judgement about
- * any real machine. The Regulation's clauses are quoted as the Official
- * Journal has them. No text from any standard is reproduced: what a
- * clause concerns is said in the example's own words, and the guidance
- * fields hold the manufacturer's own reading. The notified body and the
- * specification that is not harmonised are placeholders, and nothing
- * real is named as carrying no presumption of conformity.
- */
-
-export const EXAMPLE_PROJECT = {
+{
   "format": "openconformity-project",
   "schemaVersion": 1,
   "name": "Example project",
@@ -2499,4 +2477,4 @@ export const EXAMPLE_PROJECT = {
       "target": "ESR-014"
     }
   ]
-};
+}
