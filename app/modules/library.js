@@ -552,9 +552,20 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     }
   }
 
+  /** Everything the picker holds for one opening, dropped when it closes so it opens fresh. */
+  function reset() {
+    picks = new Set();
+    expanded = new Set();
+    highlight = null;
+    filter = '';
+    searchOpen = false;
+    sectionsFresh = true;
+  }
+
   function render() {
     body.closest('.column')?.classList.toggle('library-open', store.libraryOpen() && store.hasProject());
     if (!store.libraryOpen()) {
+      if (shown) reset();
       shown = false;
       return;
     }
