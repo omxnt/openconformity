@@ -227,8 +227,6 @@ The project has attributes of its own. Its name is the model's own, not an attri
 
 ### 3.1 European Legislation (LEG)
 
-The reference is the act's own citation, (EU) 2023/1230 or 2006/42/EC.
-
 #### 3.1.1 Legislation
 
 | Attribute | Kind | Values | Help | Key |
@@ -251,8 +249,6 @@ The reference is the act's own citation, (EU) 2023/1230 or 2006/42/EC.
 | Notes | multiline |  | Anything worth keeping that no field holds, such as how something was assessed. | notes |
 
 ### 3.2 Harmonised Standard (HST)
-
-The reference is the designation as cited, EN ISO 12100.
 
 #### 3.2.1 Standard
 
@@ -345,8 +341,6 @@ The reference is the designation as cited, EN ISO 12100.
 
 ### 4.1 Single Hazard (HAZ)
 
-Eliminated is the fact, and a measure that eliminates the hazard is the trace to what did it. Neither requires the other.
-
 #### 4.1.1 Hazard
 
 | Attribute | Kind | Values | Help | Key |
@@ -375,8 +369,6 @@ Eliminated is the fact, and a measure that eliminates the hazard is the trace to
 | Notes | multiline |  | Anything worth keeping that no field holds, such as how something was assessed. | notes |
 
 ### 4.2 Accident Scenario (SCN)
-
-The scenario is rated by the project's method, chapter 6, once for the initial and once for the residual risk. With no method chosen the ratings are typed. What the scenario arises from is its relationships to hazards, actors and tasks, not a field.
 
 #### 4.2.1 Scenario
 
@@ -493,8 +485,6 @@ The scenario is rated by the project's method, chapter 6, once for the initial a
 
 ### 4.3 Protective Measure (PRM)
 
-The step is one of the three the Regulation orders in Annex III 1.1.2, under our own names. Safe design removes the hazard by design, protection is something added between a remaining hazard and the person, and information tells the user of what is left. The kind is the modeller's own word.
-
 #### 4.3.1 Measure
 
 | Attribute | Kind | Values | Help | Key |
@@ -518,8 +508,6 @@ The step is one of the three the Regulation orders in Annex III 1.1.2, under our
 | Notes | multiline |  | Anything worth keeping that no field holds, such as how something was assessed. | notes |
 
 ### 4.4 Safety Function (SAF)
-
-The standard is the function's own choice, not the project's, and the level is chosen in the standard's terms. With no standard chosen the level is typed.
 
 #### 4.4.1 Function
 
@@ -604,8 +592,6 @@ The standard is the function's own choice, not the project's, and the level is c
 ## 5. Requirements Definition
 
 ### 5.1 Essential Requirement (ESR)
-
-The reference is the clause within the legislation, 1.3.7, not the act's citation.
 
 #### 5.1.1 Requirement
 
@@ -700,7 +686,7 @@ The reference is the clause within the legislation, 1.3.7, not the act's citatio
 
 ### 5.4 System Requirement (REQ)
 
-The type is one of the five categories of SEBoK's requirements article [2], named as the article names them. The verification method is chosen when the requirement is written, and a verification records the method actually used, so the two can be compared.
+The type follows the requirement categories of SEBoK's requirements article [2].
 
 #### 5.4.1 Requirement
 
@@ -720,8 +706,6 @@ The type is one of the five categories of SEBoK's requirements article [2], name
 | Notes | multiline |  | Anything worth keeping that no field holds, such as how something was assessed. | notes |
 
 ### 5.5 System Verification (VER)
-
-Every run is kept, and the last row is the result. A verification not yet carried out has no rows.
 
 #### 5.5.1 Verification
 
