@@ -15,7 +15,8 @@ import {
   stripText,
   boxSpan,
   caption,
-  MAX_PER_SIDE,
+  PAGE,
+  SUBJECT_MAX,
   pendingNeighbours,
   attachmentY,
   doglegPoints,
@@ -334,7 +335,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   );
 }
 
-// --- The graph caps a side at seven (pin) ------------------------------
+// --- A group pages by five, the subject growing to twenty (pin) ---------
 
 {
   const model = createModel();
@@ -346,7 +347,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   addEntity(model, 'CAS');
   relate(model, 'cas-assesses-elm', 'CAS-001', 'ELM-001');
 
-  equal(MAX_PER_SIDE, 7, 'seven boxes a side stand open by default');
+  equal(PAGE, 5, 'a page of a group is five members, one pane height');
   const around = neighbourhood(model, 'ELM-001');
   const right = groupedSide(around.outgoing, 'outgoing');
   equal(right.length, 1, 'nine hazards exhibited are one group');
@@ -356,10 +357,10 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(left.map((group) => [group.type, group.members.length]), [['CAS', 1]], 'the sparse side groups just the same');
   deepEqual([openGroups(right)[0].open, openGroups(right)[0].shown], [false, 1], 'a group starts closed: its first member shows, the rest fold');
   const onePage = openGroups(right, new Map([['outgoing:elm-exhibits-haz', 1]]))[0];
-  deepEqual([onePage.open, onePage.shown], [true, 8], 'opened by the user, it shows seven more');
+  deepEqual([onePage.open, onePage.shown], [true, 6], 'opened by the user, it shows five more');
   deepEqual([openGroups(right, new Map(), true)[0].open, openGroups(right, new Map(), true)[0].shown], [true, 9], 'a filter opens every group whole');
-  equal(stripText(openGroups(right)[0]), 'Show 7 more', 'the strip offers the next page');
-  equal(stripText(onePage), 'Show 1 more', 'and counts what the last page holds');
+  equal(stripText(openGroups(right)[0]), 'Show 5 more of 8', 'the strip offers the next page and says how many stand folded');
+  equal(stripText(onePage), 'Show 3 more', 'and on the last page counts what it holds alone');
   equal(stripText(openGroups(right, new Map([['outgoing:elm-exhibits-haz', 2]]))[0]), 'Show fewer', 'and once every member shows, offers the way back');
   const bigModel = createModel();
   addEntity(bigModel, 'LEG');
@@ -368,7 +369,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     relate(bigModel, 'leg-contains-esr', 'LEG-001', `ESR-${String(count + 1).padStart(3, '0')}`);
   }
   const act = groupedSide(neighbourhood(bigModel, 'LEG-001').outgoing, 'outgoing');
-  deepEqual([openGroups(act)[0].shown, openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))[0].shown, sideRows(openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))).height], [1, 22, 22 * 88], 'an act holding 215 requirements opens seven at a time, so the side never runs past what was asked for');
+  deepEqual([openGroups(act)[0].shown, openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))[0].shown, sideRows(openGroups(act, new Map([['outgoing:leg-contains-esr', 3]]))).height], [1, 16, 16 * 88], 'an act holding 215 requirements opens five at a time, so the side never runs past what was asked for');
 }
 
 // --- The box caption (pin) ----------------------------------------------
@@ -402,8 +403,8 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     'a port level with its lane routes dead straight'
   );
   equal(subjectHeight(3), 64, 'a quiet subject keeps the box height');
-  equal(subjectHeight(7), 120, 'a busy one grows modestly to give the attachments room');
-  equal(subjectHeight(30), 120, 'and stops growing at seven, the attachments fanning within it');
+  equal(subjectHeight(7), 120, 'a busy one grows to give the attachments room');
+  deepEqual([SUBJECT_MAX, subjectHeight(20), subjectHeight(30)], [20, 302, 302], 'and stops growing at twenty attachments, the rest fanning within it');
 
 }
 

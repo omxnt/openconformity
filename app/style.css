@@ -1335,7 +1335,6 @@ select.field-input[size] {
 .node-more:focus-visible .node-more-hit { stroke: var(--focus); stroke-width: 2; }
 .node-chevron { fill: var(--link); }
 .node-more-text { font-size: 12px; letter-spacing: 0.32px; fill: var(--link); }
-.group-rule { stroke: var(--border-strong); stroke-width: 2; }
 
 /* While picking, the picks are the subject: dashed provisional edges and
    boxes stand forward, the standing neighbourhood recedes. */
@@ -1667,7 +1666,7 @@ select.field-input[size] {
    itself. */
 .toasts {
   position: fixed;
-  top: 56px;                /* the shell, plus $spacing-03 */
+  bottom: 32px;             /* the status bar, plus $spacing-03 */
   right: 8px;               /* $spacing-03 */
   z-index: 120;
   display: flex;

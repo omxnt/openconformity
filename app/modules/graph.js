@@ -9,12 +9,12 @@
  * the owner's end and every other form the plain arrowhead. Each side
  * stands grouped by relationship type, which binds the entity type at
  * the far end: the first of a group always draws, and where the group
- * holds more a line under it says how many and opens them beneath seven
+ * holds more a line under it says how many and opens them beneath five
  * at a time, each with its own edge, the line then saying how many are
- * left or closing the block from its end, and a rule along the block's
- * outer side saying what it spans. A group opened stays open while its
- * subject is selected and closes on the next; nothing is remembered
- * beyond that. While the store holds a picker for the subject, the picks ride
+ * left or closing the block from its end. A group opened stays open
+ * while its subject is selected and closes on the next; nothing is
+ * remembered beyond that. The canvas takes the width its pane gives,
+ * the columns spreading with it. While the store holds a picker for the subject, the picks ride
  * as dashed provisional edges in their type's group, held open —
  * clicking one, or its box, lets go — and the standing neighbourhood
  * recedes until Done.
@@ -100,7 +100,11 @@ export function filteredNeighbourhood(around, filter) {
 }
 
 /** How many attachments the subject grows for; past it they fan within the same height. */
-export const MAX_PER_SIDE = 7;
+/** How many members a page of a group shows. */
+export const PAGE = 5;
+
+/** Past this many attachments a side the subject stops growing, the rest fanning within it. */
+export const SUBJECT_MAX = 20;
 
 /** The key a group is remembered by: the side it stands on and its relationship type. */
 export const groupKey = (direction, typeId) => `${direction}:${typeId}`;
@@ -137,7 +141,7 @@ export function groupedSide(entries, direction) {
 
 /**
  * How many members of each group show: the first alone while the group
- * is closed, seven more for every page the user opened, every member
+ * is closed, five more for every page the user opened, every member
  * while a filter narrows the side, and always through the last pick,
  * so nothing asked for hides. A group is open while more than its
  * first shows, or while it holds a pick.
@@ -149,7 +153,7 @@ export function openGroups(groups, opened = new Map(), filtered = false) {
   return groups.map((group) => {
     const count = group.members.length;
     const lastPick = group.members.reduce((held, entry, index) => (entry.pending === true ? index + 1 : held), 0);
-    const shown = filtered ? count : Math.min(count, Math.max(1 + MAX_PER_SIDE * (opened.get(group.key) ?? 0), lastPick));
+    const shown = filtered ? count : Math.min(count, Math.max(1 + PAGE * (opened.get(group.key) ?? 0), lastPick));
     return { ...group, shown, open: shown > 1 || lastPick > 0 };
   });
 }
@@ -220,13 +224,14 @@ export function doglegPoints(x1, y1, bendA, bendB, x2, y2) {
 }
 
 /**
- * The subject box grows modestly with its busiest side and stops
- * growing at MAX_PER_SIDE, past which the attachments fan within it.
+ * The subject box grows with its busiest side, a readable gap per
+ * attachment, and stops growing at SUBJECT_MAX, past which the
+ * attachments fan within it.
  * @param {number} busiest  the larger side's edge count
  * @returns {number}
  */
 export function subjectHeight(busiest) {
-  return Math.max(NODE_HEIGHT, Math.min(busiest, MAX_PER_SIDE) * 14 + 22);
+  return Math.max(NODE_HEIGHT, Math.min(busiest, SUBJECT_MAX) * 14 + 22);
 }
 
 /**
@@ -240,8 +245,13 @@ export function boxSpan(side) {
   return boxes.length === 0 ? 0 : boxes.at(-1).y + boxes.at(-1).height;
 }
 
-/** What a group's strip says: how many more the next page shows, or that fewer can be shown once every member does. */
-export const stripText = (group) => (group.shown < group.members.length ? `Show ${Math.min(MAX_PER_SIDE, group.members.length - group.shown)} more` : 'Show fewer');
+/** What a group's strip says: how many more the next page shows and how many stand folded, or that fewer can be shown once every member does. */
+export function stripText(group) {
+  const left = group.members.length - group.shown;
+  if (left <= 0) return 'Show fewer';
+  const next = Math.min(PAGE, left);
+  return next < left ? `Show ${next} more of ${left}` : `Show ${next} more`;
+}
 
 /**
  * The title line a box carries, cut to what three lines of box hold.
@@ -258,14 +268,16 @@ export function caption(entity) {
 const NODE_WIDTH = 224;
 const NODE_HEIGHT = 64;
 const ROW_GAP = 24;
-// A group's strip fills the gap under its last shown box; the rule
-// along an open block's outer side keeps clear of the boxes.
+// A group's strip fills the gap under its last shown box.
 const STRIP_HEIGHT = ROW_GAP;
-const RULE_GAP = 6;
-// The gap is the static worst case: the longest relationship label sits
-// over the guaranteed horizontal with the channel zone reserved.
+// The gap between columns at the least: the longest relationship label
+// sits over the guaranteed horizontal with the channel zone reserved.
+// It grows with the pane, up to a limit past which the slant is flat.
 const COLUMN_GAP = 176;
+const COLUMN_GAP_MAX = 480;
 const MARGIN = 16;
+// The host's own padding, taken off its width before the columns spread.
+const HOST_PADDING = 16;
 // The dogleg's stubs: a long horizontal at the neighbour, room for the
 // longest label, and a short one at the subject.
 const NEIGHBOUR_STUB = 112;
@@ -287,6 +299,15 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
   let openedFor = null;
   /** The strip to give focus back to after a toggle redraws it. */
   let focusKey = null;
+
+  if (typeof ResizeObserver === 'function') {
+    let lastWidth = 0;
+    new ResizeObserver(() => {
+      if (element.clientWidth === lastWidth || element.hidden) return;
+      lastWidth = element.clientWidth;
+      if (element.querySelector('.graph')) render(lastFilter);
+    }).observe(element);
+  }
 
   /**
    * @param {import('./model.js').Entity} entity
@@ -359,7 +380,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       'data-group': group.key,
     });
     control.appendChild(svg('rect', { class: 'node-more-hit', width: String(NODE_WIDTH), height: String(STRIP_HEIGHT) }));
-    control.appendChild(svg('use', { href: `#${group.open ? 'i-chevron-down' : 'i-chevron-right'}`, x: '8', y: '4', width: '16', height: '16', class: 'node-chevron' }));
+    control.appendChild(svg('use', { href: `#${group.shown < group.members.length ? 'i-chevron-down' : 'i-chevron-up'}`, x: '8', y: '4', width: '16', height: '16', class: 'node-chevron' }));
     control.appendChild(svgText('text', { x: '32', y: '16', class: 'node-more-text' }, stripText(group)));
     const toggle = () => {
       if (group.shown < group.members.length) opened.set(group.key, (opened.get(group.key) ?? 0) + 1);
@@ -374,11 +395,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       toggle();
     });
     return control;
-  }
-
-  /** The rule along an open block's outer side, from its first box to its strip. */
-  function blockRule(x, top, bottom) {
-    return svg('line', { class: 'group-rule', x1: String(x), y1: String(top), x2: String(x), y2: String(bottom) });
   }
 
   /**
@@ -502,9 +518,11 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     const leftSpan = boxSpan(leftSide);
     const rightSpan = boxSpan(rightSide);
     const columnH = Math.max(leftSpan, rightSpan, subjectH);
-    const width = MARGIN * 2 + NODE_WIDTH * 3 + COLUMN_GAP * 2;
-    const centreX = MARGIN + NODE_WIDTH + COLUMN_GAP;
-    const rightX = centreX + NODE_WIDTH + COLUMN_GAP;
+    const available = element.clientWidth - 2 * HOST_PADDING;
+    const columnGap = Math.max(COLUMN_GAP, Math.min(COLUMN_GAP_MAX, Math.floor((available - MARGIN * 2 - NODE_WIDTH * 3) / 2)));
+    const width = MARGIN * 2 + NODE_WIDTH * 3 + columnGap * 2;
+    const centreX = MARGIN + NODE_WIDTH + columnGap;
+    const rightX = centreX + NODE_WIDTH + columnGap;
     const centreY = MARGIN + (columnH - subjectH) / 2;
     const leftTop = MARGIN + (columnH - leftSpan) / 2;
     const rightTop = MARGIN + (columnH - rightSpan) / 2;
@@ -573,7 +591,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     for (const row of leftSide.rows) {
       const y = leftTop + row.y;
       if (row.kind === 'strip') {
-        if (row.group.open) canvas.appendChild(blockRule(MARGIN - RULE_GAP, leftTop + row.top, y + STRIP_HEIGHT));
         canvas.appendChild(strip(row.group, MARGIN, y));
         continue;
       }
@@ -586,7 +603,6 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     for (const row of rightSide.rows) {
       const y = rightTop + row.y;
       if (row.kind === 'strip') {
-        if (row.group.open) canvas.appendChild(blockRule(rightX + NODE_WIDTH + RULE_GAP, rightTop + row.top, y + STRIP_HEIGHT));
         canvas.appendChild(strip(row.group, rightX, y));
         continue;
       }
