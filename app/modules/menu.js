@@ -83,6 +83,7 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
           overlay.close(entry);
           item.onPick();
         });
+        menu.appendChild(button);
       }
     }
   });
