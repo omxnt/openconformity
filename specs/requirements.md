@@ -76,23 +76,14 @@ Each requirement shall have a unique identifier of the form `CLASS-GROUP-NNN`. O
 | `GROUP` | The group within the requirement class. |
 | `NNN` | The sequential number within the group. |
 
-### 1.6 Status
-
-Each requirement shall carry a status tag.
-
-| Tag | Meaning |
-|---|---|
-| `draft` | Newly written, or still being worked on. |
-| `stable` | Settled as written, and not expected to change. |
-
-### 1.7 Template
+### 1.6 Template
 
 Each requirement shall be written using the template below.
 
 ```markdown
 #### CLASS-GROUP-NNN Requirement title
 
-`syntax` `status`
+`syntax`
 
 Requirement text.
 
@@ -107,7 +98,7 @@ Requirement text.
 
 #### C-PRJ-001 Project name
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The project shall be named "openconformity".
 
@@ -117,7 +108,7 @@ The project shall be named "openconformity".
 
 #### C-PRJ-002 Domain name
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The project shall use the domain `openconformity.org`.
 
@@ -127,7 +118,7 @@ The project shall use the domain `openconformity.org`.
 
 #### C-PRJ-003 Project licence
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The project shall be licensed under the `EUPL-1.2`.
 
@@ -137,7 +128,7 @@ The project shall be licensed under the `EUPL-1.2`.
 
 #### C-PRJ-004 Funding model
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The project shall not be supplied in the course of a commercial activity.
 
@@ -147,7 +138,7 @@ The project shall not be supplied in the course of a commercial activity.
 
 #### C-PRJ-005 Standards content
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The project shall not reproduce copyrighted content from harmonised standards.
 
@@ -159,7 +150,7 @@ The project shall not reproduce copyrighted content from harmonised standards.
 
 #### C-DEV-001 Source repository
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The source shall be maintained in a public GitHub repository.
 
@@ -169,7 +160,7 @@ The source shall be maintained in a public GitHub repository.
 
 #### C-DEV-002 Hosting platform
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be hosted on Cloudflare Pages.
 
@@ -179,7 +170,7 @@ The software shall be hosted on Cloudflare Pages.
 
 #### C-DEV-003 Metamodel source
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The metamodel shall be maintained as Mermaid text in `specs/metamodel.md`.
 
@@ -189,7 +180,7 @@ The metamodel shall be maintained as Mermaid text in `specs/metamodel.md`.
 
 #### C-DEV-004 Identity source
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The identity shall be maintained in Figma.
 
@@ -199,7 +190,7 @@ The identity shall be maintained in Figma.
 
 #### C-DEV-005 Software address
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be served at `app.openconformity.org`.
 
@@ -211,7 +202,7 @@ The software shall be served at `app.openconformity.org`.
 
 #### C-TEC-001 Technology stack
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be built with HTML, CSS, and JavaScript only.
 
@@ -221,7 +212,7 @@ The software shall be built with HTML, CSS, and JavaScript only.
 
 #### C-TEC-002 No dependencies
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not include third-party code (frameworks or libraries).
 
@@ -231,7 +222,7 @@ The software shall not include third-party code (frameworks or libraries).
 
 #### C-TEC-003 No build process
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall run directly from its source files, with no build step or package manager.
 
@@ -241,7 +232,7 @@ The software shall run directly from its source files, with no build step or pac
 
 #### C-TEC-004 JavaScript modules
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall organise its JavaScript as native ES modules.
 
@@ -251,7 +242,7 @@ The software shall organise its JavaScript as native ES modules.
 
 #### C-TEC-005 Third-party assets
 
-`optional feature` `stable`
+`optional feature`
 
 Where the software uses third-party assets, they shall be self-hosted and open-licensed.
 
@@ -261,7 +252,7 @@ Where the software uses third-party assets, they shall be self-hosted and open-l
 
 #### C-TEC-006 Browser-based
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall run in a web browser, with no installation required.
 
@@ -271,7 +262,7 @@ The software shall run in a web browser, with no installation required.
 
 #### C-TEC-007 No server-side code
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall consist of static files only, with no server-side code.
 
@@ -281,7 +272,7 @@ The software shall consist of static files only, with no server-side code.
 
 #### C-TEC-008 External application
 
-`optional feature` `draft`
+`optional feature`
 
 Where the software uses an external application, the application shall be separately hosted, neither included nor bundled with the software, and used only through a sandboxed frame.
 
@@ -295,7 +286,7 @@ Where the software uses an external application, the application shall be separa
 
 #### G-IDN-001 Wordmark
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The wordmark shall be "openconformity" set as below.
 
@@ -313,7 +304,7 @@ The wordmark shall be "openconformity" set as below.
 
 #### G-IDN-002 Favicon
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The favicon shall be an isometric cube cut out of a filled circle, rendered dark on a light background and light on a dark one.
 
@@ -325,7 +316,7 @@ The favicon shall be an isometric cube cut out of a filled circle, rendered dark
 
 #### G-SYS-001 Design system
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall follow the IBM Carbon Design System, its colour tokens, spacing scale, type scale, and component patterns.
 
@@ -335,7 +326,7 @@ The software shall follow the IBM Carbon Design System, its colour tokens, spaci
 
 #### G-SYS-002 Prose typeface
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall render prose text in IBM Plex Sans.
 
@@ -345,7 +336,7 @@ The software shall render prose text in IBM Plex Sans.
 
 #### G-SYS-003 Data typeface
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall render identifiers and data values in IBM Plex Mono.
 
@@ -355,7 +346,7 @@ The software shall render identifiers and data values in IBM Plex Mono.
 
 #### G-SYS-004 Iconography
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall use Carbon Icons for its iconography.
 
@@ -365,7 +356,7 @@ The software shall use Carbon Icons for its iconography.
 
 #### G-SYS-005 Pane layout
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall present the panes arranged as below.
 
@@ -396,7 +387,7 @@ The software shall present the panes arranged as below.
 
 #### F-APP-001 Small-viewport notice
 
-`unwanted behaviour` `stable`
+`unwanted behaviour`
 
 If the viewport is smaller than the supported viewport, then the software shall display a notice that a desktop-sized screen is required.
 
@@ -406,7 +397,7 @@ If the viewport is smaller than the supported viewport, then the software shall 
 
 #### F-APP-002 Direct entry
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall present the workspace on entry, without a homepage, wizard, or project setup prompt.
 
@@ -418,7 +409,7 @@ The software shall present the workspace on entry, without a homepage, wizard, o
 
 #### F-SES-001 Working state
 
-`event driven` `stable`
+`event driven`
 
 When the software is opened, it shall restore the working state of the previous session.
 
@@ -428,7 +419,7 @@ When the software is opened, it shall restore the working state of the previous 
 
 #### F-SES-002 Model retention
 
-`event driven` `stable`
+`event driven`
 
 When the model changes, the software shall persist the change in browser storage.
 
@@ -438,7 +429,7 @@ When the model changes, the software shall persist the change in browser storage
 
 #### F-SES-003 Browser removal
 
-`event driven` `draft`
+`event driven`
 
 When the user removes the software's data from the browser, the software shall confirm first, stating what is lost, and shall then delete everything it keeps in browser storage, the project, the session state and the user's choices.
 
@@ -450,7 +441,7 @@ When the user removes the software's data from the browser, the software shall c
 
 #### F-WSP-001 Model tree
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall present the model as a tree in the navigator pane.
 
@@ -460,7 +451,7 @@ The software shall present the model as a tree in the navigator pane.
 
 #### F-WSP-002 Entity attributes
 
-`event driven` `stable`
+`event driven`
 
 When an entity is selected, the software shall present its attributes in the editor pane.
 
@@ -470,7 +461,7 @@ When an entity is selected, the software shall present its attributes in the edi
 
 #### F-WSP-003 Entity relationships
 
-`event driven` `stable`
+`event driven`
 
 When an entity is selected, the software shall present its relationships in the relationship pane.
 
@@ -480,7 +471,7 @@ When an entity is selected, the software shall present its relationships in the 
 
 #### F-WSP-004 Free filing
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall permit an entity to be filed at any position in the navigator tree, regardless of its type and relationships.
 
@@ -490,7 +481,7 @@ The software shall permit an entity to be filed at any position in the navigator
 
 #### F-WSP-005 Neutral filing
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not create, modify, or require relationships based on an entity's position in the tree.
 
@@ -500,7 +491,7 @@ The software shall not create, modify, or require relationships based on an enti
 
 #### F-WSP-006 Folder creation
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall permit the creation of folders at any position in the navigator tree.
 
@@ -510,7 +501,7 @@ The software shall permit the creation of folders at any position in the navigat
 
 #### F-WSP-007 Folder deletion
 
-`event driven` `draft`
+`event driven`
 
 When a folder is deleted, the software shall delete every folder and entity filed in it, at any depth.
 
@@ -522,7 +513,7 @@ When a folder is deleted, the software shall delete every folder and entity file
 
 #### F-MOD-001 Entity creation
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall only permit the creation of entity types defined by the metamodel in `specs/metamodel.md`.
 
@@ -532,7 +523,7 @@ The software shall only permit the creation of entity types defined by the metam
 
 #### F-MOD-002 Relationship creation
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall only permit the creation of relationships defined by the metamodel in `specs/metamodel.md`.
 
@@ -542,7 +533,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 #### F-MOD-003 Attribute definition
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall only present and edit the attributes defined for the entity's type in `notes/attributes.md`.
 
@@ -552,7 +543,7 @@ The software shall only present and edit the attributes defined for the entity's
 
 #### F-MOD-004 Edit confirmation
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not apply changes to an entity's attributes until the user confirms them.
 
@@ -562,7 +553,7 @@ The software shall not apply changes to an entity's attributes until the user co
 
 #### F-MOD-005 Entity deletion
 
-`event driven` `stable`
+`event driven`
 
 When an entity is deleted, the software shall remove the relationships it takes part in.
 
@@ -572,7 +563,7 @@ When an entity is deleted, the software shall remove the relationships it takes 
 
 #### F-MOD-006 Composition deletion
 
-`event driven` `stable`
+`event driven`
 
 When an entity that owns entities through composition is deleted, the software shall delete the owned entities.
 
@@ -582,7 +573,7 @@ When an entity that owns entities through composition is deleted, the software s
 
 #### F-MOD-007 Cascade confirmation
 
-`event driven` `stable`
+`event driven`
 
 When a deletion would cascade to owned entities, the software shall require confirmation stating the entities that will be deleted.
 
@@ -592,7 +583,7 @@ When a deletion would cascade to owned entities, the software shall require conf
 
 #### F-MOD-008 Undo action
 
-`event driven` `stable`
+`event driven`
 
 When undo is invoked, the software shall revert the most recent model change.
 
@@ -602,7 +593,7 @@ When undo is invoked, the software shall revert the most recent model change.
 
 #### F-MOD-009 Redo action
 
-`event driven` `stable`
+`event driven`
 
 When redo is invoked, the software shall reapply the most recently undone model change.
 
@@ -612,7 +603,7 @@ When redo is invoked, the software shall reapply the most recently undone model 
 
 #### F-MOD-010 Library import
 
-`event driven` `draft`
+`event driven`
 
 When the user imports picks from a catalogue, the software shall copy the picked entities into the project under the selected node, with their filing among themselves and the relationships among them.
 
@@ -622,7 +613,7 @@ When the user imports picks from a catalogue, the software shall copy the picked
 
 #### F-MOD-011 Record of related measures
 
-`event driven` `draft`
+`event driven`
 
 When a scenario's residual risk estimation or a hazard's elimination is saved, the software shall record the protective measures related to the entity at that time, and while the record no longer matches the related measures, shall flag the entity and offer to record them afresh.
 
@@ -634,7 +625,7 @@ When a scenario's residual risk estimation or a hazard's elimination is saved, t
 
 #### F-VIE-001 Model views
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall generate exportable views of the model.
 
@@ -644,7 +635,7 @@ The software shall generate exportable views of the model.
 
 #### F-VIE-002 Messages
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall list the entities whose recorded relationships no longer match the model, and open each from the list.
 
@@ -656,7 +647,7 @@ The software shall list the entities whose recorded relationships no longer matc
 
 #### F-PER-001 Project persistence
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall persist a project as a single local file conforming to `specs/project.schema.json`.
 
@@ -666,7 +657,7 @@ The software shall persist a project as a single local file conforming to `specs
 
 #### F-PER-002 Library persistence
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall read a library as a project file, valid against `specs/project.schema.json`.
 
@@ -676,7 +667,7 @@ The software shall read a library as a project file, valid against `specs/projec
 
 #### F-PER-003 Schema version
 
-`event driven` `stable`
+`event driven`
 
 When the software writes a project file, the software shall record the current schema version.
 
@@ -686,7 +677,7 @@ When the software writes a project file, the software shall record the current s
 
 #### F-PER-004 Version migration
 
-`event driven` `stable`
+`event driven`
 
 When the software opens a project file written by an earlier schema version, the software shall migrate it to the current schema version.
 
@@ -696,7 +687,7 @@ When the software opens a project file written by an earlier schema version, the
 
 #### F-PER-005 Unsupported version
 
-`unwanted behaviour` `stable`
+`unwanted behaviour`
 
 If a project file records a schema version later than the software supports, then the software shall not open it, and shall state that the file was written by a newer version.
 
@@ -706,7 +697,7 @@ If a project file records a schema version later than the software supports, the
 
 #### F-PER-006 Invalid file
 
-`unwanted behaviour` `stable`
+`unwanted behaviour`
 
 If a project file is not valid against the schema of the version it records, then the software shall not open it, and shall state that the file is invalid.
 
@@ -716,7 +707,7 @@ If a project file is not valid against the schema of the version it records, the
 
 #### F-PER-007 Migration preservation
 
-`event driven` `stable`
+`event driven`
 
 When the software migrates a file, the software shall carry all content of the source file into the migrated file, preserved as written.
 
@@ -726,7 +717,7 @@ When the software migrates a file, the software shall carry all content of the s
 
 #### F-PER-008 Version increment
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The schema version shall be incremented with any change to the structure of the files the software writes.
 
@@ -736,7 +727,7 @@ The schema version shall be incremented with any change to the structure of the 
 
 #### F-PER-009 Migration notice
 
-`event driven` `stable`
+`event driven`
 
 When opening a file requires a migration that preserves content as legacy or leaves content unplaced, the software shall state what was preserved and what needs the user's attention.
 
@@ -746,7 +737,7 @@ When opening a file requires a migration that preserves content as legacy or lea
 
 #### F-PER-010 Attribute preservation
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall preserve attribute content it does not present, unchanged, when a file is opened and saved, and shall state on opening that it does so.
 
@@ -756,7 +747,7 @@ The software shall preserve attribute content it does not present, unchanged, wh
 
 #### F-PER-011 Project templates
 
-`event driven` `draft`
+`event driven`
 
 When the user chooses a project template, the software shall fetch it from the host, sending no user data, and shall open it as it opens a project file, subject to the same checks.
 
@@ -768,7 +759,7 @@ When the user chooses a project template, the software shall fetch it from the h
 
 #### F-DRW-001 Drawing check
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall accept as a drawing only an SVG document within the drawing size limit that holds no script element, no event-handler attribute, no element that embeds a document, no link to code, and no reference that would load a resource from outside the document, and shall state why when it refuses one.
 
@@ -778,7 +769,7 @@ The software shall accept as a drawing only an SVG document within the drawing s
 
 #### F-DRW-002 Drawing storage
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall store a drawing as the drawing editor returned it, unchanged.
 
@@ -788,7 +779,7 @@ The software shall store a drawing as the drawing editor returned it, unchanged.
 
 #### F-DRW-003 External drawing editor
 
-`complex` `draft`
+`complex`
 
 Where the user has consented, when the user creates or edits a drawing, the software shall open the drawing editor at the origin the software designates, handing it the drawing being edited and nothing else, and shall take back what the editor returns as the drawing provided it passes the drawing check and carries the editor's own model.
 
@@ -804,7 +795,7 @@ Where the user has consented, when the user creates or edits a drawing, the soft
 
 #### N-OPS-001 No user account
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not require an account or a sign-in.
 
@@ -814,7 +805,7 @@ The software shall not require an account or a sign-in.
 
 #### N-OPS-002 Self-contained
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall load all of its resources on initial load, and shall fetch nothing further during use, except for a function the user invokes that states what it fetches and from where.
 
@@ -824,7 +815,7 @@ The software shall load all of its resources on initial load, and shall fetch no
 
 #### N-OPS-003 Fetch failure
 
-`unwanted behaviour` `draft`
+`unwanted behaviour`
 
 If a fetch a function makes does not succeed within its period, then the software shall state that the function is unavailable and shall leave the model unchanged.
 
@@ -836,7 +827,7 @@ If a fetch a function makes does not succeed within its period, then the softwar
 
 #### N-PRV-001 Local processing
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall perform all processing on the user's device.
 
@@ -846,7 +837,7 @@ The software shall perform all processing on the user's device.
 
 #### N-PRV-002 No data transmission
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not transmit user data to any external service, except what the user consents to hand to a named service for a function they invoke.
 
@@ -856,7 +847,7 @@ The software shall not transmit user data to any external service, except what t
 
 #### N-PRV-003 No user tracking
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not track, profile, or collect analytics on the user.
 
@@ -866,7 +857,7 @@ The software shall not track, profile, or collect analytics on the user.
 
 #### N-PRV-004 On-device storage
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall store all user data on the user's own device.
 
@@ -876,7 +867,7 @@ The software shall store all user data on the user's own device.
 
 #### N-PRV-005 Consent to hand over data
 
-`event driven` `draft`
+`event driven`
 
 When the user invokes a function that hands data to an external service, the software shall obtain the user's consent first, stating the service's origin and the data handed over, unless the user has chosen during the browser session not to be asked again.
 
@@ -886,7 +877,7 @@ When the user invokes a function that hands data to an external service, the sof
 
 #### N-PRV-006 Consent scope
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall keep a user's choice not to be asked again in session storage only, never in a project file, and shall offer a way to withdraw it.
 
@@ -896,7 +887,7 @@ The software shall keep a user's choice not to be asked again in session storage
 
 #### N-PRV-007 Data minimisation
 
-`state driven` `draft`
+`state driven`
 
 While an external service is in use, the software shall hand it the data the function states and nothing else.
 
@@ -908,7 +899,7 @@ While an external service is in use, the software shall hand it the data the fun
 
 #### N-SEC-001 Safe parsing
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall not execute code contained in imported data.
 
@@ -918,7 +909,7 @@ The software shall not execute code contained in imported data.
 
 #### N-SEC-002 Safe rendering
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall render user-provided content as text, not as markup, drawings excepted.
 
@@ -928,7 +919,7 @@ The software shall render user-provided content as text, not as markup, drawings
 
 #### N-SEC-003 Drawing rendering
 
-`optional feature` `draft`
+`optional feature`
 
 Where an attribute holds a drawing, the software shall render it as an image that can neither execute code nor load a resource.
 
@@ -938,7 +929,7 @@ Where an attribute holds a drawing, the software shall render it as an image tha
 
 #### N-SEC-004 External application isolation
 
-`optional feature` `draft`
+`optional feature`
 
 Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting only what the application's protocol requires, and shall accept messages only from that frame and origin, as data.
 
@@ -948,7 +939,7 @@ Where the software hosts an external application in its page, it shall host it i
 
 #### N-SEC-005 No hidden content
 
-`ubiquitous` `draft`
+`ubiquitous`
 
 The software shall write no project file holding attribute content that the choices in force do not present, and shall state on opening any content it keeps without presenting it.
 
@@ -960,7 +951,7 @@ The software shall write no project file holding attribute content that the choi
 
 #### N-ACC-001 Standard conformance
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall meet WCAG 2.2 Level AA [4].
 
@@ -970,7 +961,7 @@ The software shall meet WCAG 2.2 Level AA [4].
 
 #### N-ACC-002 Colour independence
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall distinguish entity types by shape, not by colour alone.
 
@@ -980,7 +971,7 @@ The software shall distinguish entity types by shape, not by colour alone.
 
 #### N-ACC-003 Keyboard operability
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be fully operable by keyboard.
 
@@ -992,7 +983,7 @@ The software shall be fully operable by keyboard.
 
 #### N-CMP-001 Desktop viewport
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be operable on desktop-sized viewports.
 
@@ -1002,7 +993,7 @@ The software shall be operable on desktop-sized viewports.
 
 #### N-CMP-002 Browser support
 
-`ubiquitous` `stable`
+`ubiquitous`
 
 The software shall be compatible with evergreen major web browsers.
 
