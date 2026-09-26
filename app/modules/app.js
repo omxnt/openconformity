@@ -117,12 +117,41 @@ createViewsPane({
   onClose: () => flows.closeView(),
 });
 
+// The keys the platforms agree on, ⌘ on Apple keyboards and Ctrl elsewhere:
+// S saves the open edit or the project, Enter finishes what is open, an
+// edit, a picking or a diagram, F reaches the tree's filter, Z and ⇧Z
+// undo and redo, and Y redoes where Windows has it.
 document.addEventListener('keydown', (event) => {
-  if (!(event.metaKey || event.ctrlKey) || store.drawingOpen()) return;
+  if (!(event.metaKey || event.ctrlKey)) return;
   const key = event.key.toLowerCase();
+  if (store.drawingOpen()) {
+    if (key !== 'enter') return;
+    event.preventDefault();
+    document.querySelector('#drawing-head .button-primary')?.click();
+    return;
+  }
   if (key === 's') {
     event.preventDefault();
-    if (!editor.editing()) actions.find((action) => action.id === 'save')?.run({});
+    if (editor.editing()) editor.submit();
+    else actions.find((action) => action.id === 'save')?.run({});
+    return;
+  }
+  if (key === 'enter') {
+    event.preventDefault();
+    if (editor.editing()) {
+      editor.submit();
+      return;
+    }
+    const picker = store.picker();
+    if (picker !== null && picker.picks.length > 0) flows.completeRelate(picker.subject, picker.picks);
+    return;
+  }
+  if (key === 'f') {
+    const filter = document.getElementById('navigator-filter');
+    if (!store.hasProject() || !filter) return;
+    event.preventDefault();
+    filter.focus();
+    filter.select();
     return;
   }
   const target = event.target;
@@ -133,8 +162,12 @@ document.addEventListener('keydown', (event) => {
   ) {
     return;
   }
-  if (key !== 'z') return;
-  event.preventDefault();
-  if (event.shiftKey) flows.redo();
-  else flows.undo();
+  if (key === 'z') {
+    event.preventDefault();
+    if (event.shiftKey) flows.redo();
+    else flows.undo();
+  } else if (key === 'y' && event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    flows.redo();
+  }
 });

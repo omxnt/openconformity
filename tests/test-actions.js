@@ -44,7 +44,7 @@ function enabledIds(actions) {
   );
   deepEqual(
     Object.fromEntries(actions.filter((action) => action.hint).map((action) => [action.id, action.hint])),
-    { save: 'Ctrl S', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', delete: 'Del' },
+    { save: 'Ctrl S', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', delete: 'Del', undo: 'Ctrl Z', redo: 'Ctrl Y' },
     'the key hints ride on the actions the keys reach, the save one as the platform writes it'
   );
   ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');

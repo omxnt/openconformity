@@ -1301,5 +1301,8 @@ export function createEditor({
   store.subscribe(render);
   render();
 
-  return { render, beginEdit, endEdit, hasUnconfirmedEdit, editing: () => mode === 'edit' };
+  /** Save the open edit as its Save button would, for the keys that mean save. */
+  const submit = () => head.querySelector('.form-button.button-primary')?.click();
+
+  return { render, beginEdit, endEdit, hasUnconfirmedEdit, submit, editing: () => mode === 'edit' };
 }

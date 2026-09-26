@@ -29,7 +29,14 @@ import { VIEWS } from './views.js';
  */
 
 /** The save shortcut as the platform writes it, the command key on Apple's, Ctrl elsewhere. */
-const SAVE_HINT = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '') ? '⌘S' : 'Ctrl S';
+const APPLE = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '');
+const SAVE_HINT = APPLE ? '⌘S' : 'Ctrl S';
+/** The other key hints as the platform writes them: undo and redo, delete, and the moves. */
+const UNDO_HINT = APPLE ? '⌘Z' : 'Ctrl Z';
+const REDO_HINT = APPLE ? '⇧⌘Z' : 'Ctrl Y';
+const DELETE_HINT = APPLE ? '⌘⌫' : 'Del';
+const UP_HINT = APPLE ? '⌥↑' : 'Alt ↑';
+const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
 
 /**
  * @param {Object} context
@@ -230,7 +237,7 @@ export function createActions({ store, flows }) {
       group: 'arrange',
       toolbar: true,
       context: true,
-      hint: 'Alt ↑',
+      hint: UP_HINT,
       enabled: () => store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
       run: () => flows.moveUp(),
     },
@@ -241,7 +248,7 @@ export function createActions({ store, flows }) {
       group: 'arrange',
       toolbar: true,
       context: true,
-      hint: 'Alt ↓',
+      hint: DOWN_HINT,
       enabled: () => store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
     },
@@ -263,7 +270,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       danger: true,
-      hint: 'Del',
+      hint: DELETE_HINT,
       describe: () => (selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
       enabled: () => selected() !== null,
       run: () => flows.deleteSelection(),
@@ -272,6 +279,7 @@ export function createActions({ store, flows }) {
       id: 'undo',
       icon: 'i-undo',
       label: 'Undo',
+      hint: UNDO_HINT,
       group: 'history',
       toolbar: false,
       context: false,
@@ -287,6 +295,7 @@ export function createActions({ store, flows }) {
       id: 'redo',
       icon: 'i-redo',
       label: 'Redo',
+      hint: REDO_HINT,
       group: 'history',
       toolbar: false,
       context: false,

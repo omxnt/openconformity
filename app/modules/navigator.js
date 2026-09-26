@@ -595,6 +595,12 @@ export function createNavigator({
     if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
       runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
+    } else if (event.key === 'F2') {
+      event.preventDefault();
+      runAction('edit');
+    } else if (event.key === 'Backspace' && event.metaKey) {
+      event.preventDefault();
+      runAction('delete');
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (index < 0) onSelect(rows[0].id);
