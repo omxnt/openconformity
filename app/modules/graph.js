@@ -474,7 +474,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
       element.appendChild(
         el('p', {
           className: 'picking-note',
-          text: 'Picked relationships show as dashed edges. Click one to let it go. Shift and click in the tree picks a range.',
+          text: 'Picked relationships show as dashed edges. Click one to let it go. In the tree, Shift and click ranges from the last click, Space picks the selected row, and Ctrl or Cmd and A picks all.',
         })
       );
     }

@@ -627,7 +627,6 @@ body {
 .tree-row.pick-dim:hover { background: none; }
 .tree-row.pickable { cursor: pointer; }
 .tree-row.picked { background: var(--layer-accent); }
-.pick-check { fill: var(--accent); }
 
 /* ---------- Editor ---------- */
 
@@ -729,8 +728,7 @@ body {
 .consent p { margin: 0 0 12px; }  /* $spacing-04 */
 .consent-box { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }  /* $spacing-03 */
 .consent-box input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
-.consent-box .checkbox,
-.library-row .checkbox {
+.checkbox {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -741,8 +739,9 @@ body {
   border-radius: 1px;
   color: var(--text-inverse);
 }
-.consent-box .checkbox .icon,
-.library-row .checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
+.checkbox .icon { width: 12px; height: 12px; visibility: hidden; }
+.checkbox.on { background: var(--text); }
+.checkbox.on .icon { visibility: visible; }
 .consent-box input:checked + .checkbox,
 .library-row input:checked + .checkbox { background: var(--text); }
 .consent-box input:checked + .checkbox .icon,

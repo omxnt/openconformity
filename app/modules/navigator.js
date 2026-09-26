@@ -252,7 +252,7 @@ export function createNavigator({
 
   /** Whether dragging is off: picks own the tree's clicks, and a filtered view's neighbours are not real siblings. */
   const dragLocked = () => store.picker() !== null || filter().trim() !== '';
-  /** @type {{ subject: string, id: string }|null} the row last picked by a plain click, the anchor a Shift+click picks a range from */
+  /** @type {{ subject: string, id: string, picked: boolean }|null} the row last toggled by a plain click and what it became, the anchor whose act a Shift+click applies to a range */
   let lastPick = null;
 
   /** The pickable rows shown between two rows, both included, in the tree's order. */
@@ -419,10 +419,8 @@ export function createNavigator({
     }
     rowElement.appendChild(twisty);
 
-    if (picked) {
-      const check = icon('i-checkmark');
-      check.classList.add('pick-check');
-      rowElement.appendChild(check);
+    if (pickable) {
+      rowElement.appendChild(el('span', { className: `checkbox${picked ? ' on' : ''}`, attributes: { 'aria-hidden': 'true' } }, [icon('i-checkmark')]));
     }
     rowElement.appendChild(
       row.node.kind === 'folder'
@@ -447,10 +445,15 @@ export function createNavigator({
         onSelect(row.id);
         return;
       }
-      const anchor = lastPick !== null && lastPick.subject === picking.subject && lastPick.id !== row.id ? lastPick.id : null;
-      if (event.shiftKey && anchor !== null) store.pickAll(pickableBetween(anchor, row.id));
-      else store.togglePick(row.id);
-      lastPick = { subject: picking.subject, id: row.id };
+      const anchor = lastPick !== null && lastPick.subject === picking.subject && lastPick.id !== row.id ? lastPick : null;
+      if (event.shiftKey && anchor !== null) {
+        const range = pickableBetween(anchor.id, row.id);
+        if (anchor.picked) store.pickAll(range);
+        else store.unpickAll(range);
+        return;
+      }
+      store.togglePick(row.id);
+      lastPick = { subject: picking.subject, id: row.id, picked: !picked };
     });
     rowElement.addEventListener('dblclick', () => {
       if (picking.subject !== null) return;
@@ -575,6 +578,19 @@ export function createNavigator({
     const selection = store.selection();
     const index = rows.findIndex((row) => row.id === selection);
     const row = index >= 0 ? rows[index] : null;
+
+    if (picker !== null) {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault();
+        if (event.key === ' ' && row && pickerCandidates(store.model(), picker).has(row.id)) store.togglePick(row.id);
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        store.pickAll([...container.querySelectorAll('.tree-row.pickable')].map((held) => held.dataset.id));
+        return;
+      }
+    }
 
     if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();

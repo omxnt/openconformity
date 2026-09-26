@@ -650,6 +650,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     },
 
     /**
+     * Unpick every entity named that is picked, as one change: a range
+     * cleared with Shift.
+     * @param {string[]} ids
+     */
+    unpickAll(ids) {
+      if (picker === null) return;
+      const gone = new Set(ids);
+      const kept = picker.picks.filter((pick) => !gone.has(pick.id));
+      if (kept.length === picker.picks.length) return;
+      picker.picks = kept;
+      notify();
+    },
+
+    /**
      * Choose the relationship a pick means, where its pair admits more
      * than one.
      * @param {string} id
