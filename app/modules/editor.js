@@ -896,7 +896,7 @@ export function createEditor({
     save.addEventListener('click', onSavePick);
     const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
     cancel.addEventListener('click', onCancel);
-    return [save, cancel];
+    return [cancel, save];
   }
 
   /** The project head: its icon, its kind, and its name as it stands. */
