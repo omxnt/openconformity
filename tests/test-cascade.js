@@ -138,18 +138,29 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   refused(removeEntity(model, zone.id), 'deleting a folder as an entity is refused');
 }
 
-// --- Folders never cascade ---------------------------------------------
+// --- A folder takes what is filed in it ----------------------------------
 
 {
   const model = createModel();
   const zone = addFolder(model, 'Zone').folder;
   addEntity(model, 'LEG', { parent: zone.id });
-  addEntity(model, 'ESR', { parent: zone.id });
+  addEntity(model, 'HAZ', { parent: zone.id });
+  addEntity(model, 'ESR', { parent: 'LEG-001' });
+  addEntity(model, 'ESR');
+  addEntity(model, 'HAZ', { parent: 'ESR-002' });
+  addEntity(model, 'ELM');
   relate(model, 'leg-contains-esr', 'LEG-001', 'ESR-001');
+  relate(model, 'leg-contains-esr', 'LEG-001', 'ESR-002');
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
 
-  allowed(removeFolder(model, zone.id), 'the folder holding an owner and its owned is deleted');
-  ok(nodeOf(model, 'LEG-001') !== null && nodeOf(model, 'ESR-001') !== null, 'deleting a folder deletes no entity');
-  equal(model.relationships.size, 1, 'and severs no relationship');
+  const outcome = removeFolder(model, zone.id);
+  allowed(outcome, 'the folder is deleted');
+  deepEqual(outcome.removed.map((entity) => entity.id), ['LEG-001', 'ESR-001', 'HAZ-001', 'ESR-002'], 'with every entity filed in it in filing order, however deep, and then what those own elsewhere');
+  equal(nodeOf(model, zone.id), null, 'the folder is gone');
+  ok(['LEG-001', 'HAZ-001', 'ESR-001', 'ESR-002'].every((id) => nodeOf(model, id) === null), 'and so are they');
+  ok(nodeOf(model, 'ELM-001') !== null, 'an entity related without composition stays');
+  equal(nodeOf(model, 'HAZ-002').parent, null, 'what was filed beneath an owned entity elsewhere moves up to the nearest survivor');
+  equal(model.relationships.size, 0, 'and every relationship touching what went is severed');
 }
 
 summary('test-cascade');

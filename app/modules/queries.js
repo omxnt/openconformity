@@ -5,7 +5,7 @@
  * each function reads what it is given and returns data.
  */
 
-import { nodeOf, childrenOf, canRelate, canFile, deletionOf } from './model.js';
+import { nodeOf, childrenOf, canRelate, canFile, deletionOf, filedBeneath } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
 
 /**
@@ -186,22 +186,31 @@ export function moveTargets(model, id) {
 }
 
 /**
- * The question a deletion asks, as data: for an entity owning nothing,
- * the title names it and the message counts its relationships; for a
- * cascade, the title counts the entities taken and the message counts
- * the relationships severed — every relationship touching anything in
- * the cascade.
+ * What the confirmation says before a deletion: for an entity, what goes
+ * with it and what is severed; for a folder, what is filed in it, what
+ * those entities own elsewhere, and what is severed.
  * @param {import('./model.js').Model} model
  * @param {string} id
  * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
  */
 export function deletionQuestion(model, id) {
+  const node = nodeOf(model, id);
   const doomed = deletionOf(model, id);
   const doomedIds = new Set(doomed.map((entity) => entity.id));
   const severed = [...model.relationships.values()].filter(
     (relationship) => doomedIds.has(relationship.source) || doomedIds.has(relationship.target)
   ).length;
   const relationships = `${severed} relationship${severed === 1 ? '' : 's'}`;
+  const entities = (n) => `${n} ${n === 1 ? 'entity' : 'entities'}`;
+  if (node && node.kind === 'folder') {
+    const title = `Delete the folder ${node.name}?`;
+    if (doomed.length === 0) return { title, message: `${node.name} holds no entity.`, doomed };
+    const beneath = new Set(filedBeneath(model, id).map((held) => held.id));
+    const held = doomed.filter((entity) => beneath.has(entity.id)).length;
+    const owned = doomed.length - held;
+    const message = `Deleting ${node.name} also deletes the ${entities(held)} filed in it${owned > 0 ? ` and ${entities(owned)} they own elsewhere` : ''}${severed > 0 ? `${owned > 0 ? ',' : ''} and severs ${relationships}` : ''}:`;
+    return { title, message, doomed };
+  }
   if (doomed.length === 1) {
     return {
       title: `Delete ${id}?`,

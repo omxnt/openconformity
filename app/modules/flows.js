@@ -432,18 +432,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const node = nodeOf(store.model(), id);
     if (!node) return;
 
-    if (node.kind === 'folder') {
-      const confirmed = await dialogs.confirm({
-        title: `Delete the folder ${node.name}?`,
-        message: 'Deleting a folder removes only its filing: what it holds moves up a level.',
-        confirmLabel: 'Delete',
-        danger: true,
-      });
-      if (!confirmed) return;
-      store.commit((model) => removeFolder(model, id));
-      return;
-    }
-
     if (freshCreation !== null && freshCreation.id === id) {
       if (!(await confirmDiscard())) return;
       endEditSession();
@@ -452,7 +440,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
     const question = deletionQuestion(store.model(), id);
     const list =
-      question.doomed.length > 1
+      question.doomed.length > (node.kind === 'folder' ? 0 : 1)
         ? el('ul', { className: 'doomed-list' }, question.doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) })))
         : undefined;
     const confirmed = await dialogs.confirm({
@@ -465,7 +453,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (!confirmed) return;
 
     endEditSession();
-    store.commit((model) => removeEntity(model, id));
+    store.commit((model) => (node.kind === 'folder' ? removeFolder(model, id) : removeEntity(model, id)));
   }
 
   /**

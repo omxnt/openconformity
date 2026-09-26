@@ -373,11 +373,11 @@ function flowsOver(store) {
   store.select('F-1');
   answer = false;
   await flows.deleteSelection();
-  deepEqual(asked.pop(), ['Delete the folder Zone?', 'Deleting a folder removes only its filing: what it holds moves up a level.', 'Delete'], 'a folder is asked about by its name');
+  deepEqual(asked.pop(), ['Delete the folder Zone?', 'Zone holds no entity.', 'Delete'], 'a folder is asked about by its name and what it holds');
   ok(nodeOf(store.model(), 'F-1') !== null, 'declining keeps the folder');
   answer = true;
   await flows.deleteSelection();
-  equal(nodeOf(store.model(), 'F-1'), null, 'accepting removes the filing');
+  equal(nodeOf(store.model(), 'F-1'), null, 'accepting deletes the folder');
 }
 
 {

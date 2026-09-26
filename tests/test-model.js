@@ -232,15 +232,20 @@ function childIds(model, parentId) {
   const zone = addFolder(model, 'Zone', { parent: outer.id }).folder;
   const a = addEntity(model, 'ELM', { parent: zone.id }).entity;
   const inner = addFolder(model, 'Inner', { parent: zone.id }).folder;
+  const b = addEntity(model, 'HAZ', { parent: inner.id }).entity;
 
   refused(removeFolder(model, 'F-9'), 'deleting a missing folder is refused');
   refused(removeFolder(model, a.id), 'deleting an entity as a folder is refused');
 
-  allowed(removeFolder(model, zone.id), 'a folder can be deleted');
+  const outcome = removeFolder(model, zone.id);
+  allowed(outcome, 'a folder can be deleted');
   equal(nodeOf(model, zone.id), null, 'the folder is gone');
-  ok(nodeOf(model, a.id) !== null, 'the entities filed in it are not');
-  equal(nodeOf(model, a.id).parent, outer.id, 'its contents moved up to where it sat');
-  equal(nodeOf(model, inner.id).parent, outer.id, 'folders among them');
+  equal(nodeOf(model, a.id), null, 'the entity filed in it with it');
+  equal(nodeOf(model, inner.id), null, 'the folder filed in it too');
+  equal(nodeOf(model, b.id), null, 'and what that folder held');
+  deepEqual(outcome.removed.map((entity) => entity.id), [a.id, b.id], 'the outcome lists the entities that went');
+  ok(nodeOf(model, outer.id) !== null, 'the folder it sat in stays');
+  allowed(removeFolder(model, outer.id), 'an empty folder is deleted too');
 }
 
 // --- The project's own attributes ---------------------------------------

@@ -286,6 +286,20 @@ function offered(model, subjectId) {
   equal(alone.message, 'HAZ-001 takes part in no relationship.', 'and says when nothing is severed');
   equal(alone.doomed.length, 1, 'it alone goes');
   relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  {
+    const filed = createModel();
+    const zone = addFolder(filed, 'Zone').folder;
+    const empty = deletionQuestion(filed, zone.id);
+    deepEqual([empty.title, empty.message, empty.doomed], ['Delete the folder Zone?', 'Zone holds no entity.', []], 'an empty folder is asked about by its name');
+    addEntity(filed, 'LEG', { parent: zone.id });
+    addEntity(filed, 'ESR', { parent: 'LEG-001' });
+    addEntity(filed, 'ESR');
+    relate(filed, 'leg-contains-esr', 'LEG-001', 'ESR-002');
+    const question = deletionQuestion(filed, zone.id);
+    equal(question.title, 'Delete the folder Zone?', 'a folder with content too');
+    equal(question.message, 'Deleting Zone also deletes the 2 entities filed in it and 1 entity they own elsewhere, and severs 1 relationship:', 'the message counts what is filed in it, what those own elsewhere and what is severed');
+    deepEqual(question.doomed.map((entity) => entity.id), ['LEG-001', 'ESR-001', 'ESR-002'], 'over the entities it lists');
+  }
   equal(deletionQuestion(model, 'HAZ-001').message, 'Deleting HAZ-001 severs 1 relationship.', 'or counts what is severed, in the singular');
 }
 

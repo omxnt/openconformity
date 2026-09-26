@@ -459,28 +459,46 @@ export function relationshipsOf(model, entityId) {
 // --- Deletion ----------------------------------------------------------
 
 /**
- * The entities a deletion removes: the entity itself and, through the
- * composition relationships, everything it owns, transitively, in the
- * order the ownership walk reaches them. This is the statement the
- * cascade confirmation makes before removeEntity acts on it. Empty when
- * the identifier names no entity.
+ * Every node filed beneath a node, however deep, in filing order.
  * @param {Model} model
- * @param {string} entityId
+ * @param {string} id
+ * @returns {Node[]}
+ */
+export function filedBeneath(model, id) {
+  const found = [];
+  const walk = (parentId) => {
+    for (const child of childrenOf(model, parentId)) {
+      found.push(child);
+      walk(child.id);
+    }
+  };
+  walk(id);
+  return found;
+}
+
+/**
+ * The entities a deletion removes. For an entity, itself and, through
+ * the composition relationships, everything it owns, transitively. For a
+ * folder, every entity filed in it however deep, and what those own the
+ * same way. The order is the walk's, filing first and ownership after,
+ * and it is the statement the confirmation makes before the removal
+ * acts on it. Empty when the identifier names nothing.
+ * @param {Model} model
+ * @param {string} id
  * @returns {Entity[]}
  */
-export function deletionOf(model, entityId) {
-  const entity = nodeOf(model, entityId);
-  if (!entity || entity.kind !== 'entity') return [];
-
+export function deletionOf(model, id) {
+  const node = nodeOf(model, id);
+  if (!node) return [];
+  const queue = node.kind === 'entity' ? [id] : filedBeneath(model, id).filter((held) => held.kind === 'entity').map((held) => held.id);
+  const seen = new Set(queue);
   const doomed = [];
-  const seen = new Set([entityId]);
-  const queue = [entityId];
   while (queue.length > 0) {
-    const id = /** @type {string} */ (queue.shift());
-    doomed.push(/** @type {Entity} */ (nodeOf(model, id)));
+    const nextId = /** @type {string} */ (queue.shift());
+    doomed.push(/** @type {Entity} */ (nodeOf(model, nextId)));
     for (const relationship of model.relationships.values()) {
       if (
-        relationship.source === id &&
+        relationship.source === nextId &&
         RELATIONSHIP_TYPES[relationship.type].composition &&
         !seen.has(relationship.target)
       ) {
@@ -493,19 +511,13 @@ export function deletionOf(model, entityId) {
 }
 
 /**
- * Delete an entity: the entities it owns go with it, every relationship
- * touching a removed entity goes with them, and whatever was filed inside
- * a removed entity moves up to its nearest surviving ancestor. Entities
- * related without composition are left in place.
+ * Remove nodes: every relationship touching a removed entity goes with
+ * them, whatever survives beneath a removed node moves up to its nearest
+ * surviving ancestor, and the nodes are deleted.
  * @param {Model} model
- * @param {string} entityId
- * @returns {Outcome & { removed?: Entity[] }}
+ * @param {Set<string>} gone
  */
-export function removeEntity(model, entityId) {
-  const doomed = deletionOf(model, entityId);
-  if (doomed.length === 0) return { ok: false, reason: 'The entity is not in the model.' };
-  const gone = new Set(doomed.map((entity) => entity.id));
-
+function purge(model, gone) {
   for (const [key, relationship] of [...model.relationships]) {
     if (gone.has(relationship.source) || gone.has(relationship.target)) {
       model.relationships.delete(key);
@@ -524,26 +536,42 @@ export function removeEntity(model, entityId) {
   }
 
   for (const id of gone) model.nodes.delete(id);
+}
+
+/**
+ * Delete an entity: the entities it owns go with it, every relationship
+ * touching a removed entity goes with them, and whatever was filed inside
+ * a removed entity moves up to its nearest surviving ancestor. Entities
+ * related without composition are left in place.
+ * @param {Model} model
+ * @param {string} entityId
+ * @returns {Outcome & { removed?: Entity[] }}
+ */
+export function removeEntity(model, entityId) {
+  const entity = nodeOf(model, entityId);
+  if (!entity || entity.kind !== 'entity') return { ok: false, reason: 'The entity is not in the model.' };
+  const doomed = deletionOf(model, entityId);
+  purge(model, new Set(doomed.map((held) => held.id)));
   return { ok: true, removed: doomed };
 }
 
 /**
- * Delete a folder. Deleting a folder removes filing, never the entities
- * filed in it: its contents move up to where the folder itself sat.
+ * Delete a folder: everything filed in it goes, folders and entities
+ * however deep, each entity as removeEntity deletes it, so what those
+ * entities own goes too wherever it is filed, and their relationships
+ * with them.
  * @param {Model} model
  * @param {string} folderId
- * @returns {Outcome}
+ * @returns {Outcome & { removed?: Entity[] }}
  */
 export function removeFolder(model, folderId) {
   const folder = nodeOf(model, folderId);
   if (!folder || folder.kind !== 'folder') {
     return { ok: false, reason: 'The folder is not in the model.' };
   }
-  for (const node of model.nodes.values()) {
-    if (node.parent === folderId) node.parent = folder.parent;
-  }
-  model.nodes.delete(folderId);
-  return { ok: true };
+  const doomed = deletionOf(model, folderId);
+  purge(model, new Set([folderId, ...filedBeneath(model, folderId).map((held) => held.id), ...doomed.map((held) => held.id)]));
+  return { ok: true, removed: doomed };
 }
 
 /**
