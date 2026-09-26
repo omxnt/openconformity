@@ -663,7 +663,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * Save the copy a failed restore set aside as a file, as the retention
    * holds it: the project it carried where the copy has that shape, the
    * text itself otherwise. Named through the question a save asks,
-   * prefilled with the name the copy carries where one can be read. The
+   * prefilled from the name the copy carries where one can be read. The
    * copy stays in the browser until it is discarded.
    */
   async function saveAsideCopy() {
@@ -676,8 +676,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const fallback = 'Set-aside copy';
     const typed = await dialogs.prompt({
       title: 'Save the copy',
-      label: 'Name',
-      value: asideName(copy, text) ?? fallback,
+      label: 'File name',
+      value: stem(asideName(copy, text) ?? fallback),
       confirmLabel: 'Save',
       preview: (value) => `The file is saved to your downloads as ${filenameFor(value.trim() || fallback)}.`,
     });
@@ -686,6 +686,9 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     saveFile(filename, text, 'application/json');
     dialogs.toast('Copy saved', `The file is saved to your downloads as ${filename}.`);
   }
+
+  /** The filename a name makes, without its extension, as a field prefills it. */
+  const stem = (name) => filenameFor(name).replace(/\.json$/, '');
 
   /** The name a set-aside copy carries, where one can be read, else null. */
   function asideName(copy, text) {
@@ -839,26 +842,23 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Save the project as a downloaded file, asking every time: the name,
-   * prefilled and renamed on confirm like any rename, and the filename
-   * it makes, previewed live. Cancel costs nothing — no download, no
-   * rename, no pointer move.
+   * Save the project as a downloaded file, asking every time for the
+   * file's name, prefilled from the project's name and previewed live
+   * as the filename it makes. The project's own name is never touched.
+   * Cancel costs nothing, no download and no pointer move.
    */
   async function saveProject() {
     if (!store.hasProject()) return;
-    const name = await dialogs.prompt({
+    const fallback = store.model().name;
+    const typed = await dialogs.prompt({
       title: 'Save to file',
-      label: 'Project name',
-      value: store.model().name,
+      label: 'File name',
+      value: stem(fallback),
       confirmLabel: 'Save',
-      preview: (typed) => `The file is saved to your downloads as ${filenameFor(typed.trim() || store.model().name)}.`,
+      preview: (value) => `The file is saved to your downloads as ${filenameFor(value.trim() || fallback)}.`,
     });
-    if (name === null) return;
-    if (name !== store.model().name) {
-      const named = store.commit((model) => nameProject(model, name));
-      if (!named.ok) return;
-    }
-    const filename = filenameFor(store.model().name);
+    if (typed === null) return;
+    const filename = filenameFor(typed.trim() || fallback);
     saveFile(filename, serialise(store.model()), 'application/json');
     store.markSaved();
     dialogs.toast('Project saved', `The file is saved to your downloads as ${filename}.`);

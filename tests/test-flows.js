@@ -10,7 +10,7 @@
 import './shim.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
-import { createModel, addEntity, addFolder, relate, nodeOf, updateEntity } from '../app/modules/model.js';
+import { createModel, addEntity, addFolder, relate, nodeOf, updateEntity, renameProject } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor } from './helpers.js';
 import { memoryRetention } from '../app/modules/retention.js';
@@ -326,10 +326,11 @@ function flowsOver(store) {
   equal(store.dirty(), true, 'a change stands unsaved');
 
   await flows.saveProject();
-  equal(prompts[0].value, '', 'the question prefills the name as it stands');
+  equal(prompts[0].label, 'File name', 'the question asks for the file name');
+  equal(prompts[0].value, 'untitled', 'prefilled from the name as it stands');
   ok(prompts[0].preview('Mixer line').includes('mixer-line.json'), 'and previews the filename live');
-  equal(store.model().name, 'Mixer line', 'confirming applies the typed name as an ordinary rename');
-  deepEqual(saved.map((held) => held.filename), ['mixer-line.json'], 'the download fires, named for the project');
+  equal(store.model().name, '', 'confirming renames nothing');
+  deepEqual(saved.map((held) => held.filename), ['mixer-line.json'], 'the download fires, named as typed');
   equal(saved[0].type, 'application/json', 'as JSON');
   equal(store.dirty(), false, 'the saved pointer moves');
   deepEqual(toasts.pop(), ['Project saved', 'The file is saved to your downloads as mixer-line.json.'], 'and the toast confirms');
@@ -338,8 +339,13 @@ function flowsOver(store) {
   store.commit((model) => addEntity(model, 'HAZ'));
   await flows.saveProject();
   equal(saved.length, 1, 'cancel downloads nothing');
-  equal(store.dirty(), true, 'moves no pointer');
-  equal(store.model().name, 'Mixer line', 'and renames nothing');
+  equal(store.dirty(), true, 'and moves no pointer');
+
+  store.commit((model) => renameProject(model, 'Mixer line'));
+  dialogs.prompt = async (spec) => { prompts.push(spec); return spec.value; };
+  await flows.saveProject();
+  equal(prompts.at(-1).value, 'mixer-line', 'a named project prefills its name as a file name');
+  equal(saved.at(-1).filename, 'mixer-line.json', 'and saves under it unchanged');
 }
 
 // --- A changed record marked reviewed -------------------------------------
@@ -630,7 +636,8 @@ function flowsOver(store) {
 
   await flows.saveAsideCopy();
   equal(prompts[0].title, 'Save the copy', 'the copy is saved through the naming question');
-  equal(prompts[0].value, 'Old line', 'prefilled with the name the copy carries');
+  equal(prompts[0].label, 'File name', 'asking for the file name');
+  equal(prompts[0].value, 'old-line', 'prefilled from the name the copy carries');
   ok(prompts[0].preview('').includes('old-line.json') === false && prompts[0].preview('').includes('set-aside-copy.json'), 'an empty name previews the fallback');
   equal(saved.length, 1, 'confirming downloads once');
   equal(saved[0].filename, 'set-aside-copy.json', 'under the fallback name when the field is emptied');
@@ -659,7 +666,7 @@ function flowsOver(store) {
     saveFile: (filename, text, type) => saved.push({ filename, text, type }),
   });
   await flows.saveAsideCopy();
-  equal(prompts[0].value, 'Set-aside copy', 'a copy with no readable name prefills the fallback');
+  equal(prompts[0].value, 'set-aside-copy', 'a copy with no readable name prefills the fallback');
   equal(saved[0].text, 'plain text that is not a blob', 'and saves as the text it is');
   equal(saved[0].filename, 'kept.json', 'under the name typed');
   await flows.discardAside();

@@ -774,6 +774,16 @@ The specification stands alone in `specs`, the requirements, the metamodel and t
 
 ---
 
+### D-093 The save names the file
+
+`2026-09-28` `product`
+
+Save to file asks for the file's name, prefilled from the project's name as the filename it makes, and the project's own name is never changed by a save. The project is renamed on its own tab. The set-aside copy is saved through the same question.
+
+> *The question had asked for the project name and renamed the project on confirm, so a user naming a download renamed their project without meaning to. A file's name and a project's name diverge in every desktop application without harm, and the field says what it names. Amends D-077, whose point that every save is a download with no silent target stands.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
