@@ -650,8 +650,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       return;
     }
     messagesHost.appendChild(
-      el('table', { className: 'table' }, [
-        el('colgroup', {}, [el('col', { className: 'col-entity' }), el('col', {}), el('col', { className: 'col-message' })]),
+      el('table', { className: 'table messages' }, [
         el('thead', {}, [el('tr', {}, [messagesHeader('Entity', 'entity'), el('th', { text: found[0].definition.name }), messagesHeader('Message', 'message')])]),
         el('tbody', {}, rows.map(messageRow)),
       ])

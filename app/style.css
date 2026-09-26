@@ -1184,6 +1184,9 @@ select.field-input[size] {
 .table .col-action { width: 48px; }
 .table .col-message { width: 44%; }
 .table td.tags { overflow: visible; }  /* the tags' tooltips reach past the cell */
+.table.messages { table-layout: auto; }  /* the entity and its measures take the width they hold, the message the rest, wrapping first */
+.table.messages td:first-child { white-space: nowrap; }
+.table.messages .cell-entity .row-title { flex: none; }
 .cell-tags { display: flex; flex-wrap: wrap; gap: 4px; }  /* $spacing-02 */
 .head-title { font-weight: 600; white-space: nowrap; }  /* $heading-compact-01; the head's own padding lands it where a tab's text stands */
 .table th {
