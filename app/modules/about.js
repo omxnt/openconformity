@@ -1,19 +1,17 @@
 /**
  * The About dialog's content: the mark and the wordmark over one line on
  * what the software is and one on where it lives and under what terms,
- * then four groups of rows by what each thing does for the tool, in
- * alphabetical order. The design, saying of each part whether it is
- * followed or carried, with its licence. The diagram editor, with where
- * it loads from and the session's standing consent. The legislation the
- * model is built around. The methods its ratings follow, each by
- * designation with its clauses. The header is the mark beside the
- * wordmark, set apart by space alone, and under it the release line,
- * the version with a link to its notes. The groups stand folded under
- * one accordion heading, opened on a click and closed again each time
- * About opens.
- * Every reference is named by designation only, and every licence named
- * is one the deployment itself carries. Chrome, not flow: the flow only
- * asks for it.
+ * then the release line, the version and the phase with a link to the
+ * notes. Beneath, four accordion items, each closed when About opens,
+ * grouping the credits and references by what each thing is to the
+ * software. References, the legislation the model is built around and
+ * the methods its ratings follow, each by designation. Design assets,
+ * the system followed and the assets self-hosted, each with its
+ * licence. External services, the diagram editor with where it loads
+ * from and the session's standing consent, and its maker. Development
+ * tools, what the software was made with. Every reference is named by designation only, and
+ * every licence named is one the deployment itself carries. Chrome, not
+ * flow: the flow only asks for it.
  */
 
 import { el, icon } from './dom.js';
@@ -29,18 +27,11 @@ export async function showAbout(dialogs, store = null) {
   const link = (href, text) => el('a', { attributes: { href, target: '_blank', rel: 'noopener' } }, [el('span', { text }), icon('i-launch')]);
   const text = (held) => document.createTextNode(held);
   const cell = (parts) => el('td', {}, typeof parts === 'string' ? [text(parts)] : parts);
-  /** A group: its label over rows of three cells, a name, what it is, and a link or a control at the end. */
-  const group = (label, rows) =>
-    el('section', { className: 'about-section' }, [
-      el('h3', { className: 'about-label', text: label }),
-      el('table', { className: 'about-table' }, [el('tbody', {}, rows.map((row) => el('tr', {}, row.map(cell))))]),
-    ]);
-
-  /** An accordion item, closed at first: a heading with the chevron over the groups it folds. */
-  const fold = (label, groups) => {
+  /** An accordion item, closed at first: a heading with the chevron over its rows of three cells, a name, what it is, and a link or a control at the end. */
+  const fold = (label, rows) => {
     const chevron = el('span', { className: 'about-fold-chevron' }, [icon('i-chevron-right')]);
     const heading = el('button', { className: 'about-fold', attributes: { type: 'button', 'aria-expanded': 'false' } }, [chevron, el('span', { text: label })]);
-    const held = el('div', { className: 'about-credits' }, groups);
+    const held = el('div', { className: 'about-credits' }, [el('table', { className: 'about-table' }, [el('tbody', {}, rows.map((row) => el('tr', {}, row.map(cell))))])]);
     held.hidden = true;
     heading.addEventListener('click', () => {
       held.hidden = !held.hidden;
@@ -86,26 +77,26 @@ export async function showAbout(dialogs, store = null) {
           ]),
         ]),
       ]),
-      fold('Credits and references', [
-      group('Design', [
-        ['IBM Carbon', 'Design system, followed', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
-        ['IBM Plex', 'Typeface, vendored', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
-        ['Carbon Icons', 'Icon set, vendored', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
-      ]),
-      group('Diagrams', [
-        ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]],
-        ['JGraph Ltd', 'Maker and trademark holder, not affiliated', [link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use'), link('https://www.drawio.com/trust/', 'Privacy')]],
-      ]),
-      group('Legislation', [
+      fold('References', [
         ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
         ['2014/30/EU', 'Electromagnetic Compatibility Directive', [link('https://eur-lex.europa.eu/eli/dir/2014/30/oj', 'eur-lex.europa.eu')]],
-      ]),
-      group('Methods', [
         ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', [link('https://www.iso.org/standard/57180.html', 'iso.org')]],
         ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
         ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],
         ['SEBoK', 'System requirement types, after the INCOSE manual', [link('https://sebokwiki.org/wiki/System_Requirements_Definition', 'sebokwiki.org')]],
       ]),
+      fold('Design assets', [
+        ['IBM Carbon', 'Design system, followed without its packages', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
+        ['IBM Plex', 'Typeface, self-hosted', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
+        ['Carbon Icons', 'Icon set, self-hosted', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
+      ]),
+      fold('External services', [
+        ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]],
+        ['JGraph Ltd', 'Maker and trademark holder, not affiliated', [link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use'), link('https://www.drawio.com/trust/', 'Privacy')]],
+      ]),
+      fold('Development tools', [
+        ['Claude Code', 'Coding assistant, used in development only', [link('https://claude.com/claude-code', 'claude.com')]],
+        ['Mermaid', 'Diagram tool, used to export the metamodel diagram', [link('https://mermaid.live', 'mermaid.live')]],
       ]),
     ]),
   });

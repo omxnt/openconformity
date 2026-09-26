@@ -1498,16 +1498,16 @@ select.field-input[size] {
    rows as Carbon's structured list sets them, a rule above and under
    every row, each group's label at $label-01. A link leaving the page
    wears the launch glyph, as the Help menu's do. */
-.dialog:has(.about) { max-width: 720px; }
+.dialog:has(.about) { max-width: 768px; }
 .about { display: grid; gap: 24px; }  /* $spacing-06 */
 .about p { margin: 0; }
 /* The header: the mark beside the wordmark and two lines, set apart
    from the groups by space alone. */
-.about-brand { display: flex; align-items: center; gap: 16px; padding: 4px 0 8px; color: var(--text); }  /* $spacing-05, $spacing-03 */
+.about-brand { display: flex; align-items: center; gap: 24px; padding: 4px 0 8px; color: var(--text); }  /* $spacing-06, $spacing-03 */
 .about-mark {
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 64px;
+  height: 64px;
   background: currentColor;
   -webkit-mask: url("assets/marks/favicon.svg") no-repeat center / contain;
   mask: url("assets/marks/favicon.svg") no-repeat center / contain;
@@ -1517,8 +1517,8 @@ select.field-input[size] {
 .about-meta { color: var(--text-helper); }
 .about-version { font: inherit; }  /* the version reads as prose in the release line, not in the mono of an identifier the model assigns */
 
-/* Carbon accordion, one item: the heading a full-width row with rules
-   above and below and the chevron first, the groups beneath when open. */
+/* Carbon accordion, four items: each heading a full-width row with a rule
+   above and below and the chevron first, its table beneath when open. */
 .about-fold {
   display: flex;
   align-items: center;
@@ -1539,16 +1539,16 @@ select.field-input[size] {
 .about-fold:hover { background: var(--hover); }
 .about-fold-chevron { display: inline-flex; width: 16px; height: 16px; }
 .about-fold-chevron .icon { width: 16px; height: 16px; fill: currentColor; }
-.about-credits { display: grid; gap: 24px; padding-top: 16px; }  /* $spacing-06, $spacing-05 */
+.about-accordion + .about-accordion { margin-top: -24px; }  /* the items stack, sharing one rule */
+.about-accordion + .about-accordion .about-fold { border-top: 0; }
+.about-credits { padding: 4px 0 8px 24px; }  /* $spacing-02, $spacing-03, the table in line with the heading past its chevron */
 .about-credits[hidden] { display: none; }
-.about-section { display: grid; gap: 8px; }  /* $spacing-03 */
-.about-label { margin: 0; font-size: 12px; line-height: 1.33; letter-spacing: 0.32px; font-weight: 400; color: var(--text-helper); }  /* $label-01 */
 .about-table { width: 100%; border-collapse: collapse; }
 .about-table td { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
-.about-table tr:first-child td { border-top: 1px solid var(--border-subtle); }
+.about-table tr:last-child td { border-bottom: 0; }
 .about-table td:last-child { padding-right: 0; text-align: right; width: 1%; }
 .about-table td:last-child > * + * { margin-left: 16px; }  /* $spacing-05 between a control and a link */
-.about-table td:first-child { width: 12em; color: var(--text); }  /* one first column across the groups */
+.about-table td:first-child { width: 12em; min-width: 12em; color: var(--text); }  /* one first column across the items */
 .about a { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }  /* $spacing-02 */
 .about a .icon { width: 12px; height: 12px; fill: currentColor; }
 
