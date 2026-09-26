@@ -16,7 +16,7 @@ import { loadProject } from '../app/modules/files.js';
 import { LIBRARY } from '../app/library/data.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/modules/icons.js';
-import { ok, summary } from './harness.js';
+import { ok, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 
 // --- Pane headers are working surfaces or nothing (G-SYS-005) ----------
@@ -589,6 +589,19 @@ import { fakeStorage } from './helpers.js';
   ok(risk.includes("if (last && sketch(last) === sketch(branch)) {") && !risk.includes("'F1, F2'"), 'the graph is grown from its table and merged where branches agree, never drawn by hand');
   ok(risk.includes("if (word === 'negligible') return 'negligible';") && editor.includes("{ caption: view.name, main: view.outcome }, 'outcome'));"), 'negligible is a tone of its own, and the outcome tag names the attribute it computes');
   ok(readFile('../app/modules/view-risk.js').includes("one per parameter of the ${method} and the rating it comes to"), "and so does the risk assessment's lead");
+}
+
+// --- The typefaces, vendored and applied (G-SYS-002, G-SYS-003) --------------
+
+{
+  const sheet = readFile('../app/style.css');
+  const faces = [...sheet.matchAll(/@font-face \{\s*font-family: "([^"]+)";\s*src: url\("assets\/fonts\/([^"]+)"\) format\("woff2"\);/g)].map((match) => [match[1], match[2]]);
+  deepEqual(faces.map(([family]) => family), ['IBM Plex Sans', 'IBM Plex Sans', 'IBM Plex Mono'], 'the two typefaces are declared from the stylesheet, Plex Sans in two weights and Plex Mono in one');
+  for (const [, file] of faces) ok(readFile(`../app/assets/fonts/${file}`).length > 0, `${file} is vendored with the software`);
+  ok(readFile('../app/assets/fonts/LICENSE.txt').includes('SIL Open Font License') || readFile('../app/assets/fonts/LICENSE.txt').includes('OFL'), 'under their open licence');
+  ok(sheet.includes('body {\n  font-family: "IBM Plex Sans", Tahoma, sans-serif;'), 'prose renders in IBM Plex Sans, from the body down');
+  ok(sheet.includes('.mono {\n  font-family: "IBM Plex Mono", ui-monospace, monospace;'), 'and identifiers and data values in IBM Plex Mono, under the class the editor and the tree give them');
+  ok(!sheet.includes('fonts.googleapis') && !sheet.includes('@import'), 'nothing is fetched from a font service');
 }
 
 summary('test-pins');
