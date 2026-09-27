@@ -145,7 +145,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const narrow = column.narrow ? 'narrow' : '';
     if (held !== null && typeof held === 'object') {
       if ('entities' in held) return el('td', {}, held.entities.length === 0 ? [empty()] : held.entities.map(entityRow));
-      if ('code' in held) return el('td', { className: `code ${narrow}`.trim(), attributes: held.title ? { title: held.title } : {} }, [el('span', { text: held.code || '–' }), ...note(held.note)]);
+      if ('code' in held) return el('td', { className: narrow }, [held.code ? el('span', { className: 'tag', text: held.code, attributes: held.title ? { title: held.title } : {} }) : empty(), ...note(held.note)]);
       if ('outcome' in held) return el('td', { className: narrow }, [held.outcome?.outcome ? outcomeTag(held.outcome) : empty(), ...note(held.note)]);
       if ('choice' in held) return el('td', { className: narrow }, [held.choice ? tag(held.choice) : empty()]);
       if ('choices' in held) return el('td', {}, held.choices.length === 0 ? [empty()] : [el('span', { className: 'tags' }, held.choices.map(tag))]);

@@ -132,7 +132,7 @@ export function buildRiskView(model) {
     { text: listed('ACT'), group: 'Hazardous situation' },
     { text: listed('TSK'), group: 'Hazardous situation' },
     ...ratingColumns('Initial risk estimation', method),
-    listed('PRM'),
+    { text: listed('PRM'), group: 'Risk reduction' },
     ...ratingColumns('Residual risk estimation', method),
   ];
 

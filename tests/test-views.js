@@ -54,7 +54,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
       ['Scenario', 'Accident scenario'], ['Hazardous event', 'Accident scenario'], ['Potential consequence', 'Accident scenario'],
       ['Single hazards', 'Hazardous situation'], ['System actors', 'Hazardous situation'], ['System tasks', 'Hazardous situation'],
       ['Rating', 'Initial risk estimation'],
-      ['Protective measures', null],
+      ['Protective measures', 'Risk reduction'],
       ['Rating', 'Residual risk estimation'],
     ],
     'the order the assessment is made in, and only what relates to the scenario directly: the scenario with its event and consequence, its hazardous situation walked from the links, the ratings around the measures reducing its risk; each related column named for its type; with no scenario rated, each rating is one column under its group'
@@ -69,7 +69,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual([cell('Hazardous event', 'Accident scenario'), cell('Potential consequence', 'Accident scenario')].map((held) => held.lines.length > 0 && held.lines.every((line) => typeof line === 'string')), [true, true], "the scenario's event and consequence as lines of its own text");
   equal(cell('Hazardous event', 'Accident scenario').lines.join('\n'), model.nodes.get('SCN-001').attributes.hazardousEvent.trim(), 'as the scenario holds it');
   deepEqual(cell('Rating', 'Initial risk estimation'), '', 'an unrated initial risk, typed since the example chooses no method, and empty');
-  deepEqual(cell('Protective measures'), { entities: ['PRM-001', 'PRM-002', 'PRM-003'] }, 'the measures reducing its risk');
+  deepEqual(cell('Protective measures', 'Risk reduction'), { entities: ['PRM-001', 'PRM-002', 'PRM-003'] }, 'the measures reducing its risk');
   equal(columns.some((column) => column.text === 'Safety functions'), false, 'and no safety function, which relates to the scenario only through a measure');
   deepEqual(cell('Rating', 'Residual risk estimation'), { lines: ['', model.nodes.get('SCN-001').attributes.evaluation.trim()] }, 'an unrated residual risk likewise, with the evaluation of it beneath');
   equal(view.sections[3].tables[0].rows.map((held) => held.id).join(' '), 'SCN-002 SCN-003 SCN-004', 'Maintenance holds the scenarios its tasks give rise to, in id order');
