@@ -38,10 +38,10 @@ This document states how each requirement in `specs/requirements.md` is verified
 |---|---|---|---|---|
 | C-PRJ-001 | Project name | Review | The repository name, the page title and the wordmark read openconformity. | Manual |
 | C-PRJ-002 | Domain name | Review | The domain is registered, and the software and the site are served at its addresses. | Manual |
-| C-PRJ-003 | Project licence | Pin | [test-pins.js:170](../tests/test-pins.js#L170) The licences ride with the software. | Tested |
+| C-PRJ-003 | Project licence | Pin | [test-pins.js:182](../tests/test-pins.js#L182) The licences ride with the software. | Tested |
 | C-PRJ-004 | Funding model | Review | The site, the software and the repository carry no advertising, paid feature or sponsorship. | Manual |
-| C-PRJ-005 | Standards content | Headless, pin, review | [test-pins.js:178](../tests/test-pins.js#L178) No standard's content is transcribed. [test-risk.js:17](../tests/test-risk.js#L17) The methods and their source. [test-risk.js:175](../tests/test-risk.js#L175) Every method names its source. The pin catches known patterns only, so the attributes, the example and the catalogue are also read for clause text. | Partly |
-| C-PRJ-006 | Vulnerability reporting | Review | `SECURITY.md` names the channel, the scope, the versions and the aim, and private vulnerability reporting is enabled in the repository settings. | Manual |
+| C-PRJ-005 | Standards content | Headless, pin, review | [test-pins.js:190](../tests/test-pins.js#L190) No standard's content is transcribed. [test-risk.js:17](../tests/test-risk.js#L17) The methods and their source. [test-risk.js:175](../tests/test-risk.js#L175) Every method names its source. The pin catches known patterns only, so the attributes, the example and the catalogue are also read for clause text. | Partly |
+| C-PRJ-006 | Vulnerability reporting | Pin, review | [test-pins.js:130](../tests/test-pins.js#L130) The way to report a vulnerability is published where tools look. `SECURITY.md` names the channel, the scope, the versions and the aim, and private vulnerability reporting is enabled in the repository settings. | Partly |
 | C-DEV-001 | Source repository | Review | The repository is public on GitHub. | Manual |
 | C-DEV-002 | Hosting platform | Review | The host project is on Cloudflare Pages. | Manual |
 | C-DEV-003 | Metamodel source | Headless | [test-metamodel.js:16](../tests/test-metamodel.js#L16) Parse the diagram. [test-metamodel.js:48](../tests/test-metamodel.js#L48) Entity types. [test-metamodel.js:71](../tests/test-metamodel.js#L71) Relationship types. | Tested |
@@ -49,13 +49,13 @@ This document states how each requirement in `specs/requirements.md` is verified
 | C-DEV-005 | Software address | Review | The host serves `app/` at `app.openconformity.org`. | Manual |
 | C-DEV-006 | Release verification | Review | Each merge to main follows a run with every test file passed and a clean console, and the release notes name the run. | Manual |
 | C-DEV-007 | Deployment integrity | Review | Each file under `app/` fetched from the host hashes as in the released commit. Rocket Loader, Auto Minify, Email Address Obfuscation and Web Analytics injection are off. | Manual |
-| C-TEC-001 | Technology stack | Pin | [test-pins.js:138](../tests/test-pins.js#L138) The software is static files of the web platform. | Tested |
-| C-TEC-002 | No dependencies | Pin | [test-pins.js:138](../tests/test-pins.js#L138) The software is static files of the web platform. | Tested |
+| C-TEC-001 | Technology stack | Pin | [test-pins.js:150](../tests/test-pins.js#L150) The software is static files of the web platform. | Tested |
+| C-TEC-002 | No dependencies | Pin | [test-pins.js:150](../tests/test-pins.js#L150) The software is static files of the web platform. | Tested |
 | C-TEC-003 | No build process | Review | The host has no build command and serves `app/` as it is. | Manual |
-| C-TEC-004 | JavaScript modules | Pin | [test-pins.js:138](../tests/test-pins.js#L138) The software is static files of the web platform. | Tested |
-| C-TEC-005 | Third-party assets | Pin, review | [test-pins.js:170](../tests/test-pins.js#L170) The licences ride with the software. [test-pins.js:187](../tests/test-pins.js#L187) Every glyph drawn is in the sprite, with its provenance. Each `ORIGIN.md` under `app/assets/` matches the files beside it. | Partly |
+| C-TEC-004 | JavaScript modules | Pin | [test-pins.js:150](../tests/test-pins.js#L150) The software is static files of the web platform. | Tested |
+| C-TEC-005 | Third-party assets | Pin, review | [test-pins.js:182](../tests/test-pins.js#L182) The licences ride with the software. [test-pins.js:199](../tests/test-pins.js#L199) Every glyph drawn is in the sprite, with its provenance. Each `ORIGIN.md` under `app/assets/` matches the files beside it. | Partly |
 | C-TEC-006 | Browser-based | Review | The software is reached by an address and installs nothing. | Manual |
-| C-TEC-007 | No server-side code | Pin, review | [test-pins.js:138](../tests/test-pins.js#L138) The software is static files of the web platform. The host settings run no functions. | Partly |
+| C-TEC-007 | No server-side code | Pin, review | [test-pins.js:150](../tests/test-pins.js#L150) The software is static files of the web platform. The host settings run no functions. | Partly |
 | C-TEC-008 | External application | Headless, pin | [test-drawing-editor.js:51](../tests/test-drawing-editor.js#L51) The origin and the frame. [test-pins.js:66](../tests/test-pins.js#L66) The one frame, sandboxed, on the editor's origin. | Tested |
 
 ### 2.2 Graphical
@@ -65,17 +65,17 @@ This document states how each requirement in `specs/requirements.md` is verified
 | G-IDN-001 | Wordmark | Review | `app/assets/marks/wordmark.svg` against the properties the requirement lists. | Manual |
 | G-IDN-002 | Favicon | Review | `app/assets/marks/favicon.svg` in a light and a dark browser tab. | Manual |
 | G-SYS-001 | Design system | Review | The tokens in `app/style.css` and the components against Carbon. | Manual |
-| G-SYS-002 | Prose typeface | Pin | [test-pins.js:299](../tests/test-pins.js#L299) The typefaces, vendored and applied. | Tested |
-| G-SYS-003 | Data typeface | Pin | [test-pins.js:299](../tests/test-pins.js#L299) The typefaces, vendored and applied. | Tested |
-| G-SYS-004 | Iconography | Headless, pin | [test-icons.js:12](../tests/test-icons.js#L12) One distinct glyph per entity type. [test-pins.js:187](../tests/test-pins.js#L187) Every glyph drawn is in the sprite, with its provenance. | Tested |
-| G-SYS-005 | Pane layout | Pin, drive | [test-pins.js:214](../tests/test-pins.js#L214) Pane headers are landmarks. Open a project and find the shell bar, the navigator at full height, and the editor over the relationship pane. | Partly |
+| G-SYS-002 | Prose typeface | Pin | [test-pins.js:311](../tests/test-pins.js#L311) The typefaces, vendored and applied. | Tested |
+| G-SYS-003 | Data typeface | Pin | [test-pins.js:311](../tests/test-pins.js#L311) The typefaces, vendored and applied. | Tested |
+| G-SYS-004 | Iconography | Headless, pin | [test-icons.js:12](../tests/test-icons.js#L12) One distinct glyph per entity type. [test-pins.js:199](../tests/test-pins.js#L199) Every glyph drawn is in the sprite, with its provenance. | Tested |
+| G-SYS-005 | Pane layout | Pin, drive | [test-pins.js:226](../tests/test-pins.js#L226) Pane headers are landmarks. Open a project and find the shell bar, the navigator at full height, and the editor over the relationship pane. | Partly |
 
 ### 2.3 Functional
 
 | Id | Requirement | Method | Verification | Status |
 |---|---|---|---|---|
-| F-APP-001 | Small-viewport notice | Pin, drive | [test-pins.js:241](../tests/test-pins.js#L241) The minimum viewport. Narrow the window below 1000 pixels and find the notice. | Partly |
-| F-APP-002 | Direct entry | Headless, pin | [test-actions.js:20](../tests/test-actions.js#L20) The landing offers the three ways in and the help surface. [test-flows.js:45](../tests/test-flows.js#L45) The landing: one action to a project. [test-pins.js:203](../tests/test-pins.js#L203) The ways into a project are the actions themselves. | Tested |
+| F-APP-001 | Small-viewport notice | Pin, drive | [test-pins.js:253](../tests/test-pins.js#L253) The minimum viewport. Narrow the window below 1000 pixels and find the notice. | Partly |
+| F-APP-002 | Direct entry | Headless, pin | [test-actions.js:20](../tests/test-actions.js#L20) The landing offers the three ways in and the help surface. [test-flows.js:45](../tests/test-flows.js#L45) The landing: one action to a project. [test-pins.js:215](../tests/test-pins.js#L215) The ways into a project are the actions themselves. | Tested |
 | F-SES-001 | Working state | Headless, drive | [test-files.js:167](../tests/test-files.js#L167). [test-store.js](../tests/test-store.js) at [43](../tests/test-store.js#L43), [201](../tests/test-store.js#L201), [232](../tests/test-store.js#L232), [263](../tests/test-store.js#L263), [279](../tests/test-store.js#L279), [302](../tests/test-store.js#L302), [314](../tests/test-store.js#L314), [329](../tests/test-store.js#L329), [482](../tests/test-store.js#L482), [557](../tests/test-store.js#L557), [675](../tests/test-store.js#L675), [711](../tests/test-store.js#L711), [747](../tests/test-store.js#L747). The tests use an in-memory stand-in for browser storage. Reload the page and find the project, the selection and the expansion. | Partly |
 | F-SES-002 | Model retention | Headless, drive | [test-files.js:142](../tests/test-files.js#L142). [test-shell.js:42](../tests/test-shell.js#L42). [test-store.js](../tests/test-store.js) at [77](../tests/test-store.js#L77), [107](../tests/test-store.js#L107), [232](../tests/test-store.js#L232), [607](../tests/test-store.js#L607). Make a change, reload, and find it kept. | Partly |
 | F-SES-003 | Browser removal | Headless, drive | [test-flows.js:695](../tests/test-flows.js#L695) Clear browser data asks, then forgets. [test-store.js:820](../tests/test-store.js#L820) Clear browser data forgets everything. Clear stored data, then find no record in the database and no session key in the storage inspector. | Partly |
@@ -102,7 +102,7 @@ This document states how each requirement in `specs/requirements.md` is verified
 | F-MOD-011 | Record of related measures | Headless | [test-editor.js:133](../tests/test-editor.js#L133). [test-flows.js:396](../tests/test-flows.js#L396). [test-records.js](../tests/test-records.js) at [16](../tests/test-records.js#L16), [25](../tests/test-records.js#L25), [34](../tests/test-records.js#L34), [40](../tests/test-records.js#L40). | Tested |
 | F-VIE-001 | Model views | Headless, pin, drive | [test-flows.js:517](../tests/test-flows.js#L517). [test-markdown.js](../tests/test-markdown.js) at [10](../tests/test-markdown.js#L10), [33](../tests/test-markdown.js#L33). [test-pins.js:123](../tests/test-pins.js#L123). [test-views.js](../tests/test-views.js) at [33](../tests/test-views.js#L33), [38](../tests/test-views.js#L38), [81](../tests/test-views.js#L81), [126](../tests/test-views.js#L126), [161](../tests/test-views.js#L161), [181](../tests/test-views.js#L181). [test-xlsx.js](../tests/test-xlsx.js) at [36](../tests/test-xlsx.js#L36), [46](../tests/test-xlsx.js#L46), [58](../tests/test-xlsx.js#L58), [69](../tests/test-xlsx.js#L69), [89](../tests/test-xlsx.js#L89). Open a view and print it. | Partly |
 | F-VIE-002 | Messages | Headless | [test-records.js:40](../tests/test-records.js#L40) The findings. [test-relationships.js:474](../tests/test-relationships.js#L474) The messages table. | Tested |
-| F-PER-001 | Project persistence | Headless, pin | [test-example.js](../tests/test-example.js) at [22](../tests/test-example.js#L22), [32](../tests/test-example.js#L32). [test-files.js](../tests/test-files.js) at [17](../tests/test-files.js#L17), [37](../tests/test-files.js#L37), [65](../tests/test-files.js#L65), [142](../tests/test-files.js#L142), [175](../tests/test-files.js#L175). [test-flows.js:347](../tests/test-flows.js#L347). [test-metamodel.js:40](../tests/test-metamodel.js#L40). [test-pins.js:153](../tests/test-pins.js#L153). [test-validator.js:215](../tests/test-validator.js#L215). | Tested |
+| F-PER-001 | Project persistence | Headless, pin | [test-example.js](../tests/test-example.js) at [22](../tests/test-example.js#L22), [32](../tests/test-example.js#L32). [test-files.js](../tests/test-files.js) at [17](../tests/test-files.js#L17), [37](../tests/test-files.js#L37), [65](../tests/test-files.js#L65), [142](../tests/test-files.js#L142), [175](../tests/test-files.js#L175). [test-flows.js:347](../tests/test-flows.js#L347). [test-metamodel.js:40](../tests/test-metamodel.js#L40). [test-pins.js:165](../tests/test-pins.js#L165). [test-validator.js:215](../tests/test-validator.js#L215). | Tested |
 | F-PER-002 | Library persistence | Headless | [test-library.js:15](../tests/test-library.js#L15) The catalogues the software ships. | Tested |
 | F-PER-003 | Schema version | Headless | [test-files.js:37](../tests/test-files.js#L37) Round-trip stability. | Tested |
 | F-PER-004 | Version migration | Headless | [test-files.js:85](../tests/test-files.js#L85) The gates, in order. The chain is empty until schema version 2 exists. A test of a real migration comes with it. | Partly |
@@ -135,28 +135,28 @@ This document states how each requirement in `specs/requirements.md` is verified
 | N-SEC-002 | Safe rendering | Headless, pin | [test-editor.js:31](../tests/test-editor.js#L31) A hyperlink is presented as a link only when it is a web address. [test-pins.js:50](../tests/test-pins.js#L50) The page states its content security policy first. [test-pins.js:58](../tests/test-pins.js#L58) No module builds or parses markup from text. | Tested |
 | N-SEC-003 | Drawing rendering | Headless, pin | [test-drawing.js:72](../tests/test-drawing.js#L72) What is refused, and why. [test-pins.js:97](../tests/test-pins.js#L97) A drawing reaches the page as an image from a data address. | Tested |
 | N-SEC-004 | External application isolation | Headless, pin | [test-drawing-editor.js:51](../tests/test-drawing-editor.js#L51) The origin and the frame. [test-drawing-editor.js:69](../tests/test-drawing-editor.js#L69) What is heard. [test-pins.js:66](../tests/test-pins.js#L66) The one frame, sandboxed, on the editor's origin. | Tested |
-| N-SEC-005 | No hidden content | Headless, pin | [test-editor.js:123](../tests/test-editor.js#L123). [test-example.js:158](../tests/test-example.js#L158). [test-flows.js](../tests/test-flows.js) at [303](../tests/test-flows.js#L303), [564](../tests/test-flows.js#L564), [601](../tests/test-flows.js#L601), [622](../tests/test-flows.js#L622). [test-model.js:118](../tests/test-model.js#L118). [test-pins.js:161](../tests/test-pins.js#L161). [test-project.js](../tests/test-project.js) at [16](../tests/test-project.js#L16), [50](../tests/test-project.js#L50). | Tested |
+| N-SEC-005 | No hidden content | Headless, pin | [test-editor.js:123](../tests/test-editor.js#L123). [test-example.js:158](../tests/test-example.js#L158). [test-flows.js](../tests/test-flows.js) at [303](../tests/test-flows.js#L303), [564](../tests/test-flows.js#L564), [601](../tests/test-flows.js#L601), [622](../tests/test-flows.js#L622). [test-model.js:118](../tests/test-model.js#L118). [test-pins.js:173](../tests/test-pins.js#L173). [test-project.js](../tests/test-project.js) at [16](../tests/test-project.js#L16), [50](../tests/test-project.js#L50). | Tested |
 | N-SEC-006 | Content security policy | Pin | [test-pins.js:50](../tests/test-pins.js#L50) The page states its content security policy first. | Tested |
-| N-SEC-007 | Framing | Pin, review | [test-pins.js:130](../tests/test-pins.js#L130) The host is told to refuse framing. The page from the host carries the header. A page on another origin that frames the software is refused by the browser. | Partly |
+| N-SEC-007 | Framing | Pin, review | [test-pins.js:142](../tests/test-pins.js#L142) The host is told to refuse framing. The page from the host carries the header. A page on another origin that frames the software is refused by the browser. | Partly |
 | N-SEC-008 | Hyperlink presentation | Headless | [test-editor.js:31](../tests/test-editor.js#L31) A hyperlink is presented as a link only when it is a web address. | Tested |
 | N-SEC-009 | Failure on opening | Headless | [test-files.js:109](../tests/test-files.js#L109) A file too deep is refused, and an error on opening is a refusal. [test-flows.js:678](../tests/test-flows.js#L678) An import into a project the checks refuse says why it did nothing. | Tested |
 | N-SEC-010 | No input from the address | Pin | [test-pins.js:109](../tests/test-pins.js#L109) Nothing is read from the address. | Tested |
 | N-SEC-011 | Safe export | Headless | [test-markdown.js:10](../tests/test-markdown.js#L10) A cell and its text. [test-xlsx.js:36](../tests/test-xlsx.js#L36) The text as XML takes it. [test-xlsx.js:69](../tests/test-xlsx.js#L69) A sheet. | Tested |
-| N-ACC-001 | Standard conformance | Pin, review | [test-pins.js:214](../tests/test-pins.js#L214) Pane headers are landmarks. [test-pins.js:248](../tests/test-pins.js#L248) Pointer targets. [test-pins.js:254](../tests/test-pins.js#L254) Text carries AA contrast in both themes. The other criteria of WCAG 2.2 AA need an audit in the browser with a screen reader. | Partly |
+| N-ACC-001 | Standard conformance | Pin, review | [test-pins.js:226](../tests/test-pins.js#L226) Pane headers are landmarks. [test-pins.js:260](../tests/test-pins.js#L260) Pointer targets. [test-pins.js:266](../tests/test-pins.js#L266) Text carries AA contrast in both themes. The other criteria of WCAG 2.2 AA need an audit in the browser with a screen reader. | Partly |
 | N-ACC-002 | Colour independence | Headless, review | [test-icons.js:12](../tests/test-icons.js#L12) One distinct glyph per entity type. Each entity type's icon in the sprite is a distinct shape. | Partly |
 | N-ACC-003 | Keyboard operability | Headless, drive | [test-actions.js:32](../tests/test-actions.js#L32). [test-flows.js:143](../tests/test-flows.js#L143). [test-overlay.js](../tests/test-overlay.js) at [76](../tests/test-overlay.js#L76), [105](../tests/test-overlay.js#L105). Walk every row of `docs/shortcuts.md` with the pointer unused. | Partly |
-| N-CMP-001 | Desktop viewport | Pin, drive | [test-pins.js:241](../tests/test-pins.js#L241) The minimum viewport. Work at 1000 by 356 pixels and find every pane usable. | Partly |
-| N-CMP-002 | Browser support | Headless, pin, drive | [test-pins.js:153](../tests/test-pins.js#L153) The file surface stays on the baseline. [test-pins.js:224](../tests/test-pins.js#L224) The pre-paint theme script speaks the store's literals. [test-store.js:636](../tests/test-store.js#L636) A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari. | Partly |
+| N-CMP-001 | Desktop viewport | Pin, drive | [test-pins.js:253](../tests/test-pins.js#L253) The minimum viewport. Work at 1000 by 356 pixels and find every pane usable. | Partly |
+| N-CMP-002 | Browser support | Headless, pin, drive | [test-pins.js:165](../tests/test-pins.js#L165) The file surface stays on the baseline. [test-pins.js:236](../tests/test-pins.js#L236) The pre-paint theme script speaks the store's literals. [test-store.js:636](../tests/test-store.js#L636) A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari. | Partly |
 
 ### 2.5 Summary
 
 | Class | Requirements | Tested | Partly | Manual | None |
 |---|---|---|---|---|---|
-| Constraints | 21 | 6 | 3 | 12 | 0 |
+| Constraints | 21 | 6 | 4 | 11 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
 | Functional | 42 | 30 | 7 | 2 | 3 |
 | Non-functional | 26 | 13 | 9 | 4 | 0 |
-| All | 96 | 52 | 20 | 21 | 3 |
+| All | 96 | 52 | 21 | 20 | 3 |
 
 | Open | Requirements |
 |---|---|
@@ -179,7 +179,7 @@ Every block below says in its title that it names no requirement. Each pins a ch
 | [test-model.js:333](../tests/test-model.js#L333) | The project's attributes under F-MOD-003. |
 | [test-navigator.js:146](../tests/test-navigator.js#L146) | The tree's presentation. |
 | [test-overlay.js](../tests/test-overlay.js) at [26](../tests/test-overlay.js#L26), [38](../tests/test-overlay.js#L38), [58](../tests/test-overlay.js#L58), [91](../tests/test-overlay.js#L91) | The overlay's mechanics. |
-| [test-pins.js:310](../tests/test-pins.js#L310) | The version constants. |
+| [test-pins.js:322](../tests/test-pins.js#L322) | The version constants. |
 | [test-queries.js](../tests/test-queries.js) at [139](../tests/test-queries.js#L139), [306](../tests/test-queries.js#L306), [358](../tests/test-queries.js#L358) | Labels and exclusions. |
 | [test-relationships.js](../tests/test-relationships.js) at [338](../tests/test-relationships.js#L338), [375](../tests/test-relationships.js#L375), [388](../tests/test-relationships.js#L388), [411](../tests/test-relationships.js#L411) | The graph's presentation. |
 | [test-risk.js](../tests/test-risk.js) at [132](../tests/test-risk.js#L132), [165](../tests/test-risk.js#L165) | The risk methods under F-MOD-003. |

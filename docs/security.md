@@ -317,7 +317,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-29 | The host serves each file as the released commit holds it, with no feature that rewrites or injects on. | The host's settings | C-DEV-007 | Not verified |
 | CT-30 | A merge to main follows a passed test run and a clean console. | The release process | C-DEV-006 | Required. No release made under it yet. |
 | CT-31 | The maintainer reviews every change before it enters the repository. | The repository's working rules | None | In place |
-| CT-32 | Vulnerabilities are reported privately, with a stated scope and response aim. | `SECURITY.md`, the repository's settings | C-PRJ-006 | The file stands. The setting is not confirmed. |
+| CT-32 | Vulnerabilities are reported privately, with a stated scope, the risks already accepted, how to test and a response aim, and the contact is published where tools look for it. | `SECURITY.md`, `.well-known/security.txt` on both origins, the repository's settings | C-PRJ-006 | The files stand. The setting is not confirmed. |
 | CT-33 | Third-party assets are recorded with their source, version and licence. | `app/assets/*/ORIGIN.md` | C-TEC-005 | In place |
 | CT-34 | The maintainer's GitHub and Cloudflare accounts are protected by a second factor. | The accounts | None | Not verified |
 

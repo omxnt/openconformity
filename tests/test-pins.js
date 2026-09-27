@@ -127,6 +127,18 @@ const sheet = readFile('../app/style.css');
   ok(readFile('../app/modules/views.js').includes("download(part.filename, workbook(viewSheets(part.built, labelOf))"), 'the view saves as an Excel workbook');
 }
 
+// --- The way to report a vulnerability is published where tools look (C-PRJ-006) ---
+
+{
+  for (const [where, host] of [['../app', 'app.openconformity.org'], ['../site', 'openconformity.org']]) {
+    const fields = readFile(`${where}/.well-known/security.txt`).split('\n').filter(Boolean).map((line) => line.split(': '));
+    const field = (name) => fields.filter(([key]) => key === name).map(([, value]) => value);
+    ok(field('Contact').includes('mailto:info@openconformity.org') && field('Policy')[0]?.endsWith('/SECURITY.md') && field('Canonical')[0] === `https://${host}/.well-known/security.txt`, `${host} publishes its contact, its policy and its own address`);
+    const expires = Date.parse(field('Expires')[0] ?? '');
+    ok(expires > Date.now() && expires - Date.now() < 366 * 24 * 3600 * 1000, `and an expiry within the coming year, renewed at a release before it passes (${field('Expires')[0]})`);
+  }
+}
+
 // --- The host is told to refuse framing (N-SEC-007) -----------------------
 
 {

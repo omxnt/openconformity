@@ -1,0 +1,6 @@
+Contact: mailto:info@openconformity.org
+Contact: https://github.com/omxnt/openconformity/security/advisories/new
+Expires: 2027-09-27T00:00:00.000Z
+Policy: https://github.com/omxnt/openconformity/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: https://app.openconformity.org/.well-known/security.txt
