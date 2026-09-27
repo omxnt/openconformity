@@ -122,7 +122,7 @@ const sheet = readFile('../app/style.css');
 // --- No standard's content is transcribed (C-PRJ-005) ---
 
 {
-  const doc = readFile('../notes/attributes.md');
+  const doc = readFile('../specs/attributes.md');
   ok(!doc.includes('PL risk graph') && !doc.includes('SIL matrix') && !doc.includes('| rated |') && !doc.includes('ISO 13849-1:2023, Safety of machinery'), 'no table of a harmonised standard reads a level, the tool ships no table nobody has verified');
   ok(!readFile('../app/modules/rating.js').includes('PL_') && !readFile('../app/modules/rating.js').includes('SIL_'), "the rating dialog draws the scenario's methods alone");
   ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article [2]"), 'the requirement categories cite their source, with none of its text');

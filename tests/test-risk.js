@@ -16,7 +16,7 @@ const SCORING_METHOD = 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)';
 
 // --- The methods and their source (C-PRJ-005, F-MOD-003) -------------------
 
-const document = readFile('../notes/attributes.md');
+const document = readFile('../specs/attributes.md');
 const chapter = document.slice(document.indexOf('## 6. Risk estimation'), document.indexOf('## 7. References'));
 ok(chapter.length > 0, 'the document carries the risk estimation chapter, before the references');
 

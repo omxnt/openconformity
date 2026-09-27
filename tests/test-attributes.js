@@ -1,5 +1,5 @@
 /**
- * Verifies the attribute transcription against `notes/attributes.md`: every
+ * Verifies the attribute transcription against `specs/attributes.md`: every
  * type section, its ungrouped table, its groups, and its kinds, compared
  * definition by definition. Run from this directory.
  */
@@ -21,7 +21,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- Parse the document (F-MOD-003) ------------------------------------
 
-const document = readFile('../notes/attributes.md');
+const document = readFile('../specs/attributes.md');
 
 /**
  * The type sections of the document: per code its name, the rows of its

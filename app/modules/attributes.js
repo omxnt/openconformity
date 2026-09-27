@@ -1,6 +1,6 @@
 /**
  * The attribute definitions per entity type, transcribed from
- * `notes/attributes.md` in the order the document records the types.
+ * `specs/attributes.md` in the order the document records the types.
  *
  * Per type, the ungrouped definitions come first and the named groups
  * follow — a group tagged tab standing on a tab of its own — with keys

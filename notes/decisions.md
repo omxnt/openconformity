@@ -864,6 +864,16 @@ A notified body carries its address and its own website beside its number and na
 
 ---
 
+### D-102 The attributes document is a specification
+
+`2026-09-28` `repository`
+
+The attributes document stands in `specs` beside the requirements, the metamodel and the schema, as `specs/attributes.md`. It is tables and conventions, held to the code by the tests, and guarded with the rest of the specification. F-MOD-003 names it there.
+
+> *D-091 kept it a note while it changed with every field. It stopped changing that way when its prose was cut to the tables, and a requirement pointing at a note ranked below the metamodel inverted the precedence table, which the security review noted. Amends D-091.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
