@@ -6,7 +6,7 @@
  */
 
 import { el, icon, tooltipTag } from './dom.js';
-import { statusIcon, rateDialog } from './rating.js';
+import { rateDialog } from './rating.js';
 import { ratingView } from './fields.js';
 import { isOutcome } from './attributes.js';
 
@@ -25,7 +25,7 @@ export function ratingTags(view, tipKey = null) {
   const tag = (className, content, lines, key) => tooltipTag(className, content, lines, key, tipKey);
   const tags = [];
   if (view.outcome !== null) {
-    tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], { caption: view.name, main: view.outcome }, 'outcome'));
+    tags.push(tag(`tag outcome tone-${view.tone}`, [...(view.tone === 'none' ? [] : [el('span', { className: 'risk-dot' })]), el('span', { text: view.outcome })], { caption: view.name, main: view.outcome }, 'outcome'));
   }
   view.parameters.forEach((parameter, i) => {
     if (parameter.value === '') return;

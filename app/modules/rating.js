@@ -360,8 +360,9 @@ export async function rateDialog(dialogs, { title, method, definitions, values }
     figure?.repaint();
     const held = estimate(method, parameters.map((definition) => state[definition.key]));
     result.className = `risk-result${held === null ? ' unrated' : ''}`;
+    outcome.className = `risk-outcome${held === null ? '' : ` tone-${levelTone(held)}`}`;
     outcome.textContent = '';
-    if (held !== null && levelTone(held) !== 'none') outcome.appendChild(statusIcon(levelTone(held)));
+    if (held !== null && levelTone(held) !== 'none') outcome.appendChild(el('span', { className: 'risk-dot' }));
     outcome.appendChild(el('span', { text: held ?? 'Not rated' }));
   }
   repaint();

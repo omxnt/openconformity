@@ -927,7 +927,6 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
    scale — and, in an edit, the field that opens its dialog, growing as
    its tags wrap, the edit pencil trailing where a select keeps its
    arrow: the one field edited in a dialog rather than typed. */
-.tag .status-icon { width: 12px; height: 12px; margin-right: 4px; }  /* $spacing-02 */
 .field-input.rating {
   display: flex;
   align-items: center;
@@ -1776,11 +1775,11 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
 .data td.mark { text-align: center; }
 .data td.wide { min-width: 16ch; }
-.data td p { margin: 0; min-width: 24ch; max-width: 36ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
+.data td p { margin: 0; min-width: 28ch; max-width: 40ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
 .data td .cell-note .tag { margin-right: 8px; vertical-align: 1px; }
 .data th.narrow, .data td.narrow { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
-.data td .tag.outcome { font-weight: 600; }
-.data td .tag .risk-dot { margin-right: 6px; }
+.tag.outcome { font-weight: 600; }
+.tag .risk-dot { margin-right: 6px; }
 .data .empty { color: var(--text-helper); }
 .data tr.row-return td { background: var(--layer-accent); }
 .data .tags { display: flex; flex-wrap: wrap; gap: 4px; }
