@@ -5,7 +5,7 @@
  */
 
 import { markdownText, markdownCell, markdown } from '../app/modules/markdown.js';
-import { equal, summary } from './harness.js';
+import { ok, equal, summary } from './harness.js';
 
 // --- A cell and its text (F-VIE-001) -----------------------------------------
 
@@ -16,6 +16,8 @@ import { equal, summary } from './harness.js';
   equal(markdownCell('a | b'), 'a \\| b', 'a pipe is escaped, so the cell keeps to its column');
   equal(markdownCell('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;', 'markup typed into a field is escaped and reads as text');
   equal(markdownText('Tom & Jerry'), 'Tom &amp; Jerry', 'as is an ampersand');
+  equal(markdown('T', [{ caption: 'Diagram', image: { alt: 'Diagram of [x]', path: 'diagrams/A B.svg' } }, { caption: 'Other', image: null }]), '# T\n\n### Diagram\n\n![Diagram of x](diagrams/A%20B.svg)\n\n### Other\n\n–\n', 'a figure is an image linked by its path, and a dash where there is none');
+  ok(markdown('T', [{ caption: 'Relationships', subcaption: 'Realises', headers: ['A'], rows: [] }]).includes('### Relationships\n\n#### Realises\n\n| A |'), 'a subcaption stands under its part');
 }
 
 // --- A document of tables (F-VIE-001) -----------------------------------------

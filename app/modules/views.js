@@ -4,7 +4,8 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, a block's heading above its tables, and
+ * cell a way to the editor, a block's headings above its tables and its
+ * figures, and
  * saves it as the view offers: as an Excel workbook, a sheet per
  * section, or as Markdown. From the first section, which holds every
  * row, the save takes the whole view, and from any other only that
@@ -20,6 +21,8 @@ import { entityLabel } from './queries.js';
 import { VIEWS } from './view-registry.js';
 import { workbook } from './xlsx.js';
 import { markdown } from './markdown.js';
+import { zip } from './zip.js';
+import { dataUrl } from './drawing.js';
 
 /** A column as an object, a bare name being its text. */
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);
@@ -43,6 +46,7 @@ export function exportText(held, labelOf) {
   if (typeof held !== 'object') return String(held);
   const labelled = (value, text) => (value && text ? `${value}: ${text}` : value || text || '');
   if ('entities' in held) return held.entities.map((id) => (labelOf(id) ? `${id} ${labelOf(id)}` : id)).join('\n');
+  if ('identifier' in held) return held.identifier;
   if ('code' in held) return labelled(held.code, held.note);
   if ('outcome' in held) return labelled(held.outcome?.outcome ?? '', held.note);
   if ('lines' in held) return held.lines.filter(Boolean).join('\n');
@@ -83,23 +87,33 @@ export function savedPart(built, section, extension = 'xlsx') {
 
 /**
  * A section as a Markdown document under the view's title: each table
- * with the heading of the block it opens, the block's text and its
- * caption, each cell as the exports write it.
+ * with the heading of the block it opens, the block's text, its caption
+ * and subcaption, each cell as the exports write it, and each figure as
+ * an image linked to a diagram file beside the document, which comes
+ * with the text.
  * @param {{ title: string }} built
- * @param {{ tables: Array<{ heading?: string, text?: string, caption?: string, columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }} section
+ * @param {{ tables: Array<*> }} section
  * @param {(id: string) => string} labelOf
+ * @returns {{ text: string, diagrams: Array<{ name: string, text: string }> }}
  */
 export function sectionMarkdown(built, section, labelOf) {
-  return markdown(
-    built.title,
-    section.tables.map((table) => ({
+  const diagrams = [];
+  const tables = section.tables.map((table) => {
+    const part = {
       heading: table.heading ? [table.heading, labelOf(table.heading)].filter(Boolean).join(' ') : '',
       text: table.text ?? '',
       caption: table.caption ?? '',
-      headers: table.columns.map(columnText),
-      rows: table.rows.map((row) => row.cells.map((held) => exportText(held, labelOf))),
-    }))
-  );
+      subcaption: table.subcaption ?? '',
+    };
+    if ('figure' in table) {
+      if (table.figure === null) return { ...part, image: null };
+      const name = `diagrams/${table.figure.id}.svg`;
+      diagrams.push({ name, text: table.figure.drawing });
+      return { ...part, image: { alt: `Diagram of ${[table.figure.id, labelOf(table.figure.id)].filter(Boolean).join(' ')}`, path: name } };
+    }
+    return { ...part, headers: table.columns.map(columnText), rows: table.rows.map((row) => row.cells.map((held) => exportText(held, labelOf))) };
+  });
+  return { text: markdown(built.title, tables), diagrams };
 }
 
 /**
@@ -200,6 +214,13 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     return link;
   }
 
+  /** An entity by its glyph and identifier alone, a way to the editor like any entity in a view. */
+  function identifierRow(id) {
+    const link = entityRow(id);
+    link.querySelector('.entity-title')?.remove();
+    return link;
+  }
+
   const empty = () => el('span', { className: 'empty', text: '–' });
   /** A rating's value as its tag, with the text given for it running on after it, such as a parameter's rationale. */
   const rated = (tagElement, text) => (text ? [el('p', { className: 'cell-note' }, [tagElement, el('span', { text })])] : [tagElement]);
@@ -222,6 +243,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const narrow = column.narrow ? 'narrow' : '';
     if (held !== null && typeof held === 'object') {
       if ('entities' in held) return el('td', {}, held.entities.length === 0 ? [empty()] : held.entities.map(entityRow));
+      if ('identifier' in held) return el('td', {}, [identifierRow(held.identifier)]);
       if ('code' in held) return el('td', { className: narrow }, held.code ? rated(el('span', { className: 'tag', text: held.code, attributes: held.title ? { title: held.title } : {} }), held.note) : [empty()]);
       if ('outcome' in held) return el('td', { className: narrow }, held.outcome?.outcome ? rated(outcomeTag(held.outcome), held.note) : [empty()]);
       if ('choice' in held) return el('td', { className: narrow }, [held.choice ? tag(held.choice) : empty()]);
@@ -342,7 +364,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     download(part.filename, workbook(viewSheets(part.built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }
 
-  /** The open section saved as Markdown, the first section holding every block. */
+  /** The open section saved as Markdown, the first section holding every block, and as a zip with its diagrams beside it where it has any. */
   function saveMarkdown() {
     const open = store.view();
     if (open === null) return;
@@ -350,7 +372,12 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const built = view.build(store.model());
     const index = Math.min(open.section, built.sections.length - 1);
     const part = savedPart(built, index, 'md');
-    download(part.filename, sectionMarkdown(built, built.sections[index], labelOf), 'text/markdown;charset=utf-8');
+    const { text, diagrams } = sectionMarkdown(built, built.sections[index], labelOf);
+    if (diagrams.length === 0) {
+      download(part.filename, text, 'text/markdown;charset=utf-8');
+      return;
+    }
+    download(part.filename.replace(/\.md$/, '.zip'), zip([{ name: part.filename, text }, ...diagrams]), 'application/zip');
   }
 
   function render() {
@@ -384,6 +411,15 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
         if (spec.heading) block.appendChild(el('h2', { className: 'view-block-head', attributes: { 'data-id': spec.heading } }, [entityRow(spec.heading)]));
         if (spec.text) block.appendChild(el('p', { className: 'view-block-text', text: spec.text }));
         if (spec.caption) block.appendChild(el('h3', { className: 'view-caption', text: spec.caption }));
+        if (spec.subcaption) block.appendChild(el('h4', { className: 'view-subcaption', text: spec.subcaption }));
+        if ('figure' in spec) {
+          block.appendChild(
+            spec.figure === null
+              ? el('p', { className: 'view-figure-empty' }, [empty()])
+              : el('div', { className: 'view-figure' }, [el('img', { attributes: { src: dataUrl(spec.figure.drawing), alt: `Diagram of ${[spec.figure.id, labelOf(spec.figure.id)].filter(Boolean).join(' ')}` } })])
+          );
+          return;
+        }
         block.appendChild(table(spec, `${built.id}/${i}/${j}`));
       });
       scroll.appendChild(block);

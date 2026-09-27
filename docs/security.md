@@ -159,7 +159,7 @@ A change of the kind below updates the sections named in the same commit.
 | EP-20 | A saved file | Out | TB-01 | `flows.js` `saveProject`, `dom.js` `download`, `files.js` `filenameFor` | CT-27 |
 | EP-21 | A view saved as a workbook | Out | TB-01 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
 | CT-36 | A saved Markdown document escapes ampersands and angle brackets in everything it carries, so no markup from a field is rendered. | `markdown.js` `markdownText` | F-VIE-001 | In place |
-| EP-22 | A view saved as Markdown | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown` | CT-36 |
+| EP-22 | A view saved as Markdown, alone or in a zip with its diagrams | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown`, `zip.js` `zip` | CT-07, CT-36 |
 
 ## 4. Threats
 

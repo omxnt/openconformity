@@ -5,7 +5,8 @@
  * its hazardous event and potential consequence, then its hazardous
  * situation, the hazards, actors and tasks it is related to, its
  * initial rating, the protective measures reducing its risk, and its
- * residual rating with the risk evaluation beneath it. Each rating
+ * residual rating with the risk evaluation beneath it, and its notes
+ * last. Each rating
  * parameter shows the rationale given for it beneath its value. One tab for all
  * scenarios and one per phase its tasks occur during, each counting its
  * rows in its name. A pure function of the model, returning the description
@@ -126,6 +127,7 @@ export function buildRiskView(model) {
     ...ratingColumns('Initial risk estimation', method),
     { text: listed('PRM'), group: 'Risk reduction' },
     ...ratingColumns('Residual risk estimation', method),
+    'Notes',
   ];
 
   const row = (scenario) => {
@@ -141,6 +143,7 @@ export function buildRiskView(model) {
         ...ratingCells(scenario, 'Initial risk estimation', method),
         { entities: related(scenario.id, 'prm-reduces-risk-of-scn') },
         ...withEvaluation(ratingCells(scenario, 'Residual risk estimation', method), scenario),
+        prose(scenario, 'notes'),
       ],
     };
   };

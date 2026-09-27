@@ -58,6 +58,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
       ['Rating', 'Initial risk estimation'],
       ['Protective measures', 'Risk reduction'],
       ['Rating', 'Residual risk estimation'],
+      ['Notes', null],
     ],
     'the order the assessment is made in, and only what relates to the scenario directly: the scenario with its event and consequence, its hazardous situation walked from the links, the ratings around the measures reducing its risk; each related column named for its type; with no scenario rated, each rating is one column under its group'
   );
@@ -184,20 +185,29 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([view.title, view.exports], ['Safety function specification', ['markdown']], 'titled, and saved as Markdown');
   deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each');
   const block = view.sections[1].tables;
-  deepEqual(block.map((table) => table.caption), ['Relationships', 'Behaviour', 'Characteristics', 'Fault handling'], 'a function is its relationships and the three tabs that specify it, its diagram and notes left in the editor');
+  deepEqual(block.map((table) => [table.caption ?? '', table.subcaption ?? '']), [['Relationships', 'Part of'], ['', 'Decomposes into'], ['', 'Realises'], ['', 'Allocated to'], ['', 'Expressed by'], ['Behaviour', ''], ['Characteristics', ''], ['Fault handling', ''], ['Diagram', ''], ['Notes', '']], 'a function is its relationships, each kind under its own heading, then its tabs in the editor\'s order, the diagram and the notes last');
   deepEqual([block[0].heading, block[0].text], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function and its description');
-  deepEqual(block[0].rows.map((row) => row.cells[0]), ['Part of', 'Decomposes into', 'Realises', 'Allocated to', 'Expressed by'], 'the relationships named from its side');
-  const saf2 = view.sections[2].tables[0].rows;
-  deepEqual([saf2[1].cells[1], view.sections[3].tables[0].rows[0].cells[1]], [{ entities: ['SAF-003', 'SAF-004'] }, { entities: ['SAF-002'] }], 'a function lists the functions it decomposes into, and each of those the one it is part of');
-  const characteristics = block[2].rows.map((row) => row.cells[0]);
+  deepEqual([block[0].columns, block[0].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
+  deepEqual(block[2].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
+  const saf2 = view.sections[2].tables;
+  deepEqual([saf2[1].rows.map((row) => row.cells[0].identifier), view.sections[3].tables[0].rows.map((row) => row.cells[0].identifier)], [['SAF-003', 'SAF-004'], ['SAF-002']], 'a function lists the functions it decomposes into, and each of those the one it is part of');
+  deepEqual(block[8].figure, { id: 'SAF-001', drawing: model.nodes.get('SAF-001').attributes.drawing.trim() }, 'the diagram is the drawing the function holds, once it passes the check');
+  const bare = unrated();
+  delete bare.nodes.get('SAF-001').attributes.drawing;
+  equal(buildSafetyView(bare).sections[1].tables[8].figure, null, 'and nothing where it holds none');
+  const characteristics = block[6].rows.map((row) => row.cells[0]);
   equal(characteristics.slice(0, 2).join(', '), 'Functional safety standard, Required integrity level', 'the required integrity level stands right after the standard it follows');
   equal(characteristics.filter((name) => name === 'Required integrity level').length, 1, 'once, the variant of the standard in force');
   const group = ATTRIBUTES.SAF.groups.find((held) => held.name === 'Characteristics');
   deepEqual([specifiedFields(group, { standard: 'EN IEC 62061:2021' })[1].key, specifiedFields(group, {})[1].key], ['sil', 'ownLevel'], 'under the other standard the level in SIL, under none the level typed');
-  ok(block.every((table) => table.spec && table.sortable === false), 'each table reads as a form, never sorted');
-  equal(view.sections[0].tables.length, 16, 'the first tab holds every function, four tables each');
-  const text = sectionMarkdown(view, view.sections[1], labelOf);
-  ok(text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n') && text.includes('### Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'the Markdown opens on the view, then the function, then its tables');
+  ok(block.every((table) => 'figure' in table || (table.spec && table.sortable === false)), 'each table reads as a form, never sorted');
+  equal(view.sections[0].tables.length, 40, 'the first tab holds every function, ten parts each');
+  const saved = sectionMarkdown(view, view.sections[1], labelOf);
+  ok(saved.text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n') && saved.text.includes('### Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'the Markdown opens on the view, then the function, then its tables');
+  ok(saved.text.includes('### Relationships\n\n#### Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship under its own heading, by identifier and title');
+  ok(saved.text.includes('### Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
+  deepEqual(saved.diagrams.map((file) => file.name), ['diagrams/SAF-001.svg'], 'which comes with the text');
+  equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');
   deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 1, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-1 Emergency Stop.md'], 'saved from the first tab under the view, from a function under its name');
 }
 

@@ -100,7 +100,9 @@ const sheet = readFile('../app/style.css');
   const cell = readFile('../app/modules/drawing-cell.js');
   const pictures = [...cell.matchAll(/el\('img', \{[^}]*attributes: \{ src: ([^,]+),/g)].map((match) => match[1]);
   deepEqual(pictures, ['dataUrl(text)', 'dataUrl(text)'], 'the two picture elements, the card and the enlargement, take the drawing as a data address');
-  ok(sources.every(([name, source]) => name === 'drawing-cell' || !/el\('img'/.test(source)) && !page.includes('<img'), 'and no other module or the page draws a picture');
+  ok(sources.every(([name, source]) => name === 'drawing-cell' || name === 'views' || !/el\('img'/.test(source)) && !page.includes('<img'), 'and no other module but the views, nor the page, draws a picture');
+  const viewPictures = [...readFile('../app/modules/views.js').matchAll(/el\('img', \{ attributes: \{ src: ([^,]+),/g)].map((match) => match[1]);
+  deepEqual(viewPictures, ['dataUrl(spec.figure.drawing)'], 'the view draws a diagram only as an image from a data address');
   ok(!cell.includes("el('svg'") && !cell.includes("el('object'") && !cell.includes("el('embed'"), 'never as markup in the page');
 }
 

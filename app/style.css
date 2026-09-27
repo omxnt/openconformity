@@ -1804,9 +1804,14 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .view-block-head .entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .view-block-text { margin: 0 0 16px; max-width: 80ch; color: var(--text); white-space: pre-wrap; }
 .view-caption { margin: 16px 0 8px; font-size: 14px; font-weight: 600; line-height: 1.28572; letter-spacing: 0.16px; }  /* $heading-compact-01 */
+.view-subcaption { margin: 12px 0 4px; font-size: 12px; font-weight: 400; line-height: 1.33333; letter-spacing: 0.32px; color: var(--text-second); }  /* $label-01 */
+.view-figure { max-width: 1200px; margin: 0 0 16px; padding: 16px; background: #ffffff; color-scheme: light; border: 1px solid var(--border-subtle); }  /* the drawing card's ground */
+.view-figure img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.view-figure-empty { margin: 0 0 16px; }
 .data.spec { max-width: 1200px; }
 .data.spec thead { display: none; }
 .data.spec td:first-child { width: 28ch; color: var(--text-second); }
+.data.spec td:first-child p { min-width: 0; }
 .data.spec td p { max-width: 80ch; }
 
 /* In a view each entity keeps to one line, a little apart from the next

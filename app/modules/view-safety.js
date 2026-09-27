@@ -1,25 +1,29 @@
 /**
  * The safety function specification as a view: one block per safety
  * function, holding only what the function says for itself and what
- * relates to it directly. Its heading and description, then its
- * relationships, then a table of field and value for each of its tabs
- * that carries the specification, Behaviour, Characteristics and Fault
- * handling, with the required integrity level of the standard in force
- * after the standard. The diagram and the notes stay in the editor. One
- * tab holds every function, and one tab each holds a function alone. A
- * pure function of the model, returning the description views.js renders
- * and saves.
+ * relates to it directly, in the order of its tabs in the editor. Its
+ * heading and description, then its relationships, each kind under a
+ * heading of its own as a table of identifier and title, then a table of
+ * field and value for Behaviour, Characteristics and Fault handling,
+ * with the required integrity level of the standard in force after the
+ * standard, then its diagram, then its notes. One tab holds every
+ * function, and one tab each holds a function alone. A pure function of
+ * the model, returning the description views.js renders and saves.
  *
  * A table may open a block: `heading` names the entity the block is
- * about and `text` stands beneath it, and `caption` names the table.
+ * about and `text` stands beneath it. `caption` names a part of the
+ * block and `subcaption` a table within it. A part may be a figure in
+ * place of a table, the drawing it shows or null for none.
  */
 
 import { ATTRIBUTES, groupShown } from './attributes.js';
 import { entityLabel } from './queries.js';
 import { setValues } from './fields.js';
+import { checkDrawing } from './drawing.js';
 
-/** The tabs of a safety function that make up its specification, in the editor's order. */
+/** The tabs of a safety function specified as fields, in the editor's order, the diagram standing before the last. */
 const SPECIFIED = ['Behaviour', 'Characteristics', 'Fault handling'];
+const CLOSING = ['Notes'];
 
 /** The relationships a safety function takes part in, as the specification names them from its side. */
 const RELATIONSHIPS = [
@@ -71,19 +75,9 @@ export function buildSafetyView(model) {
       .map((relationship) => relationship[side])
       .sort();
 
-  const block = (saf) => {
-    const values = saf.attributes;
-    const relationships = {
-      heading: saf.id,
-      text: (values.description ?? '').trim(),
-      caption: 'Relationships',
-      spec: true,
-      sortable: false,
-      columns: ['Relationship', 'Entities'],
-      rows: RELATIONSHIPS.map((held) => ({ id: null, cells: [held.name, { entities: ends(saf.id, held.type, held.side) }] })),
-    };
-    const tabs = ATTRIBUTES.SAF.groups
-      .filter((group) => SPECIFIED.includes(group.name))
+  const fields = (names, values) =>
+    ATTRIBUTES.SAF.groups
+      .filter((group) => names.includes(group.name))
       .map((group) => ({
         caption: group.name,
         spec: true,
@@ -91,7 +85,24 @@ export function buildSafetyView(model) {
         columns: ['Field', 'Value'],
         rows: specifiedFields(group, values).map((definition) => ({ id: null, cells: [definition.name, valueCell(definition, values[definition.key])] })),
       }));
-    return [relationships, ...tabs];
+
+  const block = (saf) => {
+    const values = saf.attributes;
+    const relationships = RELATIONSHIPS.map((held, i) => {
+      const ids = ends(saf.id, held.type, held.side);
+      return {
+        ...(i === 0 ? { heading: saf.id, text: (values.description ?? '').trim(), caption: 'Relationships' } : {}),
+        subcaption: held.name,
+        spec: true,
+        list: true,
+        sortable: false,
+        columns: ['Identifier', 'Title'],
+        rows: ids.length === 0 ? [{ id: null, cells: ['', ''] }] : ids.map((id) => ({ id: null, cells: [{ identifier: id }, entityLabel(model.nodes.get(id))] })),
+      };
+    });
+    const drawing = (values.drawing ?? '').trim();
+    const diagram = { caption: 'Diagram', figure: drawing !== '' && checkDrawing(drawing).ok ? { id: saf.id, drawing } : null };
+    return [...relationships, ...fields(SPECIFIED, values), diagram, ...fields(CLOSING, values)];
   };
 
   return {

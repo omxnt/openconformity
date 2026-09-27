@@ -933,6 +933,16 @@ The second view is the safety function specification, one block per safety funct
 
 ---
 
+### D-108 Notes and diagrams in the views
+
+`2026-09-27` `product`
+
+The views carry the notes, as the risk assessment's last column and as the specification's last part, and the specification carries the safety function's diagram before its notes. A safety function's relationships stand each kind under a heading of its own, as a table of identifier and title. Saved as Markdown, a specification with diagrams is a zip of the document and a folder of the diagrams as SVG files, each linked from the document by its path, and one without is the document alone.
+
+> *A view is read by someone who does not open the model, and the notes and the diagram are part of what the modeller wants read. A diagram in a Markdown file is a link, and only a file beside it shows in every viewer, where a picture written into the text shows in few. The diagrams are the ones that passed the drawing check. Amends D-107.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

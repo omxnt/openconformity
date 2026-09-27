@@ -5,7 +5,8 @@
  * their merges, their few styles and frozen heads. Run from this directory.
  */
 
-import { xmlText, sheetName, columnLetters, utf8, crc32, zip, sheetXml, workbook } from '../app/modules/xlsx.js';
+import { xmlText, sheetName, columnLetters, sheetXml, workbook } from '../app/modules/xlsx.js';
+import { utf8, crc32, zip } from '../app/modules/zip.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 /** Text from UTF-8 bytes, for reading a part back. */
