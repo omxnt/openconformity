@@ -29,18 +29,18 @@ export function columnText(column) {
 }
 
 /**
- * A cell as the exports write it: as the view shows it, each entity,
- * line and note on a line of its own.
+ * A cell as the exports write it: each entity and line on a line of its
+ * own, a rating value followed by its text after a colon.
  * @param {*} held
  * @param {(id: string) => string} labelOf
  */
 export function exportText(held, labelOf) {
   if (held === null || held === undefined) return '';
   if (typeof held !== 'object') return String(held);
-  const below = held.note ? [held.note] : [];
+  const labelled = (value, text) => (value && text ? `${value}: ${text}` : value || text || '');
   if ('entities' in held) return held.entities.map((id) => (labelOf(id) ? `${id} ${labelOf(id)}` : id)).join('\n');
-  if ('code' in held) return [held.code, ...below].filter(Boolean).join('\n');
-  if ('outcome' in held) return [held.outcome?.outcome ?? '', ...below].filter(Boolean).join('\n');
+  if ('code' in held) return labelled(held.code, held.note);
+  if ('outcome' in held) return labelled(held.outcome?.outcome ?? '', held.note);
   if ('lines' in held) return held.lines.filter(Boolean).join('\n');
   return cellText(held, labelOf);
 }
@@ -79,7 +79,7 @@ export function viewSheets(built, labelOf) {
         name: section.name,
         groups: columns.map((column) => column.group ?? ''),
         headers: columns.map(columnText),
-        rows: table.rows.map((row) => row.cells.map((held) => ({ text: exportText(held, labelOf), ...(held?.outcome?.tone ? { tone: held.outcome.tone } : {}) }))),
+        rows: table.rows.map((row) => row.cells.map((held) => ({ text: exportText(held, labelOf) }))),
       };
     })
   );
@@ -163,8 +163,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
   }
 
   const empty = () => el('span', { className: 'empty', text: '–' });
-  /** Text standing beneath a cell's value, such as a rating parameter's rationale. */
-  const note = (text) => (text ? [el('p', { className: 'cell-note', text })] : []);
+  /** A rating's value as its tag, with the text given for it running on after it, such as a parameter's rationale. */
+  const rated = (tagElement, text) => (text ? [el('p', { className: 'cell-note' }, [tagElement, el('span', { text })])] : [tagElement]);
   const tag = (text) => el('span', { className: 'tag', text });
 
   /**
@@ -184,8 +184,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const narrow = column.narrow ? 'narrow' : '';
     if (held !== null && typeof held === 'object') {
       if ('entities' in held) return el('td', {}, held.entities.length === 0 ? [empty()] : held.entities.map(entityRow));
-      if ('code' in held) return el('td', { className: narrow }, [held.code ? el('span', { className: 'tag', text: held.code, attributes: held.title ? { title: held.title } : {} }) : empty(), ...note(held.note)]);
-      if ('outcome' in held) return el('td', { className: narrow }, [held.outcome?.outcome ? outcomeTag(held.outcome) : empty(), ...note(held.note)]);
+      if ('code' in held) return el('td', { className: narrow }, held.code ? rated(el('span', { className: 'tag', text: held.code, attributes: held.title ? { title: held.title } : {} }), held.note) : [empty()]);
+      if ('outcome' in held) return el('td', { className: narrow }, held.outcome?.outcome ? rated(outcomeTag(held.outcome), held.note) : [empty()]);
       if ('choice' in held) return el('td', { className: narrow }, [held.choice ? tag(held.choice) : empty()]);
       if ('choices' in held) return el('td', {}, held.choices.length === 0 ? [empty()] : [el('span', { className: 'tags' }, held.choices.map(tag))]);
       if ('mark' in held) return el('td', { className: 'mark', text: held.mark ? '●' : '' });

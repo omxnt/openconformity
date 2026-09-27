@@ -51,7 +51,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(
     columns.map((column) => [column.text, column.group ?? null]),
     [
-      ['Scenario', 'Accident scenario'], ['Hazardous event', 'Accident scenario'], ['Potential consequence', 'Accident scenario'],
+      ['Accident scenario', 'Accident scenario'], ['Hazardous event', 'Accident scenario'], ['Potential consequence', 'Accident scenario'],
       ['Single hazards', 'Hazardous situation'], ['System actors', 'Hazardous situation'], ['System tasks', 'Hazardous situation'],
       ['Rating', 'Initial risk estimation'],
       ['Protective measures', 'Risk reduction'],
@@ -62,7 +62,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   const row = view.sections[0].tables[0].rows[0];
   equal(row.id, 'SCN-001', 'a row is about its scenario');
   const cell = (name, group = null) => row.cells[at(columns, name, group)];
-  deepEqual(cell('Scenario', 'Accident scenario'), { entities: ['SCN-001'] }, 'and opens on the scenario itself');
+  deepEqual(cell('Accident scenario', 'Accident scenario'), { entities: ['SCN-001'] }, 'and opens on the scenario itself');
   deepEqual(cell('Single hazards', 'Hazardous situation'), { entities: ['HAZ-001'] }, 'then the hazards contributing to it');
   deepEqual(cell('System actors', 'Hazardous situation'), { entities: ['ACT-001'] }, 'the actors exposed in it');
   deepEqual(cell('System tasks', 'Hazardous situation'), { entities: ['TSK-002'] }, 'the tasks giving rise to it');
@@ -87,17 +87,17 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   });
   const view = buildRiskView(rated);
   const columns = view.sections[0].tables[0].columns.map(asColumn);
-  const initial = at(columns, 'S', 'Initial risk estimation');
+  const initial = at(columns, 'Severity', 'Initial risk estimation');
   deepEqual(
-    columns.slice(initial, initial + 5).map((column) => [column.text, column.title ?? null, column.group, column.narrow === true]),
+    columns.slice(initial, initial + 5).map((column) => [column.text, column.group, column.narrow === true]),
     [
-      ['S', 'Severity', 'Initial risk estimation', true],
-      ['F', 'Exposure', 'Initial risk estimation', true],
-      ['O', 'Occurrence', 'Initial risk estimation', true],
-      ['A', 'Avoidance', 'Initial risk estimation', true],
-      ['Rating', null, 'Initial risk estimation', true],
+      ['Severity', 'Initial risk estimation', true],
+      ['Exposure', 'Initial risk estimation', true],
+      ['Occurrence', 'Initial risk estimation', true],
+      ['Avoidance', 'Initial risk estimation', true],
+      ['Rating', 'Initial risk estimation', true],
     ],
-    "under the project's method, one narrow column per parameter headed by its letters, the name behind, then the rating, and no column for a rationale"
+    "under the project's method, one column per parameter headed by its name, then the rating, and no column for a rationale"
   );
   const first = view.sections[0].tables[0].rows[0].cells;
   deepEqual(first.slice(initial, initial + 4).map((held) => held.code), ['S2', 'F2', 'O3', 'A2'], 'the codes stand in their columns');
@@ -111,8 +111,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(second.slice(initial, initial + 4), [{ code: '', title: '', note: '' }, { code: '', title: '', note: '' }, { code: '', title: '', note: '' }, { code: '', title: '', note: '' }], 'an unrated scenario shows empty cells under the same columns');
   equal(second[initial + 4].outcome.outcome, null, 'and no outcome');
   deepEqual(ratingColumns('Initial risk estimation', 'No such method'), [{ text: 'Rating', group: 'Initial risk estimation', narrow: true }], 'an unknown method gives the rating column alone');
-  deepEqual(ratingColumns('Initial risk estimation', 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)').map((column) => column.text), ['S', 'P', 'Rating'], 'a method whose values are words heads its columns by the initial of the name');
-  deepEqual(ratingColumns('Initial risk estimation', 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)').map((column) => column.text), ['SS', 'PS', 'Rating'], "and one whose values are numbers by the initials of the name, as the report abbreviates them");
+  deepEqual(ratingColumns('Initial risk estimation', 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)').map((column) => column.text), ['Severity', 'Probability', 'Rating'], 'each method heads its columns by the names of its parameters');
   deepEqual(ratingCells(rated.nodes.get('SCN-001'), 'Initial risk estimation', 'No such method'), [{ outcome: null }], 'and an empty outcome');
   deepEqual(ratingColumns('Initial risk estimation', ''), [{ text: 'Rating', group: 'Initial risk estimation' }], 'with no method chosen the typed rating is one column, wide enough for words');
   const typed = unrated();
@@ -160,13 +159,14 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 
 {
   equal(exportText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts\nHAZ-001 H-1 Moving Parts', 'entities on lines of their own');
-  equal(exportText({ code: 'Serious', title: 'Severity: Serious', note: 'An injury that does not heal.' }, labelOf), 'Serious\nAn injury that does not heal.', 'a rating value with its rationale beneath');
-  equal(exportText({ outcome: { outcome: 'Low', tone: 'low', parameters: [] }, note: 'Acceptable.' }, labelOf), 'Low\nAcceptable.', 'a rating with the evaluation beneath');
+  equal(exportText({ code: 'Serious', title: 'Severity: Serious', note: 'An injury that does not heal.' }, labelOf), 'Serious: An injury that does not heal.', 'a rating value followed by its rationale');
+  equal(exportText({ outcome: { outcome: 'Low', tone: 'low', parameters: [] }, note: 'Acceptable.' }, labelOf), 'Low: Acceptable.', 'a rating followed by the evaluation');
+  equal(exportText({ code: 'Serious', title: '', note: '' }, labelOf), 'Serious', 'a value alone where no text is given');
   equal(exportText({ outcome: null, note: '' }, labelOf), '', 'an unrated one empty');
   equal(exportText({ lines: ['Crushing.', ''] }, labelOf), 'Crushing.', 'text as written');
   const sheets = viewSheets(buildRiskView(model), labelOf);
   deepEqual(sheets.map((sheet) => [sheet.name, sheet.rows.length]), [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]], 'a sheet per tab, named as the tab');
-  deepEqual([sheets[0].groups.slice(0, 4), sheets[0].headers.slice(0, 4)], [['Accident scenario', 'Accident scenario', 'Accident scenario', 'Hazardous situation'], ['Scenario', 'Hazardous event', 'Potential consequence', 'Single hazards']], 'with the groups and the column names');
+  deepEqual([sheets[0].groups.slice(0, 4), sheets[0].headers.slice(0, 4)], [['Accident scenario', 'Accident scenario', 'Accident scenario', 'Hazardous situation'], ['Accident scenario', 'Hazardous event', 'Potential consequence', 'Single hazards']], 'with the groups and the column names');
   equal(sheets[0].rows[0][0].text, 'SCN-001 S-1 Contact with Moving Parts', 'and each cell as the exports write it');
 }
 

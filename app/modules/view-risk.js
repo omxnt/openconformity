@@ -24,7 +24,7 @@
 import { ATTRIBUTES, isParameter } from './attributes.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { entityLabel, relatedIds } from './queries.js';
-import { ratingView, initials } from './fields.js';
+import { ratingView } from './fields.js';
 
 /** The rating group of a name under an estimation method, or undefined. */
 function ratingGroup(name, method) {
@@ -35,20 +35,12 @@ function ratingGroup(name, method) {
 
 const parametersOf = (group) => group.attributes.filter(isParameter);
 
-/** A parameter's letters for a column head: a number's the initials of its name, SS; else from its first value where that is a code, S from S1 and Se from Se 1; else the initial of its name. */
-const letters = (definition) => {
-  if (definition.kind === 'number') return initials(definition.name);
-  const first = definition.values?.[0] ?? '';
-  return /\d/.test(first) ? first.replace(/[\d\s]+/g, '') : definition.name[0];
-};
-
 /** Whether a rating group is typed rather than read: it closes on no computed attribute. */
 const isTyped = (group) => group !== undefined && !group.attributes.some((definition) => definition.kind === 'computed');
 
 /**
  * The columns a rating takes under a method: one per parameter, headed
- * by its letters with the name behind them, then the rating it comes
- * to. Under no method, the typed rating as one column; under an unknown
+ * by its name, then the rating it comes to. Under no method, the typed rating as one column; under an unknown
  * one, the rating alone.
  * @param {string} name  the rating group's name
  * @param {string} method
@@ -58,7 +50,7 @@ export function ratingColumns(name, method) {
   if (isTyped(group)) return [{ text: 'Rating', group: name }];
   const parameters = group ? parametersOf(group) : [];
   return [
-    ...parameters.map((definition) => ({ text: letters(definition), title: definition.name, group: name, narrow: true })),
+    ...parameters.map((definition) => ({ text: definition.name, group: name, narrow: true })),
     { text: 'Rating', group: name, narrow: true },
   ];
 }
@@ -125,7 +117,7 @@ export function buildRiskView(model) {
   const phasesOf = (scenario) => through(related(scenario.id, 'tsk-gives-rise-to-scn'), 'tsk-occurs-during-phs');
 
   const columns = [
-    { text: 'Scenario', group: 'Accident scenario' },
+    { text: listed('SCN').slice(0, -1), group: 'Accident scenario' },
     { text: 'Hazardous event', group: 'Accident scenario' },
     { text: 'Potential consequence', group: 'Accident scenario' },
     { text: listed('HAZ'), group: 'Hazardous situation' },

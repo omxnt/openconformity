@@ -4,10 +4,11 @@
  * with a row of group names merged over their columns where the table
  * has groups, a row of column names, and the rows beneath. Every cell is
  * a string written in place, so nothing in it is ever read as a formula.
- * Text wraps, cells stand at the top with thin borders, the heads are
- * bold on a grey fill, a rating's cell carries its tone, and the heads
- * stay in view while the rows scroll. The zip is stored without
- * compression. A pure function of its input, returning the file's bytes.
+ * The formatting is kept to what reading needs: text wraps with cells at
+ * the top, the head rows stand on Carbon's grey and stay in view while
+ * the rows scroll, and each column is wide enough for its text within
+ * bounds. The zip is stored without compression. A pure function of its
+ * input, returning the file's bytes.
  */
 
 /**
@@ -15,11 +16,8 @@
  * @property {string} name  the tab it came from
  * @property {string[]} groups  each column's group, empty where it has none
  * @property {string[]} headers  each column's name
- * @property {Array<Array<{ text: string, tone?: string }>>} rows
+ * @property {Array<Array<{ text: string }>>} rows
  */
-
-/** The fill of a rating's cell by its tone, Carbon's light tints. */
-const TONE_FILLS = { high: 'FFD7D9', medium: 'FCF4D6', low: 'DEFBE6', negligible: 'F4F4F4', info: 'EDF5FF' };
 
 const MAIN = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const RELATIONSHIPS = 'http://schemas.openxmlformats.org/package/2006/relationships';
@@ -160,29 +158,20 @@ export function zip(files) {
   return bytes;
 }
 
-/** The styles by index: 0 the default, 1 a group head, 2 a column head, 3 a cell, then a cell per tone. */
-const TONES = Object.keys(TONE_FILLS);
-const STYLE = { group: 1, header: 2, cell: 3, tone: (tone) => (TONES.includes(tone) ? 4 + TONES.indexOf(tone) : 3) };
+/** The styles by index: 0 the default, 1 a group head, 2 a column head, 3 a cell. */
+const STYLE = { group: 1, header: 2, cell: 3 };
 
-/** The stylesheet the styles above stand in. */
+/** The stylesheet the styles above stand in, the heads on Carbon's gray 20. */
 function stylesheet() {
-  const border = '<border><left style="thin"><color rgb="FFC6C6C6"/></left><right style="thin"><color rgb="FFC6C6C6"/></right><top style="thin"><color rgb="FFC6C6C6"/></top><bottom style="thin"><color rgb="FFC6C6C6"/></bottom><diagonal/></border>';
-  const fill = (rgb) => `<fill><patternFill patternType="solid"><fgColor rgb="FF${rgb}"/><bgColor indexed="64"/></patternFill></fill>`;
-  const xf = (font, fillId, horizontal) =>
-    `<xf numFmtId="0" fontId="${font}" fillId="${fillId}" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="${horizontal}" vertical="top" wrapText="1"/></xf>`;
-  const xfs = [
-    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>',
-    xf(1, 2, 'center'),
-    xf(1, 2, 'left'),
-    xf(0, 0, 'left'),
-    ...TONES.map((_, i) => xf(0, 3 + i, 'left')),
-  ];
+  const xf = (fillId, horizontal) =>
+    `<xf numFmtId="0" fontId="0" fillId="${fillId}" borderId="0" xfId="0" applyFill="1" applyAlignment="1"><alignment horizontal="${horizontal}" vertical="top" wrapText="1"/></xf>`;
+  const xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>', xf(2, 'center'), xf(2, 'left'), xf(0, 'left')];
   return (
     PROLOGUE +
     `<styleSheet xmlns="${MAIN}">` +
-    '<fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts>' +
-    `<fills count="${3 + TONES.length}"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fill('E0E0E0')}${TONES.map((tone) => fill(TONE_FILLS[tone])).join('')}</fills>` +
-    `<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>${border}</borders>` +
+    '<fonts count="1"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts>' +
+    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE0E0E0"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
     `<cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs>` +
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
@@ -224,7 +213,7 @@ export function sheetXml(sheet) {
   }
   rows.push(`<row r="${heads}">${sheet.headers.map((header, i) => cell(heads, i, grouped && sheet.groups[i] === '' ? '' : header, STYLE.header)).join('')}</row>`);
   sheet.rows.forEach((row, r) => {
-    rows.push(`<row r="${heads + 1 + r}">${row.map((held, i) => cell(heads + 1 + r, i, held.text, held.tone ? STYLE.tone(held.tone) : STYLE.cell)).join('')}</row>`);
+    rows.push(`<row r="${heads + 1 + r}">${row.map((held, i) => cell(heads + 1 + r, i, held.text, STYLE.cell)).join('')}</row>`);
   });
   const widths = sheet.headers.map((header, i) => {
     const lines = [header, ...sheet.rows.flatMap((row) => (row[i]?.text ?? '').split('\n'))];

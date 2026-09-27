@@ -903,6 +903,16 @@ A view is saved as an Excel workbook, one sheet per tab named as the tab, with t
 
 ---
 
+### D-105 A workbook formatted for reading only
+
+`2026-09-27` `product`
+
+The workbook a view is saved as keeps its group heads merged, its text wrapped with cells at the top, and its head rows on Carbon's grey and held in view. It carries no bold, no borders and no tones. A rating's value and the text given for it share a cell as "Serious: the rationale", and in the view the text runs on after the value's tag.
+
+> *The user formats the workbook for the purpose at hand, and every rule the software sets is one to undo first. What stays is what every reader needs and no one would take out. A value and its reason read as one statement, on screen and in the cell. The colon labels the statement rather than joining two clauses. Amends D-104.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

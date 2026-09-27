@@ -1776,8 +1776,8 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
 .data td.mark { text-align: center; }
 .data td.wide { min-width: 16ch; }
-.data td p { margin: 0; min-width: 20ch; max-width: 30ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
-.data td .cell-note { margin-top: 4px; }
+.data td p { margin: 0; min-width: 24ch; max-width: 36ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
+.data td .cell-note .tag { margin-right: 8px; vertical-align: 1px; }
 .data th.narrow, .data td.narrow { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 .data td .tag.outcome { font-weight: 600; }
 .data td .tag .risk-dot { margin-right: 6px; }

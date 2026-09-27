@@ -2,7 +2,7 @@
  * Exercises the Excel workbook: the text as XML takes it, the sheet
  * names Excel accepts, the column letters, UTF-8, the zip's checksum and
  * its layout read back entry by entry, and the parts of a workbook with
- * their merges, styles and frozen heads. Run from this directory.
+ * their merges, their few styles and frozen heads. Run from this directory.
  */
 
 import { xmlText, sheetName, columnLetters, utf8, crc32, zip, sheetXml, workbook } from '../app/modules/xlsx.js';
@@ -72,13 +72,13 @@ function unzip(bytes) {
     name: 'All',
     groups: ['Scenario', 'Scenario', '', 'Risk'],
     headers: ['Title', 'Event', 'Notes', 'Rating'],
-    rows: [[{ text: 'SCN-001 S-1' }, { text: 'Line one\nLine two' }, { text: '' }, { text: 'High', tone: 'high' }]],
+    rows: [[{ text: 'SCN-001 S-1' }, { text: 'Line one\nLine two' }, { text: '' }, { text: 'High: Too high.' }]],
   });
   ok(xml.includes('<mergeCell ref="A1:B1"/>') && xml.includes('<mergeCell ref="C1:C2"/>') && !xml.includes('ref="D1:D1"'), 'a group is merged over its columns, a column without one down both head rows, and a group of one not merged');
   ok(xml.includes('<c r="A1" s="1" t="inlineStr"><is><t xml:space="preserve">Scenario</t></is></c><c r="B1" s="1"/>'), 'the group name stands where its group starts, the rest of the group a styled blank');
   ok(xml.includes('<c r="C1" s="2" t="inlineStr"><is><t xml:space="preserve">Notes</t></is></c>') && xml.includes('<c r="C2" s="2"/>'), 'a column without a group names itself in the first row');
   ok(xml.includes('<c r="B3" s="3" t="inlineStr"><is><t xml:space="preserve">Line one\nLine two</t></is></c>'), 'a cell keeps its line breaks, written as text');
-  ok(xml.includes('<c r="D3" s="4" t="inlineStr">'), 'a rating carries its tone');
+  ok(xml.includes('<c r="D3" s="3" t="inlineStr"><is><t xml:space="preserve">High: Too high.</t></is></c>'), 'a rating is a cell like any other');
   ok(xml.includes('<pane ySplit="2" topLeftCell="A3" activePane="bottomLeft" state="frozen"/>'), 'both head rows stay in view');
   ok(!/<f>|t="str"|t="n"/.test(xml), 'no cell is a formula or a number');
   const plain = sheetXml({ name: 'Plain', groups: ['', ''], headers: ['A', 'B'], rows: [] });
@@ -99,6 +99,8 @@ function unzip(bytes) {
   ok(part('xl/workbook.xml').includes('<sheet name="All scenarios (4)" sheetId="1" r:id="rId1"/><sheet name="L-1 Installation (0)" sheetId="2" r:id="rId2"/>'), 'the sheets are named as the tabs, in order');
   ok(part('[Content_Types].xml').includes('PartName="/xl/worksheets/sheet2.xml"') && part('xl/_rels/workbook.xml.rels').includes('Target="styles.xml"'), 'each part is declared and related');
   ok(parts.every((entry) => text(entry.data).startsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')), 'and every part is XML in UTF-8');
+  const styles = part('xl/styles.xml');
+  ok(styles.includes('<cellXfs count="4">') && styles.includes('rgb="FFE0E0E0"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is the heads on grey, wrapping and alignment, with no bold and no borders');
 }
 
 summary('test-xlsx');
