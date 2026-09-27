@@ -6,11 +6,11 @@
  * grouping the credits and references by what each thing is to the
  * software. References, the legislation the model is built around and
  * the methods its ratings follow, each by designation. Technology, what
- * the software is made of and served from. Design assets,
+ * the software is made of. Design assets,
  * the system followed and the assets self-hosted, each with its
  * licence. External services, the diagram editor with where it loads
- * from and the session's standing consent, and its maker. Development
- * tools, what the software was made with. Every reference is named by designation only, and
+ * from and the session's standing consent, and its maker. Hosting and
+ * tools, where the software is served from and what it was made with. Every reference is named by designation only, and
  * every licence named is one the deployment itself carries. Chrome, not
  * flow: the flow only asks for it.
  */
@@ -80,7 +80,6 @@ export async function showAbout(dialogs, store = null) {
       ]),
       fold('References', [
         ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
-        ['2014/30/EU', 'Electromagnetic Compatibility Directive', [link('https://eur-lex.europa.eu/eli/dir/2014/30/oj', 'eur-lex.europa.eu')]],
         ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', [link('https://www.iso.org/standard/57180.html', 'iso.org')]],
         ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
         ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],
@@ -90,7 +89,6 @@ export async function showAbout(dialogs, store = null) {
         ['Web platform', 'HTML, CSS and JavaScript as ES modules, no framework and no build', [link('https://developer.mozilla.org/docs/Web', 'developer.mozilla.org')]],
         ['JSON', 'The project file, checked against its schema', [link('https://github.com/omxnt/openconformity/blob/main/specs/project.schema.json', 'project.schema.json')]],
         ['IndexedDB', 'The browser storage the open project is kept in between sessions', [link('https://developer.mozilla.org/docs/Web/API/IndexedDB_API', 'developer.mozilla.org')]],
-        ['Cloudflare Pages', 'Where the software is served from, static files only', [link('https://pages.cloudflare.com', 'pages.cloudflare.com')]],
       ]),
       fold('Design assets', [
         ['IBM Carbon', 'Design system, followed without its packages', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
@@ -101,8 +99,11 @@ export async function showAbout(dialogs, store = null) {
         ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]],
         ['JGraph Ltd', 'Maker and trademark holder, not affiliated', [link('https://www.drawio.com/trust/terms-of-use/', 'Terms of use'), link('https://www.drawio.com/trust/', 'Privacy')]],
       ]),
-      fold('Development tools', [
+      fold('Hosting and tools', [
+        ['Cloudflare Pages', 'Where the software is served from, static files only', [link('https://pages.cloudflare.com', 'pages.cloudflare.com')]],
         ['Claude Code', 'Coding assistant, used in development only', [link('https://claude.com/claude-code', 'claude.com')]],
+        ['Visual Studio Code', 'Code editor, used in development only', [link('https://code.visualstudio.com', 'code.visualstudio.com')]],
+        ['GitHub', 'Source repository, issues and vulnerability reports', [link('https://github.com/omxnt/openconformity', 'github.com')]],
         ['Mermaid', 'Metamodel notation, the diagram exported with Mermaid Live', [link('https://mermaid.js.org', 'mermaid.js.org')]],
         ['Figma', 'Identity, the wordmark and the marks drawn in it', [link('https://www.figma.com', 'figma.com')]],
       ]),
