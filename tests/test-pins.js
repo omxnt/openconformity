@@ -13,7 +13,7 @@ import { hiddenContent, unknownContent } from '../app/modules/project.js';
 import { loadProject } from '../app/modules/files.js';
 import { LIBRARY } from '../app/library/data.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
-import { LANDING_OFFER } from '../app/modules/editor.js';
+import { LANDING_OFFER } from '../app/modules/landing.js';
 import { ok, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 

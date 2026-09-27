@@ -10,8 +10,8 @@
  */
 
 import { attributesFor, typeOf, groupsOf, SHARED_HELP, isOutcome, isRationale, leaderOf, groupShown } from './attributes.js';
-import { ratingView, firstTabName, setValues, joinSet, tableRows, joinTable, linkable, draftChanged } from './fields.js';
-import { rateDialog, statusIcon } from './rating.js';
+import { firstTabName, setValues, joinSet, tableRows, linkable, draftChanged } from './fields.js';
+import { statusIcon } from './rating.js';
 import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
@@ -19,9 +19,11 @@ import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys, tooltipTag } from './dom.js';
 import { entityLabel, relatedIds } from './queries.js';
 import { staleText, recordOf, recordedStates, recordWritten, reviewText } from './records.js';
-import { checkDrawing, dataUrl, sizeText } from './drawing.js';
-import { editDrawing } from './drawing-editor.js';
 import { headIcon, emptyState, notice } from './pane.js';
+import { ratingCell } from './rating-cell.js';
+import { drawingCell } from './drawing-cell.js';
+import { tableOf, tableCell, tableControl } from './table-control.js';
+import { landing } from './landing.js';
 
 /**
  * The project's field set: the name, mapped to the model's own name
@@ -31,15 +33,6 @@ const PROJECT_FIELDS = [{ key: 'name', name: 'Name', kind: 'text', help: "The pr
 /** How many of the project's own attributes stand before its name on the first tab: the designation and the organisation. */
 const NAME_AFTER = 2;
 
-/**
- * The ways into a project, offered from the editor's no-project state,
- * the one place the buttons live.
- */
-export const LANDING_OFFER = [
-  { id: 'new-project', icon: 'i-new-project', label: 'New project' },
-  { id: 'open', icon: 'i-open-project', label: 'Open project…' },
-  { id: 'load-example', icon: 'i-project', label: 'Load example' },
-];
 
 /**
  * @param {Object} context
@@ -97,6 +90,8 @@ export function createEditor({
   let groupOfKey = new Map();
   /** @type {Map<string, AttributeDefinition>} the definition of each key of the mounted type */
   let definitionOfKey = new Map();
+  /** What the diagram on the surface is of, for its names. */
+  const subject = () => (current ? entityLabel(current) || current.id : 'the entity');
   for (const kind of ['input', 'change']) {
     body.addEventListener(kind, (event) => {
       recordFrom(event.target);
@@ -286,7 +281,7 @@ export function createEditor({
    * @param {string|undefined} value
    */
   function valueNode(definition, value, values = {}) {
-    if (definition.kind === 'drawing') return drawingCell(value, false, definition);
+    if (definition.kind === 'drawing') return drawingCell({ value, editing: false, definition, dialogs, subject });
     if (definition.kind === 'entities') return entitiesNode(definition, value ?? '', values, definition.key);
     if (definition.kind === 'table') {
       const rows = tableRows(definition, value ?? '');
@@ -309,8 +304,7 @@ export function createEditor({
     return el('div', { className: definition.kind === 'multiline' ? 'cell-value prose' : 'cell-value', text: value });
   }
 
-  /** How wide a column is: as its values and no wider for a date, a choice or a number, brief for a text, and a multiline taking the rest. */
-  const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
+
 
   /**
    * A record of entities as tags, each its identifier with its label
@@ -391,22 +385,6 @@ export function createEditor({
   /** Every group name under a group, itself first. */
   const namesIn = (group) => [group.name, ...(group.groups ?? []).flatMap(namesIn)];
 
-  /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
-  function tableOf(definition, rows, trailing = null) {
-    for (const cells of rows) cells.forEach((cell, c) => cell.classList.add(...[columnWidth(definition.columns[c])].filter(Boolean)));
-    return el('table', { className: 'data rows' }, [
-      el('thead', {}, [el('tr', {}, [el('th', { className: 'no', text: 'No.' }), ...definition.columns.map((column) => el('th', { className: columnWidth(column), text: column.name })), ...(trailing ? [el('th', { text: '' })] : [])])]),
-      el('tbody', {}, rows.map((cells, i) => el('tr', {}, [el('td', { className: 'no', text: String(i + 1) }), ...cells, ...(trailing ? [trailing(i)] : [])]))),
-    ]);
-  }
-
-  /** A cell of a table as read: a choice as a tag, a multiline as prose keeping its breaks, anything else its text, an empty one the dash. */
-  function tableCell(column, cell) {
-    if (cell === '') return el('td', { className: 'empty', text: '–' });
-    if (column.kind === 'choice') return el('td', {}, [el('span', { className: 'tag', text: cell })]);
-    return el('td', { className: column.kind === 'multiline' ? 'prose' : '', text: cell });
-  }
-
   /** The cells of a run of definitions. */
   function cellsOf(definitions, values, editing) {
     return definitions.map((definition) => fieldCell(definition, values, editing));
@@ -415,82 +393,7 @@ export function createEditor({
   /** Whether a group is a rating: it closes on a computed attribute, and is rated in a dialog. */
   const isRating = (group) => group.attributes.some(isOutcome);
 
-  /**
-   * A rating's tags: what it comes to, carrying its status, then the
-   * code of each parameter set. Outside an edit every tag is a button
-   * whose tooltip holds what it stands for, the attribute and the
-   * outcome or the parameter and its value, as the help glyph's holds
-   * the help; a parameter with a rationale is underlined and its tooltip
-   * carries the reasoning beneath. Within an edit, where the field is a
-   * button already, a tag is a span with the browser's own tooltip.
-   * @param {Object} view
-   * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
-   */
-  function ratingTags(view, tipKey = null) {
-    const tag = (className, content, lines, key) => tooltipTag(className, content, lines, key, tipKey);
-    const tags = [];
-    if (view.outcome !== null) {
-      tags.push(tag('tag outcome', [...(view.tone === 'none' ? [] : [statusIcon(view.tone)]), el('span', { text: view.outcome })], { caption: view.name, main: view.outcome }, 'outcome'));
-    }
-    view.parameters.forEach((parameter, i) => {
-      if (parameter.value === '') return;
-      tags.push(tag(parameter.rationale ? 'tag reasoned' : 'tag', [el('span', { text: parameter.code })], { caption: parameter.name, main: parameter.value, note: parameter.rationale }, i));
-    });
-    return tags;
-  }
 
-  /**
-   * A rating as a cell like any other: its name over its tags. In an
-   * edit the cell is a field that opens the rating's dialog; the
-   * parameters ride in hidden controls, so the draft reads them as it
-   * reads any field, and the cell follows the draft as it changes.
-   */
-  function ratingCell(group, values, editing) {
-    const closing = group.attributes.find(isOutcome);
-    const carried = group.attributes.filter((definition) => !isOutcome(definition));
-    const cellElement = el('div', { className: 'cell' });
-    if (!editing) {
-      const tags = ratingTags(ratingView(group.attributes, values), closing.key);
-      cellElement.appendChild(groupNameNode(group.name, closing.key));
-      cellElement.appendChild(tags.length === 0 ? el('div', { className: 'cell-value empty', text: '–' }) : el('div', { className: 'cell-value tags' }, tags));
-      return cellElement;
-    }
-    const hidden = carried.map((definition) => {
-      const input = el('input', { attributes: { type: 'hidden', 'data-key': definition.key } });
-      input.value = values[definition.key] ?? '';
-      return input;
-    });
-    const held = el('span', { className: 'tags' });
-    const field = el(
-      'button',
-      { className: 'field-input rating', attributes: { type: 'button', id: `field-${closing.key}`, 'aria-haspopup': 'dialog' } },
-      [held, icon('i-edit')]
-    );
-    const show = (draft) => {
-      const tags = ratingTags(ratingView(group.attributes, draft));
-      held.textContent = tags.length === 0 ? '–' : '';
-      held.classList.toggle('empty', tags.length === 0);
-      for (const tag of tags) held.appendChild(tag);
-    };
-    show(values);
-    field.addEventListener('click', async () => {
-      if (!dialogs) return;
-      const chosen = await rateDialog(dialogs, {
-        title: `${group.name} by ${closing.method}`,
-        method: closing.method,
-        definitions: group.attributes,
-        values: fieldValues(),
-      });
-      if (chosen === null) return;
-      for (const input of hidden) input.value = chosen[input.dataset.key] ?? '';
-      (hidden[0] ?? body).dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    cellElement.appendChild(groupNameNode(group.name, closing.key, `field-${closing.key}`));
-    cellElement.appendChild(field);
-    for (const input of hidden) cellElement.appendChild(input);
-    refreshers.push(() => show(fieldValues()));
-    return cellElement;
-  }
 
   /**
    * A slot's holder: the cell shown while no variant of the slot holds,
@@ -527,7 +430,7 @@ export function createEditor({
   function groupInto(grid, code, group, values, editing, named) {
     const target = group.when ? el('div', { className: 'cell-group' }) : grid;
     if (isRating(group)) {
-      target.appendChild(ratingCell(group, values, editing));
+      target.appendChild(ratingCell({ group, values, editing, dialogs, nameNode: groupNameNode, fieldValues, refreshers, body }));
     } else {
       if (named && group.attributes.length > 1) target.appendChild(el('div', { className: 'cell-legend', text: group.name }));
       const subs = group.groups ?? [];
@@ -768,7 +671,7 @@ export function createEditor({
       return input;
     }
     if (definition.kind === 'table') return tableControl(definition, value);
-    if (definition.kind === 'drawing') return drawingCell(value, true, definition);
+    if (definition.kind === 'drawing') return drawingCell({ value, editing: true, definition, dialogs, store, surface: drawingSurface, subject });
     if (definition.kind === 'entities') {
       const hidden = el('input', { attributes: { type: 'hidden', 'data-key': definition.key, id: `field-${definition.key}` } });
       hidden.value = value;
@@ -794,145 +697,7 @@ export function createEditor({
     return input;
   }
 
-  /**
-   * A drawing in either mode: the picture on a white card, opening at
-   * full size, with its size beneath, and a line saying there is none
-   * where there is none, no field around either. In an edit the drawing
-   * is kept in a hidden control carrying the key, Carbon's ghost
-   * buttons opening the external editor to create or edit it and, in
-   * the danger colour, deleting it. A drawing that fails the check shows why instead of a
-   * picture, and stays as it is.
-   * @param {string|undefined} value
-   * @param {boolean} editing
-   * @param {Object} [definition]  in an edit, the attribute the control carries
-   */
-  function drawingCell(value, editing, definition = null) {
-    let text = value ?? '';
-    const subject = () => (current ? entityLabel(current) || current.id : 'the entity');
-    const hidden = editing ? el('input', { attributes: { type: 'hidden', 'data-key': definition.key } }) : null;
-    const body = el('div', { className: 'drawing-body' });
-    const ghost = (label, glyph, onPick, danger = false) => {
-      const node = el('button', { className: `ghost-button${danger ? ' ghost-danger' : ''}`, attributes: { type: 'button' } }, [icon(glyph), el('span', { text: label })]);
-      node.addEventListener('click', onPick);
-      return node;
-    };
-    const enlarge = () =>
-      dialogs.open({
-        title: `Diagram of ${subject()}`,
-        body: el('div', { className: 'drawing-large' }, [el('img', { attributes: { src: dataUrl(text), alt: `Diagram of ${subject()}` } })]),
-        actions: [],
-      });
-    const hold = (held) => {
-      text = held;
-      if (hidden) {
-        hidden.value = text;
-        hidden.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-      paint();
-    };
-    const paint = () => {
-      body.textContent = '';
-      const actions = [];
-      if (text !== '') {
-        const verdict = checkDrawing(text);
-        if (verdict.ok) {
-          const open = el('button', { className: 'drawing-open', attributes: { type: 'button', 'aria-label': `Open the diagram of ${subject()} at full size` } }, [
-            el('img', { className: 'drawing-image', attributes: { src: dataUrl(text), alt: `Diagram of ${subject()}` } }),
-          ]);
-          open.addEventListener('click', enlarge);
-          body.appendChild(el('div', { className: 'drawing-card' }, [open]));
-        } else {
-          body.appendChild(el('div', { className: 'drawing-refused', text: `The diagram cannot be shown because it ${verdict.reason}.` }));
-        }
-        actions.push(el('span', { className: 'drawing-size', text: sizeText(text) }));
-      } else if (!editing) {
-        body.appendChild(el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` }));
-      }
-      if (editing && dialogs && drawingSurface) {
-        actions.push(
-          ghost(text === '' ? 'Create in draw.io' : 'Edit in draw.io', text === '' ? 'i-new-entity' : 'i-edit', async () => {
-            const held = await editDrawing({ dialogs, store, surface: drawingSurface, drawing: text, subject: subject() });
-            if (held !== null) hold(held);
-          })
-        );
-        if (text !== '') actions.push(ghost('Delete', 'i-delete', () => hold(''), true));
-      }
-      if (actions.length > 0) body.appendChild(el('div', { className: 'drawing-meta' }, actions));
-    };
-    paint();
-    return el('div', { className: 'drawing' }, [body, ...(hidden ? [hidden] : [])]);
-  }
 
-  /**
-   * A table attribute in an edit: its rows as fields under the column
-   * names, a button at each row's end removing it and one beneath adding
-   * a row, focused on its first cell. The rows are kept as the table is
-   * stored in one hidden control carrying the key, updated as any cell
-   * changes.
-   */
-  function tableControl(definition, value) {
-    const rows = tableRows(definition, value);
-    const hidden = el('input', { attributes: { type: 'hidden', 'data-key': definition.key } });
-    const wrap = el('div', { className: 'cell-table' });
-    const keep = () => {
-      hidden.value = joinTable(definition, rows);
-    };
-    const cellField = (column, r, c) => {
-      const label = `${column.name}, row ${r + 1}`;
-      let field;
-      if (column.kind === 'choice') {
-        field = el('select', { className: 'field-input', attributes: { 'aria-label': label } });
-        field.appendChild(el('option', { text: '–', attributes: { value: '' } }));
-        for (const choice of column.values ?? []) field.appendChild(el('option', { text: choice, attributes: { value: choice } }));
-        field.value = (column.values ?? []).includes(rows[r][c]) ? rows[r][c] : '';
-      } else if (column.kind === 'multiline') {
-        field = el('textarea', { className: 'field-input', attributes: { rows: '1', 'aria-label': label } });
-        field.value = rows[r][c];
-        const grow = () => {
-          field.style.height = 'auto';
-          field.style.height = `${field.scrollHeight}px`;
-        };
-        field.addEventListener('input', grow);
-        requestAnimationFrame(grow);
-      } else {
-        field = el('input', { className: 'field-input', attributes: { type: column.kind === 'date' ? 'date' : column.kind === 'number' ? 'number' : 'text', 'aria-label': label } });
-        field.value = rows[r][c];
-      }
-      for (const kind of ['input', 'change']) {
-        field.addEventListener(kind, () => {
-          rows[r][c] = field.value;
-          keep();
-        });
-      }
-      return el('td', { className: 'field' }, [field]);
-    };
-    const paint = (focusRow = -1) => {
-      keep();
-      wrap.textContent = '';
-      const table = tableOf(
-        definition,
-        rows.map((row, r) => row.map((cell, c) => cellField(definition.columns[c], r, c))),
-        (r) => {
-          const remove = el('button', { className: 'icon-button', attributes: { type: 'button', 'aria-label': `Remove row ${r + 1}` } }, [icon('i-delete')]);
-          remove.addEventListener('click', () => {
-            rows.splice(r, 1);
-            paint();
-            hidden.dispatchEvent(new Event('input', { bubbles: true }));
-          });
-          return el('td', { className: 'remove' }, [remove]);
-        }
-      );
-      const add = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [icon('i-new-entity'), el('span', { text: 'Add row' })]);
-      add.addEventListener('click', () => {
-        rows.push(definition.columns.map(() => ''));
-        paint(rows.length - 1);
-      });
-      wrap.append(...(rows.length > 0 ? [table] : []), add, hidden);
-      if (focusRow >= 0) wrap.querySelector(`tbody tr:nth-child(${focusRow + 1}) .field-input`)?.focus();
-    };
-    paint();
-    return wrap;
-  }
 
   /** The project, on the standard surface: its tabs, view fields and Edit. */
   function renderProjectView() {
@@ -994,26 +759,7 @@ export function createEditor({
     records = [];
     if (!store.hasProject()) {
       head.hidden = true;
-      const landing = el('div', { className: 'empty-state landing' }, [
-        el('p', { className: 'empty-state-title', text: 'Welcome to openconformity' }),
-        el('p', { className: 'empty-state-body', text: 'Start a new project, open one you saved earlier, or load the example to see how a model is built.' }),
-        el('p', { className: 'empty-state-body', text: 'The software is in beta. It runs entirely in your browser, and your work is kept there between sessions. A beta can still lose it, so save your project to a file often, and keep the files you save.' }),
-        el('p', { className: 'empty-state-body' }, [
-          el('span', { text: 'Bug reports and suggestions are welcome at ' }),
-          el('a', { text: 'info@openconformity.org', attributes: { href: 'mailto:info@openconformity.org' } }),
-          el('span', { text: '.' }),
-        ]),
-      ]);
-      for (const offer of LANDING_OFFER) {
-        const button = el(
-          'button',
-          { className: 'ghost-button', attributes: { type: 'button', 'data-action': `landing-${offer.id}` } },
-          [icon(offer.icon), el('span', { text: offer.label })]
-        );
-        button.addEventListener('click', () => onAction(offer.id));
-        landing.appendChild(button);
-      }
-      body.appendChild(landing);
+      body.appendChild(landing(onAction));
       return;
     }
     if (!node) {
