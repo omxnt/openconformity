@@ -232,7 +232,7 @@ const sheet = readFile('../app/style.css');
 // --- The minimum viewport (F-APP-001, N-CMP-001) ---------------------------
 
 {
-  ok(sheet.includes('@media (max-width: 999.98px), (max-height: 355.98px)'), 'the notice covers both floors, 1000 wide and 356 tall');
+  ok(sheet.includes('@media screen and (max-width: 999.98px), screen and (max-height: 355.98px)'), 'the notice covers both floors, 1000 wide and 356 tall, on a screen and never on paper');
   ok(page.includes('at least 1000 pixels wide and 356 pixels tall'), 'and states both numbers');
 }
 

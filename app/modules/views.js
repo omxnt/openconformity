@@ -4,13 +4,13 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, and prints it. The cell kinds no view
- * produces yet, a choice, choices, a mark and lines, and the column
- * text no export reads yet, are scaffolding for the views and the
- * exports the proposal lists, kept and tested until they land.
+ * cell a way to the editor, prints it, and saves the open section as
+ * CSV. The cell kinds no view produces yet, a choice, choices and a
+ * mark, are scaffolding for the views the proposal lists, kept and
+ * tested until they land.
  */
 
-import { el, icon, tooltipOn } from './dom.js';
+import { el, icon, tooltipOn, download } from './dom.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS } from './icons.js';
 import { entityLabel } from './queries.js';
@@ -20,12 +20,58 @@ import { VIEWS } from './view-registry.js';
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);
 
 /**
- * A column's name in the text exports: its group, its full name and its
- * sub-line joined by a middle dot.
+ * A column's name in the exports: its full name, then its sub-line.
  */
 export function columnText(column) {
-  const { text, sub, group, title } = asColumn(column);
-  return [group, title ?? text, sub].filter(Boolean).join(' · ');
+  const { text, sub, title } = asColumn(column);
+  return [title ?? text, sub].filter(Boolean).join(' ');
+}
+
+/**
+ * A cell as the exports write it: as the view shows it, each entity,
+ * line and note on a line of its own.
+ * @param {*} held
+ * @param {(id: string) => string} labelOf
+ */
+export function exportText(held, labelOf) {
+  if (held === null || held === undefined) return '';
+  if (typeof held !== 'object') return String(held);
+  const below = held.note ? [held.note] : [];
+  if ('entities' in held) return held.entities.map((id) => (labelOf(id) ? `${id} ${labelOf(id)}` : id)).join('\n');
+  if ('code' in held) return [held.code, ...below].filter(Boolean).join('\n');
+  if ('outcome' in held) return [held.outcome?.outcome ?? '', ...below].filter(Boolean).join('\n');
+  if ('lines' in held) return held.lines.filter(Boolean).join('\n');
+  return cellText(held, labelOf);
+}
+
+/**
+ * The separator a spreadsheet in this language expects between fields:
+ * a semicolon where decimals are written with a comma, a comma otherwise.
+ * @param {string} language
+ */
+export function listSeparator(language) {
+  return new Intl.NumberFormat(language).format(1.5).includes(',') ? ';' : ',';
+}
+
+/**
+ * A table as CSV: a row of group names, each in the column its group
+ * starts in, where the table has groups, then a row of column names,
+ * then the rows. A field holding the separator, a quotation mark or a
+ * line break is quoted, its quotation marks doubled.
+ * @param {{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }} table
+ * @param {(id: string) => string} labelOf
+ * @param {string} separator
+ */
+export function tableCsv(table, labelOf, separator) {
+  const columns = table.columns.map(asColumn);
+  const field = (text) => (/["\r\n]/.test(text) || text.includes(separator) ? `"${text.replaceAll('"', '""')}"` : text);
+  const lines = [];
+  if (columns.some((column) => column.group)) {
+    lines.push(columns.map((column, i) => (column.group && (i === 0 || columns[i - 1].group !== column.group) ? column.group : '')));
+  }
+  lines.push(columns.map(columnText));
+  for (const row of table.rows) lines.push(row.cells.map((held) => exportText(held, labelOf)));
+  return lines.map((line) => line.map(field).join(separator)).join('\r\n') + '\r\n';
 }
 
 /**
@@ -240,11 +286,26 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       tabs.appendChild(tab);
     }
     head.appendChild(tabs);
+    const csv = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Save as CSV' })]);
+    csv.addEventListener('click', saveCsv);
     const print = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Print' })]);
     print.addEventListener('click', () => window.print());
     const close = tooltipOn(el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]), 'Close the view', { align: 'end' });
     close.addEventListener('click', onClose);
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [print, close]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [csv, print, close]));
+  }
+
+  /** The open section saved as CSV, its tables one after another, a blank line between them, in the separator the browser's language expects. */
+  function saveCsv() {
+    const open = store.view();
+    if (open === null) return;
+    const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
+    const built = view.build(store.model());
+    const section = built.sections[Math.min(open.section, built.sections.length - 1)];
+    const separator = listSeparator(navigator.language);
+    const text = section.tables.map((held) => tableCsv(held, labelOf, separator)).join('\r\n');
+    const name = `${built.title} - ${section.name.replace(/\s*\(\d+\)$/, '')}`.replace(/[\\/:*?"<>|]/g, '-');
+    download(`${name}.csv`, `\uFEFF${text}`, 'text/csv;charset=utf-8');
   }
 
   function render() {

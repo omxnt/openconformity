@@ -1703,7 +1703,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 /* The supported viewport is 1000 by 356: the ruled 1000px width, and the
    height the column needs — 48px shell bar, 160px editor floor, 4px
    splitter, 120px relationships floor, 24px status bar. */
-@media (max-width: 999.98px), (max-height: 355.98px) {
+@media screen and (max-width: 999.98px), screen and (max-height: 355.98px) {
   .small-viewport {
     display: flex;
     align-items: center;
@@ -1818,5 +1818,9 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
   .data { font-size: 10px; }
   .data th, .data td { padding: 4px 8px; }
   .data .mono { font-size: 9px; }
+  .data td p { font-size: 10px; min-width: 12ch; }
+  .data .tag { height: 14px; padding: 0 6px; font-size: 9px; }
+  .data .tag, .data .risk-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pane-view .data .entity + .entity { margin-top: 8px; }
   body { background: #fff; color: #000; }
 }
