@@ -390,7 +390,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | [1] | Microsoft, The STRIDE Threat Model | https://learn.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20) |
 | [2] | openconformity, Requirements | ../specs/requirements.md |
 | [3] | openconformity, Verification | verification.md |
-| [4] | openconformity, Security audit of September 2026 | ../reviews/security-2026-09.md |
+| [4] | openconformity, Security audit of September 2026 | ../reviews/2026-09-27-security.md |
 | [5] | openconformity, SECURITY.md | ../SECURITY.md |
 | [6] | W3C, Content Security Policy Level 3 | https://www.w3.org/TR/CSP3/ |
 | [7] | WHATWG, HTML Living Standard, the iframe sandbox attribute | https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox |

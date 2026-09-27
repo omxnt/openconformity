@@ -214,4 +214,4 @@ A change of the kind below updates the sections named in the same commit.
 | [1] | openconformity, Requirements | ../specs/requirements.md |
 | [2] | openconformity, Security | security.md |
 | [3] | openconformity, Verification | verification.md |
-| [4] | openconformity, Architecture review of September 2026 | ../reviews/architecture-2026-09.md |
+| [4] | openconformity, Architecture review of September 2026 | ../reviews/2026-09-27-architecture.md |
