@@ -18,7 +18,13 @@
       "Edit(/README.md)",
       "Write(/README.md)",
       "Edit(/LICENSE)",
-      "Write(/LICENSE)"
+      "Write(/LICENSE)",
+      "Edit(/SECURITY.md)",
+      "Write(/SECURITY.md)",
+      "Edit(/CONTRIBUTING.md)",
+      "Write(/CONTRIBUTING.md)",
+      "Edit(/CHANGELOG.md)",
+      "Write(/CHANGELOG.md)"
     ],
     "defaultMode": "default"
   }
