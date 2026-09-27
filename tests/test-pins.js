@@ -29,7 +29,7 @@ function modulesFrom(entry) {
     const source = readFile(`../app/${path}`);
     seen.set(path, source);
     const folder = path.slice(0, path.lastIndexOf('/') + 1);
-    for (const [, target] of source.matchAll(/from '(\.[^']+)'/g)) {
+    for (const [, target] of source.matchAll(/\b(?:from|import) '(\.[^']+)'/g)) {
       const parts = (folder + target).split('/');
       const resolved = [];
       for (const part of parts) {
@@ -117,6 +117,21 @@ const sheet = readFile('../app/style.css');
   const headers = readFile('../app/_headers').split('\n');
   ok(headers[0] === '/*' && headers.includes("  Content-Security-Policy: frame-ancestors 'none'"), 'every path carries the header that forbids framing on another origin');
   ok(headers.includes('  Strict-Transport-Security: max-age=15552000; includeSubDomains') && headers.includes('  X-Content-Type-Options: nosniff'), 'with transport security and no type sniffing');
+}
+
+// --- The software is static files of the web platform (C-TEC-001, C-TEC-002, C-TEC-004, C-TEC-007) ---
+
+{
+  const files = [...(globalThis.arguments ?? [])];
+  ok(files.includes('index.html') && files.includes('modules/app.js'), `run.sh hands over the ${files.length} files under app/`);
+  const kinds = new Set(['html', 'css', 'js', 'svg', 'png', 'woff2', 'txt', 'md']);
+  const foreign = files.filter((path) => path !== '_headers' && !kinds.has(path.slice(path.lastIndexOf('.') + 1)));
+  ok(foreign.length === 0, `every file is markup, style, script, an image, a font or a text${foreign.length > 0 ? ` (not: ${foreign.join(', ')})` : ''}`);
+  ok(files.every((path) => !path.startsWith('functions/') && path !== '_worker.js' && path !== '_routes.json'), 'and none is code the host would run');
+  const code = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  ok(sources.every(([, source]) => [...code(source).matchAll(/\b(?:from|import) '([^']+)'/g)].every(([, target]) => target.startsWith('.')) && !/\bimport\(/.test(code(source))), 'every import is a relative path to a file of the software, none loaded on demand');
+  const scripts = [...page.matchAll(/<script\b[^>]*>/g)].map((match) => match[0]);
+  ok(scripts.length === 2 && scripts.filter((tag) => tag.includes('type="module"')).length === 1 && scripts.includes('<script src="theme.js">'), 'every script on the page is a module but the theme script, which runs before the stylesheet');
 }
 
 // --- The file surface stays on the baseline (F-PER-001, N-CMP-002) ---
