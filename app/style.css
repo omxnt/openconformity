@@ -1777,7 +1777,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
 .data td.mark { text-align: center; }
 .data td.wide { min-width: 16ch; }
-.data td p { margin: 0; min-width: 16ch; max-width: 24ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
+.data td p { margin: 0; min-width: 20ch; max-width: 30ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
 .data td .cell-note { margin-top: 4px; }
 .data th.narrow, .data td.narrow { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 .data td .tag.outcome { font-weight: 600; }
@@ -1814,7 +1814,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
   .data { font-size: 12px; }
   .data th, .data td { padding: 4px 8px; }
   .data .mono { font-size: 11px; }
-  .data td p { font-size: 12px; min-width: 12ch; }
+  .data td p { font-size: 12px; min-width: 16ch; max-width: 26ch; }
   .data .tag { height: 18px; padding: 0 6px; font-size: 11px; }
   .data .tag, .data .risk-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { background: #fff; color: #000; }
