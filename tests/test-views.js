@@ -183,9 +183,9 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 {
   const view = buildSafetyView(model);
   deepEqual([view.title, view.exports], ['Safety function specification', ['markdown']], 'titled, and saved as Markdown');
-  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock'], 'a tab holding every function, then a tab for each function no other decomposes into');
+  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each, a function followed by those it decomposes into');
   const heads = (section) => section.tables.filter((table) => table.heading).map((table) => table.heading);
-  deepEqual([heads(view.sections[0]), heads(view.sections[2])], [['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], ['SAF-002', 'SAF-003', 'SAF-004']], 'a function is followed by those it decomposes into, and its tab holds them too');
+  deepEqual([heads(view.sections[0]), heads(view.sections[2])], [['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], ['SAF-002']], 'the first tab in the same order, and a function\'s tab holding it alone');
   const block = view.sections[1].tables;
   deepEqual(
     block.map((table) => [table.number ?? '', table.caption ?? '', table.subnumber ?? '', table.subcaption ?? '']),
@@ -200,7 +200,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([block[1].columns, block[1].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
   deepEqual(block[3].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
   const saf2 = view.sections[2].tables;
-  const partOfSaf3 = saf2[saf2.findIndex((table) => table.heading === 'SAF-003') + 1];
+  const partOfSaf3 = view.sections[3].tables[1];
   deepEqual([saf2[2].rows.map((row) => row.cells[0].identifier), partOfSaf3.subcaption, partOfSaf3.rows[0].cells[0].identifier], [['SAF-003', 'SAF-004'], 'Part of', 'SAF-002'], 'a function lists the functions it decomposes into, and each of those the one it is part of');
   deepEqual(block[9].figure, { id: 'SAF-001', drawing: model.nodes.get('SAF-001').attributes.drawing.trim() }, 'the diagram is the drawing the function holds, once it passes the check');
   const bare = unrated();
@@ -219,7 +219,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   ok(saved.text.includes('### 3 Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'then the numbered tabs');
   ok(saved.text.includes('### 6 Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
   deepEqual(saved.diagrams.map((file) => file.name), ['diagrams/SAF-001.svg'], 'which comes with the text');
-  deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg', 'diagrams/SAF-003.svg', 'diagrams/SAF-004.svg'], "and a top function's tab brings the diagrams of those it decomposes into");
+  deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg'], "and a function's tab brings its own diagram alone");
   equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');
   deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 2, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-2 Door Interlock.md'], 'saved from the first tab under the view, from a function under its name');
 }

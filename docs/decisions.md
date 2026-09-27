@@ -953,6 +953,16 @@ A safety function in its specification is numbered parts in the editor's order: 
 
 ---
 
+### D-110 A tab for each safety function
+
+`2026-09-27` `product`
+
+The specification has a tab for every safety function, holding that function alone, in the order of the first tab, so each function stands right after the one it is part of. A save from a function's tab takes that function only.
+
+> *A specification is handed on one function at a time as often as whole, and a save should hold what the tab shows. The order and the designations carry the decomposition, and each function names the one it is part of. Amends D-109.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

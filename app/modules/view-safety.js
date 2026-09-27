@@ -8,9 +8,9 @@
  * required integrity level of the standard in force after the standard,
  * its diagram, and its notes. A function is followed by the functions it
  * decomposes into, depth first. One tab holds every function, and one
- * tab each holds a function no other is decomposed into, with those it
- * decomposes into. A pure function of the model, returning the
- * description views.js renders and saves.
+ * tab each holds a function alone, the tabs in the same order. A pure
+ * function of the model, returning the description views.js renders and
+ * saves.
  *
  * A part opens a block where it carries `heading`, the entity the block
  * is about. `number` and `caption` name a part and `subnumber` and
@@ -127,7 +127,7 @@ export function buildSafetyView(model) {
     exports: ['markdown'],
     sections: [
       { name: `All functions (${all.length})`, tables: ordered.flatMap(block) },
-      ...roots.map((root) => ({ name: entityLabel(root) || root.id, tables: tree(root).flatMap(block) })),
+      ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf) })),
     ],
   };
 }
