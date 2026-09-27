@@ -51,9 +51,6 @@ export function svgText(tag, attributes, content) {
   return element;
 }
 
-/** Whether the platform is Apple's, where the command key and Option stand for Ctrl and Alt. */
-export const APPLE = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform ?? '');
-
 /**
  * Hand the browser a file to save: the text behind an object URL on an
  * anchor, clicked and removed in one breath.

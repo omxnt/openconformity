@@ -25,7 +25,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { typeOf, groupAttributes } from './attributes.js';
 import { setValues, firstTabName } from './fields.js';
 import { plural } from './text.js';
-import { APPLE } from './dom.js';
+import { APPLE } from './platform.js';
 import { loadProject } from './files.js';
 import { el, icon, tabKeys, tooltipOn } from './dom.js';
 import { splitter } from './splitter.js';

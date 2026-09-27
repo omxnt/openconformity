@@ -17,8 +17,33 @@ import { LANDING_OFFER } from '../app/modules/landing.js';
 import { ok, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
 
-const MODULES = ['about', 'actions', 'app', 'attributes', 'columns', 'dialog', 'dom', 'drawing', 'drawing-editor', 'editor', 'files', 'flows', 'graph', 'history', 'icons', 'library', 'menu', 'metamodel', 'model', 'multiselect', 'navigator', 'overlay', 'project', 'queries', 'rating', 'records', 'relate', 'relationships', 'retention', 'risk', 'shell', 'splitter', 'store', 'validator', 'version', 'view-risk', 'views'];
-const sources = MODULES.map((name) => [name, readFile(`../app/modules/${name}.js`)]);
+/**
+ * Every module the software loads, walked from the page's entry along
+ * its imports, so a module is scanned the day it is imported and none
+ * is listed by hand. Each as its path under app/ and its source.
+ */
+function modulesFrom(entry) {
+  const seen = new Map();
+  const walk = (path) => {
+    if (seen.has(path)) return;
+    const source = readFile(`../app/${path}`);
+    seen.set(path, source);
+    const folder = path.slice(0, path.lastIndexOf('/') + 1);
+    for (const [, target] of source.matchAll(/from '(\.[^']+)'/g)) {
+      const parts = (folder + target).split('/');
+      const resolved = [];
+      for (const part of parts) {
+        if (part === '..') resolved.pop();
+        else if (part !== '.') resolved.push(part);
+      }
+      walk(resolved.join('/'));
+    }
+  };
+  walk(entry);
+  return [...seen].map(([path, source]) => [path.replace(/^modules\//, '').replace(/\.js$/, ''), source]);
+}
+const sources = modulesFrom('modules/app.js').filter(([name]) => name !== 'example' && name !== 'library/data');
+ok(sources.length >= 40, `${sources.length} modules load from the page's entry`);
 const page = readFile('../app/index.html');
 const sheet = readFile('../app/style.css');
 

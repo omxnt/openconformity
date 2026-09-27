@@ -170,11 +170,6 @@ export function createEditor({
   }
 
   /**
-   * Carbon's empty state for the pane.
-   * @param {string} title
-   * @param {string} text
-   */
-  /**
    * One attribute as a cell: its name over its value — or, in an edit,
    * over its field — two cells to a row, a multiline one taking the row
    * to itself. Every cell has the one shape in either mode, so nothing

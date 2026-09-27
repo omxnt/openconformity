@@ -9,7 +9,7 @@
 import { nodeOf } from './model.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
 import { VIEWS } from './view-registry.js';
-import { APPLE } from './dom.js';
+import { APPLE } from './platform.js';
 
 /**
  * @typedef {Object} Action
