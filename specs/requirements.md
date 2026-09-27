@@ -535,7 +535,7 @@ The software shall only permit the creation of relationships defined by the meta
 
 `ubiquitous`
 
-The software shall only present and edit the attributes defined for the entity's type in `notes/attributes.md`.
+The software shall only present and edit the attributes defined for the entity's type in `specs/attributes.md`.
 
 > *The attribute definitions encode what each entity type states about the domain. Presenting only defined attributes is what makes the editor render the model rather than a free-form form. Which attributes exist per type is defined in the referenced document, transcribed by the implementation.*
 
