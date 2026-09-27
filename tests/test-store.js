@@ -276,7 +276,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.dirty(), true, 'a dirty restore seeds the pointer unreachable: no undoing reaches saved');
 }
 
-// --- A blob that fails to load is set aside (F-SES-001) ----------------
+// --- A blob that fails to load is set aside (F-SES-001, F-SES-004) ----------------
 
 {
   const storage = fakeStorage({ [THEME_KEY]: 'g100' });
@@ -604,7 +604,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(session.read('openconformity.open-view'), null, 'and none remembered');
 }
 
-// --- A failing persist (F-SES-002) -------------------------------------
+// --- A failing persist (F-SES-002, F-SES-005) -------------------------------------
 
 {
   const retention = memoryRetention();
@@ -645,7 +645,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(await retention.estimate(), null, 'with no storage manager there is no estimate');
 }
 
-// --- The storage nearly full is told (F-SES-002) ------------------------------
+// --- The storage nearly full is told (F-SES-006) ------------------------------
 
 {
   const retention = memoryRetention({ estimate: { usage: 900, quota: 1000 } });
@@ -848,7 +848,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   ok((await blobIn(store, retention)) !== null, 'and a new project persists again as ever');
 }
 
-// --- The set-aside copy can be read back and discarded (F-SES-001) -------
+// --- The set-aside copy can be read back and discarded (F-SES-004) -------
 
 {
   const retention = memoryRetention({ initial: { project: { project: { name: 'Old line' }, session: {} } } });

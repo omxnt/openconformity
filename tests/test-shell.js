@@ -54,7 +54,7 @@ equal(titleFor(true, 'Mixer line'), 'Mixer line · openconformity', 'a named pro
 equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
 equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
 
-// --- The leave-prompt fires exactly when leaving costs something (F-SES-002) ---
+// --- The leave-prompt fires exactly when leaving costs something (F-SES-005) ---
 
 equal(shouldWarnBeforeUnload(true, true), true, 'unsaved work that persistence is failing to keep warns');
 equal(shouldWarnBeforeUnload(true, false), false, 'unsaved work the blob holds does not: closing loses nothing');

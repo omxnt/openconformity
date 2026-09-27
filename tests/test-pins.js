@@ -47,7 +47,7 @@ ok(sources.length >= 40, `${sources.length} modules load from the page's entry`)
 const page = readFile('../app/index.html');
 const sheet = readFile('../app/style.css');
 
-// --- The page states its content security policy first (N-SEC-001, N-SEC-002, N-OPS-002) ---
+// --- The page states its content security policy first (N-SEC-001, N-SEC-002, N-SEC-006, N-OPS-002) ---
 
 {
   ok(page.includes(`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src https://embed.diagrams.net; object-src 'none'; base-uri 'none'; form-action 'none'">`), 'the policy allows the software its own scripts, styles and fonts, images as data, one frame origin, and no connection, object, base or form');
@@ -104,11 +104,19 @@ const sheet = readFile('../app/style.css');
   ok(!cell.includes("el('svg'") && !cell.includes("el('object'") && !cell.includes("el('embed'"), 'never as markup in the page');
 }
 
-// --- Nothing is read from the address (N-PRV-002, N-SEC-001) ---
+// --- Nothing is read from the address (N-PRV-002, N-SEC-010) ---
 
 {
   ok(sources.every(([, source]) => !/location\.(search|hash)|window\.name\b|URLSearchParams|document\.referrer/.test(source)), 'no module reads the address, the window name or the referrer');
   ok(sources.every(([name, source]) => name === 'shell' || !source.includes('location.href')) && readFile('../app/modules/shell.js').split('location.href').length === 2 && readFile('../app/modules/shell.js').includes("window.location.href = 'mailto:info@openconformity.org';"), 'the address is written once, to open the mail client, and never read');
+}
+
+// --- The host is told to refuse framing (N-SEC-007) -----------------------
+
+{
+  const headers = readFile('../app/_headers').split('\n');
+  ok(headers[0] === '/*' && headers.includes("  Content-Security-Policy: frame-ancestors 'none'"), 'every path carries the header that forbids framing on another origin');
+  ok(headers.includes('  Strict-Transport-Security: max-age=15552000; includeSubDomains') && headers.includes('  X-Content-Type-Options: nosniff'), 'with transport security and no type sniffing');
 }
 
 // --- The file surface stays on the baseline (F-PER-001, N-CMP-002) ---

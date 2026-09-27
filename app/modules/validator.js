@@ -7,10 +7,13 @@
  * The checks cover the schema's keywords first, and on a structurally
  * sound file the prose constraints its description states: unique
  * identifiers, resolving references, filing and composition acyclicity,
- * order uniqueness, endpoint types, the single composition owner, and
+ * the filing depth, order uniqueness, endpoint types, the single composition owner, and
  * counters exceeding every issued number. The endpoint types are the
  * entity types a relationship's identifier itself names.
  */
+
+/** The deepest a node may be filed, counting a node at the root as the first level. */
+export const FILING_DEPTH = 1000;
 
 /**
  * Judge a parsed file against a schema version.
@@ -330,20 +333,29 @@ function proseProblems(data) {
     }
   }
 
-  const acyclic = new Set();
+  const depths = new Map();
   for (const node of nodes.values()) {
     const trail = new Set();
     let current = node.parent;
-    while (current !== null && current !== node.id && nodes.has(current) && !trail.has(current) && !acyclic.has(current)) {
+    while (current !== null && current !== node.id && nodes.has(current) && !trail.has(current) && !depths.has(current)) {
       trail.add(current);
       current = nodes.get(current).parent;
     }
     if (current === node.id) {
       problems.push(`${node.id} sits inside itself, directly or through what holds it.`);
-    } else if (current === null || !nodes.has(current) || acyclic.has(current)) {
-      acyclic.add(node.id);
-      for (const id of trail) acyclic.add(id);
+      continue;
     }
+    const resolved = current !== null && nodes.has(current);
+    if (resolved && !depths.has(current)) continue;
+    let depth = resolved ? depths.get(current) : 0;
+    for (const id of [...trail].reverse()) {
+      depth += 1;
+      depths.set(id, depth);
+    }
+    depths.set(node.id, depth + 1);
+  }
+  for (const [id, depth] of depths) {
+    if (depth === FILING_DEPTH + 1) problems.push(`${id} is filed deeper than ${String(FILING_DEPTH).replace(/\B(?=(\d{3})+$)/g, ',')} levels.`);
   }
 
   const orders = new Map();

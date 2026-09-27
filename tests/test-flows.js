@@ -691,7 +691,7 @@ function flowsOver(store) {
   ok(!store.hasProject() && retention.records.size === 0, 'Clear forgets the project and shows the landing');
 }
 
-// --- The set-aside copy saves to a file and can be discarded (F-SES-001) ---
+// --- The set-aside copy saves to a file and can be discarded (F-SES-004) ---
 
 {
   const retention = memoryRetention({ initial: { project: { project: { name: 'Old line', format: 'x' }, session: { dirty: true } } } });

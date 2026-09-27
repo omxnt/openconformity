@@ -5,7 +5,7 @@
  */
 
 import './shim.js';
-import { validate } from '../app/modules/validator.js';
+import { validate, FILING_DEPTH } from '../app/modules/validator.js';
 import { ok, equal, summary } from './harness.js';
 
 const valid = JSON.parse(readFile('fixtures/valid.json'));
@@ -53,6 +53,23 @@ refusedOver(JSON.parse(readFile('fixtures/counter-behind.json')), 'counter does 
 
 equal(validate(valid, 99).ok, false, 'an unknown schema version has no transcription');
 equal(validate(valid, 0).ok, false, 'nor does version 0');
+
+// --- The filing depth (F-PER-006) --------------------------------------
+
+{
+  const chain = (levels) => mutated((data) => {
+    for (let i = 0; i < levels; i += 1) data.folders.push({ id: `F-${i + 100}`, name: 'Level', parent: i === 0 ? null : `F-${i + 99}`, order: 9 });
+    data.counters.F = levels + 100;
+  });
+  equal(validate(chain(FILING_DEPTH), 1).ok, true, `filing ${FILING_DEPTH} levels deep passes`);
+  refusedOver(chain(FILING_DEPTH + 1), `F-${FILING_DEPTH + 100} is filed deeper than 1,000 levels`, 'one level more is refused, naming the node past the limit');
+  const entityBelow = mutated((data) => {
+    for (let i = 0; i < FILING_DEPTH; i += 1) data.folders.push({ id: `F-${i + 100}`, name: 'Level', parent: i === 0 ? null : `F-${i + 99}`, order: 9 });
+    data.counters.F = FILING_DEPTH + 100;
+    data.entities[0].parent = `F-${FILING_DEPTH + 99}`;
+  });
+  ok(validate(entityBelow, 1).ok === false, 'an entity filed below the deepest folder counts as a level too');
+}
 
 // --- A prototype key pollutes nothing (F-PER-006, N-SEC-001) -----------
 

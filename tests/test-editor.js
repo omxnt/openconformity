@@ -28,7 +28,7 @@ equal(
 );
 equal(draftChanged([], { title: 'Mixer' }, {}), false, 'with no definitions there is nothing to change');
 
-// --- A hyperlink is presented as a link only when it is a web address (N-SEC-002) ---
+// --- A hyperlink is presented as a link only when it is a web address (N-SEC-002, N-SEC-008) ---
 
 equal(linkable('https://eur-lex.europa.eu/eli/reg/2023/1230/oj'), true, 'an https address is followable');
 equal(linkable('http://example.org'), true, 'so is http');
