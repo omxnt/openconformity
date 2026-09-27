@@ -1055,6 +1055,16 @@ The software shall read no input from the address it is opened at.
 
 > *A link is the one input another site can hand the software without the user's act. Reading nothing from the address means no query or fragment can select, open, fill, or trigger anything, and there is nothing to reflect into the page.*
 
+---
+
+#### N-SEC-011 Safe export
+
+`ubiquitous`
+
+The software shall write every file it exports so that no content from the model is taken as a formula, as markup or as a link by the application that opens the file.
+
+> *An exported file is opened in a spreadsheet or a document viewer the software does not control, and a value can come from a file someone else wrote. Written as text, a value cannot run as a formula, draw an image from an outside address, or become a link the reader did not make. A diagram saved beside a document is the drawing the drawing check accepted.*
+
 ### 5.4 Accessibility
 
 ---

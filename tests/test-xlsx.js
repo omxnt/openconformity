@@ -33,7 +33,7 @@ function unzip(bytes) {
   return { signature: view.getUint32(0, true), end: view.getUint32(end, true), entries };
 }
 
-// --- The text as XML takes it (F-VIE-001) ----------------------------------
+// --- The text as XML takes it (F-VIE-001, N-SEC-011) -----------------------
 
 {
   equal(xmlText(`<a href="x">Tom & 'Jerry'</a>`), '&lt;a href=&quot;x&quot;&gt;Tom &amp; &apos;Jerry&apos;&lt;/a&gt;', 'the five markup characters are escaped');
@@ -66,7 +66,7 @@ function unzip(bytes) {
   deepEqual(read.entries.map((entry) => [entry.name, text(entry.data), entry.crcHolds, entry.method]), [['a.txt', 'hello', true, 0], ['dir/b.xml', '<b>å</b>', true, 0]], 'each entry is found through the directory, stored, its checksum holding');
 }
 
-// --- A sheet (F-VIE-001) ----------------------------------------------------
+// --- A sheet (F-VIE-001, N-SEC-011) -----------------------------------------
 
 {
   const xml = sheetXml({

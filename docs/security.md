@@ -158,8 +158,7 @@ A change of the kind below updates the sections named in the same commit.
 | EP-19 | A link leaving the page | Out | TB-06 | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | CT-19 |
 | EP-20 | A saved file | Out | TB-01 | `flows.js` `saveProject`, `dom.js` `download`, `files.js` `filenameFor` | CT-27 |
 | EP-21 | A view saved as a workbook | Out | TB-01 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
-| CT-36 | A saved Markdown document escapes ampersands and angle brackets in everything it carries, so no markup from a field is rendered. | `markdown.js` `markdownText` | F-VIE-001 | In place |
-| EP-22 | A view saved as Markdown, alone or in a zip with its diagrams | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown`, `zip.js` `zip` | CT-07, CT-36 |
+| EP-22 | A view saved as Markdown, alone or in a zip with its diagrams as SVG files | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown`, `zip.js` `zip` | CT-07, CT-36 |
 
 ## 4. Threats
 
@@ -176,7 +175,8 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 | TH-05 | Denial of service | A file deep or wide enough to exhaust the browser. | CT-03, CT-05 |
 | TH-06 | Elevation of privilege | Markup or code in a value, a scheme that runs code in a link, or a prototype key. | CT-01, CT-02, CT-03, CT-18 |
 | TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. | CT-35 |
-| TH-50 | Elevation of privilege | A value written as markup, which a Markdown viewer would render or run when a view saved from the file is shown. | CT-36 |
+| TH-50 | Elevation of privilege | A value written as markup or as Markdown's own syntax, which a viewer would render as a link, an image loaded from an outside address, or a structure, when a view saved from the file is shown. | CT-36 |
+| TH-51 | Elevation of privilege | A diagram saved beside a specification and opened on its own, where it is a document rather than an image. | CT-07 |
 
 ### 4.2 The library catalogue
 
@@ -291,7 +291,8 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-26 | The tree acts only on a drag it started. | `navigator.js` `renderRow` and `render` | None. No test. | In place |
 | CT-27 | A saved file's name holds letters, digits and dashes only. | `files.js` `filenameFor` | None. Tested in `test-files.js`, The filename. | In place |
 | CT-28 | Nothing changes the model while a drawing is open. | `actions.js` `createActions` | F-DRW-003 | In place |
-| CT-35 | A saved workbook writes every cell as text, never as a formula or a number, and leaves out the characters XML does not allow. | `xlsx.js` `sheetXml` and `xmlText` | F-VIE-001 | In place |
+| CT-35 | A saved workbook writes every cell as text, never as a formula or a number, and leaves out the characters XML does not allow. | `xlsx.js` `sheetXml` and `xmlText` | N-SEC-011 | In place |
+| CT-36 | A saved Markdown document escapes markup and Markdown's own syntax in everything it carries, and a line that would open a structure at its start, so no field becomes a link, an image, code or a heading. | `markdown.js` `markdownText` and `proseLine` | N-SEC-011 | In place |
 
 ### 5.2 Held by the project
 
@@ -334,7 +335,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | Id | What remains | Status | Accepted by, or closed by |
 |---|---|---|---|
 | SC-01 | None found. | Closed | CT-01, CT-02 |
-| SC-02 | None found. A reference in a form the check does not name would still be held by the image rendering. | Closed | CT-07, CT-08 |
+| SC-02 | Inside the software a drawing is shown only as an image. A diagram saved beside a specification and opened on its own is held by the drawing check alone. | Open | The maintainer's acceptance |
 | SC-03 | None found. | Closed | CT-18 |
 | SC-04 | None found. Saving and every walk of the tree grow in step with the project, and a change in a flat project of 20,000 entities takes about half a second, most of it drawing the rows. | Closed | CT-03, CT-05, and the children index in `model.js` |
 | SC-05 | None found. | Closed | CT-02, CT-03 |

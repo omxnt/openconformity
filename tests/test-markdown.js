@@ -7,7 +7,7 @@
 import { markdownText, markdownCell, markdown, anchor } from '../app/modules/markdown.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- A cell and its text (F-VIE-001) -----------------------------------------
+// --- A cell and its text (F-VIE-001, N-SEC-011) -----------------------------
 
 {
   equal(markdownCell('plain'), 'plain', 'text is itself');
@@ -16,6 +16,12 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(markdownCell('a | b'), 'a \\| b', 'a pipe is escaped, so the cell keeps to its column');
   equal(markdownCell('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;', 'markup typed into a field is escaped and reads as text');
   equal(markdownText('Tom & Jerry'), 'Tom &amp; Jerry', 'as is an ampersand');
+  equal(markdownCell('![x](https://tracker.example/p.png)'), '!\\[x\\](https://tracker.example/p.png)', 'an image from an outside address cannot form, so nothing loads when the file is read');
+  equal(markdownText('[click](javascript:alert(1))'), '\\[click\\](javascript:alert(1))', 'nor a link');
+  equal(markdownText('a*b*c `code` snake_case back\\slash'), 'a\\*b\\*c \\`code\\` snake\\_case back\\\\slash', 'nor emphasis or code, a backslash kept as itself');
+  equal(markdownText('ISO 13849-1, 5 mm (min.)'), 'ISO 13849-1, 5 mm (min.)', 'while plain text stays as it is');
+  const prose = markdown('T', [{ caption: 'P', prose: '# Not a heading\n- not a list\n1. not a list\n| not a table\nplain' }]);
+  ok(prose.includes('\\# Not a heading\n\n\\- not a list\n\n1\\. not a list\n\n\\| not a table\n\nplain'), 'a line of prose that would open a heading, a list or a table is escaped at its start');
   equal(markdown('T', [{ caption: 'Diagram', image: { alt: 'Diagram of [x]', path: 'diagrams/A B.svg' } }, { caption: 'Other', image: null }]), '# T\n\n### Diagram\n\n![Diagram of x](diagrams/A%20B.svg)\n\n### Other\n\n–\n', 'a figure is an image linked by its path, and a dash where there is none');
   ok(markdown('T', [{ caption: 'Relationships', subcaption: 'Realises', headers: ['A'], rows: [] }]).includes('### Relationships\n\n#### Realises\n\n| A |'), 'a subcaption stands under its part');
   ok(markdown('T', [{ caption: 'Description', prose: '' }]).includes('### Description\n\n–\n'), 'and empty prose is a dash');

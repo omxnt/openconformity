@@ -8,17 +8,38 @@
  * its headings. Cells
  * arrive as text, a line break within one written as a break tag and a
  * pipe escaped, so a cell never leaves its column. An empty cell holds
- * a dash. Every text is written with its ampersands and angle brackets
- * escaped, so markup typed into a field reads as text wherever the file
- * is shown. A pure function of its input.
+ * a dash. Every text is written with the characters that start markup
+ * or Markdown's own syntax escaped, and a line of prose that would open
+ * a heading, a list, a quote or a table escaped at its start, so what a
+ * field holds reads as the text it is wherever the file is shown and
+ * never becomes a link, an image or a structure. A pure function of its
+ * input.
  */
 
 /**
- * Text with the characters that start markup escaped.
+ * Text with the characters that start markup or Markdown's inline syntax
+ * escaped: ampersands and angle brackets as entities, and backslashes,
+ * backticks, asterisks, underscores and square brackets behind a
+ * backslash, so no link, image, code or emphasis can form.
  * @param {string} text
  */
 export function markdownText(text) {
-  return String(text ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  return String(text ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replace(/[\\`*_[\]]/g, (held) => `\\${held}`);
+}
+
+/**
+ * A line of prose escaped, and escaped again at its start where it would
+ * open a heading, a list, a thematic break, a table or a fence.
+ * @param {string} line
+ */
+function proseLine(line) {
+  const held = markdownText(line);
+  if (/^\d+[.)](\s|$)/.test(held)) return held.replace(/^(\d+)([.)])/, '$1\\$2');
+  return /^[#+\-=|~]/.test(held) ? `\\${held}` : held;
 }
 
 /**
@@ -40,7 +61,7 @@ export function markdownText(text) {
 export function markdownCell(text) {
   const held = String(text ?? '').trim();
   if (held === '') return '–';
-  return markdownText(held).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
+  return markdownText(held).replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
 }
 
 /**
@@ -50,7 +71,7 @@ export function markdownCell(text) {
 function paragraphs(text) {
   return text
     .split(/\r?\n/)
-    .map((line) => markdownText(line.trim()))
+    .map((line) => proseLine(line.trim()))
     .filter(Boolean)
     .join('\n\n');
 }
@@ -78,7 +99,7 @@ export function markdown(title, tables, options = {}) {
   const numberedHeading = (table) => [table.chapter, table.heading].filter(Boolean).join(' ');
   if (chapters.length > 1) {
     lines.push('## Contents', '');
-    for (const [i, table] of chapters.entries()) lines.push(`${i + 1}. [${markdownText(table.heading).replace(/[[\]]/g, '')}](#${anchor(numberedHeading(table))})`);
+    for (const [i, table] of chapters.entries()) lines.push(`${i + 1}. [${markdownText(table.heading.replace(/[[\]]/g, ''))}](#${anchor(numberedHeading(table))})`);
     lines.push('');
   }
   for (const table of tables) {
@@ -90,7 +111,7 @@ export function markdown(title, tables, options = {}) {
       continue;
     }
     if ('image' in table) {
-      lines.push(table.image ? `![${markdownText(table.image.alt).replace(/[[\]]/g, '')}](${encodeURI(table.image.path)})` : '–', '');
+      lines.push(table.image ? `![${markdownText(table.image.alt.replace(/[[\]]/g, ''))}](${encodeURI(table.image.path)})` : '–', '');
       continue;
     }
     lines.push(`| ${table.headers.map(markdownCell).join(' | ')} |`, `|${table.headers.map(() => '---').join('|')}|`);

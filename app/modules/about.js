@@ -88,6 +88,10 @@ export async function showAbout(dialogs, store = null) {
       fold('Technology', [
         ['Web platform', 'HTML, CSS and JavaScript as ES modules, no framework and no build', [link('https://developer.mozilla.org/docs/Web', 'developer.mozilla.org')]],
         ['JSON', 'The project file, checked against its schema', [link('https://github.com/omxnt/openconformity/blob/main/specs/project.schema.json', 'project.schema.json')]],
+        ['SVG', 'The diagrams, and the files saved beside a specification', [link('https://www.w3.org/TR/SVG2/', 'w3.org')]],
+        ['Office Open XML', 'The Excel workbooks views are saved as', [link('https://ecma-international.org/publications-and-standards/standards/ecma-376/', 'ecma-international.org')]],
+        ['GitHub Flavored Markdown', 'The documents a specification is saved as', [link('https://github.github.com/gfm/', 'github.github.com')]],
+        ['ZIP', 'The package a workbook is, and a specification with its diagrams', [link('https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT', 'pkware.com')]],
         ['IndexedDB', 'The browser storage the open project is kept in between sessions', [link('https://developer.mozilla.org/docs/Web/API/IndexedDB_API', 'developer.mozilla.org')]],
       ]),
       fold('Design assets', [
