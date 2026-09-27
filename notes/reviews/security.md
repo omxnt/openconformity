@@ -663,10 +663,45 @@ Each item names what is verified and how. Headless means a test in `tests/` run 
 
 ## 6. Verification results
 
-Empty until the plan is run. One row per item of chapter 5, the date, who ran it, passed or failed, and remarks.
+The plan was run on 27 September 2026 against commit `eedb546`, with the test suite reporting every check passed in all 27 files. An item marked Open waits on the host or on the maintainer, and says which.
 
 | Item | Date | Run by | Result | Remarks |
 |---|---|---|---|---|
+| V1 | 2026-09-27 | Claude Code | Passed | The pin of the policy passes. The requirement now stands as N-SEC-006. |
+| V2 | 2026-09-27 | Claude Code | Passed | The pin passes. |
+| V3 | 2026-09-27 | Claude Code | Passed | `dom.js:15` to `24` sets text through `textContent` and attributes through `setAttribute` only. |
+| V4 | 2026-09-27 | Claude Code | Passed | `test-files.js` passes. |
+| V5 | 2026-09-27 | Claude Code | Passed | `test-validator.js` passes. |
+| V6 | 2026-09-27 | Claude Code | Passed | Added to `test-validator.js` and `test-files.js`. A prototype key at the root or in an attribute set reaches no prototype. |
+| V7 | 2026-09-27 | Claude Code | Passed | `test-drawing.js` passes with the five probes of 3.5 added under V25. |
+| V8 | 2026-09-27 | Claude Code | Passed | Pinned in `test-pins.js`. Driven, the card holds a button and an image whose source is a data address, and the page holds no drawing as markup, object or frame. |
+| V9 | 2026-09-27 | Claude Code | Passed | The pin passes. |
+| V10 | 2026-09-27 | Claude Code | Passed | `test-drawing-editor.js` passes. |
+| V11 | 2026-09-27 | Claude Code | Passed | `test-drawing-editor.js` passes. |
+| V12 | 2026-09-27 | Claude Code | Passed | Driven. The first edit asks, the ticked box keeps the choice for the session, the second edit opens without asking, About offers Forget, and the edit after Forget asks again. A new tab was not driven, since the browser gives each tab its own session storage. |
+| V13 | 2026-09-27 | Claude Code | Passed | `test-editor.js` passes. |
+| V14 | 2026-09-27 | Claude Code | Passed | The pin passes. |
+| V15 | 2026-09-27 | Claude Code | Passed | Driven with the network recorded. Before the editor, requests went to the host and to data addresses only. Opening the consent dialog sent nothing. After Continue, the one new origin was the editor's. |
+| V16 | 2026-09-27 | Claude Code | Passed | `test-pins.js` and `test-store.js` pass. |
+| V17 | 2026-09-27 | Claude Code | Passed | Headless blocks pass. Driven, after Clear stored data the database holds no record and neither storage holds a key, and the landing shows. |
+| V18 | 2026-09-27 | Claude Code | Passed | The blocks pass. |
+| V19 | 2026-09-27 | Claude Code | Passed | `test-store.js` passes. |
+| V20 | 2026-09-27 | Claude Code | Passed | `test-store.js` and `test-shell.js` pass. |
+| V21 | 2026-09-27 | Claude Code | Passed | `test-files.js` passes. |
+| V22 | 2026-09-27 | Claude Code | Passed | Added to `test-pins.js`. The one write to the address opens the mail client and is pinned as the only one. |
+| V23 | 2026-09-27 | Claude Code | Passed | Fixed in `9f4b4f3` and `144a814`. A file 50,000 levels deep is refused by the filing depth of 1,000 in well under two seconds. Driven, a file of 1,001 levels is refused with the dialog naming the node and the project unchanged, and one of 1,000 opens, autosaves, reloads and saves. |
+| V24 | 2026-09-27 | Claude Code | Passed | Fixed in `9f4b4f3`. Driven, the editor's save shortcut inside the frame closes the editor and puts the drawing in the draft, with the edit still open. |
+| V25 | 2026-09-27 | Claude Code | Passed | Fixed in `9f4b4f3`. The five probes and three more are refused in `test-drawing.js`, and an embedded image and a harmless animation still pass. |
+| V26 | 2026-09-27 | Claude Code | Open | Fixed in `9f4b4f3` with `app/_headers`, pinned in `test-pins.js`. The host still answers with the gate, so the software's own headers can be read only once the gate is down. The maintainer runs the check then. |
+| V27 | 2026-09-27 | Claude Code | Passed | Fixed in `9f4b4f3`. `test-flows.js` imports picks holding hidden values, expecting the question, the cleared keys and one undo. |
+| V28 | 2026-09-27 | Claude Code | Open | No release has been made since the review. Checked at the release of v1.0.0-beta.1. |
+| V29 | 2026-09-27 | Claude Code | Open | The host answers with the gate, so the files cannot be compared. The host settings are the maintainer's to read. Checked at the release. |
+| V30 | 2026-09-27 | Claude Code | Passed | Driven over the example, every view, a drawing and the editor. The console held no error or warning. |
+| V31 | 2026-09-27 | Claude Code | Passed | Made in `9ef6efb`, with these departures. C-TEC-009 was folded into C-TEC-005. F-DRW-004 was left out, since F-DRW-001 states the bounds and F-DRW-003 the page. The import clearing went to the rationale of N-SEC-005 rather than F-MOD-010. F-SES-001, F-VIE-001, N-CMP-001 and N-CMP-002 were kept as goals, and F-PER-008 kept its place and id. The conventions dropped the word status rather than add a status line. F-MOD-003 was resolved by moving the attributes document to `specs/`. |
+| V32 | 2026-09-27 | Claude Code | Passed | The pin passes. `assets/fonts/ORIGIN.md` names the three font files present, with their versions and source. |
+| V33 | 2026-09-27 | Claude Code | Open | `SECURITY.md` names the channel, the scope, the versions and the aim. Whether private vulnerability reporting is enabled is the maintainer's to confirm in the repository settings. |
+| V34 | 2026-09-27 | Claude Code | Passed | Driven. The database `openconformity` holds the record `project` in the store `retention`, readable as the project file in plain text. Recorded as accepted in 3.7. |
+| V35 | 2026-09-27 | Claude Code | Passed | `test-drawing.js` and `test-drawing-editor.js` pass. |
 
 ## 7. References
 
