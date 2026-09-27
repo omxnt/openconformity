@@ -71,6 +71,8 @@ Run the test suite with `./run.sh` from `tests`; every file must report all chec
 
 - **Never invent domain content:** Inferring intent from the request is fine. Filling gaps with hazards, requirements, standards content, or calculations nobody asked for is not.
 
+- **Guard the file format:** Schema version 1 is published with v1.0.0-beta.1, and a version 1 file must always open with its meaning intact. A change to the file's structure bumps the schema version and adds a migration, as F-PER-004 and F-PER-008 require. A renamed attribute key or choice value counts as such a change, since the schema leaves attributes open. Any such change is flagged before it is proposed.
+
 - **Push back on bad instructions:** If the user is wrong, or a better approach exists, say so and wait for a go.
 
 - **Keep rationale out of comments:** Comments say what the code does. The reasoning goes in the reply, where it can be reviewed.
