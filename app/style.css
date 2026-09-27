@@ -1244,6 +1244,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .node-more:focus-visible .node-more-hit { stroke: var(--focus); stroke-width: 2; }
 .node-chevron { fill: var(--link); }
 .node-more-text { font-size: 12px; letter-spacing: 0.32px; fill: var(--link); }
+.node-more-code { font-family: 'IBM Plex Mono', ui-monospace, monospace; letter-spacing: 0; }
 
 /* While picking, the picks are the subject: dashed provisional edges and
    boxes stand forward, the standing neighbourhood recedes. */

@@ -359,9 +359,9 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   const onePage = openGroups(right, new Map([['outgoing:elm-exhibits-haz', 1]]))[0];
   deepEqual([onePage.open, onePage.shown], [true, 6], 'opened by the user, it shows five more');
   deepEqual([openGroups(right, new Map(), true)[0].open, openGroups(right, new Map(), true)[0].shown], [true, 9], 'a filter opens every group whole');
-  equal(stripText(openGroups(right)[0]), 'Show 5 more of 8', 'the strip offers the next page and says how many stand folded');
-  equal(stripText(onePage), 'Show 3 more', 'and on the last page counts what it holds alone');
-  equal(stripText(openGroups(right, new Map([['outgoing:elm-exhibits-haz', 2]]))[0]), 'Show fewer', 'and once every member shows, offers the way back');
+  equal(stripText(openGroups(right)[0]), 'Show 5 more of 8 HAZ', 'the strip offers the next page, says how many stand folded, and ends on the code of their type');
+  equal(stripText(onePage), 'Show 3 more HAZ', 'and on the last page counts what it holds alone');
+  equal(stripText(openGroups(right, new Map([['outgoing:elm-exhibits-haz', 2]]))[0]), 'Show fewer HAZ', 'and once every member shows, offers the way back');
   const bigModel = createModel();
   addEntity(bigModel, 'LEG');
   for (let count = 0; count < 215; count += 1) {

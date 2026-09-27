@@ -40,7 +40,7 @@ export function svg(tag, attributes = {}, children = []) {
 
 /**
  * An SVG text node.
- * @param {string} tag  'text' or 'tspan'
+ * @param {string} tag  'text', 'tspan' or 'title'
  * @param {Object<string, string>} attributes
  * @param {string} content
  * @returns {SVGElement}

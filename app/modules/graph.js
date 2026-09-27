@@ -244,12 +244,17 @@ export function boxSpan(side) {
   return boxes.length === 0 ? 0 : boxes.at(-1).y + boxes.at(-1).height;
 }
 
-/** What a group's strip says: how many more the next page shows and how many stand folded, or that fewer can be shown once every member does. */
-export function stripText(group) {
+/** What a group's strip says before the type's code: how many more the next page shows and how many stand folded, or that fewer can be shown once every member does. */
+export function stripWords(group) {
   const left = group.members.length - group.shown;
   if (left <= 0) return 'Show fewer';
   const next = Math.min(PAGE, left);
   return next < left ? `Show ${next} more of ${left}` : `Show ${next} more`;
+}
+
+/** What a group's strip says in full, ending on the code of the type it shows more of. */
+export function stripText(group) {
+  return `${stripWords(group)} ${group.type}`;
 }
 
 /**
@@ -367,7 +372,10 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
     });
     control.appendChild(svg('rect', { class: 'node-more-hit', width: String(NODE_WIDTH), height: String(STRIP_HEIGHT) }));
     control.appendChild(svg('use', { href: `#${group.shown < group.members.length ? 'i-chevron-down' : 'i-chevron-up'}`, x: '8', y: '4', width: '16', height: '16', class: 'node-chevron' }));
-    control.appendChild(svgText('text', { x: '32', y: '16', class: 'node-more-text' }, stripText(group)));
+    control.appendChild(svgText('title', {}, `${ENTITY_TYPES[group.type].name}, ${group.members.length} in all`));
+    const words = svgText('text', { x: '32', y: '16', class: 'node-more-text' }, `${stripWords(group)} `);
+    words.appendChild(svgText('tspan', { class: 'node-more-code' }, group.type));
+    control.appendChild(words);
     const toggle = () => {
       if (group.shown < group.members.length) opened.set(group.key, (opened.get(group.key) ?? 0) + 1);
       else opened.delete(group.key);
