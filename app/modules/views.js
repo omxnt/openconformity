@@ -4,7 +4,7 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, prints it, and saves the open section as
+ * cell a way to the editor, and saves the open section as
  * CSV. The cell kinds no view produces yet, a choice, choices and a
  * mark, are scaffolding for the views the proposal lists, kept and
  * tested until they land.
@@ -288,11 +288,9 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     head.appendChild(tabs);
     const csv = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Save as CSV' })]);
     csv.addEventListener('click', saveCsv);
-    const print = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Print' })]);
-    print.addEventListener('click', () => window.print());
     const close = tooltipOn(el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]), 'Close the view', { align: 'end' });
     close.addEventListener('click', onClose);
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [csv, print, close]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [csv, close]));
   }
 
   /** The open section saved as CSV, its tables one after another, a blank line between them, in the separator the browser's language expects. */
@@ -322,7 +320,6 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const section = Math.min(open.section, built.sections.length - 1);
     renderHead(open);
     body.textContent = '';
-    body.appendChild(el('h1', { className: 'print-only', text: built.title }));
     if (built.sections.length > 1) {
       const tabs = el('nav', { className: 'tabs', attributes: { 'aria-label': 'Sections' } });
       built.sections.forEach((held, i) => {
@@ -336,7 +333,6 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     built.sections.forEach((held, i) => {
       const block = el('div', { className: 'section' });
       block.hidden = i !== section;
-      if (built.sections.length > 1) block.appendChild(el('h2', { className: 'print-only', text: held.name }));
       held.tables.forEach((spec, j) => block.appendChild(table(spec, `${built.id}/${i}/${j}`)));
       scroll.appendChild(block);
     });

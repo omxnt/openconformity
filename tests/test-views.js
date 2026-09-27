@@ -40,7 +40,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
 
 {
   const view = buildRiskView(model);
-  equal(view.title, 'Risk assessment', 'titled for print');
+  equal(view.title, 'Risk assessment', 'titled, which names the saved file');
   deepEqual(
     view.sections.map((section) => [section.name, section.tables[0].rows.length]),
     [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]],

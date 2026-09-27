@@ -1756,7 +1756,6 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .pane-view .tabs { background: var(--layer); }
 .view-scroll { flex: 1; min-height: 0; overflow: auto; padding: 16px 16px 64px; }  /* $spacing-05 */
 .pane-view .section[hidden] { display: none; }
-.pane-view .print-only { display: none; }
 
 /* Carbon's data table: heads on $layer-accent in $heading-compact-01,
    rows ruled by $border-subtle, cells on the type's compact sizes. A
@@ -1798,24 +1797,4 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data .entity:hover .entity-title { text-decoration: underline; }
 .data .entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .data .entity.gone { color: var(--text-helper); }
-
-/* Printing a view: the view alone, every section on a page of its own
-   under its name, on A3 landscape so the widest view fits whole. */
-@page { size: A3 landscape; margin: 12mm; }
-@media print {
-  .shell-bar, .notices, .toasts, #overlay-root, .pane-navigator, .splitter, .column, .view-head, .pane-view .tabs { display: none !important; }
-  .workspace, .pane-view, .pane-view .pane-body, .view-scroll { display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important; }
-  .pane-view[hidden] { display: none !important; }
-  .pane-view .section[hidden] { display: block !important; }
-  .pane-view .section { page-break-after: always; }
-  .pane-view .print-only { display: block; }
-  .pane-view h1 { font-size: 20px; font-weight: 400; margin: 0 0 8px; }
-  .pane-view h2 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; }
-  .data { font-size: 12px; }
-  .data th, .data td { padding: 4px 8px; }
-  .data .mono { font-size: 11px; }
-  .data td p { font-size: 12px; min-width: 16ch; max-width: 26ch; }
-  .data .tag { height: 18px; padding: 0 6px; font-size: 11px; }
-  .data .tag, .data .risk-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { background: #fff; color: #000; }
 }
