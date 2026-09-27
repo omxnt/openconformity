@@ -617,7 +617,24 @@ Size. Small.
 
 Size. Small, each.
 
-## 8. What to leave alone
+## 8. Outcome
+
+Every finding was taken up between 27 and 28 September 2026, in the order the review ranked them, one commit each.
+
+| Findings | Commit |
+|---|---|
+| 7.5 the source pins | `2103f31` |
+| 7.3, 7.4, 7.15, 7.16, 7.17 the model's writes, the doc blocks, the dead paths and the small things | `cd4a4c5` |
+| 7.1, 7.2, 7.11 the field helpers, the view registry and the folded helpers | `4a60c2a` |
+| 7.7, 7.12 the shared pane pieces and the shell's notices | `c2aae33` |
+| 7.8, 7.9, 7.10, 7.13, 7.14 the stylesheet, the store's session facts, the editor test and the views note | `a76fea1` |
+| 7.6 the editor split | `44568b4` |
+
+Three findings were decided otherwise. The column widths stay in memory by choice, so only the splitter layout moved into the store. The unused cell kinds of the views, and the column text of 7.17 with them, are named as scaffolding rather than removed. The editor test keeps its checks on the field helpers and lost only the restated definitions.
+
+One regression came with the rounds and was fixed in `930aa53`, a menu that lost its entries to a re-indentation. The suite could not see it because the page modules have no headless test, and the browser drives that caught it live outside the repository. Bringing them in is the open item this review leaves.
+
+## 9. What to leave alone
 
 The store as one owner. It is long because there are many session facts, its interface is flat, and every method has a test. Splitting it by fact would make the persistence chain and `clearBrowserData` harder to see whole.
 
@@ -639,7 +656,7 @@ The graph's layout as pure functions. `graph.js` lines 29 to 249 are geometry wi
 
 The interface text inside `queries.js`, `records.js` and `project.js`. Each sentence stands beside the count it states, and a module of sentences apart from their counts would be harder to keep true.
 
-## 9. References
+## 10. References
 
 | No. | Reference | Link |
 |---|---|---|
