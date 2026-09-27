@@ -550,7 +550,7 @@ export const ATTRIBUTES = {
       { key: 'description', name: 'Requirement', kind: 'multiline', help: 'What the system must do or be.' },
       { key: 'rationale', name: 'Rationale', kind: 'multiline', help: 'Why the system requirement exists.' },
     ],
-    groups: [{ name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
+    groups: [drawingTab(), { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] }],
   },
   VER: {
     attributes: [
@@ -581,6 +581,7 @@ export const ATTRIBUTES = {
           },
         ],
       },
+      drawingTab(),
       { name: 'Notes', tab: true, attributes: [{ key: 'notes', name: 'Notes', kind: 'multiline', help: 'Anything worth keeping that no field holds, such as how something was assessed.' }] },
     ],
   },

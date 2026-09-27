@@ -699,7 +699,13 @@ The type follows the requirement categories of SEBoK's requirements article [2].
 | Requirement | multiline |  | What the system must do or be. | description |
 | Rationale | multiline |  | Why the system requirement exists. | rationale |
 
-#### 5.4.2 Notes
+#### 5.4.2 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 5.4.3 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -729,7 +735,13 @@ The type follows the requirement categories of SEBoK's requirements article [2].
 | Result | choice | Passed; Failed |  | runs.result |
 | Remarks | multiline |  |  | runs.remarks |
 
-#### 5.5.3 Notes
+#### 5.5.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 5.5.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
