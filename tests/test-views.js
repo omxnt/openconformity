@@ -190,12 +190,14 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual(
     block.map((table) => [table.number ?? '', table.caption ?? '', table.subnumber ?? '', table.subcaption ?? '']),
     [
-      ['1', 'Description', '', ''],
-      ['2', 'Relationships', '2.1', 'Part of'], ['', '', '2.2', 'Decomposes into'], ['', '', '2.3', 'Realises'], ['', '', '2.4', 'Allocated to'], ['', '', '2.5', 'Expressed by'],
-      ['3', 'Behaviour', '', ''], ['4', 'Characteristics', '', ''], ['5', 'Fault handling', '', ''], ['6', 'Diagram', '', ''], ['7', 'Notes', '', ''],
+      ['1.1', 'Description', '', ''],
+      ['1.2', 'Relationships', '1.2.1', 'Part of'], ['', '', '1.2.2', 'Decomposes into'], ['', '', '1.2.3', 'Realises'], ['', '', '1.2.4', 'Allocated to'], ['', '', '1.2.5', 'Expressed by'],
+      ['1.3', 'Behaviour', '', ''], ['1.4', 'Characteristics', '', ''], ['1.5', 'Fault handling', '', ''], ['1.6', 'Diagram', '', ''], ['1.7', 'Notes', '', ''],
     ],
-    "a function's parts numbered in the editor's order, each kind of relationship a numbered sub-part"
+    "a function is chapter 1 on its own tab, its parts numbered within it in the editor's order, each kind of relationship a numbered sub-part"
   );
+  deepEqual(view.sections[0].tables.filter((table) => table.heading).map((table) => [table.chapter, table.heading]), [['1', 'SAF-001'], ['2', 'SAF-002'], ['3', 'SAF-003'], ['4', 'SAF-004']], 'and on the first tab each function is the next chapter, in tree order');
+  equal(view.sections[0].tables.find((table) => table.heading === 'SAF-002').number, '2.1', 'its parts numbered under its chapter');
   deepEqual([block[0].heading, block[0].prose], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function, its description the first part');
   deepEqual([block[1].columns, block[1].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
   deepEqual(block[3].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
@@ -213,11 +215,13 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([specifiedFields(group, { standard: 'EN IEC 62061:2021' })[1].key, specifiedFields(group, {})[1].key], ['sil', 'ownLevel'], 'under the other standard the level in SIL, under none the level typed');
   ok(block.every((table) => 'figure' in table || 'prose' in table || (table.spec && table.sortable === false)), 'each table reads as a form, never sorted');
   equal(view.sections[0].tables.length, 44, 'the first tab holds every function, eleven parts each');
-  const saved = sectionMarkdown(view, view.sections[1], labelOf);
-  ok(saved.text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n### 1 Description\n\n'), 'the Markdown opens on the view, then the function and its description');
-  ok(saved.text.includes('### 2 Relationships\n\n#### 2.1 Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### 2.3 Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship a numbered sub-part, by identifier and title');
-  ok(saved.text.includes('### 3 Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'then the numbered tabs');
-  ok(saved.text.includes('### 6 Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
+  const saved = sectionMarkdown(view, view.sections[1], labelOf, 'Example project, saved 27 September 2026');
+  ok(saved.text.startsWith('# Safety function specification\n\nExample project, saved 27 September 2026\n\n## 1 SAF-001 SF-1 Emergency Stop\n\n### 1.1 Description\n\n'), 'the Markdown opens on the view, the line under it, then the function as chapter 1 and its description, with no contents for one chapter');
+  ok(saved.text.includes('### 1.2 Relationships\n\n#### 1.2.1 Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### 1.2.3 Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship a numbered sub-part, by identifier and title');
+  ok(saved.text.includes('### 1.3 Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'then the numbered tabs');
+  ok(saved.text.includes('### 1.6 Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
+  const whole = sectionMarkdown(view, view.sections[0], labelOf).text;
+  ok(whole.includes('## Contents\n\n1. [SAF-001 SF-1 Emergency Stop](#1-saf-001-sf-1-emergency-stop)\n2. [SAF-002 SF-2 Door Interlock](#2-saf-002-sf-2-door-interlock)\n3. [SAF-003 SF-2.1 Position Detection](#3-saf-003-sf-21-position-detection)\n') && whole.includes('\n## 3 SAF-003 SF-2.1 Position Detection\n'), 'the whole view lists its chapters, each linked to its heading');
   deepEqual(saved.diagrams.map((file) => file.name), ['diagrams/SAF-001.svg'], 'which comes with the text');
   deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg'], "and a function's tab brings its own diagram alone");
   equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');

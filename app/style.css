@@ -1797,6 +1797,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
    head, its field names in the secondary colour. */
 .view-block-head { margin: 32px 0 8px; font-size: 20px; font-weight: 400; line-height: 1.4; }  /* $heading-03 */
 .section > .view-block-head:first-child { margin-top: 0; }
+.view-block-number { margin-right: 12px; }
 .view-block-head .entity { display: inline-flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
 .view-block-head .entity .icon { width: 20px; height: 20px; flex: none; }
 .view-block-head .entity .mono { font-size: 16px; color: var(--text-second); }

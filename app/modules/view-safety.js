@@ -1,8 +1,8 @@
 /**
  * The safety function specification as a view: one block per safety
  * function, holding only what the function says for itself and what
- * relates to it directly, in numbered parts in the order of its tabs in
- * the editor: its description, its relationships, each kind a numbered
+ * relates to it directly, as a numbered chapter whose parts number
+ * within it in the order of its tabs in the editor: its description, its relationships, each kind a numbered
  * sub-part with a table of identifier and title, a table of field and
  * value for Behaviour, Characteristics and Fault handling, with the
  * required integrity level of the standard in force after the standard,
@@ -13,7 +13,7 @@
  * saves.
  *
  * A part opens a block where it carries `heading`, the entity the block
- * is about. `number` and `caption` name a part and `subnumber` and
+ * is about, and `chapter`, its number. `number` and `caption` name a part and `subnumber` and
  * `subcaption` a table within it. A part holds a table, or `prose` in
  * its place, or `figure`, the drawing it shows or null for none.
  */
@@ -86,12 +86,12 @@ export function buildSafetyView(model) {
   const roots = all.filter((saf) => !partOf.has(saf.id));
   const ordered = roots.flatMap((root) => tree(root));
 
-  const block = (saf) => {
+  const block = (saf, chapter) => {
     const values = saf.attributes;
     let number = 1;
-    const part = (caption, rest) => ({ number: String(number++), caption, ...rest });
-    const description = part('Description', { heading: saf.id, prose: (values.description ?? '').trim() });
-    const at = number++;
+    const part = (caption, rest) => ({ number: `${chapter}.${number++}`, caption, ...rest });
+    const description = part('Description', { heading: saf.id, chapter: String(chapter), prose: (values.description ?? '').trim() });
+    const at = `${chapter}.${number++}`;
     const relationships = RELATIONSHIPS.map((held, i) => {
       const ids = ends(saf.id, held.type, held.side);
       return {
@@ -126,8 +126,8 @@ export function buildSafetyView(model) {
     title: 'Safety function specification',
     exports: ['markdown'],
     sections: [
-      { name: `All functions (${all.length})`, tables: ordered.flatMap(block) },
-      ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf) })),
+      { name: `All functions (${all.length})`, tables: ordered.flatMap((saf, i) => block(saf, i + 1)) },
+      ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf, 1) })),
     ],
   };
 }

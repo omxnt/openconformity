@@ -963,6 +963,16 @@ The specification has a tab for every safety function, holding that function alo
 
 ---
 
+### D-111 The specification reads as a document
+
+`2026-09-27` `product`
+
+Each safety function is a numbered chapter, its parts numbered within it, in the view and in the Markdown alike, and a function's own tab makes it chapter 1. Saved as Markdown, the document opens with its title, a line naming the project and the date it was saved, and, where it holds two chapters or more, a list of contents linking to each by the anchor GitHub gives its heading.
+
+> *A specification is read away from the software, so it has to say where it came from and let a reader find a function in it. Chapters numbered like the project's own documents let a review point at a part. The anchors are GitHub's, which most Markdown tools share, and in a tool that makes them otherwise the list still reads. Amends D-109.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

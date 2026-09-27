@@ -97,13 +97,15 @@ export const numbered = (number, caption) => [number, caption].filter(Boolean).j
  * @param {{ title: string }} built
  * @param {{ tables: Array<*> }} section
  * @param {(id: string) => string} labelOf
+ * @param {string} [subtitle]  the line under the title
  * @returns {{ text: string, diagrams: Array<{ name: string, text: string }> }}
  */
-export function sectionMarkdown(built, section, labelOf) {
+export function sectionMarkdown(built, section, labelOf, subtitle = '') {
   const diagrams = [];
   const tables = section.tables.map((table) => {
     const part = {
       heading: table.heading ? [table.heading, labelOf(table.heading)].filter(Boolean).join(' ') : '',
+      chapter: table.chapter ?? '',
       caption: table.caption ? numbered(table.number, table.caption) : '',
       subcaption: table.subcaption ? numbered(table.subnumber, table.subcaption) : '',
     };
@@ -116,7 +118,7 @@ export function sectionMarkdown(built, section, labelOf) {
     }
     return { ...part, headers: table.columns.map(columnText), rows: table.rows.map((row) => row.cells.map((held) => exportText(held, labelOf))) };
   });
-  return { text: markdown(built.title, tables), diagrams };
+  return { text: markdown(built.title, tables, { subtitle }), diagrams };
 }
 
 /**
@@ -375,7 +377,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const built = view.build(store.model());
     const index = Math.min(open.section, built.sections.length - 1);
     const part = savedPart(built, index, 'md');
-    const { text, diagrams } = sectionMarkdown(built, built.sections[index], labelOf);
+    const saved = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+    const { text, diagrams } = sectionMarkdown(built, built.sections[index], labelOf, `${store.model().name.trim() || 'Untitled'}, saved ${saved}`);
     if (diagrams.length === 0) {
       download(part.filename, text, 'text/markdown;charset=utf-8');
       return;
@@ -411,7 +414,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       const block = el('div', { className: 'section' });
       block.hidden = i !== section;
       held.tables.forEach((spec, j) => {
-        if (spec.heading) block.appendChild(el('h2', { className: 'view-block-head', attributes: { 'data-id': spec.heading } }, [entityRow(spec.heading)]));
+        if (spec.heading) block.appendChild(el('h2', { className: 'view-block-head', attributes: { 'data-id': spec.heading } }, [...(spec.chapter ? [el('span', { className: 'view-block-number', text: spec.chapter })] : []), entityRow(spec.heading)]));
         if (spec.caption) block.appendChild(el('h3', { className: 'view-caption', text: numbered(spec.number, spec.caption) }));
         if (spec.subcaption) block.appendChild(el('h4', { className: 'view-subcaption', text: numbered(spec.subnumber, spec.subcaption) }));
         if ('prose' in spec) {

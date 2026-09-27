@@ -4,8 +4,8 @@
  * directory.
  */
 
-import { markdownText, markdownCell, markdown } from '../app/modules/markdown.js';
-import { ok, equal, summary } from './harness.js';
+import { markdownText, markdownCell, markdown, anchor } from '../app/modules/markdown.js';
+import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- A cell and its text (F-VIE-001) -----------------------------------------
 
@@ -19,6 +19,9 @@ import { ok, equal, summary } from './harness.js';
   equal(markdown('T', [{ caption: 'Diagram', image: { alt: 'Diagram of [x]', path: 'diagrams/A B.svg' } }, { caption: 'Other', image: null }]), '# T\n\n### Diagram\n\n![Diagram of x](diagrams/A%20B.svg)\n\n### Other\n\n–\n', 'a figure is an image linked by its path, and a dash where there is none');
   ok(markdown('T', [{ caption: 'Relationships', subcaption: 'Realises', headers: ['A'], rows: [] }]).includes('### Relationships\n\n#### Realises\n\n| A |'), 'a subcaption stands under its part');
   ok(markdown('T', [{ caption: 'Description', prose: '' }]).includes('### Description\n\n–\n'), 'and empty prose is a dash');
+  deepEqual([anchor('3 SAF-003 SF-2.1 Position Detection'), anchor('Åsa & Örjan: (test)')], ['3-saf-003-sf-21-position-detection', 'åsa--örjan-test'], 'an anchor is the heading in lower case, without punctuation, its spaces hyphens, as GitHub makes it');
+  const doc = markdown('T', [{ heading: 'A', chapter: '1', caption: '1.1 X', prose: 'x' }, { heading: 'B', chapter: '2', caption: '2.1 X', prose: 'y' }], { subtitle: 'P, saved today' });
+  ok(doc.startsWith('# T\n\nP, saved today\n\n## Contents\n\n1. [A](#1-a)\n2. [B](#2-b)\n\n## 1 A\n\n### 1.1 X'), 'the line under the title, then the contents, then each numbered chapter');
 }
 
 // --- A document of tables (F-VIE-001) -----------------------------------------
