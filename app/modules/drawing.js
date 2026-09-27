@@ -16,6 +16,9 @@ const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 /** Elements a drawing may not hold, in any namespace: what runs code or embeds a document. */
 const FORBIDDEN_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'applet', 'frame', 'frameset']);
 
+/** Attributes that name something to load, checked on every element but a link's own href. */
+const REFERENCES = new Set(['href', 'src', 'poster']);
+
 /** Elements that rewrite another element's attribute over time. */
 const ANIMATIONS = new Set(['animate', 'set', 'animatetransform', 'animatemotion', 'animatecolor', 'discard']);
 
@@ -192,6 +195,7 @@ const lengthOf = (value) => Number.parseFloat(String(value ?? '').trim());
 function cssFault(text) {
   const css = text.replace(/\\([0-9a-f]{1,6})\s?/gi, (held, hex) => String.fromCodePoint(Number.parseInt(hex, 16))).replace(/\\(.)/g, '$1');
   if (/@import/i.test(css)) return 'imports a stylesheet';
+  if (/image-set\(/i.test(css)) return 'references a resource outside the diagram';
   const urls = css.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi);
   for (const [, , target] of urls) {
     const held = target.trim().toLowerCase();
@@ -251,12 +255,14 @@ function walk(element) {
       const animated = local(attribute.value.trim().toLowerCase());
       if (animated === 'href' || animated.startsWith('on')) return 'animates a link or a handler';
     }
-    if (local(key) === 'href' || local(key) === 'src') {
+    if (local(key) === 'srcset') return 'references a resource outside the diagram';
+    if (REFERENCES.has(local(key))) {
       const target = attribute.value.trim().toLowerCase().replace(/\s+/g, '');
       if (/^(javascript|vbscript|data:text\/html)/.test(target)) return 'links to code';
-      if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the diagram';
+      const inside = target.startsWith('#') || target.startsWith('data:image/');
+      if (name === 'image' && !inside) return 'references an image outside the diagram';
       if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the diagram';
-      if (local(key) === 'src' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references a resource outside the diagram';
+      if (!(name === 'a' && local(key) === 'href') && !inside) return 'references a resource outside the diagram';
     }
     if (local(key) === 'style') {
       const held = cssFault(attribute.value);

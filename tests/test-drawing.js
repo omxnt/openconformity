@@ -102,6 +102,15 @@ const reason = (text) => {
   equal(reason(svg('<rect><set attributeName="onload" to="x()"/></rect>')), 'animates a link or a handler', 'a set of a handler');
   equal(reason(svg('<rect><animate attributeName="xlink:href" to="javascript:alert(1)"/></rect>')), 'animates a link or a handler', 'a link in the linking namespace');
   equal(reason(svg('<rect><animate attributeName="opacity" from="0" to="1"/></rect>')), 'accepted', 'an animation of anything else passes');
+  const outside = 'references a resource outside the diagram';
+  equal(reason(svg('<filter id="f"><feImage href="https://x/a.png"/></filter>')), outside, 'a filter image on the web');
+  equal(reason(svg('<pattern id="p" xlink:href="https://x/p.svg#q"/>')), outside, 'a pattern taken from another file');
+  equal(reason(svg('<foreignObject><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="https://x/s.css"/></foreignObject>')), outside, 'a link element in embedded HTML');
+  equal(reason(svg('<foreignObject><img xmlns="http://www.w3.org/1999/xhtml" srcset="https://x/a.png 1x"/></foreignObject>')), outside, 'a source set');
+  equal(reason(svg('<foreignObject><video xmlns="http://www.w3.org/1999/xhtml" poster="https://x/p.png"></video></foreignObject>')), outside, 'a poster');
+  equal(reason(svg('<rect style="fill: image-set(\'https://x/a.png\' 1x)"/>')), outside, 'an image set in a style, with no url');
+  equal(reason(svg('<a href="https://example.org"><rect/></a>')), 'accepted', 'a link to a page passes, since a picture follows no link');
+  equal(reason(svg('<pattern id="p"/><pattern id="q" href="#p"/><filter id="f"><feImage href="data:image/png;base64,AAAA"/></filter>')), 'accepted', 'references inside the drawing, and an image as data, pass');
 }
 
 summary('test-drawing');

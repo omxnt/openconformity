@@ -264,7 +264,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-04 | The gates run newer, invalid, older, then a replay through the model. | `files.js` `loadProject` and `buildModel` | F-PER-004, F-PER-005, F-PER-006 | In place |
 | CT-05 | Any error inside the gates ends in a refusal. | `files.js` `loadProject` | N-SEC-009 | In place |
 | CT-06 | Content under choices not in force is cleared after a question on opening, on loading the example, on import and on save. Unknown content is kept and stated. | `flows.js` `clearHidden`, `stateUnknown`, `importPicks` and `saveProjectEdit`, `project.js` | N-SEC-005, F-PER-010, F-MOD-010 | In place. The restore path does not clear, see SC-18. |
-| CT-07 | The drawing check refuses script, handlers, embedding elements, links to code, animated links and handlers, outside references, entity declarations, and sizes and dimensions over the limits. | `drawing.js` `checkDrawing` and `parseXml` | F-DRW-001 | In place. Some outside references still pass, see SC-02. |
+| CT-07 | The drawing check refuses script, handlers, embedding elements, links to code, animated links and handlers, entity declarations, and sizes and dimensions over the limits. It refuses any `href`, `src` or `poster` that is neither local nor an image as data, on every element but a link's own `href`, and any `srcset` or CSS `image-set`. | `drawing.js` `checkDrawing` and `parseXml` | F-DRW-001 | In place |
 | CT-08 | A drawing is shown only as an image from a data address. | `drawing-cell.js` `drawingCell`, `drawing.js` `dataUrl` | N-SEC-003 | In place |
 | CT-09 | The frame is created once, after consent, sandboxed to scripts and its own origin, with every device permission denied and no referrer. | `drawing-editor.js` `editDrawing`, `FRAME_SANDBOX` and `FRAME_ALLOW` | C-TEC-008, N-SEC-004 | In place |
 | CT-10 | A message is heard only from the frame's window and the editor's origin, as a string under 8 megabytes, holding JSON and a known event. | `drawing-editor.js` `acceptMessage` | N-SEC-004 | In place |
@@ -328,7 +328,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | Id | What remains | Status | Accepted by, or closed by |
 |---|---|---|---|
 | SC-01 | None found. | Closed | CT-01, CT-02 |
-| SC-02 | Some outside references pass the check, such as a `feImage` source, `srcset` and a CSS `image-set`. The image rendering holds against every one. | Open | Widening CT-07 |
+| SC-02 | None found. A reference in a form the check does not name would still be held by the image rendering. | Closed | CT-07, CT-08 |
 | SC-03 | None found. | Closed | CT-18 |
 | SC-04 | Saving is one pass over the nodes. A change in a flat project of 20,000 entities still holds the tab for about three seconds, since the tree finds a node's children by reading every node. | Open | A children index in the model |
 | SC-05 | None found. | Closed | CT-02, CT-03 |
