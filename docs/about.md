@@ -20,9 +20,9 @@ Compared to a document-centric approach, where the same information is repeated 
 
 ### 1.3 Problem Statement
 
-When studying the framework behind CE marking, it becomes apparent that this work has the same character as the problems MBSE tries to solve. Legislation defines essential requirements, which are triggered by the hazards the product exhibits. The essential requirements are usually met by applying harmonised standards, where the hazards are fed into the risk analysis. Multiple hazards can contribute to different accident scenarios, mitigated by a set of risk reduction measures. A mature organisation usually translates this into system requirements, which are later verified by verification activities.
+When studying the framework behind CE marking, it becomes apparent that this work has the same character as the problems MBSE tries to solve. Legislation defines essential requirements, which are triggered by the hazards the product exhibits. The essential requirements are usually met by applying harmonised standards, where the hazards are fed into the risk analysis. Multiple hazards can contribute to different accident scenarios, mitigated by a set of protective measures. A mature organisation usually translates this into system requirements, which are later verified by verification activities.
 
-Traditional document-centric CE marking implies that the same information is stated multiple times, from different points of view. The relationships within the CE marking work are inherently many-to-many, where a single risk reduction measure may reduce the risk of several hazards, a single hazard may appear in several accident scenarios, and a harmonised standard may relate both to essential requirements and to the risk reduction measures that implement its clauses. In a document-centric approach, each of these connections is repeated wherever it is relevant, for example, the same risk reduction measure is written into the row of every hazard it mitigates. This means that each repetition must be maintained by hand.
+Traditional document-centric CE marking implies that the same information is stated multiple times, from different points of view. The relationships within the CE marking work are inherently many-to-many, where a single protective measure may reduce the risk of several hazards, a single hazard may appear in several accident scenarios, and a harmonised standard may relate both to essential requirements and to the protective measures that implement its clauses. In a document-centric approach, each of these connections is repeated wherever it is relevant, for example, the same protective measure is written into the row of every hazard it mitigates. This means that each repetition must be maintained by hand.
 
 In a model-based approach, every entity is stated once, and the connections are expressed as semantic relationships. Views can then be exported for any purpose, such as a hazard list, a requirement specification, or a verification plan. All of these artefacts are generated from the same model, always consistent with each other, with the traceability between legislation, standards, hazards, measures, requirements, and verifications preserved automatically.
 
@@ -32,7 +32,7 @@ The software is a modelling environment for CE marking of machinery, used direct
 
 The modelling language is defined by a metamodel, built into the software, which encodes the domain knowledge of CE marking and governs which entities and relationships can exist. The model is built up entity by entity as the engineering work progresses, one model per machinery product.
 
-Every fact is stated once in the model. Artefacts such as hazard lists and requirement specifications are generated as views of the model, exportable for use in the user's own documentation. Content can be reused between projects, while the relationships are always re-established in the context of each machinery product.
+Every fact is stated once in the model. Artefacts such as the risk assessment and the safety function specification are generated as views of the model, exportable for use in the user's own documentation. Content can be reused between projects, while the relationships are always re-established in the context of each machinery product.
 
 ## 3. Principles
 
@@ -48,7 +48,7 @@ The software runs entirely client-side, with no installation, no account, and no
 
 ### 3.3 Privacy by Design
 
-There is no server contact, no tracking, no analytics, and no data collection of any kind. All processing happens in the user's browser, and user data never leaves it.
+There is no tracking, no analytics, and no data collection of any kind. All processing happens in the user's browser. User data leaves it only when the user consents to edit a diagram in draw.io, and then only that diagram.
 
 ### 3.4 User-Owned Data
 

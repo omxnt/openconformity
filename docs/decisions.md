@@ -31,7 +31,7 @@ An entry states what was decided and why. It does not repeat requirement text: w
 
 ### 1.5 Supersession
 
-A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it.
+A decision that changes is not edited. A new entry is added that states the updated decision in full, and the entry it replaces is left unchanged except for a `superseded by D-NNN` tag naming the entry that replaces it. A decision that changes part of an earlier one and leaves the rest standing ends its rationale with `Amends D-NNN`, and the earlier entry is left unchanged.
 
 ### 1.6 Template
 
@@ -306,16 +306,6 @@ The interface follows the IBM Carbon Design System, its colour tokens, spacing s
 Entity type icons carry a colour by pillar, from Carbon's palette, with one value per theme. Shape remains the carrier of meaning, since each entity type has its own silhouette, and colour groups rather than identifies.
 
 > *An earlier palette was built and removed because shape did not need it. What changed is the count: eighteen entity types are more than a tree can be scanned by shape alone, and four colours group them into areas of the work before any icon is read. The hues were chosen by searching every combination of three Carbon hues plus yellow across the usable steps, requiring three to one contrast against every row state and scoring by the smallest perceptual distance between any two pillars under normal vision and simulated protanopia, deuteranopia and tritanopia. Purple, magenta, teal and yellow won by a wide margin, with no pair falling below a distance of fifteen. Under protanopia the system context colour sits close to the neutral icon grey, which was accepted in exchange for keeping the pillars apart from each other. Nobody who cannot see the colour loses information, only the speed of finding a pillar. Supersedes D-027.*
-
----
-
-### D-044 Freeform navigator
-
-`2026-08-11` `product` `superseded by D-087`
-
-The navigator is independent of the metamodel. Entities and folders are placed anywhere in the tree, and placement carries no meaning: it neither creates nor requires a relationship. The metamodel continues to govern which entities exist and how they may relate.
-
-> *The tree is filing rather than structure. A user can work with folders alone, build full traceability, or organise a machine so that a subsystem folder holds its own elements, hazards, measures and requirements. Composition governs deletion rather than placement, so a hazard can exist before its element and imported content needs no owner. Exports that depend on relationships are unavailable to a user who does not create them, which is a consequence rather than a fault. Settles U-009.*
 
 ---
 
@@ -649,16 +639,6 @@ The requirements open with a table of the terms they use, and every statement us
 
 ---
 
-### D-081 The beta behind one shared login
-
-`2026-09-25` `architecture` `repository`
-
-During the beta the software at app.openconformity.org is reachable only with one login shared with the invited testers. The gate is a Cloudflare Worker doing HTTP Basic Authentication on the route in front of the Pages deployment, configured on the host with the login as its variables, and the address the host gives every Pages project is covered by a Cloudflare Access policy. The software knows nothing of the gate. The Worker's source and its settings are kept in the sandbox as a record.
-
-> *The beta is for invited testers, and a login that travels with the invitation is what steers it to them. Basic Authentication over HTTPS is enough for that and no more, and the browser keeps the credentials for the session so the software's own requests pass unprompted. A gate written into the deployment, as a Pages Function, would put server-side code where C-TEC-007 forbids it, so the gate stands in front of the deployment instead, where removing one route ends it. Access with a one-time code per tester was weighed and would have given revocation per tester, but not one shared login. The exception in D-071 is not touched, since the gate receives what the browser sends to the host anyway and hands nothing on.*
-
----
-
 ### D-082 Prototypes as tags, the specification as spec
 
 `2026-09-25` `repository`
@@ -776,7 +756,7 @@ The specification stands alone in `specs`, the requirements, the metamodel and t
 
 ### D-093 The save names the file
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 Save to file asks for the file's name, prefilled from the project's name as the filename it makes, and the project's own name is never changed by a save. The project is renamed on its own tab. The set-aside copy is saved through the same question.
 
@@ -786,7 +766,7 @@ Save to file asks for the file's name, prefilled from the project's name as the 
 
 ### D-094 No hidden content
 
-`2026-09-28` `product` `architecture`
+`2026-09-26` `product` `architecture`
 
 A project holds nothing its author cannot see in the software. A choice that hides a group clears what the group held, at the save that changes the choice on the entity, at the save of the project for a choice the entities read from it, and on opening a file that arrives holding such values, each after a question naming what is cleared. Content no definition of this revision presents is kept as written and stated when the file is opened. Ratings are not kept across a change of the risk estimation method. Trying another method means saving the project and opening a copy.
 
@@ -796,7 +776,7 @@ A project holds nothing its author cannot see in the software. A choice that hid
 
 ### D-095 No user-defined risk method
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 The project chooses one of the three risk estimation methods of D-068 or none, and with none chosen the ratings are typed as text. No method of the user's own is defined in the settings.
 
@@ -806,7 +786,7 @@ The project chooses one of the three risk estimation methods of D-068 or none, a
 
 ### D-096 The risk evaluation is the verdict
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 The scenario's Risk evaluation field, the modeller's own judgement whether the residual risk is acceptable and why, is the verdict on the scenario. No separate yes or no stands beside the rating.
 
@@ -816,7 +796,7 @@ The scenario's Risk evaluation field, the modeller's own judgement whether the r
 
 ### D-097 The editor's tabs and labels
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 A type's own attributes stand on its first tab, named by the last word of the type's name, and every type ends with a Notes tab. A group earns a tab by a distinct task, such as a verdict or an estimate, or by a set of fields about one concern, never by a single field and never by the identity alone. An entity is labelled by its reference and its title with a space between, or by its title alone. An entity set out of play by a decision, Applicable No or Eliminated Yes, stays in the model and is shown in the one grey the interface uses for everything out of play, Carbon's disabled strength.
 
@@ -826,7 +806,7 @@ A type's own attributes stand on its first tab, named by the last word of the ty
 
 ### D-098 The rating's face
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 A rating shows as a cell of tags, what it comes to and the code of each parameter chosen. A code is a value's first word, or its second where the first holds no digit, and for a number the initials of its name before it. What the rating comes to wears Carbon's status colours, error for high, warning for medium, the check for low and the check in the secondary colour for negligible, whichever method's word says so. A parameter with a rationale is underlined, and its tooltip carries the reasoning beneath the parameter's name and value.
 
@@ -836,7 +816,7 @@ A rating shows as a cell of tags, what it comes to and the code of each paramete
 
 ### D-099 The safety function's tabs
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 A sentence about what happens stands on a story tab, Behaviour for the nominal path and Fault handling for the faulty one, and a quantity or an interface stands on Characteristics. Fault handling is self-contained, the faults to be detected, the means of detection, the reaction with the state it brings the machinery to, the two times, the indication, the recovery and the power disturbances. What a standard requires of the design beyond the level stands in one text, the specific design targets, in the standard's own terms. The functional safety standard is the function's own choice, and the required integrity level is chosen in the one slot beside it under one name, whichever standard's term it is.
 
@@ -846,7 +826,7 @@ A sentence about what happens stands on a story tab, Behaviour for the nominal p
 
 ### D-100 The protective measure's step
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 A measure belongs to one of the three steps the Regulation orders in Annex III 1.1.2, under names of our own. Safe design removes the hazard or holds it back by the design itself, protection is something added that stands between a remaining hazard and the person, and information tells the user of what is left. The kind beside the step is the modeller's own word for what the measure is.
 
@@ -856,7 +836,7 @@ A measure belongs to one of the three steps the Regulation orders in Annex III 1
 
 ### D-101 The notified body's notification
 
-`2026-09-28` `product`
+`2026-09-26` `product`
 
 A notified body carries its address and its own website beside its number and name, and a Notification tab holding what the Commission's register says of it, the act it is notified under, the Member State that notified it, its entry in the register, the procedures it may carry out and the products it may assess. It carries no description.
 
@@ -866,7 +846,7 @@ A notified body carries its address and its own website beside its number and na
 
 ### D-102 The attributes document is a specification
 
-`2026-09-28` `repository`
+`2026-09-27` `repository`
 
 The attributes document stands in `specs` beside the requirements, the metamodel and the schema, as `specs/attributes.md`. It is tables and conventions, held to the code by the tests, and guarded with the rest of the specification. F-MOD-003 names it there.
 
@@ -983,6 +963,16 @@ The safety function specification is also saved as an Excel workbook, as a regis
 
 ---
 
+### D-113 The beta open to everyone
+
+`2026-09-27` `architecture` `repository`
+
+The beta at app.openconformity.org is open to everyone, with no login. The gate D-081 put in front of the deployment is taken down, and its Worker and settings leave the repository with it.
+
+> *The software keeps nothing on the host, so the login decided who could try the beta and guarded nothing of any user's. An open beta reaches anyone the tool is meant for, and the landing page asks them for feedback at the project's address. Without the gate the headers the host sends are read from the software's own response.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
@@ -1008,6 +998,26 @@ Whether the views rate in place, or ratings are made only in the editor as today
 ## 4. Superseded
 
 Entries replaced by a later decision, kept as a record of what was chosen and when.
+
+---
+
+### D-081 The beta behind one shared login
+
+`2026-09-25` `architecture` `repository` `superseded by D-113`
+
+During the beta the software at app.openconformity.org is reachable only with one login shared with the invited testers. The gate is a Cloudflare Worker doing HTTP Basic Authentication on the route in front of the Pages deployment, configured on the host with the login as its variables, and the address the host gives every Pages project is covered by a Cloudflare Access policy. The software knows nothing of the gate. The Worker's source and its settings are kept in the sandbox as a record.
+
+> *The beta is for invited testers, and a login that travels with the invitation is what steers it to them. Basic Authentication over HTTPS is enough for that and no more, and the browser keeps the credentials for the session so the software's own requests pass unprompted. A gate written into the deployment, as a Pages Function, would put server-side code where C-TEC-007 forbids it, so the gate stands in front of the deployment instead, where removing one route ends it. Access with a one-time code per tester was weighed and would have given revocation per tester, but not one shared login. The exception in D-071 is not touched, since the gate receives what the browser sends to the host anyway and hands nothing on.*
+
+---
+
+### D-044 Freeform navigator
+
+`2026-08-11` `product` `superseded by D-087`
+
+The navigator is independent of the metamodel. Entities and folders are placed anywhere in the tree, and placement carries no meaning: it neither creates nor requires a relationship. The metamodel continues to govern which entities exist and how they may relate.
+
+> *The tree is filing rather than structure. A user can work with folders alone, build full traceability, or organise a machine so that a subsystem folder holds its own elements, hazards, measures and requirements. Composition governs deletion rather than placement, so a hazard can exist before its element and imported content needs no owner. Exports that depend on relationships are unavailable to a user who does not create them, which is a consequence rather than a fault. Settles U-009.*
 
 ---
 

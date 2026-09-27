@@ -87,7 +87,6 @@ A change of the kind below updates the sections named in the same commit.
 | Part | Why | Where a report goes |
 |---|---|---|
 | The project site at `openconformity.org` | Another origin and another deployment. | The maintainer, as `SECURITY.md` says. |
-| The beta gate in front of the host | The host's configuration, seen only from its response. | The maintainer. |
 | draw.io's code at its origin | JGraph's software. | JGraph, as `SECURITY.md` says. |
 | The browser | The vendor's software. | The vendor. |
 | Cloudflare's and GitHub's own systems | Their services. | Cloudflare and GitHub. |
@@ -297,8 +296,8 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-16 | No module fetches, opens a socket or sends a beacon, and every import is a relative file. | Every module | N-PRV-002, N-OPS-002, C-TEC-002 | In place |
 | CT-17 | Nothing is read from the page's address. | Every module | N-SEC-010 | In place |
 | CT-18 | A hyperlink is a link only for an http or https address, and opens without an opener. | `fields.js` `linkable`, `editor.js` `valueNode` | N-SEC-008 | In place |
-| CT-19 | Every link of the software's own opens without an opener. | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | None. Pinned in `test-pins.js`, Nothing leaves the page but by a link the user follows. | In place |
-| CT-20 | The theme and the session values are accepted only as literals of the expected type. | `theme.js`, `store.js` `createStore` and `sessionRead` | None. Pinned in `test-pins.js`, The pre-paint theme script speaks the store's literals. | In place |
+| CT-19 | Every link of the software's own opens without an opener. | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | N-PRV-002, N-OPS-002 | In place |
+| CT-20 | The theme and the session values are accepted only as literals of the expected type. | `theme.js`, `store.js` `createStore` and `sessionRead` | N-CMP-002 | In place |
 | CT-21 | The stored project passes the same gates as a file, and one that fails is set aside and stated. | `store.js` `restore` and `install` | F-SES-001, F-SES-004 | In place |
 | CT-22 | A refused write is stated, the leave prompt fires while unsaved work is not stored, and a nearly full store is stated. | `store.js` `persist` and `checkQuota`, `shell.js` `render` | F-SES-005, F-SES-006 | In place |
 | CT-23 | Clear stored data removes everything the software keeps in the browser. | `store.js` `clearBrowserData`, `flows.js` `clearBrowserData` | F-SES-003 | In place |
@@ -328,7 +327,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | Id | Scenario | Actor | Threats | Controls | Feasibility | Impact | Risk | Verdict |
 |---|---|---|---|---|---|---|---|---|
 | SC-01 | A file runs code through a name or value. | TA-01 | TH-06 | CT-01, CT-02, CT-15 | High | High | High | Blocked |
-| SC-02 | A drawing in a file acts, runs script, loads a resource or embeds a document. | TA-03 | TH-16, TH-18 | CT-07, CT-08, CT-15 | High | High | High | Mitigated |
+| SC-02 | A drawing in a file acts, runs script, loads a resource or embeds a document. | TA-03 | TH-16, TH-18 | CT-07, CT-08, CT-15 | High | High | High | Blocked |
 | SC-03 | A hyperlink in a file runs code when clicked. | TA-01 | TH-06 | CT-18 | High | High | High | Blocked |
 | SC-04 | A file deep or wide enough stops the tool. | TA-01 | TH-05 | CT-03, CT-05 | High | Low | Medium | Mitigated |
 | SC-05 | A file pollutes the runtime through a prototype key. | TA-01 | TH-06 | CT-02, CT-03 | High | High | High | Blocked |
@@ -340,7 +339,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-11 | A compromised editor escapes the frame. | TA-04 | TH-24 | CT-09, CT-10 | Low | High | Medium | Blocked |
 | SC-12 | A network attacker alters the software in transit. | TA-07 | TH-37 | CT-24, AU-05 | Low | High | Medium | Blocked |
 | SC-13 | Another site frames, messages or links into the software. | TA-05 | TH-36 | CT-10, CT-17, CT-24 | High | Low | Medium | Mitigated |
-| SC-14 | A person at the machine reads the stored project. | TA-06 | TH-28 | CT-23 | Medium | High | High | Open |
+| SC-14 | A person at the machine reads the stored project. | TA-06 | TH-28 | CT-23 | Medium | High | High | Mitigated |
 | SC-15 | A hostile commit reaches the origin. | TA-08 | TH-43, TH-44, TH-48 | CT-30, CT-31, CT-34 | Low | High | Medium | Mitigated |
 | SC-16 | The host puts code on the origin. | TA-08 | TH-38, TH-42 | CT-29 | Low | High | Medium | Open |
 | SC-17 | A file carries consent, or another editor origin. | TA-01 | TH-06, TH-22 | CT-09, CT-13 | High | Medium | High | Blocked |
@@ -362,8 +361,8 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-09 | A browser bug in the sandbox or the decoder. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
 | SC-10 | None found. | Closed | CT-12 |
 | SC-11 | A browser bug in the sandbox. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
-| SC-12 | The strict transport header on the software's own response is not yet read. | Open | Reading the headers once the gate is down |
-| SC-13 | The framing header on the software's own response is not yet read. | Open | Reading the headers once the gate is down |
+| SC-12 | The strict transport header on the software's own response is not yet read. | Open | Reading the headers from the live host at the release |
+| SC-13 | The framing header on the software's own response is not yet read. | Open | Reading the headers from the live host at the release |
 | SC-14 | The project stands in clear on the device. | Accepted | The project lives on the user's device like any document they save, and Clear stored data removes it (F-SES-003). Encryption would need a key the user keeps, and gives nothing against someone at an unlocked machine. |
 | SC-15 | Review is the gate, and the release check has not yet run at a release. | Open | CT-30 run at the next release |
 | SC-16 | The host's settings are not read. | Open | CT-29 verified |

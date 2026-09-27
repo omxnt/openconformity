@@ -27,6 +27,8 @@ This document describes how the software in `app/` is built. It names the princi
 | `library/` | The library the software ships, as data and the catalogues cut from it |
 | `assets/` | Fonts, icons, marks and images, each folder with its origin and licence |
 | `_headers` | The response headers the host sends |
+| `.well-known/security.txt` | Where to report a vulnerability, in the form security tools read |
+| `LICENSE.txt` | The software's licence, served beside it |
 
 ### 2.2 Layers
 
@@ -34,13 +36,13 @@ The modules fall into seven layers. An import points down to a lower layer or st
 
 | No. | Layer | Touches the page | Modules | Lines |
 |---|---|---|---|---|
-| 1 | Definitions | No | metamodel, attributes, risk, icons, version, platform, text, library data, example | 7,096 |
-| 2 | Model and rules | No | model, validator, files, history, queries, relate, records, project, fields, drawing, view-risk, view-safety, view-registry, xlsx, markdown, zip, library index | 3,391 |
-| 3 | State | No | store, retention | 1,090 |
-| 4 | Page parts | Yes | dom, overlay, dialog, menu, splitter, columns, multiselect, pane, rating, rating-cell, table-control, drawing-cell, drawing-editor, landing, about | 2,301 |
-| 5 | Panes | Yes | shell, navigator, editor, relationships, graph, library, views | 4,137 |
-| 6 | Coordination | Yes | flows, actions | 1,320 |
-| 7 | Wiring | Yes | app | 174 |
+| 1 | Definitions | No | metamodel, attributes, risk, icons, version, platform, text, library data, example | 7,087 |
+| 2 | Model and rules | No | model, validator, files, history, queries, relate, records, project, fields, drawing, view-risk, view-safety, view-registry, xlsx, markdown, zip, library index | 3,480 |
+| 3 | State | No | store, retention | 1,089 |
+| 4 | Page parts | Yes | dom, overlay, dialog, menu, splitter, columns, multiselect, pane, rating, rating-cell, table-control, drawing-cell, drawing-editor, landing, about | 2,295 |
+| 5 | Panes | Yes | shell, navigator, editor, relationships, graph, library, views | 4,298 |
+| 6 | Coordination | Yes | flows, actions | 1,325 |
+| 7 | Wiring | Yes | app | 183 |
 
 Most of the first layer is data. The library and the example are about 6,000 lines of it, each a copy of its source in `sources/`.
 
