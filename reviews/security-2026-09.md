@@ -1,6 +1,6 @@
 # Security 2026-09
 
-This document is the first security audit of openconformity, made against commit `2338fc0` of 27 September 2026 and followed up at commit `e7c5da8` the same day. It reviews the requirements in `specs/requirements.md` for form, testability, consistency and coverage, and proposes what was missing. It analysed the threats to the software, and that analysis is now held and kept current as the security model in `notes/security.md`. It ranks and sizes the findings of both parts, plans how each control and finding is verified, records the run of that plan, and records the follow-up of every finding. The target is openconformity. Cloudflare, GitHub, draw.io and JGraph are boundaries the software depends on, and crossing them is described for what it means to the software, never planned as an attack on them.
+This document is the first security audit of openconformity, made against commit `2338fc0` of 27 September 2026 and followed up at commit `e7c5da8` the same day. It reviews the requirements in `specs/requirements.md` for form, testability, consistency and coverage, and proposes what was missing. It analysed the threats to the software, and that analysis is now held and kept current as the security model in `docs/security.md`. It ranks and sizes the findings of both parts, plans how each control and finding is verified, records the run of that plan, and records the follow-up of every finding. The target is openconformity. Cloudflare, GitHub, draw.io and JGraph are boundaries the software depends on, and crossing them is described for what it means to the software, never planned as an attack on them.
 
 ## 1. Method
 
@@ -14,7 +14,7 @@ A missing requirement was found by walking what the software does and holds. Eac
 
 The analysis follows one order. The assets are named first, ranked by what their loss would cost the user. The trust boundaries come next, each line data or code crosses into the software, with what stands on each side. The threat actors are named with what each has, can do and wants. The attack surface lists every entry point with the file and line where data enters and the check it meets. Each boundary is then put to the six STRIDE questions [3], spoofing, tampering, repudiation, information disclosure, denial of service and elevation of privilege. Attack scenarios are then written as the attacker would plan them, and each step is checked against the code. Every claim about what the software does names a file and a line, and where a claim could be run it was run in the JavaScriptCore shell the test suite uses.
 
-A scenario is rated on feasibility and impact, each on three steps. Feasibility is Low when it needs a compromise of a party the software trusts, such as the host or the editor's origin, or conditions the attacker cannot arrange. It is Medium when it needs the user to act once, such as opening a file or consenting to the editor. It is High when any visitor or any file reaches it with no condition. Impact is Low when the outcome is an annoyance without loss. It is Medium when the outcome is the loss of unsaved work, or the exposure of one drawing. It is High when project content is read or altered without the user knowing, or code runs on the user's device. Risk combines the two. It is High when one is High and the other at least Medium. It is Medium when both are Medium, or when one is High and the other Low. It is Low otherwise. Each scenario ends with a verdict. Blocked means the software stops it. Mitigated means the software reduces it but a residue stays. Open means the software does nothing about it today. The same scale now stands in section 1.2 of `notes/security.md`, so later audits rate alike.
+A scenario is rated on feasibility and impact, each on three steps. Feasibility is Low when it needs a compromise of a party the software trusts, such as the host or the editor's origin, or conditions the attacker cannot arrange. It is Medium when it needs the user to act once, such as opening a file or consenting to the editor. It is High when any visitor or any file reaches it with no condition. Impact is Low when the outcome is an annoyance without loss. It is Medium when the outcome is the loss of unsaved work, or the exposure of one drawing. It is High when project content is read or altered without the user knowing, or code runs on the user's device. Risk combines the two. It is High when one is High and the other at least Medium. It is Medium when both are Medium, or when one is High and the other Low. It is Low otherwise. Each scenario ends with a verdict. Blocked means the software stops it. Mitigated means the software reduces it but a residue stays. Open means the software does nothing about it today. The same scale now stands in section 1.2 of `docs/security.md`, so later audits rate alike.
 
 ### 1.3 Evidence
 
@@ -361,7 +361,7 @@ This section was added because the review found the conventions themselves promi
 
 ## 3. Threat analysis
 
-The threat analysis this audit made is now held and kept current in `notes/security.md`, whose identifiers it gave rise to. The analysis as audited, with every claim's file and line, stands in the history at commit `e7c5da8`. References in chapters 4 to 6 to sections 3.1 to 3.8 are to that text. What stays here is what the audit judged at commit `2338fc0`.
+The threat analysis this audit made is now held and kept current in `docs/security.md`, whose identifiers it gave rise to. The analysis as audited, with every claim's file and line, stands in the history at commit `e7c5da8`. References in chapters 4 to 6 to sections 3.1 to 3.8 are to that text. What stays here is what the audit judged at commit `2338fc0`.
 
 ### 3.1 Scenarios as audited
 
@@ -557,7 +557,7 @@ The line for finding D reads as follows, for the maintainer to paste.
 | [7] | draw.io, Configure the diagram editor | https://www.drawio.com/doc/faq/configure-diagram-editor |
 | [8] | Cloudflare Pages, Headers | https://developers.cloudflare.com/pages/configuration/headers/ |
 | [9] | Cloudflare, Network Error Logging | https://developers.cloudflare.com/network-error-logging/ |
-| [10] | openconformity, SECURITY.md | ../../SECURITY.md |
+| [10] | openconformity, SECURITY.md | ../SECURITY.md |
 | [11] | Web Content Accessibility Guidelines (WCAG) 2.2 | https://www.w3.org/TR/WCAG22/ |
 | [12] | MDN, State Partitioning | https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/State_Partitioning |
-| [13] | openconformity, Security model | ../security.md |
+| [13] | openconformity, Security model | ../docs/security.md |

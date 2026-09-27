@@ -24,23 +24,32 @@ Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no 
 openconformity/
 ├── app/            the published software
 ├── site/           the published project site
-├── docs/           the user documentation, published later
 ├── specs/          the specification and the schema
+├── docs/           the formal documents, kept current
+├── reviews/        the reviews, each against a state of the code
 ├── sources/        the sources in editable formats
 ├── tests/          headless tests for the software
-└── notes/          the decisions and the working notes
+└── temp/           the working material, meant to go
 ```
+
+## Specification
+
+| Document | Contents |
+|---|---|
+| [requirements.md](specs/requirements.md) | What it shall be and do |
+| [metamodel.md](specs/metamodel.md) | What a model may contain |
+| [attributes.md](specs/attributes.md) | What each entity type carries |
+| [project.schema.json](specs/project.schema.json) | What a project file holds |
 
 ## Documentation
 
 | Document | Contents |
 |---|---|
-| [about.md](notes/about.md) | Why it exists and what it is |
-| [decisions.md](notes/decisions.md) | What was chosen and why |
-| [requirements.md](specs/requirements.md) | What it shall be and do |
-| [metamodel.md](specs/metamodel.md) | What a model may contain |
-| [attributes.md](specs/attributes.md) | What each entity type carries |
-| [security.md](notes/security.md) | How the software is kept secure |
+| [about.md](docs/about.md) | Why it exists and what it is |
+| [decisions.md](docs/decisions.md) | What was chosen and why |
+| [security.md](docs/security.md) | How the software is kept secure |
+| [verification.md](docs/verification.md) | How each requirement is verified |
+| [shortcuts.md](docs/shortcuts.md) | Every keyboard path through the software |
 
 ## Disclaimer
 

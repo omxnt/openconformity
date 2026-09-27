@@ -661,5 +661,5 @@ The interface text inside `queries.js`, `records.js` and `project.js`. Each sent
 | No. | Reference | Link |
 |---|---|---|
 | [1] | Requirements specification, chapter 2.3 Technical, C-TEC-001 to C-TEC-004 | `specs/requirements.md` |
-| [2] | Document form and structure | `notes/template.md` |
-| [3] | Views in the app, working plan | `notes/proposals/views-proposal.md` |
+| [2] | Document form and structure | `docs/template.md` |
+| [3] | Views in the app, working plan | `temp/proposals/views-proposal.md` |

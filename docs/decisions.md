@@ -874,6 +874,25 @@ The attributes document stands in `specs` beside the requirements, the metamodel
 
 ---
 
+### D-103 Formal documents, reviews and working material
+
+`2026-09-27` `repository`
+
+What governs the software stands in `specs`. Every other document kept current stands in `docs`, formal and written to the template, the background, the decisions, the security model, the verification and the template itself, beside the user documentation. Every review asked for stands in `reviews`, each made against a state of the code and not kept current. What is in flight and meant to go stands in `temp`.
+
+    app/            the published software
+    site/           the published project site
+    specs/          the specification and the schema
+    docs/           the formal documents, kept current
+    reviews/        the reviews, each against a state of the code
+    sources/        the sources in editable formats
+    tests/          headless tests for the software
+    temp/           the working material, meant to go
+
+> *The notes had become formal documents that other documents and audits point at, and a folder named for notes undersold them. A review is a record of one moment, so it stands apart from what is kept current, where any review a chat is asked for finds its place without a decision. The working material, the views proposal and the beta gate, is the one thing meant to leave the repository, and its folder says so. The user documentation shares `docs` until a documentation site needs its own folder. Amends the layout in D-091.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

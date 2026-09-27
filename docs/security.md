@@ -1,6 +1,6 @@
 # Security
 
-This document holds the security model of openconformity as software. It names what the software protects, where data and code cross into it, who could attack it, the threats at each crossing, the controls that answer them, and the risk that remains. It points at the requirements in `specs/requirements.md` by id and never restates them. It is kept true as the software changes, and an audit in `notes/reviews/` checks the software against it at one commit and records what it found. The model names modules and functions, and an audit names files and lines.
+This document holds the security model of openconformity as software. It names what the software protects, where data and code cross into it, who could attack it, the threats at each crossing, the controls that answer them, and the risk that remains. It points at the requirements in `specs/requirements.md` by id and never restates them. It is kept true as the software changes, and an audit in `reviews/` checks the software against it at one commit and records what it found. The model names modules and functions, and an audit names files and lines.
 
 ## 1. Conventions
 
@@ -254,7 +254,7 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 
 ### 5.1 In the software
 
-A control with no requirement says None, which marks a gap in the requirements. Verification is by the requirement's row in `notes/verification.md`, or by the test block named where no requirement stands.
+A control with no requirement says None, which marks a gap in the requirements. Verification is by the requirement's row in `docs/verification.md`, or by the test block named where no requirement stands.
 
 | Id | Control | Where | Requirements | Standing |
 |---|---|---|---|---|
@@ -364,7 +364,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | [1] | Microsoft, The STRIDE Threat Model | https://learn.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20) |
 | [2] | openconformity, Requirements | ../specs/requirements.md |
 | [3] | openconformity, Verification | verification.md |
-| [4] | openconformity, Security audit of September 2026 | reviews/security-2026-09.md |
+| [4] | openconformity, Security audit of September 2026 | ../reviews/security-2026-09.md |
 | [5] | openconformity, SECURITY.md | ../SECURITY.md |
 | [6] | W3C, Content Security Policy Level 3 | https://www.w3.org/TR/CSP3/ |
 | [7] | WHATWG, HTML Living Standard, the iframe sandbox attribute | https://html.spec.whatwg.org/multipage/iframe-embed-object.html#attr-iframe-sandbox |

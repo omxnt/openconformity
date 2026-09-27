@@ -20,12 +20,12 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
     app/            the published software
     site/           the published project site
-    docs/           the user documentation, published later
     specs/          the specification and the schema
+    docs/           the formal documents, kept current
+    reviews/        every review asked for, each against a state of the code
     sources/        the sources in editable formats
     tests/          headless tests for the software
-    notes/          the decisions and the working notes
-    notes/reviews/  the reviews, each against a state of the code
+    temp/           the working material, meant to go
 
 ## Publishing
 
@@ -40,20 +40,21 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | 2 | `specs/metamodel.md` | Governs what a model contains | The metamodel is right |
 | 3 | `specs/project.schema.json` | Derived from the metamodel | The schema is wrong |
 | 4 | `specs/attributes.md` | Derived from the metamodel | The attributes are wrong |
-| 5 | `notes/decisions.md` | Reasoning behind the choices | The entry is out of date |
+| 5 | `docs/decisions.md` | Reasoning behind the choices | The entry is out of date |
 
 ## Documents
 
 | File | What it is | Read when |
 |---|---|---|
-| `notes/about.md` | Background, principles, and scope | Needing context on the project |
+| `docs/about.md` | Background, principles, and scope | Needing context on the project |
 | `specs/requirements.md` | Requirements specification | Building or changing the software |
 | `specs/metamodel.md` | Entity types and relationships | Working with entities or relationships |
 | `specs/attributes.md` | Attributes per entity type | Working with entity attributes |
-| `notes/decisions.md` | Decision log and rationale | Proposing something undiscussed |
-| `notes/template.md` | Document form and structure | Writing or updating a document |
+| `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
+| `docs/template.md` | Document form and structure | Writing or updating a document |
 | `specs/project.schema.json` | Project file specification | Working with the project schema file |
-| `notes/security.md` | Security model, threats and controls | Changing what enters, leaves or is stored |
+| `docs/security.md` | Security model, threats and controls | Changing what enters, leaves or is stored |
+| `docs/verification.md` | Each requirement mapped to its tests | Adding a requirement or a test block |
 
 ## Verification
 
