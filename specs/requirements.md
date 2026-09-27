@@ -1,6 +1,6 @@
 # Requirements
 
-This document specifies the requirements the software is implemented and verified against. The conventions define how a requirement is written and identified, and the four classes that follow state the constraints, the graphical profile, the functional behaviour, and the non-functional qualities. Each requirement carries an identifier, a rationale, and a status.
+This document specifies the requirements the software is implemented and verified against. The conventions define how a requirement is written and identified, and the four classes that follow state the constraints, the graphical profile, the functional behaviour, and the non-functional qualities. Each requirement carries an identifier, a syntax, and a rationale.
 
 ## 1. Conventions
 
@@ -144,6 +144,16 @@ The project shall not reproduce copyrighted content from harmonised standards.
 
 > *Standards are sold by national standardisation bodies and their content is protected. The harmonised standards lists published in the Official Journal of the European Union give standard references and titles, which are public and may be used. Anything beyond that, including clause text, tables, figures, and Annex ZA mappings, is treated as protected unless established otherwise.*
 
+---
+
+#### C-PRJ-006 Vulnerability reporting
+
+`ubiquitous`
+
+The project shall publish a private way to report a vulnerability, stating what is in scope, which versions are supported, and when a report is acknowledged.
+
+> *A tool that opens files from anywhere will receive reports, and a report made in public reaches every user before a fix does. A private channel with a stated scope sends a report about the drawing editor to its maker and a report about the software to the maintainer. A stated response aim tells the reporter what to expect.*
+
 ### 2.2 Development
 
 ---
@@ -196,6 +206,26 @@ The software shall be served at `app.openconformity.org`.
 
 > *The software is served on its own subdomain, separate from the project site at the root domain. The two are deployed independently, and the software is self-contained so that it can equally be served from anywhere else.*
 
+---
+
+#### C-DEV-006 Release verification
+
+`ubiquitous`
+
+The project shall merge to main only a commit on which the test suite reports every check passed and the page opens with no console error or warning.
+
+> *The host serves what main holds the moment it is pushed, with no step between. The source pins catch a change that widens what the software exposes, a new fetch, a frame, or markup built from text, and they catch it only when they run. The console check reaches what the pins cannot, a policy violation the browser reports at runtime.*
+
+---
+
+#### C-DEV-007 Deployment integrity
+
+`ubiquitous`
+
+The project shall deploy the software so that the host serves every file byte for byte as the released commit holds it.
+
+> *With no build step the deployed software is the source, which lets anyone check what they run against what they can read. A host offers features that break this, minification, analytics injection, script loaders, and obfuscation, each placing code on the software's origin that the page's policy cannot tell from the software's own.*
+
 ### 2.3 Technical
 
 ---
@@ -234,7 +264,7 @@ The software shall run directly from its source files, with no build step or pac
 
 `ubiquitous`
 
-The software shall organise its JavaScript as native ES modules.
+The software shall organise its JavaScript as native ES modules, except a script that must run before the stylesheet loads.
 
 > *ES modules give modular structure, with explicit imports and exports, without a bundler. This is what makes the no-build stack workable at scale. The alternatives, a single large file or global scripts, do not scale for a maintainer.*
 
@@ -244,9 +274,9 @@ The software shall organise its JavaScript as native ES modules.
 
 `optional feature`
 
-Where the software uses third-party assets, they shall be self-hosted and open-licensed.
+Where the software uses third-party assets, they shall be self-hosted, open-licensed, and recorded with their source, version, and licence.
 
-> *Assets such as typefaces or icons carry no executable code, so they pose no supply-chain risk and are allowed where third-party code is not. Self-hosting keeps the software self-contained and avoids requests to third-party servers, and open licensing keeps redistribution compatible with the EUPL.*
+> *Assets such as typefaces or icons carry no code the browser runs, so they are allowed where third-party code is not. The browser still parses them, and the record is what lets a copy be checked against its release. Self-hosting keeps the software self-contained and avoids requests to third-party servers, and open licensing keeps redistribution compatible with the EUPL.*
 
 ---
 
@@ -298,8 +328,8 @@ The wordmark shall be "openconformity" set as below.
 | Letter spacing | 0% |
 | Colour | `#161616` |
 
-> *The name is the identity. A square sans reads as engineering without being cold, and a weight above regular gives the mark presence at the size it appears in the shell.*
-
+> *The name is the identity. A square sans reads as engineering without being cold, and a weight above regular gives the mark presence at the size it appears in the shell. On a dark ground the mark is shown light, as the favicon is.*
+> 
 ---
 
 #### G-IDN-002 Favicon
@@ -401,7 +431,7 @@ If the viewport is smaller than the supported viewport, then the software shall 
 
 The software shall present the workspace on entry, without a homepage, wizard, or project setup prompt.
 
-> *The software is the destination, not a page in front of it. A first visit opens an empty project ready for the first entity, and information about the project is available from within the software rather than ahead of it.*
+> *The software is the destination, not a page in front of it. A first visit opens the workspace with no project, and the editor pane offers the ways into one, a new project, a saved file, or the example. Information about the project is available from within the software rather than ahead of it.*
 
 ### 4.2 Session
 
@@ -431,9 +461,39 @@ When the model changes, the software shall persist the change in browser storage
 
 `event driven`
 
-When the user removes the software's data from the browser, the software shall confirm first, stating what is lost, and shall then delete everything it keeps in browser storage, the project, the session state and the user's choices.
+When the user clears stored data, the software shall confirm first, stating what is lost, and shall then delete everything it keeps in browser storage, the project, any copy set aside, the session state, and the user's choices.
 
 > *A borrowed or shared machine must be left with nothing. The browser's own site-data clearing does the same, but from outside the software and only for those who know where to look, and clearing history alone does not reach site data at all. An action in the software makes the wipe explicit and complete. A project saved to a file is the user's and is not touched.*
+
+---
+
+#### F-SES-004 Restoration failure
+
+`unwanted behaviour`
+
+If the working state of the previous session cannot be restored, then the software shall state so, keep the stored state aside unchanged, and offer to save it to a file or to discard it.
+
+> *The stored state can hold the only copy of unsaved work, and a state that fails to load is not the same as no state. Setting it aside rather than deleting it keeps the work recoverable, and stating the failure means an empty workspace is never left unexplained. The copy stays until the user discards it, since only the user can judge what it held.*
+
+---
+
+#### F-SES-005 Persistence failure
+
+`unwanted behaviour`
+
+If browser storage refuses to persist a change, then the software shall keep the model in memory, state that changes are not being stored, and warn before the page is left while unsaved changes exist.
+
+> *A browser can refuse a write when storage is full, in a private window, or with storage disabled, and the software must go on working. The statement tells the user to save to a file. The warning on leaving is kept for this case alone, since while browser storage holds the work a warning at every leave would be one the user learns to dismiss.*
+
+---
+
+#### F-SES-006 Storage nearly full
+
+`state driven`
+
+While browser storage stands past eight tenths of its quota, the software shall state that browser storage is nearly full.
+
+> *A write refused for want of space is the failure F-SES-005 handles, and the warning before it lets the user save to a file first. Eight tenths leaves room to save before a write is refused.*
 
 ### 4.3 Workspace
 
@@ -495,7 +555,7 @@ The software shall not create, modify, or require relationships based on an enti
 
 The software shall permit the creation of folders at any position in the navigator tree.
 
-> *Folders are filing, not model content. They hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model. Deleting a folder removes filing, never the entities filed in it.*
+> *Folders are filing, not model content. They hold entities and other folders, carry a name and nothing else, and appear in no view or export. They give a user structure the metamodel does not impose, a zone, a workstream, a supplier, without adding anything to the model.*
 
 ---
 
@@ -613,7 +673,7 @@ When the user imports picks from a catalogue, the software shall copy the picked
 
 #### F-MOD-011 Record of related measures
 
-`event driven`
+`complex`
 
 When a scenario's residual risk estimation or a hazard's elimination is saved, the software shall record the protective measures related to the entity at that time, and while the record no longer matches the related measures, shall flag the entity and offer to record them afresh.
 
@@ -701,7 +761,7 @@ If a project file records a schema version later than the software supports, the
 
 If a project file is not valid against the schema of the version it records, then the software shall not open it, and shall state that the file is invalid.
 
-> *A file is valid when it conforms to the schema of its recorded version and satisfies the constraints the schema cannot express, which are unique identifiers, resolving references, and no cycles in ownership or filing. Validity is judged against the file's own version, not the current one, so an older file is not invalid merely for being older. It is validated as its producer wrote it, then migrated (F-PER-004). A file that fails cannot be trusted to mean what it appears to mean, since opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery. On opening, the checks run in order. A version newer than supported is refused (F-PER-005), a file invalid against its recorded schema is refused (F-PER-006), and an older version is migrated (F-PER-004).*
+> *A file is valid when it conforms to the schema of its recorded version and satisfies the constraints the schema cannot express, which are unique identifiers, resolving references, no cycles in ownership or filing, and filing no deeper than 1,000 levels. A thousand levels is far beyond any product and well within what a browser can walk. Validity is judged against the file's own version, not the current one, so an older file is not invalid merely for being older. It is validated as its producer wrote it, then migrated (F-PER-004). A file that fails cannot be trusted to mean what it appears to mean, since opening it would load a structure the software cannot reason about, and saving would overwrite the original with a guess. Refusing, and saying why, leaves the user's file intact for inspection or recovery. On opening, the checks run in order. A version newer than supported is refused (F-PER-005), a file invalid against its recorded schema is refused (F-PER-006), and an older version is migrated (F-PER-004).*
 
 ---
 
@@ -751,7 +811,7 @@ The software shall preserve attribute content it does not present, unchanged, wh
 
 When the user chooses a project template, the software shall fetch it from the host, sending no user data, and shall open it as it opens a project file, subject to the same checks.
 
-> *A template is a project file the maintainer wrote and published beside the software, so fetching it is what fetching the software already is, a request to the host carrying nothing of the user's, and it needs no consent. It can be as stale or as malformed as any other file, so it passes the same gate of version, validity and migration, and can never bypass what a file cannot. The list of templates is fetched the same way, when the user opens the choice.*
+> *A template is a project file the maintainer wrote and published beside the software, so fetching it is what fetching the software already is, a request to the host carrying nothing of the user's, and it needs no consent. It can be as stale or as malformed as any other file, so it passes the same gate of version, validity and migration, and can never bypass what a file cannot. The list of templates is fetched the same way, when the user opens the choice. The function is not built yet. When it is, the page's policy must allow connections to the software's own origin, since today it allows none.*
 
 ### 4.7 Drawings
 
@@ -781,9 +841,9 @@ The software shall store a drawing as the drawing editor returned it, unchanged.
 
 `complex`
 
-Where the user has consented, when the user creates or edits a drawing, the software shall open the drawing editor at the origin the software designates, handing it the drawing being edited and nothing else, and shall take back what the editor returns as the drawing provided it passes the drawing check and carries the editor's own model.
+While the user's consent stands, when the user creates or edits a drawing, the software shall open the drawing editor at the origin the software designates, handing it the drawing being edited and nothing else, and shall take back what the editor returns as the drawing provided it passes the drawing check and carries the editor's own model.
 
-> *This is the function that fetches and hands data over, so it is the one that states what and where. It hands the drawing being edited, nothing else, to one designated origin, draw.io's embed at the time of writing, in a frame that permits scripts and the editor's own origin and nothing else. Viewing a drawing never loads the editor. Only a creation or an edit the user asks for does, and only after consent (N-PRV-005). The editor is the only way a drawing enters. Nothing is imported from a file, so every drawing in a project is one the editor made and can open again, and what comes back is a drawing from outside, checked as one (F-DRW-001) and kept as returned (F-DRW-002). One returned without its model is refused, since it could not be edited again. A drawing refused on return is refused with the editor still open and the reason stated, so the user can amend it rather than lose it. What is taken back enters the entity's unsaved edit like any changed attribute. The entity's save commits it, cancel discards it, and the edit guard (F-MOD-004) protects it. The editor's own apply is not a save.*
+> *This is the function that fetches and hands data over, so it is the one that states what and where. It hands the drawing being edited, nothing else, to one designated origin, draw.io's embed at the time of writing, in a frame that permits scripts and the editor's own origin and nothing else. Viewing a drawing never loads the editor. Only a creation or an edit the user asks for does, and only after consent (N-PRV-005). The editor is the only way a drawing enters. Nothing is imported from a file, so every drawing in a project is one the editor made and can open again, and what comes back is a drawing from outside, checked as one (F-DRW-001) and kept as returned (F-DRW-002). One returned without its model is refused, since it could not be edited again, and one holding more than one page is refused, since the picture shows only one. A drawing refused on return is refused with the editor still open and the reason stated, so the user can amend it rather than lose it. What is taken back enters the entity's unsaved edit like any changed attribute. The entity's save commits it, cancel discards it, and the edit guard (F-MOD-004) protects it. The editor's own save is taken as its apply, and neither is a save of the entity.*
 
 ---
 
@@ -809,7 +869,7 @@ The software shall not require an account or a sign-in.
 
 The software shall load all of its resources on initial load, and shall fetch nothing further during use, except for a function the user invokes that states what it fetches and from where.
 
-> *Once loaded, the software runs from what the browser already holds, so work continues uninterrupted if the connection drops. A function that fetches is the exception, never the rule. It fetches only when the user invokes it, it says what it fetches and from where, and it fails plainly when the fetch fails (N-OPS-003). Which functions fetch, and what each may fetch, is stated with the function (F-DRW-003, F-PER-011).*
+> *Once loaded, the software runs from what the browser already holds, so work continues uninterrupted if the connection drops. A function that fetches is the exception, never the rule. It fetches only when the user invokes it, it says what it fetches and from where, and it fails plainly when the fetch fails (N-OPS-003). Which functions fetch, and what each may fetch, is stated with the function (F-DRW-003, F-PER-011). A file of the software's own opened from the host at the user's request, such as the metamodel image or a licence text, is not a fetch from outside and needs no statement.*
 
 ---
 
@@ -931,7 +991,7 @@ Where an attribute holds a drawing, the software shall render it as an image tha
 
 `optional feature`
 
-Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting only what the application's protocol requires, and shall accept messages only from that frame and origin, as data.
+Where the software hosts an external application in its page, it shall host it in a sandboxed frame on an origin other than its own, permitting only what the application's protocol requires, sending it no referrer, and shall accept messages only from that frame and origin, as data.
 
 > *The frame cannot reach the software's storage, and cannot navigate the page, open windows or submit forms unless its protocol needs one of these. Each permission granted is recorded with the function that grants it. The origin rule is what makes the sandbox hold, since on the software's own origin the same permissions would let the application read the project. Scripts and the application's own origin are the expected minimum, and what draw.io's embed needs at the time of writing.*
 
@@ -943,7 +1003,57 @@ Where the software hosts an external application in its page, it shall host it i
 
 The software shall write no project file holding attribute content that the choices in force do not present, and shall state on opening any content it keeps without presenting it.
 
-> *A file holds nothing its author cannot see in the software. A project cleared to serve as a template, or handed to someone else, must not carry what was written under a choice since changed, since a reader of the file would find it where the author could not. A change of the risk estimation method clears every rating made under the old one, and a change of a safety function's standard clears the old level, each after a warning, and a file that arrives holding such content is cleared on opening after the same warning. Content the software does not know is kept (F-PER-010), because deleting it would destroy what a newer revision wrote, and it is stated on opening so nothing in the file is unknown to its owner.*
+> *A file holds nothing its author cannot see in the software. A project cleared to serve as a template, or handed to someone else, must not carry what was written under a choice since changed, since a reader of the file would find it where the author could not. A change of the risk estimation method clears every rating made under the old one, and a change of a safety function's standard clears the old level, each after a warning. A file that arrives holding such content is cleared on opening after the same warning, and so are entities imported from a library. Content the software does not know is kept (F-PER-010), because deleting it would destroy what a newer revision wrote, and it is stated on opening so nothing in the file is unknown to its owner.*
+
+---
+
+#### N-SEC-006 Content security policy
+
+`ubiquitous`
+
+The software shall declare on its page, before anything loads, a content security policy that permits scripts, styles, and fonts from its own origin only, images from its own origin and from data, frames from the drawing editor's origin only, and no connection, object, base, or form.
+
+> *A policy the browser enforces is a guarantee the code alone cannot give. A mistaken change, or a drawing the check missed, cannot reach out, run inline code, or submit anything. The single frame origin states, where the browser reads it, the one exception the software makes. The theme script is a file rather than inline so the policy can hold.*
+
+---
+
+#### N-SEC-007 Framing
+
+`ubiquitous`
+
+The software shall not be presentable in a frame on another origin.
+
+> *A page framed by another site can be laid over and clicked through, or shown as if it were the other site's. A policy declared on the page cannot forbid it, only a response header from the host can. A headers file beside the page does that on the current host and is ignored on any other, so the folder still runs anywhere.*
+
+---
+
+#### N-SEC-008 Hyperlink presentation
+
+`optional feature`
+
+Where an attribute holds a hyperlink, the software shall present it as a link only when its value is an http or https address, and shall open it in a new browsing context without an opener.
+
+> *A value in a file can be any text, and a scheme that runs code must never become something the user can click. Anything that is not a web address is shown as the text it is. Opening without an opener keeps the destination from reaching back to the page.*
+
+---
+
+#### N-SEC-009 Failure on opening
+
+`unwanted behaviour`
+
+If opening a project file fails for a reason the checks do not name, then the software shall state that the file could not be opened and shall leave the open project unchanged.
+
+> *The checks name what they know. A file can still exhaust the browser by its size, and an error that escapes the checks must end where a refusal does, in a statement and an unchanged project, rather than in a silent stop.*
+
+---
+
+#### N-SEC-010 No input from the address
+
+`ubiquitous`
+
+The software shall read no input from the address it is opened at.
+
+> *A link is the one input another site can hand the software without the user's act. Reading nothing from the address means no query or fragment can select, open, fill, or trigger anything, and there is nothing to reflect into the page.*
 
 ### 5.4 Accessibility
 
