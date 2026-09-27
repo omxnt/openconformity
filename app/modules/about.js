@@ -2,10 +2,11 @@
  * The About dialog's content: the mark and the wordmark over one line on
  * what the software is and one on where it lives and under what terms,
  * then the release line, the version and the phase with a link to the
- * notes. Beneath, four accordion items, each closed when About opens,
+ * notes. Beneath, five accordion items, each closed when About opens,
  * grouping the credits and references by what each thing is to the
  * software. References, the legislation the model is built around and
- * the methods its ratings follow, each by designation. Design assets,
+ * the methods its ratings follow, each by designation. Technology, what
+ * the software is made of and served from. Design assets,
  * the system followed and the assets self-hosted, each with its
  * licence. External services, the diagram editor with where it loads
  * from and the session's standing consent, and its maker. Development
@@ -84,6 +85,12 @@ export async function showAbout(dialogs, store = null) {
         ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
         ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],
         ['SEBoK', 'System requirement types, after the INCOSE manual', [link('https://sebokwiki.org/wiki/System_Requirements_Definition', 'sebokwiki.org')]],
+      ]),
+      fold('Technology', [
+        ['Web platform', 'HTML, CSS and JavaScript as ES modules, no framework and no build', [link('https://developer.mozilla.org/docs/Web', 'developer.mozilla.org')]],
+        ['JSON', 'The project file, checked against its schema', [link('https://github.com/omxnt/openconformity/blob/main/specs/project.schema.json', 'project.schema.json')]],
+        ['IndexedDB', 'The browser storage the open project is kept in between sessions', [link('https://developer.mozilla.org/docs/Web/API/IndexedDB_API', 'developer.mozilla.org')]],
+        ['Cloudflare Pages', 'Where the software is served from, static files only', [link('https://pages.cloudflare.com', 'pages.cloudflare.com')]],
       ]),
       fold('Design assets', [
         ['IBM Carbon', 'Design system, followed without its packages', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
