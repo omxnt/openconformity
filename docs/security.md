@@ -301,7 +301,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-21 | The stored project passes the same gates as a file, and one that fails is set aside and stated. | `store.js` `restore` and `install` | F-SES-001, F-SES-004 | In place |
 | CT-22 | A refused write is stated, the leave prompt fires while unsaved work is not stored, and a nearly full store is stated. | `store.js` `persist` and `checkQuota`, `shell.js` `render` | F-SES-005, F-SES-006 | In place |
 | CT-23 | Clear stored data removes everything the software keeps in the browser. | `store.js` `clearBrowserData`, `flows.js` `clearBrowserData` | F-SES-003 | In place |
-| CT-24 | The headers file forbids framing, requires HTTPS and forbids content sniffing. | `app/_headers` | N-SEC-007 | In the repository. Not yet read from the host. |
+| CT-24 | The headers file forbids framing, requires HTTPS and forbids content sniffing. | `app/_headers` | N-SEC-007 | In place. Read from both hosts at v1.0.0-beta.1. |
 | CT-25 | The software is static files of the web platform, with one classic script and every other a module. | The files under `app/`, `index.html` | C-TEC-001, C-TEC-004, C-TEC-007 | In place |
 | CT-26 | The tree acts only on a drag it started. | `navigator.js` `renderRow` and `render` | None. No test. | In place |
 | CT-27 | A saved file's name holds letters, digits and dashes only. | `files.js` `filenameFor` | None. Tested in `test-files.js`, The filename. | In place |
@@ -313,12 +313,12 @@ A control with no requirement says None, which marks a gap in the requirements. 
 
 | Id | Control | Where | Requirements | Standing |
 |---|---|---|---|---|
-| CT-29 | The host serves each file as the released commit holds it, with no feature that rewrites or injects on. | The host's settings | C-DEV-007 | Not verified |
-| CT-30 | A merge to main follows a passed test run and a clean console. | The release process | C-DEV-006 | Required. No release made under it yet. |
+| CT-29 | The host serves each file as the released commit holds it, with no feature that rewrites or injects on. | The host's settings | C-DEV-007 | In place. Verified at v1.0.0-beta.1, every served file identical to the commit, after Rocket Loader was found on and turned off. |
+| CT-30 | A merge to main follows a passed test run and a clean console. | The release process | C-DEV-006 | In place. Run at v1.0.0-beta.1. |
 | CT-31 | The maintainer reviews every change before it enters the repository. | The repository's working rules | None | In place |
 | CT-32 | Vulnerabilities are reported privately, with a stated scope, the risks already accepted, how to test and a response aim, and the contact is published where tools look for it. | `SECURITY.md`, `.well-known/security.txt` on both origins, the repository's settings | C-PRJ-006 | In place |
 | CT-33 | Third-party assets are recorded with their source, version and licence. | `app/assets/*/ORIGIN.md` | C-TEC-005 | In place |
-| CT-34 | The maintainer's GitHub and Cloudflare accounts are protected by a second factor. | The accounts | None | Not verified |
+| CT-34 | The maintainer's GitHub and Cloudflare accounts are protected by a second factor. | The accounts | None | In place. Verified on 27 September 2026. |
 
 ## 6. Risk
 
@@ -361,11 +361,11 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-09 | A browser bug in the sandbox or the decoder. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
 | SC-10 | None found. | Closed | CT-12 |
 | SC-11 | A browser bug in the sandbox. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
-| SC-12 | The strict transport header on the software's own response is not yet read. | Open | Reading the headers from the live host at the release |
-| SC-13 | The framing header on the software's own response is not yet read. | Open | Reading the headers from the live host at the release |
+| SC-12 | None found. | Closed | CT-24, AU-05 |
+| SC-13 | None found. | Closed | CT-24 |
 | SC-14 | The project stands in clear on the device. | Accepted | The project lives on the user's device like any document they save, and Clear stored data removes it (F-SES-003). Encryption would need a key the user keeps, and gives nothing against someone at an unlocked machine. |
-| SC-15 | Review is the gate, and the release check has not yet run at a release. | Open | CT-30 run at the next release |
-| SC-16 | The host's settings are not read. | Open | CT-29 verified |
+| SC-15 | A hostile change that passes review and the tests. | Accepted | Every change is reviewed before it enters the repository (CT-31), the release check ran at v1.0.0-beta.1 (CT-30), and both accounts carry a second factor (CT-34). |
+| SC-16 | A setting changed later, or the host itself, adds code to the origin. | Accepted | The settings were read at the release and the served files matched the commit (CT-29). The release check reads them again at every release. |
 | SC-17 | None found. | Closed | CT-13 |
 | SC-18 | Content under choices not in force can reach a saved file through a stored project someone altered. | Accepted | Only someone who alters the browser's storage reaches it, and they could alter the project directly. |
 | SC-19 | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone. | Accepted | The check refuses any address in any attribute or stylesheet that is not local or data, and every attribute that names something to load. Opened on its own in Chrome, no diagram of a set of 54 hostile ones that the check accepts made a request to an outside address, and each case the set found is tested. The example's diagrams and the editor's own export pass the check. No script can run in a diagram the check accepts, so what a missed case could do is a request that tells a server the file was opened. Inside the software the image rendering still guards every drawing. |
