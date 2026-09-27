@@ -68,6 +68,8 @@ Vulnerabilities go by GitHub's private vulnerability reporting or to the address
 
 [info@openconformity.org](mailto:info@openconformity.org)
 
+How to give feedback is in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Links
 
 - [The project site](https://openconformity.org)
