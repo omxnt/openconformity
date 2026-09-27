@@ -973,6 +973,16 @@ Each safety function is a numbered chapter, its parts numbered within it, in the
 
 ---
 
+### D-112 The safety functions as a register in Excel
+
+`2026-09-27` `product`
+
+The safety function specification is also saved as an Excel workbook, as a register: one row per function in tree order, the function and its description first, then its relationships, then a column for each field under the name of its tab, the required integrity level as one column whatever the standard, and the notes last. Saved whole it is one sheet of every function, and from a function's tab its row alone. The diagrams stay in the Markdown.
+
+> *In a spreadsheet safety functions are compared side by side, which a register shows and blocks of small tables do not. The register reads the same tabs the specification does, so a field added there appears in both. A picture in a workbook needs a raster copy the software cannot make without drawing it, so the diagram travels with the Markdown alone.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

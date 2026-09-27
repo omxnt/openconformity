@@ -80,7 +80,7 @@ export function cellText(held, labelOf) {
  */
 export function savedPart(built, section, extension = 'xlsx') {
   const whole = section <= 0 || built.sections.length <= 1;
-  const held = whole ? built : { ...built, sections: [built.sections[section]] };
+  const held = whole ? built : { ...built, wholeSheets: undefined, sections: [built.sections[section]] };
   const name = whole ? built.title : `${built.title} - ${built.sections[section].name.replace(/\s*\(\d+\)$/, '')}`;
   return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.${extension}` };
 }
@@ -123,14 +123,17 @@ export function sectionMarkdown(built, section, labelOf, subtitle = '') {
 
 /**
  * A view as the sheets of a workbook: each section's tables a sheet
- * named for the section, each cell as the exports write it.
+ * named for the section, or its register where it carries one, each
+ * cell as the exports write it. A view saved whole whose sheets come
+ * from its first section alone gives that section's sheet only.
  * @param {{ sections: Array<{ name: string, tables: Array<{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }> }} built
  * @param {(id: string) => string} labelOf
  * @returns {Array<import('./xlsx.js').Sheet>}
  */
 export function viewSheets(built, labelOf) {
-  return built.sections.flatMap((section) =>
-    section.tables.map((table) => {
+  const sections = built.wholeSheets === 'first' ? built.sections.slice(0, 1) : built.sections;
+  return sections.flatMap((section) =>
+    (section.register ? [section.register] : section.tables).map((table) => {
       const columns = table.columns.map(asColumn);
       return {
         name: section.name,

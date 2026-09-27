@@ -182,7 +182,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 
 {
   const view = buildSafetyView(model);
-  deepEqual([view.title, view.exports], ['Safety function specification', ['markdown']], 'titled, and saved as Markdown');
+  deepEqual([view.title, view.exports], ['Safety function specification', ['markdown', 'excel']], 'titled, and saved as Markdown or as Excel');
   deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each, a function followed by those it decomposes into');
   const heads = (section) => section.tables.filter((table) => table.heading).map((table) => table.heading);
   deepEqual([heads(view.sections[0]), heads(view.sections[2])], [['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], ['SAF-002']], 'the first tab in the same order, and a function\'s tab holding it alone');
@@ -226,6 +226,16 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg'], "and a function's tab brings its own diagram alone");
   equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');
   deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 2, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-2 Door Interlock.md'], 'saved from the first tab under the view, from a function under its name');
+  const register = view.sections[0].register;
+  deepEqual(register.columns.slice(0, 7).map(asColumn).map((column) => [column.text, column.group ?? null]), [['Safety function', null], ['Description', null], ['Part of', 'Relationships'], ['Decomposes into', 'Relationships'], ['Realises', 'Relationships'], ['Allocated to', 'Relationships'], ['Expressed by', 'Relationships']], 'the register opens on the function, its description and its relationships under one group');
+  const names = register.columns.map(asColumn);
+  deepEqual([names.at(-1).text, names.at(-1).group ?? null, names.find((column) => column.text === 'Required integrity level').group], ['Notes', null, 'Characteristics'], 'its tabs follow, each field a column under the tab, the required integrity level one column whatever the standard, the notes last');
+  deepEqual(register.rows.map((row) => row.id), ['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], 'one row per function, in tree order');
+  const level = names.findIndex((column) => column.text === 'Required integrity level');
+  deepEqual([register.rows[1].cells[3], register.rows[1].cells[level]], [{ entities: ['SAF-003', 'SAF-004'] }, { choice: model.nodes.get('SAF-002').attributes.plr }], 'a row holds its relationships and the level of its standard');
+  ok(register.rows.every((row) => row.cells.length === register.columns.length), 'every row fills every column');
+  deepEqual(viewSheets(savedPart(view, 0).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['All functions (4)', 4]], 'saved whole, the workbook is the one register of every function');
+  deepEqual(viewSheets(savedPart(view, 2).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['SF-2 Door Interlock', 1]], 'and from a function, its row alone');
 }
 
 summary('test-views');

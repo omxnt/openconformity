@@ -8,7 +8,10 @@
  * required integrity level of the standard in force after the standard,
  * its diagram, and its notes. A function is followed by the functions it
  * decomposes into, depth first. One tab holds every function, and one
- * tab each holds a function alone, the tabs in the same order. A pure
+ * tab each holds a function alone, the tabs in the same order. Each tab
+ * also carries its functions as a register, one row per function and a
+ * column per field under its tab's name, which the workbook is saved
+ * from, the first tab's register alone for the whole view. A pure
  * function of the model, returning the description views.js renders and
  * saves.
  *
@@ -121,13 +124,42 @@ export function buildSafetyView(model) {
     return [description, ...relationships, ...specified, diagram, ...fields(CLOSING)];
   };
 
+  const registerGroups = ATTRIBUTES.SAF.groups.filter((group) => [...SPECIFIED, ...CLOSING].includes(group.name));
+  const registerColumns = [
+    'Safety function',
+    'Description',
+    ...RELATIONSHIPS.map((held) => ({ text: held.name, group: 'Relationships' })),
+    ...registerGroups.flatMap((group) => specifiedFields(group, {}).map((definition) => (CLOSING.includes(group.name) ? definition.name : { text: definition.name, group: group.name }))),
+  ];
+  const registerRow = (saf) => {
+    const values = saf.attributes;
+    const byName = (group) => new Map(specifiedFields(group, values).map((definition) => [definition.name, definition]));
+    return {
+      id: saf.id,
+      cells: [
+        { entities: [saf.id] },
+        valueCell({ kind: 'multiline' }, values.description),
+        ...RELATIONSHIPS.map((held) => ({ entities: ends(saf.id, held.type, held.side) })),
+        ...registerGroups.flatMap((group) => {
+          const held = byName(group);
+          return specifiedFields(group, {}).map((column) => {
+            const definition = held.get(column.name);
+            return definition ? valueCell(definition, values[definition.key]) : { lines: [''] };
+          });
+        }),
+      ],
+    };
+  };
+  const register = (functions) => ({ columns: registerColumns, rows: functions.map(registerRow) });
+
   return {
     id: 'safety',
     title: 'Safety function specification',
-    exports: ['markdown'],
+    exports: ['markdown', 'excel'],
+    wholeSheets: 'first',
     sections: [
-      { name: `All functions (${all.length})`, tables: ordered.flatMap((saf, i) => block(saf, i + 1)) },
-      ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf, 1) })),
+      { name: `All functions (${all.length})`, tables: ordered.flatMap((saf, i) => block(saf, i + 1)), register: register(ordered) },
+      ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf, 1), register: register([saf]) })),
     ],
   };
 }
