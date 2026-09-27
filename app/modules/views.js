@@ -124,6 +124,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
   }
 
   const empty = () => el('span', { className: 'empty', text: '–' });
+  /** Text standing beneath a cell's value, such as a rating parameter's rationale. */
+  const note = (text) => (text ? [el('p', { className: 'cell-note', text })] : []);
   const tag = (text) => el('span', { className: 'tag', text });
 
   /**
@@ -143,8 +145,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const narrow = column.narrow ? 'narrow' : '';
     if (held !== null && typeof held === 'object') {
       if ('entities' in held) return el('td', {}, held.entities.length === 0 ? [empty()] : held.entities.map(entityRow));
-      if ('code' in held) return el('td', { className: `code ${narrow}`.trim(), text: held.code || '–', attributes: held.title ? { title: held.title } : {} });
-      if ('outcome' in held) return el('td', { className: narrow }, [held.outcome?.outcome ? outcomeTag(held.outcome) : empty()]);
+      if ('code' in held) return el('td', { className: `code ${narrow}`.trim(), attributes: held.title ? { title: held.title } : {} }, [el('span', { text: held.code || '–' }), ...note(held.note)]);
+      if ('outcome' in held) return el('td', { className: narrow }, [held.outcome?.outcome ? outcomeTag(held.outcome) : empty(), ...note(held.note)]);
       if ('choice' in held) return el('td', { className: narrow }, [held.choice ? tag(held.choice) : empty()]);
       if ('choices' in held) return el('td', {}, held.choices.length === 0 ? [empty()] : [el('span', { className: 'tags' }, held.choices.map(tag))]);
       if ('mark' in held) return el('td', { className: 'mark', text: held.mark ? '●' : '' });

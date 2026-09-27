@@ -36,6 +36,7 @@
 
   /* Borders */
   --border-subtle: #C6C6C6;  /* $border-subtle-01, gray-30 */
+  --border-selected: #C6C6C6;  /* $border-subtle-selected-01, gray-30 */
   --border-strong: #8D8D8D;  /* $border-strong-01, gray-50 */
 
   /* Text and icons */
@@ -91,6 +92,7 @@
 
   /* Borders */
   --border-subtle: #393939;  /* g100 $border-subtle-01, gray-80 */
+  --border-selected: #525252;  /* g100 $border-subtle-selected-01, gray-70 */
   --border-strong: #6F6F6F;  /* g100 $border-strong-01, gray-60 */
 
   /* Text and icons */
@@ -1763,19 +1765,22 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
    its columns with a strong rule beneath it and its edges ruled down
    through the head and, faintly, the body. */
 .data { border-collapse: collapse; width: 100%; background: var(--layer); font-size: 14px; }
-.data th { text-align: left; font-weight: 600; background: var(--layer-accent); padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); white-space: nowrap; vertical-align: bottom; }
+.data th { text-align: left; font-weight: 600; background: var(--layer-accent); padding: 8px 12px; border-bottom: 1px solid var(--border-selected); white-space: nowrap; vertical-align: bottom; }
 .data th small { display: block; font-weight: 400; color: var(--text-second); }
 .data th.group { text-align: center; border-bottom: 1px solid var(--border-strong); }
 .data th.group-first, .data td.group-first { border-left: 1px solid var(--border-subtle); }
 .data th.group-last, .data td.group-last { border-right: 1px solid var(--border-subtle); }
+.data th.group-first { border-left-color: var(--border-selected); }
+.data th.group-last { border-right-color: var(--border-selected); }
 .data th.sortable { cursor: pointer; user-select: none; }
 .data th.sortable:hover { background: var(--hover); }
 .data th .sort { width: 16px; height: 16px; vertical-align: -3px; margin-left: 4px; }
 .data td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
 .data td.mark { text-align: center; }
 .data td.wide { min-width: 16ch; }
-.data td p { margin: 0; max-width: 24ch; white-space: pre-wrap; }
-.data th.narrow, .data td.narrow { text-align: center; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+.data td p { margin: 0; min-width: 16ch; max-width: 24ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
+.data td .cell-note { margin-top: 4px; }
+.data th.narrow, .data td.narrow { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 .data td.code { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; }
 .data td .tag.outcome { font-weight: 600; }
 .data td .tag .risk-dot { margin-right: 6px; }

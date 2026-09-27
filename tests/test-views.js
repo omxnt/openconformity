@@ -51,28 +51,27 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(
     columns.map((column) => [column.text, column.group ?? null]),
     [
-      ['Accident scenario', null],
-      ['Hazards', 'Arises from'], ['Exposed persons', 'Arises from'], ['Tasks', 'Arises from'],
+      ['Scenario', 'Accident scenario'], ['Hazardous event', 'Accident scenario'], ['Potential consequence', 'Accident scenario'],
+      ['Single hazards', 'Hazardous situation'], ['System actors', 'Hazardous situation'], ['System tasks', 'Hazardous situation'],
       ['Rating', 'Initial risk estimation'],
-      ['Protective measures', 'Risk reduction'], ['Safety functions', 'Risk reduction'],
+      ['Protective measures', null],
       ['Rating', 'Residual risk estimation'],
     ],
-    'an index: the scenario as the subject, what it arises from walked from the links, then the ratings around what reduces it, and nothing an entity says for itself; with no scenario rated, each rating is one column under its group'
+    'the order the assessment is made in, and only what relates to the scenario directly: the scenario with its event and consequence, its hazardous situation walked from the links, the ratings around the measures reducing its risk; each related column named for its type; with no scenario rated, each rating is one column under its group'
   );
   const row = view.sections[0].tables[0].rows[0];
   equal(row.id, 'SCN-001', 'a row is about its scenario');
   const cell = (name, group = null) => row.cells[at(columns, name, group)];
-  deepEqual(cell('Accident scenario'), { entities: ['SCN-001'] }, 'and opens on the scenario itself');
-  deepEqual(cell('Hazards', 'Arises from'), { entities: ['HAZ-001'] }, 'then the hazards contributing to it');
-  deepEqual(cell('Exposed persons', 'Arises from'), { entities: ['ACT-001'] }, 'the actors exposed in it');
-  deepEqual(cell('Tasks', 'Arises from'), { entities: ['TSK-002'] }, 'the tasks giving rise to it');
-  equal(at(columns, 'Hazardous event'), -1, "and nothing of the scenario's own prose, which the editor holds");
+  deepEqual(cell('Scenario', 'Accident scenario'), { entities: ['SCN-001'] }, 'and opens on the scenario itself');
+  deepEqual(cell('Single hazards', 'Hazardous situation'), { entities: ['HAZ-001'] }, 'then the hazards contributing to it');
+  deepEqual(cell('System actors', 'Hazardous situation'), { entities: ['ACT-001'] }, 'the actors exposed in it');
+  deepEqual(cell('System tasks', 'Hazardous situation'), { entities: ['TSK-002'] }, 'the tasks giving rise to it');
+  deepEqual([cell('Hazardous event', 'Accident scenario'), cell('Potential consequence', 'Accident scenario')].map((held) => held.lines.length > 0 && held.lines.every((line) => typeof line === 'string')), [true, true], "the scenario's event and consequence as lines of its own text");
+  equal(cell('Hazardous event', 'Accident scenario').lines.join('\n'), model.nodes.get('SCN-001').attributes.hazardousEvent.trim(), 'as the scenario holds it');
   deepEqual(cell('Rating', 'Initial risk estimation'), '', 'an unrated initial risk, typed since the example chooses no method, and empty');
-  deepEqual(cell('Protective measures', 'Risk reduction'), { entities: ['PRM-001', 'PRM-002', 'PRM-003'] }, 'the measures reducing its risk');
-  deepEqual(cell('Safety functions', 'Risk reduction'), { entities: ['SAF-001', 'SAF-002'] }, 'the safety functions realising them');
-  equal(at(columns, 'System requirements', 'Risk reduction'), -1, 'and no requirements or verifications, which are traceability for other views');
-  deepEqual(cell('Rating', 'Residual risk estimation'), '', 'an unrated residual risk likewise');
-  equal(at(columns, 'Risk evaluation', 'Residual risk estimation'), -1, 'and no evaluation, the editor holding it');
+  deepEqual(cell('Protective measures'), { entities: ['PRM-001', 'PRM-002', 'PRM-003'] }, 'the measures reducing its risk');
+  equal(columns.some((column) => column.text === 'Safety functions'), false, 'and no safety function, which relates to the scenario only through a measure');
+  deepEqual(cell('Rating', 'Residual risk estimation'), { lines: ['', model.nodes.get('SCN-001').attributes.evaluation.trim()] }, 'an unrated residual risk likewise, with the evaluation of it beneath');
   equal(view.sections[3].tables[0].rows.map((held) => held.id).join(' '), 'SCN-002 SCN-003 SCN-004', 'Maintenance holds the scenarios its tasks give rise to, in id order');
 }
 
@@ -102,13 +101,14 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   );
   const first = view.sections[0].tables[0].rows[0].cells;
   deepEqual(first.slice(initial, initial + 4).map((held) => held.code), ['S2', 'F2', 'O3', 'A2'], 'the codes stand in their columns');
-  equal(first[initial].title, 'Severity: S2\nAmputation is credible at the tool', 'each with its parameter and value behind it, and the rationale given for it beneath');
-  equal(first[initial + 1].title, 'Exposure: F2', 'or the parameter and value alone where none is made');
+  deepEqual([first[initial].title, first[initial].note], ['Severity: S2', 'Amputation is credible at the tool'], 'each with its parameter and value behind it, and the rationale given for it beneath');
+  deepEqual([first[initial + 1].title, first[initial + 1].note], ['Exposure: F2', ''], 'and no note where no rationale is given');
   equal(first[initial + 4].outcome.outcome, 'RI 6 (highest)', 'and the rating it comes to');
   equal(first[initial + 4].outcome.tone, 'high', 'with its tone');
   equal(first[at(columns, 'Rating', 'Residual risk estimation')].outcome.outcome, 'RI 2 (lowest)', 'the residual likewise');
+  equal(first[at(columns, 'Rating', 'Residual risk estimation')].note, 'Acceptable.', 'with the risk evaluation beneath it');
   const second = view.sections[0].tables[0].rows[1].cells;
-  deepEqual(second.slice(initial, initial + 4), [{ code: '', title: '' }, { code: '', title: '' }, { code: '', title: '' }, { code: '', title: '' }], 'an unrated scenario shows empty cells under the same columns');
+  deepEqual(second.slice(initial, initial + 4), [{ code: '', title: '', note: '' }, { code: '', title: '', note: '' }, { code: '', title: '', note: '' }, { code: '', title: '', note: '' }], 'an unrated scenario shows empty cells under the same columns');
   equal(second[initial + 4].outcome.outcome, null, 'and no outcome');
   deepEqual(ratingColumns('Initial risk estimation', 'No such method'), [{ text: 'Rating', group: 'Initial risk estimation', narrow: true }], 'an unknown method gives the rating column alone');
   deepEqual(ratingColumns('Initial risk estimation', 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)').map((column) => column.text), ['S', 'P', 'Rating'], 'a method whose values are words heads its columns by the initial of the name');
