@@ -1535,7 +1535,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .about-table td:nth-child(2) { white-space: normal; }  /* what a thing is may wrap, its name and its link never */
 .about-table td:last-child { padding-right: 0; text-align: right; width: 1%; }
 .about-table td:last-child > * + * { margin-left: 16px; }  /* $spacing-05 between a control and a link */
-.about-table td:first-child { width: 12em; min-width: 12em; color: var(--text); }  /* one first column across the items */
+.about-table td:first-child { width: 14em; min-width: 14em; color: var(--text); }  /* one first column across the items, wide enough for the longest name */
 .about a { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }  /* $spacing-02 */
 .about a .icon { width: 12px; height: 12px; fill: currentColor; }
 
