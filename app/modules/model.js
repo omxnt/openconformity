@@ -125,7 +125,7 @@ function levelOf(model, id) {
  * @param {string} id
  * @returns {number}
  */
-function spanOf(model, id) {
+export function spanOf(model, id) {
   const children = new Map();
   for (const node of model.nodes.values()) {
     if (!children.has(node.parent)) children.set(node.parent, []);
@@ -143,17 +143,19 @@ function spanOf(model, id) {
 
 /**
  * Whether a node, and what is filed beneath it, fits under a parent
- * within the filing depth. A new node spans one level.
+ * within the filing depth. A new node spans one level. A caller asking
+ * for many parents passes the node's span, measured once.
  * @param {Model} model
  * @param {string|null} parentId
  * @param {string|null} nodeId
+ * @param {number} [span]
  * @returns {Outcome}
  */
-function checkDepth(model, parentId, nodeId) {
+function checkDepth(model, parentId, nodeId, span) {
   const level = levelOf(model, parentId);
   if (level + 1 > FILING_DEPTH) return { ok: false, reason: TOO_DEEP };
   if (nodeId === null || level + model.nodes.size <= FILING_DEPTH) return { ok: true };
-  return level + spanOf(model, nodeId) > FILING_DEPTH ? { ok: false, reason: TOO_DEEP } : { ok: true };
+  return level + (span ?? spanOf(model, nodeId)) > FILING_DEPTH ? { ok: false, reason: TOO_DEEP } : { ok: true };
 }
 
 // --- Creation ----------------------------------------------------------
@@ -323,9 +325,10 @@ export function renameFolder(model, id, name) {
  * @param {Model} model
  * @param {string} nodeId
  * @param {string|null} parentId
+ * @param {number} [span]  the node's span, where the caller measured it once
  * @returns {Outcome}
  */
-export function canFile(model, nodeId, parentId) {
+export function canFile(model, nodeId, parentId, span) {
   const node = nodeOf(model, nodeId);
   if (!node) return { ok: false, reason: 'It is not in the project.' };
   if (parentId !== null) {
@@ -335,7 +338,7 @@ export function canFile(model, nodeId, parentId) {
     }
   }
   if (node.parent === parentId) return { ok: false, reason: 'It is already there.' };
-  return checkDepth(model, parentId, nodeId);
+  return checkDepth(model, parentId, nodeId, span);
 }
 
 /**

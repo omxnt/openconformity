@@ -5,7 +5,7 @@
  * each function reads what it is given and returns data.
  */
 
-import { nodeOf, childrenOf, canRelate, canFile, deletionOf, filedBeneath } from './model.js';
+import { nodeOf, childrenOf, canRelate, canFile, spanOf, deletionOf, filedBeneath } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
 import { plural } from './text.js';
 
@@ -170,8 +170,9 @@ export function designated(entity) {
 export function moveTargets(model, id) {
   if (nodeOf(model, id) === null) return [];
   const targets = [];
+  const span = spanOf(model, id);
   const offer = (parentId, label, depth) => {
-    if (canFile(model, id, parentId).ok) targets.push({ parentId, label, depth });
+    if (canFile(model, id, parentId, span).ok) targets.push({ parentId, label, depth });
   };
   offer(null, model.name.trim() || 'Untitled', 0);
   const walk = (parentId, depth) => {

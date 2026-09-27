@@ -18,7 +18,7 @@
  */
 
 import { ENTITY_TYPES } from './metamodel.js';
-import { createModel, addEntity, addFolder, relate, renameProject, restoreCounters, childrenOf } from './model.js';
+import { createModel, addEntity, addFolder, relate, renameProject, restoreCounters } from './model.js';
 import { validate, isPlainObject } from './validator.js';
 
 /** The schema version this software writes. */
@@ -55,10 +55,15 @@ export function toFileObject(model) {
   for (const code of Object.keys(ENTITY_TYPES)) counters[code] = model.counters[code];
   counters.F = model.counters.F;
 
+  const children = new Map();
+  for (const node of model.nodes.values()) {
+    if (!children.has(node.parent)) children.set(node.parent, []);
+    children.get(node.parent).push(node);
+  }
   const folders = [];
   const entities = [];
   const walk = (parentId) => {
-    childrenOf(model, parentId).forEach((node, index) => {
+    (children.get(parentId) ?? []).forEach((node, index) => {
       if (node.kind === 'folder') {
         folders.push({ id: node.id, name: node.name, parent: node.parent, order: index });
       } else {

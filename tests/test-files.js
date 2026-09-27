@@ -139,6 +139,20 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(({}).polluted, undefined, 'and pollutes nothing');
 }
 
+// --- A wide project saves in one pass (F-PER-001, F-SES-002) ---------------
+
+{
+  const wide = createModel();
+  const folder = addFolder(wide, 'Half').folder.id;
+  for (let i = 0; i < 20000; i += 1) addEntity(wide, 'ELM', { parent: i % 2 === 0 ? null : folder, attributes: { title: `Element ${i}` } });
+  const started = Date.now();
+  const text = serialise(wide);
+  const took = Date.now() - started;
+  ok(took < 500, `twenty thousand entities serialise in ${took} ms, each node visited once`);
+  const back = openProject(text);
+  equal(back.ok && serialise(back.model), text, 'and the text opens and serialises to the same bytes');
+}
+
 // --- The filename (no requirement) ------------------------------------------------
 
 {
