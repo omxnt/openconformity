@@ -13,8 +13,11 @@ export const DIMENSION_LIMIT = 16384;
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
-/** Elements a drawing may not hold, in any namespace: what runs code or embeds a document. */
-const FORBIDDEN_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'applet', 'frame', 'frameset']);
+/** Elements a drawing may not hold, in any namespace: what runs code, embeds a document, refreshes to another address or sends a form. */
+const FORBIDDEN_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'applet', 'frame', 'frameset', 'meta', 'form', 'input', 'button', 'textarea', 'select']);
+
+/** Attributes a drawing may not hold, which send to or navigate to an address. */
+const FORBIDDEN_ATTRIBUTES = new Set(['ping', 'formaction', 'action', 'http-equiv']);
 
 /** Attributes that name something to load, checked on every element but a link's own href. */
 const REFERENCES = new Set(['href', 'src', 'poster']);
@@ -195,7 +198,7 @@ const lengthOf = (value) => Number.parseFloat(String(value ?? '').trim());
 function cssFault(text) {
   const css = text.replace(/\\([0-9a-f]{1,6})\s?/gi, (held, hex) => String.fromCodePoint(Number.parseInt(hex, 16))).replace(/\\(.)/g, '$1');
   if (/@import/i.test(css)) return 'imports a stylesheet';
-  if (/image-set\(/i.test(css)) return 'references a resource outside the diagram';
+  if (/image-set\(|(^|[^\w-])(image|cross-fade|element)\(/i.test(css)) return 'references a resource outside the diagram';
   const urls = css.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi);
   for (const [, , target] of urls) {
     const held = target.trim().toLowerCase();
@@ -207,9 +210,11 @@ function cssFault(text) {
 /**
  * Whether a drawing may be accepted: an SVG document, within the size
  * limit, declaring no entities, linking no stylesheet, holding no
- * element that runs code or embeds a document, no event handler and no
- * animation of a link or a handler, referencing nothing outside itself
- * by link, source or style, and no larger than the dimension limit.
+ * element that runs code, embeds a document, refreshes to another
+ * address or sends a form, no event handler, no attribute that pings or
+ * navigates, and no animation of a link or a handler, referencing nothing
+ * outside itself by link, source or style, and no larger than the
+ * dimension limit, so that it stays inert even when opened on its own.
  * The reason completes the sentence "The drawing …".
  * @param {string} text
  * @returns {{ ok: true } | { ok: false, reason: string }}
@@ -251,6 +256,7 @@ function walk(element) {
   for (const attribute of element.attributes) {
     const key = attribute.name.toLowerCase();
     if (key.startsWith('on')) return 'holds an event handler';
+    if (FORBIDDEN_ATTRIBUTES.has(local(key))) return 'holds an attribute that sends or navigates';
     if (ANIMATIONS.has(name) && local(key) === 'attributename') {
       const animated = local(attribute.value.trim().toLowerCase());
       if (animated === 'href' || animated.startsWith('on')) return 'animates a link or a handler';

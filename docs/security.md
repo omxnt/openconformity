@@ -60,6 +60,7 @@ A change of the kind below updates the sections named in the same commit.
 | A change to the page's policy, the frame's sandbox or the headers file | 4.4, 4.6, 5.1 |
 | A new or changed requirement in the privacy or security groups | 5 |
 | A change of host, repository or release process | 2, 3.2, 4.7, 4.8, 5.2 |
+| A new export format, or a change to what a view writes | 3.2, 3.4, 4.9, 5.1, 6.1 |
 | An audit finding that is fixed or accepted | The rows it touches, and 6.2 |
 
 ## 2. Scope
@@ -82,6 +83,7 @@ A change of the kind below updates the sections named in the same commit.
 | draw.io's code at its origin | JGraph's software. | JGraph, as `SECURITY.md` says. |
 | The browser | The vendor's software. | The vendor. |
 | Cloudflare's and GitHub's own systems | Their services. | Cloudflare and GitHub. |
+| The applications an exported file is opened in | The vendors' software, such as a spreadsheet or a Markdown viewer. | The vendor. |
 | The user's device and the files the user saves | The user's to protect. | None. |
 
 ### 2.3 Assumptions
@@ -102,7 +104,7 @@ A change of the kind below updates the sections named in the same commit.
 
 | Id | Asset | Where it lives | What its loss costs | Rank |
 |---|---|---|---|---|
-| AS-01 | The project's content, the model, its attribute values and its drawings | Memory while the software runs, the stored project, the saved file | Disclosure hands out the product's design and its judgements. Silent alteration makes the conformity record a false statement the manufacturer signs. | 1 |
+| AS-01 | The project's content, the model, its attribute values and its drawings | Memory while the software runs, the stored project, the saved file, and the files a view is saved as | Disclosure hands out the product's design and its judgements. Silent alteration makes the conformity record a false statement the manufacturer signs. | 1 |
 | AS-02 | What is stored in the browser, the project, the set-aside copy, the theme, the session state and the consent | IndexedDB, web storage and session storage of the software's origin | The project in it is AS-01. The consent decides whether the editor asks before it loads. | 2 |
 | AS-03 | The integrity of the software the user runs, its files, its policy, its fixed editor origin and its checks | The host, and the browser's cache | Every other control stands on it. | 3 |
 | AS-04 | The software's reputation | The users' trust | A leak or a file that runs code ends the trust a free tool for confidential data lives on. | 4 |
@@ -119,6 +121,7 @@ A change of the kind below updates the sections named in the same commit.
 | TB-06 | The page's own origin | Every module the page loads from `app.openconformity.org` | Every other origin, the project site and any preview address included | The page, `index.html` |
 | TB-07 | The host | The files at the released commit | Cloudflare Pages and the network in front of it | Every response the host sends |
 | TB-08 | The repository | The commit on main | GitHub, the maintainer's accounts, the assistant that proposes changes, and every contributor | The host's deployment of main on push |
+| TB-09 | An exported file | The view the software built from the model | A spreadsheet, a Markdown viewer or a browser the software does not control, which opens the file | `views.js` `saveExcel` and `saveMarkdown`, `xlsx.js`, `markdown.js`, `zip.js` |
 
 ### 3.3 Actors
 
@@ -157,8 +160,8 @@ A change of the kind below updates the sections named in the same commit.
 | EP-18 | The drawing handed to the editor | Out | TB-04 | `drawing-editor.js` `createSession` | CT-11, CT-13 |
 | EP-19 | A link leaving the page | Out | TB-06 | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | CT-19 |
 | EP-20 | A saved file | Out | TB-01 | `flows.js` `saveProject`, `dom.js` `download`, `files.js` `filenameFor` | CT-27 |
-| EP-21 | A view saved as a workbook | Out | TB-01 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
-| EP-22 | A view saved as Markdown, alone or in a zip with its diagrams as SVG files | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown`, `zip.js` `zip` | CT-07, CT-36 |
+| EP-21 | A view saved as a workbook | Out | TB-09 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
+| EP-22 | A view saved as Markdown, alone or in a zip with its diagrams as SVG files | Out | TB-09 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown`, `zip.js` `zip` | CT-07, CT-36 |
 
 ## 4. Threats
 
@@ -174,9 +177,6 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 | TH-04 | Information disclosure | A file holds content its author cannot see, under choices not in force or unknown to this revision. | CT-06 |
 | TH-05 | Denial of service | A file deep or wide enough to exhaust the browser. | CT-03, CT-05 |
 | TH-06 | Elevation of privilege | Markup or code in a value, a scheme that runs code in a link, or a prototype key. | CT-01, CT-02, CT-03, CT-18 |
-| TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. | CT-35 |
-| TH-50 | Elevation of privilege | A value written as markup or as Markdown's own syntax, which a viewer would render as a link, an image loaded from an outside address, or a structure, when a view saved from the file is shown. | CT-36 |
-| TH-51 | Elevation of privilege | A diagram saved beside a specification and opened on its own, where it is a document rather than an image. | CT-07 |
 
 ### 4.2 The library catalogue
 
@@ -255,6 +255,14 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 | TH-47 | Denial of service | A broken commit on main is deployed within minutes. | CT-30 |
 | TH-48 | Elevation of privilege | A commit on main is code the policy trusts in full. | CT-30, CT-31 |
 
+### 4.9 An exported file
+
+| Id | Class | Threat | Controls |
+|---|---|---|---|
+| TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. | CT-35 |
+| TH-50 | Elevation of privilege | A value written as markup or as Markdown's own syntax, which a viewer would render as a link, an image loaded from an outside address, or a structure, when a view saved from the file is shown. | CT-36 |
+| TH-51 | Elevation of privilege | A diagram saved beside a specification and opened on its own, where it is a document rather than an image. | CT-07 |
+
 ## 5. Controls
 
 ### 5.1 In the software
@@ -269,7 +277,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-04 | The gates run newer, invalid, older, then a replay through the model. | `files.js` `loadProject` and `buildModel` | F-PER-004, F-PER-005, F-PER-006 | In place |
 | CT-05 | Any error inside the gates ends in a refusal. | `files.js` `loadProject` | N-SEC-009 | In place |
 | CT-06 | Content under choices not in force is cleared after a question on opening, on loading the example, on import and on save. Unknown content is kept and stated. | `flows.js` `clearHidden`, `stateUnknown`, `importPicks` and `saveProjectEdit`, `project.js` | N-SEC-005, F-PER-010, F-MOD-010 | In place. The restore path does not clear, see SC-18. |
-| CT-07 | The drawing check refuses script, handlers, embedding elements, links to code, animated links and handlers, entity declarations, and sizes and dimensions over the limits. It refuses any `href`, `src` or `poster` that is neither local nor an image as data, on every element but a link's own `href`, and any `srcset` or CSS `image-set`. | `drawing.js` `checkDrawing` and `parseXml` | F-DRW-001 | In place |
+| CT-07 | The drawing check refuses script, handlers, embedding elements, refresh tags and forms, attributes that ping or navigate, links to code, animated links and handlers, entity declarations, and sizes and dimensions over the limits. It refuses any `href`, `src` or `poster` that is neither local nor an image as data, on every element but a link's own `href`, and any `srcset`, CSS `image-set`, `image()`, `cross-fade()` or `element()`, so a drawing stays inert even when opened on its own. | `drawing.js` `checkDrawing` and `parseXml` | F-DRW-001 | In place |
 | CT-08 | A drawing is shown only as an image from a data address. | `drawing-cell.js` `drawingCell`, `drawing.js` `dataUrl` | N-SEC-003 | In place |
 | CT-09 | The frame is created once, after consent, sandboxed to scripts and its own origin, with every device permission denied and no referrer. | `drawing-editor.js` `editDrawing`, `FRAME_SANDBOX` and `FRAME_ALLOW` | C-TEC-008, N-SEC-004 | In place |
 | CT-10 | A message is heard only from the frame's window and the editor's origin, as a string under 8 megabytes, holding JSON and a known event. | `drawing-editor.js` `acceptMessage` | N-SEC-004 | In place |
@@ -329,15 +337,16 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-16 | The host puts code on the origin. | TA-08 | TH-38, TH-42 | CT-29 | Low | High | Medium | Open |
 | SC-17 | A file carries consent, or another editor origin. | TA-01 | TH-06, TH-22 | CT-09, CT-13 | High | Medium | High | Blocked |
 | SC-18 | A tampered stored project restores holding content under choices not in force. | TA-06 | TH-26 | CT-21 | Low | Low | Low | Open |
+| SC-19 | A file someone else wrote is opened, a view is saved from it, and the saved file runs a formula, loads from an outside address, becomes a link, or navigates away when opened. | TA-01 | TH-49, TH-50, TH-51 | CT-07, CT-35, CT-36 | Medium | High | High | Mitigated |
 
 ### 6.2 Residual risk
 
 | Id | What remains | Status | Accepted by, or closed by |
 |---|---|---|---|
 | SC-01 | None found. | Closed | CT-01, CT-02 |
-| SC-02 | Inside the software a drawing is shown only as an image. A diagram saved beside a specification and opened on its own is held by the drawing check alone. | Open | The maintainer's acceptance |
+| SC-02 | None found. Inside the software a drawing is shown only as an image, which runs nothing and loads nothing whatever the check missed. | Closed | CT-07, CT-08 |
 | SC-03 | None found. | Closed | CT-18 |
-| SC-04 | None found. Saving and every walk of the tree grow in step with the project, and a change in a flat project of 20,000 entities takes about half a second, most of it drawing the rows. | Closed | CT-03, CT-05, and the children index in `model.js` |
+| SC-04 | Nothing limits a file's size before it is read, so a file of hundreds of megabytes can freeze or crash the tab of the person who opens it. Nothing runs, nothing leaves the device, and the stored project is replaced only once a file opens cleanly, so a reload restores it. Opening a file is always the user's own act. | Accepted | The maintainer, 27 September 2026 |
 | SC-05 | None found. | Closed | CT-02, CT-03 |
 | SC-06 | Unknown content is kept and stated, as F-PER-010 requires. | Accepted | F-PER-010 |
 | SC-07 | A file carries no author, signature or history. | Accepted | The maintainer, 27 September 2026 |
@@ -352,6 +361,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-16 | The host's settings are not read. | Open | CT-29 verified |
 | SC-17 | None found. | Closed | CT-13 |
 | SC-18 | Content under choices not in force can reach a saved file through a stored project someone altered. | Accepted | The maintainer, 27 September 2026 |
+| SC-19 | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone. The check refuses every element and attribute found to act in a standalone SVG, and the example's diagrams and the editor's own export pass it. | Accepted | The maintainer, 27 September 2026 |
 
 ### 6.3 What the user trusts
 
@@ -363,6 +373,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | TR-04 | The maintainer, to review what reaches main | The host deploys main on push. | SC-15 |
 | TR-05 | JGraph's editor, with the one drawing they consent to hand it | The consent names the origin and the data. | SC-08 |
 | TR-06 | The author of any file they open, for its content | The software checks structure, never truth. | SC-07 |
+| TR-07 | The application an exported file is opened in, to treat text as text | The software writes every value as text and escapes what the format would read as syntax. | SC-19 |
 
 ## 7. References
 

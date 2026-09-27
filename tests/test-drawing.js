@@ -111,6 +111,15 @@ const reason = (text) => {
   equal(reason(svg('<rect style="fill: image-set(\'https://x/a.png\' 1x)"/>')), outside, 'an image set in a style, with no url');
   equal(reason(svg('<a href="https://example.org"><rect/></a>')), 'accepted', 'a link to a page passes, since a picture follows no link');
   equal(reason(svg('<pattern id="p"/><pattern id="q" href="#p"/><filter id="f"><feImage href="data:image/png;base64,AAAA"/></filter>')), 'accepted', 'references inside the drawing, and an image as data, pass');
+  const html = (inner) => svg(`<foreignObject width="1" height="1"><div xmlns="http://www.w3.org/1999/xhtml">${inner}</div></foreignObject>`);
+  equal(reason(html('<meta http-equiv="refresh" content="0;url=https://x/"/>')), 'holds a meta element', 'a refresh, which a saved diagram opened on its own would follow');
+  equal(reason(html('<form><input name="a"/></form>')), 'holds a form element', 'a form');
+  equal(reason(html('<button>x</button>')), 'holds a button element', 'a button');
+  equal(reason(html('<div http-equiv="refresh">x</div>')), 'holds an attribute that sends or navigates', 'a refresh attribute on any element');
+  equal(reason(html('<a href="#x" ping="https://x/p">x</a>')), 'holds an attribute that sends or navigates', 'a link that pings');
+  equal(reason(svg('<rect style="fill: image(https://x/a.png)"/>')), 'references a resource outside the diagram', 'an image function in a style');
+  equal(reason(svg('<style>.a { background: cross-fade(url(#a), url(#b)) }</style>')), 'references a resource outside the diagram', 'a cross-fade');
+  equal(reason(svg('<rect style="background-image: none"/>')), 'accepted', 'while a property that only names an image passes');
 }
 
 summary('test-drawing');
