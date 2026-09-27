@@ -357,6 +357,8 @@ export async function editDrawing({ dialogs, store, surface, drawing, subject })
   const host = el('div', { className: 'drawing-editor' }, [note, frame]);
   const foreign = drawing !== '' && embeddedModel(drawing) === null;
   let settleApply = null;
+  /** Resolves the edit with the drawing the editor returned on its own save, before Apply was pressed. */
+  let finish = () => {};
   const session = createSession({
     drawing,
     post: (message) => frame.contentWindow?.postMessage(JSON.stringify(message), EDITOR_ORIGIN),
@@ -366,7 +368,7 @@ export async function editDrawing({ dialogs, store, surface, drawing, subject })
       note.textContent = foreign ? 'This diagram was not made in draw.io, so the editor opens empty. Apply replaces it with what is drawn here.' : '';
     },
     onChanged: () => {},
-    onDone: (text) => settleApply?.(text),
+    onDone: (text) => (settleApply ?? finish)(text),
     onRefuse: (why) => {
       note.textContent = `The editor ${why}. The diagram is unchanged. You can apply again or cancel.`;
       settleApply?.(undefined);
@@ -383,6 +385,7 @@ export async function editDrawing({ dialogs, store, surface, drawing, subject })
   window.addEventListener('message', handler);
   const picked = await new Promise((resolve) => {
     let asking = false;
+    finish = resolve;
     surface.open({
       title: `Diagram of ${subject}`,
       content: host,

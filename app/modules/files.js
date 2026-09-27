@@ -194,6 +194,20 @@ function buildModel(data) {
  * @returns {LoadResult}
  */
 export function loadProject(data) {
+  try {
+    return gates(data);
+  } catch (error) {
+    return refusal('invalid', INVALID_STATEMENT, [`The file could not be read: ${error instanceof Error ? error.message : String(error)}`]);
+  }
+}
+
+/**
+ * The gates themselves. An error escaping them, from a file that
+ * exhausts the browser, is the refusal above.
+ * @param {any} data
+ * @returns {LoadResult}
+ */
+function gates(data) {
   if (!isPlainObject(data) || data.format !== FILE_FORMAT) {
     return refusal('invalid', 'The file is not an openconformity project file.');
   }

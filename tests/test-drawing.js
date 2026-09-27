@@ -93,6 +93,15 @@ const reason = (text) => {
   equal(reason(`<svg xmlns="http://www.w3.org/2000/svg" width="99999px" height="10"></svg>`), `declares a width beyond ${DIMENSION_LIMIT}`, 'a width too wide');
   equal(reason('<svg xmlns="http://www.w3.org/2000/svg"><rect onClick="x"/></svg>'), 'holds an event handler', 'a handler in any case');
   equal(reason('<svg xmlns="http://www.w3.org/2000/svg"><SCRIPT/></svg>'), 'holds a script element', 'an element in any case');
+  equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="https://x/a.png"/></div></foreignObject>')), 'references a resource outside the diagram', 'a source in embedded HTML');
+  equal(reason(svg('<foreignObject><video xmlns="http://www.w3.org/1999/xhtml" src="https://x/v.mp4"></video></foreignObject>')), 'references a resource outside the diagram', 'a video source');
+  equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="data:image/png;base64,AAAA"/></div></foreignObject>')), 'accepted', 'an embedded image source passes');
+  equal(reason(svg('<rect style="fill: url(\\68 ttps://x/p.png)"/>')), 'references a resource outside the diagram', 'an escaped url in a style');
+  equal(reason(svg('<style>.a { background: \\75rl(\\68\\74\\74\\70\\73://x/y) }</style>')), 'references a resource outside the diagram', 'an escaped url in a stylesheet, its name escaped too');
+  equal(reason(svg('<a><animate attributeName="href" to="javascript:alert(1)"/><rect/></a>')), 'animates a link or a handler', 'an animation of a link');
+  equal(reason(svg('<rect><set attributeName="onload" to="x()"/></rect>')), 'animates a link or a handler', 'a set of a handler');
+  equal(reason(svg('<rect><animate attributeName="xlink:href" to="javascript:alert(1)"/></rect>')), 'animates a link or a handler', 'a link in the linking namespace');
+  equal(reason(svg('<rect><animate attributeName="opacity" from="0" to="1"/></rect>')), 'accepted', 'an animation of anything else passes');
 }
 
 summary('test-drawing');

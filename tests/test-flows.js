@@ -619,6 +619,45 @@ function flowsOver(store) {
   );
 }
 
+// --- An import clears what the copies hold under choices not in force, after a question (F-MOD-010, N-SEC-005) ---
+
+{
+  const library = createModel();
+  addEntity(library, 'SCN', { attributes: { title: 'Fall', initialSeverity: 'Serious', initialS: 'S2' } });
+  addEntity(library, 'SAF', { attributes: { title: 'Stop', standard: 'EN ISO 13849-1:2023', plr: 'PL c', sil: 'SIL 2' } });
+  addEntity(library, 'ELM', { attributes: { title: 'Drive' } });
+  globalThis.document = fakeDocument();
+  const run = async (picks, answer) => {
+    const held = createModel();
+    held.attributes.estimationMethod = 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)';
+    const store = createStore({ storage: fakeStorage() });
+    store.replaceProject(held);
+    const asked = [];
+    const dialogs = {
+      confirm: async (question) => { asked.push(question); return answer; },
+      toast: () => {},
+    };
+    const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+    await flows.importPicks({ library, picks: new Set(picks) });
+    return { store, asked };
+  };
+  const declined = await run(['SCN-001', 'SAF-001'], false);
+  equal(declined.asked[0].title, 'Clear values that no longer apply?', 'picks holding values under choices not in force raise the clearing question before the copy');
+  deepEqual([...declined.asked[0].body.querySelectorAll('li')].map((li) => li.textContent), ['1 accident scenario under Risk graph (ISO/TR 14121-2:2012, 6.3.2)', '1 safety function under EN IEC 62061:2021'], 'listing what is held, by type and the value it stood under');
+  deepEqual([declined.asked[0].confirmLabel, declined.asked[0].danger], ['Clear and import', true], 'the primary action names both, in the danger colour');
+  equal(declined.store.model().nodes.size, 0, 'and declining copies nothing');
+  const accepted = await run(['SCN-001', 'SAF-001'], true);
+  equal(accepted.store.model().nodes.size, 2, 'confirming copies the picks');
+  deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SCN-001').attributes), ['title', 'initialSeverity'], 'with the hidden rating cleared and the shown one kept');
+  deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SAF-001').attributes), ['title', 'standard', 'plr'], 'and the hidden level cleared');
+  accepted.store.undo();
+  equal(accepted.store.model().nodes.size, 0, 'as one change the history undoes');
+  const quiet = await run(['ELM-001'], false);
+  equal(quiet.asked.length, 0, 'picks holding nothing hidden ask nothing');
+  equal(quiet.store.model().nodes.size, 1, 'and copy at once');
+  delete globalThis.document;
+}
+
 // --- Clear browser data asks, then forgets (F-SES-003) ------------
 
 {

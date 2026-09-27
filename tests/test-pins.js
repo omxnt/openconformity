@@ -94,6 +94,23 @@ const sheet = readFile('../app/style.css');
   ok(!sheet.includes('fonts.googleapis') && !sheet.includes('@import') && !/url\("https?:/.test(sheet), 'the stylesheet loads nothing from outside');
 }
 
+// --- A drawing reaches the page as an image from a data address (N-SEC-003) ---
+
+{
+  const cell = readFile('../app/modules/drawing-cell.js');
+  const pictures = [...cell.matchAll(/el\('img', \{[^}]*attributes: \{ src: ([^,]+),/g)].map((match) => match[1]);
+  deepEqual(pictures, ['dataUrl(text)', 'dataUrl(text)'], 'the two picture elements, the card and the enlargement, take the drawing as a data address');
+  ok(sources.every(([name, source]) => name === 'drawing-cell' || !/el\('img'/.test(source)) && !page.includes('<img'), 'and no other module or the page draws a picture');
+  ok(!cell.includes("el('svg'") && !cell.includes("el('object'") && !cell.includes("el('embed'"), 'never as markup in the page');
+}
+
+// --- Nothing is read from the address (N-PRV-002, N-SEC-001) ---
+
+{
+  ok(sources.every(([, source]) => !/location\.(search|hash)|window\.name\b|URLSearchParams|document\.referrer/.test(source)), 'no module reads the address, the window name or the referrer');
+  ok(sources.every(([name, source]) => name === 'shell' || !source.includes('location.href')) && readFile('../app/modules/shell.js').split('location.href').length === 2 && readFile('../app/modules/shell.js').includes("window.location.href = 'mailto:info@openconformity.org';"), 'the address is written once, to open the mail client, and never read');
+}
+
 // --- The file surface stays on the baseline (F-PER-001, N-CMP-002) ---
 
 {

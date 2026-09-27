@@ -1,0 +1,4 @@
+/*
+  Content-Security-Policy: frame-ancestors 'none'
+  Strict-Transport-Security: max-age=15552000; includeSubDomains
+  X-Content-Type-Options: nosniff

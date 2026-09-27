@@ -16,6 +16,9 @@ const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 /** Elements a drawing may not hold, in any namespace: what runs code or embeds a document. */
 const FORBIDDEN_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'applet', 'frame', 'frameset']);
 
+/** Elements that rewrite another element's attribute over time. */
+const ANIMATIONS = new Set(['animate', 'set', 'animatetransform', 'animatemotion', 'animatecolor', 'discard']);
+
 /** The five entities XML predefines; a drawing may use no other by name. */
 const ENTITIES = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -186,7 +189,8 @@ const lengthOf = (value) => Number.parseFloat(String(value ?? '').trim());
  * @param {string} css
  * @returns {string|null}  what is wrong, or null
  */
-function cssFault(css) {
+function cssFault(text) {
+  const css = text.replace(/\\([0-9a-f]{1,6})\s?/gi, (held, hex) => String.fromCodePoint(Number.parseInt(hex, 16))).replace(/\\(.)/g, '$1');
   if (/@import/i.test(css)) return 'imports a stylesheet';
   const urls = css.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi);
   for (const [, , target] of urls) {
@@ -199,9 +203,10 @@ function cssFault(css) {
 /**
  * Whether a drawing may be accepted: an SVG document, within the size
  * limit, declaring no entities, linking no stylesheet, holding no
- * element that runs code or embeds a document and no event handler,
- * referencing nothing outside itself, and no larger than the dimension
- * limit. The reason completes the sentence "The drawing …".
+ * element that runs code or embeds a document, no event handler and no
+ * animation of a link or a handler, referencing nothing outside itself
+ * by link, source or style, and no larger than the dimension limit.
+ * The reason completes the sentence "The drawing …".
  * @param {string} text
  * @returns {{ ok: true } | { ok: false, reason: string }}
  */
@@ -242,11 +247,16 @@ function walk(element) {
   for (const attribute of element.attributes) {
     const key = attribute.name.toLowerCase();
     if (key.startsWith('on')) return 'holds an event handler';
-    if (local(key) === 'href') {
+    if (ANIMATIONS.has(name) && local(key) === 'attributename') {
+      const animated = local(attribute.value.trim().toLowerCase());
+      if (animated === 'href' || animated.startsWith('on')) return 'animates a link or a handler';
+    }
+    if (local(key) === 'href' || local(key) === 'src') {
       const target = attribute.value.trim().toLowerCase().replace(/\s+/g, '');
       if (/^(javascript|vbscript|data:text\/html)/.test(target)) return 'links to code';
       if (name === 'image' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references an image outside the diagram';
       if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the diagram';
+      if (local(key) === 'src' && !target.startsWith('#') && !target.startsWith('data:image/')) return 'references a resource outside the diagram';
     }
     if (local(key) === 'style') {
       const held = cssFault(attribute.value);

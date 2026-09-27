@@ -54,6 +54,15 @@ refusedOver(JSON.parse(readFile('fixtures/counter-behind.json')), 'counter does 
 equal(validate(valid, 99).ok, false, 'an unknown schema version has no transcription');
 equal(validate(valid, 0).ok, false, 'nor does version 0');
 
+// --- A prototype key pollutes nothing (F-PER-006, N-SEC-001) -----------
+
+{
+  validate(mutated((data) => { data.entities[0].attributes = JSON.parse('{"__proto__": {"polluted": true}}'); }), 1);
+  validate(JSON.parse('{"__proto__": {"polluted": true}, "format": "openconformity-project", "schemaVersion": 1}'), 1);
+  equal(({}).polluted, undefined, 'a prototype key at the root or in an attribute set reaches no prototype');
+  equal(Object.hasOwn(Object.prototype, 'polluted'), false, 'nor is it written onto the prototype itself');
+}
+
 // --- Keyword mutations (F-PER-006, N-SEC-001) --------------------------
 
 refusedOver(mutated((data) => delete data.name), 'has no name', 'a missing required key is refused');

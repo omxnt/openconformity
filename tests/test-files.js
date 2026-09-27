@@ -106,6 +106,34 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(loadProject({ format: 'openconformity-project', schemaVersion: 999 }).code, 'newer', 'any later version refuses as newer');
 }
 
+// --- A file the browser cannot hold is refused, never thrown (F-PER-006) ---
+
+{
+  const base = JSON.parse(fixtureText);
+  const chain = (levels) => {
+    const folders = [];
+    for (let i = 0; i < levels; i += 1) folders.push({ id: `F-${i + 100}`, name: 'Level', parent: i === 0 ? null : `F-${i + 99}`, order: 9 });
+    return { ...base, folders: [...base.folders, ...folders], counters: { ...base.counters, F: levels + 100 } };
+  };
+  let deep;
+  try {
+    deep = loadProject(chain(50000));
+  } catch (error) {
+    deep = { threw: error };
+  }
+  equal(deep.code, 'invalid', 'a file fifty thousand levels deep is refused as invalid, the error caught');
+  ok(deep.statement.includes('not a valid project file') && deep.problems.some((problem) => problem.startsWith('The file could not be read: ')), 'stating that it could not be read');
+  const started = Date.now();
+  const long = loadProject(chain(20000));
+  equal(long.ok, true, 'a file twenty thousand levels deep opens in this shell');
+  ok(Date.now() - started < 2000, `in ${Date.now() - started} ms, the cycle checks walking each node once`);
+  const proto = JSON.parse('{"__proto__": {"polluted": true}}');
+  const polluting = { ...base, entities: base.entities.map((entity, index) => (index === 0 ? { ...entity, attributes: proto } : entity)) };
+  const held = loadProject(polluting);
+  ok(held.ok === true || held.code === 'invalid', 'a prototype key in an attribute set opens or refuses');
+  equal(({}).polluted, undefined, 'and pollutes nothing');
+}
+
 // --- The filename (no requirement) ------------------------------------------------
 
 {

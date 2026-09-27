@@ -38,7 +38,7 @@ import { removalText } from './fields.js';
 import { VIEWS } from './view-registry.js';
 import { plural } from './text.js';
 import { projectSweep, hiddenContent, unknownContent } from './project.js';
-import { serialise, openProject, loadProject, filenameFor } from './files.js';
+import { serialise, openProject, loadProject, toFileObject, filenameFor } from './files.js';
 import { EXAMPLE_PROJECT } from './example.js';
 import { importInto } from './library.js';
 import { TYPE_ICONS } from './icons.js';
@@ -421,8 +421,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Delete the selection, asking first. A folder deletion removes
-   * filing, never entities. An entity deletion severs the entity's
+   * Delete the selection, asking first. A folder deletion takes every
+   * folder and entity filed in it. An entity deletion severs the entity's
    * relationships and takes what it owns through composition, the
    * entities that will go stated before they go. A pristine creation
    * collapses without a question, having nothing to lose; one typed into
@@ -824,9 +824,38 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.setLibraryOpen(true);
   }
 
-  /** The picks copied into the project where the selection stands, as one change the history can undo. */
-  function importPicks(chosen) {
-    const outcome = store.commit((model) => importInto(model, chosen.library, chosen.picks, store.selection()));
+  /**
+   * The picks copied into the project where the selection stands, as one
+   * change the history can undo. The copies are first made on a trial
+   * copy of the project, and what they would hold under choices not in
+   * force is asked about and cleared with the import, as a file is on
+   * opening.
+   */
+  async function importPicks(chosen) {
+    const trial = loadProject(toFileObject(store.model()));
+    if (!trial.ok) return;
+    const tried = importInto(trial.model, chosen.library, chosen.picks, store.selection());
+    if (!tried.ok) {
+      toastRefusal('Could not import', tried);
+      return;
+    }
+    const hidden = hiddenContent(trial.model);
+    if (hidden.count > 0) {
+      const confirmed = await dialogs.confirm({
+        title: 'Clear values that no longer apply?',
+        message: 'The picks hold values under choices not in force in this project, which the software does not show. Importing clears them.',
+        body: el('ul', { className: 'doomed-list' }, hidden.lines.map((line) => el('li', { text: line }))),
+        confirmLabel: 'Clear and import',
+        danger: true,
+      });
+      if (!confirmed) return;
+    }
+    const outcome = store.commit((model) => {
+      const result = importInto(model, chosen.library, chosen.picks, store.selection());
+      if (!result.ok) return result;
+      for (const { id, keys } of hidden.entities) removeAttributes(model, id, keys);
+      return result;
+    });
     if (!outcome.ok) {
       toastRefusal('Could not import', outcome);
       return;

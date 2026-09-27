@@ -330,15 +330,19 @@ function proseProblems(data) {
     }
   }
 
+  const acyclic = new Set();
   for (const node of nodes.values()) {
     const trail = new Set();
     let current = node.parent;
-    while (current !== null && current !== node.id && nodes.has(current) && !trail.has(current)) {
+    while (current !== null && current !== node.id && nodes.has(current) && !trail.has(current) && !acyclic.has(current)) {
       trail.add(current);
       current = nodes.get(current).parent;
     }
     if (current === node.id) {
       problems.push(`${node.id} sits inside itself, directly or through what holds it.`);
+    } else if (current === null || !nodes.has(current) || acyclic.has(current)) {
+      acyclic.add(node.id);
+      for (const id of trail) acyclic.add(id);
     }
   }
 
@@ -381,15 +385,19 @@ function proseProblems(data) {
     }
   }
 
+  const unowned = new Set();
   for (const id of ownerBy.keys()) {
     const trail = new Set();
     let current = ownerBy.get(id);
-    while (current !== undefined && current !== id && !trail.has(current)) {
+    while (current !== undefined && current !== id && !trail.has(current) && !unowned.has(current)) {
       trail.add(current);
       current = ownerBy.get(current);
     }
     if (current === id) {
       problems.push(`${id} owns itself, directly or through what it owns.`);
+    } else if (current === undefined || unowned.has(current)) {
+      unowned.add(id);
+      for (const held of trail) unowned.add(held);
     }
   }
 
