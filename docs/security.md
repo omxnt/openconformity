@@ -48,6 +48,14 @@ A scenario is rated on feasibility and impact, as the attacker would plan it, be
 | Mitigated | The software reduces it and a residue stays. |
 | Open | The software does nothing about it today. |
 
+A scenario's residual risk takes one of three statuses, and its ground says why.
+
+| Status | Meaning | Ground |
+|---|---|---|
+| Closed | A control leaves nothing of the risk. | The controls that close it. |
+| Accepted | Something of the risk remains and is tolerable. | The argument that makes it tolerable. An acceptance is the maintainer's, made in the commit that records it. |
+| Open | Something remains to be done before the risk is closed or accepted. | What closes it. |
+
 ### 1.3 Keeping it true
 
 A change of the kind below updates the sections named in the same commit.
@@ -341,27 +349,27 @@ A control with no requirement says None, which marks a gap in the requirements. 
 
 ### 6.2 Residual risk
 
-| Id | What remains | Status | Accepted by, or closed by |
+| Id | What remains | Status | Ground |
 |---|---|---|---|
 | SC-01 | None found. | Closed | CT-01, CT-02 |
 | SC-02 | None found. Inside the software a drawing is shown only as an image, which runs nothing and loads nothing whatever the check missed. | Closed | CT-07, CT-08 |
 | SC-03 | None found. | Closed | CT-18 |
-| SC-04 | Nothing limits a file's size before it is read, so a file of hundreds of megabytes can freeze or crash the tab of the person who opens it. Nothing runs, nothing leaves the device, and the stored project is replaced only once a file opens cleanly, so a reload restores it. Opening a file is always the user's own act. | Accepted | The maintainer, 27 September 2026 |
+| SC-04 | A file of hundreds of megabytes can freeze or crash the tab of the person who opens it, since nothing limits a file's size before it is read. | Accepted | Nothing runs and nothing leaves the device. The stored project is replaced only once a file opens cleanly, so a reload restores it. Only the person who chooses to open the file is affected. |
 | SC-05 | None found. | Closed | CT-02, CT-03 |
-| SC-06 | Unknown content is kept and stated, as F-PER-010 requires. | Accepted | F-PER-010 |
-| SC-07 | A file carries no author, signature or history. | Accepted | The maintainer, 27 September 2026 |
-| SC-08 | One drawing per edit is exposed to the editor's origin. | Accepted | The user's consent, N-PRV-005 |
-| SC-09 | A browser bug in the sandbox or the decoder. | Accepted | AU-02 |
+| SC-06 | Unknown content is kept and stated, as F-PER-010 requires. | Accepted | Deleting content the software does not know would destroy what a newer revision wrote. F-PER-010 keeps it and states it on opening. |
+| SC-07 | A file carries no author, signature or history. | Accepted | A project file is a document like any other. Proving who wrote it needs keys and identities a local tool does not hold, so the reader decides whom to trust (TR-06). |
+| SC-08 | One drawing per edit is exposed to the editor's origin. | Accepted | Only the drawing being edited is handed over, and only after a consent that names the service (N-PRV-005). |
+| SC-09 | A browser bug in the sandbox or the decoder. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
 | SC-10 | None found. | Closed | CT-12 |
-| SC-11 | A browser bug in the sandbox. | Accepted | AU-02 |
+| SC-11 | A browser bug in the sandbox. | Accepted | Only a flaw in the browser reaches it, which the browser's maker fixes (AU-02). |
 | SC-12 | The strict transport header on the software's own response is not yet read. | Open | Reading the headers once the gate is down |
 | SC-13 | The framing header on the software's own response is not yet read. | Open | Reading the headers once the gate is down |
-| SC-14 | The project stands in clear on the device. | Accepted | The maintainer, 27 September 2026 |
+| SC-14 | The project stands in clear on the device. | Accepted | The project lives on the user's device like any document they save, and Clear stored data removes it (F-SES-003). Encryption would need a key the user keeps, and gives nothing against someone at an unlocked machine. |
 | SC-15 | Review is the gate, and the release check has not yet run at a release. | Open | CT-30 run at the next release |
 | SC-16 | The host's settings are not read. | Open | CT-29 verified |
 | SC-17 | None found. | Closed | CT-13 |
-| SC-18 | Content under choices not in force can reach a saved file through a stored project someone altered. | Accepted | The maintainer, 27 September 2026 |
-| SC-19 | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone. The check refuses every element and attribute found to act in a standalone SVG, and the example's diagrams and the editor's own export pass it. | Accepted | The maintainer, 27 September 2026 |
+| SC-18 | Content under choices not in force can reach a saved file through a stored project someone altered. | Accepted | Only someone who alters the browser's storage reaches it, and they could alter the project directly. |
+| SC-19 | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone. | Accepted | The check refuses every element and attribute found to act in a standalone SVG, each case tested, and the example's diagrams and the editor's own export pass it. Inside the software the image rendering still guards every drawing. |
 
 ### 6.3 What the user trusts
 
