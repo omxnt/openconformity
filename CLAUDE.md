@@ -55,6 +55,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 | `specs/project.schema.json` | Project file specification | Working with the project schema file |
 | `docs/security.md` | Security model, threats and controls | Changing what enters, leaves or is stored |
 | `docs/verification.md` | Each requirement mapped to its tests | Adding a requirement or a test block |
+| `docs/architecture.md` | Layers, modules, state and the page | Adding or moving a module, or changing how state flows |
 
 ## Verification
 

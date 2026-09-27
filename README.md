@@ -47,6 +47,7 @@ openconformity/
 |---|---|
 | [about.md](docs/about.md) | Why it exists and what it is |
 | [decisions.md](docs/decisions.md) | What was chosen and why |
+| [architecture.md](docs/architecture.md) | How the software is built |
 | [security.md](docs/security.md) | How the software is kept secure |
 | [verification.md](docs/verification.md) | How each requirement is verified |
 | [shortcuts.md](docs/shortcuts.md) | Every keyboard path through the software |
