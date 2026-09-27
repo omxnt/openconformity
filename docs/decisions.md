@@ -913,6 +913,16 @@ The workbook a view is saved as keeps its group heads merged, its text wrapped w
 
 ---
 
+### D-106 A workbook with no colour
+
+`2026-09-27` `product`
+
+The workbook a view is saved as carries no fill on its head rows. Its formatting is layout alone, the group heads merged and centred, text wrapped with cells at the top, the head rows held in view, and the columns set to their text.
+
+> *A colour is a choice about looks, and the user makes those in the spreadsheet for the purpose at hand. Amends D-105.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

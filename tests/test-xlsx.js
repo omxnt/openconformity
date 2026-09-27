@@ -100,7 +100,7 @@ function unzip(bytes) {
   ok(part('[Content_Types].xml').includes('PartName="/xl/worksheets/sheet2.xml"') && part('xl/_rels/workbook.xml.rels').includes('Target="styles.xml"'), 'each part is declared and related');
   ok(parts.every((entry) => text(entry.data).startsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')), 'and every part is XML in UTF-8');
   const styles = part('xl/styles.xml');
-  ok(styles.includes('<cellXfs count="4">') && styles.includes('rgb="FFE0E0E0"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is the heads on grey, wrapping and alignment, with no bold and no borders');
+  ok(styles.includes('<cellXfs count="4">') && !styles.includes('patternType="solid"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is wrapping and alignment only, with no fill, no bold and no borders');
 }
 
 summary('test-xlsx');

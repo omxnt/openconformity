@@ -4,10 +4,10 @@
  * with a row of group names merged over their columns where the table
  * has groups, a row of column names, and the rows beneath. Every cell is
  * a string written in place, so nothing in it is ever read as a formula.
- * The formatting is kept to what reading needs: text wraps with cells at
- * the top, the head rows stand on Carbon's grey and stay in view while
- * the rows scroll, and each column is wide enough for its text within
- * bounds. The zip is stored without compression. A pure function of its
+ * The formatting is kept to layout: text wraps with cells at the top,
+ * the group heads centred over their columns, the head rows stay in view
+ * while the rows scroll, and each column is wide enough for its text
+ * within bounds. The zip is stored without compression. A pure function of its
  * input, returning the file's bytes.
  */
 
@@ -161,16 +161,16 @@ export function zip(files) {
 /** The styles by index: 0 the default, 1 a group head, 2 a column head, 3 a cell. */
 const STYLE = { group: 1, header: 2, cell: 3 };
 
-/** The stylesheet the styles above stand in, the heads on Carbon's gray 20. */
+/** The stylesheet the styles above stand in, alignment and wrapping only. */
 function stylesheet() {
-  const xf = (fillId, horizontal) =>
-    `<xf numFmtId="0" fontId="0" fillId="${fillId}" borderId="0" xfId="0" applyFill="1" applyAlignment="1"><alignment horizontal="${horizontal}" vertical="top" wrapText="1"/></xf>`;
-  const xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>', xf(2, 'center'), xf(2, 'left'), xf(0, 'left')];
+  const xf = (horizontal) =>
+    `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="${horizontal}" vertical="top" wrapText="1"/></xf>`;
+  const xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>', xf('center'), xf('left'), xf('left')];
   return (
     PROLOGUE +
     `<styleSheet xmlns="${MAIN}">` +
     '<fonts count="1"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts>' +
-    '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE0E0E0"/><bgColor indexed="64"/></patternFill></fill></fills>' +
+    '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
     '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
     `<cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs>` +
