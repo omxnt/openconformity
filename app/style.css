@@ -1792,20 +1792,16 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data .entity + .entity { margin-top: 4px; }
 .data .entity .icon { width: 16px; height: 16px; flex: none; }
 .data .entity .entity-title { color: var(--link); }
-/* In a view an entity stacks: the glyph and the identifier on one line,
-   the title beneath from the glyph's edge, wrapping within the column, and entities in
-   one cell stand apart by more than their own two lines do. */
-.pane-view .data .entity { display: grid; grid-template-columns: 16px auto; column-gap: 8px; row-gap: 2px; align-items: center; white-space: normal; }
-.pane-view .data .entity + .entity { margin-top: 16px; }  /* $spacing-05 */
-.pane-view .data .entity .mono { white-space: nowrap; }
-.pane-view .data .entity .entity-title { grid-column: 1 / -1; }
+/* In a view each entity keeps to one line, a little apart from the next
+   in the same cell. */
+.pane-view .data .entity + .entity { margin-top: 6px; }
 .data .entity:hover .entity-title { text-decoration: underline; }
 .data .entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .data .entity.gone { color: var(--text-helper); }
 
 /* Printing a view: the view alone, every section on a page of its own
-   under its name, landscape, in the type's print sizes. */
-@page { size: A4 landscape; margin: 12mm; }
+   under its name, on A3 landscape so the widest view fits whole. */
+@page { size: A3 landscape; margin: 12mm; }
 @media print {
   .shell-bar, .notices, .toasts, #overlay-root, .pane-navigator, .splitter, .column, .view-head, .pane-view .tabs { display: none !important; }
   .workspace, .pane-view, .pane-view .pane-body, .view-scroll { display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important; }
@@ -1815,12 +1811,11 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
   .pane-view .print-only { display: block; }
   .pane-view h1 { font-size: 20px; font-weight: 400; margin: 0 0 8px; }
   .pane-view h2 { font-size: 16px; font-weight: 600; margin: 16px 0 8px; }
-  .data { font-size: 10px; }
+  .data { font-size: 12px; }
   .data th, .data td { padding: 4px 8px; }
-  .data .mono { font-size: 9px; }
-  .data td p { font-size: 10px; min-width: 12ch; }
-  .data .tag { height: 14px; padding: 0 6px; font-size: 9px; }
+  .data .mono { font-size: 11px; }
+  .data td p { font-size: 12px; min-width: 12ch; }
+  .data .tag { height: 18px; padding: 0 6px; font-size: 11px; }
   .data .tag, .data .risk-dot { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .pane-view .data .entity + .entity { margin-top: 8px; }
   body { background: #fff; color: #000; }
 }
