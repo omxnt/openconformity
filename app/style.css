@@ -1478,7 +1478,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
    rows as Carbon's structured list sets them, a rule above and under
    every row, each group's label at $label-01. A link leaving the page
    wears the launch glyph, as the Help menu's do. */
-.dialog:has(.about) { max-width: 768px; }
+.dialog:has(.about) { max-width: 880px; }
 .about-forget { height: 24px; padding: 0 8px; }
 .about-forget[hidden] { display: none; }
 .about { display: grid; gap: 24px; }  /* $spacing-06 */
@@ -1528,6 +1528,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .about-table { width: 100%; border-collapse: collapse; }
 .about-table td { padding: 8px 16px 8px 0; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; white-space: nowrap; }  /* $spacing-03, $spacing-05 */
 .about-table tr:last-child td { border-bottom: 0; }
+.about-table td:nth-child(2) { white-space: normal; }  /* what a thing is may wrap, its name and its link never */
 .about-table td:last-child { padding-right: 0; text-align: right; width: 1%; }
 .about-table td:last-child > * + * { margin-left: 16px; }  /* $spacing-05 between a control and a link */
 .about-table td:first-child { width: 12em; min-width: 12em; color: var(--text); }  /* one first column across the items */
