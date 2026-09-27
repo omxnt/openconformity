@@ -330,7 +330,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-01 | None found. | Closed | CT-01, CT-02 |
 | SC-02 | None found. A reference in a form the check does not name would still be held by the image rendering. | Closed | CT-07, CT-08 |
 | SC-03 | None found. | Closed | CT-18 |
-| SC-04 | Saving is one pass over the nodes. A change in a flat project of 20,000 entities still holds the tab for about three seconds, since the tree finds a node's children by reading every node. | Open | A children index in the model |
+| SC-04 | None found. Saving and every walk of the tree grow in step with the project, and a change in a flat project of 20,000 entities takes about half a second, most of it drawing the rows. | Closed | CT-03, CT-05, and the children index in `model.js` |
 | SC-05 | None found. | Closed | CT-02, CT-03 |
 | SC-06 | Unknown content is kept and stated, as F-PER-010 requires. | Accepted | F-PER-010 |
 | SC-07 | A file carries no author, signature or history. | Accepted | The maintainer, 27 September 2026 |

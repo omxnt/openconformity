@@ -21,10 +21,13 @@ import {
   unrelate,
   relationshipsOf,
   removeFolder,
+  removeEntity,
   setProjectAttribute,
   removeAttributes,
 } from '../app/modules/model.js';
 import { FILING_DEPTH } from '../app/modules/validator.js';
+import { createStore } from '../app/modules/store.js';
+import { fakeStorage } from './helpers.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
 /** The identifiers of a parent's children, in sibling order. */
@@ -182,6 +185,52 @@ function childIds(model, parentId) {
   allowed(placeBeside(model, branch, levels[FILING_DEPTH - 1], 'after'), 'and placed where its content fits');
   const lone = addFolder(model, 'Lone').folder.id;
   allowed(placeBeside(model, lone, deepest, 'before'), 'a node alone takes the deepest level beside another');
+}
+
+// --- The children index agrees with the node list after every change (F-WSP-001, F-WSP-004) ---
+
+{
+  /** Whether every parent's children, as the index gives them, are what a full scan finds, in order. */
+  const agrees = (model) => [null, ...model.nodes.keys()].every((parentId) => {
+    const indexed = childrenOf(model, parentId).map((node) => node.id).join(' ');
+    const scanned = [...model.nodes.values()].filter((node) => node.parent === parentId).map((node) => node.id).join(' ');
+    return indexed === scanned;
+  });
+  const model = createModel();
+  const shelf = addFolder(model, 'Shelf').folder.id;
+  const drive = addEntity(model, 'ELM', { parent: shelf }).entity.id;
+  const motor = addEntity(model, 'ELM', { parent: drive }).entity.id;
+  const hazard = addEntity(model, 'HAZ').entity.id;
+  ok(agrees(model), 'after creating');
+  file(model, hazard, shelf);
+  ok(agrees(model), 'after filing');
+  placeBeside(model, hazard, drive, 'before');
+  ok(agrees(model), 'after placing');
+  const returned = childrenOf(model, shelf);
+  returned.pop();
+  ok(agrees(model), 'after a caller changes the list it was given');
+  removeEntity(model, drive);
+  ok(agrees(model) && nodeOf(model, motor).parent === shelf, 'after deleting, what was filed beneath moving up');
+  removeFolder(model, shelf);
+  ok(agrees(model) && model.nodes.size === 0, 'after deleting a folder');
+
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
+  store.commit((held) => addFolder(held, 'A'));
+  store.commit((held) => addEntity(held, 'ELM', { parent: 'F-1' }));
+  store.commit((held) => file(held, 'ELM-001', null));
+  store.undo();
+  ok(agrees(store.model()) && nodeOf(store.model(), 'ELM-001').parent === 'F-1', 'after undo');
+  store.redo();
+  ok(agrees(store.model()) && nodeOf(store.model(), 'ELM-001').parent === null, 'after redo');
+
+  const wide = createModel();
+  for (let i = 0; i < 20000; i += 1) addEntity(wide, 'ELM');
+  const started = Date.now();
+  for (const id of wide.nodes.keys()) childrenOf(wide, id);
+  childrenOf(wide, null);
+  const took = Date.now() - started;
+  ok(took < 500, `the children of all twenty thousand nodes are found in ${took} ms`);
 }
 
 // --- Sibling order (F-WSP-004) -----------------------------------------

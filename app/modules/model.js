@@ -74,7 +74,33 @@ export function nodeOf(model, id) {
  * @returns {Node[]}
  */
 export function childrenOf(model, parentId) {
-  return [...model.nodes.values()].filter((node) => node.parent === parentId);
+  let index = childIndex.get(model.nodes);
+  if (!index) {
+    index = new Map();
+    for (const node of model.nodes.values()) {
+      if (!index.has(node.parent)) index.set(node.parent, []);
+      index.get(node.parent).push(node);
+    }
+    childIndex.set(model.nodes, index);
+  }
+  return [...(index.get(parentId) ?? [])];
+}
+
+/**
+ * The children of each parent in sibling order, per node map. Built on
+ * the first question and dropped by every change to filing or order, so
+ * it is never read stale. History restores into a new node map, which
+ * starts without one.
+ * @type {WeakMap<Map<string, Node>, Map<string|null, Node[]>>}
+ */
+const childIndex = new WeakMap();
+
+/**
+ * Drop the children index after a change to filing or order.
+ * @param {Model} model
+ */
+function refiled(model) {
+  childIndex.delete(model.nodes);
 }
 
 /**
@@ -126,17 +152,12 @@ function levelOf(model, id) {
  * @returns {number}
  */
 export function spanOf(model, id) {
-  const children = new Map();
-  for (const node of model.nodes.values()) {
-    if (!children.has(node.parent)) children.set(node.parent, []);
-    children.get(node.parent).push(node.id);
-  }
   let span = 0;
   const pending = [[id, 1]];
   while (pending.length > 0) {
     const [current, level] = /** @type {[string, number]} */ (pending.pop());
     span = Math.max(span, level);
-    for (const child of children.get(current) ?? []) pending.push([child, level + 1]);
+    for (const child of childrenOf(model, current)) pending.push([child.id, level + 1]);
   }
   return span;
 }
@@ -219,6 +240,7 @@ export function addEntity(model, code, options = {}) {
   /** @type {Entity} */
   const entity = { id, kind: 'entity', type: code, parent, attributes: { ...(options.attributes ?? {}) } };
   model.nodes.set(id, entity);
+  refiled(model);
   return { ok: true, entity };
 }
 
@@ -254,6 +276,7 @@ export function addFolder(model, name, options = {}) {
   /** @type {Folder} */
   const folder = { id, kind: 'folder', name, parent };
   model.nodes.set(id, folder);
+  refiled(model);
   return { ok: true, folder };
 }
 
@@ -355,6 +378,7 @@ export function file(model, nodeId, parentId) {
   node.parent = parentId;
   model.nodes.delete(nodeId);
   model.nodes.set(nodeId, node);
+  refiled(model);
   return { ok: true };
 }
 
@@ -395,6 +419,7 @@ export function placeBeside(model, nodeId, targetId, position) {
   entries.splice(position === 'after' ? at + 1 : at, 0, [nodeId, node]);
   model.nodes.clear();
   for (const [id, entry] of entries) model.nodes.set(id, entry);
+  refiled(model);
   return { ok: true };
 }
 
@@ -616,6 +641,7 @@ function purge(model, gone) {
   }
 
   for (const id of gone) model.nodes.delete(id);
+  refiled(model);
 }
 
 /**

@@ -111,6 +111,13 @@ const sheet = readFile('../app/style.css');
   ok(sources.every(([name, source]) => name === 'shell' || !source.includes('location.href')) && readFile('../app/modules/shell.js').split('location.href').length === 2 && readFile('../app/modules/shell.js').includes("window.location.href = 'mailto:info@openconformity.org';"), 'the address is written once, to open the mail client, and never read');
 }
 
+// --- Only the model changes filing, so its children index stays true (F-WSP-001, F-WSP-004) ---
+
+{
+  const writers = sources.filter(([name, source]) => name !== 'model' && /\.nodes\.(set|delete|clear)\(|\.parent\s*=[^=]/.test(source)).map(([name]) => name);
+  ok(writers.length === 0, `no module but the model writes to the node list or to a parent${writers.length > 0 ? ` (written in: ${writers.join(', ')})` : ''}`);
+}
+
 // --- The host is told to refuse framing (N-SEC-007) -----------------------
 
 {
