@@ -4,9 +4,11 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, and saves it as an Excel workbook, a sheet
- * per section: from the first section, which holds every row, the whole
- * view, and from any other only that section. The cell kinds no view produces yet, a choice, choices and a
+ * cell a way to the editor, a block's heading above its tables, and
+ * saves it as the view offers: as an Excel workbook, a sheet per
+ * section, or as Markdown. From the first section, which holds every
+ * row, the save takes the whole view, and from any other only that
+ * section. The cell kinds no view produces yet, a choice, choices and a
  * mark, are scaffolding for the views the proposal lists, kept and
  * tested until they land.
  */
@@ -17,6 +19,7 @@ import { TYPE_ICONS } from './icons.js';
 import { entityLabel } from './queries.js';
 import { VIEWS } from './view-registry.js';
 import { workbook } from './xlsx.js';
+import { markdown } from './markdown.js';
 
 /** A column as an object, a bare name being its text. */
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);
@@ -71,11 +74,32 @@ export function cellText(held, labelOf) {
  * @param {{ title: string, sections: Array<{ name: string }> }} built
  * @param {number} section  the open section's index
  */
-export function savedPart(built, section) {
+export function savedPart(built, section, extension = 'xlsx') {
   const whole = section <= 0 || built.sections.length <= 1;
   const held = whole ? built : { ...built, sections: [built.sections[section]] };
   const name = whole ? built.title : `${built.title} - ${built.sections[section].name.replace(/\s*\(\d+\)$/, '')}`;
-  return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.xlsx` };
+  return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.${extension}` };
+}
+
+/**
+ * A section as a Markdown document under the view's title: each table
+ * with the heading of the block it opens, the block's text and its
+ * caption, each cell as the exports write it.
+ * @param {{ title: string }} built
+ * @param {{ tables: Array<{ heading?: string, text?: string, caption?: string, columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }} section
+ * @param {(id: string) => string} labelOf
+ */
+export function sectionMarkdown(built, section, labelOf) {
+  return markdown(
+    built.title,
+    section.tables.map((table) => ({
+      heading: table.heading ? [table.heading, labelOf(table.heading)].filter(Boolean).join(' ') : '',
+      text: table.text ?? '',
+      caption: table.caption ?? '',
+      headers: table.columns.map(columnText),
+      rows: table.rows.map((row) => row.cells.map((held) => exportText(held, labelOf))),
+    }))
+  );
 }
 
 /**
@@ -284,7 +308,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     return el('table', { className: spec.spec ? 'data spec' : 'data' }, [el('thead', {}, headRows(spec.columns, key, sortable)), el('tbody', {}, rows)]);
   }
 
-  function renderHead(open) {
+  function renderHead(open, built) {
     head.textContent = '';
     const tabs = el('nav', { className: 'contained-tabs', attributes: { 'aria-label': 'Views' } });
     for (const view of VIEWS) {
@@ -293,11 +317,20 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       tabs.appendChild(tab);
     }
     head.appendChild(tabs);
-    const excel = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Save as Excel' })]);
-    excel.addEventListener('click', saveExcel);
+    const exports = built.exports ?? ['excel'];
+    const saves = [];
+    if (exports.includes('excel')) saves.push(saveButton('Save as Excel', saveExcel));
+    if (exports.includes('markdown')) saves.push(saveButton('Save as Markdown', saveMarkdown));
     const close = tooltipOn(el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]), 'Close the view', { align: 'end' });
     close.addEventListener('click', onClose);
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [excel, close]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [...saves, close]));
+  }
+
+  /** A save action in the view's head. */
+  function saveButton(text, save) {
+    const button = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text })]);
+    button.addEventListener('click', save);
+    return button;
   }
 
   /** The whole view saved as an Excel workbook, each section's tables a sheet named for the section. */
@@ -307,6 +340,17 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
     const part = savedPart(view.build(store.model()), open.section);
     download(part.filename, workbook(viewSheets(part.built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  }
+
+  /** The open section saved as Markdown, the first section holding every block. */
+  function saveMarkdown() {
+    const open = store.view();
+    if (open === null) return;
+    const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
+    const built = view.build(store.model());
+    const index = Math.min(open.section, built.sections.length - 1);
+    const part = savedPart(built, index, 'md');
+    download(part.filename, sectionMarkdown(built, built.sections[index], labelOf), 'text/markdown;charset=utf-8');
   }
 
   function render() {
@@ -321,7 +365,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
     const built = view.build(store.model());
     const section = Math.min(open.section, built.sections.length - 1);
-    renderHead(open);
+    renderHead(open, built);
     body.textContent = '';
     if (built.sections.length > 1) {
       const tabs = el('nav', { className: 'tabs', attributes: { 'aria-label': 'Sections' } });
@@ -336,14 +380,19 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     built.sections.forEach((held, i) => {
       const block = el('div', { className: 'section' });
       block.hidden = i !== section;
-      held.tables.forEach((spec, j) => block.appendChild(table(spec, `${built.id}/${i}/${j}`)));
+      held.tables.forEach((spec, j) => {
+        if (spec.heading) block.appendChild(el('h2', { className: 'view-block-head', attributes: { 'data-id': spec.heading } }, [entityRow(spec.heading)]));
+        if (spec.text) block.appendChild(el('p', { className: 'view-block-text', text: spec.text }));
+        if (spec.caption) block.appendChild(el('h3', { className: 'view-caption', text: spec.caption }));
+        block.appendChild(table(spec, `${built.id}/${i}/${j}`));
+      });
       scroll.appendChild(block);
     });
     body.appendChild(scroll);
 
     const back = store.viewReturn();
     if (back !== null && back.id === built.id && revealed !== back.rowId) {
-      const row = scroll.querySelector(`.section:not([hidden]) tr[data-id="${back.rowId}"]`);
+      const row = scroll.querySelector(`.section:not([hidden]) [data-id="${back.rowId}"]`);
       if (row) {
         row.scrollIntoView({ block: 'center' });
         revealed = back.rowId;

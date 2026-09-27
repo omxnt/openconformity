@@ -8,7 +8,9 @@
 
 import './shim.js';
 import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
-import { asColumn, columnText, cellText, exportText, viewSheets, savedPart, sortRows, groupEdges } from '../app/modules/views.js';
+import { buildSafetyView, specifiedFields } from '../app/modules/view-safety.js';
+import { ATTRIBUTES } from '../app/modules/attributes.js';
+import { asColumn, columnText, cellText, exportText, viewSheets, savedPart, sectionMarkdown, sortRows, groupEdges } from '../app/modules/views.js';
 import { VIEWS } from '../app/modules/view-registry.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
@@ -30,7 +32,7 @@ const labelOf = (id) => entityLabel(model.nodes.get(id));
 
 // --- The registry (F-VIE-001) ---------------------------------------------
 
-deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function']], 'the first view is the risk assessment, built by a function of the model');
+deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function'], ['safety', 'Safety function specification', 'function']], 'the risk assessment, then the safety function specification, each built by a function of the model');
 equal(RISK_VIEW.build, buildRiskView, 'registered under its builder');
 
 // --- The risk assessment over the example (F-VIE-001) ----------------------
@@ -173,6 +175,30 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([whole.filename, whole.built.sections.length], ['Risk assessment.xlsx', 5], 'saved from the first tab, which holds every row, the whole view goes, every tab a sheet');
   const phase = savedPart(view, 3);
   deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - L-3 Maintenance.xlsx', ['L-3 Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
+}
+
+// --- The safety function specification over the example (F-VIE-001) ---------
+
+{
+  const view = buildSafetyView(model);
+  deepEqual([view.title, view.exports], ['Safety function specification', ['markdown']], 'titled, and saved as Markdown');
+  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each');
+  const block = view.sections[1].tables;
+  deepEqual(block.map((table) => table.caption), ['Relationships', 'Behaviour', 'Characteristics', 'Fault handling'], 'a function is its relationships and the three tabs that specify it, its diagram and notes left in the editor');
+  deepEqual([block[0].heading, block[0].text], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function and its description');
+  deepEqual(block[0].rows.map((row) => row.cells[0]), ['Part of', 'Decomposes into', 'Realises', 'Allocated to', 'Expressed by'], 'the relationships named from its side');
+  const saf2 = view.sections[2].tables[0].rows;
+  deepEqual([saf2[1].cells[1], view.sections[3].tables[0].rows[0].cells[1]], [{ entities: ['SAF-003', 'SAF-004'] }, { entities: ['SAF-002'] }], 'a function lists the functions it decomposes into, and each of those the one it is part of');
+  const characteristics = block[2].rows.map((row) => row.cells[0]);
+  equal(characteristics.slice(0, 2).join(', '), 'Functional safety standard, Required integrity level', 'the required integrity level stands right after the standard it follows');
+  equal(characteristics.filter((name) => name === 'Required integrity level').length, 1, 'once, the variant of the standard in force');
+  const group = ATTRIBUTES.SAF.groups.find((held) => held.name === 'Characteristics');
+  deepEqual([specifiedFields(group, { standard: 'EN IEC 62061:2021' })[1].key, specifiedFields(group, {})[1].key], ['sil', 'ownLevel'], 'under the other standard the level in SIL, under none the level typed');
+  ok(block.every((table) => table.spec && table.sortable === false), 'each table reads as a form, never sorted');
+  equal(view.sections[0].tables.length, 16, 'the first tab holds every function, four tables each');
+  const text = sectionMarkdown(view, view.sections[1], labelOf);
+  ok(text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n') && text.includes('### Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'the Markdown opens on the view, then the function, then its tables');
+  deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 1, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-1 Emergency Stop.md'], 'saved from the first tab under the view, from a function under its name');
 }
 
 summary('test-views');

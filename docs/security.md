@@ -158,6 +158,8 @@ A change of the kind below updates the sections named in the same commit.
 | EP-19 | A link leaving the page | Out | TB-06 | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | CT-19 |
 | EP-20 | A saved file | Out | TB-01 | `flows.js` `saveProject`, `dom.js` `download`, `files.js` `filenameFor` | CT-27 |
 | EP-21 | A view saved as a workbook | Out | TB-01 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
+| CT-36 | A saved Markdown document escapes ampersands and angle brackets in everything it carries, so no markup from a field is rendered. | `markdown.js` `markdownText` | F-VIE-001 | In place |
+| EP-22 | A view saved as Markdown | Out | TB-01 | `views.js` `saveMarkdown` and `sectionMarkdown`, `markdown.js` `markdown` | CT-36 |
 
 ## 4. Threats
 
@@ -174,6 +176,7 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 | TH-05 | Denial of service | A file deep or wide enough to exhaust the browser. | CT-03, CT-05 |
 | TH-06 | Elevation of privilege | Markup or code in a value, a scheme that runs code in a link, or a prototype key. | CT-01, CT-02, CT-03, CT-18 |
 | TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. | CT-35 |
+| TH-50 | Elevation of privilege | A value written as markup, which a Markdown viewer would render or run when a view saved from the file is shown. | CT-36 |
 
 ### 4.2 The library catalogue
 

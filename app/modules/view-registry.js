@@ -5,6 +5,7 @@
  */
 
 import { RISK_VIEW } from './view-risk.js';
+import { SAFETY_VIEW } from './view-safety.js';
 
 /** Every view, in menu and tab order. */
-export const VIEWS = [RISK_VIEW];
+export const VIEWS = [RISK_VIEW, SAFETY_VIEW];

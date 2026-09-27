@@ -923,6 +923,16 @@ The workbook a view is saved as carries no fill on its head rows. Its formatting
 
 ---
 
+### D-107 The safety function specification
+
+`2026-09-27` `product`
+
+The second view is the safety function specification, one block per safety function holding only what it says for itself and what relates to it directly: its heading and description, its relationships named from its side, and a table of field and value for each of Behaviour, Characteristics and Fault handling, the required integrity level in force after the standard. One tab holds every function and one tab each holds a function alone, and a save follows the risk assessment's rule. It is saved as Markdown, with any markup a field holds escaped, and its diagram and notes stay in the editor.
+
+> *A specification is a document to hand on, to a designer, a supplier or a reviewer, and Markdown is a document every tool reads and every repository shows. The view reads the safety function's own tabs, so a field added there appears here without a change to the view. A field left empty shows a dash, since a gap in a specification is worth seeing. The notes are the modeller's own remarks, and a diagram does not travel in a text file.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

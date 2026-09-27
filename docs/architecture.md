@@ -35,7 +35,7 @@ The modules fall into seven layers. An import points down to a lower layer or st
 | No. | Layer | Touches the page | Modules | Lines |
 |---|---|---|---|---|
 | 1 | Definitions | No | metamodel, attributes, risk, icons, version, platform, text, library data, example | 7,096 |
-| 2 | Model and rules | No | model, validator, files, history, queries, relate, records, project, fields, drawing, view-risk, view-registry, xlsx, library index | 3,174 |
+| 2 | Model and rules | No | model, validator, files, history, queries, relate, records, project, fields, drawing, view-risk, view-safety, view-registry, xlsx, markdown, library index | 3,360 |
 | 3 | State | No | store, retention | 1,090 |
 | 4 | Page parts | Yes | dom, overlay, dialog, menu, splitter, columns, multiselect, pane, rating, rating-cell, table-control, drawing-cell, drawing-editor, landing, about | 2,301 |
 | 5 | Panes | Yes | shell, navigator, editor, relationships, graph, library, views | 4,137 |
@@ -68,8 +68,10 @@ Most of the first layer is data. The library and the example are about 6,000 lin
 | `fields.js` | 2 | Reading and writing field values apart from the page |
 | `drawing.js` | 2 | The XML parser and the drawing check |
 | `view-risk.js` | 2 | The risk assessment as a description of sections, columns and rows |
+| `view-safety.js` | 2 | The safety function specification as a description of blocks and tables |
 | `view-registry.js` | 2 | The list of views in menu and tab order |
 | `xlsx.js` | 2 | An Excel workbook written from tables of text, its zip included |
+| `markdown.js` | 2 | A Markdown document written from tables of text |
 | `library/index.js` | 2 | The catalogues cut out of the shipped library |
 | `store.js` | 3 | What is open, the selection, the session state, the history and the persistence |
 | `retention.js` | 3 | IndexedDB behind a small interface, and an in-memory twin for the tests |

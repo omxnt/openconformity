@@ -1791,6 +1791,24 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data .entity + .entity { margin-top: 4px; }
 .data .entity .icon { width: 16px; height: 16px; flex: none; }
 .data .entity .entity-title { color: var(--link); }
+/* A block of a view, as a safety function in its specification: the
+   entity as the heading, its text beneath, then each table under its
+   caption. A table of field and value reads like a form, without a
+   head, its field names in the secondary colour. */
+.view-block-head { margin: 32px 0 8px; font-size: 20px; font-weight: 400; line-height: 1.4; }  /* $heading-03 */
+.section > .view-block-head:first-child { margin-top: 0; }
+.view-block-head .entity { display: inline-flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; }
+.view-block-head .entity .icon { width: 20px; height: 20px; flex: none; }
+.view-block-head .entity .mono { font-size: 16px; color: var(--text-second); }
+.view-block-head .entity:hover .entity-title { text-decoration: underline; }
+.view-block-head .entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.view-block-text { margin: 0 0 16px; max-width: 80ch; color: var(--text); white-space: pre-wrap; }
+.view-caption { margin: 16px 0 8px; font-size: 14px; font-weight: 600; line-height: 1.28572; letter-spacing: 0.16px; }  /* $heading-compact-01 */
+.data.spec { max-width: 1200px; }
+.data.spec thead { display: none; }
+.data.spec td:first-child { width: 28ch; color: var(--text-second); }
+.data.spec td p { max-width: 80ch; }
+
 /* In a view each entity keeps to one line, a little apart from the next
    in the same cell. */
 .pane-view .data .entity + .entity { margin-top: 6px; }
