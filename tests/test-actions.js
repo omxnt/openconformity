@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'import', 'relate', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -209,6 +209,9 @@ function enabledIds(actions) {
     ['new-entity', 'new-related', 'new-folder', 'import', 'move-up', 'move-down', 'move-to', 'delete'],
     'the tree toolbar holds the tree actions and the import from a library: relating lives in the relationship pane, undo and redo in the shell'
   );
+  const runs = [];
+  for (const action of actions.filter((offered) => offered.toolbar)) if (runs.at(-1)?.[0] !== action.group) runs.push([action.group, action.id]);
+  deepEqual(runs.map(([group]) => group), ['create', 'library', 'arrange', 'delete'], 'each group a run of its own, so the import from a library stands between dividers');
 }
 
 // --- Reorder stands down while the tree is filtered (F-WSP-001) ------------

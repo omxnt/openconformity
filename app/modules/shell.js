@@ -213,7 +213,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
 
   // Everything that changes the model, separated as the action groups
   // separate.
-  const modelGroups = ['edit', 'create', 'arrange', 'delete', 'history'];
+  const modelGroups = ['edit', 'create', 'library', 'arrange', 'delete', 'history'];
   menubarMenu(editButton, 'Edit', () => {
     const items = [];
     let lastGroup = null;

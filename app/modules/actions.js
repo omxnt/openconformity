@@ -210,16 +210,6 @@ export function createActions({ store, flows }) {
       run: () => flows.createFolder(),
     },
     {
-      id: 'import',
-      icon: 'i-import',
-      label: 'Import from library',
-      group: 'create',
-      toolbar: true,
-      context: false,
-      enabled: () => store.hasProject(),
-      run: () => flows.importFromLibrary(),
-    },
-    {
       id: 'relate',
       icon: 'i-add-relationship',
       label: 'Add relationship',
@@ -230,6 +220,16 @@ export function createActions({ store, flows }) {
         selected()?.kind === 'entity' &&
         relationshipOptions(store.model(), store.selection()).length > 0,
       run: () => flows.relateSelection(),
+    },
+    {
+      id: 'import',
+      icon: 'i-import',
+      label: 'Import from library',
+      group: 'library',
+      toolbar: true,
+      context: false,
+      enabled: () => store.hasProject(),
+      run: () => flows.importFromLibrary(),
     },
     {
       id: 'move-up',

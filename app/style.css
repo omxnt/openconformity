@@ -624,6 +624,7 @@ body {
 .tree-row.pick-dim { opacity: 0.25; }
 /* A row both excluded and not offered fades once, as the whole row. */
 .tree-row.pick-dim.excluded .row-title,
+.tree-row.pick-dim.excluded .designation { color: inherit; }
 .tree-row.pick-dim.excluded .designation { color: var(--text-second); }
 .tree-row.pick-dim.excluded > .icon,
 .tree-row.pick-dim.excluded .twisty { opacity: 1; }
@@ -959,7 +960,8 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 }
 .help-trigger .icon { width: 16px; height: 16px; fill: currentColor; }
 .help-trigger:hover,
-.help-trigger:focus-visible { color: var(--text); outline: 2px solid var(--focus); outline-offset: -2px; }
+.help-trigger:focus-visible { color: var(--text); }
+.help-trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .tooltip {
   position: absolute;
   top: calc(100% + 12px);  /* Carbon's popover offset for a tooltip */
