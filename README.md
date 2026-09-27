@@ -39,7 +39,7 @@ openconformity/
 | [decisions.md](notes/decisions.md) | What was chosen and why |
 | [requirements.md](specs/requirements.md) | What it shall be and do |
 | [metamodel.md](specs/metamodel.md) | What a model may contain |
-| [attributes.md](notes/attributes.md) | What each entity type carries |
+| [attributes.md](specs/attributes.md) | What each entity type carries |
 
 ## Disclaimer
 
