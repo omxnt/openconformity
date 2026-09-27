@@ -96,7 +96,8 @@ export async function showAbout(dialogs, store = null) {
       ]),
       fold('Development tools', [
         ['Claude Code', 'Coding assistant, used in development only', [link('https://claude.com/claude-code', 'claude.com')]],
-        ['Mermaid', 'Diagram tool, used to export the metamodel diagram', [link('https://mermaid.live', 'mermaid.live')]],
+        ['Mermaid', 'Metamodel notation, the diagram exported with Mermaid Live', [link('https://mermaid.js.org', 'mermaid.js.org')]],
+        ['Figma', 'Identity, the wordmark and the marks drawn in it', [link('https://www.figma.com', 'figma.com')]],
       ]),
     ]),
   });
