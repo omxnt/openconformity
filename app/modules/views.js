@@ -276,7 +276,6 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       const block = el('div', { className: 'section' });
       block.hidden = i !== section;
       if (built.sections.length > 1) block.appendChild(el('h2', { className: 'print-only', text: held.name }));
-      if (held.lead) block.appendChild(el('p', { className: 'lead', text: held.lead }));
       held.tables.forEach((spec, j) => block.appendChild(table(spec, `${built.id}/${i}/${j}`)));
       scroll.appendChild(block);
     });

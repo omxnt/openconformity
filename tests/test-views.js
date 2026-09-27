@@ -46,7 +46,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
     [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]],
     'every scenario on the first tab, then each phase holding the scenarios its tasks give rise to, each tab counting its rows in its name'
   );
-  ok(view.sections.every((section) => typeof section.lead === 'string' && section.lead.length > 0), 'each section says what it holds');
+  ok(view.sections.every((section) => !('lead' in section)), 'and no text above a table, the tab naming what it holds');
   const columns = view.sections[0].tables[0].columns.map(asColumn);
   deepEqual(
     columns.map((column) => [column.text, column.group ?? null]),
@@ -119,7 +119,6 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   Object.assign(typed.nodes.get('SCN-001').attributes, { initialRating: ' Tolerable ' });
   deepEqual(ratingCells(typed.nodes.get('SCN-001'), 'Initial risk estimation', ''), ['Tolerable'], 'holding what was typed, trimmed');
   deepEqual(ratingCells(typed.nodes.get('SCN-002'), 'Initial risk estimation', ''), [''], 'or nothing');
-  ok(buildRiskView(typed).sections[0].lead.includes('typed with no method chosen'), 'and the lead says so');
 }
 
 // --- The renderer's pure parts (F-VIE-001) ---------------------------------

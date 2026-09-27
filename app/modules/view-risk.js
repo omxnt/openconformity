@@ -9,7 +9,7 @@
  * parameter shows the rationale given for it beneath its value. One tab for all
  * scenarios and one per phase its tasks occur during, each counting its
  * rows in its name. A pure function of the model, returning the description
- * views.js renders and exports: a title and sections, each a lead and
+ * views.js renders and exports: a title and sections, each a name and
  * tables of columns and rows.
  *
  * A column is a name or an object with a text, an optional group whose
@@ -153,13 +153,11 @@ export function buildRiskView(model) {
     };
   };
 
-  const rated = method ? `one per parameter of the ${method} and the rating it comes to` : 'the rating each was given, typed with no method chosen';
   const table = (held) => ({ columns, rows: held.map(row) });
   const named = (name, held) => `${name} (${held.length})`;
   const sections = [
     {
       name: named('All scenarios', scenarios),
-      lead: `Every accident scenario with what relates to it directly, in the order it is assessed. What happens and what harm could follow, the hazardous situation it arises in, the initial risk, the protective measures reducing it, and the residual risk with whether it is acceptable beneath it. The ratings stand in columns under their group, ${rated}, each with its rationale.`,
       tables: [table(scenarios)],
     },
   ];
@@ -167,7 +165,6 @@ export function buildRiskView(model) {
     const held = scenarios.filter((scenario) => phasesOf(scenario).includes(phase.id));
     sections.push({
       name: named(entityLabel(phase) || phase.id, held),
-      lead: `Scenarios a task occurring during ${entityLabel(phase) || phase.id} gives rise to.`,
       tables: [table(held)],
     });
   }
@@ -175,7 +172,6 @@ export function buildRiskView(model) {
   if (unplaced.length > 0) {
     sections.push({
       name: named('No phase', unplaced),
-      lead: 'Scenarios no task gives rise to, so no phase holds them.',
       tables: [table(unplaced)],
     });
   }

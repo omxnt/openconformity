@@ -1755,7 +1755,6 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .pane-view .pane-body { display: flex; flex-direction: column; background: var(--layer); overflow: hidden; }
 .pane-view .tabs { background: var(--layer); }
 .view-scroll { flex: 1; min-height: 0; overflow: auto; padding: 16px 16px 64px; }  /* $spacing-05 */
-.pane-view .lead { margin: 0 0 16px; max-width: 80ch; color: var(--text-second); }
 .pane-view .section[hidden] { display: none; }
 .pane-view .print-only { display: none; }
 
@@ -1794,6 +1793,13 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data .entity + .entity { margin-top: 4px; }
 .data .entity .icon { width: 16px; height: 16px; flex: none; }
 .data .entity .entity-title { color: var(--link); }
+/* In a view an entity stacks: the glyph and the identifier on one line,
+   the title beneath from the glyph's edge, wrapping within the column, and entities in
+   one cell stand apart by more than their own two lines do. */
+.pane-view .data .entity { display: grid; grid-template-columns: 16px auto; column-gap: 8px; row-gap: 2px; align-items: center; white-space: normal; }
+.pane-view .data .entity + .entity { margin-top: 16px; }  /* $spacing-05 */
+.pane-view .data .entity .mono { white-space: nowrap; }
+.pane-view .data .entity .entity-title { grid-column: 1 / -1; }
 .data .entity:hover .entity-title { text-decoration: underline; }
 .data .entity:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .data .entity.gone { color: var(--text-helper); }
