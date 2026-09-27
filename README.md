@@ -40,6 +40,7 @@ openconformity/
 | [requirements.md](specs/requirements.md) | What it shall be and do |
 | [metamodel.md](specs/metamodel.md) | What a model may contain |
 | [attributes.md](specs/attributes.md) | What each entity type carries |
+| [security.md](notes/security.md) | How the software is kept secure |
 
 ## Disclaimer
 

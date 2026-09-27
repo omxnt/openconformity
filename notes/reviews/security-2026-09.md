@@ -1,6 +1,6 @@
-# Assessment
+# Security 2026-09
 
-This document assesses openconformity as software, as it stands at commit `2338fc0` on 28 September 2026. It has two parts that feed each other. The first reviews the requirements in `specs/requirements.md` themselves, whether each is well formed, testable and consistent with the others, and what is missing. The second is a threat analysis of the software as built, its assets, its trust boundaries, who could attack it and how, what it does about each today, and the risk that remains. The findings of both parts are ranked and sized, and a verification plan says how each control and each finding is checked, so that a later run can report how it went. The target is openconformity. Cloudflare, GitHub, draw.io and JGraph are boundaries the software depends on, and crossing them is described for what it means to the software, never planned as an attack on them.
+This document is the first security audit of openconformity, made against commit `2338fc0` of 27 September 2026 and followed up at commit `e7c5da8` the same day. It reviews the requirements in `specs/requirements.md` for form, testability, consistency and coverage, and proposes what was missing. It analysed the threats to the software, and that analysis is now held and kept current as the security model in `notes/security.md`. It ranks and sizes the findings of both parts, plans how each control and finding is verified, records the run of that plan, and records the follow-up of every finding. The target is openconformity. Cloudflare, GitHub, draw.io and JGraph are boundaries the software depends on, and crossing them is described for what it means to the software, never planned as an attack on them.
 
 ## 1. Method
 
@@ -14,7 +14,7 @@ A missing requirement was found by walking what the software does and holds. Eac
 
 The analysis follows one order. The assets are named first, ranked by what their loss would cost the user. The trust boundaries come next, each line data or code crosses into the software, with what stands on each side. The threat actors are named with what each has, can do and wants. The attack surface lists every entry point with the file and line where data enters and the check it meets. Each boundary is then put to the six STRIDE questions [3], spoofing, tampering, repudiation, information disclosure, denial of service and elevation of privilege. Attack scenarios are then written as the attacker would plan them, and each step is checked against the code. Every claim about what the software does names a file and a line, and where a claim could be run it was run in the JavaScriptCore shell the test suite uses.
 
-A scenario is rated on feasibility and impact, each on three steps. Feasibility is Low when it needs a compromise of a party the software trusts, such as the host or the editor's origin, or conditions the attacker cannot arrange. It is Medium when it needs the user to act once, such as opening a file or consenting to the editor. It is High when any visitor or any file reaches it with no condition. Impact is Low when the outcome is an annoyance without loss. It is Medium when the outcome is the loss of unsaved work, or the exposure of one drawing. It is High when project content is read or altered without the user knowing, or code runs on the user's device. Risk combines the two. It is High when one is High and the other at least Medium. It is Medium when both are Medium, or when one is High and the other Low. It is Low otherwise. Each scenario ends with a verdict. Blocked means the software stops it. Mitigated means the software reduces it but a residue stays. Open means the software does nothing about it today.
+A scenario is rated on feasibility and impact, each on three steps. Feasibility is Low when it needs a compromise of a party the software trusts, such as the host or the editor's origin, or conditions the attacker cannot arrange. It is Medium when it needs the user to act once, such as opening a file or consenting to the editor. It is High when any visitor or any file reaches it with no condition. Impact is Low when the outcome is an annoyance without loss. It is Medium when the outcome is the loss of unsaved work, or the exposure of one drawing. It is High when project content is read or altered without the user knowing, or code runs on the user's device. Risk combines the two. It is High when one is High and the other at least Medium. It is Medium when both are Medium, or when one is High and the other Low. It is Low otherwise. Each scenario ends with a verdict. Blocked means the software stops it. Mitigated means the software reduces it but a residue stays. Open means the software does nothing about it today. The same scale now stands in section 1.2 of `notes/security.md`, so later audits rate alike.
 
 ### 1.3 Evidence
 
@@ -361,239 +361,29 @@ This section was added because the review found the conventions themselves promi
 
 ## 3. Threat analysis
 
-### 3.1 Assets
-
-**The project's content.** The model, its attribute values and its drawings describe a manufacturer's product, its hazards, its protective measures and the judgements made about them. Disclosure hands a competitor a design and a regulator a reading the manufacturer did not intend. Silent alteration is worse, since a changed rating or a dropped relationship in a conformity record is a false statement the manufacturer signs later. This asset lives in memory while the software runs, in the file the user saves, and in the browser's storage between sessions.
-
-**What is stored in the browser.** The project blob in IndexedDB with the selection and expansion beside it (`store.js:236` to `239`), the set-aside copy of a blob that failed to load (`store.js:384`), the theme in web storage (`store.js:64`), and in session storage the consent, the chosen tabs, the open view, the layout and the pane states (`store.js:67` to `79`). All of it is readable by anyone who can read the browser profile, and none of it is encrypted by the software.
-
-**The integrity of the software the user runs.** The files the host serves, the policy on the page, the fixed editor origin (`drawing-editor.js:21`), and the checks that stand between a file and the model. If any of these is altered on the way to the browser, every other guarantee falls.
-
-**The software's reputation.** A demonstrated leak, or a file that runs code, would end the trust a free tool for confidential data lives on, and with it the project's standing as non-commercial software outside the regulations C-PRJ-004 names.
-
-The files the user saves stand outside the software once written, and are the user's to protect.
-
-### 3.2 Trust boundaries
-
-**The project file.** Inside, the model built by the software's own functions. Outside, a JSON text from anywhere, picked through the browser's file input (`index.html:117`, `flows.js:718` to `728`). It is crossed at `files.js:235`, where the text is parsed, and at `files.js:196` to `225`, where the gates run.
-
-**The library catalogue.** Inside, the picks copied into the project. Outside, a project-shaped object shipped as a module (`library/data.js`, cut into catalogues at `library/index.js:42` to `44`). Today it is code the repository ships, so its trust is the repository's. It is crossed at `library.js:264`, where the catalogue passes the loader, and at `library.js:174`, where attributes are copied.
-
-**The drawing.** Inside, an image on a card. Outside, SVG text held in an attribute, written by the editor or by whoever wrote the file. It is crossed at `drawing-cell.js:56`, where the check runs, and `drawing-cell.js:59`, where the text becomes a data URL in an image element.
-
-**The draw.io frame.** Inside, the software's page and its window. Outside, an application from `https://embed.diagrams.net` running in a sandboxed frame on its own origin (`drawing-editor.js:348` to `356`). Data crosses out at `drawing-editor.js:362`, one drawing's model and the editor's configuration. Data crosses in at `drawing-editor.js:379` to `383`, every message the window receives, filtered at `drawing-editor.js:80` to `91`.
-
-**Browser storage.** Inside, the store's state. Outside, whatever the browser holds for the origin, written by an earlier session of the software and readable by anything on the same origin or with the profile on disk. It is crossed at `store.js:371`, where the blob is read back and passes the same loader a file does (`store.js:321`), at `store.js:305` to `310` for the theme, and at `store.js:150` to `190` for session storage.
-
-**The page's own origin.** Inside, every module the page loads from `app.openconformity.org`, trusted in full by the policy's `'self'`. Outside, every other origin, including the project site at the root domain and any preview address the host gives. Nothing shares this origin with the software, no cookie is set, and no other application runs on it.
-
-**The host.** Inside, the files at the released commit. Outside, Cloudflare Pages and the Cloudflare network in front of it, which terminates TLS, may cache, may compress, and offers features that rewrite or inject content. At the time of writing a login gate stands in front of the deployment (D-081) and answers unauthenticated requests with a challenge. Whether the gate is meant to stand at the beta's opening is for the maintainer to say, and the notes of 27 September say it was to go.
-
-**The repository.** Inside, the commit the maintainer pushed to main. Outside, GitHub, the maintainer's account, the assistant that proposes changes (D-063), and every contributor. The host deploys main on push with no step between, so a commit on main is the software within minutes.
-
-### 3.3 Threat actors
-
-**A hostile author of a project file.** Has a text editor and the schema, which is public. Can write any JSON and send it to the user by any route. Wants code to run on the user's device, content to leak, or the tool to fail on their file so the user distrusts it. Also wants to plant misleading content the user takes as their own.
-
-**A hostile catalogue.** Today a catalogue is code the repository ships, so this actor is the supply chain actor below. When a user library comes, this actor is the file author above with a second door in.
-
-**A hostile drawing.** An SVG text in a file or returned by a compromised editor. Wants markup to act rather than draw, to run script, load a resource that reports the user's address, or embed a document.
-
-**A compromised or impersonated editor origin.** Compromised, JGraph's deployment serves altered code. Impersonated, a network attacker answers for the name. Either can run any code inside the frame, read the drawing model handed over, send any message to the page, and return any text as the drawing. Wants the project, the device, or the drawings of every user.
-
-**Another site in the same browser.** Any page the user has open. Can open the software in a window or frame, post messages to it, and link to it. Wants the project from the software's storage, or a click the user did not mean to make.
-
-**A person at the machine.** Has the profile on disk or the unlocked session. Can read IndexedDB, session storage, the downloads folder and the browser history. Wants the project.
-
-**A network attacker.** Sits between the browser and the two origins. Can read and alter plain traffic, and can try to answer for a name. Wants to alter the software or the editor on the way in.
-
-**Someone in the supply chain.** Has a way to put a commit on main, the maintainer's GitHub account, the maintainer's Cloudflare account, or the host's own pipeline. Wants their code on the software's origin, which the policy trusts in full.
-
-### 3.4 Attack surface
-
-1. A project file picked by the user. Enters as text at `flows.js:757` and is parsed at `files.js:235` with `JSON.parse` inside a try. It then meets the format and version checks (`files.js:197` to `205`), the validator against the recorded version (`validator.js:21`), the migration chain (`files.js:212` to `220`), and the replay through the model (`files.js:141` to `185`). Attribute values must be strings (`validator.js:266`) and every key of every object is checked against the schema's list (`validator.js:141` to `150`).
-
-2. The blob restored from IndexedDB. Enters at `store.js:371` and passes the same loader at `store.js:321` inside a try. A blob that fails is set aside (`store.js:384`).
-
-3. The theme in web storage. Read at `theme.js:7` and `store.js:306`, accepted only as one of two literal values.
-
-4. Session storage. Read at `store.js:150` to `190`, each key parsed inside a try and checked for type, and the consent accepted only as the literal `'1'` (`store.js:172`).
-
-5. The shipped example. Enters at `flows.js:853` through the loader, then the hidden-content question (`flows.js:858`).
-
-6. The shipped catalogue. Enters at `library.js:264` through the loader. Its attributes are copied verbatim at `library.js:174` into the project.
-
-7. A drawing held in an attribute. Enters the page at `drawing-cell.js:56` through the check, and reaches the browser only as an image source at `drawing-cell.js:59` and `41`.
-
-8. A drawing returned by the editor. Enters at `drawing-editor.js:219` to `242`, decoded from base64 by the software's own decoder (`drawing-editor.js:96` to `164`), then the check, the model test and the page count.
-
-9. Any message to the window while an edit is open. Enters at `drawing-editor.js:379` and passes `acceptMessage`, which requires the frame's own window as source, the editor's origin, a string under eight megabytes, JSON, and an event name from a fixed set (`drawing-editor.js:80` to `91`).
-
-10. The editor's frame. Created once at `drawing-editor.js:348` to `356` with a fixed source, a sandbox of scripts and its own origin, a permissions policy that denies every device, and no referrer. Its own network and code are governed by draw.io's policy, not the software's.
-
-11. A hyperlink attribute value. Presented as a link only if `linkable` passes (`fields.js:190`, `editor.js:295` to `297`), else as text.
-
-12. Every other attribute value and name. Reaches the page through `textContent` only (`dom.js:18`), and through `setAttribute` only for fixed names with values the software composes.
-
-13. Drag and drop in the tree. The dragged id is the software's own state (`navigator.js:474`), and a drop with no dragged id does nothing (`navigator.js:500`), so an external drop enters nothing.
-
-14. Keyboard events. Read at `app.js:124` to `173` for shortcuts. No text is taken from them.
-
-15. The page's address. Read nowhere. No module reads `location.search`, `location.hash` or `window.name`.
-
-16. Fixed outward links. `window.open` with `noopener` (`shell.js:237`, `flows.js:893`), anchors with `rel="noopener"` (`about.js:28`, `index.html:88`), and a fixed `mailto:` (`shell.js:254`, `landing.js:31`).
-
-17. The saved file. Leaves through a blob URL on an anchor (`dom.js:61` to `69`) under a name slugified to letters, digits and dashes (`files.js:110` to `118`).
-
-### 3.5 Threats per boundary
-
-**The project file.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | A file can claim any project name and any content, and the software has no way to tell who wrote it. Nothing in the format identifies an author, by design. |
-| Tampering | Anyone with the file can alter it. Structure is checked at every gate. Content is not and cannot be, since the software holds no reference to compare against. |
-| Repudiation | The file records no author and no history, so no one can be held to a change. A repudiation of one's own file is not a threat here, since the file has no other reader than its owner. |
-| Information disclosure | A file holds attribute content its author cannot see when the choices changed after writing. N-SEC-005 clears it on opening after a warning (`flows.js:784` to `797`). Content no definition knows is kept and stated (`flows.js:804` to `814`). |
-| Denial of service | A file valid at every gate can be deep or large enough to exhaust the browser. A filing chain 10,000 deep opens in three seconds and 50,000 deep throws after eighty, with no statement (`files.js:157` to `171`, `flows.js:757`). |
-| Elevation of privilege | Parsing is `JSON.parse` and rendering is text, so a file cannot run code. A key named `__proto__` in an attribute object stays an own property and pollutes nothing, checked by probe. |
-
-**The library catalogue.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | None today. The catalogue is a module of the repository and cannot be substituted without the repository. |
-| Tampering | Only through the repository. A user library, when it comes, is a project file and inherits the file's row above. |
-| Repudiation | The catalogue records a date and an author in its project attributes (`library/data.js`), and the repository's history holds the rest. |
-| Information disclosure | Copies carry attribute content verbatim (`library.js:174`) and pass no hidden-content check, so a catalogue holding content under a choice not in force in the project would carry it in. The shipped catalogue holds legislation only, checked by probe. |
-| Denial of service | A catalogue is loaded once per session on first use (`library.js:262` to `268`), and the shipped one holds 216 entities. None. |
-| Elevation of privilege | The catalogue passes the same loader as a file and is rendered as text. None beyond the file's row. |
-
-**The drawing.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | A drawing can carry any model in its content attribute. Only a model the editor wrote can open again, and one without a model is refused on return (`drawing-editor.js:232`). A drawing in a file that carries none is shown but not editable. |
-| Tampering | The drawing is stored as returned (`drawing-editor.js:241`) and never re-serialised. A file author can alter it freely, and the check runs again before it is shown. |
-| Repudiation | None. A drawing has no author but the file's. |
-| Information disclosure | A reference to a resource outside the drawing would report the viewer's address on render. The check refuses `href` outside the document, stylesheet links and `url()` in CSS (`drawing.js:219`, `245` to `258`). It does not refuse a `src` attribute in embedded HTML, nor a `url()` written with a CSS escape, both accepted by probe. The image rendering blocks the load either way (`drawing-cell.js:59`). |
-| Denial of service | Size is capped at 512 kilobytes (`drawing.js:211`). A drawing nested 60,000 deep makes the parser overflow the stack, which is caught and refused (`drawing.js:216`). Dimensions are capped (`drawing.js:222` to `229`). |
-| Elevation of privilege | Script elements, event handler attributes, embedding elements and links to code are refused (`drawing.js:17`, `241` to `247`). An animation that sets `href` to `javascript:` and a `set` element naming `onload` are accepted by the check, found by probe. In an image element the browser runs no script whatever the markup says, so the rendering holds where the check does not. |
-
-**The draw.io frame.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | A message from any other window or origin is dropped (`drawing-editor.js:81`). The origin is fixed in code and shown in the consent (`drawing-editor.js:21`, `271`). An impersonation of the name is for TLS to stop. |
-| Tampering | The editor can return any text. It passes the base64 decoder, the drawing check, the model test and the page count before it enters the draft (`drawing-editor.js:222` to `239`), and the user's Save commits it. |
-| Repudiation | None. The session is the user's own act, opened after consent, and nothing is recorded. |
-| Information disclosure | The editor receives one drawing's model and the configuration (`drawing-editor.js:207`, `212`). The user is told so (`drawing-editor.js:271`). The frame sends no referrer (`drawing-editor.js:353`). What the editor does with the model at its origin is beyond the software. |
-| Denial of service | An editor that never signals readiness ends the session after ten seconds (`drawing-editor.js:63`, `191`). One that never returns the export refuses after ten and keeps editing (`drawing-editor.js:248`). A `save` event the editor sends on its own triggers the export (`drawing-editor.js:217`), and the result reaches no one unless Apply was pressed (`drawing-editor.js:369`, `412` to `416`), after which Apply does nothing and only Cancel ends the session. |
-| Elevation of privilege | The sandbox grants scripts and the editor's own origin, nothing else (`drawing-editor.js:57`), so the frame cannot navigate the page, open windows, submit forms or reach the software's storage. The permissions policy denies camera, microphone, location, clipboard, payment and capture (`drawing-editor.js:60`). The page's own policy allows this one frame origin (`index.html:5`). |
-
-**Browser storage.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | Only the software's origin can write its storage, and only a session of the software does. A blob written by another origin is impossible by the browser's model. |
-| Tampering | A person at the machine can alter the blob on disk. It passes the same gates a file does on restore (`store.js:321`), so a broken one is set aside rather than loaded. |
-| Repudiation | None. |
-| Information disclosure | The whole project stands in IndexedDB in clear, readable with the profile. F-SES-003 lets the user wipe it (`store.js:466` to `499`). The browser tab title carries the project name (`shell.js:418`) into history. |
-| Denial of service | A refused write is told and the leave prompt guards the unsaved work (`store.js:253` to `258`, `shell.js:428` to `431`). A nearly full store is told at eight tenths (`store.js:58`). |
-| Elevation of privilege | The stored blob is data through the loader. Session values are checked for type and accepted as literals (`store.js:150` to `190`). |
-
-**The page's own origin.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | Any file served on the origin is the software to the policy. Only the host and the repository can put one there. |
-| Tampering | The same. |
-| Repudiation | None. |
-| Information disclosure | No other application shares the origin, no cookie is set, and the site at the root domain is another origin with its own storage. The host's preview address, if reachable, is another origin where a user could store a project without knowing the difference. D-081 says an access policy covers it. |
-| Denial of service | None beyond the host's. |
-| Elevation of privilege | Framing by another site is not forbidden by the page, since a meta policy cannot carry frame-ancestors [4]. The gate's response carries the header today, the software's own response behind it is unverified. |
-
-**The host.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | An attacker answering for `app.openconformity.org` is stopped by TLS. The gate's response carried a strict transport security header at the time of writing, so a browser that has seen it refuses plain connections after. Whether the software's own response carries it is unverified. |
-| Tampering | The host can alter what it serves. Features such as minification, script injection for analytics, loaders and email obfuscation place code on the origin under `/cdn-cgi/` or in the page, which the policy's `'self'` permits. Only a comparison of served bytes against the commit shows it. |
-| Repudiation | The host's logs are the host's. The software records nothing. |
-| Information disclosure | The host sees every request, the address it comes from, and the user agent. It sees no project content, since the software sends none (`test-pins.js:83`). The response carried Network Error Logging headers, under which a browser may report failed connections to Cloudflare, which is a host setting the maintainer should know of. |
-| Denial of service | The host's availability is the host's. Once loaded the software runs from what the browser holds (N-OPS-002), and work continues. |
-| Elevation of privilege | Code from the host is the software. There is nothing to elevate to, and nothing to stop it. |
-
-**The repository.**
-
-| Class | Threat, or why none |
-|---|---|
-| Spoofing | A commit under the maintainer's name from a compromised account. GitHub's account protections and the maintainer's review of every diff are the controls (D-063). |
-| Tampering | A hostile change in a proposed diff, accepted by review. The source pins catch a new fetch, a frame, markup from text or an evaluation (`test-pins.js:58` to `95`), but only when run, and no run is recorded at a release. |
-| Repudiation | Every commit is signed by its author in the history. Signatures are not verified by the host. |
-| Information disclosure | The repository is public by C-DEV-001 and holds nothing secret. The assistant's settings file holds permissions only (`.claude/settings.json`). |
-| Denial of service | A broken commit on main is the software within minutes. The tests are the only gate, and they are run by hand. |
-| Elevation of privilege | A commit on main is code on the origin, which the policy trusts in full. |
-
-### 3.6 Attack scenarios
-
-**S1. A file that runs code through a name.** The attacker writes a project file whose entity title holds a script tag or an event handler and sends it to the user as a shared model. The user opens it. The attacker gains code on the user's device. Today the file parses as data (`files.js:235`), the title is a string the validator accepts (`validator.js:266`), and every place it is shown sets it through `textContent` (`dom.js:18`, `navigator.js`, `editor.js`, `views.js:117`). The policy allows no inline script (`index.html:5`). Feasibility High, impact High, risk High before controls. Verdict, blocked.
-
-**S2. A file with a drawing that acts.** The attacker writes a system element whose drawing holds a script element, an event handler, an image from their server, or a nested document. The user opens the file and selects the element. The attacker gains code, or the viewer's address when the image loads. Today the check refuses the script, the handler, the outside image and the document (`drawing.js:241` to `249`), and states why where the picture would stand (`drawing-cell.js:64`). A drawing that passes is shown only as an image from a data URL (`drawing-cell.js:59`), where the browser runs no script and loads no resource, and the policy allows images from data only (`index.html:5`). The check misses a `src` in embedded HTML, a CSS escape in `url()`, and an animation that rewrites `href`, all accepted by probe. The image rendering holds against all three. Feasibility High, impact High, risk High before controls. Verdict, mitigated. The check has gaps, the rendering has none known.
-
-**S3. A file with a link that runs code.** The attacker sets a hyperlink attribute to `javascript:` code. The user clicks the link. Today a value that is not an http or https address renders as text (`fields.js:190`, `editor.js:295`), and a web address opens in a new context without an opener (`editor.js:297`). Feasibility High, impact High, risk High before controls. Verdict, blocked.
-
-**S4. A file that stops the tool.** The attacker writes a file valid at every gate with a filing chain tens of thousands deep, or with tens of thousands of entities. The user opens it. The attacker gains a stuck tab and a user who distrusts the tool. Today the replay walks the chain by recursion (`files.js:157` to `171`) and lists children by scanning every node (`model.js:76`), so 10,000 levels take three seconds and 50,000 throw a range error, measured in the shell. The error escapes `openProjectFlow` (`flows.js:757`), so the promise rejects with no dialog and the open project stays as it was. Feasibility High, impact Low, risk Medium. Verdict, open. The project is not lost, but F-PER-006's statement is never made and nothing tells the user why.
-
-**S5. A file that pollutes the runtime.** The attacker names an attribute `__proto__` or `constructor` and gives it an object value, hoping the loader copies it into a prototype. Today the validator requires every attribute value to be a string (`validator.js:266`) and every other object's keys to be from the schema's list (`validator.js:141` to `150`). Object spread creates own properties (`model.js:157`), and a probe with a parsed `__proto__` key left the object prototype untouched. Feasibility High, impact High, risk High before controls. Verdict, blocked.
-
-**S6. A file that hides content.** The attacker writes a file holding ratings under a method the project does not use, or unknown keys, so the recipient signs off a model with content they cannot see. Today the software lists what stands under choices not in force and clears it on opening after a question, or does not open the file (`flows.js:784` to `797`). It lists what no definition presents and keeps it, stated (`flows.js:804` to `814`). Feasibility High, impact Medium, risk High before controls. Verdict, mitigated. Unknown content is kept by design, which is right for a newer revision's data and stated so the owner knows.
-
-**S7. A file that lies.** The attacker alters ratings, drops relationships or rewrites requirement text in a colleague's file and passes it on as unchanged. Today the software cannot know, since it holds no reference and the format carries no author, signature or history, by design. The hidden-content and record checks catch a change of ground for a judgement (F-MOD-011), nothing else. Feasibility High, impact High, risk High. Verdict, open. This is the trust every file format without signatures asks for, and the mitigation is outside the software, in how the user obtains files.
-
-**S8. A compromised editor reads the drawing.** JGraph's deployment is compromised, or the user's network answers for its name with a certificate the browser accepts. The user edits a drawing. The attacker gains that drawing's model. Today the software hands the frame the model of the one drawing and nothing else (`drawing-editor.js:212`, pinned at `test-pins.js:75`), only after consent that names the origin and the data (`drawing-editor.js:271`), and the frame cannot read the page or its storage (`drawing-editor.js:57`). An impersonation of the name is for TLS, and the origin is fixed to `https://` (`drawing-editor.js:21`). Feasibility Low, impact Medium, risk Low. Verdict, mitigated. The one drawing is the residue, and the consent says so.
-
-**S9. A compromised editor returns a weapon.** The attacker's editor code returns an SVG with a script, or a picture 100,000 units wide, or a message of a gigabyte. Today a message over eight megabytes is dropped unread (`drawing-editor.js:82`), the export is decoded by the software's own decoder (`drawing-editor.js:160`), then checked as any drawing (`drawing-editor.js:227`), refused with the reason and the editor still open (`drawing-editor.js:229`). What passes is shown as an image. Feasibility Low, impact High, risk Medium before controls. Verdict, blocked.
-
-**S10. A compromised editor wedges the session.** The attacker's editor code sends a `save` event as soon as the user has drawn something, before Apply. Today the session treats `save` as Apply (`drawing-editor.js:217`, tested at `test-drawing-editor.js:178`), exports, and on the export calls `onDone`, which hands the drawing to `settleApply` (`drawing-editor.js:369`). That function exists only while the Apply button's handler is waiting (`drawing-editor.js:412` to `416`), so the drawing is dropped and the session is done. The user's Apply then finds a done session and does nothing (`drawing-editor.js:416`), and Cancel returns nothing (`drawing-editor.js:404` to `405`). The same happens if the real editor sends `save` on its own keyboard shortcut inside the frame, which its protocol allows and which this assessment could not run. Feasibility Low for the attacker, Medium if the shortcut does it, impact Medium, risk Medium. Verdict, open.
-
-**S11. A compromised editor escapes the frame.** The attacker's editor code tries to navigate the page, open a window, submit a form, read the parent's storage or post to the parent. Today the sandbox grants none of the first three (`drawing-editor.js:57`), the origin is another so the DOM and storage are unreachable, and every message is accepted only as JSON with a known event name and acted on as data (`drawing-editor.js:80` to `91`, `203` to `243`). Feasibility Low, impact High, risk Medium before controls. Verdict, blocked. A browser bug in the sandbox is the residue, which is the browser's.
-
-**S12. A network attacker alters the software in transit.** The attacker sits on the user's network and rewrites a module. Today both origins are HTTPS and the browser verifies them. The gate's response carried a strict transport security header for six months with subdomains at the time of writing, which makes a browser that has seen it refuse a plain connection after. Whether the software's own response behind the gate carries it is unverified. Feasibility Low, impact High, risk Medium before controls. Verdict, blocked by the browser, with the header to confirm.
-
-**S13. Another site reaches into the software.** A page the user visits opens the software in a frame or window, posts messages, or links to it with a crafted address. Today the software reads nothing from its address, has one message listener that requires the editor's frame and origin (`drawing-editor.js:81`) and exists only while an edit is open (`drawing-editor.js:383`, `421`), and its storage is unreachable from another origin by the browser's model. Framing is not forbidden by the page, since a meta policy cannot carry frame-ancestors. A framed copy sees partitioned storage in current browsers [12], so the user's project is not in it, and the clickable surface is a landing. Feasibility High, impact Low, risk Medium. Verdict, mitigated. A response header from the host would close it, see finding 4.
-
-**S14. A person at the machine reads the project.** Someone with the profile or the unlocked session opens the browser's storage inspector, or the downloads folder, or the history, where the tab title carries the project name (`shell.js:418`). Today the software offers a full wipe of what it keeps (`flows.js:698` to `713`, `store.js:466` to `499`) and tells the user to save to a file. It encrypts nothing and cannot protect the file once saved. Feasibility Medium, impact High, risk High. Verdict, open by design. The device is the user's to protect, and the landing and F-SES-003 say so.
-
-**S15. A hostile commit reaches the origin.** Someone with the maintainer's GitHub account, or a diff the maintainer accepts, adds a fetch, an inline script or a wider policy. The host deploys main on push. Today the source pins would fail on a fetch, a beacon, a second frame, markup from text, an evaluation or a changed policy (`test-pins.js:50` to `95`), but only when run, and no record ties a release to a run. The maintainer reviews every diff (D-063). Feasibility Low, impact High, risk Medium. Verdict, mitigated. Finding 10 asks for the run to be a gate.
-
-**S16. The host puts code on the origin.** A host feature, minification, a loader, analytics injection or email obfuscation, rewrites the page or adds a script under the origin. The policy permits it as the origin's own. Today nothing in the software can detect it. The maintainer's host settings are the control, and a comparison of served bytes against the commit is the check. The response carried Network Error Logging headers, a host feature the software did not ask for. Feasibility Low, impact High, risk Medium. Verdict, open. This is the trust the host is given, and C-DEV-007 of 2.4 would bind it.
-
-**S17. A file carries consent.** The attacker writes a file that would make the editor load without asking, or with a different origin. Today consent lives in session storage only (`store.js:72`, `908`), the origin is a constant (`drawing-editor.js:21`), and the file format has no field for either. A duplicated tab inherits session storage, which is the browser's behaviour and within N-PRV-006's one session. Feasibility High, impact Medium, risk High before controls. Verdict, blocked.
-
-### 3.7 Residual risk
-
-| Scenario | Residual risk after the software's controls |
-|---|---|
-| S1, S3, S5, S17 | None found. The controls are structural, text rendering, a string-only schema, a fixed origin and a session-only consent. |
-| S2 | Low. The check has three gaps the image rendering covers. A browser bug in image-mode SVG would be the only way through. |
-| S4 | Medium. A chosen file can stop the open action without a word. Nothing is lost. |
-| S6 | Low. Unknown content is kept by design and stated. |
-| S7 | High and accepted. The software cannot vouch for a file's author or history. |
-| S8 | Low. One drawing per edit is exposed to the editor's origin, with consent. |
-| S9, S11 | Low. The residue is a browser bug in the sandbox or the decoder. |
-| S10 | Medium. A save from inside the editor can drop the drawing and dead-end Apply. To confirm in the browser. |
-| S12 | Low. TLS and the strict transport header, the latter to confirm on the software's own response. |
-| S13 | Low. Framing is possible, with a partitioned and empty copy. A header closes it. |
-| S14 | High and accepted. The project stands in clear on the device. |
-| S15 | Medium. Review is the gate and the pins run by hand. |
-| S16 | Medium. The host is trusted in full and its settings are unverified. |
-
-The user is asked to trust their own device and browser, the web's certificate system for two HTTPS names, the host to serve the repository's files unchanged, the maintainer to review what reaches main, and JGraph's editor with the one drawing they consent to hand it.
-
-### 3.8 What the analysis leaves out
-
-This section was added so the boundary of the assessment is stated rather than assumed. The project site at the root domain is another origin and another deployment and was not assessed, though one line in its page says it shares the theme key with the software, which two origins cannot do. The login gate of D-081 is a Cloudflare Worker outside the software and was observed only from its response. The drawing editor's own code and what it does at its origin are JGraph's, and a report about them belongs to them, as `SECURITY.md` says. The browser's own bugs, in its sandbox, its image renderer and its storage isolation, are assumed absent, since every control the software has stands on them.
+The threat analysis this audit made is now held and kept current in `notes/security.md`, whose identifiers it gave rise to. The analysis as audited, with every claim's file and line, stands in the history at commit `e7c5da8`. References in chapters 4 to 6 to sections 3.1 to 3.8 are to that text. What stays here is what the audit judged at commit `2338fc0`.
+
+### 3.1 Scenarios as audited
+
+| Audit | Model | Scenario | Feasibility | Impact | Risk | Verdict | Residual |
+|---|---|---|---|---|---|---|---|
+| S1 | SC-01 | A file runs code through a name | High | High | High | Blocked | None |
+| S2 | SC-02 | A drawing in a file acts | High | High | High | Mitigated | Low |
+| S3 | SC-03 | A link in a file runs code | High | High | High | Blocked | None |
+| S4 | SC-04 | A file stops the tool | High | Low | Medium | Open | Medium |
+| S5 | SC-05 | A file pollutes the runtime | High | High | High | Blocked | None |
+| S6 | SC-06 | A file hides content | High | Medium | High | Mitigated | Low |
+| S7 | SC-07 | A file lies | High | High | High | Open | High, accepted |
+| S8 | SC-08 | A compromised editor reads the drawing | Low | Medium | Low | Mitigated | Low |
+| S9 | SC-09 | A compromised editor returns a weapon | Low | High | Medium | Blocked | Low |
+| S10 | SC-10 | A compromised editor wedges the session | Medium | Medium | Medium | Open | Medium |
+| S11 | SC-11 | A compromised editor escapes the frame | Low | High | Medium | Blocked | Low |
+| S12 | SC-12 | A network attacker alters the software | Low | High | Medium | Blocked | Low |
+| S13 | SC-13 | Another site reaches into the software | High | Low | Medium | Mitigated | Low |
+| S14 | SC-14 | A person at the machine reads the project | Medium | High | High | Open | High, accepted |
+| S15 | SC-15 | A hostile commit reaches the origin | Low | High | Medium | Mitigated | Medium |
+| S16 | SC-16 | The host puts code on the origin | Low | High | Medium | Open | Medium |
+| S17 | SC-17 | A file carries consent | High | Medium | High | Blocked | None |
 
 ## 4. Findings
 
@@ -703,7 +493,58 @@ The plan was run on 27 September 2026 against commit `eedb546`, with the test su
 | V34 | 2026-09-27 | Claude Code | Passed | Driven. The database `openconformity` holds the record `project` in the store `retention`, readable as the project file in plain text. Recorded as accepted in 3.7. |
 | V35 | 2026-09-27 | Claude Code | Passed | `test-drawing.js` and `test-drawing-editor.js` pass. |
 
-## 7. References
+## 7. Follow-up
+
+This chapter was added to close the loop on the findings. The software was checked again at commit `e7c5da8`, after the fixes in `9f4b4f3`, the requirement changes in `9ef6efb`, the filing depth limit in `144a814` and the pins in `eedb546`. Three probes were run in the test shell, and one request read the live page's headers.
+
+### 7.1 The findings
+
+| No. | Status | Where | Remarks |
+|---|---|---|---|
+| 1 | Partly closed | `files.js:196` to `201`, `validator.js:16`, `336` to `359` | Deep files are refused and an escaping error ends in a refusal. A wide file still freezes the tab, see B. |
+| 2 | Closed | `drawing-editor.js:361`, `371`, `388` | An editor save before Apply ends the edit with the checked drawing in the unsaved draft. |
+| 3 | Closed for the named cases | `drawing.js:20`, `192` to `193`, `250` to `259` | Six other references still pass, see C. |
+| 4 | Partly closed | `app/_headers` | The file is present and pinned. The gate still answers, so the software's own headers are unread. |
+| 5 | Closed | `flows.js:834` to `858` | A trial import, the question, the clearing and one undo. |
+| 6 | Closed | F-PER-011 | The rationale says the function is not built and names the policy change it needs. |
+| 7 | Closed | C-PRJ-006, C-TEC-005, F-SES-004 to F-SES-006, N-SEC-006, N-SEC-008 | |
+| 8 | Closed | The conventions | The word status was dropped. |
+| 9 | Closed | F-WSP-006, F-APP-002, C-TEC-004, C-TEC-005, `flows.js` | |
+| 10 | Partly closed | C-DEV-006 | The requirement stands. No release has been made under it. |
+| 11 | Open | C-DEV-007, the host | The host's settings are unread, the gate stands, and the page still sends network error logging headers. |
+| 12 | Closed | N-OPS-002 | |
+| 13 | Partly closed | F-SES-003, F-MOD-011, F-DRW-003 | These three were changed. F-SES-001, F-VIE-001, F-APP-001, N-CMP-001, N-CMP-002, G-SYS-001 and N-ACC-001 stay as goals, by the maintainer's choice. |
+
+### 7.2 The scenarios
+
+| Audit | Model | Status at `e7c5da8` |
+|---|---|---|
+| S1, S3, S5, S9, S11, S17 | SC-01, SC-03, SC-05, SC-09, SC-11, SC-17 | Blocked, unchanged. |
+| S2 | SC-02 | Mitigated, with fewer gaps in the check. |
+| S4 | SC-04 | Blocked for deep files, open for wide ones. |
+| S6 | SC-06 | Mitigated, and an import is now covered. |
+| S7, S14 | SC-07, SC-14 | Accepted, unchanged. |
+| S8 | SC-08 | Mitigated, unchanged. |
+| S10 | SC-10 | Blocked. |
+| S12, S13 | SC-12, SC-13 | Mitigated, the headers waiting on the gate. |
+| S15 | SC-15 | Mitigated. The pins now cover the static file set, the imports and the page's scripts. |
+| S16 | SC-16 | Open, unchanged. |
+
+### 7.3 New findings
+
+| No. | Severity | Finding | Where | Change | Size |
+|---|---|---|---|---|---|
+| A | Low | The software can write a file it then refuses. Filing checks no depth, so a probe filed 1,001 folders and the file it wrote was refused on opening. The stored project would fail to restore the same way, and an import into such a project does nothing without a word. | `model.js:267`, `flows.js:836` | In `model.js`, check the depth when filing, placing and creating, and when an import copies. | small |
+| B | Low | A wide file freezes the tab. Serialising calls `childrenOf` for every node and runs on every persist. It took 0.2 seconds at 5,000 entities and 3.2 seconds at 20,000, so a file of 100,000 would block the tab for minutes after opening, with no statement. | `files.js:52`, `model.js:75`, `store.js:237` | In `files.js`, group the children once per serialise, or refuse a file past a node limit beside the depth limit. | small to medium |
+| C | Low | The drawing check still accepts six outside references, an `href` on `feImage` or `pattern`, a `link` in embedded HTML, `srcset`, `poster`, and a CSS `image-set` without `url()`. The image rendering blocks all six. | `drawing.js:254` to `259`, `192` | In `drawing.js`, refuse any `href`, `src`, `srcset` or `poster` that is not local or an image as data on any element but `a`, and `image-set` in the style check. | small |
+| D | Low | The schema's description omits the filing depth limit that the validator and the rationale of F-PER-006 state. | `specs/project.schema.json` | Add to its list of constraints the line below. | small |
+| E | Very low | The restore path loads the stored project without clearing content under choices not in force. Only someone who altered the browser's storage reaches it. | `store.js:321` | Accepted as SC-18 of the model. | none |
+
+The line for finding D reads as follows, for the maintainer to paste.
+
+    - Filing is no deeper than 1,000 levels, counting a node at the root as the first level.
+
+## 8. References
 
 | No. | Reference | Link |
 |---|---|---|
@@ -716,6 +557,7 @@ The plan was run on 27 September 2026 against commit `eedb546`, with the test su
 | [7] | draw.io, Configure the diagram editor | https://www.drawio.com/doc/faq/configure-diagram-editor |
 | [8] | Cloudflare Pages, Headers | https://developers.cloudflare.com/pages/configuration/headers/ |
 | [9] | Cloudflare, Network Error Logging | https://developers.cloudflare.com/network-error-logging/ |
-| [10] | openconformity, SECURITY.md | ../SECURITY.md |
+| [10] | openconformity, SECURITY.md | ../../SECURITY.md |
 | [11] | Web Content Accessibility Guidelines (WCAG) 2.2 | https://www.w3.org/TR/WCAG22/ |
 | [12] | MDN, State Partitioning | https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/State_Partitioning |
+| [13] | openconformity, Security model | ../security.md |

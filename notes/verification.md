@@ -1,6 +1,6 @@
 # Verification
 
-This document states how each requirement in `specs/requirements.md` is verified. It maps every requirement to the test blocks that verify it, and names the drive or review that stands in where no test can. It then lists the test blocks that name no requirement, so the mapping reads in both directions. It describes the repository on 27 September 2026, after the security review's changes. The security review in `notes/reviews/security.md` plans and records the checks of its own findings.
+This document states how each requirement in `specs/requirements.md` is verified. It maps every requirement to the test blocks that verify it, and names the drive or review that stands in where no test can. It then lists the test blocks that name no requirement, so the mapping reads in both directions. It describes the repository on 27 September 2026, after the security review's changes. The security model in `notes/security.md` maps its controls to requirement ids, and the audit in `notes/reviews/security-2026-09.md` plans and records the checks of its own findings.
 
 ## 1. Method
 
@@ -191,4 +191,5 @@ Every block below says in its title that it names no requirement. Each pins a ch
 | No. | Reference | Link |
 |---|---|---|
 | [1] | openconformity, Requirements | ../specs/requirements.md |
-| [2] | openconformity, Security review | reviews/security.md |
+| [2] | openconformity, Security audit of September 2026 | reviews/security-2026-09.md |
+| [3] | openconformity, Security model | security.md |
