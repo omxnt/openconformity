@@ -1,19 +1,21 @@
 /**
  * The safety function specification as a view: one block per safety
  * function, holding only what the function says for itself and what
- * relates to it directly, in the order of its tabs in the editor. Its
- * heading and description, then its relationships, each kind under a
- * heading of its own as a table of identifier and title, then a table of
- * field and value for Behaviour, Characteristics and Fault handling,
- * with the required integrity level of the standard in force after the
- * standard, then its diagram, then its notes. One tab holds every
- * function, and one tab each holds a function alone. A pure function of
- * the model, returning the description views.js renders and saves.
+ * relates to it directly, in numbered parts in the order of its tabs in
+ * the editor: its description, its relationships, each kind a numbered
+ * sub-part with a table of identifier and title, a table of field and
+ * value for Behaviour, Characteristics and Fault handling, with the
+ * required integrity level of the standard in force after the standard,
+ * its diagram, and its notes. A function is followed by the functions it
+ * decomposes into, depth first. One tab holds every function, and one
+ * tab each holds a function no other is decomposed into, with those it
+ * decomposes into. A pure function of the model, returning the
+ * description views.js renders and saves.
  *
- * A table may open a block: `heading` names the entity the block is
- * about and `text` stands beneath it. `caption` names a part of the
- * block and `subcaption` a table within it. A part may be a figure in
- * place of a table, the drawing it shows or null for none.
+ * A part opens a block where it carries `heading`, the entity the block
+ * is about. `number` and `caption` name a part and `subnumber` and
+ * `subcaption` a table within it. A part holds a table, or `prose` in
+ * its place, or `figure`, the drawing it shows or null for none.
  */
 
 import { ATTRIBUTES, groupShown } from './attributes.js';
@@ -68,41 +70,55 @@ export function specifiedFields(group, values) {
  * @param {import('./model.js').Model} model
  */
 export function buildSafetyView(model) {
-  const functions = [...model.nodes.values()].filter((node) => node.kind === 'entity' && node.type === 'SAF').sort((a, b) => a.id.localeCompare(b.id));
+  const all = [...model.nodes.values()].filter((node) => node.kind === 'entity' && node.type === 'SAF').sort((a, b) => a.id.localeCompare(b.id));
   const ends = (id, type, side) =>
     [...model.relationships.values()]
       .filter((relationship) => relationship.type === type && relationship[side === 'target' ? 'source' : 'target'] === id)
       .map((relationship) => relationship[side])
       .sort();
-
-  const fields = (names, values) =>
-    ATTRIBUTES.SAF.groups
-      .filter((group) => names.includes(group.name))
-      .map((group) => ({
-        caption: group.name,
-        spec: true,
-        sortable: false,
-        columns: ['Field', 'Value'],
-        rows: specifiedFields(group, values).map((definition) => ({ id: null, cells: [definition.name, valueCell(definition, values[definition.key])] })),
-      }));
+  const partOf = new Set(all.flatMap((saf) => ends(saf.id, 'saf-decomposes-into-saf', 'target')));
+  /** A function followed by every function it decomposes into, depth first, in identifier order among siblings. */
+  const tree = (saf, seen = new Set()) => {
+    if (seen.has(saf.id)) return [];
+    seen.add(saf.id);
+    return [saf, ...ends(saf.id, 'saf-decomposes-into-saf', 'target').map((id) => model.nodes.get(id)).filter(Boolean).flatMap((child) => tree(child, seen))];
+  };
+  const roots = all.filter((saf) => !partOf.has(saf.id));
+  const ordered = roots.flatMap((root) => tree(root));
 
   const block = (saf) => {
     const values = saf.attributes;
+    let number = 1;
+    const part = (caption, rest) => ({ number: String(number++), caption, ...rest });
+    const description = part('Description', { heading: saf.id, prose: (values.description ?? '').trim() });
+    const at = number++;
     const relationships = RELATIONSHIPS.map((held, i) => {
       const ids = ends(saf.id, held.type, held.side);
       return {
-        ...(i === 0 ? { heading: saf.id, text: (values.description ?? '').trim(), caption: 'Relationships' } : {}),
+        ...(i === 0 ? { number: String(at), caption: 'Relationships' } : {}),
+        subnumber: `${at}.${i + 1}`,
         subcaption: held.name,
         spec: true,
-        list: true,
         sortable: false,
         columns: ['Identifier', 'Title'],
         rows: ids.length === 0 ? [{ id: null, cells: ['', ''] }] : ids.map((id) => ({ id: null, cells: [{ identifier: id }, entityLabel(model.nodes.get(id))] })),
       };
     });
+    const fields = (names) =>
+      ATTRIBUTES.SAF.groups
+        .filter((group) => names.includes(group.name))
+        .map((group) =>
+          part(group.name, {
+            spec: true,
+            sortable: false,
+            columns: ['Field', 'Value'],
+            rows: specifiedFields(group, values).map((definition) => ({ id: null, cells: [definition.name, valueCell(definition, values[definition.key])] })),
+          })
+        );
+    const specified = fields(SPECIFIED);
     const drawing = (values.drawing ?? '').trim();
-    const diagram = { caption: 'Diagram', figure: drawing !== '' && checkDrawing(drawing).ok ? { id: saf.id, drawing } : null };
-    return [...relationships, ...fields(SPECIFIED, values), diagram, ...fields(CLOSING, values)];
+    const diagram = part('Diagram', { figure: drawing !== '' && checkDrawing(drawing).ok ? { id: saf.id, drawing } : null });
+    return [description, ...relationships, ...specified, diagram, ...fields(CLOSING)];
   };
 
   return {
@@ -110,8 +126,8 @@ export function buildSafetyView(model) {
     title: 'Safety function specification',
     exports: ['markdown'],
     sections: [
-      { name: `All functions (${functions.length})`, tables: functions.flatMap(block) },
-      ...functions.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf) })),
+      { name: `All functions (${all.length})`, tables: ordered.flatMap(block) },
+      ...roots.map((root) => ({ name: entityLabel(root) || root.id, tables: tree(root).flatMap(block) })),
     ],
   };
 }

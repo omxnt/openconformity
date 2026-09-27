@@ -1,8 +1,8 @@
 /**
  * A view's section as Markdown: the view's title as the document's
- * heading, then each table in order, under the heading and text of the
- * block it opens, its part's caption and its own, written as a pipe
- * table, or as an image linked to a file beside the document. Cells
+ * heading, then each part in order, under the heading of the block it
+ * opens, its part's caption and its own, written as a pipe table, as
+ * prose, or as an image linked to a file beside the document. Cells
  * arrive as text, a line break within one written as a break tag and a
  * pipe escaped, so a cell never leaves its column. An empty cell holds
  * a dash. Every text is written with its ampersands and angle brackets
@@ -20,8 +20,8 @@ export function markdownText(text) {
 
 /**
  * @typedef {Object} MarkdownTable
- * @property {string} [heading]  the block the table opens
- * @property {string} [text]  the text under the block's heading
+ * @property {string} [heading]  the block the part opens
+ * @property {string} [prose]  text in place of the table, a dash where empty
  * @property {string} [caption]  the part's name
  * @property {string} [subcaption]  the table's own name within the part
  * @property {string[]} [headers]
@@ -61,9 +61,12 @@ export function markdown(title, tables) {
   const lines = [`# ${markdownText(title)}`, ''];
   for (const table of tables) {
     if (table.heading) lines.push(`## ${markdownText(table.heading)}`, '');
-    if (table.text) lines.push(paragraphs(table.text), '');
     if (table.caption) lines.push(`### ${markdownText(table.caption)}`, '');
     if (table.subcaption) lines.push(`#### ${markdownText(table.subcaption)}`, '');
+    if ('prose' in table) {
+      lines.push(paragraphs(table.prose ?? '') || '–', '');
+      continue;
+    }
     if ('image' in table) {
       lines.push(table.image ? `![${markdownText(table.image.alt).replace(/[[\]]/g, '')}](${encodeURI(table.image.path)})` : '–', '');
       continue;

@@ -85,12 +85,15 @@ export function savedPart(built, section, extension = 'xlsx') {
   return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.${extension}` };
 }
 
+/** A part's name with its number before it, as its heading reads. */
+export const numbered = (number, caption) => [number, caption].filter(Boolean).join(' ');
+
 /**
- * A section as a Markdown document under the view's title: each table
- * with the heading of the block it opens, the block's text, its caption
- * and subcaption, each cell as the exports write it, and each figure as
- * an image linked to a diagram file beside the document, which comes
- * with the text.
+ * A section as a Markdown document under the view's title: each part
+ * with the heading of the block it opens and its numbered caption and
+ * subcaption, a table's cells as the exports write them, prose as its
+ * paragraphs, and each figure as an image linked to a diagram file
+ * beside the document, which comes with the text.
  * @param {{ title: string }} built
  * @param {{ tables: Array<*> }} section
  * @param {(id: string) => string} labelOf
@@ -101,10 +104,10 @@ export function sectionMarkdown(built, section, labelOf) {
   const tables = section.tables.map((table) => {
     const part = {
       heading: table.heading ? [table.heading, labelOf(table.heading)].filter(Boolean).join(' ') : '',
-      text: table.text ?? '',
-      caption: table.caption ?? '',
-      subcaption: table.subcaption ?? '',
+      caption: table.caption ? numbered(table.number, table.caption) : '',
+      subcaption: table.subcaption ? numbered(table.subnumber, table.subcaption) : '',
     };
+    if ('prose' in table) return { ...part, prose: table.prose };
     if ('figure' in table) {
       if (table.figure === null) return { ...part, image: null };
       const name = `diagrams/${table.figure.id}.svg`;
@@ -409,9 +412,12 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       block.hidden = i !== section;
       held.tables.forEach((spec, j) => {
         if (spec.heading) block.appendChild(el('h2', { className: 'view-block-head', attributes: { 'data-id': spec.heading } }, [entityRow(spec.heading)]));
-        if (spec.text) block.appendChild(el('p', { className: 'view-block-text', text: spec.text }));
-        if (spec.caption) block.appendChild(el('h3', { className: 'view-caption', text: spec.caption }));
-        if (spec.subcaption) block.appendChild(el('h4', { className: 'view-subcaption', text: spec.subcaption }));
+        if (spec.caption) block.appendChild(el('h3', { className: 'view-caption', text: numbered(spec.number, spec.caption) }));
+        if (spec.subcaption) block.appendChild(el('h4', { className: 'view-subcaption', text: numbered(spec.subnumber, spec.subcaption) }));
+        if ('prose' in spec) {
+          block.appendChild(spec.prose ? el('p', { className: 'view-block-text', text: spec.prose }) : el('p', { className: 'view-figure-empty' }, [empty()]));
+          return;
+        }
         if ('figure' in spec) {
           block.appendChild(
             spec.figure === null

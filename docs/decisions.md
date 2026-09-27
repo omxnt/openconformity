@@ -943,6 +943,16 @@ The views carry the notes, as the risk assessment's last column and as the speci
 
 ---
 
+### D-109 The specification in numbered parts, sub-functions under their parent
+
+`2026-09-27` `product`
+
+A safety function in its specification is numbered parts in the editor's order: its description, its relationships with each kind a numbered sub-part, Behaviour, Characteristics, Fault handling, its diagram and its notes. The numbering starts again in each function. A function is followed by the functions it decomposes into, depth first, and a tab stands for each function no other decomposes into, holding those beneath it, beside the tab that holds every function.
+
+> *Numbered parts let a review point at one, as SF-2, 2.3, and follow the form the project's own documents take. A decomposition has one parent, so the functions form a tree, and a tab for each trunk keeps the tab row short while a part of a function is read with the whole it belongs to. Tabs within tabs are not a Carbon pattern. Amends D-107.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

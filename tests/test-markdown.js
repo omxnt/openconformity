@@ -18,13 +18,15 @@ import { ok, equal, summary } from './harness.js';
   equal(markdownText('Tom & Jerry'), 'Tom &amp; Jerry', 'as is an ampersand');
   equal(markdown('T', [{ caption: 'Diagram', image: { alt: 'Diagram of [x]', path: 'diagrams/A B.svg' } }, { caption: 'Other', image: null }]), '# T\n\n### Diagram\n\n![Diagram of x](diagrams/A%20B.svg)\n\n### Other\n\n–\n', 'a figure is an image linked by its path, and a dash where there is none');
   ok(markdown('T', [{ caption: 'Relationships', subcaption: 'Realises', headers: ['A'], rows: [] }]).includes('### Relationships\n\n#### Realises\n\n| A |'), 'a subcaption stands under its part');
+  ok(markdown('T', [{ caption: 'Description', prose: '' }]).includes('### Description\n\n–\n'), 'and empty prose is a dash');
 }
 
 // --- A document of tables (F-VIE-001) -----------------------------------------
 
 {
   const text = markdown('Safety function specification', [
-    { heading: 'SAF-001 SF-1 Stop', text: 'Stops the drives.\nAlways.', caption: 'Relationships', headers: ['Relationship', 'Entities'], rows: [['Realises', 'PRM-003 PM-3\nPRM-004 PM-4']] },
+    { heading: 'SAF-001 SF-1 Stop', caption: '1 Description', prose: 'Stops the drives.\nAlways.' },
+    { caption: '2 Relationships', headers: ['Relationship', 'Entities'], rows: [['Realises', 'PRM-003 PM-3\nPRM-004 PM-4']] },
     { caption: 'Behaviour', headers: ['Field', 'Value'], rows: [['Priority', '']] },
   ]);
   equal(
@@ -34,9 +36,11 @@ import { ok, equal, summary } from './harness.js';
       '',
       '## SAF-001 SF-1 Stop',
       '',
+      '### 1 Description',
+      '',
       'Stops the drives.\n\nAlways.',
       '',
-      '### Relationships',
+      '### 2 Relationships',
       '',
       '| Relationship | Entities |',
       '|---|---|',
@@ -49,7 +53,7 @@ import { ok, equal, summary } from './harness.js';
       '| Priority | – |',
       '',
     ].join('\n'),
-    'the title, then each block under its heading and text, each table under its caption'
+    'the title, then each block under its heading, each part under its numbered caption, prose as paragraphs'
   );
 }
 

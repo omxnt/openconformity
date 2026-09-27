@@ -183,32 +183,45 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 {
   const view = buildSafetyView(model);
   deepEqual([view.title, view.exports], ['Safety function specification', ['markdown']], 'titled, and saved as Markdown');
-  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each');
+  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock'], 'a tab holding every function, then a tab for each function no other decomposes into');
+  const heads = (section) => section.tables.filter((table) => table.heading).map((table) => table.heading);
+  deepEqual([heads(view.sections[0]), heads(view.sections[2])], [['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], ['SAF-002', 'SAF-003', 'SAF-004']], 'a function is followed by those it decomposes into, and its tab holds them too');
   const block = view.sections[1].tables;
-  deepEqual(block.map((table) => [table.caption ?? '', table.subcaption ?? '']), [['Relationships', 'Part of'], ['', 'Decomposes into'], ['', 'Realises'], ['', 'Allocated to'], ['', 'Expressed by'], ['Behaviour', ''], ['Characteristics', ''], ['Fault handling', ''], ['Diagram', ''], ['Notes', '']], 'a function is its relationships, each kind under its own heading, then its tabs in the editor\'s order, the diagram and the notes last');
-  deepEqual([block[0].heading, block[0].text], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function and its description');
-  deepEqual([block[0].columns, block[0].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
-  deepEqual(block[2].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
+  deepEqual(
+    block.map((table) => [table.number ?? '', table.caption ?? '', table.subnumber ?? '', table.subcaption ?? '']),
+    [
+      ['1', 'Description', '', ''],
+      ['2', 'Relationships', '2.1', 'Part of'], ['', '', '2.2', 'Decomposes into'], ['', '', '2.3', 'Realises'], ['', '', '2.4', 'Allocated to'], ['', '', '2.5', 'Expressed by'],
+      ['3', 'Behaviour', '', ''], ['4', 'Characteristics', '', ''], ['5', 'Fault handling', '', ''], ['6', 'Diagram', '', ''], ['7', 'Notes', '', ''],
+    ],
+    "a function's parts numbered in the editor's order, each kind of relationship a numbered sub-part"
+  );
+  deepEqual([block[0].heading, block[0].prose], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function, its description the first part');
+  deepEqual([block[1].columns, block[1].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
+  deepEqual(block[3].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
   const saf2 = view.sections[2].tables;
-  deepEqual([saf2[1].rows.map((row) => row.cells[0].identifier), view.sections[3].tables[0].rows.map((row) => row.cells[0].identifier)], [['SAF-003', 'SAF-004'], ['SAF-002']], 'a function lists the functions it decomposes into, and each of those the one it is part of');
-  deepEqual(block[8].figure, { id: 'SAF-001', drawing: model.nodes.get('SAF-001').attributes.drawing.trim() }, 'the diagram is the drawing the function holds, once it passes the check');
+  const partOfSaf3 = saf2[saf2.findIndex((table) => table.heading === 'SAF-003') + 1];
+  deepEqual([saf2[2].rows.map((row) => row.cells[0].identifier), partOfSaf3.subcaption, partOfSaf3.rows[0].cells[0].identifier], [['SAF-003', 'SAF-004'], 'Part of', 'SAF-002'], 'a function lists the functions it decomposes into, and each of those the one it is part of');
+  deepEqual(block[9].figure, { id: 'SAF-001', drawing: model.nodes.get('SAF-001').attributes.drawing.trim() }, 'the diagram is the drawing the function holds, once it passes the check');
   const bare = unrated();
   delete bare.nodes.get('SAF-001').attributes.drawing;
-  equal(buildSafetyView(bare).sections[1].tables[8].figure, null, 'and nothing where it holds none');
-  const characteristics = block[6].rows.map((row) => row.cells[0]);
+  equal(buildSafetyView(bare).sections[1].tables[9].figure, null, 'and nothing where it holds none');
+  const characteristics = block[7].rows.map((row) => row.cells[0]);
   equal(characteristics.slice(0, 2).join(', '), 'Functional safety standard, Required integrity level', 'the required integrity level stands right after the standard it follows');
   equal(characteristics.filter((name) => name === 'Required integrity level').length, 1, 'once, the variant of the standard in force');
   const group = ATTRIBUTES.SAF.groups.find((held) => held.name === 'Characteristics');
   deepEqual([specifiedFields(group, { standard: 'EN IEC 62061:2021' })[1].key, specifiedFields(group, {})[1].key], ['sil', 'ownLevel'], 'under the other standard the level in SIL, under none the level typed');
-  ok(block.every((table) => 'figure' in table || (table.spec && table.sortable === false)), 'each table reads as a form, never sorted');
-  equal(view.sections[0].tables.length, 40, 'the first tab holds every function, ten parts each');
+  ok(block.every((table) => 'figure' in table || 'prose' in table || (table.spec && table.sortable === false)), 'each table reads as a form, never sorted');
+  equal(view.sections[0].tables.length, 44, 'the first tab holds every function, eleven parts each');
   const saved = sectionMarkdown(view, view.sections[1], labelOf);
-  ok(saved.text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n') && saved.text.includes('### Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'the Markdown opens on the view, then the function, then its tables');
-  ok(saved.text.includes('### Relationships\n\n#### Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship under its own heading, by identifier and title');
-  ok(saved.text.includes('### Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
+  ok(saved.text.startsWith('# Safety function specification\n\n## SAF-001 SF-1 Emergency Stop\n\n### 1 Description\n\n'), 'the Markdown opens on the view, then the function and its description');
+  ok(saved.text.includes('### 2 Relationships\n\n#### 2.1 Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### 2.3 Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship a numbered sub-part, by identifier and title');
+  ok(saved.text.includes('### 3 Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'then the numbered tabs');
+  ok(saved.text.includes('### 6 Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
   deepEqual(saved.diagrams.map((file) => file.name), ['diagrams/SAF-001.svg'], 'which comes with the text');
+  deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg', 'diagrams/SAF-003.svg', 'diagrams/SAF-004.svg'], "and a top function's tab brings the diagrams of those it decomposes into");
   equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');
-  deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 1, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-1 Emergency Stop.md'], 'saved from the first tab under the view, from a function under its name');
+  deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 2, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-2 Door Interlock.md'], 'saved from the first tab under the view, from a function under its name');
 }
 
 summary('test-views');
