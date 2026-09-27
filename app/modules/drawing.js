@@ -20,7 +20,10 @@ const FORBIDDEN_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'appl
 const FORBIDDEN_ATTRIBUTES = new Set(['ping', 'formaction', 'action', 'http-equiv']);
 
 /** Attributes that name something to load, checked on every element but a link's own href. */
-const REFERENCES = new Set(['href', 'src', 'poster']);
+const REFERENCES = new Set(['href', 'src', 'poster', 'background', 'lowsrc', 'dynsrc', 'longdesc', 'icon', 'manifest']);
+
+/** Attributes that list sources to load, refused wherever they stand. */
+const SOURCE_SETS = new Set(['srcset', 'imagesrcset']);
 
 /** Elements that rewrite another element's attribute over time. */
 const ANIMATIONS = new Set(['animate', 'set', 'animatetransform', 'animatemotion', 'animatecolor', 'discard']);
@@ -190,19 +193,20 @@ const attributeOf = (element, name) => element.attributes.find((held) => local(h
 const lengthOf = (value) => Number.parseFloat(String(value ?? '').trim());
 
 /**
- * Whether a stylesheet or a style attribute reaches outside the drawing:
- * an import, or a url() that is not a local reference or data.
- * @param {string} css
+ * Whether a stylesheet, or any attribute read as style, reaches outside
+ * the drawing: an import, a function that loads an image, or a url()
+ * whose target, after any spaces and an opening quote of either kind,
+ * does not start as a local reference or data.
+ * @param {string} text
  * @returns {string|null}  what is wrong, or null
  */
 function cssFault(text) {
   const css = text.replace(/\\([0-9a-f]{1,6})\s?/gi, (held, hex) => String.fromCodePoint(Number.parseInt(hex, 16))).replace(/\\(.)/g, '$1');
   if (/@import/i.test(css)) return 'imports a stylesheet';
-  if (/image-set\(|(^|[^\w-])(image|cross-fade|element)\(/i.test(css)) return 'references a resource outside the diagram';
-  const urls = css.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi);
-  for (const [, , target] of urls) {
-    const held = target.trim().toLowerCase();
-    if (!held.startsWith('#') && !held.startsWith('data:')) return 'references a resource outside the diagram';
+  if (/image-set\(|(^|[^\w-])(image|cross-fade|element|src)\(/i.test(css)) return 'references a resource outside the diagram';
+  for (const opening of css.matchAll(/url\(\s*['"]?\s*/gi)) {
+    const target = css.slice(opening.index + opening[0].length).toLowerCase();
+    if (!target.startsWith('#') && !target.startsWith('data:')) return 'references a resource outside the diagram';
   }
   return null;
 }
@@ -213,7 +217,8 @@ function cssFault(text) {
  * element that runs code, embeds a document, refreshes to another
  * address or sends a form, no event handler, no attribute that pings or
  * navigates, and no animation of a link or a handler, referencing nothing
- * outside itself by link, source or style, and no larger than the
+ * outside itself by link, source, stylesheet or any attribute but the
+ * editor's own model, and no larger than the
  * dimension limit, so that it stays inert even when opened on its own.
  * The reason completes the sentence "The drawing …".
  * @param {string} text
@@ -261,16 +266,17 @@ function walk(element) {
       const animated = local(attribute.value.trim().toLowerCase());
       if (animated === 'href' || animated.startsWith('on')) return 'animates a link or a handler';
     }
-    if (local(key) === 'srcset') return 'references a resource outside the diagram';
+    if (SOURCE_SETS.has(local(key))) return 'references a resource outside the diagram';
     if (REFERENCES.has(local(key))) {
-      const target = attribute.value.trim().toLowerCase().replace(/\s+/g, '');
-      if (/^(javascript|vbscript|data:text\/html)/.test(target)) return 'links to code';
+      const target = attribute.value.toLowerCase().replace(/[\u0000-\u0020]+/g, '');
+      if (/^(javascript|vbscript):/.test(target)) return 'links to code';
+      if (target.startsWith('data:') && !target.startsWith('data:image/')) return 'links to data that is not an image';
       const inside = target.startsWith('#') || target.startsWith('data:image/');
       if (name === 'image' && !inside) return 'references an image outside the diagram';
       if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the diagram';
       if (!(name === 'a' && local(key) === 'href') && !inside) return 'references a resource outside the diagram';
     }
-    if (local(key) === 'style') {
+    if (local(key) !== 'content') {
       const held = cssFault(attribute.value);
       if (held !== null) return held;
     }

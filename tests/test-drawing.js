@@ -82,7 +82,7 @@ const reason = (text) => {
   equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><iframe src="https://x"></iframe></div></foreignObject>')), 'holds a iframe element', 'a frame inside HTML');
   equal(reason(svg('<rect onload="x()" width="1" height="1"/>')), 'holds an event handler', 'an event handler');
   equal(reason(svg('<a xlink:href="java\nscript:alert(1)"><rect/></a>')), 'links to code', 'a code link, even split by whitespace');
-  equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to code', 'a document link');
+  equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to data that is not an image', 'a document link');
   equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on the web');
   equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on disk');
   equal(reason(svg('<use href="shapes.svg#a"/>')), 'references a shape outside the diagram', 'a shape from another file');
@@ -120,6 +120,23 @@ const reason = (text) => {
   equal(reason(svg('<rect style="fill: image(https://x/a.png)"/>')), 'references a resource outside the diagram', 'an image function in a style');
   equal(reason(svg('<style>.a { background: cross-fade(url(#a), url(#b)) }</style>')), 'references a resource outside the diagram', 'a cross-fade');
   equal(reason(svg('<rect style="background-image: none"/>')), 'accepted', 'while a property that only names an image passes');
+  equal(reason(svg('<rect style="mask:url(\'https://x/m)\')"/>')), outside, 'a url whose quotes do not match');
+  equal(reason(svg('<style>rect { mask: url("https://x/m\')") }</style>')), outside, 'a url in a stylesheet whose quotes do not match');
+  equal(reason(svg('<rect style="mask:url(  \'  https://x/m\')"/>')), outside, 'a url with spaces inside its quote');
+  for (const held of ['fill', 'stroke', 'mask', 'clip-path', 'filter', 'marker-start', 'cursor']) {
+    equal(reason(svg(`<rect ${held}="url(https://x/p#g)"/>`)), outside, `a url in the ${held} attribute`);
+  }
+  equal(reason(svg('<rect fill="URL( \'https://x/p#g\' )"/>')), outside, 'a url in an attribute, quoted and in capitals');
+  equal(reason(svg('<rect fill="u\\72l(https://x/p#g)"/>')), outside, 'a url in an attribute, its name escaped');
+  equal(reason(svg('<rect><set attributeName="fill" to="url(https://x/p#g)"/></rect>')), outside, 'a url an animation sets');
+  equal(reason(svg('<rect fill="url(#g)" stroke="url(\'#g\')"/>')), 'accepted', 'local paint in attributes passes');
+  equal(reason(html('<table background="https://x/b.png"><tr><td background="https://x/c.png">x</td></tr></table>')), outside, 'a background in embedded HTML');
+  equal(reason(html('<img lowsrc="https://x/a.png"/>')), outside, 'a low source');
+  equal(reason(html('<link rel="preload" as="image" imagesrcset="https://x/a.png 1x"/>')), outside, 'an image source set on a link');
+  equal(reason(svg('<rect style="background-image: src(\'https://x/a.png\')"/>')), outside, 'a source function');
+  equal(reason(svg('<a href="data:application/xhtml+xml,x"><rect/></a>')), 'links to data that is not an image', 'a link to a document held as data');
+  equal(reason(svg('<a href="&#9;java&#10;script:alert(1)"><rect/></a>')), 'links to code', 'a link to code broken by spaces');
+  equal(reason(svg('<rect width="5" height="5"/>', ' content="url(https://x) image(y)"')), 'accepted', 'the editor\'s own model is read as data, not as style');
 }
 
 summary('test-drawing');
