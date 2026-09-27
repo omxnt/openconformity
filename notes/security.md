@@ -260,7 +260,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 |---|---|---|---|---|
 | CT-01 | Text reaches the page through `textContent` only, and attributes through `setAttribute` with names the software fixes. | `dom.js` `el` and `svg` | N-SEC-002 | In place |
 | CT-02 | Foreign text is parsed with `JSON.parse` only, and nothing is evaluated. | `files.js` `openProject` | N-SEC-001 | In place |
-| CT-03 | The validator refuses unknown keys, wrong types, broken references, cycles, and filing deeper than 1,000 levels. | `validator.js` `validate` | F-PER-006, N-SEC-001 | In place for reading. Filing in the tree does not check the depth. |
+| CT-03 | The validator refuses unknown keys, wrong types, broken references, cycles, and filing deeper than 1,000 levels. Creating, filing and placing refuse the same depth, so the software never writes a file it refuses. | `validator.js` `validate`, `model.js` `checkDepth` | F-PER-006, N-SEC-001 | In place |
 | CT-04 | The gates run newer, invalid, older, then a replay through the model. | `files.js` `loadProject` and `buildModel` | F-PER-004, F-PER-005, F-PER-006 | In place |
 | CT-05 | Any error inside the gates ends in a refusal. | `files.js` `loadProject` | N-SEC-009 | In place for errors. A wide file freezes rather than throws. |
 | CT-06 | Content under choices not in force is cleared after a question on opening, on loading the example, on import and on save. Unknown content is kept and stated. | `flows.js` `clearHidden`, `stateUnknown`, `importPicks` and `saveProjectEdit`, `project.js` | N-SEC-005, F-PER-010, F-MOD-010 | In place. The restore path does not clear, see SC-18. |

@@ -14,6 +14,7 @@
  */
 
 import { ENTITY_TYPES, RELATIONSHIP_TYPES } from './metamodel.js';
+import { FILING_DEPTH } from './validator.js';
 
 /**
  * @typedef {Object} Folder
@@ -95,6 +96,66 @@ function isWithin(model, id, containerId) {
   return false;
 }
 
+/** The refusal of filing past the depth a file may hold. */
+const TOO_DEEP = `Filing goes no deeper than ${String(FILING_DEPTH).replace(/\B(?=(\d{3})+$)/g, ',')} levels.`;
+
+/**
+ * The level a node stands at, a node at the root being the first and the
+ * root itself the zeroth.
+ * @param {Model} model
+ * @param {string|null} id
+ * @returns {number}
+ */
+function levelOf(model, id) {
+  const seen = new Set();
+  let level = 0;
+  let current = nodeOf(model, id);
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    level += 1;
+    current = nodeOf(model, current.parent);
+  }
+  return level;
+}
+
+/**
+ * How many levels a node and everything filed beneath it span, the node
+ * alone being one.
+ * @param {Model} model
+ * @param {string} id
+ * @returns {number}
+ */
+function spanOf(model, id) {
+  const children = new Map();
+  for (const node of model.nodes.values()) {
+    if (!children.has(node.parent)) children.set(node.parent, []);
+    children.get(node.parent).push(node.id);
+  }
+  let span = 0;
+  const pending = [[id, 1]];
+  while (pending.length > 0) {
+    const [current, level] = /** @type {[string, number]} */ (pending.pop());
+    span = Math.max(span, level);
+    for (const child of children.get(current) ?? []) pending.push([child, level + 1]);
+  }
+  return span;
+}
+
+/**
+ * Whether a node, and what is filed beneath it, fits under a parent
+ * within the filing depth. A new node spans one level.
+ * @param {Model} model
+ * @param {string|null} parentId
+ * @param {string|null} nodeId
+ * @returns {Outcome}
+ */
+function checkDepth(model, parentId, nodeId) {
+  const level = levelOf(model, parentId);
+  if (level + 1 > FILING_DEPTH) return { ok: false, reason: TOO_DEEP };
+  if (nodeId === null || level + model.nodes.size <= FILING_DEPTH) return { ok: true };
+  return level + spanOf(model, nodeId) > FILING_DEPTH ? { ok: false, reason: TOO_DEEP } : { ok: true };
+}
+
 // --- Creation ----------------------------------------------------------
 
 /**
@@ -106,7 +167,7 @@ function checkParent(model, parent) {
   if (parent !== null && !model.nodes.has(parent)) {
     return { ok: false, reason: 'The parent is not in the project.' };
   }
-  return { ok: true };
+  return checkDepth(model, parent, null);
 }
 
 /**
@@ -256,9 +317,9 @@ export function renameFolder(model, id, name) {
 
 /**
  * Whether a node can be filed in a parent, and why not when it cannot.
- * Filing is free: anything files inside anything, to any depth, and the
- * only arrangements refused are one that changes nothing and one that
- * would put a node inside itself.
+ * Filing is free: anything files inside anything, and the only
+ * arrangements refused are one that changes nothing, one that would put
+ * a node inside itself, and one deeper than a file may hold.
  * @param {Model} model
  * @param {string} nodeId
  * @param {string|null} parentId
@@ -274,7 +335,7 @@ export function canFile(model, nodeId, parentId) {
     }
   }
   if (node.parent === parentId) return { ok: false, reason: 'It is already there.' };
-  return { ok: true };
+  return checkDepth(model, parentId, nodeId);
 }
 
 /**
@@ -309,7 +370,7 @@ export function canPlaceBeside(model, nodeId, targetId) {
   if (target.parent !== null && isWithin(model, target.parent, nodeId)) {
     return { ok: false, reason: 'Nothing can be moved into itself.' };
   }
-  return { ok: true };
+  return checkDepth(model, target.parent, nodeId);
 }
 
 /**

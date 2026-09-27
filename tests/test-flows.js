@@ -658,6 +658,40 @@ function flowsOver(store) {
   delete globalThis.document;
 }
 
+// --- A creation past the filing depth says why (F-WSP-004, F-PER-006) ---
+
+{
+  const held = createModel();
+  let parent = null;
+  for (let level = 1; level <= 1000; level += 1) parent = addFolder(held, `Level ${level}`, { parent }).folder.id;
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(held);
+  store.select(parent);
+  const toasts = [];
+  const flows = createFlows({ store, overlay: {}, dialogs: { ...noDialogs, prompt: async () => 'Below', toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
+  await flows.createFolder();
+  await flows.createEntity('ELM');
+  deepEqual(toasts, [['Could not create', 'Filing goes no deeper than 1,000 levels.'], ['Could not create', 'Filing goes no deeper than 1,000 levels.']], 'a folder and an entity under the deepest level are refused, saying why');
+  equal(store.model().nodes.size, 1000, 'and nothing is created');
+}
+
+// --- An import into a project the checks refuse says why it did nothing (F-MOD-010, N-SEC-009) ---
+
+{
+  const library = createModel();
+  addEntity(library, 'ELM', { attributes: { title: 'Drive' } });
+  const held = createModel();
+  addEntity(held, 'ELM', { attributes: { title: 'Held' } });
+  held.counters.ELM = 1;
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(held);
+  const toasts = [];
+  const flows = createFlows({ store, overlay: {}, dialogs: { ...noDialogs, toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
+  await flows.importPicks({ library, picks: new Set(['ELM-001']) });
+  deepEqual(toasts, [['Could not import', 'The open project does not pass the checks a file must pass, so nothing was imported.']], 'the import says why');
+  equal(store.model().nodes.size, 1, 'and copies nothing');
+}
+
 // --- Clear browser data asks, then forgets (F-SES-003) ------------
 
 {

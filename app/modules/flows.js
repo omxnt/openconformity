@@ -116,7 +116,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     endEditSession();
     const parent = store.selection();
     const outcome = store.commit((model) => addEntity(model, code, { parent }));
-    if (!outcome.ok) return;
+    if (!toastRefusal('Could not create', outcome)) return;
     if (parent !== null) store.setExpanded(parent, true);
     store.select(outcome.entity.id);
     freshCreation = { id: outcome.entity.id, sequence: store.sequence() };
@@ -152,7 +152,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
           : relate(model, form.typeId, created.entity.id, subjectId);
       return related.ok ? { ok: true, entity: created.entity } : related;
     });
-    if (!outcome.ok) return;
+    if (!toastRefusal('Could not create', outcome)) return;
     store.setExpanded(subjectId, true);
     store.select(outcome.entity.id);
     freshCreation = { id: outcome.entity.id, sequence: store.sequence() };
@@ -170,7 +170,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (!name) return;
     const parent = store.selection();
     const outcome = store.commit((model) => addFolder(model, name, { parent }));
-    if (!outcome.ok) return;
+    if (!toastRefusal('Could not create', outcome)) return;
     if (parent !== null) store.setExpanded(parent, true);
     store.select(outcome.folder.id);
   }
@@ -833,7 +833,10 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   async function importPicks(chosen) {
     const trial = loadProject(toFileObject(store.model()));
-    if (!trial.ok) return;
+    if (!trial.ok) {
+      dialogs.toast('Could not import', 'The open project does not pass the checks a file must pass, so nothing was imported.');
+      return;
+    }
     const tried = importInto(trial.model, chosen.library, chosen.picks, store.selection());
     if (!tried.ok) {
       toastRefusal('Could not import', tried);

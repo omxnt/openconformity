@@ -24,6 +24,7 @@ import {
   setProjectAttribute,
   removeAttributes,
 } from '../app/modules/model.js';
+import { FILING_DEPTH } from '../app/modules/validator.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
 /** The identifiers of a parent's children, in sibling order. */
@@ -160,6 +161,27 @@ function childIds(model, parentId) {
   allowed(back, 'a nested node can be filed back at the top');
   equal(nodeOf(model, b.id).parent, null, 'and stands at the top');
   deepEqual(childIds(model, null), [zone.id, b.id], 'a filed node lands last among its new siblings');
+}
+
+// --- Filing stays within the depth a file may hold (F-WSP-004, F-PER-006) ---
+
+{
+  const model = createModel();
+  const levels = [null];
+  for (let level = 1; level <= FILING_DEPTH; level += 1) levels.push(addFolder(model, `Level ${level}`, { parent: levels[level - 1] }).folder.id);
+  const deepest = levels[FILING_DEPTH];
+  const tooDeep = `Filing goes no deeper than 1,000 levels.`;
+  equal(addFolder(model, 'Below', { parent: deepest }).reason, tooDeep, 'a folder under the deepest level is refused, saying why');
+  equal(addEntity(model, 'ELM', { parent: deepest }).reason, tooDeep, 'and so is an entity');
+  allowed(addEntity(model, 'ELM', { parent: levels[FILING_DEPTH - 1] }), 'an entity at the deepest level is filed');
+  const branch = addFolder(model, 'Branch').folder.id;
+  addEntity(model, 'ELM', { parent: branch });
+  equal(canFile(model, branch, levels[FILING_DEPTH - 1]).reason, tooDeep, 'a folder whose content would reach past the limit cannot be filed there');
+  allowed(file(model, branch, levels[FILING_DEPTH - 2]), 'one level higher it can');
+  equal(canPlaceBeside(model, branch, levels[FILING_DEPTH]).reason, tooDeep, 'nor placed beside a node whose parent leaves no room for its content');
+  allowed(placeBeside(model, branch, levels[FILING_DEPTH - 1], 'after'), 'and placed where its content fits');
+  const lone = addFolder(model, 'Lone').folder.id;
+  allowed(placeBeside(model, lone, deepest, 'before'), 'a node alone takes the deepest level beside another');
 }
 
 // --- Sibling order (F-WSP-004) -----------------------------------------
