@@ -157,6 +157,7 @@ A change of the kind below updates the sections named in the same commit.
 | EP-18 | The drawing handed to the editor | Out | TB-04 | `drawing-editor.js` `createSession` | CT-11, CT-13 |
 | EP-19 | A link leaving the page | Out | TB-06 | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | CT-19 |
 | EP-20 | A saved file | Out | TB-01 | `flows.js` `saveProject`, `dom.js` `download`, `files.js` `filenameFor` | CT-27 |
+| EP-21 | A view saved as a workbook | Out | TB-01 | `views.js` `saveExcel` and `viewSheets`, `xlsx.js` `workbook` | CT-35 |
 
 ## 4. Threats
 
@@ -172,6 +173,7 @@ Each boundary is put to the six STRIDE questions [1]. A threat none applies to s
 | TH-04 | Information disclosure | A file holds content its author cannot see, under choices not in force or unknown to this revision. | CT-06 |
 | TH-05 | Denial of service | A file deep or wide enough to exhaust the browser. | CT-03, CT-05 |
 | TH-06 | Elevation of privilege | Markup or code in a value, a scheme that runs code in a link, or a prototype key. | CT-01, CT-02, CT-03, CT-18 |
+| TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. | CT-35 |
 
 ### 4.2 The library catalogue
 
@@ -286,6 +288,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | CT-26 | The tree acts only on a drag it started. | `navigator.js` `renderRow` and `render` | None. No test. | In place |
 | CT-27 | A saved file's name holds letters, digits and dashes only. | `files.js` `filenameFor` | None. Tested in `test-files.js`, The filename. | In place |
 | CT-28 | Nothing changes the model while a drawing is open. | `actions.js` `createActions` | F-DRW-003 | In place |
+| CT-35 | A saved workbook writes every cell as text, never as a formula or a number, and leaves out the characters XML does not allow. | `xlsx.js` `sheetXml` and `xmlText` | F-VIE-001 | In place |
 
 ### 5.2 Held by the project
 

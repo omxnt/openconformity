@@ -4,8 +4,8 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, and saves the open section as
- * CSV. The cell kinds no view produces yet, a choice, choices and a
+ * cell a way to the editor, and saves the whole view as an Excel
+ * workbook, a sheet per section. The cell kinds no view produces yet, a choice, choices and a
  * mark, are scaffolding for the views the proposal lists, kept and
  * tested until they land.
  */
@@ -15,6 +15,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS } from './icons.js';
 import { entityLabel } from './queries.js';
 import { VIEWS } from './view-registry.js';
+import { workbook } from './xlsx.js';
 
 /** A column as an object, a bare name being its text. */
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);
@@ -45,36 +46,6 @@ export function exportText(held, labelOf) {
 }
 
 /**
- * The separator a spreadsheet in this language expects between fields:
- * a semicolon where decimals are written with a comma, a comma otherwise.
- * @param {string} language
- */
-export function listSeparator(language) {
-  return new Intl.NumberFormat(language).format(1.5).includes(',') ? ';' : ',';
-}
-
-/**
- * A table as CSV: a row of group names, each in the column its group
- * starts in, where the table has groups, then a row of column names,
- * then the rows. A field holding the separator, a quotation mark or a
- * line break is quoted, its quotation marks doubled.
- * @param {{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }} table
- * @param {(id: string) => string} labelOf
- * @param {string} separator
- */
-export function tableCsv(table, labelOf, separator) {
-  const columns = table.columns.map(asColumn);
-  const field = (text) => (/["\r\n]/.test(text) || text.includes(separator) ? `"${text.replaceAll('"', '""')}"` : text);
-  const lines = [];
-  if (columns.some((column) => column.group)) {
-    lines.push(columns.map((column, i) => (column.group && (i === 0 || columns[i - 1].group !== column.group) ? column.group : '')));
-  }
-  lines.push(columns.map(columnText));
-  for (const row of table.rows) lines.push(row.cells.map((held) => exportText(held, labelOf)));
-  return lines.map((line) => line.map(field).join(separator)).join('\r\n') + '\r\n';
-}
-
-/**
  * A cell as text, for sorting and the text exports.
  * @param {*} held
  * @param {(id: string) => string} labelOf  an entity's label by id
@@ -90,6 +61,28 @@ export function cellText(held, labelOf) {
   if ('mark' in held) return held.mark ? 'x' : '';
   if ('lines' in held) return held.lines.join('; ');
   return String(held);
+}
+
+/**
+ * A view as the sheets of a workbook: each section's tables a sheet
+ * named for the section, each cell as the exports write it, a rating
+ * carrying its tone.
+ * @param {{ sections: Array<{ name: string, tables: Array<{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }> }} built
+ * @param {(id: string) => string} labelOf
+ * @returns {Array<import('./xlsx.js').Sheet>}
+ */
+export function viewSheets(built, labelOf) {
+  return built.sections.flatMap((section) =>
+    section.tables.map((table) => {
+      const columns = table.columns.map(asColumn);
+      return {
+        name: section.name,
+        groups: columns.map((column) => column.group ?? ''),
+        headers: columns.map(columnText),
+        rows: table.rows.map((row) => row.cells.map((held) => ({ text: exportText(held, labelOf), ...(held?.outcome?.tone ? { tone: held.outcome.tone } : {}) }))),
+      };
+    })
+  );
 }
 
 /**
@@ -286,24 +279,21 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       tabs.appendChild(tab);
     }
     head.appendChild(tabs);
-    const csv = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Save as CSV' })]);
-    csv.addEventListener('click', saveCsv);
+    const excel = el('button', { className: 'ghost-button', attributes: { type: 'button' } }, [el('span', { text: 'Save as Excel' })]);
+    excel.addEventListener('click', saveExcel);
     const close = tooltipOn(el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]), 'Close the view', { align: 'end' });
     close.addEventListener('click', onClose);
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [csv, close]));
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [excel, close]));
   }
 
-  /** The open section saved as CSV, its tables one after another, a blank line between them, in the separator the browser's language expects. */
-  function saveCsv() {
+  /** The whole view saved as an Excel workbook, each section's tables a sheet named for the section. */
+  function saveExcel() {
     const open = store.view();
     if (open === null) return;
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
     const built = view.build(store.model());
-    const section = built.sections[Math.min(open.section, built.sections.length - 1)];
-    const separator = listSeparator(navigator.language);
-    const text = section.tables.map((held) => tableCsv(held, labelOf, separator)).join('\r\n');
-    const name = `${built.title} - ${section.name.replace(/\s*\(\d+\)$/, '')}`.replace(/[\\/:*?"<>|]/g, '-');
-    download(`${name}.csv`, `\uFEFF${text}`, 'text/csv;charset=utf-8');
+    const name = built.title.replace(/[\\/:*?"<>|]/g, '-');
+    download(`${name}.xlsx`, workbook(viewSheets(built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }
 
   function render() {

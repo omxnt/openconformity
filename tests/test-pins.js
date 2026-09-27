@@ -118,11 +118,11 @@ const sheet = readFile('../app/style.css');
   ok(writers.length === 0, `no module but the model writes to the node list or to a parent${writers.length > 0 ? ` (written in: ${writers.join(', ')})` : ''}`);
 }
 
-// --- A view leaves the software as CSV, print waiting until the views settle (F-VIE-001) ---
+// --- A view leaves the software as a workbook, print waiting until the views settle (F-VIE-001) ---
 
 {
   ok(sources.every(([, source]) => !/window\.print\(/.test(source)) && !sheet.includes('@media print') && !sheet.includes('@page'), 'no module prints and the stylesheet holds no print layout');
-  ok(readFile('../app/modules/views.js').includes("download(`${name}.csv`"), 'the view saves the open section as CSV');
+  ok(readFile('../app/modules/views.js').includes("download(`${name}.xlsx`, workbook(viewSheets(built, labelOf))"), 'the view saves as an Excel workbook');
 }
 
 // --- The host is told to refuse framing (N-SEC-007) -----------------------

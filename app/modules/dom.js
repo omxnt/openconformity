@@ -52,10 +52,10 @@ export function svgText(tag, attributes, content) {
 }
 
 /**
- * Hand the browser a file to save: the text behind an object URL on an
- * anchor, clicked and removed in one breath.
+ * Hand the browser a file to save: the text or bytes behind an object
+ * URL on an anchor, clicked and removed in one breath.
  * @param {string} filename
- * @param {string} text
+ * @param {string|Uint8Array} text
  * @param {string} type  the MIME type the blob carries
  */
 export function download(filename, text, type) {

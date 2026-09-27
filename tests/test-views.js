@@ -8,7 +8,7 @@
 
 import './shim.js';
 import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
-import { asColumn, columnText, cellText, exportText, listSeparator, tableCsv, sortRows, groupEdges } from '../app/modules/views.js';
+import { asColumn, columnText, cellText, exportText, viewSheets, sortRows, groupEdges } from '../app/modules/views.js';
 import { VIEWS } from '../app/modules/view-registry.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
@@ -156,7 +156,7 @@ equal(cellText(null, labelOf), '', 'nothing is empty');
 
 deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' }, { text: 'd', group: 'H' }, 'E']), ['', 'first', 'last', 'first last', ''], 'a group knows its first and last column, a lone one is both');
 
-// --- Saved as CSV, ready for a spreadsheet (F-VIE-001) ------------------------
+// --- Saved as an Excel workbook (F-VIE-001) ----------------------------------
 
 {
   equal(exportText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts\nHAZ-001 H-1 Moving Parts', 'entities on lines of their own');
@@ -164,21 +164,10 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   equal(exportText({ outcome: { outcome: 'Low', tone: 'low', parameters: [] }, note: 'Acceptable.' }, labelOf), 'Low\nAcceptable.', 'a rating with the evaluation beneath');
   equal(exportText({ outcome: null, note: '' }, labelOf), '', 'an unrated one empty');
   equal(exportText({ lines: ['Crushing.', ''] }, labelOf), 'Crushing.', 'text as written');
-  equal(listSeparator('sv-SE'), ';', 'where decimals take a comma, fields are split by semicolons, as a spreadsheet there expects');
-  equal(listSeparator('de-DE'), ';', 'in German too');
-  equal(listSeparator('en-GB'), ',', 'and by commas where decimals take a point');
-  const table = {
-    columns: [{ text: 'Scenario', group: 'Accident scenario' }, { text: 'Hazardous event', group: 'Accident scenario' }, { text: 'S', title: 'Severity', group: 'Initial risk estimation' }, 'Notes'],
-    rows: [{ id: 'SCN-001', cells: [{ entities: ['SCN-001'] }, { lines: ['Says "stop"; then; moves.'] }, { code: 'Serious', title: '', note: 'Heals badly.' }, 'plain'] }],
-  };
-  equal(
-    tableCsv(table, labelOf, ';'),
-    'Accident scenario;;Initial risk estimation;\r\nScenario;Hazardous event;Severity;Notes\r\nSCN-001 S-1 Contact with Moving Parts;"Says ""stop""; then; moves.";"Serious\nHeals badly.";plain\r\n',
-    'a row of group names, each where its group starts, a row of column names, and the rows, a field quoted where it holds the separator, a quotation mark or a line break'
-  );
-  equal(tableCsv({ columns: ['A', 'B'], rows: [{ cells: ['1', 'x,y'] }] }, labelOf, ','), 'A,B\r\n1,"x,y"\r\n', 'a table without groups has one header row');
-  const csv = tableCsv(buildRiskView(model).sections[0].tables[0], labelOf, ',');
-  deepEqual(csv.split('\r\n').slice(0, 2), ['Accident scenario,,,Hazardous situation,,,Initial risk estimation,Risk reduction,Residual risk estimation', 'Scenario,Hazardous event,Potential consequence,Single hazards,System actors,System tasks,Rating,Protective measures,Rating'], 'the risk assessment of the example opens with its two header rows');
+  const sheets = viewSheets(buildRiskView(model), labelOf);
+  deepEqual(sheets.map((sheet) => [sheet.name, sheet.rows.length]), [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]], 'a sheet per tab, named as the tab');
+  deepEqual([sheets[0].groups.slice(0, 4), sheets[0].headers.slice(0, 4)], [['Accident scenario', 'Accident scenario', 'Accident scenario', 'Hazardous situation'], ['Scenario', 'Hazardous event', 'Potential consequence', 'Single hazards']], 'with the groups and the column names');
+  equal(sheets[0].rows[0][0].text, 'SCN-001 S-1 Contact with Moving Parts', 'and each cell as the exports write it');
 }
 
 summary('test-views');

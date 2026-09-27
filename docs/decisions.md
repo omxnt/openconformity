@@ -893,6 +893,16 @@ What governs the software stands in `specs`. Every other document kept current s
 
 ---
 
+### D-104 Views leave as an Excel workbook
+
+`2026-09-27` `product`
+
+A view is saved as an Excel workbook, one sheet per tab named as the tab, with the group heads merged over their columns, text wrapped, thin borders, the heads bold and held in view, and a rating's cell in its tone. The software writes the format itself, the Office Open XML of ECMA-376, and every cell as text. Print waits until the views settle.
+
+> *A CSV carries one sheet and no formatting, so every user would merge, wrap and colour by hand what the software already knows, and a spreadsheet splits a CSV by the separator its region expects. The format is an open standard any implementer may write, so no dependency and no licence comes with it. Written as text, no cell can become a formula when the workbook opens, which a CSV cannot promise. A print layout was built for the risk assessment and taken out, since each view would need its own before the views have settled.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
