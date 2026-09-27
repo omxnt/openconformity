@@ -8,7 +8,7 @@
 
 import './shim.js';
 import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
-import { asColumn, columnText, cellText, exportText, viewSheets, sortRows, groupEdges } from '../app/modules/views.js';
+import { asColumn, columnText, cellText, exportText, viewSheets, savedPart, sortRows, groupEdges } from '../app/modules/views.js';
 import { VIEWS } from '../app/modules/view-registry.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
@@ -168,6 +168,11 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual(sheets.map((sheet) => [sheet.name, sheet.rows.length]), [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]], 'a sheet per tab, named as the tab');
   deepEqual([sheets[0].groups.slice(0, 4), sheets[0].headers.slice(0, 4)], [['Accident scenario', 'Accident scenario', 'Accident scenario', 'Hazardous situation'], ['Accident scenario', 'Hazardous event', 'Potential consequence', 'Single hazards']], 'with the groups and the column names');
   equal(sheets[0].rows[0][0].text, 'SCN-001 S-1 Contact with Moving Parts', 'and each cell as the exports write it');
+  const view = buildRiskView(model);
+  const whole = savedPart(view, 0);
+  deepEqual([whole.filename, whole.built.sections.length], ['Risk assessment.xlsx', 5], 'saved from the first tab, which holds every row, the whole view goes, every tab a sheet');
+  const phase = savedPart(view, 3);
+  deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - L-3 Maintenance.xlsx', ['L-3 Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
 }
 
 summary('test-views');

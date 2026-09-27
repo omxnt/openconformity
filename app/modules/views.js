@@ -4,8 +4,9 @@
  * description built from the model; this module renders any such
  * description as Carbon data tables under contained tabs for the views
  * and line tabs for the sections, sortable by column, an entity in a
- * cell a way to the editor, and saves the whole view as an Excel
- * workbook, a sheet per section. The cell kinds no view produces yet, a choice, choices and a
+ * cell a way to the editor, and saves it as an Excel workbook, a sheet
+ * per section: from the first section, which holds every row, the whole
+ * view, and from any other only that section. The cell kinds no view produces yet, a choice, choices and a
  * mark, are scaffolding for the views the proposal lists, kept and
  * tested until they land.
  */
@@ -64,9 +65,22 @@ export function cellText(held, labelOf) {
 }
 
 /**
+ * What a save from a section takes: the first section, which holds
+ * every row, takes the whole view, and any other takes itself alone,
+ * with the file named for what it holds.
+ * @param {{ title: string, sections: Array<{ name: string }> }} built
+ * @param {number} section  the open section's index
+ */
+export function savedPart(built, section) {
+  const whole = section <= 0 || built.sections.length <= 1;
+  const held = whole ? built : { ...built, sections: [built.sections[section]] };
+  const name = whole ? built.title : `${built.title} - ${built.sections[section].name.replace(/\s*\(\d+\)$/, '')}`;
+  return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.xlsx` };
+}
+
+/**
  * A view as the sheets of a workbook: each section's tables a sheet
- * named for the section, each cell as the exports write it, a rating
- * carrying its tone.
+ * named for the section, each cell as the exports write it.
  * @param {{ sections: Array<{ name: string, tables: Array<{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }> }} built
  * @param {(id: string) => string} labelOf
  * @returns {Array<import('./xlsx.js').Sheet>}
@@ -291,9 +305,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const open = store.view();
     if (open === null) return;
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
-    const built = view.build(store.model());
-    const name = built.title.replace(/[\\/:*?"<>|]/g, '-');
-    download(`${name}.xlsx`, workbook(viewSheets(built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    const part = savedPart(view.build(store.model()), open.section);
+    download(part.filename, workbook(viewSheets(part.built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }
 
   function render() {

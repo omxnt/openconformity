@@ -122,7 +122,7 @@ const sheet = readFile('../app/style.css');
 
 {
   ok(sources.every(([, source]) => !/window\.print\(/.test(source)) && !sheet.includes('@media print') && !sheet.includes('@page'), 'no module prints and the stylesheet holds no print layout');
-  ok(readFile('../app/modules/views.js').includes("download(`${name}.xlsx`, workbook(viewSheets(built, labelOf))"), 'the view saves as an Excel workbook');
+  ok(readFile('../app/modules/views.js').includes("download(part.filename, workbook(viewSheets(part.built, labelOf))"), 'the view saves as an Excel workbook');
 }
 
 // --- The host is told to refuse framing (N-SEC-007) -----------------------
