@@ -120,9 +120,11 @@ createViewsPane({
 // The keys the platforms agree on, ⌘ on Apple keyboards and Ctrl elsewhere:
 // S saves the open edit or the project, Enter finishes what is open, an
 // edit, a picking or a diagram, F reaches the tree's filter, Z and ⇧Z
-// undo and redo, and Y redoes where Windows has it.
+// undo and redo, and Y redoes where Windows has it. None of them acts
+// while a dialog is open.
 document.addEventListener('keydown', (event) => {
   if (!(event.metaKey || event.ctrlKey)) return;
+  if (overlay.dialogOpen()) return;
   const key = event.key.toLowerCase();
   if (store.drawingOpen()) {
     if (key !== 'enter') return;
@@ -170,4 +172,12 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     flows.redo();
   }
+});
+
+// Escape leaves a picking without relating, once no menu, dialog, edit,
+// diagram or view has taken the key first.
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || event.defaultPrevented || store.picker() === null || store.drawingOpen()) return;
+  event.preventDefault();
+  store.endPicking();
 });

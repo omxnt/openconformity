@@ -479,6 +479,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       savedSequence = history.reset(model);
       projectOpen = false;
       asideHeld = false;
+      restoration = 'fresh';
       selection = null;
       expanded = new Set();
       projectCollapsed = false;
@@ -936,7 +937,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
         if (theme === null) storage.removeItem(THEME_KEY);
         else storage.setItem(THEME_KEY, theme);
       } catch {
-        persistFailed = true;
+        // The theme holds for this session and the next one starts from the system's.
       }
       notify();
     },

@@ -344,6 +344,25 @@ function flowsOver(store) {
   delete globalThis.document;
 }
 
+// --- A file the browser cannot read is told, not opened (N-SEC-009) ---
+
+{
+  const fileInput = { files: [{ text: async () => { throw new Error('NotReadableError'); } }], value: '', onchange: null, oncancel: null, click() { this.onchange?.(); } };
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const dialogs = { confirm: async () => true, open: async () => null, toast: (title, message) => toasts.push([title, message]) };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput, saveFile: () => {} });
+  let threw = false;
+  try {
+    await flows.openProjectFlow();
+  } catch {
+    threw = true;
+  }
+  equal(threw, false, 'a file that cannot be read throws nothing');
+  deepEqual(toasts, [['Could not open', 'The browser could not read the file.']], 'and the reason is told in passing');
+  equal(store.hasProject(), false, 'with nothing opened');
+}
+
 // --- Save asks every time, and cancel costs nothing (F-PER-001) ----------
 
 {

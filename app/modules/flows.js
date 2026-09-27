@@ -754,7 +754,14 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
     const file = await pickFile();
     if (file === null) return;
-    const result = openProject(await file.text());
+    let text;
+    try {
+      text = await file.text();
+    } catch {
+      dialogs.toast('Could not open', 'The browser could not read the file.');
+      return;
+    }
+    const result = openProject(text);
     if (!result.ok) {
       await presentRefusal(result);
       return;

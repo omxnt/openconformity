@@ -73,6 +73,20 @@ function kinds(stack) {
   equal(menu.closed, 1, 'closing the menus twice closes nothing twice');
 }
 
+// --- A dialog is known wherever it stands in the stack (F-MOD-007, N-ACC-003) ---
+
+{
+  const stack = createOverlayStack();
+  equal(stack.hasDialog(), false, 'an empty stack holds no dialog');
+  stack.open(entryOf('panel'));
+  equal(stack.hasDialog(), false, 'nor does a panel');
+  const dialog = stack.open(entryOf('dialog'));
+  stack.open(entryOf('menu'));
+  equal(stack.hasDialog(), true, 'a dialog under a menu is known');
+  stack.close(dialog);
+  equal(stack.hasDialog(), false, 'and forgotten once closed');
+}
+
 // --- Escape goes to the top entry (N-ACC-003) --------------------------
 
 {

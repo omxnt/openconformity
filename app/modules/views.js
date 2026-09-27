@@ -368,7 +368,8 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const open = store.view();
     if (open === null) return;
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
-    const part = savedPart(view.build(store.model()), open.section);
+    const built = view.build(store.model());
+    const part = savedPart(built, Math.min(open.section, built.sections.length - 1));
     download(part.filename, workbook(viewSheets(part.built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }
 
@@ -456,6 +457,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       if (event.key !== 'Escape' || store.view() === null || overlay.isOpen()) return;
       const target = event.target;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return;
+      event.preventDefault();
       onClose();
     },
     true

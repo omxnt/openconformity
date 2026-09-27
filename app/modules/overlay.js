@@ -65,6 +65,8 @@ export function createOverlayStack() {
 
     top: () => entries[entries.length - 1] ?? null,
     entries: () => [...entries],
+    /** Whether a dialog stands anywhere in the stack. */
+    hasDialog: () => entries.some((entry) => entry.kind === 'dialog'),
   };
 }
 
@@ -128,5 +130,7 @@ export function createOverlay({ container }) {
     closeMenus: () => stack.closeMenus(),
     /** Whether anything at all is open: a menu, a panel or a dialog. */
     isOpen: () => stack.top() !== null,
+    /** Whether a dialog is open, under whatever else stands above it. */
+    dialogOpen: () => stack.hasDialog(),
   };
 }

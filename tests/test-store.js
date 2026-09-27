@@ -229,6 +229,17 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(storage.read(THEME_KEY), null, 'and stores nothing');
 }
 
+// --- A theme web storage refuses is no persistence failure (F-SES-005) ---
+
+{
+  const storage = fakeStorage();
+  const store = openStore(memoryRetention(), storage);
+  storage.failing = true;
+  store.setTheme('g100');
+  equal(store.theme(), 'g100', 'a theme web storage refuses still holds for the session');
+  equal(store.persistFailed(), false, 'and does not say the project is not being stored');
+}
+
 // --- The persistence loop (F-SES-001, F-SES-002) -----------------------
 
 {
@@ -880,6 +891,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   await store.whenPersisted();
   equal(store.hasAside(), false, 'and clearing browser data lets go of it');
   equal(retention.records.has('aside'), false, 'with the record removed as before');
+  equal(store.restoration(), 'fresh', 'and the session counts as fresh, so the failed restore is no longer stated');
 }
 
 // --- The relationship pane collapses to its head, for the session (no requirement) ---

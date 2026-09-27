@@ -77,6 +77,18 @@ const sheet = readFile('../app/style.css');
   ok(/text: `Diagrams are created and edited in draw\.io[^`]*\$\{EDITOR_ORIGIN\.replace\('https:\/\/', ''\)\}[^`]*diagram[^`]*`/.test(editorModule), 'the consent names the service, its origin and the diagram handed over (N-PRV-005)');
 }
 
+// --- The page's keys yield to what is open (F-MOD-007, F-MOD-002, N-ACC-003) ---
+
+{
+  const wiring = readFile('../app/modules/app.js');
+  const global = wiring.slice(wiring.indexOf("document.addEventListener('keydown'"));
+  ok(global.indexOf('if (overlay.dialogOpen()) return;') !== -1 && global.indexOf('if (overlay.dialogOpen()) return;') < global.indexOf("if (key === 's')"), 'no shortcut acts while a dialog is open');
+  ok(wiring.includes("if (event.key !== 'Escape' || event.defaultPrevented || store.picker() === null || store.drawingOpen()) return;") && wiring.includes('store.endPicking();'), 'Escape leaves a picking once nothing else has taken the key');
+  const views = readFile('../app/modules/views.js');
+  ok(views.includes("event.preventDefault();\n      onClose();"), 'an Escape that closes a view is not also the one that leaves a picking');
+  ok(views.includes('const part = savedPart(built, Math.min(open.section, built.sections.length - 1));'), 'the workbook is saved from a section that exists');
+}
+
 // --- Nothing leaves the page but by a link the user follows (N-PRV-002, N-OPS-002) ---
 
 {
