@@ -1,6 +1,6 @@
 # Verification
 
-This document states how each requirement in `specs/requirements.md` is verified. It maps every requirement to the test blocks that verify it, and names the drive or review that stands in where no test can. It then lists the test blocks that name no requirement, so the mapping reads in both directions. It describes the repository on 27 September 2026, after the security review's changes. The security model in `docs/security.md` maps its controls to requirement ids, and the audit in `reviews/2026-09-27-security.md` plans and records the checks of its own findings.
+This document states how each requirement in `specs/requirements.md` is verified. It maps every requirement to the test blocks that verify it, and names the drive or review that stands in where no test can. It describes the repository on 27 September 2026, after the security review's changes. The security model in `docs/security.md` maps its controls to requirement ids, and the audit in `reviews/2026-09-27-security.md` plans and records the checks of its own findings.
 
 ## 1. Method
 
@@ -163,31 +163,9 @@ This document states how each requirement in `specs/requirements.md` is verified
 | Wait on the first migration | F-PER-007, F-PER-009 |
 | Wait on the function | F-PER-011 |
 
-## 3. Verification to requirements
+Every other test block says in its header that it names no requirement, and pins a choice made within one.
 
-Every block below says in its title that it names no requirement. Each pins a choice made within a requirement that governs it more broadly.
-
-| Blocks | What they cover |
-|---|---|
-| [test-actions.js](../tests/test-actions.js) at [160](../tests/test-actions.js#L160), [203](../tests/test-actions.js#L203) | The menus and the toolbar as laid out. |
-| [test-example.js](../tests/test-example.js) at [42](../tests/test-example.js#L42), [72](../tests/test-example.js#L72), [100](../tests/test-example.js#L100), [112](../tests/test-example.js#L112) | The example's own content. |
-| [test-files.js:156](../tests/test-files.js#L156) | The file name offered on saving. |
-| [test-flows.js](../tests/test-flows.js) at [195](../tests/test-flows.js#L195), [483](../tests/test-flows.js#L483) | How refusals and removals are told. |
-| [test-history.js](../tests/test-history.js) at [98](../tests/test-history.js#L98), [118](../tests/test-history.js#L118), [141](../tests/test-history.js#L141), [156](../tests/test-history.js#L156) | The history's mechanics under F-MOD-008 and F-MOD-009. |
-| [test-library.js](../tests/test-library.js) at [31](../tests/test-library.js#L31), [157](../tests/test-library.js#L157) | The picker's presentation. |
-| [test-metamodel.js:92](../tests/test-metamodel.js#L92) | The metamodel's lookups. |
-| [test-model.js:333](../tests/test-model.js#L333) | The project's attributes under F-MOD-003. |
-| [test-navigator.js:146](../tests/test-navigator.js#L146) | The tree's presentation. |
-| [test-overlay.js](../tests/test-overlay.js) at [26](../tests/test-overlay.js#L26), [38](../tests/test-overlay.js#L38), [58](../tests/test-overlay.js#L58), [105](../tests/test-overlay.js#L105) | The overlay's mechanics. |
-| [test-pins.js:334](../tests/test-pins.js#L334) | The version constants. |
-| [test-queries.js](../tests/test-queries.js) at [139](../tests/test-queries.js#L139), [306](../tests/test-queries.js#L306), [358](../tests/test-queries.js#L358) | Labels and exclusions. |
-| [test-relationships.js](../tests/test-relationships.js) at [338](../tests/test-relationships.js#L338), [375](../tests/test-relationships.js#L375), [388](../tests/test-relationships.js#L388), [411](../tests/test-relationships.js#L411) | The graph's presentation. |
-| [test-risk.js](../tests/test-risk.js) at [132](../tests/test-risk.js#L132), [165](../tests/test-risk.js#L165) | The risk methods under F-MOD-003. |
-| [test-shell.js](../tests/test-shell.js) at [20](../tests/test-shell.js#L20), [29](../tests/test-shell.js#L29), [49](../tests/test-shell.js#L49) | The theme and the tab title. |
-| [test-store.js](../tests/test-store.js) at [128](../tests/test-store.js#L128), [150](../tests/test-store.js#L150), [175](../tests/test-store.js#L175), [384](../tests/test-store.js#L384), [405](../tests/test-store.js#L405), [473](../tests/test-store.js#L473), [514](../tests/test-store.js#L514), [737](../tests/test-store.js#L737), [897](../tests/test-store.js#L897) | The store's mechanics and the session's presentation state. |
-| [test-text.js:9](../tests/test-text.js#L9) | The wording helpers. |
-
-## 4. References
+## 3. References
 
 | No. | Reference | Link |
 |---|---|---|
