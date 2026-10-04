@@ -1343,9 +1343,6 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .library-list { flex: 1; min-height: 0; overflow: auto; padding: 8px 0; }  /* $spacing-03 */
 .library-preview { flex: 1; min-height: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
 /* The select-all box in a picker's head, with the count beside it: what is shown picked or cleared as one. */
-.head-all { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 8px; font: inherit; letter-spacing: inherit; color: var(--text-second); background: none; border: 0; cursor: pointer; white-space: nowrap; }  /* $spacing-03 */
-.head-all:hover { background: var(--hover); }
-.head-all:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .head-count { color: var(--text-second); }
 .library-row { display: flex; align-items: center; gap: 8px; height: var(--row); padding-right: 16px; white-space: nowrap; cursor: default; }  /* $spacing-03, $spacing-05 */
 .library-row:hover { background: var(--hover); }
