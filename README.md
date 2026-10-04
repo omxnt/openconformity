@@ -39,6 +39,7 @@ openconformity/
 | [requirements.md](specs/requirements.md) | What it shall be and do |
 | [metamodel.md](specs/metamodel.md) | What a model may contain |
 | [attributes.md](specs/attributes.md) | What each entity type carries |
+| [references.md](specs/references.md) | How a reference is written |
 | [project.schema.json](specs/project.schema.json) | What a project file holds |
 
 ## Documentation
