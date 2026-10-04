@@ -14,11 +14,11 @@
  * partly checked, and only what is checked travels, a partly checked
  * heading saying what is beneath it and nothing more. Alt and click,
  * Option on a Mac, checks one entity without what is beneath it.
- * Folders are the catalogue's shelves. They never travel, and checking
- * one checks what it holds.
+ * A folder is picked like an entity, with everything in it, and a picked
+ * folder travels as a folder, so a catalogue can hold a project structure.
  */
 
-import { nodeOf, childrenOf, filedBeneath, addEntity, relate } from './model.js';
+import { nodeOf, childrenOf, filedBeneath, addEntity, addFolder, relate } from './model.js';
 import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
@@ -83,24 +83,22 @@ export function libraryRows(library, filter = '', expanded = new Set()) {
 }
 
 /**
- * The entities a row stands for when checked: an entity itself and
- * every entity filed beneath it, a folder every entity filed in it.
+ * The nodes a row stands for when checked: itself and everything filed
+ * beneath it, entities and folders alike.
  * @param {import('./model.js').Model} library
  * @param {string} id
  * @returns {string[]}
  */
-function entitiesUnder(library, id) {
-  const node = nodeOf(library, id);
-  if (!node) return [];
-  const beneath = filedBeneath(library, id).filter((held) => held.kind === 'entity').map((held) => held.id);
-  return node.kind === 'entity' ? [id, ...beneath] : beneath;
+function nodesUnder(library, id) {
+  if (!nodeOf(library, id)) return [];
+  return [id, ...filedBeneath(library, id).map((held) => held.id)];
 }
 
 /**
- * How a row's checkbox stands for a set of picks. For an entity,
- * checked when it is picked, mixed when
- * it is not but something beneath it is, none otherwise. For a folder,
- * checked when everything in it is picked, mixed when some of it is.
+ * How a row's checkbox stands for a set of picks. An entity is checked
+ * when it is picked, mixed when it is not but something beneath it is,
+ * none otherwise. A folder is checked when it and everything in it is
+ * picked, mixed when it or some of it is.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
@@ -109,10 +107,10 @@ function entitiesUnder(library, id) {
 export function checkState(library, picks, id) {
   const node = nodeOf(library, id);
   if (!node) return 'none';
-  const under = entitiesUnder(library, id);
+  const under = nodesUnder(library, id);
   const picked = under.filter((held) => picks.has(held)).length;
   if (node.kind === 'entity') return picks.has(id) ? 'checked' : picked > 0 ? 'mixed' : 'none';
-  if (under.length > 0 && picked === under.length) return 'checked';
+  if (picked === under.length) return 'checked';
   return picked > 0 ? 'mixed' : 'none';
 }
 
@@ -132,7 +130,7 @@ export function togglePick(library, picks, id, alone = false) {
     else picks.add(id);
     return;
   }
-  const under = entitiesUnder(library, id);
+  const under = nodesUnder(library, id);
   const checked = checkState(library, picks, id) === 'checked';
   for (const held of under) {
     if (checked) picks.delete(held);
@@ -141,23 +139,24 @@ export function togglePick(library, picks, id, alone = false) {
 }
 
 /**
- * What an import copies: the picked entities in the catalogue's filing
- * order, and nothing else. Folders never travel, nor does a heading
- * that is only partly checked.
+ * What an import copies: the picked entities and folders in the
+ * catalogue's filing order, and nothing else. A heading that is only
+ * partly checked travels nowhere.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
- * @returns {import('./model.js').Entity[]}
+ * @returns {Array<import('./model.js').Entity|import('./model.js').Folder>}
  */
 export function importPlan(library, picks) {
-  return filedBeneath(library, null).filter((node) => node.kind === 'entity' && picks.has(node.id));
+  return filedBeneath(library, null).filter((node) => picks.has(node.id));
 }
 
 /**
- * Copy the picked entities into the project: each with its attributes,
- * filed under the copy of the nearest picked entity above it, and under
- * the target where none is picked above it. Then every relationship of the catalogue between two copied
- * entities, between their copies. Identifiers are the project's own,
- * issued as it issues them.
+ * Copy the picked entities and folders into the project: an entity with
+ * its attributes, a folder with its name, each filed under the copy of
+ * the nearest picked node above it, and under the target where none is
+ * picked above it. Then every relationship of the catalogue between two
+ * copied entities, between their copies. Identifiers are the project's
+ * own, issued as it issues them.
  * @param {import('./model.js').Model} project
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
@@ -171,10 +170,11 @@ export function importInto(project, library, picks, targetId = null) {
     let above = nodeOf(library, node.parent);
     while (above && !mapping.has(above.id)) above = nodeOf(library, above.parent);
     const parent = above ? mapping.get(above.id) : targetId;
-    const result = addEntity(project, node.type, { parent, attributes: { ...node.attributes } });
+    const result = node.kind === 'folder' ? addFolder(project, node.name, { parent }) : addEntity(project, node.type, { parent, attributes: { ...node.attributes } });
     if (!result.ok) return result;
-    mapping.set(node.id, result.entity.id);
-    added.push(result.entity.id);
+    const copy = node.kind === 'folder' ? result.folder.id : result.entity.id;
+    mapping.set(node.id, copy);
+    added.push(copy);
   }
   let related = 0;
   for (const relationship of library.relationships.values()) {
@@ -341,10 +341,13 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
 
   function renderCount() {
     const held = libraryOf(libraries[current]);
-    const planned = held.ok ? importPlan(held.model, picks).length : 0;
-    count.textContent = planned === 0 ? 'Nothing picked' : `${plural(planned, 'entity')} to import`;
+    const plan = held.ok ? importPlan(held.model, picks) : [];
+    const entities = plan.filter((node) => node.kind === 'entity').length;
+    const folders = plan.length - entities;
+    const parts = [entities > 0 ? plural(entities, 'entity') : '', folders > 0 ? plural(folders, 'folder') : ''].filter(Boolean);
+    count.textContent = plan.length === 0 ? 'Nothing picked' : `${parts.join(' and ')} to import`;
     const button = head.querySelector('.library-import');
-    if (button) button.disabled = planned === 0;
+    if (button) button.disabled = plan.length === 0;
   }
 
   function renderHead() {
@@ -507,7 +510,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
     if (node.kind === 'folder') {
       preview.append(
         el('div', { className: 'library-preview-head' }, [icon(FOLDER_ICON), el('span', { text: node.name })]),
-        el('p', { className: 'library-note', text: 'Check the folder to pick everything in it.' })
+        el('p', { className: 'library-note', text: 'Check the folder to pick it and everything in it.' })
       );
       return;
     }

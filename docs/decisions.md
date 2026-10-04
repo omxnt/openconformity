@@ -973,6 +973,16 @@ The beta at app.openconformity.org is open to everyone, with no login. The gate 
 
 ---
 
+### D-114 Folders travel with a catalogue
+
+`2026-10-04` `product`
+
+A folder in a catalogue is picked like an entity, with everything in it, and a picked folder is imported as a folder with its name, nested as the catalogue nests it. A folder with nothing in it imports as an empty folder.
+
+> *The library's folders were shelves that never travelled, which left a catalogue of folders alone, a recommended project structure, with nothing to import. A user starting a project typed the same folders every time. The model already holds folders and entities as one kind of node, so the picker and the import treat them alike, and the metamodel is untouched. Amends D-086.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

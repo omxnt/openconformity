@@ -92,8 +92,16 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   addEntity(shelves, 'HAZ', { parent: shelf.id });
   const held = new Set();
   togglePick(shelves, held, shelf.id);
-  deepEqual([...held], ['HAZ-001', 'HAZ-002'], 'checking a folder picks what it holds and never the folder');
+  deepEqual([...held], [shelf.id, 'HAZ-001', 'HAZ-002'], 'checking a folder picks it and what it holds');
   equal(checkState(shelves, held, shelf.id), 'checked', 'and it shows checked');
+  togglePick(shelves, held, 'HAZ-002');
+  equal(checkState(shelves, held, shelf.id), 'mixed', 'unchecking one inside leaves the folder partly checked');
+  togglePick(shelves, held, shelf.id);
+  equal(held.size, 3, 'and clicking the dash picks the folder with everything in it');
+  togglePick(shelves, held, shelf.id);
+  equal(held.size, 0, 'and the check unpicks all');
+  togglePick(shelves, held, shelf.id, true);
+  equal(held.size, 0, 'Alt does nothing on a folder');
   equal(checkState(createModel(), held, 'F-9'), 'none', 'a row that is not there is none');
 }
 
@@ -152,6 +160,42 @@ ok(library.model.relationships.size === 215 && [...library.model.relationships.v
   equal(nodeOf(project, 'ELM-002').parent, 'ELM-001', 'the lower lands under the copy of the nearest picked entity above it');
   equal(outcome.related, 0, 'the relationships to what was not picked stay behind');
   equal(nodeOf(project, 'ELM-002').attributes.title, 'Guard', 'and it is the guard');
+
+  const shelved = createModel();
+  const withShelf = importInto(shelved, catalogue, new Set([shelf.id, 'ELM-001']), null);
+  deepEqual(withShelf.added, ['F-1', 'ELM-001'], 'a picked folder travels as a folder, before what it holds');
+  equal(nodeOf(shelved, 'F-1').name, 'Elements', 'with its name');
+  equal(nodeOf(shelved, 'ELM-001').parent, 'F-1', 'and the element lands in its copy');
+}
+
+// --- A project structure, folders alone (F-MOD-010) ---------------------------------
+
+{
+  const structure = createModel();
+  const top = addFolder(structure, 'Project structure').folder;
+  const first = addFolder(structure, '1. Legislation and standards', { parent: top.id }).folder;
+  addFolder(structure, '1.1. European legislation', { parent: first.id });
+  addFolder(structure, '2. System and hazards', { parent: top.id });
+  const picks = new Set();
+  togglePick(structure, picks, top.id);
+  equal(picks.size, 4, 'checking the top folder picks every folder in it');
+  deepEqual(importPlan(structure, picks).map((node) => node.name), ['Project structure', '1. Legislation and standards', '1.1. European legislation', '2. System and hazards'], 'and the plan is the folders in filing order');
+
+  const project = createModel();
+  const outcome = importInto(project, structure, picks, null);
+  ok(outcome.ok, 'folders alone import');
+  equal(outcome.added.length, 4, 'all four');
+  equal(outcome.related, 0, 'with nothing to relate');
+  const copies = outcome.added.map((id) => nodeOf(project, id));
+  deepEqual(copies.map((node) => [node.kind, node.name]), [['folder', 'Project structure'], ['folder', '1. Legislation and standards'], ['folder', '1.1. European legislation'], ['folder', '2. System and hazards']], 'as folders with their names');
+  equal(copies[1].parent, copies[0].id, 'nested as the catalogue nests them');
+  equal(copies[2].parent, copies[1].id, 'two deep');
+  equal(copies[3].parent, copies[0].id, 'and beside each other where they stood beside');
+
+  const bare = createModel();
+  const alone = importInto(bare, structure, new Set([first.id]), null);
+  equal(alone.added.length, 1, 'a folder picked by itself imports as an empty folder');
+  deepEqual([nodeOf(bare, alone.added[0]).name, childrenOf(bare, alone.added[0]).length], ['1. Legislation and standards', 0], 'with its name and nothing in it');
 }
 
 // --- The preview (no requirement) ------------------------------------------------------------------

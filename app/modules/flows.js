@@ -870,9 +870,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       toastRefusal('Could not import', outcome);
       return;
     }
-    const n = outcome.added.length;
+    const copies = outcome.added.map((id) => nodeOf(store.model(), id));
+    const entities = copies.filter((node) => node?.kind === 'entity').length;
+    const folders = copies.length - entities;
     const r = outcome.related;
-    dialogs.toast('Imported', `${plural(n, 'entity')}${r > 0 ? ` and ${plural(r, 'relationship')}` : ''} added to the project.`);
+    const parts = [entities > 0 ? plural(entities, 'entity') : '', folders > 0 ? plural(folders, 'folder') : '', r > 0 ? plural(r, 'relationship') : ''].filter(Boolean);
+    dialogs.toast('Imported', `${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}` : parts[0]} added to the project.`);
     if (store.selection() !== null) store.setExpanded(store.selection(), true);
   }
 
