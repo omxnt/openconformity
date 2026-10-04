@@ -32,40 +32,34 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
     app/        →   app.openconformity.org
     site/       →   openconformity.org
 
-## Precedence
-
-| # | Document | Authority | On disagreement |
-|---|---|---|---|
-| 1 | `specs/requirements.md` | Governs what the software does | The requirements are right |
-| 2 | `specs/metamodel.md` | Governs what a model contains | The metamodel is right |
-| 3 | `specs/project.schema.json` | Derived from the metamodel | The schema is wrong |
-| 4 | `specs/attributes.md` | Derived from the metamodel | The attributes are wrong |
-| 5 | `docs/decisions.md` | Reasoning behind the choices | The entry is out of date |
-
 ## Documents
 
 | File | What it is | Read when |
 |---|---|---|
-| `docs/about.md` | Background, principles, and scope | Needing context on the project |
 | `specs/requirements.md` | Requirements specification | Building or changing the software |
 | `specs/metamodel.md` | Entity types and relationships | Working with entities or relationships |
 | `specs/attributes.md` | Attributes per entity type | Working with entity attributes |
-| `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
-| `docs/template.md` | Document form and structure | Writing or updating a document |
+| `specs/references.md` | How a reference is written | Writing or checking a reference attribute |
 | `specs/project.schema.json` | Project file specification | Working with the project schema file |
+| `docs/about.md` | Background, principles, and scope | Needing context on the project |
+| `docs/decisions.md` | Decision log and rationale | Proposing something undiscussed |
+| `docs/architecture.md` | Layers, modules, state and the page | Adding or moving a module |
 | `docs/security.md` | Security model, threats and controls | Changing what enters, leaves or is stored |
 | `docs/verification.md` | Each requirement mapped to its tests | Adding a requirement or a test block |
-| `docs/architecture.md` | Layers, modules, state and the page | Adding or moving a module, or changing how state flows |
+| `docs/shortcuts.md` | Every keyboard path through the software | Adding or changing a key |
+| `docs/template.md` | Document form and structure | Writing or updating a document |
 
 ## Verification
 
-Run the test suite with `./run.sh` from `tests`; every file must report all checks passed. Then run a local server with `python3 -m http.server 8000` from `app`, open the page, and check the browser console shows no errors or warnings.
+Run the test suite with `./run.sh` from `tests`, and every file must report all checks passed. Then run a local server with `python3 -m http.server 8000` from `app`, open the page, and check the browser console shows no errors or warnings.
 
 ## Rules
 
 - **Present, then ask:** Summarise what would change, file by file and sized to one commit, and wait for a go. Only an unambiguous instruction to act, such as "implement X now", skips the asking. A question, a maybe, or a what do you think is presented and asked about, and when in doubt, ask.
 
 - **Change exactly what was agreed:** After the go, make that change and nothing more, then give the commit line. The protected documents are never edited, their text is proposed for the user to paste.
+
+- **The specification governs:** The requirements and the metamodel say what the software does and what a model contains. Everything else in `specs/`, the data in `sources/` and the documents in `docs/` follow them, and whatever disagrees with them is wrong or out of date.
 
 - **Never commit or push:** The user runs every git command and reviews every change before it enters the repository. A proposed commit line is one subject in the user's voice, with no body and no trailer.
 
