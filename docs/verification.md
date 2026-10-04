@@ -148,7 +148,9 @@ This document states how each requirement in `specs/requirements.md` is verified
 | N-CMP-001 | Desktop viewport | Pin, drive | [test-pins.js:265](../tests/test-pins.js#L265) The minimum viewport. Work at 1000 by 356 pixels and find every pane usable. | Partly |
 | N-CMP-002 | Browser support | Headless, pin, drive | [test-pins.js:177](../tests/test-pins.js#L177) The file surface stays on the baseline. [test-pins.js:248](../tests/test-pins.js#L248) The pre-paint theme script speaks the store's literals. [test-store.js:647](../tests/test-store.js#L647) A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari. | Partly |
 
-### 2.5 Summary
+## 3. Summary
+
+### 3.1 By class
 
 | Class | Requirements | Tested | Partly | Manual | None |
 |---|---|---|---|---|---|
@@ -158,14 +160,17 @@ This document states how each requirement in `specs/requirements.md` is verified
 | Non-functional | 26 | 13 | 9 | 4 | 0 |
 | All | 96 | 52 | 21 | 20 | 3 |
 
-| Open | Requirements |
-|---|---|
-| Wait on the first migration | F-PER-007, F-PER-009 |
-| Wait on the function | F-PER-011 |
-
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 
-## 3. References
+### 3.2 Without a check
+
+| Requirement | Why |
+|---|---|
+| F-PER-007 | Waits on the first migration |
+| F-PER-009 | Waits on the first migration |
+| F-PER-011 | Waits on the function |
+
+## 4. References
 
 | No. | Reference | Link |
 |---|---|---|
