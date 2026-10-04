@@ -338,7 +338,7 @@ A control with no requirement says None, which marks a gap in the requirements. 
 | SC-10 | An editor save before Apply drops the drawing and wedges the session. | TA-04 | TH-20, TH-23 | CT-12, CT-14 | Medium | Medium | Medium | Blocked |
 | SC-11 | A compromised editor escapes the frame. | TA-04 | TH-24 | CT-09, CT-10 | Low | High | Medium | Blocked |
 | SC-12 | A network attacker alters the software in transit. | TA-07 | TH-37 | CT-24, AU-05 | Low | High | Medium | Blocked |
-| SC-13 | Another site frames, messages or links into the software. | TA-05 | TH-36 | CT-10, CT-17, CT-24 | High | Low | Medium | Mitigated |
+| SC-13 | Another site frames, messages or links into the software. | TA-05 | TH-36 | CT-10, CT-17, CT-24 | High | Low | Medium | Blocked |
 | SC-14 | A person at the machine reads the stored project. | TA-06 | TH-28 | CT-23 | Medium | High | High | Mitigated |
 | SC-15 | A hostile commit reaches the origin. | TA-08 | TH-43, TH-44, TH-48 | CT-30, CT-31, CT-34 | Low | High | Medium | Mitigated |
 | SC-16 | The host puts code on the origin. | TA-08 | TH-38, TH-42 | CT-29 | Low | High | Medium | Open |
