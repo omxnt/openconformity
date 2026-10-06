@@ -6,7 +6,7 @@ This document holds the security model of openconformity as software, read forwa
 
 ### 1.1 Identifiers
 
-Each row carries an identifier of a prefix and two digits. Identifiers are append-only. A row that no longer applies keeps its identifier and says Retired. A scenario that says Proposed is not yet rated.
+Each row carries an identifier of a prefix and two digits. Identifiers are append-only. A row that no longer applies keeps its identifier and says Retired.
 
 | Prefix | What it names |
 |---|---|
@@ -85,7 +85,7 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 
 | Part | Why | Where a report goes |
 |---|---|---|
-| The project site at `openconformity.org` | Another origin and another deployment. | The maintainer, as `SECURITY.md` says. |
+| The project site at `openconformity.org`, except its `security.txt`, which CT-32 relies on | Another origin and another deployment. | The maintainer, as `SECURITY.md` says. |
 | draw.io's code at its origin | JGraph's software. | JGraph, as `SECURITY.md` says. |
 | The browser | The vendor's software. | The vendor. |
 | Cloudflare's and GitHub's own systems | Their services. | Cloudflare and GitHub. |
@@ -153,6 +153,7 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 | TA-06 | A person at the machine | The browser profile, or the unlocked session | Read and alter storage, downloads and history | The project |
 | TA-07 | A network attacker | A place between the browser and the two origins | Read and alter plain traffic, try to answer for a name | Altered software or an altered editor |
 | TA-08 | Someone in the supply chain | The maintainer's GitHub or Cloudflare account, an accepted diff, or the host's pipeline | Put code on main or on the origin | Their code on the origin, which the policy trusts |
+| TA-09 | The host, as a party | The deployment, its settings and its logs | Observe every request, fail, or change what it serves | Nothing hostile. Named so that what it sees and what its failure costs have a row. |
 
 ### 3.4 Attack surface
 
@@ -275,6 +276,11 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 
 | Id | Class | Threat |
 |---|---|---|
+| TH-52 | Spoofing | None. A saved view carries no author, as a project file carries none. |
+| TH-53 | Tampering | None. A saved view is the user's file from the moment it is written. |
+| TH-54 | Repudiation | None. |
+| TH-55 | Information disclosure | A saved view is the project's content in clear, on the device and wherever the user sends it. By design, see TR-01. |
+| TH-56 | Denial of service | None. |
 | TH-49 | Elevation of privilege | A value written as a formula, which a spreadsheet would run when a view saved from the file is opened. |
 | TH-50 | Elevation of privilege | A value written as markup or as Markdown's own syntax, which a viewer would render as a link, an image loaded from an outside address, or a structure, when a view saved from the file is shown. |
 | TH-51 | Elevation of privilege | A diagram saved beside a specification and opened on its own, where it is a document rather than an image. |
@@ -296,16 +302,16 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 | SC-11 | A compromised editor escapes the frame. | TA-04 | TH-24 | Low | High | Medium | CT-09, CT-10 |
 | SC-12 | A network attacker alters the software in transit. | TA-07 | TH-37 | Low | High | Medium | CT-24 |
 | SC-13 | Another site frames, messages or links into the software. | TA-05 | TH-19, TH-36 | High | Low | Medium | CT-10, CT-17, CT-19, CT-24 |
-| SC-14 | A person at the machine reads the stored project. | TA-06 | TH-28 | Medium | High | High | CT-23 |
+| SC-14 | A person at the machine reads the stored project. | TA-06 | TH-28 | Low | High | Medium | CT-23 |
 | SC-15 | A hostile commit reaches the origin. | TA-08 | TH-07, TH-08, TH-43, TH-44, TH-48 | Low | High | Medium | CT-30, CT-31, CT-33, CT-34 |
 | SC-16 | The host puts code on the origin. | TA-08 | TH-31, TH-32, TH-38, TH-42 | Low | High | Medium | CT-25, CT-29, CT-30, CT-31 |
 | SC-17 | A file carries consent, or another editor origin. | TA-01 | TH-06, TH-22 | High | Medium | High | CT-01, CT-02, CT-03, CT-09, CT-11, CT-13, CT-15, CT-18 |
 | SC-18 | A tampered stored project restores holding content under choices not in force. | TA-06 | TH-26, TH-30 | Low | Low | Low | CT-20, CT-21 |
 | SC-19 | A file someone else wrote is opened, a view is saved from it, and the saved file runs a formula, loads from an outside address, becomes a link, or navigates away when opened. | TA-01 | TH-49, TH-50, TH-51 | Medium | High | High | CT-07, CT-35, CT-36 |
-| SC-20 | Proposed. The browser refuses to store the project, and unsaved work is lost with the tab. | TA-06 | TH-29 | Medium | Medium | Medium | CT-22 |
-| SC-21 | Proposed. A user works on a preview address of the host and stores a project there unknowingly. | TA-08 | TH-34 | Low | Medium | Low | None |
-| SC-22 | Proposed. The host observes who uses the software, from requests, addresses and user agents. | TA-08 | TH-40 | High | Low | Medium | CT-16 |
-| SC-23 | Proposed. A broken release or an outage stops the software for every new session. | TA-08 | TH-41, TH-47 | Low | Low | Low | CT-30 |
+| SC-20 | The browser refuses to store the project, and unsaved work is lost with the tab. | None | TH-29 | Medium | Medium | Medium | CT-22 |
+| SC-21 | A user works on a preview address of the host and stores a project there unknowingly. | TA-08 | TH-34 | Low | Medium | Low | None |
+| SC-22 | The host observes who uses the software, from requests, addresses and user agents. | TA-09 | TH-40 | High | Low | Medium | CT-16 |
+| SC-23 | A broken release or an outage stops the software for every new session. | TA-09 | TH-41, TH-47 | Low | Low | Low | CT-30 |
 
 ## 6. Controls
 
@@ -326,21 +332,21 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 | CT-13 | The consent shall name the service, its origin and the data handed over before the editor loads, and a choice not to be asked shall last the session alone and be withdrawable. | [N-PRV-005](../specs/requirements.md#n-prv-005-consent-to-hand-over-data), [N-PRV-006](../specs/requirements.md#n-prv-006-consent-scope) | `drawing-editor.js` `consent`, `store.js` `setConsented`, `about.js` `showAbout` | [test-store.js](../tests/test-store.js), A drive | Partly |
 | CT-14 | The editor shall have a bounded time to become ready and to return the drawing, after which the session ends with the project unchanged. | [N-OPS-003](../specs/requirements.md#n-ops-003-fetch-failure) | `drawing-editor.js` `createSession` | [test-drawing-editor.js](../tests/test-drawing-editor.js) | Tested |
 | CT-15 | The page shall declare its content security policy before anything loads, allowing scripts, styles and fonts from its origin alone and connections to none. | [N-SEC-006](../specs/requirements.md#n-sec-006-content-security-policy) | `index.html` | [test-pins.js](../tests/test-pins.js) | Tested |
-| CT-16 | The software shall make no request but for its own files, and shall open no socket and send no beacon. | [N-PRV-002](../specs/requirements.md#n-prv-002-no-data-transmission), [N-OPS-002](../specs/requirements.md#n-ops-002-self-contained), [C-TEC-002](../specs/requirements.md#c-tec-002-no-dependencies) | Every module | [test-pins.js](../tests/test-pins.js), A drive | Partly |
-| CT-17 | The software shall read nothing from the page's address. | [N-SEC-010](../specs/requirements.md#n-sec-010-no-input-from-the-address) | Every module | [test-pins.js](../tests/test-pins.js) | Tested |
+| CT-16 | The software shall make no request but for its own files, and shall open no socket and send no beacon. | [N-PRV-002](../specs/requirements.md#n-prv-002-no-data-transmission), [N-OPS-002](../specs/requirements.md#n-ops-002-self-contained), [C-TEC-002](../specs/requirements.md#c-tec-002-no-dependencies) | Every module, held by the pin in `test-pins.js` | [test-pins.js](../tests/test-pins.js), A drive | Partly |
+| CT-17 | The software shall read nothing from the page's address. | [N-SEC-010](../specs/requirements.md#n-sec-010-no-input-from-the-address) | Every module, held by the pin in `test-pins.js` | [test-pins.js](../tests/test-pins.js) | Tested |
 | CT-18 | A value shall become a link only for an http or https address, and shall open without an opener. | [N-SEC-008](../specs/requirements.md#n-sec-008-hyperlink-presentation) | `fields.js` `linkable`, `editor.js` `valueNode` | [test-editor.js](../tests/test-editor.js) | Tested |
 | CT-19 | Every link the software draws shall open without an opener. | [N-PRV-002](../specs/requirements.md#n-prv-002-no-data-transmission), [N-OPS-002](../specs/requirements.md#n-ops-002-self-contained) | `shell.js` `openLink`, `about.js` `showAbout`, `flows.js` `openMetamodel`, `index.html` | [test-pins.js](../tests/test-pins.js), A drive | Partly |
 | CT-20 | A value read from browser storage shall be accepted only as a literal of the type expected. | [N-CMP-002](../specs/requirements.md#n-cmp-002-browser-support) | `theme.js`, `store.js` `createStore` and `sessionRead` | [test-pins.js](../tests/test-pins.js), [test-store.js](../tests/test-store.js), A drive | Partly |
 | CT-21 | The stored project shall pass the same gates as a file, and one that fails shall be set aside and stated. | [F-SES-001](../specs/requirements.md#f-ses-001-working-state), [F-SES-004](../specs/requirements.md#f-ses-004-restoration-failure) | `store.js` `restore` and `install` | [test-files.js](../tests/test-files.js), [test-store.js](../tests/test-store.js), [test-flows.js](../tests/test-flows.js), A drive | Partly |
 | CT-22 | A refused write shall be stated, the leave prompt shall fire while unsaved work is not stored, and a nearly full store shall be stated. | [F-SES-005](../specs/requirements.md#f-ses-005-persistence-failure), [F-SES-006](../specs/requirements.md#f-ses-006-storage-nearly-full) | `store.js` `persist` and `checkQuota`, `shell.js` `render` | [test-shell.js](../tests/test-shell.js), [test-store.js](../tests/test-store.js) | Tested |
 | CT-23 | Clearing stored data shall remove everything the software keeps in the browser. | [F-SES-003](../specs/requirements.md#f-ses-003-browser-removal) | `store.js` `clearBrowserData`, `flows.js` `clearBrowserData` | [test-flows.js](../tests/test-flows.js), [test-store.js](../tests/test-store.js), A drive | Partly |
-| CT-24 | The host shall send headers that forbid framing, require HTTPS and forbid content sniffing. | [N-SEC-007](../specs/requirements.md#n-sec-007-framing) | `app/_headers` | [test-pins.js](../tests/test-pins.js), a review of both hosts at v1.0.0-beta.1 | Partly |
+| CT-24 | The host shall send headers that forbid framing, require HTTPS and forbid content sniffing. | [N-SEC-007](../specs/requirements.md#n-sec-007-framing) | `app/_headers` | [test-pins.js](../tests/test-pins.js), a review of both hosts at v1.0.0-beta.2 | Partly |
 | CT-25 | The software shall be static files of the web platform, run by the browser from source, with no server-side code. | [C-TEC-001](../specs/requirements.md#c-tec-001-technology-stack), [C-TEC-004](../specs/requirements.md#c-tec-004-javascript-modules), [C-TEC-007](../specs/requirements.md#c-tec-007-no-server-side-code) | The files under `app/`, `index.html` | [test-pins.js](../tests/test-pins.js), A review | Partly |
 | CT-26 | Retired. The tree shall act only on a drag it started itself. |  | `navigator.js` `renderRow` and `render` |  |  |
 | CT-27 | Retired. A saved file's name shall hold letters, digits and dashes only. |  | `files.js` `filenameFor` |  |  |
 | CT-28 | Nothing shall change the model while a drawing is open in the editor. | [F-DRW-003](../specs/requirements.md#f-drw-003-external-drawing-editor) | `actions.js` `createActions` | [test-actions.js](../tests/test-actions.js), [test-drawing-editor.js](../tests/test-drawing-editor.js), A drive | Partly |
-| CT-29 | The host shall serve each file as the released commit holds it, with no feature that rewrites or injects, verified at each release. | [C-DEV-007](../specs/requirements.md#c-dev-007-deployment-integrity) | The host's settings | A review of every served file against the commit at v1.0.0-beta.1 | Manual |
-| CT-30 | A commit shall reach main only after the test suite passes and the page opens with a clean console. | [C-DEV-006](../specs/requirements.md#c-dev-006-release-verification) | The release process | The release check at v1.0.0-beta.1 | Manual |
+| CT-29 | The host shall serve each file as the released commit holds it, with no feature that rewrites or injects, verified at each release. | [C-DEV-007](../specs/requirements.md#c-dev-007-deployment-integrity) | The host's settings | A review of every served file against the commit at v1.0.0-beta.2, 152 files identical | Manual |
+| CT-30 | A commit shall reach main only after the test suite passes and the page opens with a clean console. | [C-DEV-006](../specs/requirements.md#c-dev-006-release-verification) | The release process | The release check at v1.0.0-beta.2 | Manual |
 | CT-31 | Every change shall be reviewed by the maintainer before it enters the repository. |  | The repository's working rules |  |  |
 | CT-32 | Vulnerabilities shall be reportable privately, with the scope, the accepted risks, how to test and a response aim published where tools look. | [C-PRJ-006](../specs/requirements.md#c-prj-006-vulnerability-reporting) | `SECURITY.md`, `.well-known/security.txt` on both origins, the repository's settings | [test-pins.js](../tests/test-pins.js), A review | Partly |
 | CT-33 | Every third-party asset shall be recorded with its source, version and licence. | [C-TEC-005](../specs/requirements.md#c-tec-005-third-party-assets) | `app/assets/*/ORIGIN.md` | [test-pins.js](../tests/test-pins.js), A review | Partly |
@@ -356,8 +362,8 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 | SC-01 | Blocked | None found. | Closed | CT-01, CT-02 | A text reaches the page by any way but `textContent`, or a value is evaluated. |
 | SC-02 | Blocked | None found. Inside the software a drawing is shown only as an image, which runs nothing and loads nothing whatever the check missed. | Closed | CT-07, CT-08 | A drawing is shown by any way but an image element. |
 | SC-03 | Blocked | None found. | Closed | CT-18 | A link the software draws follows a scheme other than http, https or mailto. |
-| SC-04 | Mitigated | A file of hundreds of megabytes can freeze or crash the tab of the person who opens it, since nothing limits a file's size before it is read. | Accepted | Nothing runs and nothing leaves the device. The stored project is replaced only once a file opens cleanly, so a reload restores it. Only the person who chooses to open the file is affected. | A file of ordinary size, under a few megabytes, freezes the tab. |
-| SC-05 | Blocked | None found. | Closed | CT-02, CT-03 | The validator accepts a key it does not know, or a prototype key. |
+| SC-04 | Mitigated | A valid file of a few thousand chained entities, under a megabyte, freezes the tab for seconds to minutes on opening and on every restore, since the replay of its relationships costs the cube of the chain. Found by the review of 5 October 2026 [11]. | Open | An owner index on the model, or a replay that skips the check the validator made, so a chain of ten thousand opens in under a second. Nothing runs and nothing leaves the device meanwhile, and only the person who opens the file is affected. | A file of ordinary size freezes the tab. |
+| SC-05 | Blocked | None found. | Closed | CT-02, CT-03 | A prototype key reaches a prototype. |
 | SC-06 | Mitigated | Unknown content is kept and stated, as F-PER-010 requires. | Accepted | Deleting content the software does not know would destroy what a newer revision wrote. F-PER-010 keeps it and states it on opening. | A newer revision writes content an older one would delete. |
 | SC-07 | Open | A file carries no author, signature or history. | Accepted | A project file is a document like any other. Proving who wrote it needs keys and identities a local tool does not hold, so the reader decides whom to trust (TR-06). | The software gains an identity to sign with, or a user is harmed by a file passed off as another's. |
 | SC-08 | Mitigated | One drawing per edit is exposed to the editor's origin. | Accepted | Only the drawing being edited is handed over, and only after a consent that names the service (N-PRV-005). | The editor receives more than the one drawing, or the consent stops naming the service. |
@@ -371,11 +377,11 @@ The status is whether what remains of the scenario is acceptable, with a ground 
 | SC-16 | Open | A setting changed later, or the host itself, adds code to the origin. | Accepted | The settings were read at the release and the served files matched the commit (CT-29). The release check reads them again at every release. | A served file differs from the commit at a release check, or the host gains a setting that injects. |
 | SC-17 | Blocked | None found. | Closed | CT-13 | The software reads a consent or an editor origin from a file. |
 | SC-18 | Open | Content under choices not in force can reach a saved file through a stored project someone altered. | Accepted | Only someone who alters the browser's storage reaches it, and they could alter the project directly. | A stored project is restored without the gates, or clearing on opening a file stops. |
-| SC-19 | Mitigated | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone. | Accepted | The check refuses any address in any attribute or stylesheet that is not local or data, and every attribute that names something to load. Opened on its own in Chrome, no diagram of a set of 54 hostile ones that the check accepts made a request to an outside address, and each case the set found is tested. The example's diagrams and the editor's own export pass the check. No script can run in a diagram the check accepts, so what a missed case could do is a request that tells a server the file was opened. Inside the software the image rendering still guards every drawing. | A diagram the check accepts makes a request to an outside address when opened on its own. |
-| SC-20 | Mitigated | Unsaved work since the last successful write, when the browser refuses writes. | To judge | The refusal is stated, the leave prompt fires while work is not stored, and a nearly full store is stated (F-SES-005, F-SES-006). | A refused write goes unstated, or the leave prompt stays silent while work is unstored. |
-| SC-21 | Open | A project stored on a preview origin the user did not choose. | To judge | Preview deployments are off in the host's settings, and nothing requires that. See chapter 6. | A preview deployment appears. |
-| SC-22 | Mitigated | The host sees requests, addresses and user agents, and may receive network error reports. | To judge | The software sends nothing but its own requests, and no project content leaves the browser (N-PRV-002). What the host logs is the host's (TR-03). | The software makes a request that carries project content, or a beacon appears in the page. |
-| SC-23 | Mitigated | New sessions cannot load while the host is down or main is broken. | To judge | A session already loaded runs from what the browser holds, and a merge to main follows a passed check (C-DEV-006). | A broken commit reaches main past the check. |
+| SC-19 | Mitigated | A diagram saved beside a specification is a document when opened on its own, held by the drawing check alone, and a link in it navigates the viewer on a click. A saved Markdown document lets a bare address become a link in GitHub's renderer, and a lone carriage return or a line break in a title open a structure. Found by the reviews of 5 and 6 October 2026 [11][12]. | Open | The Markdown writer escaping what GitHub autolinks and treating every line break alike, and the drawing check refusing every data scheme on a link. The drawing check otherwise holds against a set of 54 hostile diagrams opened in Chrome, and no script can run in a diagram it accepts. | A diagram the check accepts makes a request to an outside address when opened on its own, or a value becomes a link, an image or a structure in a renderer the escapes do not reach. |
+| SC-20 | Mitigated | Unsaved work since the last successful write, when the browser refuses writes. | Open | A rating to confirm, and whether the unsaved work the leave prompt guards is enough. | A refused write goes unstated, or the leave prompt stays silent while work is unstored. |
+| SC-21 | Open | A project stored on a preview origin the user did not choose. | Open | A rating to confirm. Preview deployments are off in the host's settings, and nothing requires that. See chapter 6. | A preview deployment appears. |
+| SC-22 | Mitigated | The host sees requests, addresses and user agents, and may receive network error reports. | Open | A rating to confirm. The software makes no request but its own, and what the host logs is the host's (TR-03). | The software makes a request that carries project content, or a beacon appears in the page. |
+| SC-23 | Mitigated | New sessions cannot load while the host is down or main is broken. | Open | A rating to confirm. A session already loaded runs from what the browser holds, and a merge follows the release check. | A broken commit reaches main past the check. |
 
 ## 8. Maintenance
 
@@ -398,7 +404,7 @@ The model stays true in two ways. The first is with each commit, where a change 
 
 | No. | Reference | Link |
 |---|---|---|
-| [1] | Microsoft, The STRIDE Threat Model | https://learn.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20) |
+| [1] | Microsoft, Threat Modeling | https://www.microsoft.com/en-us/securityengineering/sdl/threatmodeling |
 | [2] | openconformity, Requirements | ../specs/requirements.md |
 | [3] | openconformity, Verification | verification.md |
 | [4] | openconformity, Security audit of September 2026 | ../reviews/2026-09-27-security.md |
@@ -408,3 +414,5 @@ The model stays true in two ways. The first is with each commit, where a change 
 | [8] | draw.io, Embed mode | https://www.drawio.com/doc/faq/embed-mode |
 | [9] | Cloudflare Pages, Headers | https://developers.cloudflare.com/pages/configuration/headers/ |
 | [10] | MDN, State Partitioning | https://developer.mozilla.org/en-US/docs/Web/Privacy/Guides/State_Partitioning |
+| [11] | openconformity, Security review of 5 October 2026 | ../reviews/2026-10-05-security.md |
+| [12] | openconformity, Security review of 6 October 2026 | ../reviews/2026-10-06-security.md |
