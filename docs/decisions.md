@@ -983,6 +983,16 @@ A folder in a catalogue is picked like an entity, with everything in it, and a p
 
 ---
 
+### D-115 The security model as a forward process
+
+`2026-10-06` `documentation`
+
+The security model in `docs/security.md` reads forward in one process. Scope and system describe and judge nothing. Threats are identification, one section per boundary. A scenario is rated before the controls act and names the controls it demands. A control is stated as a requirement would be and names the requirement that holds it, where it is implemented, and what verifies it. A control with no requirement is a gap, and the control is the proposal. The evaluation holds each scenario against its controls. Each link is written once and points forward, and the model is read again at every release.
+
+> *The model had described what the software does, and its links between threats, scenarios, controls and requirements were written in three places and had drifted apart, so a control could stand against a threat no scenario tracked. Stating controls as what shall hold turns the model from a record of the code into the analysis that feeds the specification, which is the loop a living model needs. A scenario is the unit that is rated and evaluated, so it is the unit a control answers. The method mirrors the hazard analysis the project's own domain uses, identification, analysis, requirements and evaluation.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.
