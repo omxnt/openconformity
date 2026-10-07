@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Open-source tool for CE marking of machinery | openconformity</title>
 <meta name="description" content="A free, open-source, browser-based tool for CE marking of machinery under the Machinery Regulation (EU) 2023/1230.">
@@ -17,28 +18,20 @@
 <meta property="og:image" content="https://openconformity.org/assets/images/app-light.png">
 
 <!-- The theme is set before the stylesheet loads, so the first paint is
-     already in the right one. Stored choice first, system preference else.
-     The key is the software's, so a visitor who has chosen a theme in the
-     tool arrives here in it. -->
-<script>
-  document.documentElement.dataset.theme = (function () {
-    try {
-      var stored = localStorage.getItem('openconformity.theme');
-      if (stored === 'light' || stored === 'dark') return stored;
-    } catch (error) { /* Storage can be unavailable; fall through. */ }
-    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  })();
-</script>
+     already in the right one: theme.js, a file rather than an inline
+     script, so the content security policy can allow the site's own
+     scripts and nothing else. -->
+<script src="theme.js"></script>
 
 <link rel="preload" href="assets/fonts/IBMPlexSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/IBMPlexSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
-<script type="module" src="theme.js"></script>
+<script type="module" src="toggle.js"></script>
 </head>
 <body>
 
 <!-- IBM Carbon icons, Apache-2.0. See assets/icons/ORIGIN.md. -->
-<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+<svg width="0" height="0" aria-hidden="true" focusable="false" class="sprite">
   <defs>
     <symbol id="i-scales" viewBox="0 0 32 32"><path d="M20,16a5,5,0,0,0,10,0,1,1,0,0,0-.1055-.4473L25.896,7.5562a.8913.8913,0,0,0-.0454-.0816A1,1,0,0,0,25,7H18.8218A3.0155,3.0155,0,0,0,17,5.1841V2H15V5.1841A3.0155,3.0155,0,0,0,13.1782,7H7a1,1,0,0,0-.8945.5527l-4,8A1,1,0,0,0,2,16a5,5,0,0,0,10,0,1,1,0,0,0-.1055-.4473L8.6182,9h4.56A3.0147,3.0147,0,0,0,15,10.8154V28H6v2H26V28H17V10.8159A3.0155,3.0155,0,0,0,18.8218,9h4.56l-3.2763,6.5527A1,1,0,0,0,20,16ZM7,19a2.9958,2.9958,0,0,1-2.8152-2h5.63A2.9956,2.9956,0,0,1,7,19Zm2.3821-4H4.6179L7,10.2363ZM16,9a1,1,0,1,1,1-1A1.0009,1.0009,0,0,1,16,9Zm9,10a2.9958,2.9958,0,0,1-2.8152-2h5.63A2.9956,2.9956,0,0,1,25,19Zm0-8.7637L27.3821,15H22.6179Z"/></symbol>  <!-- scales -->
     <symbol id="i-security" viewBox="0 0 32 32"><path d="M14 16.59 11.41 14 10 15.41 14 19.41 22 11.41 20.59 10 14 16.59z"/><path d="M16,30,9.8242,26.7071A10.9818,10.9818,0,0,1,4,17V4A2.0021,2.0021,0,0,1,6,2H26a2.0021,2.0021,0,0,1,2,2V17a10.9818,10.9818,0,0,1-5.8242,9.7071ZM6,4V17a8.9852,8.9852,0,0,0,4.7656,7.9423L16,27.7333l5.2344-2.791A8.9852,8.9852,0,0,0,26,17V4Z"/></symbol>  <!-- security -->
@@ -102,7 +95,7 @@
 
       <!-- The shot follows the theme. The source's own query answers for the
            system setting, which is also what the page falls back to when no
-           choice has been stored; once the toggle owns the theme, theme.js
+           choice has been stored; once the toggle owns the theme, toggle.js
            forces that query to match always or never. Only one of the two
            files is ever fetched, which is why this is a picture rather than
            two images taking turns at being hidden. -->

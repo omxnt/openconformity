@@ -294,7 +294,7 @@ export function createEditor({
     }
     if (definition.kind === 'hyperlink' && linkable(value)) {
       const address = value.trim();
-      return el('div', { className: 'cell-value' }, [el('a', { text: address, attributes: { href: address, target: '_blank', rel: 'noopener' } })]);
+      return el('div', { className: 'cell-value' }, [el('a', { text: address, attributes: { href: address, target: '_blank', rel: 'noopener noreferrer' } })]);
     }
     return el('div', { className: definition.kind === 'multiline' ? 'cell-value prose' : 'cell-value', text: value });
   }

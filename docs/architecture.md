@@ -21,12 +21,13 @@ This document describes how the software in `app/` is built. It names the princi
 | Path | What it is |
 |---|---|
 | `index.html` | The page, its policy, the icon sprite and the empty regions the panes fill |
+| `404.html` | The not-found page the host serves for an unknown path |
 | `theme.js` | The theme set before the first paint, a classic script by necessity |
 | `style.css` | The one stylesheet, Carbon's tokens copied in by value with each token's name beside it |
 | `modules/` | The modules, one file each |
 | `library/` | The library the software ships, as data and the catalogues cut from it |
 | `assets/` | Fonts, icons, marks and images, each folder with its origin and licence |
-| `_headers` | The response headers the host sends |
+| `_headers` | The response headers the host sends, the policy among them |
 | `.well-known/security.txt` | Where to report a vulnerability, in the form security tools read |
 | `LICENSE.txt` | The software's licence, served beside it |
 

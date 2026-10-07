@@ -25,7 +25,7 @@ import { VERSION, PHASE } from './version.js';
  */
 export async function showAbout(dialogs, store = null) {
   /** A link leaving the page, wearing the launch glyph as the Help menu's do. */
-  const link = (href, text) => el('a', { attributes: { href, target: '_blank', rel: 'noopener' } }, [el('span', { text }), icon('i-launch')]);
+  const link = (href, text) => el('a', { attributes: { href, target: '_blank', rel: 'noopener noreferrer' } }, [el('span', { text }), icon('i-launch')]);
   const text = (held) => document.createTextNode(held);
   const cell = (parts) => el('td', {}, typeof parts === 'string' ? [text(parts)] : parts);
   /** An accordion item, closed at first: a heading with the chevron over its rows of three cells, a name, what it is, and a link or a control at the end. */

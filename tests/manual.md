@@ -41,7 +41,7 @@ The drives and the reviews that verify a requirement where no test can. Each row
 | V-ANA-026 | Review | The files of the repository | The store writes to IndexedDB, web storage, session storage and downloaded files only | N-PRV-004 |
 | V-DEM-010 | Drive | The software in a browser | The tab chosen per type: the session's. Create a drawing and find the dialog naming the origin and the diagram | N-PRV-005 |
 | V-DEM-011 | Drive | The software in a browser | The tab chosen per type: the session's. Tick the box, open About, press Forget, and find the dialog on the next edit | N-PRV-006 |
-| V-ANA-027 | Review | The host's dashboard and its responses | The host is told to refuse framing. The page from the host carries the header. A page on another origin that frames the software is refused by the browser | N-SEC-007 |
+| V-ANA-027 | Review | The host's dashboard and its responses | The responses from both hosts carry every header of the headers file, the policy, transport security, no sniffing, no referrer, no opener and no device feature, and an unknown path answers not found. A page on another origin that frames the software is refused by the browser | N-SEC-006, N-SEC-007 |
 | V-ANA-028 | Review | The host's dashboard and its responses | Pane headers are landmarks. Pointer targets. Text carries AA contrast in both themes. The other criteria of WCAG 2.2 AA need an audit in the browser with a screen reader | N-ACC-001 |
 | V-ANA-029 | Review | The files of the repository | One distinct glyph per entity type. Each entity type's icon in the sprite is a distinct shape | N-ACC-002 |
 | V-DEM-012 | Drive | The software in a browser | Walk every row of `docs/shortcuts.md` with the pointer unused | N-ACC-003 |

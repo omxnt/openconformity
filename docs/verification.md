@@ -248,7 +248,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-INS-008 | Pin | [test-pins.js](../tests/test-pins.js) | Only the model changes filing, so its children index stays true |
 | V-INS-009 | Pin | [test-pins.js](../tests/test-pins.js) | A view leaves the software as a saved file, never as a print |
 | V-INS-010 | Pin | [test-pins.js](../tests/test-pins.js) | The way to report a vulnerability is published where tools look |
-| V-INS-011 | Pin | [test-pins.js](../tests/test-pins.js) | The host is told to refuse framing |
+| V-INS-011 | Pin | [test-pins.js](../tests/test-pins.js) | The host sends the policy and the headers the page cannot |
 | V-INS-012 | Pin | [test-pins.js](../tests/test-pins.js) | The software is static files of the web platform |
 | V-INS-013 | Pin | [test-pins.js](../tests/test-pins.js) | The file surface stays on the baseline |
 | V-INS-014 | Pin | [test-pins.js](../tests/test-pins.js) | The shipped data opens without a question |
@@ -312,7 +312,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-ANA-024 | Review | The files of the repository | Every module runs in the page, and the pins of N-PRV-002 rule out sending |
 | V-ANA-025 | Review | The files of the repository | No module counts, records or reports use |
 | V-ANA-026 | Review | The files of the repository | The store writes to IndexedDB, web storage, session storage and downloaded files only |
-| V-ANA-027 | Review | The host's dashboard and its responses | The host is told to refuse framing. The page from the host carries the header. A page on another origin that frames the software is refused by the browser |
+| V-ANA-027 | Review | The host's dashboard and its responses | The responses from both hosts carry every header of the headers file, the policy, transport security, no sniffing, no referrer, no opener and no device feature, and an unknown path answers not found. A page on another origin that frames the software is refused by the browser |
 | V-ANA-028 | Review | The host's dashboard and its responses | Pane headers are landmarks. Pointer targets. Text carries AA contrast in both themes. The other criteria of WCAG 2.2 AA need an audit in the browser with a screen reader |
 | V-ANA-029 | Review | The files of the repository | One distinct glyph per entity type. Each entity type's icon in the sprite is a distinct shape |
 
@@ -430,7 +430,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-INS-006 | Tested |
 | N-SEC-004 | External application isolation | V-TST-016, V-TST-017, V-INS-003 | Tested |
 | N-SEC-005 | No hidden content | V-TST-027, V-TST-031, V-TST-048, V-TST-055, V-TST-056, V-TST-057, V-TST-083, V-INS-014, V-TST-098, V-TST-099 | Tested |
-| N-SEC-006 | Content security policy | V-INS-001 | Tested |
+| N-SEC-006 | Content security policy | V-INS-001, V-INS-011, V-ANA-027 | Partly |
 | N-SEC-007 | Framing | V-INS-011, V-ANA-027 | Partly |
 | N-SEC-008 | Hyperlink presentation | V-TST-025 | Tested |
 | N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059, V-TST-175, V-TST-177 | Tested |
@@ -451,8 +451,8 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
 | Functional | 47 | 36 | 6 | 2 | 3 |
-| Non-functional | 26 | 13 | 9 | 4 | 0 |
-| All | 104 | 58 | 20 | 23 | 3 |
+| Non-functional | 26 | 12 | 10 | 4 | 0 |
+| All | 104 | 57 | 21 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

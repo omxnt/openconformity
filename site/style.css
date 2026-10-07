@@ -619,3 +619,5 @@ footer :focus-visible { outline-color: var(--shell-focus); }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+
+.sprite { position: absolute; }

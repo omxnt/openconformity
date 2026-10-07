@@ -1718,6 +1718,12 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .small-viewport-panel p { color: var(--text-second); }
 .wordmark-page { color: var(--text); height: 16px; }
 
+/* The not-found page, served by the host for an unknown path. */
+.not-found { display: flex; align-items: center; justify-content: center; min-height: 100%; padding: 32px; background: var(--background); }
+.not-found-panel { max-width: 420px; display: grid; gap: 16px; justify-items: start; }
+.not-found-panel h1 { font-size: 20px; line-height: 1.4; font-weight: 400; }
+.not-found-panel a { color: var(--link); }
+
 /* ---------- Views ---------- */
 
 /* A view takes the workspace: the panes and their splitters step aside

@@ -49,10 +49,14 @@ const sheet = readFile('../app/style.css');
 
 // --- V-INS-001 The page states its content security policy first (N-SEC-001, N-SEC-002, N-SEC-006, N-OPS-002) ---
 
+const POLICY = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src https://embed.diagrams.net; object-src 'none'; base-uri 'none'; form-action 'none'; require-trusted-types-for 'script'; trusted-types 'none'";
+
 {
-  ok(page.includes(`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src https://embed.diagrams.net; object-src 'none'; base-uri 'none'; form-action 'none'">`), 'the policy allows the software its own scripts, styles and fonts, images as data, one frame origin, and no connection, object, base or form');
+  ok(page.includes(`<meta http-equiv="Content-Security-Policy" content="${POLICY}">`), 'the page allows its own scripts, styles and fonts, images from itself and data, the editor frame alone, and no connection, object, base or form, and requires trusted types so an HTML sink throws');
   ok(page.indexOf('Content-Security-Policy') < page.indexOf('<script') && page.indexOf('Content-Security-Policy') < page.indexOf('<link'), 'stated before anything loads');
   ok(!/<script(?![^>]*\ssrc=)/.test(page) && !/\sstyle="/.test(page) && page.includes('<script src="theme.js"></script>'), 'no inline script or style stands on the page, the theme being a file');
+  const notFound = readFile('../app/404.html');
+  ok(notFound.includes(`<meta http-equiv="Content-Security-Policy" content="${POLICY}">`) && !/<script(?![^>]*\ssrc=)/.test(notFound) && !/\sstyle="/.test(notFound), 'the not-found page states the same policy and holds no inline script or style');
 }
 
 // --- V-INS-002 No module builds or parses markup from text (N-SEC-001, N-SEC-002) ---
@@ -151,19 +155,33 @@ const sheet = readFile('../app/style.css');
   }
 }
 
-// --- V-INS-011 The host is told to refuse framing (N-SEC-007) ----------------
+// --- V-INS-011 The host sends the policy and the headers the page cannot (N-SEC-006, N-SEC-007) ---
 
 {
-  const headers = readFile('../app/_headers').split('\n');
-  ok(headers[0] === '/*' && headers.includes("  Content-Security-Policy: frame-ancestors 'none'"), 'every path carries the header that forbids framing on another origin');
-  ok(headers.includes('  Strict-Transport-Security: max-age=15552000; includeSubDomains') && headers.includes('  X-Content-Type-Options: nosniff'), 'with transport security and no type sniffing');
+  const expected = (policy) => [
+    '/*',
+    `  Content-Security-Policy: ${policy}; frame-ancestors 'none'`,
+    '  Strict-Transport-Security: max-age=15552000; includeSubDomains',
+    '  X-Content-Type-Options: nosniff',
+    '  Referrer-Policy: no-referrer',
+    '  Cross-Origin-Opener-Policy: same-origin',
+    "  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()",
+  ];
+  deepEqual(readFile('../app/_headers').trimEnd().split('\n'), expected(POLICY), 'every path of the software carries the page policy with framing forbidden, transport security for 180 days without preload, no type sniffing, no referrer, no opener and no device feature');
+  const sitePage = readFile('../site/index.html');
+  const sitePolicy = /<meta http-equiv="Content-Security-Policy" content="([^"]*)">/.exec(sitePage)?.[1];
+  ok(typeof sitePolicy === 'string' && sitePolicy.includes("frame-src 'none'") && sitePolicy.includes("trusted-types 'none'"), 'the site states a policy of its own that frames nothing');
+  deepEqual(readFile('../site/_headers').trimEnd().split('\n'), expected(sitePolicy), 'and its host sends the same headers around it');
+  ok(!/<script(?![^>]*\ssrc=)/.test(sitePage) && !/\sstyle="/.test(sitePage), 'the site holds no inline script or style either');
+  const anchors = sources.flatMap(([, source]) => [...source.matchAll(/el\('a',[^\n]*target: '_blank'[^\n]*/g)].map((match) => match[0]));
+  ok(anchors.length === 2 && anchors.every((anchor) => anchor.includes("rel: 'noopener noreferrer'")), 'every anchor the software draws to another tab opens without an opener and sends no referrer, host or no host');
 }
 
 // --- V-INS-012 The software is static files of the web platform (C-TEC-001, C-TEC-002, C-TEC-004, C-TEC-007) ---
 
 {
   const files = [...(globalThis.arguments ?? [])];
-  ok(files.includes('index.html') && files.includes('modules/app.js'), `run.sh hands over the ${files.length} files under app/`);
+  ok(files.includes('index.html') && files.includes('404.html') && files.includes('modules/app.js'), `run.sh hands over the ${files.length} files under app/`);
   const kinds = new Set(['html', 'css', 'js', 'svg', 'png', 'woff2', 'txt', 'md']);
   const foreign = files.filter((path) => path !== '_headers' && !kinds.has(path.slice(path.lastIndexOf('.') + 1)));
   ok(foreign.length === 0, `every file is markup, style, script, an image, a font or a text${foreign.length > 0 ? ` (not: ${foreign.join(', ')})` : ''}`);
