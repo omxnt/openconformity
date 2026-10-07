@@ -695,7 +695,9 @@ export function createStore({ storage, session = null, retention = memoryRetenti
 
     /**
      * Select a node, or nothing. An identifier not in the model selects
-     * nothing.
+     * nothing. Every node above the selection opens, and so does the
+     * project row, so the selected row is in the tree whichever pane
+     * chose it.
      * @param {string|null} id
      */
     select(id) {
@@ -704,6 +706,14 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       if (viewReturn !== null && next !== viewReturn.rowId) viewReturn = null;
       if (next === selection) return;
       selection = next;
+      if (next !== null) {
+        projectCollapsed = false;
+        const seen = new Set();
+        for (let held = model.nodes.get(next); held && held.parent !== null && !seen.has(held.parent); held = model.nodes.get(held.parent)) {
+          seen.add(held.parent);
+          expanded.add(held.parent);
+        }
+      }
       persist();
       notify();
     },

@@ -198,6 +198,31 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(rootStore.selection(), null, 'with no surviving ancestor the selection falls to the root');
 }
 
+// --- V-TST-179 Selecting a node opens the tree above it (F-WSP-001, F-SES-001) ---
+
+{
+  const retention = memoryRetention();
+  const store = createStore({ storage: fakeStorage(), retention });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'ELM-001' }));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.setProjectExpanded(false);
+  store.select(null);
+  equal(store.isExpanded('F-1'), false, 'selecting nothing opens nothing');
+  const wasDirty = store.dirty();
+  store.select('ELM-002');
+  ok(store.isExpanded('F-1') && store.isExpanded('ELM-001'), 'selecting a node from any pane opens the folder and the entity above it');
+  equal(store.projectExpanded(), true, 'and the project row');
+  equal(store.isExpanded('ELM-002'), false, 'while the selected node itself stays as it was');
+  equal(store.dirty(), wasDirty, 'and the unsaved state is as it was, since session state never dirties');
+  deepEqual((await blobIn(store, retention)).session.expanded.sort(), ['ELM-001', 'F-1'], 'and the opening persists with the session');
+  store.setExpanded('F-1', false);
+  store.select('HAZ-001');
+  equal(store.isExpanded('F-1'), false, 'a node at the root opens nothing else');
+}
+
 // --- V-TST-133 Session state beside model state (F-SES-001) ------------------
 
 {

@@ -194,6 +194,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-130 | Headless | [test-store.js](../tests/test-store.js) | A fresh session has no project |
 | V-TST-131 | Headless | [test-store.js](../tests/test-store.js) | Commit records, persists and notifies |
 | V-TST-132 | Headless | [test-store.js](../tests/test-store.js) | A burst of changes costs one write |
+| V-TST-179 | Headless | [test-store.js](../tests/test-store.js) | Selecting a node opens the tree above it |
 | V-TST-133 | Headless | [test-store.js](../tests/test-store.js) | Session state beside model state |
 | V-TST-134 | Headless | [test-store.js](../tests/test-store.js) | A theme web storage refuses is no persistence failure |
 | V-TST-135 | Headless | [test-store.js](../tests/test-store.js) | The persistence loop |
@@ -283,6 +284,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-013 | Drive | The software in a browser | The minimum viewport. Work at 1000 by 356 pixels and find every pane usable |
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
 | V-DEM-015 | Drive | The software in a browser | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
+| V-DEM-016 | Drive | The software in a browser | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
 
 ### 2.4 Analyses
 
@@ -367,15 +369,15 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|
 | F-APP-001 | Small-viewport notice | V-INS-021, V-DEM-002 | Partly |
 | F-APP-002 | Direct entry | V-TST-001, V-TST-040, V-INS-018 | Tested |
-| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-DEM-003 | Partly |
+| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-DEM-003 | Partly |
 | F-SES-002 | Model retention | V-TST-037, V-TST-128, V-TST-131, V-TST-132, V-TST-135, V-TST-143, V-DEM-004 | Partly |
 | F-SES-003 | Browser removal | V-TST-060, V-TST-150, V-DEM-005 | Partly |
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
-| F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108 | Tested |
+| F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
-| F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015 | Partly |
+| F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016 | Partly |
 | F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105, V-TST-106 | Tested |
 | F-WSP-005 | Neutral filing | V-TST-014, V-TST-084 | Tested |
 | F-WSP-006 | Folder creation | V-TST-081 | Tested |
@@ -452,9 +454,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 47 | 35 | 7 | 2 | 3 |
+| Functional | 47 | 34 | 8 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 104 | 56 | 22 | 23 | 3 |
+| All | 104 | 55 | 23 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

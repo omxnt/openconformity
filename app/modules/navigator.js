@@ -546,6 +546,8 @@ export function createNavigator({
     if (hadFocus) {
       const again = focusedId === null || moved ? null : container.querySelector(`.tree-row[data-id="${focusedId}"]`);
       (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: moved ? false : true });
+    } else if (moved) {
+      container.querySelector('.tree-row.selected')?.scrollIntoView({ block: 'nearest' });
     }
 
     syncToolbar();
