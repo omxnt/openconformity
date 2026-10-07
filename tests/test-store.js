@@ -40,7 +40,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   return store;
 }
 
-// --- A fresh session has no project (F-SES-001) ------------------------
+// --- V-TST-130 A fresh session has no project (F-SES-001) --------------------
 
 {
   const storage = fakeStorage();
@@ -74,7 +74,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.hasProject(), true, 'skips the landing');
 }
 
-// --- Commit: record, persist, notify (F-MOD-008, F-SES-002) ------------
+// --- V-TST-131 Commit records, persists and notifies (F-MOD-008, F-SES-002) ---
 
 {
   const retention = memoryRetention();
@@ -104,7 +104,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(notified, 1, 'and tells no one');
 }
 
-// --- A burst of changes costs one write (F-SES-002) ----------------------
+// --- V-TST-132 A burst of changes costs one write (F-SES-002) ----------------
 
 {
   const retention = memoryRetention();
@@ -198,7 +198,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(rootStore.selection(), null, 'with no surviving ancestor the selection falls to the root');
 }
 
-// --- Session state beside model state (F-SES-001) ----------------------
+// --- V-TST-133 Session state beside model state (F-SES-001) ------------------
 
 {
   const storage = fakeStorage();
@@ -229,7 +229,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(storage.read(THEME_KEY), null, 'and stores nothing');
 }
 
-// --- A theme web storage refuses is no persistence failure (F-SES-005) ---
+// --- V-TST-134 A theme web storage refuses is no persistence failure (F-SES-005) ---
 
 {
   const storage = fakeStorage();
@@ -240,7 +240,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.persistFailed(), false, 'and does not say the project is not being stored');
 }
 
-// --- The persistence loop (F-SES-001, F-SES-002) -----------------------
+// --- V-TST-135 The persistence loop (F-SES-001, F-SES-002) -------------------
 
 {
   const storage = fakeStorage();
@@ -271,7 +271,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.dirty(), false, 'a clean restore seeds the pointer at the initial entry');
 }
 
-// --- A dirty session restores dirty (F-SES-001) ------------------------
+// --- V-TST-136 A dirty session restores dirty (F-SES-001) --------------------
 
 {
   const retention = memoryRetention();
@@ -287,7 +287,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.dirty(), true, 'a dirty restore seeds the pointer unreachable: no undoing reaches saved');
 }
 
-// --- A blob that fails to load is set aside (F-SES-001, F-SES-004) ----------------
+// --- V-TST-137 A blob that fails to load is set aside (F-SES-001, F-SES-004) ---
 
 {
   const storage = fakeStorage({ [THEME_KEY]: 'g100' });
@@ -310,7 +310,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(retention.records.get('aside'), 'worse', 'and replaces the side copy: it survives until the next failure');
 }
 
-// --- A well-formed blob that fails the gates (F-PER-006, F-SES-001) -----
+// --- V-TST-138 A well-formed blob that fails the gates (F-PER-006, F-SES-001) ---
 
 {
   const blob = { project: { format: 'something-else' }, session: { dirty: true } };
@@ -322,7 +322,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(typeof store.restoration(), 'string', 'the store reports a state, never a file refusal');
 }
 
-// --- A stale selection in the blob (F-SES-001) -------------------------
+// --- V-TST-139 A stale selection in the blob (F-SES-001) ---------------------
 
 {
   const retention = memoryRetention();
@@ -337,7 +337,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.selection(), null, 'a selection no longer in the model restores as nothing');
 }
 
-// --- A blob the previous generation kept in web storage is moved over (F-SES-001) ---
+// --- V-TST-140 A blob the previous generation kept in web storage is moved over (F-SES-001) ---
 
 {
   const donorRetention = memoryRetention();
@@ -490,7 +490,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.picker(), null, 'an undo that removes the subject closes the workflow');
 }
 
-// --- Picker mode is never persisted (F-SES-001) ------------------------
+// --- V-TST-141 Picker mode is never persisted (F-SES-001) --------------------
 
 {
   const retention = memoryRetention();
@@ -565,7 +565,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(second.relationshipView(), 'graph', 'a restored session opens on the default view again');
 }
 
-// --- The open view is session state with a way back (F-SES-001) ---------
+// --- V-TST-142 The open view is session state with a way back (F-SES-001) ----
 
 {
   const storage = fakeStorage();
@@ -615,7 +615,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(session.read('openconformity.open-view'), null, 'and none remembered');
 }
 
-// --- A failing persist (F-SES-002, F-SES-005) -------------------------------------
+// --- V-TST-143 A failing persist (F-SES-002, F-SES-005) ----------------------
 
 {
   const retention = memoryRetention();
@@ -644,7 +644,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(retention.records.get('project').project.entities.length, 3, 'and writes the whole state');
 }
 
-// --- A browser without IndexedDB (N-CMP-002) -------------------------------
+// --- V-TST-144 A browser without IndexedDB (N-CMP-002) -----------------------
 
 {
   const retention = createRetention({ indexedDB: undefined });
@@ -656,7 +656,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(await retention.estimate(), null, 'with no storage manager there is no estimate');
 }
 
-// --- The storage nearly full is told (F-SES-006) ------------------------------
+// --- V-TST-145 The storage nearly full is told (F-SES-006) -------------------
 
 {
   const retention = memoryRetention({ estimate: { usage: 900, quota: 1000 } });
@@ -683,7 +683,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(none.storageNearlyFull(), false, 'nor where the browser gives no estimate');
 }
 
-// --- The project row's expansion is session state (F-SES-001) ------------
+// --- V-TST-146 The project row's expansion is session state (F-SES-001) ------
 
 {
   const retention = memoryRetention();
@@ -719,7 +719,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(held.projectExpanded(), true, 'a blob from before the collapse existed restores open');
 }
 
-// --- The splitter layout is session state (F-SES-001) ------------------------
+// --- V-TST-147 The splitter layout is session state (F-SES-001) --------------
 
 {
   const session = fakeStorage();
@@ -755,7 +755,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.navigatorFilter(), '', 'a replaced project starts unfiltered');
 }
 
-// --- The view survives a reload, never a new session, never the blob (F-SES-001) ---
+// --- V-TST-148 The view survives a reload, never a new session, never the blob (F-SES-001) ---
 
 {
   const storage = fakeStorage();
@@ -777,7 +777,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(none.relationshipView(), 'graph', 'and no session store at all is just the default');
 }
 
-// --- The tab chosen per type: the session's (N-PRV-005, N-PRV-006) ---------
+// --- V-TST-149 The tab chosen per type is the session's (N-PRV-005, N-PRV-006) ---
 
 {
   const storage = fakeStorage();
@@ -828,7 +828,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(createStore({ storage, session, retention }).tabOf('ESR'), null, 'as does one holding the wrong shape');
 }
 
-// --- Clear browser data forgets everything (F-SES-003) ------------
+// --- V-TST-150 Clear browser data forgets everything (F-SES-003) -------------
 
 {
   const storage = fakeStorage({ [ASIDE_KEY]: 'an old failed blob', [PROJECT_KEY]: 'an old blob' });
@@ -859,7 +859,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   ok((await blobIn(store, retention)) !== null, 'and a new project persists again as ever');
 }
 
-// --- The set-aside copy can be read back and discarded (F-SES-004) -------
+// --- V-TST-151 The set-aside copy can be read back and discarded (F-SES-004) ---
 
 {
   const retention = memoryRetention({ initial: { project: { project: { name: 'Old line' }, session: {} } } });

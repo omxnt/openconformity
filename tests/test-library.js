@@ -12,7 +12,7 @@ import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The catalogues the software ships (F-PER-002, F-PER-012) -------------------------
+// --- V-TST-069 The catalogues the software ships (F-PER-002, F-PER-012) ------
 
 deepEqual(LIBRARIES.map((held) => held.name), ['Project structure', 'European legislation', 'System phases'], 'the software ships three catalogues, the root folders of the library project in their order');
 ok(LIBRARIES.every((held) => loadProject(held.project).ok), 'and each passes the gates a project file passes');
@@ -62,7 +62,7 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   deepEqual(libraryRows(shelves, 'mech').map(({ node }) => node.id), [shelf.id, 'HAZ-001'], 'and matches by its name, keeping what it holds');
 }
 
-// --- The picks (F-MOD-010) ------------------------------------------------------
+// --- V-TST-070 The picks (F-MOD-010) -----------------------------------------
 
 {
   const picks = new Set();
@@ -120,7 +120,7 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   equal(checkState(createModel(), held, 'F-9'), 'none', 'a row that is not there is none');
 }
 
-// --- The plan and the copy (F-MOD-010) ----------------------------------------------
+// --- V-TST-071 The plan and the copy (F-MOD-010) -----------------------------
 
 {
   deepEqual(importPlan(library.model, new Set([NEXT_CLAUSE, HEADING, CLAUSE])).map((node) => node.id), [HEADING, CLAUSE, NEXT_CLAUSE], 'the plan is the picks in filing order, whatever the order picked');
@@ -183,7 +183,7 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   equal(nodeOf(shelved, 'ELM-001').parent, 'F-1', 'and the element lands in its copy');
 }
 
-// --- A project structure, folders alone (F-MOD-010) ---------------------------------
+// --- V-TST-072 A project structure, folders alone (F-MOD-010) ----------------
 
 {
   const structure = createModel();

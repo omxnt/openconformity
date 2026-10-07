@@ -35,7 +35,7 @@ function childIds(model, parentId) {
   return childrenOf(model, parentId).map((node) => node.id);
 }
 
-// --- Creation (F-MOD-001) ----------------------------------------------
+// --- V-TST-079 Creation (F-MOD-001) ------------------------------------------
 
 {
   const model = createModel();
@@ -60,7 +60,7 @@ function childIds(model, parentId) {
   equal(filed.entity.parent, 'ELM-001', 'an entity can be created inside another node');
 }
 
-// --- Creation from a file (F-PER-010) ----------------------------------
+// --- V-TST-080 Creation from a file (F-PER-010) ------------------------------
 
 {
   const model = createModel();
@@ -78,7 +78,7 @@ function childIds(model, parentId) {
   refused(addFolder(model, 'Wrong', { id: 'ELM-001' }), 'a folder identifier of another code is refused');
 }
 
-// --- Folders (F-WSP-006) -----------------------------------------------
+// --- V-TST-081 Folders (F-WSP-006) -------------------------------------------
 
 {
   const model = createModel();
@@ -98,7 +98,7 @@ function childIds(model, parentId) {
   refused(renameFolder(model, entity.id, 'X'), 'renaming an entity as a folder is refused');
 }
 
-// --- Updates (F-MOD-004) -----------------------------------------------
+// --- V-TST-082 Updates (F-MOD-004) -------------------------------------------
 
 {
   const model = createModel();
@@ -115,7 +115,7 @@ function childIds(model, parentId) {
   deepEqual(Object.keys(nodeOf(model, 'ELM-001').attributes), [], 'the entity carries only what is set');
 }
 
-// --- Removing keys (N-SEC-005) ----------------------------------------------
+// --- V-TST-083 Removing keys (N-SEC-005) -------------------------------------
 
 {
   const model = createModel();
@@ -125,7 +125,7 @@ function childIds(model, parentId) {
   deepEqual(removeAttributes(model, 'SCN-009', ['title']), { ok: false, reason: 'The entity is not in the project.' }, 'an entity not in the project is refused');
 }
 
-// --- Filing (F-WSP-004, F-WSP-005) -------------------------------------
+// --- V-TST-084 Filing (F-WSP-004, F-WSP-005) ---------------------------------
 
 {
   const model = createModel();
@@ -166,7 +166,7 @@ function childIds(model, parentId) {
   deepEqual(childIds(model, null), [zone.id, b.id], 'a filed node lands last among its new siblings');
 }
 
-// --- Filing stays within the depth a file may hold (F-WSP-004, F-PER-006) ---
+// --- V-TST-085 Filing stays within the depth a file may hold (F-WSP-004, F-PER-006) ---
 
 {
   const model = createModel();
@@ -187,7 +187,7 @@ function childIds(model, parentId) {
   allowed(placeBeside(model, lone, deepest, 'before'), 'a node alone takes the deepest level beside another');
 }
 
-// --- The children index agrees with the node list after every change (F-WSP-001, F-WSP-004) ---
+// --- V-TST-086 The children index agrees with the node list after every change (F-WSP-001, F-WSP-004) ---
 
 {
   /** Whether every parent's children, as the index gives them, are what a full scan finds, in order. */
@@ -233,7 +233,7 @@ function childIds(model, parentId) {
   ok(took < 500, `the children of all twenty thousand nodes are found in ${took} ms`);
 }
 
-// --- Sibling order (F-WSP-004, F-WSP-009) -----------------------------------------
+// --- V-TST-087 Sibling order (F-WSP-004, F-WSP-009) --------------------------
 
 {
   const model = createModel();
@@ -268,7 +268,7 @@ function childIds(model, parentId) {
   equal(did.ok, false, 'placeBeside agrees with canPlaceBeside');
 }
 
-// --- Relationships (F-MOD-002, F-MOD-005) ------------------------------
+// --- V-TST-088 Relationships (F-MOD-002, F-MOD-005) --------------------------
 
 {
   const model = createModel();
@@ -306,7 +306,7 @@ function childIds(model, parentId) {
   allowed(canRelate(model, 'elm-exhibits-haz', elm.id, haz.id), 'and could be created again');
 }
 
-// --- Folder deletion (F-WSP-007) ---------------------------------------
+// --- V-TST-089 Folder deletion (F-WSP-007) -----------------------------------
 
 {
   const model = createModel();

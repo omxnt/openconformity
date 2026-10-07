@@ -34,7 +34,7 @@ function offered(model, subjectId) {
   }));
 }
 
-// --- The offer follows the metamodel and the model (F-MOD-002) ----------
+// --- V-TST-101 The offer follows the metamodel and the model (F-MOD-002) -----
 
 {
   const model = createModel();
@@ -72,7 +72,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- Composition narrows the offer (F-MOD-002) --------------------------
+// --- V-TST-102 Composition narrows the offer (F-MOD-002) ---------------------
 
 {
   const model = createModel();
@@ -116,7 +116,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The full surface (F-MOD-002) --------------------------------------
+// --- V-TST-103 The full surface (F-MOD-002) ----------------------------------
 
 {
   const model = createModel();
@@ -159,7 +159,7 @@ function offered(model, subjectId) {
   equal(designated(nodeOf(model, 'ELM-001')), 'ELM-001', 'a blank title is no title');
 }
 
-// --- The new-related offer (F-MOD-001, F-MOD-002) ----------------------
+// --- V-TST-104 The new-related offer (F-MOD-001, F-MOD-002) ------------------
 
 {
   const model = createModel();
@@ -196,7 +196,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The move predicates (F-WSP-004) -----------------------------------
+// --- V-TST-105 The move predicates (F-WSP-004) -------------------------------
 
 {
   const model = createModel();
@@ -217,7 +217,7 @@ function offered(model, subjectId) {
   equal(canMoveUp(model, null), false, 'nor does no selection');
 }
 
-// --- Every legal destination (F-WSP-004) -------------------------------
+// --- V-TST-106 Every legal destination (F-WSP-004) ---------------------------
 
 {
   const model = createModel();
@@ -250,7 +250,7 @@ function offered(model, subjectId) {
   );
 }
 
-// --- The cascade question counts what it takes (F-MOD-007, F-WSP-007) ---
+// --- V-TST-107 The cascade question counts what it takes (F-MOD-007, F-WSP-007) ---
 
 {
   const model = createModel();
@@ -346,7 +346,7 @@ function offered(model, subjectId) {
   equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
 }
 
-// --- A filter's one rule (F-WSP-001, F-WSP-008) ---------------------------------------
+// --- V-TST-108 A filter's one rule (F-WSP-001, F-WSP-008) --------------------
 
 {
   const entity = { id: 'HAZ-001', kind: 'entity', type: 'HAZ', attributes: { title: 'Moving Parts' } };

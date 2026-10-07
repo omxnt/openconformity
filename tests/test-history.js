@@ -10,7 +10,7 @@ import { createHistory } from '../app/modules/history.js';
 import { createModel, addEntity, updateEntity, relate, nodeOf, setProjectAttribute } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The line (F-MOD-008, F-MOD-009) -----------------------------------
+// --- V-TST-062 The line (F-MOD-008, F-MOD-009) -------------------------------
 
 {
   let model = createModel();
@@ -36,7 +36,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.canRedo(), false, 'and the top is reached again');
 }
 
-// --- Counters outside snapshots (F-MOD-008, F-MOD-009) -----------------
+// --- V-TST-063 Counters outside snapshots (F-MOD-008, F-MOD-009) -------------
 
 {
   let model = createModel();
@@ -56,7 +56,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   deepEqual(Object.keys(model.counters).length, 19, 'every counter rides across undo and redo');
 }
 
-// --- Name and relationships travel with the snapshot (F-MOD-008, F-MOD-009) ---
+// --- V-TST-064 Name and relationships travel with the snapshot (F-MOD-008, F-MOD-009) ---
 
 {
   let model = createModel();
@@ -77,7 +77,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(model.relationships.size, 1, 'intact');
 }
 
-// --- Truncation (F-MOD-008) --------------------------------------------
+// --- V-TST-065 Truncation (F-MOD-008) ----------------------------------------
 
 {
   let model = createModel();
@@ -168,7 +168,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(history.sequence(), seeded, 'and the cursor stands on it');
 }
 
-// --- The entries are nobody else's (F-MOD-008) -------------------------
+// --- V-TST-066 The entries are nobody else's (F-MOD-008) ---------------------
 
 {
   const model = createModel();
@@ -191,7 +191,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(nodeOf(history.undo(again), 'ELM-001').attributes.title, 'Mixer', 'a change made to a restored model does not reach the entry');
 }
 
-// --- Snapshots carry the project's attributes (F-MOD-008, F-MOD-009) ----
+// --- V-TST-067 Snapshots carry the project's attributes (F-MOD-008, F-MOD-009) ---
 
 {
   const model = createModel();

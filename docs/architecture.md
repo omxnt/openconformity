@@ -188,13 +188,14 @@ While the diagram editor is open, every action stands disabled.
 
 ## 7. Tests
 
-| Kind | Where | What it reaches |
-|---|---|---|
-| Headless | `tests/test-*.js`, run by `./run.sh` in the JavaScriptCore shell | The layers below the page, and the flows over a stub page |
-| Pins | `tests/test-pins.js` | Facts read from the source, the page and the file list, such as the policy, the imports and who writes filing |
-| Drives | Outside the repository today | The panes in a real browser, driven by the headless Chrome driver |
+| Method | Technique | Where | What it reaches |
+|---|---|---|---|
+| Test | Headless | `tests/test-*.js`, run by `./run.sh` in the JavaScriptCore shell | The layers below the page, and the flows over a stub page |
+| Inspection | Pin | `tests/test-pins.js` | Facts read from the source, the page and the file list, such as the policy, the imports and who writes filing |
+| Demonstration | Drive | Outside the repository today | The panes in a real browser, driven by the headless Chrome driver |
+| Analysis | Review | `tests/manual.md` | The host, the accounts and the repository, read at each release |
 
-Which test verifies which requirement is in `docs/verification.md`. Bringing the drives into the repository is the one open item the architecture review left.
+Each activity carries an identifier, in the header of its test block or in a row of `tests/manual.md`, with the requirements it verifies. `tests/generate-verification.js` reads both and writes `docs/verification.md` at the end of every run, so the document is never edited by hand. Bringing the drives into the repository is the one open item the architecture review left.
 
 ## 8. Keeping it true
 
@@ -213,7 +214,7 @@ A change of the kind below updates the sections named in the same commit.
 
 | No. | Reference | Link |
 |---|---|---|
-| [1] | openconformity, Requirements | ../specs/requirements.md |
-| [2] | openconformity, Security | security.md |
-| [3] | openconformity, Verification | verification.md |
-| [4] | openconformity, Architecture review of September 2026 | ../reviews/2026-09-27-architecture.md |
+| [1] | openconformity, Requirements | [requirements.md](../specs/requirements.md) |
+| [2] | openconformity, Security | [security.md](security.md) |
+| [3] | openconformity, Verification | [verification.md](verification.md) |
+| [4] | openconformity, Architecture review of September 2026 | [2026-09-27-architecture.md](../reviews/2026-09-27-architecture.md) |

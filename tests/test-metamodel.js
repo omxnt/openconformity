@@ -13,7 +13,7 @@ import {
 } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- Parse the diagram (C-DEV-003) -------------------------------------
+// --- V-TST-075 Parse the diagram (C-DEV-003) ---------------------------------
 
 const diagram = readFile('../specs/metamodel.md');
 const lines = diagram.split('\n').map((line) => line.trim());
@@ -37,7 +37,7 @@ for (const line of lines) {
   if (pillar) documentPillars.push(pillar[1]);
 }
 
-// --- Parse the schema (F-PER-001) --------------------------------------
+// --- V-TST-076 Parse the schema (F-PER-001) ----------------------------------
 
 const schema = JSON.parse(readFile('../specs/project.schema.json'));
 const schemaRelationshipIds = schema.$defs.relationship.properties.type.enum;
@@ -45,7 +45,7 @@ const schemaTypeCodes = schema.$defs.entity.properties.type.enum;
 const schemaCounterKeys = schema.properties.counters.required;
 const schemaIdCodes = schema.$defs.entityId.pattern.match(/^\^\(([A-Z|]+)\)-/)[1].split('|');
 
-// --- Entity types (C-DEV-003, F-MOD-001) -------------------------------
+// --- V-TST-077 Entity types (C-DEV-003, F-MOD-001) ---------------------------
 
 equal(documentTypes.length, 18, 'the diagram declares 18 types');
 deepEqual(
@@ -68,7 +68,7 @@ deepEqual(Object.keys(ENTITY_TYPES), schemaTypeCodes, 'the codes match the schem
 deepEqual([...Object.keys(ENTITY_TYPES), 'F'].sort(), [...schemaCounterKeys].sort(), 'the codes plus F are the schema counter keys');
 deepEqual(Object.keys(ENTITY_TYPES).sort(), [...schemaIdCodes].sort(), 'the codes are the schema identifier pattern alternatives');
 
-// --- Relationship types (C-DEV-003, F-MOD-002) -------------------------
+// --- V-TST-078 Relationship types (C-DEV-003, F-MOD-002) ---------------------
 
 equal(documentArrows.length, 44, 'the diagram draws 44 arrows');
 equal(documentArrows.filter((arrow) => arrow.composition).length, 6, 'six of the arrows are compositions');

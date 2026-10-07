@@ -48,7 +48,7 @@ function base64Of(text) {
 const EXPORTED = `data:image/svg+xml;base64,${base64Of(fixture)}`;
 const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" content="&lt;mxfile&gt;&lt;diagram id=&quot;a&quot;/&gt;&lt;diagram id=&quot;b&quot;/&gt;&lt;/mxfile&gt;"><g/></svg>')}`;
 
-// --- The origin and the frame (C-TEC-008, F-DRW-003, N-SEC-004) ----------------
+// --- V-TST-016 The origin and the frame (C-TEC-008, F-DRW-003, N-SEC-004) ----
 
 {
   equal(EDITOR_ORIGIN, 'https://embed.diagrams.net', "the editor's origin is fixed, and named to the user");
@@ -66,7 +66,7 @@ const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.
   ok(!EDITOR_ORIGIN.includes('openconformity'), 'and that origin is never the software\'s own');
 }
 
-// --- What is heard (N-SEC-004) ---------------------------------------------------
+// --- V-TST-017 What is heard (N-SEC-004) -------------------------------------
 
 {
   const frameWindow = {};
@@ -83,7 +83,7 @@ const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.
   equal(acceptMessage({ source: null, origin: EDITOR_ORIGIN, data: '{"event":"init"}' }, null), null, 'and nothing is heard while there is no frame');
 }
 
-// --- Decoding an export (F-DRW-003) ------------------------------------------------------
+// --- V-TST-018 Decoding an export (F-DRW-003) --------------------------------
 
 {
   deepEqual(bytesOfBase64('aGk='), [104, 105], 'base64 decodes');
@@ -107,7 +107,7 @@ const TWO_PAGES = `data:image/svg+xml;base64,${base64Of('<svg xmlns="http://www.
   equal(decodeExport({ event: 'export', format: 'xmlsvg' }), null, 'no data is nothing');
 }
 
-// --- The session, against a fake frame (F-DRW-002, F-DRW-003, N-OPS-003, N-PRV-007) ---
+// --- V-TST-019 The session, against a fake frame (F-DRW-002, F-DRW-003, N-OPS-003, N-PRV-007) ---
 
 /** A session with everything it posts and every timer it sets in hand. */
 function drive(drawing) {

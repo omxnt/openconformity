@@ -13,7 +13,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 const measures = groupsOf('SCN').flatMap((group) => group.attributes).find((held) => held.key === 'measures');
 const elimination = groupsOf('HAZ').flatMap((group) => group.attributes).find((held) => held.key === 'measures');
 
-// --- What a record is (F-MOD-011) ------------------------------------------
+// --- V-TST-109 What a record is (F-MOD-011) ----------------------------------
 
 equal(recordOf(['PRM-002', 'PRM-001', 'PRM-002']), 'PRM-001; PRM-002', 'a record is the identifiers once each, in order, parted by semicolons');
 equal(recordOf([]), '', 'and nothing with nothing');
@@ -22,7 +22,7 @@ equal(changedText(measures, 'SCN'), "The protective measures have changed since 
 deepEqual(reviewText(measures), { title: 'The protective measures changed', text: 'Review the residual risk estimation and what rests on it.' }, "and the notification at the top of the tab says what changed and what to review");
 equal(nounOf('HAZ'), 'hazard', 'an entity goes by the last word of its type');
 
-// --- Whether a record was written (F-MOD-011) ------------------------------
+// --- V-TST-110 Whether a record was written (F-MOD-011) ----------------------
 
 ok(!recordWritten('SCN', measures, {}), 'a scenario with no residual rating has written no record');
 ok(recordWritten('SCN', measures, { residualRating: 'Low' }), 'a typed residual rating writes it');
@@ -31,13 +31,13 @@ ok(!recordWritten('SCN', measures, { residualRationaleSeverity: 'Because.', meas
 ok(!recordWritten('HAZ', elimination, { rationale: 'Considered.' }), 'a hazard with a rationale but no decision has written no record');
 ok(recordWritten('HAZ', elimination, { eliminated: 'No' }), 'a No is a decision as much as a Yes');
 
-// --- Where a record stands (F-MOD-011) --------------------------------------
+// --- V-TST-111 Where a record stands (F-MOD-011) -----------------------------
 
 equal(tabNameOf('SCN', 'measures'), 'Risk', "a scenario's record stands on its Risk tab");
 equal(tabNameOf('HAZ', 'measures'), 'Elimination', "a hazard's on its Elimination tab");
 equal(tabNameOf('HAZ', 'title'), null, 'and the title on the first tab, which has no name here');
 
-// --- The findings (F-MOD-011, F-VIE-002) ------------------------------------
+// --- V-TST-112 The findings (F-MOD-011, F-VIE-002) ---------------------------
 
 {
   const model = createModel();

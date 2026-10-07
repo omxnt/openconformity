@@ -9,7 +9,7 @@ import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from '../app/modules/icons.js';
 import { ENTITY_TYPES } from '../app/modules/metamodel.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- One distinct glyph per entity type (G-SYS-004, N-ACC-002) ---------------
+// --- V-TST-068 One distinct glyph per entity type (G-SYS-004, N-ACC-002) -----
 
 deepEqual(Object.keys(TYPE_ICONS), Object.keys(ENTITY_TYPES), 'one icon per entity type, in metamodel order');
 

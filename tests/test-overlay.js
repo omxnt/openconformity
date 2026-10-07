@@ -73,7 +73,7 @@ function kinds(stack) {
   equal(menu.closed, 1, 'closing the menus twice closes nothing twice');
 }
 
-// --- A dialog is known wherever it stands in the stack (F-MOD-007, N-ACC-003) ---
+// --- V-TST-095 A dialog is known wherever it stands in the stack (F-MOD-007, N-ACC-003) ---
 
 {
   const stack = createOverlayStack();
@@ -87,7 +87,7 @@ function kinds(stack) {
   equal(stack.hasDialog(), false, 'and forgotten once closed');
 }
 
-// --- Escape goes to the top entry (N-ACC-003) --------------------------
+// --- V-TST-096 Escape goes to the top entry (N-ACC-003) ----------------------
 
 {
   const stack = createOverlayStack();
@@ -116,7 +116,7 @@ function kinds(stack) {
   equal(panel.closed, 1, 'and does not close it twice');
 }
 
-// --- The opener rides with its entry (N-ACC-003) ------------------------
+// --- V-TST-097 The opener rides with its entry (N-ACC-003) -------------------
 
 {
   const stack = createOverlayStack();

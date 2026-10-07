@@ -17,7 +17,7 @@ function enabledIds(actions) {
   return actions.filter((action) => action.enabled()).map((action) => action.id);
 }
 
-// --- The landing offers the three ways in and the help surface (F-APP-002) ---
+// --- V-TST-001 The landing offers the three ways in and the help surface (F-APP-002) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -29,7 +29,7 @@ function enabledIds(actions) {
   );
 }
 
-// --- The action list against a live store (F-MOD-001, F-MOD-005, F-MOD-008, F-MOD-009, N-ACC-003) ---
+// --- V-TST-002 The action list against a live store (F-MOD-001, F-MOD-005, F-MOD-008, F-MOD-009, N-ACC-003) ---
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -187,7 +187,7 @@ function enabledIds(actions) {
   );
 }
 
-// --- Nothing acts while a diagram is open (F-DRW-003) ------------------------
+// --- V-TST-003 Nothing acts while a diagram is open (F-DRW-003) --------------
 
 {
   const store = createStore({ storage: fakeStorage() });
@@ -215,7 +215,7 @@ function enabledIds(actions) {
   deepEqual(runs.map(([group]) => group), ['create', 'library', 'arrange', 'delete'], 'each group a run of its own, so the import from a library stands between dividers');
 }
 
-// --- Reorder stands down while the tree is filtered (F-WSP-001) ------------
+// --- V-TST-004 Reorder stands down while the tree is filtered (F-WSP-001) ----
 
 {
   const store = createStore({ storage: fakeStorage() });

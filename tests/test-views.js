@@ -30,12 +30,12 @@ function unrated() {
 const model = unrated();
 const labelOf = (id) => entityLabel(model.nodes.get(id));
 
-// --- The registry (F-VIE-001) ---------------------------------------------
+// --- V-TST-158 The registry (F-VIE-001) --------------------------------------
 
 deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function'], ['safety', 'Safety function specification', 'function']], 'the risk assessment, then the safety function specification, each built by a function of the model');
 equal(RISK_VIEW.build, buildRiskView, 'registered under its builder');
 
-// --- The risk assessment over the example (F-VIE-001, F-VIE-003) ----------------------
+// --- V-TST-159 The risk assessment over the example (F-VIE-001, F-VIE-003) ---
 
 /** The index of a column by its text and, where it has one, its group. */
 const at = (columns, name, group = null) => columns.map(asColumn).findIndex((column) => column.text === name && (column.group ?? null) === group);
@@ -78,7 +78,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   equal(view.sections[3].tables[0].rows.map((held) => held.id).join(' '), 'SCN-002 SCN-003 SCN-004', 'Maintenance holds the scenarios its tasks give rise to, in id order');
 }
 
-// --- Rated scenarios spread over parameter columns (F-VIE-001, F-VIE-003) --------------
+// --- V-TST-160 Rated scenarios spread over parameter columns (F-VIE-001, F-VIE-003) ---
 
 {
   const rated = unrated();
@@ -123,7 +123,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   deepEqual(ratingCells(typed.nodes.get('SCN-002'), 'Initial risk estimation', ''), [''], 'or nothing');
 }
 
-// --- The renderer's pure parts (F-VIE-001) ---------------------------------
+// --- V-TST-161 The renderer's pure parts (F-VIE-001) -------------------------
 
 equal(columnText('Scenario'), 'Scenario', 'a bare column is its name');
 equal(columnText({ text: 'S', title: 'Severity', group: 'Initial risk estimation' }), 'Severity', 'a column exports its full name, its group standing in a row of its own');
@@ -158,7 +158,7 @@ equal(cellText(null, labelOf), '', 'nothing is empty');
 
 deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' }, { text: 'd', group: 'H' }, 'E']), ['', 'first', 'last', 'first last', ''], 'a group knows its first and last column, a lone one is both');
 
-// --- Saved as an Excel workbook (F-VIE-001) ----------------------------------
+// --- V-TST-162 Saved as an Excel workbook (F-VIE-001) ------------------------
 
 {
   equal(exportText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts\nHAZ-001 H-1 Moving Parts', 'entities on lines of their own');
@@ -178,7 +178,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - L-3 Maintenance.xlsx', ['L-3 Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
 }
 
-// --- The safety function specification over the example (F-VIE-001, F-VIE-004) ---------
+// --- V-TST-163 The safety function specification over the example (F-VIE-001, F-VIE-004) ---
 
 {
   const view = buildSafetyView(model);

@@ -19,7 +19,7 @@ import {
 } from '../app/modules/model.js';
 import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
 
-// --- Single owner (F-MOD-002) ------------------------------------------
+// --- V-TST-010 Single owner (F-MOD-002) --------------------------------------
 
 {
   const model = createModel();
@@ -40,7 +40,7 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   allowed(canRelate(model, 'esr-triggered-by-haz', 'ESR-002', 'HAZ-001'), 'so a second one may reach the same entity');
 }
 
-// --- Ownership acyclicity (F-MOD-002) ----------------------------------
+// --- V-TST-011 Ownership acyclicity (F-MOD-002) ------------------------------
 
 {
   const model = createModel();
@@ -58,7 +58,7 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   refused(canRelate(model, 'elm-decomposes-into-elm', 'ELM-003', 'ELM-002'), 'the single owner rule holds along the chain');
 }
 
-// --- The deletion preview (F-MOD-007) ----------------------------------
+// --- V-TST-012 The deletion preview (F-MOD-007) ------------------------------
 
 {
   const model = createModel();
@@ -90,7 +90,7 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   deepEqual(deletionOf(model, 'F-1'), [], 'a folder previews empty');
 }
 
-// --- Nested cascade (F-MOD-005, F-MOD-006) -----------------------------
+// --- V-TST-013 Nested cascade (F-MOD-005, F-MOD-006) -------------------------
 
 {
   const model = createModel();
@@ -113,7 +113,7 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   equal(model.relationships.size, 0, 'every relationship touching a removed entity went with it');
 }
 
-// --- Deletion against filing (F-MOD-006, F-WSP-005) --------------------
+// --- V-TST-014 Deletion against filing (F-MOD-006, F-WSP-005) ----------------
 
 {
   const model = createModel();
@@ -138,7 +138,7 @@ import { ok, equal, deepEqual, refused, allowed, summary } from './harness.js';
   refused(removeEntity(model, zone.id), 'deleting a folder as an entity is refused');
 }
 
-// --- A folder takes what is filed in it (F-WSP-007) ----------------------
+// --- V-TST-015 A folder takes what is filed in it (F-WSP-007) ----------------
 
 {
   const model = createModel();

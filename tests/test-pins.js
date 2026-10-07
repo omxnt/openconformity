@@ -47,7 +47,7 @@ ok(sources.length >= 40, `${sources.length} modules load from the page's entry`)
 const page = readFile('../app/index.html');
 const sheet = readFile('../app/style.css');
 
-// --- The page states its content security policy first (N-SEC-001, N-SEC-002, N-SEC-006, N-OPS-002) ---
+// --- V-INS-001 The page states its content security policy first (N-SEC-001, N-SEC-002, N-SEC-006, N-OPS-002) ---
 
 {
   ok(page.includes(`<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src https://embed.diagrams.net; object-src 'none'; base-uri 'none'; form-action 'none'">`), 'the policy allows the software its own scripts, styles and fonts, images as data, one frame origin, and no connection, object, base or form');
@@ -55,7 +55,7 @@ const sheet = readFile('../app/style.css');
   ok(!/<script(?![^>]*\ssrc=)/.test(page) && !/\sstyle="/.test(page) && page.includes('<script src="theme.js"></script>'), 'no inline script or style stands on the page, the theme being a file');
 }
 
-// --- No module builds or parses markup from text (N-SEC-001, N-SEC-002) ---
+// --- V-INS-002 No module builds or parses markup from text (N-SEC-001, N-SEC-002) ---
 
 {
   ok(sources.every(([, source]) => !/innerHTML|insertAdjacentHTML|outerHTML|srcdoc/.test(source)), 'every element is created and every string set as text');
@@ -63,7 +63,7 @@ const sheet = readFile('../app/style.css');
   ok(sources.every(([, source]) => !/\beval\(|new Function\(/.test(source)), 'nothing evaluates text as code');
 }
 
-// --- The one frame, sandboxed, on the editor's origin (C-TEC-008, N-SEC-004, N-PRV-007) ---
+// --- V-INS-003 The one frame, sandboxed, on the editor's origin (C-TEC-008, N-SEC-004, N-PRV-007) ---
 
 {
   const editorModule = readFile('../app/modules/drawing-editor.js');
@@ -77,7 +77,7 @@ const sheet = readFile('../app/style.css');
   ok(/text: `Diagrams are created and edited in draw\.io[^`]*\$\{EDITOR_ORIGIN\.replace\('https:\/\/', ''\)\}[^`]*diagram[^`]*`/.test(editorModule), 'the consent names the service, its origin and the diagram handed over (N-PRV-005)');
 }
 
-// --- The page's keys yield to what is open (F-MOD-007, F-MOD-002, N-ACC-003) ---
+// --- V-INS-004 The page's keys yield to what is open (F-MOD-007, F-MOD-002, N-ACC-003) ---
 
 {
   const wiring = readFile('../app/modules/app.js');
@@ -89,7 +89,7 @@ const sheet = readFile('../app/style.css');
   ok(views.includes('const part = savedPart(built, Math.min(open.section, built.sections.length - 1));'), 'the workbook is saved from a section that exists');
 }
 
-// --- Nothing leaves the page but by a link the user follows (N-PRV-002, N-OPS-002) ---
+// --- V-INS-005 Nothing leaves the page but by a link the user follows (N-PRV-002, N-OPS-002) ---
 
 {
   ok(sources.every(([, source]) => !/\bfetch\(|XMLHttpRequest|WebSocket|navigator\.sendBeacon/.test(source)), 'no module fetches, opens a socket or sends a beacon');
@@ -106,7 +106,7 @@ const sheet = readFile('../app/style.css');
   ok(!sheet.includes('fonts.googleapis') && !sheet.includes('@import') && !/url\("https?:/.test(sheet), 'the stylesheet loads nothing from outside');
 }
 
-// --- A drawing reaches the page as an image from a data address (N-SEC-003) ---
+// --- V-INS-006 A drawing reaches the page as an image from a data address (N-SEC-003) ---
 
 {
   const cell = readFile('../app/modules/drawing-cell.js');
@@ -118,28 +118,28 @@ const sheet = readFile('../app/style.css');
   ok(!cell.includes("el('svg'") && !cell.includes("el('object'") && !cell.includes("el('embed'"), 'never as markup in the page');
 }
 
-// --- Nothing is read from the address (N-PRV-002, N-SEC-010) ---
+// --- V-INS-007 Nothing is read from the address (N-PRV-002, N-SEC-010) -------
 
 {
   ok(sources.every(([, source]) => !/location\.(search|hash)|window\.name\b|URLSearchParams|document\.referrer/.test(source)), 'no module reads the address, the window name or the referrer');
   ok(sources.every(([name, source]) => name === 'shell' || !source.includes('location.href')) && readFile('../app/modules/shell.js').split('location.href').length === 2 && readFile('../app/modules/shell.js').includes("window.location.href = 'mailto:info@openconformity.org';"), 'the address is written once, to open the mail client, and never read');
 }
 
-// --- Only the model changes filing, so its children index stays true (F-WSP-001, F-WSP-004) ---
+// --- V-INS-008 Only the model changes filing, so its children index stays true (F-WSP-001, F-WSP-004) ---
 
 {
   const writers = sources.filter(([name, source]) => name !== 'model' && /\.nodes\.(set|delete|clear)\(|\.parent\s*=[^=]/.test(source)).map(([name]) => name);
   ok(writers.length === 0, `no module but the model writes to the node list or to a parent${writers.length > 0 ? ` (written in: ${writers.join(', ')})` : ''}`);
 }
 
-// --- A view leaves the software as a saved file, never as a print (F-VIE-001) ---
+// --- V-INS-009 A view leaves the software as a saved file, never as a print (F-VIE-001) ---
 
 {
   ok(sources.every(([, source]) => !/window\.print\(/.test(source)) && !sheet.includes('@media print') && !sheet.includes('@page'), 'no module prints and the stylesheet holds no print layout');
   ok(readFile('../app/modules/views.js').includes("download(part.filename, workbook(viewSheets(part.built, labelOf))"), 'the view saves as an Excel workbook');
 }
 
-// --- The way to report a vulnerability is published where tools look (C-PRJ-006) ---
+// --- V-INS-010 The way to report a vulnerability is published where tools look (C-PRJ-006) ---
 
 {
   for (const [where, host] of [['../app', 'app.openconformity.org'], ['../site', 'openconformity.org']]) {
@@ -151,7 +151,7 @@ const sheet = readFile('../app/style.css');
   }
 }
 
-// --- The host is told to refuse framing (N-SEC-007) -----------------------
+// --- V-INS-011 The host is told to refuse framing (N-SEC-007) ----------------
 
 {
   const headers = readFile('../app/_headers').split('\n');
@@ -159,7 +159,7 @@ const sheet = readFile('../app/style.css');
   ok(headers.includes('  Strict-Transport-Security: max-age=15552000; includeSubDomains') && headers.includes('  X-Content-Type-Options: nosniff'), 'with transport security and no type sniffing');
 }
 
-// --- The software is static files of the web platform (C-TEC-001, C-TEC-002, C-TEC-004, C-TEC-007) ---
+// --- V-INS-012 The software is static files of the web platform (C-TEC-001, C-TEC-002, C-TEC-004, C-TEC-007) ---
 
 {
   const files = [...(globalThis.arguments ?? [])];
@@ -174,7 +174,7 @@ const sheet = readFile('../app/style.css');
   ok(scripts.length === 2 && scripts.filter((tag) => tag.includes('type="module"')).length === 1 && scripts.includes('<script src="theme.js">'), 'every script on the page is a module but the theme script, which runs before the stylesheet');
 }
 
-// --- The file surface stays on the baseline (F-PER-001, N-CMP-002) ---
+// --- V-INS-013 The file surface stays on the baseline (F-PER-001, N-CMP-002) ---
 
 {
   ok(page.includes('id="file-input"') && page.includes('accept=".json'), 'a .json file input is the way in');
@@ -182,7 +182,7 @@ const sheet = readFile('../app/style.css');
   ok(!readFile('../app/modules/history.js').includes('structuredClone'), 'a snapshot is copied by hand, so an older browser without structuredClone runs the software');
 }
 
-// --- The shipped data opens without a question (N-SEC-005) ---
+// --- V-INS-014 The shipped data opens without a question (N-SEC-005) ---------
 
 {
   for (const [name, data] of [['library', LIBRARY], ['example', EXAMPLE_PROJECT]]) {
@@ -191,7 +191,7 @@ const sheet = readFile('../app/style.css');
   }
 }
 
-// --- The licences ride with the software (C-PRJ-003, C-TEC-005) ---
+// --- V-INS-015 The licences ride with the software (C-PRJ-003, C-TEC-005) ----
 
 {
   ok(readFile('../app/LICENSE.txt').includes('EUROPEAN UNION PUBLIC LICENCE v. 1.2'), 'the EUPL-1.2 text is reachable at LICENSE.txt');
@@ -199,7 +199,7 @@ const sheet = readFile('../app/style.css');
   ok(readFile('../app/assets/icons/LICENSE.txt').includes('Apache License'), 'the Apache licence rides with the icons');
 }
 
-// --- No standard's content is transcribed (C-PRJ-005) ---
+// --- V-INS-016 No standard's content is transcribed (C-PRJ-005) --------------
 
 {
   const doc = readFile('../specs/attributes.md');
@@ -208,7 +208,7 @@ const sheet = readFile('../app/style.css');
   ok(doc.includes('| [2] | SEBoK, Guide to the Systems Engineering Body of Knowledge, System Requirements') && doc.includes("SEBoK's requirements article [2]"), 'the requirement categories cite their source, with none of its text');
 }
 
-// --- Every glyph drawn is in the sprite, with its provenance (C-TEC-005, G-SYS-004) ---
+// --- V-INS-017 Every glyph drawn is in the sprite, with its provenance (C-TEC-005, G-SYS-004) ---
 
 {
   const origin = readFile('../app/assets/icons/ORIGIN.md');
@@ -224,7 +224,7 @@ const sheet = readFile('../app/style.css');
   ok(actions.every((action) => named.has(action.icon)), 'every action draws under a named glyph');
 }
 
-// --- The ways into a project are the actions themselves (F-APP-002) ---
+// --- V-INS-018 The ways into a project are the actions themselves (F-APP-002) ---
 
 {
   const actions = createActions({ store: createStore({ storage: fakeStorage() }), flows: {} });
@@ -235,7 +235,7 @@ const sheet = readFile('../app/style.css');
   ok(!readFile('../app/modules/navigator.js').includes('landing-'), 'and the navigator landing carries no buttons, they live in one place');
 }
 
-// --- Pane headers are landmarks (G-SYS-005, N-ACC-001) ---
+// --- V-INS-019 Pane headers are landmarks (G-SYS-005, N-ACC-001) -------------
 
 {
   ok(!page.includes('pane-title'), 'no pane header only names its pane');
@@ -245,7 +245,7 @@ const sheet = readFile('../app/style.css');
   ok(!page.includes(' title="'), 'no control on the page relies on a browser title for its name');
 }
 
-// --- The pre-paint theme script speaks the store's literals (N-CMP-002) ---
+// --- V-INS-020 The pre-paint theme script speaks the store's literals (N-CMP-002) ---
 
 {
   const script = readFile('../app/theme.js');
@@ -262,20 +262,20 @@ const sheet = readFile('../app/style.css');
   ok(script.includes(`? '${themes[1]}' : '${themes[0]}'`), 'and its system fallback lands on the same pair');
 }
 
-// --- The minimum viewport (F-APP-001, N-CMP-001) ---------------------------
+// --- V-INS-021 The minimum viewport (F-APP-001, N-CMP-001) -------------------
 
 {
   ok(sheet.includes('@media screen and (max-width: 999.98px), screen and (max-height: 355.98px)'), 'the notice covers both floors, 1000 wide and 356 tall, on a screen and never on paper');
   ok(page.includes('at least 1000 pixels wide and 356 pixels tall'), 'and states both numbers');
 }
 
-// --- Pointer targets (N-ACC-001) ---------------------------------------------
+// --- V-INS-022 Pointer targets (N-ACC-001) -----------------------------------
 
 {
   ok(sheet.includes('.splitter-vertical::after { inset: 0 -10px;') && sheet.includes('.splitter-horizontal::after { inset: -10px 0;'), 'the splitters take a 24px pointer target around the 4px bar');
 }
 
-// --- Text carries AA contrast in both themes (N-ACC-001) --------------------
+// --- V-INS-023 Text carries AA contrast in both themes (N-ACC-001) -----------
 
 {
   const g100At = sheet.indexOf(':root[data-theme="g100"]');
@@ -320,7 +320,7 @@ const sheet = readFile('../app/style.css');
   ok(sheet.includes('.dialog a { color: var(--link); text-decoration: underline; }'), 'a link inside prose is underlined, colour alone cannot mark it (N-ACC-002)');
 }
 
-// --- The typefaces, vendored and applied (G-SYS-002, G-SYS-003) --------------
+// --- V-INS-024 The typefaces, vendored and applied (G-SYS-002, G-SYS-003) ----
 
 {
   const faces = [...sheet.matchAll(/@font-face \{\s*font-family: "([^"]+)";\s*src: url\("assets\/fonts\/([^"]+)"\) format\("woff2"\);/g)].map((match) => [match[1], match[2]]);

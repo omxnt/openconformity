@@ -7,7 +7,7 @@
 import { markdownText, markdownCell, markdown, anchor } from '../app/modules/markdown.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- A cell and its text (F-VIE-001, N-SEC-011) -----------------------------
+// --- V-TST-073 A cell and its text (F-VIE-001, N-SEC-011) --------------------
 
 {
   equal(markdownCell('plain'), 'plain', 'text is itself');
@@ -30,7 +30,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   ok(doc.startsWith('# T\n\nP, saved today\n\n## Contents\n\n1. [A](#1-a)\n2. [B](#2-b)\n\n## 1 A\n\n### 1.1 X'), 'the line under the title, then the contents, then each numbered chapter');
 }
 
-// --- A document of tables (F-VIE-001) -----------------------------------------
+// --- V-TST-074 A document of tables (F-VIE-001) ------------------------------
 
 {
   const text = markdown('Safety function specification', [

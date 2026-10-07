@@ -33,7 +33,7 @@ function unzip(bytes) {
   return { signature: view.getUint32(0, true), end: view.getUint32(end, true), entries };
 }
 
-// --- The text as XML takes it (F-VIE-001, N-SEC-011) -----------------------
+// --- V-TST-164 The text as XML takes it (F-VIE-001, N-SEC-011) ---------------
 
 {
   equal(xmlText(`<a href="x">Tom & 'Jerry'</a>`), '&lt;a href=&quot;x&quot;&gt;Tom &amp; &apos;Jerry&apos;&lt;/a&gt;', 'the five markup characters are escaped');
@@ -43,7 +43,7 @@ function unzip(bytes) {
   equal(xmlText('=HYPERLINK("x")'), '=HYPERLINK(&quot;x&quot;)', 'a leading equals sign is text like any other');
 }
 
-// --- The names Excel accepts (F-VIE-001) -----------------------------------
+// --- V-TST-165 The names Excel accepts (F-VIE-001) ---------------------------
 
 {
   const taken = new Set();
@@ -55,7 +55,7 @@ function unzip(bytes) {
   deepEqual([0, 25, 26, 51, 701, 702].map(columnLetters), ['A', 'Z', 'AA', 'AZ', 'ZZ', 'AAA'], 'columns are lettered as Excel letters them');
 }
 
-// --- The bytes (F-VIE-001) --------------------------------------------------
+// --- V-TST-166 The bytes (F-VIE-001) -----------------------------------------
 
 {
   deepEqual([...utf8('aå€😀')], [0x61, 0xc3, 0xa5, 0xe2, 0x82, 0xac, 0xf0, 0x9f, 0x98, 0x80], 'text is UTF-8 in one to four bytes a character');
@@ -66,7 +66,7 @@ function unzip(bytes) {
   deepEqual(read.entries.map((entry) => [entry.name, text(entry.data), entry.crcHolds, entry.method]), [['a.txt', 'hello', true, 0], ['dir/b.xml', '<b>å</b>', true, 0]], 'each entry is found through the directory, stored, its checksum holding');
 }
 
-// --- A sheet (F-VIE-001, N-SEC-011) -----------------------------------------
+// --- V-TST-167 A sheet (F-VIE-001, N-SEC-011) --------------------------------
 
 {
   const xml = sheetXml({
@@ -86,7 +86,7 @@ function unzip(bytes) {
   ok(!plain.includes('mergeCells') && plain.includes('<pane ySplit="1" topLeftCell="A2"'), 'a table without groups has one head row and nothing merged');
 }
 
-// --- The workbook (F-VIE-001) -----------------------------------------------
+// --- V-TST-168 The workbook (F-VIE-001) --------------------------------------
 
 {
   const bytes = workbook([

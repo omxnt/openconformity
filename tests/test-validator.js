@@ -36,7 +36,7 @@ function mutated(change) {
   return copy;
 }
 
-// --- The fixtures (F-PER-006) ------------------------------------------
+// --- V-TST-152 The fixtures (F-PER-006) --------------------------------------
 
 equal(validate(valid, 1).ok, true, 'the valid fixture passes');
 equal(validate(JSON.parse(readFile('fixtures/null-parent.json')), 1).ok, true, 'a null parent passes: the pattern applies to strings only');
@@ -54,7 +54,7 @@ refusedOver(JSON.parse(readFile('fixtures/counter-behind.json')), 'counter does 
 equal(validate(valid, 99).ok, false, 'an unknown schema version has no transcription');
 equal(validate(valid, 0).ok, false, 'nor does version 0');
 
-// --- The filing depth (F-PER-006) --------------------------------------
+// --- V-TST-153 The filing depth (F-PER-006) ----------------------------------
 
 {
   const chain = (levels) => mutated((data) => {
@@ -71,7 +71,7 @@ equal(validate(valid, 0).ok, false, 'nor does version 0');
   ok(validate(entityBelow, 1).ok === false, 'an entity filed below the deepest folder counts as a level too');
 }
 
-// --- A prototype key pollutes nothing (F-PER-006, N-SEC-001) -----------
+// --- V-TST-154 A prototype key pollutes nothing (F-PER-006, N-SEC-001) -------
 
 {
   validate(mutated((data) => { data.entities[0].attributes = JSON.parse('{"__proto__": {"polluted": true}}'); }), 1);
@@ -80,7 +80,7 @@ equal(validate(valid, 0).ok, false, 'nor does version 0');
   equal(Object.hasOwn(Object.prototype, 'polluted'), false, 'nor is it written onto the prototype itself');
 }
 
-// --- Keyword mutations (F-PER-006, N-SEC-001) --------------------------
+// --- V-TST-155 Keyword mutations (F-PER-006, N-SEC-001) ----------------------
 
 refusedOver(mutated((data) => delete data.name), 'has no name', 'a missing required key is refused');
 refusedOver(mutated((data) => { data.extra = 1; }), 'extra', 'an unknown root key is refused');
@@ -120,7 +120,7 @@ ok(validate('text', 1).ok === false, 'a file that is not an object is refused');
 ok(validate(null, 1).ok === false, 'null is refused');
 ok(validate([], 1).ok === false, 'an array is refused');
 
-// --- The enumerations, behaviourally (F-MOD-001, F-MOD-002) ------------
+// --- V-TST-156 The enumerations, behaviourally (F-MOD-001, F-MOD-002) --------
 
 const schema = JSON.parse(readFile('../specs/project.schema.json'));
 const relationshipIds = schema.$defs.relationship.properties.type.enum;
@@ -212,7 +212,7 @@ for (const id of relationshipIds) {
   );
 }
 
-// --- The project's attribute bag (F-PER-001) ----------------------------
+// --- V-TST-157 The project's attribute bag (F-PER-001) -----------------------
 
 {
   const bagged = JSON.parse(readFile('fixtures/valid-attributes.json'));

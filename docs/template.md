@@ -16,4 +16,4 @@ References are always the last chapter, numbered after the content chapters. The
 
 | No. | Reference | Link |
 |---|---|---|
-| *[1]* | *Reference*| *Link* |
+| *[1]* | *Reference* | *Link, a web address, or the file name linked to its path* |

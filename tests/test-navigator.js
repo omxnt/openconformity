@@ -13,7 +13,7 @@ function drawn(model, expanded) {
   return treeRows(model, (id) => expanded.has(id)).map((row) => row.id);
 }
 
-// --- The rows (F-WSP-001) ----------------------------------------------
+// --- V-TST-090 The rows (F-WSP-001) ------------------------------------------
 
 {
   const model = createModel();
@@ -49,7 +49,7 @@ function drawn(model, expanded) {
   deepEqual(drawn(model, new Set(['F-1'])), ['ELM-001', 'F-1', 'ELM-002', 'HAZ-001'], 'a filed node draws last among its new siblings');
 }
 
-// --- The project row (F-WSP-001) ----------------------------------------
+// --- V-TST-091 The project row (F-WSP-001) -----------------------------------
 
 {
   const model = createModel();
@@ -67,7 +67,7 @@ function drawn(model, expanded) {
   deepEqual(treeRows(model, () => false).map((row) => row.id), ['ELM-001', 'F-1'], 'and the tree itself never contains it');
 }
 
-// --- The project row collapses over the whole tree (F-WSP-001) -----------
+// --- V-TST-092 The project row collapses over the whole tree (F-WSP-001) -----
 
 {
   const model = createModel();
@@ -91,7 +91,7 @@ function drawn(model, expanded) {
   );
 }
 
-// --- The filter (F-WSP-001, F-WSP-008) --------------------------------------------
+// --- V-TST-093 The filter (F-WSP-001, F-WSP-008) -----------------------------
 
 {
   const model = createModel();
@@ -162,7 +162,7 @@ function drawn(model, expanded) {
   ok(!revealSet(model, ['HAZ-001']).has('HAZ-001'), 'the candidate itself is not a branch to open');
 }
 
-// --- The labels (F-WSP-001) --------------------------------------------
+// --- V-TST-094 The labels (F-WSP-001) ----------------------------------------
 
 {
   const model = createModel();

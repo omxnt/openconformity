@@ -39,7 +39,7 @@ deepEqual(
   'in the dark, the sun and the light'
 );
 
-// --- The notices (F-SES-002) -------------------------------------------
+// --- V-TST-128 The notices (F-SES-002) ---------------------------------------
 
 ok(RESTORATION_NOTICE.includes('could not be restored'), 'the restoration notice states the session could not be restored');
 ok(RESTORATION_DETAIL.includes('set aside'), 'and that a copy of the stored blob was set aside');
@@ -54,7 +54,7 @@ equal(titleFor(true, 'Mixer line'), 'Mixer line · openconformity', 'a named pro
 equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
 equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
 
-// --- The leave-prompt fires exactly when leaving costs something (F-SES-005) ---
+// --- V-TST-129 The leave-prompt fires exactly when leaving costs something (F-SES-005) ---
 
 equal(shouldWarnBeforeUnload(true, true), true, 'unsaved work that persistence is failing to keep warns');
 equal(shouldWarnBeforeUnload(true, false), false, 'unsaved work the blob holds does not: closing loses nothing');

@@ -107,4 +107,3 @@ Any content generated or proposed by the software is treated as a draft, pending
 
 | No. | Reference | Link |
 |---|---|---|
-| *[1]* | *Reference*| *Link* |

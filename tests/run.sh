@@ -1,6 +1,6 @@
 #!/bin/sh
-# Runs every test file with the JavaScriptCore shell, from this directory.
-# Exits non-zero if any test fails.
+# Runs every test file with the JavaScriptCore shell, from this directory, then
+# writes docs/verification.md. Exits non-zero if any test fails.
 
 cd "$(dirname "$0")" || exit 1
 JSC="${JSC:-/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc}"
@@ -15,4 +15,8 @@ for test in test-*.js; do
     status=1
   fi
 done
+
+# The verification document is written from the test headers and manual.md.
+# shellcheck disable=SC2086
+"$JSC" -m generate-verification.js -- test-*.js > ../docs/verification.md || status=1
 exit $status
