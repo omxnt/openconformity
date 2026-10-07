@@ -49,6 +49,9 @@ This document states how each requirement in `specs/requirements.md` is verified
 | C-DEV-005 | Software address | Review | The host serves `app/` at `app.openconformity.org`. | Manual |
 | C-DEV-006 | Release verification | Review | Each merge to main follows a run with every test file passed and a clean console, and the release notes name the run. | Manual |
 | C-DEV-007 | Deployment integrity | Review | Each file under `app/` fetched from the host hashes as in the released commit. Rocket Loader, Auto Minify, Email Address Obfuscation and Web Analytics injection are off. | Manual |
+| C-DEV-008 | Change review | Review | Every commit on main was reviewed by the maintainer before it was merged, read from the history at each release. | Manual |
+| C-DEV-009 | Account protection | Review | Both accounts show a second factor, read at each release. | Manual |
+| C-DEV-010 | Production deployment only | Review | The host's branch control deploys main alone with previews off, read at each release. | Manual |
 | C-TEC-001 | Technology stack | Pin | [test-pins.js:162](../tests/test-pins.js#L162) The software is static files of the web platform. | Tested |
 | C-TEC-002 | No dependencies | Pin | [test-pins.js:162](../tests/test-pins.js#L162) The software is static files of the web platform. | Tested |
 | C-TEC-003 | No build process | Review | The host has no build command and serves `app/` as it is. | Manual |
@@ -154,11 +157,11 @@ This document states how each requirement in `specs/requirements.md` is verified
 
 | Class | Requirements | Tested | Partly | Manual | None |
 |---|---|---|---|---|---|
-| Constraints | 21 | 6 | 4 | 11 | 0 |
+| Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
 | Functional | 42 | 30 | 7 | 2 | 3 |
 | Non-functional | 26 | 13 | 9 | 4 | 0 |
-| All | 96 | 52 | 21 | 20 | 3 |
+| All | 99 | 52 | 21 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

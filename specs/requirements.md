@@ -226,6 +226,36 @@ The project shall deploy the software so that the host serves every file byte fo
 
 > *With no build step the deployed software is the source, which lets anyone check what they run against what they can read. A host offers features that break this, minification, analytics injection, script loaders, and obfuscation, each placing code on the software's origin that the page's policy cannot tell from the software's own.*
 
+---
+
+#### C-DEV-008 Change review
+
+`ubiquitous`
+
+The project shall merge to main only a change the maintainer has reviewed.
+
+> *The host serves main the moment it is pushed, so the review is the one step between a change and the user. The release check catches what a test can reach, and the review catches what it cannot, a vendored asset, a changed policy, a new fetch. Nothing else reads a change before it is live.*
+
+---
+
+#### C-DEV-009 Account protection
+
+`ubiquitous`
+
+The project shall protect every account that can change the repository or the host with a second factor.
+
+> *A commit under the maintainer's name from a compromised account is the one way a hostile change reaches the user without a review, and the host deploys it within minutes. A second factor is the cheapest control against it and the one every platform offers.*
+
+---
+
+#### C-DEV-010 Production deployment only
+
+`ubiquitous`
+
+The project shall deploy the software from main alone, with no preview deployment reachable at another address.
+
+> *A preview address is another origin, where a user who followed a link could store a project unknowingly and lose it when the preview is gone. The host's setting that turns previews off is the only thing standing between a push to develop and a public copy, and nothing requires it.*
+
 ### 2.3 Technical
 
 ---
