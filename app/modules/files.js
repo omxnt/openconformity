@@ -185,7 +185,8 @@ function buildModel(data) {
     }
   }
 
-  restoreCounters(model, data.counters);
+  const counters = restoreCounters(model, data.counters);
+  if (!counters.ok) problems.push(counters.reason);
   return problems.length > 0 ? { ok: false, problems } : { ok: true, model };
 }
 

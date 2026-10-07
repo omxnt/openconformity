@@ -24,6 +24,7 @@ import {
   removeEntity,
   setProjectAttribute,
   removeAttributes,
+  restoreCounters,
 } from '../app/modules/model.js';
 import { FILING_DEPTH } from '../app/modules/validator.js';
 import { createStore } from '../app/modules/store.js';
@@ -359,6 +360,24 @@ function childIds(model, parentId) {
   equal(relate(chained, 'req-decomposes-into-req', id(n + 1), id(2)).ok, false, 'as is a second owner for the second link');
   ok(unrelate(chained, 'req-decomposes-into-req', id(1), id(2)).ok, 'unrelating the first link');
   ok(relate(chained, 'req-decomposes-into-req', id(n + 1), id(2)).ok, 'then lets another entity own the second, so the index was dropped with the change');
+}
+
+// --- V-TST-177 An identifier already in the model is never issued twice (F-MOD-001, N-SEC-009) ---
+
+{
+  const model = createModel();
+  addEntity(model, 'HAZ', { id: 'HAZ-001', attributes: { title: 'Kept' } });
+  const taken = addEntity(model, 'HAZ');
+  refused(taken, 'an entity whose issued identifier is taken is refused');
+  equal(nodeOf(model, 'HAZ-001').attributes.title, 'Kept', 'and the entity holding it is untouched');
+  equal(model.counters.HAZ, 1, 'and the counter stays where it was');
+  addFolder(model, 'Held', { id: 'F-1' });
+  refused(addFolder(model, 'Second'), 'a folder whose issued identifier is taken is refused');
+  equal(model.nodes.size, 2, 'and nothing was added');
+  refused(restoreCounters(model, { ...model.counters, HAZ: 2 ** 53 }), 'restoring a counter past the largest safe integer is refused');
+  refused(restoreCounters(model, { ...model.counters, F: 0 }), 'as is one below 1');
+  allowed(restoreCounters(model, { ...model.counters, HAZ: 2 }), 'while a safe counter restores');
+  equal(model.counters.HAZ, 2, 'and takes effect');
 }
 
 summary('test-model');

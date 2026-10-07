@@ -148,6 +148,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-088 | Headless | [test-model.js](../tests/test-model.js) | Relationships |
 | V-TST-089 | Headless | [test-model.js](../tests/test-model.js) | Folder deletion |
 | V-TST-175 | Headless | [test-model.js](../tests/test-model.js) | The owner index keeps a long chain cheap and never stale |
+| V-TST-177 | Headless | [test-model.js](../tests/test-model.js) | An identifier already in the model is never issued twice |
 | V-TST-090 | Headless | [test-navigator.js](../tests/test-navigator.js) | The rows |
 | V-TST-091 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row |
 | V-TST-092 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row collapses over the whole tree |
@@ -215,6 +216,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-153 | Headless | [test-validator.js](../tests/test-validator.js) | The filing depth |
 | V-TST-154 | Headless | [test-validator.js](../tests/test-validator.js) | A prototype key pollutes nothing |
 | V-TST-155 | Headless | [test-validator.js](../tests/test-validator.js) | Keyword mutations |
+| V-TST-176 | Headless | [test-validator.js](../tests/test-validator.js) | A counter the software cannot issue from is refused |
 | V-TST-156 | Headless | [test-validator.js](../tests/test-validator.js) | The enumerations, behaviourally |
 | V-TST-157 | Headless | [test-validator.js](../tests/test-validator.js) | The project's attribute bag |
 | V-TST-170 | Headless | [test-validator.js](../tests/test-validator.js) | A prototype key is refused as an attribute key |
@@ -378,7 +380,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-007 | Folder deletion | V-TST-015, V-TST-052, V-TST-089, V-TST-107 | Tested |
 | F-WSP-008 | Tree filter | V-TST-093, V-TST-108 | Tested |
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
-| F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-104, V-TST-156 | Tested |
+| F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-053, V-TST-082 | Tested |
@@ -398,7 +400,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-003 | Schema version | V-TST-033 | Tested |
 | F-PER-004 | Version migration | V-TST-035 | Tested |
 | F-PER-005 | Unsupported version | V-TST-035 | Tested |
-| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-175, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-170 | Tested |
+| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-175, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-176, V-TST-170 | Tested |
 | F-PER-007 | Migration preservation | None | None |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
@@ -423,7 +425,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-PRV-005 | Consent to hand over data | V-TST-149, V-DEM-010 | Partly |
 | N-PRV-006 | Consent scope | V-TST-149, V-DEM-011 | Partly |
 | N-PRV-007 | Data minimisation | V-TST-019, V-INS-003 | Tested |
-| N-SEC-001 | Safe parsing | V-TST-020, V-INS-001, V-INS-002, V-TST-172, V-TST-154, V-TST-155, V-TST-170 | Tested |
+| N-SEC-001 | Safe parsing | V-TST-020, V-INS-001, V-INS-002, V-TST-172, V-TST-154, V-TST-155, V-TST-176, V-TST-170 | Tested |
 | N-SEC-002 | Safe rendering | V-TST-025, V-INS-001, V-INS-002 | Tested |
 | N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-INS-006 | Tested |
 | N-SEC-004 | External application isolation | V-TST-016, V-TST-017, V-INS-003 | Tested |
@@ -431,7 +433,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-006 | Content security policy | V-INS-001 | Tested |
 | N-SEC-007 | Framing | V-INS-011, V-ANA-027 | Partly |
 | N-SEC-008 | Hyperlink presentation | V-TST-025 | Tested |
-| N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059, V-TST-175 | Tested |
+| N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059, V-TST-175, V-TST-177 | Tested |
 | N-SEC-010 | No input from the address | V-INS-007 | Tested |
 | N-SEC-011 | Safe export | V-TST-073, V-TST-169, V-TST-174, V-TST-164, V-TST-167, V-TST-173 | Tested |
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028 | Partly |

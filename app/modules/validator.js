@@ -210,8 +210,8 @@ function keywordProblems(data) {
     } else {
       checkKeys(data.counters, [...V1_TYPE_CODES, 'F'], 'The counters object', problems);
       for (const [key, value] of Object.entries(data.counters)) {
-        if (!Number.isInteger(value) || value < 1) {
-          problems.push(`The ${key} counter is not a whole number of at least 1.`);
+        if (!Number.isSafeInteger(value) || value < 1) {
+          problems.push(`The ${key} counter is not a whole number from 1 to ${Number.MAX_SAFE_INTEGER}.`);
         }
       }
     }

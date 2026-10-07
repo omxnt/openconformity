@@ -266,6 +266,7 @@ export function addEntity(model, code, options = {}) {
   let id = options.id;
   if (id === undefined) {
     id = `${code}-${String(model.counters[code]).padStart(3, '0')}`;
+    if (model.nodes.has(id)) return { ok: false, reason: `${id} is already in the model.` };
     model.counters[code] += 1;
   } else {
     const idCheck = checkSuppliedId(model, id, code);
@@ -302,6 +303,7 @@ export function addFolder(model, name, options = {}) {
   let id = options.id;
   if (id === undefined) {
     id = `F-${model.counters.F}`;
+    if (model.nodes.has(id)) return { ok: false, reason: `${id} is already in the model.` };
     model.counters.F += 1;
   } else {
     const idCheck = checkSuppliedId(model, id, 'F');
@@ -753,10 +755,19 @@ export function setProjectAttribute(model, key, value) {
 /**
  * Install the counters a file records, replacing the issued state. The
  * loader's final step: a file's counters are authoritative, and may exceed
- * the next unissued number where undone creations left holes.
+ * the next unissued number where undone creations left holes. A counter
+ * that is not a safe integer of at least 1 is refused, since the software
+ * could not issue an identifier from it.
  * @param {Model} model
  * @param {Object<string, number>} counters
+ * @returns {Outcome}
  */
 export function restoreCounters(model, counters) {
+  for (const [key, value] of Object.entries(counters)) {
+    if (!Number.isSafeInteger(value) || value < 1) {
+      return { ok: false, reason: `The ${key} counter is not a whole number from 1 to ${Number.MAX_SAFE_INTEGER}.` };
+    }
+  }
   model.counters = { ...counters };
+  return { ok: true };
 }

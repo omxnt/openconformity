@@ -94,6 +94,13 @@ refusedOver(mutated((data) => { data.counters.SCN = 0; }), 'SCN counter', 'a cou
 refusedOver(mutated((data) => { data.counters.SCN = '2'; }), 'SCN counter', 'a counter held as text is refused');
 refusedOver(mutated((data) => { data.counters.SCN = 1.5; }), 'SCN counter', 'a fractional counter is refused');
 
+// --- V-TST-176 A counter the software cannot issue from is refused (F-PER-006, N-SEC-001) ---
+
+refusedOver(mutated((data) => { data.counters.HAZ = 2 ** 53; }), 'HAZ counter', 'a counter past the largest safe integer is refused, since two of them issue one identifier');
+refusedOver(mutated((data) => { data.counters.HAZ = 1e21; }), 'HAZ counter', 'a counter that prints in exponent form is refused');
+refusedOver(mutated((data) => { data.counters.HAZ = 1e300; }), 'HAZ counter', 'as is one far beyond it');
+ok(validate(mutated((data) => { data.counters.HAZ = Number.MAX_SAFE_INTEGER; }), 1).ok, 'while the largest safe integer is accepted');
+
 refusedOver(mutated((data) => { data.folders[0].name = ''; }), 'name', 'an empty folder name is refused');
 refusedOver(mutated((data) => { data.folders[0].id = 'folder-1'; }), 'identifier', 'a malformed folder identifier is refused');
 refusedOver(mutated((data) => { data.folders[0].order = -1; }), 'order', 'a negative order is refused');
