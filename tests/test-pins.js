@@ -331,6 +331,35 @@ const sheet = readFile('../app/style.css');
   ok(sheet.includes('.mono {\n  font-family: "IBM Plex Mono", ui-monospace, monospace;'), 'and identifiers and data values in IBM Plex Mono');
 }
 
+// --- The security model cites the verification document truly (no requirement) ---
+
+{
+  const verification = readFile('../docs/verification.md');
+  const activities = new Map();
+  const coverage = new Map();
+  for (const line of verification.split('\n')) {
+    const row = /^\| ([A-Z]-[A-Z]{3}-\d{3}) \| [^|]* \| ([^|]*) \| (Tested|Partly|Manual|None) \|$/.exec(line);
+    if (row) {
+      activities.set(row[1], row[2].match(/V-[A-Z]{3}-\d{3}/g) ?? []);
+      coverage.set(row[1], row[3]);
+    }
+  }
+  const rank = { Tested: 0, Partly: 1, Manual: 2, None: 3 };
+  const order = (id) => ['TST', 'INS', 'DEM', 'ANA'].indexOf(id.slice(2, 5)) * 1000 + Number(id.slice(6));
+  const controls = readFile('../docs/security.md').split('\n').filter((line) => /^\| CT-\d{2} \|/.test(line));
+  ok(controls.length > 30, 'the controls table is found');
+  for (const line of controls) {
+    const cells = line.split('|').map((cell) => cell.trim());
+    const requirements = cells[3].match(/[A-Z]-[A-Z]{3}-\d{3}/g);
+    if (!requirements) continue;
+    const expected = [...new Set(requirements.flatMap((id) => activities.get(id) ?? []))].sort((a, b) => order(a) - order(b));
+    const cited = cells[5].match(/V-[A-Z]{3}-\d{3}/g) ?? [];
+    deepEqual(cited, expected, `${cells[1]} cites the activities verification.md lists for its requirements`);
+    const weakest = requirements.map((id) => coverage.get(id) ?? 'None').sort((a, b) => rank[b] - rank[a])[0];
+    ok(cells[6] === weakest, `${cells[1]} carries the coverage verification.md gives its requirements`);
+  }
+}
+
 // --- The release line (no requirement) ------------------------------------
 
 {
