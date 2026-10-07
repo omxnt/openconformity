@@ -14,7 +14,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
 
 // --- V-TST-069 The catalogues the software ships (F-PER-002, F-PER-012) ------
 
-deepEqual(LIBRARIES.map((held) => held.name), ['Project structure', 'European legislation', 'System phases'], 'the software ships three catalogues, the root folders of the library project in their order');
+deepEqual(LIBRARIES.map((held) => held.name), ['Project structure', 'European legislation', 'System phases', 'Single hazards'], 'the software ships four catalogues, the root folders of the library project in their order');
 ok(LIBRARIES.every((held) => loadProject(held.project).ok), 'and each passes the gates a project file passes');
 const library = loadProject(LIBRARIES.find((held) => held.name === 'European legislation').project);
 /** The entity of the legislation catalogue carrying a reference, found as the specification writes it. */
@@ -40,6 +40,27 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   deepEqual([a.name, a.folders, a.entities.map((e) => [e.id, e.parent]), a.relationships], ['A', [], [['HAZ-001', null]], []], 'a root folder is cut out as a catalogue of its own, named after it, what stood in it at the root, and no relationship to what is outside');
   const b = catalogueOf(project, 'F-2');
   deepEqual([b.folders.map((f) => [f.id, f.parent]), b.entities.map((e) => [e.id, e.parent]), b.relationships.length], [[['F-3', null]], [['HAZ-002', 'F-3'], ['ELM-001', null]], 1], 'a nested folder stays a shelf inside it, and the relationship between two of its entities travels');
+}
+
+// --- V-TST-180 The checklist of single hazards (C-PRJ-005, F-MOD-010, F-PER-012) ---
+
+{
+  const hazards = loadProject(LIBRARIES.find((held) => held.name === 'Single hazards').project);
+  const nodes = [...hazards.model.nodes.values()];
+  ok(nodes.every((node) => node.kind === 'entity' && node.type === 'HAZ'), 'the catalogue holds Single Hazards and nothing else');
+  const groups = nodes.filter((node) => node.parent === null);
+  equal(groups.length, 16, 'sixteen groups stand at its root, as the checklist groups its items');
+  deepEqual(groups.map((group) => group.attributes.reference), Array.from({ length: 16 }, (_, i) => String(i + 1)), 'numbered as the checklist numbers them');
+  const items = nodes.filter((node) => node.parent !== null);
+  equal(items.length, 200, 'two hundred hazards stand under them');
+  ok(items.every((item) => item.attributes.reference.startsWith(`${nodeOf(hazards.model, item.parent).attributes.reference}.`)), 'each numbered under its group');
+  ok(nodes.every((node) => Object.keys(node.attributes).sort().join() === 'reference,title' && node.attributes.title !== ''), 'each carrying its number and its title as the checklist writes them, and nothing else');
+  equal(hazards.model.relationships.size, 0, 'and no relationship, since a checklist states no structure');
+  const target = createModel();
+  const landed = importInto(target, hazards.model, new Set(nodes.map((node) => node.id)));
+  equal(landed.ok, true, 'the whole catalogue imports into a new project');
+  equal(target.nodes.size, 216, 'every hazard landing');
+  equal(childrenOf(target, null).length, 16, 'the groups at the root and the hazards under them');
 }
 
 // --- The rows (no requirement) -----------------------------------------------------------

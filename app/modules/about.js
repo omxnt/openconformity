@@ -81,6 +81,7 @@ export async function showAbout(dialogs, store = null) {
       ]),
       fold('References', [
         ...ACTS.map((act) => [act.reference, act.title, [link(act.address, 'eur-lex.europa.eu')]]),
+        ['FMV PHL template 2.0', 'Checklist of hazards and hazardous conditions, carried with permission', [link('https://www.fmv.se/om-fmv/for-leverantorer-och-kunder/systemsakerhet/', 'fmv.se')]],
         ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', [link('https://www.iso.org/standard/57180.html', 'iso.org')]],
         ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
         ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],

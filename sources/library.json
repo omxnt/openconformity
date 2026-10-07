@@ -13,7 +13,7 @@
     "OSR": 1,
     "REQ": 1,
     "VER": 1,
-    "HAZ": 1,
+    "HAZ": 217,
     "SCN": 1,
     "PRM": 1,
     "SAF": 1,
@@ -21,7 +21,7 @@
     "ACT": 1,
     "TSK": 1,
     "PHS": 16,
-    "F": 20
+    "F": 21
   },
   "folders": [
     {
@@ -137,6 +137,12 @@
       "name": "System phases",
       "parent": null,
       "order": 2
+    },
+    {
+      "id": "F-20",
+      "name": "Single hazards",
+      "parent": null,
+      "order": 3
     }
   ],
   "entities": [
@@ -3463,6 +3469,2166 @@
       "order": 14,
       "attributes": {
         "title": "Scrapping"
+      }
+    },
+    {
+      "id": "HAZ-001",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 0,
+      "attributes": {
+        "reference": "1",
+        "title": "Kinetic energy"
+      }
+    },
+    {
+      "id": "HAZ-017",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 0,
+      "attributes": {
+        "reference": "1.1",
+        "title": "Moving objects / parts"
+      }
+    },
+    {
+      "id": "HAZ-018",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 1,
+      "attributes": {
+        "reference": "1.2",
+        "title": "Rotating objects / parts"
+      }
+    },
+    {
+      "id": "HAZ-019",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 2,
+      "attributes": {
+        "reference": "1.3",
+        "title": "Fracturing of rotating equipment"
+      }
+    },
+    {
+      "id": "HAZ-020",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 3,
+      "attributes": {
+        "reference": "1.4",
+        "title": "Ejected parts / fragments"
+      }
+    },
+    {
+      "id": "HAZ-021",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 4,
+      "attributes": {
+        "reference": "1.5",
+        "title": "Falling objects"
+      }
+    },
+    {
+      "id": "HAZ-022",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 5,
+      "attributes": {
+        "reference": "1.6",
+        "title": "Linear impact"
+      }
+    },
+    {
+      "id": "HAZ-023",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 6,
+      "attributes": {
+        "reference": "1.7",
+        "title": "Explosive atmosphere"
+      }
+    },
+    {
+      "id": "HAZ-024",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 7,
+      "attributes": {
+        "reference": "1.8",
+        "title": "Explosives"
+      }
+    },
+    {
+      "id": "HAZ-025",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 8,
+      "attributes": {
+        "reference": "1.9",
+        "title": "Displacement"
+      }
+    },
+    {
+      "id": "HAZ-026",
+      "type": "HAZ",
+      "parent": "HAZ-001",
+      "order": 9,
+      "attributes": {
+        "reference": "1.10",
+        "title": "Friction beteween moving parts"
+      }
+    },
+    {
+      "id": "HAZ-002",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 1,
+      "attributes": {
+        "reference": "2",
+        "title": "Mechanical energy"
+      }
+    },
+    {
+      "id": "HAZ-027",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 0,
+      "attributes": {
+        "reference": "2.1",
+        "title": "Tensioned springs"
+      }
+    },
+    {
+      "id": "HAZ-028",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 1,
+      "attributes": {
+        "reference": "2.2",
+        "title": "Compressed spring release"
+      }
+    },
+    {
+      "id": "HAZ-029",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 2,
+      "attributes": {
+        "reference": "2.3",
+        "title": "Stored energy release"
+      }
+    },
+    {
+      "id": "HAZ-030",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 3,
+      "attributes": {
+        "reference": "2.4",
+        "title": "Hot objects"
+      }
+    },
+    {
+      "id": "HAZ-031",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 4,
+      "attributes": {
+        "reference": "2.5",
+        "title": "Cold objects"
+      }
+    },
+    {
+      "id": "HAZ-032",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 5,
+      "attributes": {
+        "reference": "2.6",
+        "title": "Sharp corners and edges"
+      }
+    },
+    {
+      "id": "HAZ-033",
+      "type": "HAZ",
+      "parent": "HAZ-002",
+      "order": 6,
+      "attributes": {
+        "reference": "2.7",
+        "title": "Pinch points"
+      }
+    },
+    {
+      "id": "HAZ-003",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 2,
+      "attributes": {
+        "reference": "3",
+        "title": "Pressure"
+      }
+    },
+    {
+      "id": "HAZ-034",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 0,
+      "attributes": {
+        "reference": "3.1",
+        "title": "Systems under pressure, (pressure containers)"
+      }
+    },
+    {
+      "id": "HAZ-035",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 1,
+      "attributes": {
+        "reference": "3.2",
+        "title": "Overpressure"
+      }
+    },
+    {
+      "id": "HAZ-036",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 2,
+      "attributes": {
+        "reference": "3.3",
+        "title": "Underpressure"
+      }
+    },
+    {
+      "id": "HAZ-037",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 3,
+      "attributes": {
+        "reference": "3.4",
+        "title": "No pressure"
+      }
+    },
+    {
+      "id": "HAZ-216",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 4,
+      "attributes": {
+        "reference": "3.5",
+        "title": "System leakage"
+      }
+    },
+    {
+      "id": "HAZ-038",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 5,
+      "attributes": {
+        "reference": "3.6",
+        "title": "Heating / cooling by pressure change"
+      }
+    },
+    {
+      "id": "HAZ-039",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 6,
+      "attributes": {
+        "reference": "3.7",
+        "title": "Aero bends / choking / shock"
+      }
+    },
+    {
+      "id": "HAZ-040",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 7,
+      "attributes": {
+        "reference": "3.8",
+        "title": "Compressed gas"
+      }
+    },
+    {
+      "id": "HAZ-041",
+      "type": "HAZ",
+      "parent": "HAZ-003",
+      "order": 8,
+      "attributes": {
+        "reference": "3.9",
+        "title": "Accidental release"
+      }
+    },
+    {
+      "id": "HAZ-004",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 3,
+      "attributes": {
+        "reference": "4",
+        "title": "Acceleration"
+      }
+    },
+    {
+      "id": "HAZ-042",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 0,
+      "attributes": {
+        "reference": "4.1",
+        "title": "Structural deformation"
+      }
+    },
+    {
+      "id": "HAZ-043",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 1,
+      "attributes": {
+        "reference": "4.2",
+        "title": "Impact"
+      }
+    },
+    {
+      "id": "HAZ-044",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 2,
+      "attributes": {
+        "reference": "4.3",
+        "title": "Displacement of parts/pipes/fluids"
+      }
+    },
+    {
+      "id": "HAZ-045",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 3,
+      "attributes": {
+        "reference": "4.4",
+        "title": "Valve / electrical contact seating"
+      }
+    },
+    {
+      "id": "HAZ-046",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 4,
+      "attributes": {
+        "reference": "4.5",
+        "title": "Fluid pressure loss"
+      }
+    },
+    {
+      "id": "HAZ-047",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 5,
+      "attributes": {
+        "reference": "4.6",
+        "title": "Fluid pressure surge"
+      }
+    },
+    {
+      "id": "HAZ-048",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 6,
+      "attributes": {
+        "reference": "4.7",
+        "title": "Detonation - chock sensitive explosive"
+      }
+    },
+    {
+      "id": "HAZ-049",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 7,
+      "attributes": {
+        "reference": "4.8",
+        "title": "Falling objekts"
+      }
+    },
+    {
+      "id": "HAZ-050",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 8,
+      "attributes": {
+        "reference": "4.9",
+        "title": "Change in velocity"
+      }
+    },
+    {
+      "id": "HAZ-051",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 9,
+      "attributes": {
+        "reference": "4.10",
+        "title": "Uncotrolled loss of altitude"
+      }
+    },
+    {
+      "id": "HAZ-052",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 10,
+      "attributes": {
+        "reference": "4.11",
+        "title": "Turbulence"
+      }
+    },
+    {
+      "id": "HAZ-053",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 11,
+      "attributes": {
+        "reference": "4.12",
+        "title": "Loss of motive power"
+      }
+    },
+    {
+      "id": "HAZ-054",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 12,
+      "attributes": {
+        "reference": "4.13",
+        "title": "Failure of restraining mechanism"
+      }
+    },
+    {
+      "id": "HAZ-055",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 13,
+      "attributes": {
+        "reference": "4.14",
+        "title": "Loss of braking"
+      }
+    },
+    {
+      "id": "HAZ-056",
+      "type": "HAZ",
+      "parent": "HAZ-004",
+      "order": 14,
+      "attributes": {
+        "title": "Deflection / bottoming of shock isolated parts",
+        "reference": "4.15"
+      }
+    },
+    {
+      "id": "HAZ-005",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 4,
+      "attributes": {
+        "reference": "5",
+        "title": "Vibration / sound"
+      }
+    },
+    {
+      "id": "HAZ-057",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 0,
+      "attributes": {
+        "reference": "5.1",
+        "title": "Material fatigue"
+      }
+    },
+    {
+      "id": "HAZ-058",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 1,
+      "attributes": {
+        "reference": "5.2",
+        "title": "Pressure / shock wave effects"
+      }
+    },
+    {
+      "id": "HAZ-059",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 2,
+      "attributes": {
+        "reference": "5.3",
+        "title": "Loosening of parts"
+      }
+    },
+    {
+      "id": "HAZ-060",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 3,
+      "attributes": {
+        "reference": "5.4",
+        "title": "Communication interferens"
+      }
+    },
+    {
+      "id": "HAZ-061",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 4,
+      "attributes": {
+        "reference": "5.5",
+        "title": "Sound pressure,excessive noise"
+      }
+    },
+    {
+      "id": "HAZ-062",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 5,
+      "attributes": {
+        "reference": "5.6",
+        "title": "Excessive vibration"
+      }
+    },
+    {
+      "id": "HAZ-063",
+      "type": "HAZ",
+      "parent": "HAZ-005",
+      "order": 6,
+      "attributes": {
+        "reference": "5.7",
+        "title": "Supersonics"
+      }
+    },
+    {
+      "id": "HAZ-006",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 5,
+      "attributes": {
+        "reference": "6",
+        "title": "Material deformation"
+      }
+    },
+    {
+      "id": "HAZ-064",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 0,
+      "attributes": {
+        "reference": "6.1",
+        "title": "Material aging"
+      }
+    },
+    {
+      "id": "HAZ-065",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 1,
+      "attributes": {
+        "reference": "6.2",
+        "title": "Material embrittelment"
+      }
+    },
+    {
+      "id": "HAZ-066",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 2,
+      "attributes": {
+        "reference": "6.3",
+        "title": "Change in physical / chemical properties"
+      }
+    },
+    {
+      "id": "HAZ-067",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 3,
+      "attributes": {
+        "reference": "6.4",
+        "title": "Structural damage / failure"
+      }
+    },
+    {
+      "id": "HAZ-068",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 4,
+      "attributes": {
+        "reference": "6.5",
+        "title": "Delamination"
+      }
+    },
+    {
+      "id": "HAZ-069",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 5,
+      "attributes": {
+        "reference": "6.6",
+        "title": "Dimension change from heat / sun"
+      }
+    },
+    {
+      "id": "HAZ-070",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 6,
+      "attributes": {
+        "reference": "6.7",
+        "title": "Improper welds"
+      }
+    },
+    {
+      "id": "HAZ-071",
+      "type": "HAZ",
+      "parent": "HAZ-006",
+      "order": 7,
+      "attributes": {
+        "reference": "6.8",
+        "title": "High aerodynamic loads"
+      }
+    },
+    {
+      "id": "HAZ-007",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 6,
+      "attributes": {
+        "reference": "7",
+        "title": "Hazardous substances / Chemical energy"
+      }
+    },
+    {
+      "id": "HAZ-072",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 0,
+      "attributes": {
+        "reference": "7.1",
+        "title": "Flammable substances"
+      }
+    },
+    {
+      "id": "HAZ-073",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 1,
+      "attributes": {
+        "reference": "7.2",
+        "title": "Substances subject to spontaneous combustion"
+      }
+    },
+    {
+      "id": "HAZ-074",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 2,
+      "attributes": {
+        "reference": "7.3",
+        "title": "Substances producing gas"
+      }
+    },
+    {
+      "id": "HAZ-075",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 3,
+      "attributes": {
+        "reference": "7.4",
+        "title": "Oxidising substances"
+      }
+    },
+    {
+      "id": "HAZ-076",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 4,
+      "attributes": {
+        "reference": "7.5",
+        "title": "Corrosive substances"
+      }
+    },
+    {
+      "id": "HAZ-077",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 5,
+      "attributes": {
+        "reference": "7.6",
+        "title": "Toxic substances"
+      }
+    },
+    {
+      "id": "HAZ-078",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 6,
+      "attributes": {
+        "reference": "7.7",
+        "title": "Radioactive substances"
+      }
+    },
+    {
+      "id": "HAZ-079",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 7,
+      "attributes": {
+        "reference": "7.8",
+        "title": "Fire"
+      }
+    },
+    {
+      "id": "HAZ-080",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 8,
+      "attributes": {
+        "reference": "7.9",
+        "title": "Non-explosive reaktion"
+      }
+    },
+    {
+      "id": "HAZ-081",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 9,
+      "attributes": {
+        "reference": "7.10",
+        "title": "Material degradetion"
+      }
+    },
+    {
+      "id": "HAZ-082",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 10,
+      "attributes": {
+        "reference": "7.11",
+        "title": "Toxic gas production"
+      }
+    },
+    {
+      "id": "HAZ-083",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 11,
+      "attributes": {
+        "reference": "7.12",
+        "title": "Corrosion"
+      }
+    },
+    {
+      "id": "HAZ-084",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 12,
+      "attributes": {
+        "reference": "7.13",
+        "title": "Organic material swelling"
+      }
+    },
+    {
+      "id": "HAZ-085",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 13,
+      "attributes": {
+        "reference": "7.14",
+        "title": "Disassociation hazardous substances"
+      }
+    },
+    {
+      "id": "HAZ-086",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 14,
+      "attributes": {
+        "reference": "7.15",
+        "title": "Incompatible materials / chemicals"
+      }
+    },
+    {
+      "id": "HAZ-087",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 15,
+      "attributes": {
+        "reference": "7.16",
+        "title": "Incompatible material reaction"
+      }
+    },
+    {
+      "id": "HAZ-088",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 16,
+      "attributes": {
+        "reference": "7.17",
+        "title": "Combination hazardous substances"
+      }
+    },
+    {
+      "id": "HAZ-089",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 17,
+      "attributes": {
+        "reference": "7.18",
+        "title": "Presence of fuel"
+      }
+    },
+    {
+      "id": "HAZ-090",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 18,
+      "attributes": {
+        "reference": "7.19",
+        "title": "Presence of strong oxidizer"
+      }
+    },
+    {
+      "id": "HAZ-091",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 19,
+      "attributes": {
+        "reference": "7.20",
+        "title": "Presence of ignition source"
+      }
+    },
+    {
+      "id": "HAZ-092",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 20,
+      "attributes": {
+        "reference": "7.21",
+        "title": "Explosive gas, liquid, solid"
+      }
+    },
+    {
+      "id": "HAZ-093",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 21,
+      "attributes": {
+        "reference": "7.22",
+        "title": "Formation of explosive gels between fuels / oxidizers"
+      }
+    },
+    {
+      "id": "HAZ-094",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 22,
+      "attributes": {
+        "reference": "7.23",
+        "title": "Cryogenics"
+      }
+    },
+    {
+      "id": "HAZ-095",
+      "type": "HAZ",
+      "parent": "HAZ-007",
+      "order": 23,
+      "attributes": {
+        "reference": "7.24",
+        "title": "Fuel exhaustion"
+      }
+    },
+    {
+      "id": "HAZ-008",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 7,
+      "attributes": {
+        "reference": "8",
+        "title": "Toxicants"
+      }
+    },
+    {
+      "id": "HAZ-096",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 0,
+      "attributes": {
+        "reference": "8.1",
+        "title": "Respiratory system damage"
+      }
+    },
+    {
+      "id": "HAZ-097",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 1,
+      "attributes": {
+        "reference": "8.2",
+        "title": "Blood system damage"
+      }
+    },
+    {
+      "id": "HAZ-098",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 2,
+      "attributes": {
+        "reference": "8.3",
+        "title": "Body organ damage"
+      }
+    },
+    {
+      "id": "HAZ-099",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 3,
+      "attributes": {
+        "reference": "8.4",
+        "title": "Skin irritation / damage"
+      }
+    },
+    {
+      "id": "HAZ-100",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 4,
+      "attributes": {
+        "reference": "8.5",
+        "title": "Nervous system effects"
+      }
+    },
+    {
+      "id": "HAZ-101",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 5,
+      "attributes": {
+        "reference": "8.6",
+        "title": "Foul odor"
+      }
+    },
+    {
+      "id": "HAZ-102",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 6,
+      "attributes": {
+        "reference": "8.7",
+        "title": "Asphyxiant"
+      }
+    },
+    {
+      "id": "HAZ-103",
+      "type": "HAZ",
+      "parent": "HAZ-008",
+      "order": 7,
+      "attributes": {
+        "reference": "8.8",
+        "title": "Carcinogen"
+      }
+    },
+    {
+      "id": "HAZ-009",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 8,
+      "attributes": {
+        "reference": "9",
+        "title": "Radiation"
+      }
+    },
+    {
+      "id": "HAZ-104",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 0,
+      "attributes": {
+        "reference": "9.1",
+        "title": "Electromagnetic (radar, communications)"
+      }
+    },
+    {
+      "id": "HAZ-105",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 1,
+      "attributes": {
+        "reference": "9.2",
+        "title": "Jonizing (radioactive, x-ray, radar, nuclear)"
+      }
+    },
+    {
+      "id": "HAZ-106",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 2,
+      "attributes": {
+        "reference": "9.3",
+        "title": "Therminal infrared"
+      }
+    },
+    {
+      "id": "HAZ-107",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 3,
+      "attributes": {
+        "reference": "9.4",
+        "title": "UV (solar, electric weld arc)"
+      }
+    },
+    {
+      "id": "HAZ-108",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 4,
+      "attributes": {
+        "reference": "9.5",
+        "title": "Microwave"
+      }
+    },
+    {
+      "id": "HAZ-109",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 5,
+      "attributes": {
+        "reference": "9.6",
+        "title": "Laser"
+      }
+    },
+    {
+      "id": "HAZ-110",
+      "type": "HAZ",
+      "parent": "HAZ-009",
+      "order": 6,
+      "attributes": {
+        "reference": "9.7",
+        "title": "Electronic equipment interference"
+      }
+    },
+    {
+      "id": "HAZ-010",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 9,
+      "attributes": {
+        "reference": "10",
+        "title": "Contamination"
+      }
+    },
+    {
+      "id": "HAZ-111",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 0,
+      "attributes": {
+        "reference": "10.1",
+        "title": "Clogging/blocking of components"
+      }
+    },
+    {
+      "id": "HAZ-112",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 1,
+      "attributes": {
+        "reference": "10.2",
+        "title": "Fluid deterioration"
+      }
+    },
+    {
+      "id": "HAZ-113",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 2,
+      "attributes": {
+        "reference": "10.3",
+        "title": "Performance sensors / operating components degradation"
+      }
+    },
+    {
+      "id": "HAZ-114",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 3,
+      "attributes": {
+        "reference": "10.4",
+        "title": "Line / component erosion"
+      }
+    },
+    {
+      "id": "HAZ-115",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 4,
+      "attributes": {
+        "reference": "10.5",
+        "title": "Line / component fracture / degradation due to high speed particles"
+      }
+    },
+    {
+      "id": "HAZ-116",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 5,
+      "attributes": {
+        "reference": "10.6",
+        "title": "Electrical insulation breakdown"
+      }
+    },
+    {
+      "id": "HAZ-117",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 6,
+      "attributes": {
+        "reference": "10.7",
+        "title": "Emulsion in water"
+      }
+    },
+    {
+      "id": "HAZ-118",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 7,
+      "attributes": {
+        "reference": "10.8",
+        "title": "Reduction in lubrication"
+      }
+    },
+    {
+      "id": "HAZ-119",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 8,
+      "attributes": {
+        "reference": "10.9",
+        "title": "Leakage of petrolium / injurios products"
+      }
+    },
+    {
+      "id": "HAZ-120",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 9,
+      "attributes": {
+        "reference": "10.10",
+        "title": "Filter owerload"
+      }
+    },
+    {
+      "id": "HAZ-121",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 10,
+      "attributes": {
+        "reference": "10.11",
+        "title": "Metal particles"
+      }
+    },
+    {
+      "id": "HAZ-122",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 11,
+      "attributes": {
+        "reference": "10.12",
+        "title": "Airborne dirt / contamination"
+      }
+    },
+    {
+      "id": "HAZ-123",
+      "type": "HAZ",
+      "parent": "HAZ-010",
+      "order": 12,
+      "attributes": {
+        "reference": "10.13",
+        "title": "Wrong seal / gasket"
+      }
+    },
+    {
+      "id": "HAZ-011",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 10,
+      "attributes": {
+        "reference": "11",
+        "title": "Electrical energy"
+      }
+    },
+    {
+      "id": "HAZ-124",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 0,
+      "attributes": {
+        "reference": "11.1",
+        "title": "Electrocution / shock"
+      }
+    },
+    {
+      "id": "HAZ-125",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 1,
+      "attributes": {
+        "reference": "11.2",
+        "title": "Burns"
+      }
+    },
+    {
+      "id": "HAZ-126",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 2,
+      "attributes": {
+        "reference": "11.3",
+        "title": "Ignition of combustibles"
+      }
+    },
+    {
+      "id": "HAZ-127",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 3,
+      "attributes": {
+        "reference": "11.4",
+        "title": "Equipment burnout"
+      }
+    },
+    {
+      "id": "HAZ-128",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 4,
+      "attributes": {
+        "reference": "11.5",
+        "title": "Necessary equipment/warning of cation equipment unavailable"
+      }
+    },
+    {
+      "id": "HAZ-129",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 5,
+      "attributes": {
+        "reference": "11.6",
+        "title": "Failure of emergency of rescue system"
+      }
+    },
+    {
+      "id": "HAZ-130",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 6,
+      "attributes": {
+        "reference": "11.7",
+        "title": "Restraining device release"
+      }
+    },
+    {
+      "id": "HAZ-131",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 7,
+      "attributes": {
+        "reference": "11.8",
+        "title": "Communication interuption"
+      }
+    },
+    {
+      "id": "HAZ-132",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 8,
+      "attributes": {
+        "reference": "11.9",
+        "title": "Power failure"
+      }
+    },
+    {
+      "id": "HAZ-133",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 9,
+      "attributes": {
+        "reference": "11.10",
+        "title": "Static electricity"
+      }
+    },
+    {
+      "id": "HAZ-134",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 10,
+      "attributes": {
+        "reference": "11.11",
+        "title": "Proper ground / bond"
+      }
+    },
+    {
+      "id": "HAZ-135",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 11,
+      "attributes": {
+        "reference": "11.12",
+        "title": "Adequate insulation"
+      }
+    },
+    {
+      "id": "HAZ-136",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 12,
+      "attributes": {
+        "reference": "11.13",
+        "title": "Circuit power surge protection"
+      }
+    },
+    {
+      "id": "HAZ-137",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 13,
+      "attributes": {
+        "reference": "11.14",
+        "title": "Positive power lockout"
+      }
+    },
+    {
+      "id": "HAZ-138",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 14,
+      "attributes": {
+        "reference": "11.15",
+        "title": "Ground failure"
+      }
+    },
+    {
+      "id": "HAZ-139",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 15,
+      "attributes": {
+        "reference": "11.16",
+        "title": "EMI Electromagnetic interference"
+      }
+    },
+    {
+      "id": "HAZ-140",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 16,
+      "attributes": {
+        "reference": "11.17",
+        "title": "Overheating"
+      }
+    },
+    {
+      "id": "HAZ-141",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 17,
+      "attributes": {
+        "reference": "11.18",
+        "title": "Owerloading"
+      }
+    },
+    {
+      "id": "HAZ-142",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 18,
+      "attributes": {
+        "reference": "11.19",
+        "title": "Magnetic field"
+      }
+    },
+    {
+      "id": "HAZ-143",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 19,
+      "attributes": {
+        "reference": "11.20",
+        "title": "Current-carrying parts"
+      }
+    },
+    {
+      "id": "HAZ-144",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 20,
+      "attributes": {
+        "reference": "11.21",
+        "title": "Electromagnetic radiation"
+      }
+    },
+    {
+      "id": "HAZ-145",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 21,
+      "attributes": {
+        "reference": "11.22",
+        "title": "Charged condensers"
+      }
+    },
+    {
+      "id": "HAZ-146",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 22,
+      "attributes": {
+        "reference": "11.23",
+        "title": "Electrostatic energy"
+      }
+    },
+    {
+      "id": "HAZ-147",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 23,
+      "attributes": {
+        "reference": "11.24",
+        "title": "Accumulators / fuel cell / battery"
+      }
+    },
+    {
+      "id": "HAZ-148",
+      "type": "HAZ",
+      "parent": "HAZ-011",
+      "order": 24,
+      "attributes": {
+        "reference": "11.25",
+        "title": "Lasers"
+      }
+    },
+    {
+      "id": "HAZ-012",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 11,
+      "attributes": {
+        "reference": "12",
+        "title": "Thermal energy"
+      }
+    },
+    {
+      "id": "HAZ-149",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 0,
+      "attributes": {
+        "reference": "12.1",
+        "title": "High temperature"
+      }
+    },
+    {
+      "id": "HAZ-150",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 1,
+      "attributes": {
+        "reference": "12.2",
+        "title": "Low temperature"
+      }
+    },
+    {
+      "id": "HAZ-151",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 2,
+      "attributes": {
+        "reference": "12.3",
+        "title": "Combustible ignition"
+      }
+    },
+    {
+      "id": "HAZ-152",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 3,
+      "attributes": {
+        "reference": "12.4",
+        "title": "Reaction ignition"
+      }
+    },
+    {
+      "id": "HAZ-153",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 4,
+      "attributes": {
+        "reference": "12.5",
+        "title": "Distortion of parts"
+      }
+    },
+    {
+      "id": "HAZ-154",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 5,
+      "attributes": {
+        "reference": "12.6",
+        "title": "Fluid expansion/constraction"
+      }
+    },
+    {
+      "id": "HAZ-155",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 6,
+      "attributes": {
+        "reference": "12.7",
+        "title": "Inadequate heat dissipation"
+      }
+    },
+    {
+      "id": "HAZ-156",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 7,
+      "attributes": {
+        "reference": "12.8",
+        "title": "Thermal source insulation"
+      }
+    },
+    {
+      "id": "HAZ-157",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 8,
+      "attributes": {
+        "reference": "12.9",
+        "title": "Freezing of liquids"
+      }
+    },
+    {
+      "id": "HAZ-158",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 9,
+      "attributes": {
+        "reference": "12.10",
+        "title": "Icing"
+      }
+    },
+    {
+      "id": "HAZ-159",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 10,
+      "attributes": {
+        "reference": "12.11",
+        "title": "Thermal expansion/contraction"
+      }
+    },
+    {
+      "id": "HAZ-160",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 11,
+      "attributes": {
+        "reference": "12.12",
+        "title": "Temperature interlocks"
+      }
+    },
+    {
+      "id": "HAZ-161",
+      "type": "HAZ",
+      "parent": "HAZ-012",
+      "order": 12,
+      "attributes": {
+        "reference": "12.13",
+        "title": "Thermal stress"
+      }
+    },
+    {
+      "id": "HAZ-013",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 12,
+      "attributes": {
+        "reference": "13",
+        "title": "Natural environment"
+      }
+    },
+    {
+      "id": "HAZ-162",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 0,
+      "attributes": {
+        "reference": "13.1",
+        "title": "Dew"
+      }
+    },
+    {
+      "id": "HAZ-163",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 1,
+      "attributes": {
+        "reference": "13.2",
+        "title": "Fog"
+      }
+    },
+    {
+      "id": "HAZ-164",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 2,
+      "attributes": {
+        "reference": "13.3",
+        "title": "Humidity"
+      }
+    },
+    {
+      "id": "HAZ-165",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 3,
+      "attributes": {
+        "reference": "13.4",
+        "title": "Gravity"
+      }
+    },
+    {
+      "id": "HAZ-166",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 4,
+      "attributes": {
+        "reference": "13.5",
+        "title": "Hail"
+      }
+    },
+    {
+      "id": "HAZ-167",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 5,
+      "attributes": {
+        "reference": "13.6",
+        "title": "Icing"
+      }
+    },
+    {
+      "id": "HAZ-168",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 6,
+      "attributes": {
+        "reference": "13.7",
+        "title": "Cold"
+      }
+    },
+    {
+      "id": "HAZ-169",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 7,
+      "attributes": {
+        "reference": "13.8",
+        "title": "Rain"
+      }
+    },
+    {
+      "id": "HAZ-170",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 8,
+      "attributes": {
+        "reference": "13.9",
+        "title": "Snow"
+      }
+    },
+    {
+      "id": "HAZ-171",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 9,
+      "attributes": {
+        "reference": "13.10",
+        "title": "Solar"
+      }
+    },
+    {
+      "id": "HAZ-172",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 10,
+      "attributes": {
+        "reference": "13.11",
+        "title": "Wind"
+      }
+    },
+    {
+      "id": "HAZ-173",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 11,
+      "attributes": {
+        "reference": "13.12",
+        "title": "Thermal"
+      }
+    },
+    {
+      "id": "HAZ-174",
+      "type": "HAZ",
+      "parent": "HAZ-013",
+      "order": 12,
+      "attributes": {
+        "reference": "13.13",
+        "title": "Lightning"
+      }
+    },
+    {
+      "id": "HAZ-014",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 13,
+      "attributes": {
+        "reference": "14",
+        "title": "Abnormal environments"
+      }
+    },
+    {
+      "id": "HAZ-175",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 0,
+      "attributes": {
+        "reference": "14.1",
+        "title": "Fire"
+      }
+    },
+    {
+      "id": "HAZ-176",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 1,
+      "attributes": {
+        "reference": "14.2",
+        "title": "Water pressure"
+      }
+    },
+    {
+      "id": "HAZ-177",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 2,
+      "attributes": {
+        "reference": "14.3",
+        "title": "Energized power lines"
+      }
+    },
+    {
+      "id": "HAZ-178",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 3,
+      "attributes": {
+        "reference": "14.4",
+        "title": "Microbiological organism"
+      }
+    },
+    {
+      "id": "HAZ-179",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 4,
+      "attributes": {
+        "reference": "14.5",
+        "title": "Macrobiological organism"
+      }
+    },
+    {
+      "id": "HAZ-180",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 5,
+      "attributes": {
+        "reference": "14.6",
+        "title": "Nuclear contaminated environment"
+      }
+    },
+    {
+      "id": "HAZ-181",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 6,
+      "attributes": {
+        "reference": "14.7",
+        "title": "Biologic contaminated environment"
+      }
+    },
+    {
+      "id": "HAZ-182",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 7,
+      "attributes": {
+        "reference": "14.8",
+        "title": "Chemical contaminated environment"
+      }
+    },
+    {
+      "id": "HAZ-183",
+      "type": "HAZ",
+      "parent": "HAZ-014",
+      "order": 8,
+      "attributes": {
+        "reference": "14.9",
+        "title": "Projectiles"
+      }
+    },
+    {
+      "id": "HAZ-015",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 14,
+      "attributes": {
+        "reference": "15",
+        "title": "Human Factors"
+      }
+    },
+    {
+      "id": "HAZ-184",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 0,
+      "attributes": {
+        "reference": "15.1",
+        "title": "Important information hidden/ placed under sub functions"
+      }
+    },
+    {
+      "id": "HAZ-185",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 1,
+      "attributes": {
+        "reference": "15.2",
+        "title": "The system expresses wrong information"
+      }
+    },
+    {
+      "id": "HAZ-186",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 2,
+      "attributes": {
+        "reference": "15.3",
+        "title": "The system gives delayed feedback after a user’s action"
+      }
+    },
+    {
+      "id": "HAZ-187",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 3,
+      "attributes": {
+        "reference": "15.4",
+        "title": "The system gives incomprehensive feedback after a user’s action"
+      }
+    },
+    {
+      "id": "HAZ-188",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 4,
+      "attributes": {
+        "reference": "15.5",
+        "title": "The system doesn’t give any feedback after a user´s action"
+      }
+    },
+    {
+      "id": "HAZ-189",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 5,
+      "attributes": {
+        "reference": "15.6",
+        "title": "The system doesn’t give any information about the current mode"
+      }
+    },
+    {
+      "id": "HAZ-190",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 6,
+      "attributes": {
+        "reference": "15.7",
+        "title": "The system doesn’t invite the user to make an action or invites the user to make a wrong action"
+      }
+    },
+    {
+      "id": "HAZ-191",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 7,
+      "attributes": {
+        "reference": "15.8",
+        "title": "The system doesn’t have a specific design to prevent a user from doing wrong (ex. a plug that only fits in one jack)"
+      }
+    },
+    {
+      "id": "HAZ-192",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 8,
+      "attributes": {
+        "reference": "15.9",
+        "title": "The system has wrong or bad mapping (ex. a car that turns right when you turn the steering-wheel to the left)"
+      }
+    },
+    {
+      "id": "HAZ-193",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 9,
+      "attributes": {
+        "reference": "15.10",
+        "title": "The system expresses too much information at the same time (heavy load on the short-time memory)"
+      }
+    },
+    {
+      "id": "HAZ-194",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 10,
+      "attributes": {
+        "reference": "15.11",
+        "title": "The system expresses unnecessary information (relevant information could get lost)"
+      }
+    },
+    {
+      "id": "HAZ-195",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 11,
+      "attributes": {
+        "reference": "15.12",
+        "title": "The system express contradictive information"
+      }
+    },
+    {
+      "id": "HAZ-196",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 12,
+      "attributes": {
+        "reference": "15.13",
+        "title": "Instruments which functionally belong together are physically separated"
+      }
+    },
+    {
+      "id": "HAZ-197",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 13,
+      "attributes": {
+        "reference": "15.14",
+        "title": "Instruments which functionally belong together have different design or layout"
+      }
+    },
+    {
+      "id": "HAZ-198",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 14,
+      "attributes": {
+        "reference": "15.15",
+        "title": "The system is lacking redundant information (same information expressed with different impression ex. lights, sounds, colors, shape, placement)"
+      }
+    },
+    {
+      "id": "HAZ-199",
+      "type": "HAZ",
+      "parent": "HAZ-015",
+      "order": 15,
+      "attributes": {
+        "reference": "15.16",
+        "title": "Information expressed in foreign language or in unfamiliar terms"
+      }
+    },
+    {
+      "id": "HAZ-016",
+      "type": "HAZ",
+      "parent": "F-20",
+      "order": 15,
+      "attributes": {
+        "reference": "16",
+        "title": "Other hazards"
+      }
+    },
+    {
+      "id": "HAZ-200",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 0,
+      "attributes": {
+        "reference": "16.1",
+        "title": "Altitude differences"
+      }
+    },
+    {
+      "id": "HAZ-201",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 1,
+      "attributes": {
+        "reference": "16.2",
+        "title": "Dangerous heights"
+      }
+    },
+    {
+      "id": "HAZ-202",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 2,
+      "attributes": {
+        "reference": "16.3",
+        "title": "Slippery surfaces"
+      }
+    },
+    {
+      "id": "HAZ-203",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 3,
+      "attributes": {
+        "reference": "16.4",
+        "title": "Improper floor surface"
+      }
+    },
+    {
+      "id": "HAZ-204",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 4,
+      "attributes": {
+        "reference": "16.5",
+        "title": "Unquarded floor / wall openings"
+      }
+    },
+    {
+      "id": "HAZ-205",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 5,
+      "attributes": {
+        "reference": "16.6",
+        "title": "Pressure differences"
+      }
+    },
+    {
+      "id": "HAZ-206",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 6,
+      "attributes": {
+        "reference": "16.7",
+        "title": "Lack of oxygen"
+      }
+    },
+    {
+      "id": "HAZ-207",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 7,
+      "attributes": {
+        "reference": "16.8",
+        "title": "Risk of suffocation"
+      }
+    },
+    {
+      "id": "HAZ-208",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 8,
+      "attributes": {
+        "reference": "16.9",
+        "title": "Cold"
+      }
+    },
+    {
+      "id": "HAZ-209",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 9,
+      "attributes": {
+        "reference": "16.10",
+        "title": "Heat"
+      }
+    },
+    {
+      "id": "HAZ-210",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 10,
+      "attributes": {
+        "reference": "16.11",
+        "title": "Ergonomic strain (repetitive strain injury)"
+      }
+    },
+    {
+      "id": "HAZ-211",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 11,
+      "attributes": {
+        "reference": "16.12",
+        "title": "Constrained work area"
+      }
+    },
+    {
+      "id": "HAZ-212",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 12,
+      "attributes": {
+        "reference": "16.13",
+        "title": "Weights to be lifted"
+      }
+    },
+    {
+      "id": "HAZ-213",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 13,
+      "attributes": {
+        "reference": "16.14",
+        "title": "Vibration"
+      }
+    },
+    {
+      "id": "HAZ-214",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 14,
+      "attributes": {
+        "reference": "16.15",
+        "title": "Noise"
+      }
+    },
+    {
+      "id": "HAZ-215",
+      "type": "HAZ",
+      "parent": "HAZ-016",
+      "order": 15,
+      "attributes": {
+        "reference": "16.16",
+        "title": "Dazzle"
       }
     }
   ],

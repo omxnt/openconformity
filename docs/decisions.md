@@ -993,6 +993,16 @@ The security model in `docs/security.md` reads forward in one process. Scope and
 
 ---
 
+### D-116 A checklist carried with permission
+
+`2026-10-07` `legal` `product`
+
+The library ships FMV's checklist of hazards and hazardous conditions, the section "Checklist of hazards and hazardous conditions" of the PHL template, version 2.0, as a catalogue of Single Hazards. On 2026-10-07 FMV replied by email that carrying the English list in the software, which the request described as open source and a hobby project, is fine with them, on the undertaking to name the authority as the rights holder with a reference to the source. The content stays FMV's, reproduced with permission, and is not under the project's licence. About names FMV as the source with a link to where the template is published.
+
+> *A project starting its hazard identification needs a list to pick from, as the legislation catalogue gives it requirements to pick from, and FMV's list is in use in Swedish machinery safety work. D-036 treats content as protected unless established otherwise, and permission from the holder is the way to establish it for one item. The permission covers the software and its public source with attribution, not a licence to others, so the checklist is not part of the EUPL grant, as the fonts and the icons are carried under their own licences.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

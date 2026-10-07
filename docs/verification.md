@@ -126,6 +126,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-067 | Headless | [test-history.js](../tests/test-history.js) | Snapshots carry the project's attributes |
 | V-TST-068 | Headless | [test-icons.js](../tests/test-icons.js) | One distinct glyph per entity type |
 | V-TST-069 | Headless | [test-library.js](../tests/test-library.js) | The catalogues the software ships |
+| V-TST-180 | Headless | [test-library.js](../tests/test-library.js) | The checklist of single hazards |
 | V-TST-070 | Headless | [test-library.js](../tests/test-library.js) | The picks |
 | V-TST-071 | Headless | [test-library.js](../tests/test-library.js) | The plan and the copy |
 | V-TST-072 | Headless | [test-library.js](../tests/test-library.js) | A project structure, folders alone |
@@ -330,7 +331,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | C-PRJ-002 | Domain name | V-ANA-002 | Manual |
 | C-PRJ-003 | Project licence | V-INS-015 | Tested |
 | C-PRJ-004 | Funding model | V-ANA-003 | Manual |
-| C-PRJ-005 | Standards content | V-TST-178, V-INS-016, V-TST-123, V-TST-127, V-ANA-004 | Partly |
+| C-PRJ-005 | Standards content | V-TST-180, V-TST-178, V-INS-016, V-TST-123, V-TST-127, V-ANA-004 | Partly |
 | C-PRJ-006 | Vulnerability reporting | V-INS-010, V-ANA-005 | Partly |
 | C-DEV-001 | Source repository | V-ANA-006 | Manual |
 | C-DEV-002 | Hosting platform | V-ANA-007 | Manual |
@@ -393,7 +394,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
-| F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-070, V-TST-071, V-TST-072 | Tested |
+| F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072 | Tested |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
 | F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
@@ -410,7 +411,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
-| F-PER-012 | Shipped library | V-TST-069, V-TST-178 | Tested |
+| F-PER-012 | Shipped library | V-TST-069, V-TST-180, V-TST-178 | Tested |
 | F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171 | Tested |
 | F-DRW-002 | Drawing storage | V-TST-019, V-TST-021 | Tested |
 | F-DRW-003 | External drawing editor | V-TST-003, V-TST-016, V-TST-018, V-TST-019, V-DEM-008 | Partly |

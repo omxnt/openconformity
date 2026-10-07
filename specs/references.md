@@ -1,6 +1,6 @@
 # References
 
-The form of the `reference` attribute for European Legislation, Essential Requirement, Harmonised Standard and Harmonised Requirement, and the Uniform Resource Identifier derived from container and requirement. The container carries the document and the requirement carries the subdivision. Tree rows show the Shown column. Identifiers are derived, never stored, and the syntax of [2] is applied inside annexes alike. Requirement text is copied from the current consolidated text on EUR-Lex, and the legislation records which. An Annex ZA row is a `covers` relationship from Harmonised Requirement to Essential Requirement, matched on the point number under the legislation the standard is harmonised under.
+How the `reference` attribute is written for each entity type that carries one, and how an identifier is derived from it. The entity types are those of the metamodel and the attributes those of `specs/attributes.md`, and the library in `sources/library.json` follows this document. Tree rows show the Shown column. Identifiers are derived, never stored.
 
 ## 1. European Legislation
 
@@ -167,7 +167,27 @@ The Uniform Resource Identifier shall be derived according to [3].
 
 Example `urn:iso:std:iso:13849:-1:ed-4:en:clause:4.5.2`
 
-## 5. References
+## 5. Single Hazard
+
+### 5.1 Attribute Reference
+
+The attribute reference shall be the number of the item in the checklist it is taken from, as the checklist numbers it. A group carries its number and a hazard carries its number under the group. The examples are from [6].
+
+| Case | Reference | Shown |
+|---|---|---|
+| Group | `1` | `1` |
+| Hazard | `1.1` | `1.1` |
+
+### 5.2 Attribute Title
+
+The attribute title shall be the name of the item as the checklist prints it, in English where the checklist is bilingual. The examples are from [6].
+
+| Case | Title |
+|---|---|
+| Group | `Kinetic energy` |
+| Hazard | `Moving objects / parts` |
+
+## 6. References
 
 | No. | Reference | Link |
 |---|---|---|
@@ -176,3 +196,4 @@ Example `urn:iso:std:iso:13849:-1:ed-4:en:clause:4.5.2`
 | [3] | RFC 5141, A URN Namespace for ISO | https://www.rfc-editor.org/rfc/rfc5141 |
 | [4] | Summary list of harmonised standards, European Commission | https://single-market-economy.ec.europa.eu/single-market/european-standards/harmonised-standards_en |
 | [5] | ISO/IEC Directives, Part 2, Principles and rules for the structure and drafting of ISO and IEC documents | https://www.iso.org/sites/directives/current/part2/index.xhtml |
+| [6] | PHL template, version 2.0, FMV | https://www.fmv.se/globalassets/dokument/om-fmv/systemsakerhet/stoddokument/phl-mall-template_ver.2.0_sv-eng.docx |
