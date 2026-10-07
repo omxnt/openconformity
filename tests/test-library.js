@@ -7,7 +7,7 @@
 
 import './shim.js';
 import { libraryRows, checkState, togglePick, importPlan, importInto, previewValue, previewSections } from '../app/modules/library.js';
-import { LIBRARIES, catalogueOf } from '../app/library/index.js';
+import { LIBRARIES, catalogueOf, ACTS, addressOf } from '../app/library/index.js';
 import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
@@ -229,6 +229,21 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   const hazard = addEntity(catalogue, 'HAZ', { attributes: { title: 'Crushing', eliminated: 'Yes' } }).entity;
   deepEqual(previewSections(hazard).slice(0, 2).map((section) => [section.name, section.fields.map((field) => field.value)]), [['Hazard', ['Crushing']], ['Elimination', ['Yes']]], 'a hazard eliminated shows its Elimination tab as a second section');
   deepEqual(previewSections(addEntity(catalogue, 'HAZ').entity).map((section) => section.fields.length), previewSections(hazard).map(() => 0), 'an entity holding nothing shows the same sections, each empty');
+}
+
+// --- V-TST-178 The acts the library ships, as About names them (C-PRJ-005, F-PER-012) ---
+
+{
+  const filed = LIBRARIES.flatMap((library) => library.project.entities).filter((entity) => entity.type === 'LEG');
+  equal(ACTS.length, filed.length, `every act in the library is listed (${ACTS.length})`);
+  ok(ACTS.length >= 5, 'five at least, the Machinery Regulation among its neighbours');
+  deepEqual(ACTS.map((act) => act.reference), filed.sort((a, b) => a.order - b.order).map((entity) => entity.attributes.reference), 'in the filed order, by the reference the library writes');
+  deepEqual(ACTS.map((act) => act.title), filed.map((entity) => entity.attributes.title), 'with the title the library writes');
+  ok(ACTS.every((act) => /^https:\/\/eur-lex\.europa\.eu\/eli\/(reg|dir)\/\d{4}\/\d+\/oj$/.test(act.address)), 'each at its permanent address on EUR-Lex');
+  const machinery = ACTS.find((act) => act.reference === 'Regulation (EU) 2023/1230');
+  deepEqual(machinery, { reference: 'Regulation (EU) 2023/1230', title: 'Machinery Regulation (MR)', address: 'https://eur-lex.europa.eu/eli/reg/2023/1230/oj' }, 'the Machinery Regulation reads like the others');
+  equal(addressOf('Directive 2011/65/EU'), 'https://eur-lex.europa.eu/eli/dir/2011/65/oj', 'a directive resolves to its identifier');
+  equal(addressOf('Regulation (EC) No 765/2008'), null, 'a reference in neither form gives no address, so the library\'s own link stands in');
 }
 
 summary('test-library');

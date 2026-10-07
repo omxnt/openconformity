@@ -129,6 +129,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-070 | Headless | [test-library.js](../tests/test-library.js) | The picks |
 | V-TST-071 | Headless | [test-library.js](../tests/test-library.js) | The plan and the copy |
 | V-TST-072 | Headless | [test-library.js](../tests/test-library.js) | A project structure, folders alone |
+| V-TST-178 | Headless | [test-library.js](../tests/test-library.js) | The acts the library ships, as About names them |
 | V-TST-073 | Headless | [test-markdown.js](../tests/test-markdown.js) | A cell and its text |
 | V-TST-074 | Headless | [test-markdown.js](../tests/test-markdown.js) | A document of tables |
 | V-TST-169 | Headless | [test-markdown.js](../tests/test-markdown.js) | What a renderer would autolink or restructure is escaped |
@@ -326,7 +327,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | C-PRJ-002 | Domain name | V-ANA-002 | Manual |
 | C-PRJ-003 | Project licence | V-INS-015 | Tested |
 | C-PRJ-004 | Funding model | V-ANA-003 | Manual |
-| C-PRJ-005 | Standards content | V-INS-016, V-TST-123, V-TST-127, V-ANA-004 | Partly |
+| C-PRJ-005 | Standards content | V-TST-178, V-INS-016, V-TST-123, V-TST-127, V-ANA-004 | Partly |
 | C-PRJ-006 | Vulnerability reporting | V-INS-010, V-ANA-005 | Partly |
 | C-DEV-001 | Source repository | V-ANA-006 | Manual |
 | C-DEV-002 | Hosting platform | V-ANA-007 | Manual |
@@ -406,7 +407,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
-| F-PER-012 | Shipped library | V-TST-069 | Tested |
+| F-PER-012 | Shipped library | V-TST-069, V-TST-178 | Tested |
 | F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171 | Tested |
 | F-DRW-002 | Drawing storage | V-TST-019, V-TST-021 | Tested |
 | F-DRW-003 | External drawing editor | V-TST-003, V-TST-016, V-TST-018, V-TST-019, V-DEM-008 | Partly |

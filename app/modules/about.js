@@ -4,7 +4,7 @@
  * then the release line, the version and the phase with a link to the
  * notes. Beneath, five accordion items, each closed when About opens,
  * grouping the credits and references by what each thing is to the
- * software. References, the legislation the model is built around and
+ * software. References, every act the library ships, read from it, and
  * the methods its ratings follow, each by designation. Technology, what
  * the software is made of. Design assets,
  * the system followed and the assets self-hosted, each with its
@@ -17,6 +17,7 @@
 
 import { el, icon } from './dom.js';
 import { VERSION, PHASE } from './version.js';
+import { ACTS } from '../library/index.js';
 
 /**
  * @param {ReturnType<import('./dialog.js').createDialogs>} dialogs
@@ -79,7 +80,7 @@ export async function showAbout(dialogs, store = null) {
         ]),
       ]),
       fold('References', [
-        ['(EU) 2023/1230', 'Machinery Regulation', [link('https://eur-lex.europa.eu/eli/reg/2023/1230/oj', 'eur-lex.europa.eu')]],
+        ...ACTS.map((act) => [act.reference, act.title, [link(act.address, 'eur-lex.europa.eu')]]),
         ['ISO/TR 14121-2:2012', 'Risk matrix 6.2.2, risk graph 6.3.2, numerical scoring 6.4.2', [link('https://www.iso.org/standard/57180.html', 'iso.org')]],
         ['EN ISO 13849-1:2023', 'Required performance level of a safety function', [link('https://www.iso.org/standard/73481.html', 'iso.org')]],
         ['EN IEC 62061:2021', 'Required safety integrity level of a safety function', [link('https://webstore.iec.ch/en/publication/59927', 'iec.ch')]],

@@ -76,7 +76,7 @@ Most of the first layer is data. The library and the example are about 6,000 lin
 | `xlsx.js` | 2 | An Excel workbook written from tables of text |
 | `markdown.js` | 2 | A Markdown document written from tables of text and figures |
 | `zip.js` | 2 | A zip archive of text files, which the workbook and the Markdown bundle are |
-| `library/index.js` | 2 | The catalogues cut out of the shipped library |
+| `library/index.js` | 2 | The catalogues cut out of the shipped library, and the acts it ships |
 | `store.js` | 3 | What is open, the selection, the session state, the history and the persistence |
 | `retention.js` | 3 | IndexedDB behind a small interface, and an in-memory twin for the tests |
 | `dom.js` | 4 | Element construction, tooltips, tab keys and the download |
