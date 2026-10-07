@@ -47,3 +47,4 @@ The drives and the reviews that verify a requirement where no test can. Each row
 | V-DEM-012 | Drive | The software in a browser | Walk every row of `docs/shortcuts.md` with the pointer unused | N-ACC-003 |
 | V-DEM-013 | Drive | The software in a browser | The minimum viewport. Work at 1000 by 356 pixels and find every pane usable | N-CMP-001 |
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari | N-CMP-002 |
+| V-DEM-015 | Drive | The software in a browser | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity | F-WSP-003, N-ACC-001 |

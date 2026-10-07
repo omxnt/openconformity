@@ -254,7 +254,15 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     return toggle;
   }
 
-  function renderHead(picking) {
+  /**
+   * The head: the view tabs, the filter, Add relationship or the picker's
+   * Done and Cancel, and the collapse toggle. Idle, with no entity
+   * selected, the head stays and every control but the collapse toggle
+   * is disabled, so the layout holds and the controls stay in view.
+   * @param {boolean} picking
+   * @param {boolean} [idle]
+   */
+  function renderHead(picking, idle = false) {
     head.textContent = '';
     head.hidden = false;
 
@@ -267,16 +275,21 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
         text: label,
         attributes: { type: 'button', role: 'tab', 'aria-selected': String(view === value), tabindex: view === value ? '0' : '-1' },
       });
+      tab.disabled = idle;
       tab.addEventListener('click', () => store.setRelationshipView(value));
       tabs.appendChild(tab);
     }
-    tabKeys(tabs, (i) => {
-      store.setRelationshipView(views[i][0]);
-      head.querySelector('.tab[aria-selected="true"]')?.focus();
-    });
+    if (!idle) {
+      tabKeys(tabs, (i) => {
+        store.setRelationshipView(views[i][0]);
+        head.querySelector('.tab[aria-selected="true"]')?.focus();
+      });
+    }
     head.appendChild(tabs);
 
-    const actions = [searchControl()];
+    const search = idle ? headIcon('Filter the relationships', 'i-search', () => {}) : searchControl();
+    if (idle) search.disabled = true;
+    const actions = [search];
     if (picking) {
       const picked = store.picker().picks.length;
       actions.unshift(el('span', { className: 'head-count', text: picked === 0 ? 'Nothing picked' : `${picked} picked` }));
@@ -629,12 +642,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     }
     messagesHost.hidden = true;
     if (!subject || subject.kind !== 'entity') {
-      head.textContent = '';
-      head.hidden = !store.relationshipsCollapsed();
-      if (store.relationshipsCollapsed()) {
-        head.appendChild(el('span', { className: 'toolbar-spacer' }));
-        head.appendChild(el('div', { className: 'pane-head-actions' }, [collapseToggle()]));
-      }
+      renderHead(false, true);
       listHost.hidden = false;
       graph.element.hidden = true;
       listHost.textContent = '';

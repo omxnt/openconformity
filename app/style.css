@@ -711,7 +711,8 @@ select.field-input.wide { max-width: none; }
   transition: color var(--motion-fast) var(--motion-standard),
               border-color var(--motion-fast) var(--motion-standard);
 }
-.tab:hover { color: var(--text); border-bottom-color: var(--border-strong); }
+.tab:hover:not(:disabled) { color: var(--text); border-bottom-color: var(--border-strong); }
+.tab:disabled { color: var(--disabled); cursor: not-allowed; }
 .tab[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 .tab:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 /* In a pane head the tabs stand in the name's place, on the head's own
