@@ -346,7 +346,7 @@ function offered(model, subjectId) {
   equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
 }
 
-// --- A filter's one rule (F-WSP-001) ---------------------------------------
+// --- A filter's one rule (F-WSP-001, F-WSP-008) ---------------------------------------
 
 {
   const entity = { id: 'HAZ-001', kind: 'entity', type: 'HAZ', attributes: { title: 'Moving Parts' } };

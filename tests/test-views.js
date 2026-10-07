@@ -35,7 +35,7 @@ const labelOf = (id) => entityLabel(model.nodes.get(id));
 deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function'], ['safety', 'Safety function specification', 'function']], 'the risk assessment, then the safety function specification, each built by a function of the model');
 equal(RISK_VIEW.build, buildRiskView, 'registered under its builder');
 
-// --- The risk assessment over the example (F-VIE-001) ----------------------
+// --- The risk assessment over the example (F-VIE-001, F-VIE-003) ----------------------
 
 /** The index of a column by its text and, where it has one, its group. */
 const at = (columns, name, group = null) => columns.map(asColumn).findIndex((column) => column.text === name && (column.group ?? null) === group);
@@ -78,7 +78,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   equal(view.sections[3].tables[0].rows.map((held) => held.id).join(' '), 'SCN-002 SCN-003 SCN-004', 'Maintenance holds the scenarios its tasks give rise to, in id order');
 }
 
-// --- Rated scenarios spread over parameter columns (F-VIE-001) --------------
+// --- Rated scenarios spread over parameter columns (F-VIE-001, F-VIE-003) --------------
 
 {
   const rated = unrated();
@@ -178,7 +178,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - L-3 Maintenance.xlsx', ['L-3 Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
 }
 
-// --- The safety function specification over the example (F-VIE-001) ---------
+// --- The safety function specification over the example (F-VIE-001, F-VIE-004) ---------
 
 {
   const view = buildSafetyView(model);

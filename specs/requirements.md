@@ -471,7 +471,7 @@ The software shall present the workspace on entry, without a homepage, wizard, o
 
 `event driven`
 
-When the software is opened, it shall restore the working state of the previous session.
+When the software is opened, the software shall restore the working state of the previous session.
 
 > *The user returns to what they left. Losing the open project and the selection on every visit would make the software unusable for work that spans more than one sitting.*
 
@@ -596,6 +596,26 @@ The software shall permit the creation of folders at any position in the navigat
 When a folder is deleted, the software shall delete every folder and entity filed in it, at any depth.
 
 > *A folder holds what the user filed in it and nothing lands there otherwise, so deleting the folder is deleting its content. Each entity in it is deleted as any entity is, its relationships severed and what it owns through composition taken with it wherever that is filed, and the confirmation lists all of it first. Between entities, filing carries no ownership, and what is merely filed beneath a deleted entity moves up a level.*
+
+---
+
+#### F-WSP-008 Tree filter
+
+`event driven`
+
+When the user types in the navigator's filter, the software shall show only the rows whose identifier or label holds the text, with every row above them, and shall show every row again when the filter is cleared.
+
+> *A model of a few hundred entities is found by typing, not by scrolling. The rows above a match stay so the user sees where it is filed, and clearing the filter returns the tree as it was, with nothing selected or expanded on the user's behalf.*
+
+---
+
+#### F-WSP-009 Sibling order
+
+`ubiquitous`
+
+The software shall keep the order of the things filed in one place as the user set it, and shall let the user move a thing up or down among its siblings.
+
+> *Filing carries no meaning, but order carries the user's reading of their own work, a list of hazards in the order they were found or the requirements in the order of a standard. The order is the user's and the software never sorts it for them.*
 
 ### 4.4 Model
 
@@ -731,6 +751,26 @@ The software shall list the entities whose recorded relationships no longer matc
 
 > *A record is the ground a judgement was made on, the measures a residual risk was rated against or a hazard's elimination was decided against. When one of them is since unlinked, deleted or newly related, the judgement stands on changed ground and the entity wants revisiting. The list is derived from the model wherever it is shown and never stored, so it is always current, and it says what the software knows without judging, which entities and what changed.*
 
+---
+
+#### F-VIE-003 Risk assessment
+
+`ubiquitous`
+
+The software shall provide the risk assessment as a view of the model.
+
+> *The risk assessment is the document the Machinery Regulation asks the manufacturer to hold, and it is the first thing a reader outside the tool wants from a model. What the view holds is decided in the decision log and changes as the view is used.*
+
+---
+
+#### F-VIE-004 Safety function specification
+
+`ubiquitous`
+
+The software shall provide the safety function specification as a view of the model.
+
+> *A safety function is specified for someone who builds it, often outside the organisation that wrote it. What the view holds is decided in the decision log and changes as the view is used.*
+
 ### 4.6 Persistence
 
 ---
@@ -842,6 +882,16 @@ The software shall preserve attribute content it does not present, unchanged, wh
 When the user chooses a project template, the software shall fetch it from the host, sending no user data, and shall open it as it opens a project file, subject to the same checks.
 
 > *A template is a project file the maintainer wrote and published beside the software, so fetching it is what fetching the software already is, a request to the host carrying nothing of the user's, and it needs no consent. It can be as stale or as malformed as any other file, so it passes the same gate of version, validity and migration, and can never bypass what a file cannot. The list of templates is fetched the same way, when the user opens the choice. The function is not built yet. When it is, the page's policy must allow connections to the software's own origin, since today it allows none.*
+
+---
+
+#### F-PER-012 Shipped library
+
+`ubiquitous`
+
+The software shall ship a library with it, and shall offer each root folder of the library as a catalogue to import from.
+
+> *The library is what makes a new project start from something, the legislation, a project structure, the phases of a machine's life. It ships as a module because the software fetches nothing (N-OPS-002), and it is one project file so that one schema and one loader serve it (F-PER-002). What an import copies is F-MOD-010.*
 
 ### 4.7 Drawings
 
@@ -1009,9 +1059,9 @@ The software shall render user-provided content as text, not as markup, drawings
 
 #### N-SEC-003 Drawing rendering
 
-`optional feature`
+`ubiquitous`
 
-Where an attribute holds a drawing, the software shall render it as an image that can neither execute code nor load a resource.
+The software shall render a drawing as an image that can neither execute code nor load a resource.
 
 > *A drawing is markup by nature, so the text rule cannot apply to it. Shown as an image, the browser grants it no script, no document and no network, the same guarantee text has. A drawing that fails the drawing check (F-DRW-001) is not shown and is preserved unchanged. The reason stands where the drawing would, so a user opening someone else's file learns why the drawing is absent rather than meeting a blank.*
 
@@ -1059,9 +1109,9 @@ The software shall not be presentable in a frame on another origin.
 
 #### N-SEC-008 Hyperlink presentation
 
-`optional feature`
+`ubiquitous`
 
-Where an attribute holds a hyperlink, the software shall present it as a link only when its value is an http or https address, and shall open it in a new browsing context without an opener.
+The software shall present a hyperlink attribute as a link only when its value is an http or https address, and shall open it in a new browsing context without an opener.
 
 > *A value in a file can be any text, and a scheme that runs code must never become something the user can click. Anything that is not a web address is shown as the text it is. Opening without an opener keeps the destination from reaching back to the page.*
 

@@ -233,7 +233,7 @@ function childIds(model, parentId) {
   ok(took < 500, `the children of all twenty thousand nodes are found in ${took} ms`);
 }
 
-// --- Sibling order (F-WSP-004) -----------------------------------------
+// --- Sibling order (F-WSP-004, F-WSP-009) -----------------------------------------
 
 {
   const model = createModel();

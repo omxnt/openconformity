@@ -91,7 +91,7 @@ function drawn(model, expanded) {
   );
 }
 
-// --- The filter (F-WSP-001) --------------------------------------------
+// --- The filter (F-WSP-001, F-WSP-008) --------------------------------------------
 
 {
   const model = createModel();

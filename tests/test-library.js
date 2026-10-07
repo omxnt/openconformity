@@ -12,7 +12,7 @@ import { loadProject } from '../app/modules/files.js';
 import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
-// --- The catalogues the software ships (F-PER-002) -------------------------
+// --- The catalogues the software ships (F-PER-002, F-PER-012) -------------------------
 
 deepEqual(LIBRARIES.map((held) => held.name), ['Project structure', 'European legislation', 'System phases'], 'the software ships three catalogues, the root folders of the library project in their order');
 ok(LIBRARIES.every((held) => loadProject(held.project).ok), 'and each passes the gates a project file passes');
