@@ -104,6 +104,41 @@ function refiled(model) {
 }
 
 /**
+ * The owner of each owned entity, per relationship map. Built on the
+ * first question, extended by relate and dropped by every removal, so it
+ * is never read stale. History restores into a new map, which starts
+ * without one.
+ * @type {WeakMap<Map<string, Relationship>, Map<string, string>>}
+ */
+const ownerIndex = new WeakMap();
+
+/**
+ * Drop the owner index after a relationship is removed. A new
+ * relationship is added to the index by relate instead.
+ * @param {Model} model
+ */
+function rerelated(model) {
+  ownerIndex.delete(model.relationships);
+}
+
+/**
+ * The owner of each owned entity, built once per relationship map.
+ * @param {Model} model
+ * @returns {Map<string, string>}
+ */
+function ownersOf(model) {
+  let owners = ownerIndex.get(model.relationships);
+  if (!owners) {
+    owners = new Map();
+    for (const relationship of model.relationships.values()) {
+      if (RELATIONSHIP_TYPES[relationship.type].composition && !owners.has(relationship.target)) owners.set(relationship.target, relationship.source);
+    }
+    ownerIndex.set(model.relationships, owners);
+  }
+  return owners;
+}
+
+/**
  * Whether a node is another node or filed anywhere beneath it. The walk
  * upwards is guarded against a cycle.
  * @param {Model} model
@@ -444,12 +479,7 @@ function relationshipKey(type, source, target) {
  * @returns {string|null}
  */
 function ownerOf(model, entityId) {
-  for (const relationship of model.relationships.values()) {
-    if (relationship.target === entityId && RELATIONSHIP_TYPES[relationship.type].composition) {
-      return relationship.source;
-    }
-  }
-  return null;
+  return ownersOf(model).get(entityId) ?? null;
 }
 
 /**
@@ -481,9 +511,10 @@ function wouldOwnItself(model, sourceId, targetId) {
  * @param {string} typeId
  * @param {string} sourceId
  * @param {string} targetId
+ * @param {{ acyclic?: boolean }} [options]  acyclic when the caller has already checked that no composition cycle forms, as the validator does for a file
  * @returns {Outcome}
  */
-export function canRelate(model, typeId, sourceId, targetId) {
+export function canRelate(model, typeId, sourceId, targetId, options = {}) {
   if (!Object.hasOwn(RELATIONSHIP_TYPES, typeId)) {
     return { ok: false, reason: 'The metamodel defines no such relationship.' };
   }
@@ -507,7 +538,7 @@ export function canRelate(model, typeId, sourceId, targetId) {
     if (ownerOf(model, targetId) !== null) {
       return { ok: false, reason: 'It is already part of another entity.' };
     }
-    if (wouldOwnItself(model, sourceId, targetId)) {
+    if (!options.acyclic && wouldOwnItself(model, sourceId, targetId)) {
       return { ok: false, reason: 'That would make it part of itself.' };
     }
   }
@@ -519,14 +550,16 @@ export function canRelate(model, typeId, sourceId, targetId) {
  * @param {string} typeId
  * @param {string} sourceId
  * @param {string} targetId
+ * @param {{ acyclic?: boolean }} [options]  as for canRelate
  * @returns {Outcome & { relationship?: Relationship }}
  */
-export function relate(model, typeId, sourceId, targetId) {
-  const check = canRelate(model, typeId, sourceId, targetId);
+export function relate(model, typeId, sourceId, targetId, options = {}) {
+  const check = canRelate(model, typeId, sourceId, targetId, options);
   if (!check.ok) return check;
   /** @type {Relationship} */
   const relationship = { type: typeId, source: sourceId, target: targetId };
   model.relationships.set(relationshipKey(typeId, sourceId, targetId), relationship);
+  if (RELATIONSHIP_TYPES[typeId].composition) ownerIndex.get(model.relationships)?.set(targetId, sourceId);
   return { ok: true, relationship };
 }
 
@@ -542,6 +575,7 @@ export function unrelate(model, typeId, sourceId, targetId) {
   if (!model.relationships.delete(relationshipKey(typeId, sourceId, targetId))) {
     return { ok: false, reason: 'The relationship is not in the project.' };
   }
+  rerelated(model);
   return { ok: true };
 }
 
@@ -628,6 +662,7 @@ function purge(model, gone) {
       model.relationships.delete(key);
     }
   }
+  rerelated(model);
 
   for (const node of model.nodes.values()) {
     if (gone.has(node.id) || node.parent === null || !gone.has(node.parent)) continue;

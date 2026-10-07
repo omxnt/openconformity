@@ -147,6 +147,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-087 | Headless | [test-model.js](../tests/test-model.js) | Sibling order |
 | V-TST-088 | Headless | [test-model.js](../tests/test-model.js) | Relationships |
 | V-TST-089 | Headless | [test-model.js](../tests/test-model.js) | Folder deletion |
+| V-TST-175 | Headless | [test-model.js](../tests/test-model.js) | The owner index keeps a long chain cheap and never stale |
 | V-TST-090 | Headless | [test-navigator.js](../tests/test-navigator.js) | The rows |
 | V-TST-091 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row |
 | V-TST-092 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row collapses over the whole tree |
@@ -397,7 +398,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-003 | Schema version | V-TST-033 | Tested |
 | F-PER-004 | Version migration | V-TST-035 | Tested |
 | F-PER-005 | Unsupported version | V-TST-035 | Tested |
-| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-170 | Tested |
+| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-175, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-170 | Tested |
 | F-PER-007 | Migration preservation | None | None |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
@@ -430,7 +431,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-006 | Content security policy | V-INS-001 | Tested |
 | N-SEC-007 | Framing | V-INS-011, V-ANA-027 | Partly |
 | N-SEC-008 | Hyperlink presentation | V-TST-025 | Tested |
-| N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059 | Tested |
+| N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059, V-TST-175 | Tested |
 | N-SEC-010 | No input from the address | V-INS-007 | Tested |
 | N-SEC-011 | Safe export | V-TST-073, V-TST-169, V-TST-174, V-TST-164, V-TST-167, V-TST-173 | Tested |
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028 | Partly |

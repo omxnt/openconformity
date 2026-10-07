@@ -343,4 +343,22 @@ function childIds(model, parentId) {
   refused(setProjectAttribute(model, 'description', 7), 'a non-text value is refused');
 }
 
+// --- V-TST-175 The owner index keeps a long chain cheap and never stale (F-PER-006, N-SEC-009) ---
+
+{
+  const chained = createModel();
+  const n = 5000;
+  for (let i = 0; i < n + 2; i += 1) addEntity(chained, 'REQ', { attributes: { title: 'r' } });
+  const id = (i) => `REQ-${String(i).padStart(3, '0')}`;
+  const started = Date.now();
+  let linked = 0;
+  for (let i = 1; i < n; i += 1) if (relate(chained, 'req-decomposes-into-req', id(i), id(i + 1)).ok) linked += 1;
+  equal(linked, n - 1, 'a chain of five thousand relates link by link');
+  ok(Date.now() - started < 1000, `and takes under a second, not the cube of its length (${Date.now() - started} ms)`);
+  equal(relate(chained, 'req-decomposes-into-req', id(n), id(1)).ok, false, 'closing the chain into a cycle is still refused');
+  equal(relate(chained, 'req-decomposes-into-req', id(n + 1), id(2)).ok, false, 'as is a second owner for the second link');
+  ok(unrelate(chained, 'req-decomposes-into-req', id(1), id(2)).ok, 'unrelating the first link');
+  ok(relate(chained, 'req-decomposes-into-req', id(n + 1), id(2)).ok, 'then lets another entity own the second, so the index was dropped with the change');
+}
+
 summary('test-model');

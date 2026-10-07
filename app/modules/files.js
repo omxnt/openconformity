@@ -179,7 +179,7 @@ function buildModel(data) {
   }
 
   for (const relationship of data.relationships) {
-    const result = relate(model, relationship.type, relationship.source, relationship.target);
+    const result = relate(model, relationship.type, relationship.source, relationship.target, { acyclic: true });
     if (!result.ok) {
       problems.push(`${relationship.type} from ${relationship.source} to ${relationship.target}: ${result.reason}`);
     }
