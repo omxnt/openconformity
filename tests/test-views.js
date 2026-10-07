@@ -238,4 +238,14 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual(viewSheets(savedPart(view, 2).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['SF-2 Door Interlock', 1]], 'and from a function, its row alone');
 }
 
+// --- V-TST-174 A section name is trimmed without backtracking (N-SEC-011) ---
+
+{
+  const view = { id: 'v', title: 'View', sections: [{ name: 'All', tables: [] }, { name: `${' '.repeat(100000)}(1x`, tables: [] }] };
+  const started = Date.now();
+  const part = savedPart(view, 1, 'md');
+  ok(Date.now() - started < 200, 'a section name of a hundred thousand spaces is named in no time');
+  ok(part.filename.endsWith('(1x.md'), 'and the count is trimmed only when it closes');
+}
+
 summary('test-views');

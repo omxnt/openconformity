@@ -104,4 +104,15 @@ function unzip(bytes) {
   ok(styles.includes('<cellXfs count="4">') && !styles.includes('patternType="solid"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is wrapping and alignment only, with no fill, no bold and no borders');
 }
 
+// --- V-TST-173 Sheet names and column widths hold on hostile values (N-SEC-011) ---
+
+{
+  equal(sheetName('a\nb', new Set()), 'a b', 'a line break in a sheet name becomes a space');
+  equal(sheetName('History', new Set()), 'History 2', 'the name Excel reserves is never issued');
+  equal(sheetName('history', new Set()), 'history 2', 'in any case');
+  const tall = Array(200000).fill('a').join('\n');
+  const xml = sheetXml({ name: 'S', headers: ['c'], groups: [''], rows: [[{ text: tall }]] });
+  ok(xml.includes('width="12"'), 'a cell of two hundred thousand lines is measured without a spread, so the save does not throw');
+}
+
 summary('test-xlsx');

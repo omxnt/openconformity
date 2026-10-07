@@ -163,7 +163,8 @@ export function estimate(method, parameters) {
   switch (method) {
     case MATRIX_METHOD: {
       const column = MATRIX_SEVERITY.indexOf(String(a ?? '').trim());
-      const row = MATRIX[String(b ?? '').trim()];
+      const key = String(b ?? '').trim();
+      const row = Object.hasOwn(MATRIX, key) ? MATRIX[key] : undefined;
       return column >= 0 && row ? row[column] : null;
     }
     case GRAPH_METHOD: {

@@ -16,7 +16,7 @@ import { ok, equal, deepEqual, summary } from './harness.js';
   equal(markdownCell('a | b'), 'a \\| b', 'a pipe is escaped, so the cell keeps to its column');
   equal(markdownCell('<img src=x onerror=alert(1)>'), '&lt;img src=x onerror=alert(1)&gt;', 'markup typed into a field is escaped and reads as text');
   equal(markdownText('Tom & Jerry'), 'Tom &amp; Jerry', 'as is an ampersand');
-  equal(markdownCell('![x](https://tracker.example/p.png)'), '!\\[x\\](https://tracker.example/p.png)', 'an image from an outside address cannot form, so nothing loads when the file is read');
+  equal(markdownCell('![x](https://tracker.example/p.png)'), '!\\[x\\](https\\://tracker.example/p.png)', 'an image from an outside address cannot form, so nothing loads when the file is read');
   equal(markdownText('[click](javascript:alert(1))'), '\\[click\\](javascript:alert(1))', 'nor a link');
   equal(markdownText('a*b*c `code` snake_case back\\slash'), 'a\\*b\\*c \\`code\\` snake\\_case back\\\\slash', 'nor emphasis or code, a backslash kept as itself');
   equal(markdownText('ISO 13849-1, 5 mm (min.)'), 'ISO 13849-1, 5 mm (min.)', 'while plain text stays as it is');
@@ -64,6 +64,19 @@ import { ok, equal, deepEqual, summary } from './harness.js';
     ].join('\n'),
     'the title, then each block under its heading, each part under its numbered caption, prose as paragraphs'
   );
+}
+
+// --- V-TST-169 What a renderer would autolink or restructure is escaped (N-SEC-011) ---
+
+{
+  equal(markdownCell('see https://tracker.example/p?u=1'), 'see https\\://tracker.example/p?u=1', 'a bare web address is escaped at its colon, so GitHub makes no link of it');
+  equal(markdownCell('at www.example.com'), 'at www\\.example.com', 'a www name at its dot');
+  equal(markdownCell('mail a@b.example'), 'mail a\\@b.example', 'and an email address at its at sign');
+  equal(markdownCell('ok\r# Injected\r- item'), 'ok<br># Injected<br>- item', 'a lone carriage return is a line break like any other, and inside a cell no line can open a heading');
+  const doc = markdown('T', [{ heading: 'ELM-001 Title\n# Injected', chapter: '1', prose: 'x\ry' }]);
+  ok(doc.includes('## 1 ELM-001 Title # Injected') && !doc.includes('\n# Injected'), 'a line break in a heading becomes a space, so no heading is opened');
+  ok(doc.includes('x\n\ny'), 'and a carriage return in prose breaks the line as a line feed does');
+  equal(markdown('A\r\nB', []).split('\n')[0], '# A B', 'the title is one line too');
 }
 
 summary('test-markdown');

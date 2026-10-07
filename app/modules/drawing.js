@@ -76,11 +76,12 @@ export function parseXml(text) {
       if (end < 0 || end - amp > 10) fail('an entity reference without its end');
       const name = raw.slice(amp + 1, end);
       let value;
-      if (name.startsWith('#x')) value = String.fromCodePoint(Number.parseInt(name.slice(2), 16));
-      else if (name.startsWith('#')) value = String.fromCodePoint(Number.parseInt(name.slice(1), 10));
-      else if (Object.hasOwn(ENTITIES, name)) value = ENTITIES[name];
+      if (name.startsWith('#')) {
+        const point = name.startsWith('#x') ? Number.parseInt(name.slice(2), 16) : Number.parseInt(name.slice(1), 10);
+        if (!Number.isInteger(point) || point <= 0 || point > 0x10ffff || (point >= 0xd800 && point <= 0xdfff)) fail('a numeric reference to nothing');
+        value = String.fromCodePoint(point);
+      } else if (Object.hasOwn(ENTITIES, name)) value = ENTITIES[name];
       else fail(`an entity the diagram may not use, ${name}`);
-      if (value === undefined || Number.isNaN(value.codePointAt(0))) fail('a numeric reference to nothing');
       out += raw.slice(from, amp) + value;
       from = end + 1;
     }
@@ -260,7 +261,7 @@ function walk(element) {
   if (FORBIDDEN_ELEMENTS.has(name)) return `holds a ${name} element`;
   for (const attribute of element.attributes) {
     const key = attribute.name.toLowerCase();
-    if (key.startsWith('on')) return 'holds an event handler';
+    if (local(key).startsWith('on')) return 'holds an event handler';
     if (FORBIDDEN_ATTRIBUTES.has(local(key))) return 'holds an attribute that sends or navigates';
     if (ANIMATIONS.has(name) && local(key) === 'attributename') {
       const animated = local(attribute.value.trim().toLowerCase());
@@ -270,13 +271,14 @@ function walk(element) {
     if (REFERENCES.has(local(key))) {
       const target = attribute.value.toLowerCase().replace(/[\u0000-\u0020]+/g, '');
       if (/^(javascript|vbscript):/.test(target)) return 'links to code';
+      if (name === 'a' && local(key) === 'href' && target.startsWith('data:')) return 'links to data';
       if (target.startsWith('data:') && !target.startsWith('data:image/')) return 'links to data that is not an image';
       const inside = target.startsWith('#') || target.startsWith('data:image/');
       if (name === 'image' && !inside) return 'references an image outside the diagram';
       if (name === 'use' && !target.startsWith('#')) return 'references a shape outside the diagram';
       if (!(name === 'a' && local(key) === 'href') && !inside) return 'references a resource outside the diagram';
     }
-    if (local(key) !== 'content') {
+    if (!(name === 'svg' && local(key) === 'content')) {
       const held = cssFault(attribute.value);
       if (held !== null) return held;
     }

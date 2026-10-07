@@ -82,7 +82,7 @@ const reason = (text) => {
   equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><iframe src="https://x"></iframe></div></foreignObject>')), 'holds a iframe element', 'a frame inside HTML');
   equal(reason(svg('<rect onload="x()" width="1" height="1"/>')), 'holds an event handler', 'an event handler');
   equal(reason(svg('<a xlink:href="java\nscript:alert(1)"><rect/></a>')), 'links to code', 'a code link, even split by whitespace');
-  equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to data that is not an image', 'a document link');
+  equal(reason(svg('<a href="data:text/html,x"><rect/></a>')), 'links to data', 'a document link');
   equal(reason(svg('<image href="https://example.org/a.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on the web');
   equal(reason(svg('<image href="file.png" width="1" height="1"/>')), 'references an image outside the diagram', 'an image on disk');
   equal(reason(svg('<use href="shapes.svg#a"/>')), 'references a shape outside the diagram', 'a shape from another file');
@@ -134,9 +134,23 @@ const reason = (text) => {
   equal(reason(html('<img lowsrc="https://x/a.png"/>')), outside, 'a low source');
   equal(reason(html('<link rel="preload" as="image" imagesrcset="https://x/a.png 1x"/>')), outside, 'an image source set on a link');
   equal(reason(svg('<rect style="background-image: src(\'https://x/a.png\')"/>')), outside, 'a source function');
-  equal(reason(svg('<a href="data:application/xhtml+xml,x"><rect/></a>')), 'links to data that is not an image', 'a link to a document held as data');
+  equal(reason(svg('<a href="data:application/xhtml+xml,x"><rect/></a>')), 'links to data', 'a link to a document held as data');
   equal(reason(svg('<a href="&#9;java&#10;script:alert(1)"><rect/></a>')), 'links to code', 'a link to code broken by spaces');
   equal(reason(svg('<rect width="5" height="5"/>', ' content="url(https://x) image(y)"')), 'accepted', 'the editor\'s own model is read as data, not as style');
+}
+
+// --- V-TST-171 The gaps the October reviews found (F-DRW-001, N-SEC-003) ---
+
+{
+  equal(reason(svg('<rect xlink:onload="alert(1)"/>')), 'holds an event handler', 'a handler behind a prefix is read by its local name');
+  equal(reason(svg('<rect ev:onclick="x"/>')), 'holds an event handler', 'whatever the prefix');
+  equal(reason(svg('<a href="data:image/svg+xml,%3Csvg%3E"><rect/></a>')), 'links to data', 'a link to data is refused even when the data is an image');
+  equal(reason(svg('<rect content="url(https://x/a)"/>')), 'references a resource outside the diagram', 'the content attribute is read as style on every element but the root');
+  equal(reason(svg('<rect/>', ' content="url(https://x) image(y)"')), 'accepted', "while the root's content, the editor's own model, is left alone");
+  equal(reason(svg('<text>&#0;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'a reference to zero is refused');
+  equal(reason(svg('<text>&#xD800;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'a reference to a surrogate is refused');
+  equal(reason(svg('<text>&#x110000;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'and one past the last code point');
+  equal(reason(svg('<text>&#65;&#x42;</text>')), 'accepted', 'while a reference to a character passes');
 }
 
 summary('test-drawing');

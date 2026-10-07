@@ -81,7 +81,7 @@ export function cellText(held, labelOf) {
 export function savedPart(built, section, extension = 'xlsx') {
   const whole = section <= 0 || built.sections.length <= 1;
   const held = whole ? built : { ...built, wholeSheets: undefined, sections: [built.sections[section]] };
-  const name = whole ? built.title : `${built.title} - ${built.sections[section].name.replace(/\s*\(\d+\)$/, '')}`;
+  const name = whole ? built.title : `${built.title} - ${built.sections[section].name.replace(/ \(\d+\)$/, '')}`;
   return { built: held, filename: `${name.replace(/[\\/:*?"<>|]/g, '-')}.${extension}` };
 }
 

@@ -223,4 +223,16 @@ for (const id of relationshipIds) {
   refusedOver({ ...bagged, attributes: { '': 'x' } }, 'key is empty', 'an empty key in the bag is refused');
 }
 
+// --- V-TST-170 A prototype key is refused as an attribute key (F-PER-006, N-SEC-001) ---
+
+{
+  for (const key of ['__proto__', 'constructor', 'prototype']) {
+    const entity = validate(mutated((data) => { data.entities[0].attributes = JSON.parse(`{"${key}": "x", "title": "T"}`); }), 1);
+    ok(entity.ok === false && entity.problems.some((held) => held.includes(`${key} attribute key is not allowed`)), `${key} is refused as an entity attribute key`);
+    const project = validate(mutated((data) => { data.attributes = JSON.parse(`{"${key}": "x"}`); }), 1);
+    ok(project.ok === false && project.problems.some((held) => held.includes(`${key} attribute key is not allowed`)), `and as a project attribute key`);
+  }
+  ok(validate(mutated((data) => { data.entities[0].attributes = { toString: 'x', title: 'T' }; }), 1).ok, 'while a key that only shadows a method stays allowed, since it reaches no prototype');
+}
+
 summary('test-validator');

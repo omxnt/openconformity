@@ -28,8 +28,17 @@ export function markdownText(text) {
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replace(/[\\`*_[\]]/g, (held) => `\\${held}`);
+    .replace(/[\\`*_[\]]/g, (held) => `\\${held}`)
+    .replace(/\b(https?)(:)/gi, '$1\\$2')
+    .replace(/\b(www)(\.)/gi, '$1\\$2')
+    .replace(/(\w)@(?=\w)/g, '$1\\@');
 }
+
+/** Text with every line break, whatever form, as one line feed. */
+const breaks = (text) => String(text ?? '').replace(/\r\n?/g, '\n');
+
+/** Text on one line, for a title, a heading or a caption. */
+const oneLine = (text) => markdownText(breaks(text).replace(/\n+/g, ' '));
 
 /**
  * A line of prose escaped, and escaped again at its start where it would
@@ -61,7 +70,7 @@ function proseLine(line) {
 export function markdownCell(text) {
   const held = String(text ?? '').trim();
   if (held === '') return '–';
-  return markdownText(held).replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
+  return markdownText(breaks(held)).replace(/\|/g, '\\|').replace(/\n/g, '<br>');
 }
 
 /**
@@ -69,8 +78,8 @@ export function markdownCell(text) {
  * @param {string} text
  */
 function paragraphs(text) {
-  return text
-    .split(/\r?\n/)
+  return breaks(text)
+    .split('\n')
     .map((line) => proseLine(line.trim()))
     .filter(Boolean)
     .join('\n\n');
@@ -93,19 +102,19 @@ export function anchor(text) {
  * @returns {string}
  */
 export function markdown(title, tables, options = {}) {
-  const lines = [`# ${markdownText(title)}`, ''];
-  if (options.subtitle) lines.push(markdownText(options.subtitle), '');
+  const lines = [`# ${oneLine(title)}`, ''];
+  if (options.subtitle) lines.push(oneLine(options.subtitle), '');
   const chapters = tables.filter((table) => table.heading);
   const numberedHeading = (table) => [table.chapter, table.heading].filter(Boolean).join(' ');
   if (chapters.length > 1) {
     lines.push('## Contents', '');
-    for (const [i, table] of chapters.entries()) lines.push(`${i + 1}. [${markdownText(table.heading.replace(/[[\]]/g, ''))}](#${anchor(numberedHeading(table))})`);
+    for (const [i, table] of chapters.entries()) lines.push(`${i + 1}. [${oneLine(table.heading.replace(/[[\]]/g, ''))}](#${anchor(numberedHeading(table))})`);
     lines.push('');
   }
   for (const table of tables) {
-    if (table.heading) lines.push(`## ${markdownText(numberedHeading(table))}`, '');
-    if (table.caption) lines.push(`### ${markdownText(table.caption)}`, '');
-    if (table.subcaption) lines.push(`#### ${markdownText(table.subcaption)}`, '');
+    if (table.heading) lines.push(`## ${oneLine(numberedHeading(table))}`, '');
+    if (table.caption) lines.push(`### ${oneLine(table.caption)}`, '');
+    if (table.subcaption) lines.push(`#### ${oneLine(table.subcaption)}`, '');
     if ('prose' in table) {
       lines.push(paragraphs(table.prose ?? '') || '–', '');
       continue;

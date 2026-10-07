@@ -49,9 +49,9 @@ export function xmlText(text) {
  * @param {Set<string>} taken  names already given, compared without case
  */
 export function sheetName(name, taken) {
-  const base = (name.replace(/[\\/?*:[\]]/g, '-').replace(/^'+|'+$/g, '').trim() || 'Sheet').slice(0, 31);
+  const base = (name.replace(/[\\/?*:[\]]/g, '-').replace(/\s+/g, ' ').replace(/^'+|'+$/g, '').trim() || 'Sheet').slice(0, 31);
   let held = base;
-  for (let n = 2; taken.has(held.toLowerCase()); n += 1) held = `${base.slice(0, 31 - ` ${n}`.length)} ${n}`;
+  for (let n = 2; taken.has(held.toLowerCase()) || held.toLowerCase() === 'history'; n += 1) held = `${base.slice(0, 31 - ` ${n}`.length)} ${n}`;
   taken.add(held.toLowerCase());
   return held;
 }
@@ -124,8 +124,11 @@ export function sheetXml(sheet) {
     rows.push(`<row r="${heads + 1 + r}">${row.map((held, i) => cell(heads + 1 + r, i, held.text, STYLE.cell)).join('')}</row>`);
   });
   const widths = sheet.headers.map((header, i) => {
-    const lines = [header, ...sheet.rows.flatMap((row) => (row[i]?.text ?? '').split('\n'))];
-    return Math.min(48, Math.max(12, ...lines.map((line) => line.length + 2)));
+    let widest = 12;
+    for (const text of [header, ...sheet.rows.map((row) => row[i]?.text ?? '')]) {
+      for (const line of text.split('\n')) widest = Math.max(widest, line.length + 2);
+    }
+    return Math.min(48, widest);
   });
   const cols = widths.map((width, i) => `<col min="${i + 1}" max="${i + 1}" width="${width}" customWidth="1"/>`).join('');
   return (

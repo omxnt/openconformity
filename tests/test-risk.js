@@ -176,4 +176,12 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
 
 ok(METHODS.every((method) => /^\w[\w ]+ \(ISO\/TR 14121-2:2012, 6\.\d\.2\)$/.test(method)), 'each method names the report, its year and the clause its example stands in, as a citation after its name, so the choice reads as one wherever it is shown');
 
+// --- V-TST-172 A rating reads its parameters as own keys only (F-MOD-003, N-SEC-001) ---
+
+{
+  equal(estimate(MATRIX_METHOD, ['Serious', '__proto__']), null, 'a prototype key as a probability rates nothing');
+  equal(estimate(MATRIX_METHOD, ['Serious', 'toString']), null, 'nor does a method name');
+  equal(estimate(MATRIX_METHOD, ['Serious', 'constructor']), null, 'nor the constructor');
+}
+
 summary('test-risk');

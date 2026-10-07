@@ -100,6 +100,9 @@ const V1_PARENT = /^((LEG|HST|OSP|CAS|NTB|ESR|HSR|OSR|REQ|VER|HAZ|SCN|PRM|SAF|EL
 
 const V1_FILE_KEYS = ['format', 'schemaVersion', 'name', 'counters', 'folders', 'entities', 'relationships'];
 const V1_FILE_OPTIONAL_KEYS = ['attributes'];
+
+/** Attribute keys refused, since each names a property every object inherits. */
+const PROTOTYPE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const V1_FOLDER_KEYS = ['id', 'name', 'parent', 'order'];
 const V1_ENTITY_KEYS = ['id', 'type', 'parent', 'order', 'attributes'];
 const V1_RELATIONSHIP_KEYS = ['type', 'source', 'target'];
@@ -195,6 +198,7 @@ function keywordProblems(data) {
     } else {
       for (const [key, value] of Object.entries(data.attributes)) {
         if (key.length < 1) problems.push('A project attribute key is empty.');
+        if (PROTOTYPE_KEYS.has(key)) problems.push(`The project ${key} attribute key is not allowed.`);
         if (typeof value !== 'string') problems.push(`The project ${key} attribute is not text.`);
       }
     }
@@ -266,6 +270,7 @@ function keywordProblems(data) {
       } else {
         for (const [key, value] of Object.entries(entity.attributes)) {
           if (key.length < 1) problems.push(`${label}: an attribute key is empty.`);
+          if (PROTOTYPE_KEYS.has(key)) problems.push(`${label}: the ${key} attribute key is not allowed.`);
           if (typeof value !== 'string') problems.push(`${label}: the ${key} attribute is not text.`);
         }
       }

@@ -79,6 +79,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-021 | Headless | [test-drawing.js](../tests/test-drawing.js) | A real export is accepted, and carries its model |
 | V-TST-022 | Headless | [test-drawing.js](../tests/test-drawing.js) | What is accepted |
 | V-TST-023 | Headless | [test-drawing.js](../tests/test-drawing.js) | What is refused, and why |
+| V-TST-171 | Headless | [test-drawing.js](../tests/test-drawing.js) | The gaps the October reviews found |
 | V-TST-024 | Headless | [test-editor.js](../tests/test-editor.js) | The draft against the entity |
 | V-TST-025 | Headless | [test-editor.js](../tests/test-editor.js) | A hyperlink is presented as a link only when it is a web address |
 | V-TST-026 | Headless | [test-editor.js](../tests/test-editor.js) | The field helpers over the definitions |
@@ -130,6 +131,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-072 | Headless | [test-library.js](../tests/test-library.js) | A project structure, folders alone |
 | V-TST-073 | Headless | [test-markdown.js](../tests/test-markdown.js) | A cell and its text |
 | V-TST-074 | Headless | [test-markdown.js](../tests/test-markdown.js) | A document of tables |
+| V-TST-169 | Headless | [test-markdown.js](../tests/test-markdown.js) | What a renderer would autolink or restructure is escaped |
 | V-TST-075 | Headless | [test-metamodel.js](../tests/test-metamodel.js) | Parse the diagram |
 | V-TST-076 | Headless | [test-metamodel.js](../tests/test-metamodel.js) | Parse the schema |
 | V-TST-077 | Headless | [test-metamodel.js](../tests/test-metamodel.js) | Entity types |
@@ -183,6 +185,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-125 | Headless | [test-risk.js](../tests/test-risk.js) | Risk graph, 6.3.2 Figures 3 and 4 |
 | V-TST-126 | Headless | [test-risk.js](../tests/test-risk.js) | Numerical scoring, 6.4.2 Table 2 |
 | V-TST-127 | Headless | [test-risk.js](../tests/test-risk.js) | Every method names its source |
+| V-TST-172 | Headless | [test-risk.js](../tests/test-risk.js) | A rating reads its parameters as own keys only |
 | V-TST-128 | Headless | [test-shell.js](../tests/test-shell.js) | The notices |
 | V-TST-129 | Headless | [test-shell.js](../tests/test-shell.js) | The leave-prompt fires exactly when leaving costs something |
 | V-TST-130 | Headless | [test-store.js](../tests/test-store.js) | A fresh session has no project |
@@ -213,17 +216,20 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-155 | Headless | [test-validator.js](../tests/test-validator.js) | Keyword mutations |
 | V-TST-156 | Headless | [test-validator.js](../tests/test-validator.js) | The enumerations, behaviourally |
 | V-TST-157 | Headless | [test-validator.js](../tests/test-validator.js) | The project's attribute bag |
+| V-TST-170 | Headless | [test-validator.js](../tests/test-validator.js) | A prototype key is refused as an attribute key |
 | V-TST-158 | Headless | [test-views.js](../tests/test-views.js) | The registry |
 | V-TST-159 | Headless | [test-views.js](../tests/test-views.js) | The risk assessment over the example |
 | V-TST-160 | Headless | [test-views.js](../tests/test-views.js) | Rated scenarios spread over parameter columns |
 | V-TST-161 | Headless | [test-views.js](../tests/test-views.js) | The renderer's pure parts |
 | V-TST-162 | Headless | [test-views.js](../tests/test-views.js) | Saved as an Excel workbook |
 | V-TST-163 | Headless | [test-views.js](../tests/test-views.js) | The safety function specification over the example |
+| V-TST-174 | Headless | [test-views.js](../tests/test-views.js) | A section name is trimmed without backtracking |
 | V-TST-164 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The text as XML takes it |
 | V-TST-165 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The names Excel accepts |
 | V-TST-166 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The bytes |
 | V-TST-167 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | A sheet |
 | V-TST-168 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The workbook |
+| V-TST-173 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | Sheet names and column widths hold on hostile values |
 
 ### 2.2 Inspections
 
@@ -373,7 +379,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
-| F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126 | Tested |
+| F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-053, V-TST-082 | Tested |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
@@ -391,14 +397,14 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-003 | Schema version | V-TST-033 | Tested |
 | F-PER-004 | Version migration | V-TST-035 | Tested |
 | F-PER-005 | Unsupported version | V-TST-035 | Tested |
-| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155 | Tested |
+| F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-170 | Tested |
 | F-PER-007 | Migration preservation | None | None |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
 | F-PER-012 | Shipped library | V-TST-069 | Tested |
-| F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023 | Tested |
+| F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171 | Tested |
 | F-DRW-002 | Drawing storage | V-TST-019, V-TST-021 | Tested |
 | F-DRW-003 | External drawing editor | V-TST-003, V-TST-016, V-TST-018, V-TST-019, V-DEM-008 | Partly |
 
@@ -416,9 +422,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-PRV-005 | Consent to hand over data | V-TST-149, V-DEM-010 | Partly |
 | N-PRV-006 | Consent scope | V-TST-149, V-DEM-011 | Partly |
 | N-PRV-007 | Data minimisation | V-TST-019, V-INS-003 | Tested |
-| N-SEC-001 | Safe parsing | V-TST-020, V-INS-001, V-INS-002, V-TST-154, V-TST-155 | Tested |
+| N-SEC-001 | Safe parsing | V-TST-020, V-INS-001, V-INS-002, V-TST-172, V-TST-154, V-TST-155, V-TST-170 | Tested |
 | N-SEC-002 | Safe rendering | V-TST-025, V-INS-001, V-INS-002 | Tested |
-| N-SEC-003 | Drawing rendering | V-TST-023, V-INS-006 | Tested |
+| N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-INS-006 | Tested |
 | N-SEC-004 | External application isolation | V-TST-016, V-TST-017, V-INS-003 | Tested |
 | N-SEC-005 | No hidden content | V-TST-027, V-TST-031, V-TST-048, V-TST-055, V-TST-056, V-TST-057, V-TST-083, V-INS-014, V-TST-098, V-TST-099 | Tested |
 | N-SEC-006 | Content security policy | V-INS-001 | Tested |
@@ -426,7 +432,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-008 | Hyperlink presentation | V-TST-025 | Tested |
 | N-SEC-009 | Failure on opening | V-TST-036, V-TST-049, V-TST-059 | Tested |
 | N-SEC-010 | No input from the address | V-INS-007 | Tested |
-| N-SEC-011 | Safe export | V-TST-073, V-TST-164, V-TST-167 | Tested |
+| N-SEC-011 | Safe export | V-TST-073, V-TST-169, V-TST-174, V-TST-164, V-TST-167, V-TST-173 | Tested |
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
 | N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012 | Partly |
