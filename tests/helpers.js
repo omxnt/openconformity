@@ -26,7 +26,7 @@ export function fakeStorage(initial = {}) {
 
 /** An editor that is never editing, so no guard ever needs a dialog. */
 export function stubEditor() {
-  return { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false };
+  return { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => false, editing: () => false, save: async () => true };
 }
 
 /**

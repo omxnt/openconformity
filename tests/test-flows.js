@@ -412,6 +412,58 @@ function flowsOver(store) {
   equal(saved.at(-1).filename, 'mixer-line.json', 'and saves under it unchanged');
 }
 
+// --- V-TST-181 Save to file offers to save an open draft first (F-MOD-004, F-PER-001) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const saved = [];
+  const asked = [];
+  let prompts = 0;
+  let ended = 0;
+  let answer = false;
+  let applies = true;
+  const editor = {
+    beginEdit() {},
+    endEdit() { ended += 1; },
+    editing: () => true,
+    hasUnconfirmedEdit: () => true,
+    save: async () => {
+      if (!applies) return false;
+      store.commit((model) => updateEntity(model, 'ELM-001', { title: 'Typed' }));
+      return true;
+    },
+  };
+  const dialogs = {
+    confirm: async (question) => { asked.push(question); return answer; },
+    prompt: async (spec) => { prompts += 1; return spec.value; },
+    toast() {},
+  };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null, saveFile: (filename, text) => saved.push(text) });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM', { attributes: { title: 'Drive' } }));
+
+  await flows.saveProject();
+  equal(asked[0].title, 'Save the changes to the attributes first?', 'a changed draft is offered to be saved before the file');
+  deepEqual([asked[0].confirmLabel, asked[0].cancelLabel], ['Save them', 'Keep editing'], 'with saving it or going back to it as the choices');
+  equal(prompts + saved.length, 0, 'and keep editing asks for no file name and downloads nothing');
+
+  answer = true;
+  applies = false;
+  await flows.saveProject();
+  equal(prompts + saved.length, 0, 'a save the editor refuses stops there too');
+
+  applies = true;
+  await flows.saveProject();
+  equal(prompts, 1, 'a saved draft goes on to the file name question');
+  ok(saved.length === 1 && saved[0].includes('"Typed"'), 'and the file holds what was typed');
+  equal(store.dirty(), false, 'with the saved pointer moved after the draft');
+
+  editor.hasUnconfirmedEdit = () => false;
+  await flows.saveProject();
+  equal(ended, 1, 'a draft without changes ends silently');
+  equal(asked.length, 3, 'and asks nothing, the three questions being the three earlier saves');
+}
+
 // --- V-TST-051 A changed record marked reviewed (F-MOD-011) ------------------
 
 {

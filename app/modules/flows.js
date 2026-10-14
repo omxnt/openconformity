@@ -907,10 +907,23 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * Save the project as a downloaded file, asking every time for the
    * file's name, prefilled from the project's name and previewed live
    * as the filename it makes. The project's own name is never touched.
-   * Cancel costs nothing, no download and no pointer move.
+   * Cancel costs nothing, no download and no pointer move. An open draft
+   * with changes is offered to be saved first, since the file holds the
+   * project as committed, and a clean draft ends silently.
    */
   async function saveProject() {
     if (!store.hasProject()) return;
+    if (editor.hasUnconfirmedEdit()) {
+      const keep = await dialogs.confirm({
+        title: 'Save the changes to the attributes first?',
+        message: 'The file name is asked next.',
+        confirmLabel: 'Save them',
+        cancelLabel: 'Keep editing',
+      });
+      if (!keep || !(await editor.save())) return;
+    } else if (editor.editing()) {
+      endEditSession();
+    }
     const fallback = store.model().name;
     const typed = await dialogs.prompt({
       title: 'Save to file',

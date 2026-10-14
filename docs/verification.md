@@ -107,6 +107,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
+| V-TST-181 | Headless | [test-flows.js](../tests/test-flows.js) | Save to file offers to save an open draft first |
 | V-TST-051 | Headless | [test-flows.js](../tests/test-flows.js) | A changed record marked reviewed |
 | V-TST-052 | Headless | [test-flows.js](../tests/test-flows.js) | Every deletion asks first |
 | V-TST-053 | Headless | [test-flows.js](../tests/test-flows.js) | Cancel asks like Escape when the draft is dirty |
@@ -286,6 +287,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
 | V-DEM-015 | Drive | The software in a browser | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
 | V-DEM-016 | Drive | The software in a browser | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
+| V-DEM-017 | Drive | The software in a browser | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
 
 ### 2.4 Analyses
 
@@ -388,7 +390,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-053, V-TST-082 | Tested |
+| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
@@ -400,7 +402,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
 | F-VIE-004 | Safety function specification | V-TST-163 | Tested |
-| F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-076, V-INS-013, V-TST-157 | Tested |
+| F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-181, V-TST-076, V-INS-013, V-TST-157, V-DEM-017 | Partly |
 | F-PER-002 | Library persistence | V-TST-069 | Tested |
 | F-PER-003 | Schema version | V-TST-033 | Tested |
 | F-PER-004 | Version migration | V-TST-035 | Tested |
@@ -455,9 +457,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 47 | 34 | 8 | 2 | 3 |
+| Functional | 47 | 32 | 10 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 104 | 55 | 23 | 23 | 3 |
+| All | 104 | 53 | 25 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

@@ -723,13 +723,23 @@ export function createEditor({
     mount(node.id, node.type, node.attributes, false);
   }
 
+  /**
+   * Save the open draft as the form's Save button does: the removal
+   * question first where a save clears values, then the save itself.
+   * @returns {Promise<boolean>} whether the draft was applied and the edit ended
+   */
+  async function save() {
+    if (mode !== 'edit') return false;
+    const removed = removals();
+    if (removed.length > 0 && !(await onRemoval(removed))) return false;
+    if (onSave(editingId, savedValues()) === false) return false;
+    endEdit();
+    return true;
+  }
+
   function renderEdit(node) {
     current = node;
-    renderHead(node, saveCancel(async () => {
-      const removed = removals();
-      if (removed.length > 0 && !(await onRemoval(removed))) return;
-      if (onSave(editingId, savedValues()) !== false) endEdit();
-    }));
+    renderHead(node, saveCancel(save));
     mount(node.id, node.type, node.attributes, true);
     followConditions();
   }
@@ -833,5 +843,5 @@ export function createEditor({
   /** Save the open edit as its Save button would, for the keys that mean save. */
   const submit = () => head.querySelector('.form-button.button-primary')?.click();
 
-  return { render, beginEdit, endEdit, hasUnconfirmedEdit, submit, editing: () => mode === 'edit' };
+  return { render, beginEdit, endEdit, hasUnconfirmedEdit, submit, save, editing: () => mode === 'edit' };
 }
