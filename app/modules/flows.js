@@ -30,6 +30,7 @@ import {
   childrenOf,
   nodeOf,
   relationshipsOf,
+  copyNode,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
@@ -331,8 +332,25 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     store.setCut(store.cut() === id ? null : id);
   }
 
-  /** File the cut row under the selection as a drop would, then forget the cut. A refusal is told and keeps the cut. */
-  function pasteCut() {
+  /** Mark the selection as copied, held for a paste. */
+  function copySelection() {
+    const id = store.selection();
+    if (id !== null) store.setCopied(id);
+  }
+
+  /**
+   * Paste what is held: a copy of the copied row inside the selection,
+   * selected once made and the mark kept for another paste, or the cut
+   * row filed under the selection as a drop would, the cut then
+   * forgotten. A refusal is told and keeps the mark.
+   */
+  function pasteHeld() {
+    const copied = store.copied();
+    if (copied !== null) {
+      const outcome = store.commit((model) => copyNode(model, copied, store.selection()));
+      if (toastRefusal('Could not paste', outcome)) store.select(outcome.id);
+      return;
+    }
     const id = store.cut();
     if (id === null) return;
     if (toastRefusal('Could not paste', store.commit((model) => file(model, id, store.selection())))) store.setCut(null);
@@ -1013,7 +1031,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     selectNode,
     fileNode,
     cutSelection,
-    pasteCut,
+    copySelection,
+    pasteHeld,
     placeNode,
     moveUp,
     moveDown,

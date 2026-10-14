@@ -183,9 +183,10 @@ document.addEventListener('keydown', (event) => {
   store.endPicking();
 });
 
-// Escape forgets a cut row, once nothing above has taken the key.
+// Escape forgets a cut or copied row, once nothing above has taken the key.
 document.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape' || event.defaultPrevented || store.cut() === null || store.drawingOpen()) return;
+  if (event.key !== 'Escape' || event.defaultPrevented || (store.cut() === null && store.copied() === null) || store.drawingOpen()) return;
   event.preventDefault();
   store.setCut(null);
+  store.setCopied(null);
 });

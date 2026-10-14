@@ -110,6 +110,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
 | V-TST-181 | Headless | [test-flows.js](../tests/test-flows.js) | Save to file offers to save an open draft first |
 | V-TST-186 | Headless | [test-flows.js](../tests/test-flows.js) | Cut and paste file a row as a drop would |
+| V-TST-188 | Headless | [test-flows.js](../tests/test-flows.js) | Copy and paste make a copy inside the selection |
 | V-TST-051 | Headless | [test-flows.js](../tests/test-flows.js) | A changed record marked reviewed |
 | V-TST-052 | Headless | [test-flows.js](../tests/test-flows.js) | Every deletion asks first |
 | V-TST-053 | Headless | [test-flows.js](../tests/test-flows.js) | Cancel asks like Escape when the draft is dirty |
@@ -154,6 +155,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-089 | Headless | [test-model.js](../tests/test-model.js) | Folder deletion |
 | V-TST-175 | Headless | [test-model.js](../tests/test-model.js) | The owner index keeps a long chain cheap and never stale |
 | V-TST-177 | Headless | [test-model.js](../tests/test-model.js) | An identifier already in the model is never issued twice |
+| V-TST-187 | Headless | [test-model.js](../tests/test-model.js) | A copy takes the subtree, the attributes and new identifiers, and no relationship |
 | V-TST-090 | Headless | [test-navigator.js](../tests/test-navigator.js) | The rows |
 | V-TST-091 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row |
 | V-TST-092 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row collapses over the whole tree |
@@ -295,6 +297,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-017 | Drive | The software in a browser | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
 | V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
 | V-DEM-019 | Drive | The software in a browser | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
+| V-DEM-020 | Drive | The software in a browser | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
 
 ### 2.4 Analyses
 
@@ -396,6 +399,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-008 | Tree filter | V-TST-093, V-TST-108 | Tested |
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
 | F-WSP-010 | Cut and paste | V-TST-186, V-TST-185, V-DEM-019 | Partly |
+| F-WSP-011 | Copy and paste | V-TST-188, V-TST-187, V-DEM-020 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
@@ -466,9 +470,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 49 | 32 | 12 | 2 | 3 |
+| Functional | 50 | 32 | 13 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 106 | 53 | 27 | 23 | 3 |
+| All | 107 | 53 | 28 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

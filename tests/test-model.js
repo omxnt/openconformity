@@ -25,6 +25,7 @@ import {
   setProjectAttribute,
   removeAttributes,
   restoreCounters,
+  copyNode,
 } from '../app/modules/model.js';
 import { FILING_DEPTH } from '../app/modules/validator.js';
 import { createStore } from '../app/modules/store.js';
@@ -378,6 +379,47 @@ function childIds(model, parentId) {
   refused(restoreCounters(model, { ...model.counters, F: 0 }), 'as is one below 1');
   allowed(restoreCounters(model, { ...model.counters, HAZ: 2 }), 'while a safe counter restores');
   equal(model.counters.HAZ, 2, 'and takes effect');
+}
+
+// --- V-TST-187 A copy takes the subtree, the attributes and new identifiers, and no relationship (F-WSP-011) ---
+
+{
+  const model = createModel();
+  addFolder(model, 'Zone', { id: 'F-1' });
+  addEntity(model, 'ELM', { id: 'ELM-001', parent: 'F-1', attributes: { title: 'Press', description: 'Hydraulic' } });
+  addEntity(model, 'HAZ', { id: 'HAZ-001', parent: 'ELM-001', attributes: { title: 'Crushing' } });
+  addEntity(model, 'HAZ', { id: 'HAZ-002', parent: 'ELM-001', attributes: { title: 'Shearing' } });
+  relate(model, 'elm-exhibits-haz', 'ELM-001', 'HAZ-001');
+  model.counters.ELM = 2;
+  model.counters.HAZ = 3;
+  model.counters.F = 2;
+  const copied = copyNode(model, 'F-1', null);
+  allowed(copied, 'a folder copies');
+  equal(copied.id, 'F-2', 'under a new identifier');
+  equal(nodeOf(model, 'F-2').name, 'Zone', 'with its name');
+  deepEqual(childrenOf(model, 'F-2').map((node) => node.id), ['ELM-002'], 'and what was filed in it, copied too');
+  deepEqual(nodeOf(model, 'ELM-002').attributes, { title: 'Press', description: 'Hydraulic' }, 'every attribute as stored');
+  deepEqual(childrenOf(model, 'ELM-002').map((node) => [node.id, node.attributes.title]), [['HAZ-003', 'Crushing'], ['HAZ-004', 'Shearing']], 'the whole subtree in its filed order');
+  equal(model.relationships.size, 1, 'and no relationship, the original keeping its own');
+  deepEqual(nodeOf(model, 'ELM-001').attributes, { title: 'Press', description: 'Hydraulic' }, 'the original untouched');
+  const inside = copyNode(model, 'HAZ-001', 'ELM-001');
+  allowed(inside, 'an entity copies beside its original');
+  equal(nodeOf(model, inside.id).parent, 'ELM-001', 'filed where asked');
+  refused(copyNode(model, 'HAZ-999', null), 'a row not in the project copies nothing');
+  const size = model.nodes.size;
+  const deep = createModel();
+  addEntity(deep, 'ELM', { id: 'ELM-001' });
+  addEntity(deep, 'ELM', { id: 'ELM-002', parent: 'ELM-001' });
+  deep.counters.ELM = 3;
+  let held = 'ELM-002';
+  for (let depth = 3; depth <= FILING_DEPTH; depth += 1) {
+    const made = addEntity(deep, 'ELM', { parent: held });
+    held = made.entity.id;
+  }
+  const refusedDeep = copyNode(deep, 'ELM-001', held);
+  refused(refusedDeep, 'a copy past the filing depth is refused');
+  equal(deep.nodes.size, FILING_DEPTH, 'and leaves nothing behind');
+  equal(model.nodes.size, size, 'the other model untouched');
 }
 
 summary('test-model');

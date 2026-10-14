@@ -1003,6 +1003,16 @@ The library ships FMV's checklist of hazards and hazardous conditions, the secti
 
 ---
 
+### D-117 A copy carries attributes and no relationships
+
+`2026-10-14` `product`
+
+Pasting a copied row creates a copy of the row with everything filed under it, each with a new identifier and every attribute as stored, and no relationship. The copy is taken from the model at the paste, and the mark is kept so a second paste makes another copy.
+
+> *A hazard, a scenario or a requirement is written once and repeated with small changes, and a copy saves the retyping. A relationship states that two particular entities are connected, and a copy is a new entity that nobody has connected yet, so copying relationships would assert connections no one made. Attributes are the entity's own words and travel with it. The identifier is new because an identifier names one entity, as the file format requires. Holding the identifier rather than a snapshot keeps the mark small and the paste honest to the model as it stands.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

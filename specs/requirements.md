@@ -637,6 +637,16 @@ When the user pastes a cut row, the software shall file the row under the select
 
 > *Filing by drag and by the Alt arrows exists, and a cut and a paste are the same move by keyboard and menu, which any tree is expected to offer. The checks and the undo are those of filing, so nothing new can go wrong, and the cut row stays where it is until the paste, since a cut that removed it would be a delete.*
 
+---
+
+#### F-WSP-011 Copy and paste
+
+`event driven`
+
+When the user pastes a copied row, the software shall create a copy of the row with everything filed under it inside the selected row, each copy with a new identifier, every attribute as stored, and no relationship.
+
+> *A hazard, a scenario or a requirement is written once and repeated with small changes, and a copy saves the retyping. The relationships are left out because a copy is a new thing that relates to nothing yet, and relating it is the user's work to do. The identifiers are new because an identifier names one entity.*
+
 ### 4.4 Model
 
 ---

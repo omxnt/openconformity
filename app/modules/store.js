@@ -199,6 +199,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let picker = null;
   /** The row cut and not yet pasted: session state, never persisted, one mark for the keys and the menus. */
   let cut = null;
+  /** The row copied and held for a paste: session state like the cut, and never held together with one. */
+  let copied = null;
   const listeners = new Set();
 
   function notify() {
@@ -296,6 +298,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   /** A change that removes the cut row forgets the cut. */
   function repairCut() {
     if (cut !== null && !model.nodes.has(cut)) cut = null;
+    if (copied !== null && !model.nodes.has(copied)) copied = null;
   }
 
   function repairPicker() {
@@ -494,6 +497,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       navigatorFilter = '';
       picker = null;
       cut = null;
+      copied = null;
       openView = null;
       viewReturn = null;
       theme = null;
@@ -614,6 +618,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       navigatorFilter = '';
       picker = null;
       cut = null;
+      copied = null;
       openView = null;
       viewReturn = null;
       keepOpenView();
@@ -643,8 +648,27 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     setCut(id) {
       if (!projectOpen) return;
       const next = id !== null && model.nodes.has(id) ? id : null;
-      if (next === cut) return;
+      if (next === cut && (next === null || copied === null)) return;
       cut = next;
+      if (next !== null) copied = null;
+      notify();
+    },
+
+    /** The row copied and held for a paste, or null. */
+    copied: () => copied,
+
+    /**
+     * Mark a row as copied, or forget the mark with null. One mark is
+     * held at a time, so a copy forgets a cut. Session state, never
+     * persisted, never in history.
+     * @param {string|null} id
+     */
+    setCopied(id) {
+      if (!projectOpen) return;
+      const next = id !== null && model.nodes.has(id) ? id : null;
+      if (next === copied && (next === null || cut === null)) return;
+      copied = next;
+      if (next !== null) cut = null;
       notify();
     },
 

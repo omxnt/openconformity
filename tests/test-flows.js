@@ -10,7 +10,7 @@
 import './shim.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
-import { createModel, addEntity, addFolder, relate, nodeOf, updateEntity, renameProject } from '../app/modules/model.js';
+import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf, updateEntity, renameProject } from '../app/modules/model.js';
 import { serialise } from '../app/modules/files.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor, fakeDocument } from './helpers.js';
@@ -482,7 +482,7 @@ function flowsOver(store) {
   equal(store.cut(), null, 'and a second cut on the same row forgets it');
   flows.cutSelection();
   store.select('ELM-001');
-  flows.pasteCut();
+  flows.pasteHeld();
   equal(nodeOf(store.model(), 'HAZ-001').parent, 'ELM-001', 'paste files the cut row inside the selection');
   equal(store.cut(), null, 'and forgets the cut');
   equal(toasts.length, 0, 'saying nothing');
@@ -492,11 +492,38 @@ function flowsOver(store) {
   store.select('ELM-001');
   flows.cutSelection();
   store.select('HAZ-001');
-  flows.pasteCut();
+  flows.pasteHeld();
   equal(nodeOf(store.model(), 'ELM-001').parent, null, 'a paste inside the cut row itself is refused and files nothing');
   equal(toasts.at(-1)?.[0], 'Could not paste', 'and is told');
   ok(toasts.at(-1)?.[1].length > 0, 'with the model\'s own reason');
   equal(store.cut(), 'ELM-001', 'while the cut stays for another target');
+}
+
+// --- V-TST-188 Copy and paste make a copy inside the selection (F-WSP-011) ----
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const flows = createFlows({ store, overlay: {}, dialogs: { toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM', { attributes: { title: 'Press' } }));
+  store.commit((model) => addEntity(model, 'HAZ', { parent: 'ELM-001', attributes: { title: 'Crushing' } }));
+  store.select('ELM-001');
+  flows.cutSelection();
+  flows.copySelection();
+  equal(store.copied(), 'ELM-001', 'copy marks the selection');
+  equal(store.cut(), null, 'and forgets a cut');
+  store.select(null);
+  flows.pasteHeld();
+  equal(store.selection(), 'ELM-002', 'paste makes the copy and selects it');
+  deepEqual([nodeOf(store.model(), 'ELM-002').parent, nodeOf(store.model(), 'ELM-002').attributes.title], [null, 'Press'], 'at the root, with its attributes');
+  deepEqual(childrenOf(store.model(), 'ELM-002').map((node) => node.attributes.title), ['Crushing'], 'and what was filed under it');
+  equal(store.copied(), 'ELM-001', 'the mark is kept');
+  flows.pasteHeld();
+  equal(store.model().nodes.size, 6, 'so a second paste makes another copy');
+  store.undo();
+  equal(store.model().nodes.size, 4, 'one undo removes the whole paste');
+  equal(toasts.length, 0, 'nothing was told');
 }
 
 // --- V-TST-051 A changed record marked reviewed (F-MOD-011) ------------------

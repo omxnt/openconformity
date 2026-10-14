@@ -38,6 +38,7 @@ const REDO_HINT = APPLE ? '⇧⌘Z' : 'Ctrl Y';
 const DELETE_HINT = APPLE ? '⌘⌫' : 'Del';
 const CUT_HINT = APPLE ? '⌘X' : 'Ctrl X';
 const PASTE_HINT = APPLE ? '⌘V' : 'Ctrl V';
+const COPY_HINT = APPLE ? '⌘C' : 'Ctrl C';
 const UP_HINT = APPLE ? '⌥↑' : 'Alt ↑';
 const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
 
@@ -277,6 +278,17 @@ export function createActions({ store, flows }) {
       run: () => flows.cutSelection(),
     },
     {
+      id: 'copy',
+      icon: 'i-copy',
+      label: 'Copy',
+      group: 'arrange',
+      toolbar: false,
+      context: true,
+      hint: COPY_HINT,
+      enabled: () => selected() !== null,
+      run: () => flows.copySelection(),
+    },
+    {
       id: 'paste',
       icon: 'i-paste',
       label: 'Paste',
@@ -284,8 +296,11 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: PASTE_HINT,
-      enabled: () => store.cut() !== null && canFile(store.model(), store.cut(), store.selection()).ok,
-      run: () => flows.pasteCut(),
+      enabled: () =>
+        store.copied() !== null
+          ? store.hasProject() && (store.selection() === null || selected() !== null)
+          : store.cut() !== null && canFile(store.model(), store.cut(), store.selection()).ok,
+      run: () => flows.pasteHeld(),
     },
     {
       id: 'delete',

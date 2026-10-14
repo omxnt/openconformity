@@ -281,6 +281,42 @@ export function addEntity(model, code, options = {}) {
 }
 
 /**
+ * Copy a folder or an entity with everything filed under it, each copy
+ * filed under the copy of what held the original, the root under the
+ * parent given. An entity's attributes are copied as stored, a folder's
+ * name with it, every identifier is issued anew, and no relationship is
+ * copied, since a copy relates to nothing yet. The first refusal stops
+ * the copy with the model as it was before it.
+ * @param {Model} model
+ * @param {string} id
+ * @param {string|null} parentId
+ * @returns {Outcome & { id?: string }}
+ */
+export function copyNode(model, id, parentId) {
+  const root = nodeOf(model, id);
+  if (!root) return { ok: false, reason: 'It is not in the project.' };
+  const before = new Map(model.nodes);
+  const counters = { ...model.counters };
+  const copy = (node, parent) => {
+    const result = node.kind === 'folder' ? addFolder(model, node.name, { parent }) : addEntity(model, node.type, { parent, attributes: { ...node.attributes } });
+    if (!result.ok) return result;
+    const made = node.kind === 'folder' ? result.folder.id : result.entity.id;
+    for (const child of childrenOf(model, node.id)) {
+      const held = copy(child, made);
+      if (!held.ok) return held;
+    }
+    return { ok: true, id: made };
+  };
+  const outcome = copy(root, parentId);
+  if (!outcome.ok) {
+    model.nodes = before;
+    model.counters = counters;
+    refiled(model);
+  }
+  return outcome;
+}
+
+/**
  * Add a folder, filed last among the parent's children. A folder carries a
  * name and nothing else, and the name cannot be empty. An identifier is
  * issued from the folder counter unless one is supplied, which only the

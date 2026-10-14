@@ -598,9 +598,9 @@ export function createNavigator({
       }
     }
 
-    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'v'].includes(event.key.toLowerCase())) {
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'c', 'v'].includes(event.key.toLowerCase())) {
       event.preventDefault();
-      runAction(event.key.toLowerCase() === 'x' ? 'cut' : 'paste');
+      runAction({ x: 'cut', c: 'copy', v: 'paste' }[event.key.toLowerCase()]);
     } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
       runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
