@@ -23,6 +23,22 @@ import { workbook } from './xlsx.js';
 import { markdown } from './markdown.js';
 import { zip } from './zip.js';
 import { dataUrl } from './drawing.js';
+import { VERSION } from './version.js';
+
+/** The software and its version, as a saved view names what wrote it. */
+const WRITER = `openconformity ${VERSION}`;
+
+/**
+ * The line under a saved Markdown's title: the project, when it was
+ * saved, and what wrote it, so a reader can fetch the version behind it.
+ * @param {string} name  the project's name, or '' for none
+ * @param {Date} date
+ * @returns {string}
+ */
+export function savedLine(name, date) {
+  const saved = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+  return `${name.trim() || 'Untitled'}, saved ${saved} by ${WRITER}`;
+}
 
 /** A column as an object, a bare name being its text. */
 export const asColumn = (column) => (typeof column === 'string' ? { text: column } : column);
@@ -370,7 +386,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const view = VIEWS.find((held) => held.id === open.id) ?? VIEWS[0];
     const built = view.build(store.model());
     const part = savedPart(built, Math.min(open.section, built.sections.length - 1));
-    download(part.filename, workbook(viewSheets(part.built, labelOf)), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    download(part.filename, workbook(viewSheets(part.built, labelOf), WRITER), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   }
 
   /** The open section saved as Markdown, the first section holding every block, and as a zip with its diagrams beside it where it has any. */
@@ -381,8 +397,7 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
     const built = view.build(store.model());
     const index = Math.min(open.section, built.sections.length - 1);
     const part = savedPart(built, index, 'md');
-    const saved = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
-    const { text, diagrams } = sectionMarkdown(built, built.sections[index], labelOf, `${store.model().name.trim() || 'Untitled'}, saved ${saved}`);
+    const { text, diagrams } = sectionMarkdown(built, built.sections[index], labelOf, savedLine(store.model().name, new Date()));
     if (diagrams.length === 0) {
       download(part.filename, text, 'text/markdown;charset=utf-8');
       return;

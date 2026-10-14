@@ -92,14 +92,17 @@ function unzip(bytes) {
   const bytes = workbook([
     { name: 'All scenarios (4)', groups: ['G'], headers: ['H'], rows: [[{ text: 'x' }]] },
     { name: 'L-1 Installation (0)', groups: [''], headers: ['H'], rows: [] },
-  ]);
+  ], 'openconformity 1.0.0-test');
   const parts = unzip(bytes).entries;
-  deepEqual(parts.map((entry) => entry.name), ['[Content_Types].xml', '_rels/.rels', 'xl/workbook.xml', 'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml'], 'the parts of a workbook, the content types first');
+  deepEqual(parts.map((entry) => entry.name), ['[Content_Types].xml', '_rels/.rels', 'docProps/app.xml', 'xl/workbook.xml', 'xl/_rels/workbook.xml.rels', 'xl/styles.xml', 'xl/worksheets/sheet1.xml', 'xl/worksheets/sheet2.xml'], 'the parts of a workbook, the content types first');
   ok(parts.every((entry) => entry.crcHolds), 'every checksum holds');
   const part = (name) => text(parts.find((entry) => entry.name === name).data);
   ok(part('xl/workbook.xml').includes('<sheet name="All scenarios (4)" sheetId="1" r:id="rId1"/><sheet name="L-1 Installation (0)" sheetId="2" r:id="rId2"/>'), 'the sheets are named as the tabs, in order');
   ok(part('[Content_Types].xml').includes('PartName="/xl/worksheets/sheet2.xml"') && part('xl/_rels/workbook.xml.rels').includes('Target="styles.xml"'), 'each part is declared and related');
   ok(parts.every((entry) => text(entry.data).startsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')), 'and every part is XML in UTF-8');
+  ok(part('docProps/app.xml').includes('<Application>openconformity 1.0.0-test</Application>'), 'the document properties name the software and its version');
+  ok(part('[Content_Types].xml').includes('PartName="/docProps/app.xml"') && part('_rels/.rels').includes('Target="docProps/app.xml"'), 'declared and related from the package root');
+  ok(!unzip(workbook([{ name: 'A', groups: [''], headers: ['H'], rows: [] }])).entries.some((entry) => entry.name === 'docProps/app.xml'), 'a workbook without an application carries no properties part');
   const styles = part('xl/styles.xml');
   ok(styles.includes('<cellXfs count="4">') && !styles.includes('patternType="solid"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is wrapping and alignment only, with no fill, no bold and no borders');
 }

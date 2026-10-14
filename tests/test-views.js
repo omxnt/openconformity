@@ -10,7 +10,8 @@ import './shim.js';
 import { buildRiskView, ratingColumns, ratingCells, RISK_VIEW } from '../app/modules/view-risk.js';
 import { buildSafetyView, specifiedFields } from '../app/modules/view-safety.js';
 import { ATTRIBUTES } from '../app/modules/attributes.js';
-import { asColumn, columnText, cellText, exportText, viewSheets, savedPart, sectionMarkdown, sortRows, groupEdges } from '../app/modules/views.js';
+import { asColumn, columnText, cellText, exportText, viewSheets, savedPart, sectionMarkdown, sortRows, groupEdges, savedLine } from '../app/modules/views.js';
+import { VERSION } from '../app/modules/version.js';
 import { VIEWS } from '../app/modules/view-registry.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
@@ -247,5 +248,10 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   ok(Date.now() - started < 200, 'a section name of a hundred thousand spaces is named in no time');
   ok(part.filename.endsWith('(1x.md'), 'and the count is trimmed only when it closes');
 }
+
+// --- V-TST-184 A saved view names what wrote it (F-VIE-001) -------------------
+
+equal(savedLine('Mixer line', new Date(2026, 9, 14)), `Mixer line, saved 14 October 2026 by openconformity ${VERSION}`, 'the line under the title names the project, the date and the software with its version');
+equal(savedLine('   ', new Date(2026, 0, 1)), `Untitled, saved 1 January 2026 by openconformity ${VERSION}`, 'an unnamed project is Untitled');
 
 summary('test-views');

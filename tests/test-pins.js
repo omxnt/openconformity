@@ -140,7 +140,7 @@ const POLICY = "default-src 'self'; script-src 'self'; style-src 'self'; img-src
 
 {
   ok(sources.every(([, source]) => !/window\.print\(/.test(source)) && !sheet.includes('@media print') && !sheet.includes('@page'), 'no module prints and the stylesheet holds no print layout');
-  ok(readFile('../app/modules/views.js').includes("download(part.filename, workbook(viewSheets(part.built, labelOf))"), 'the view saves as an Excel workbook');
+  ok(readFile('../app/modules/views.js').includes("download(part.filename, workbook(viewSheets(part.built, labelOf), WRITER)"), 'the view saves as an Excel workbook');
 }
 
 // --- V-INS-010 The way to report a vulnerability is published where tools look (C-PRJ-006) ---

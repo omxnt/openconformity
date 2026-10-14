@@ -232,6 +232,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-162 | Headless | [test-views.js](../tests/test-views.js) | Saved as an Excel workbook |
 | V-TST-163 | Headless | [test-views.js](../tests/test-views.js) | The safety function specification over the example |
 | V-TST-174 | Headless | [test-views.js](../tests/test-views.js) | A section name is trimmed without backtracking |
+| V-TST-184 | Headless | [test-views.js](../tests/test-views.js) | A saved view names what wrote it |
 | V-TST-164 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The text as XML takes it |
 | V-TST-165 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The names Excel accepts |
 | V-TST-166 | Headless | [test-xlsx.js](../tests/test-xlsx.js) | The bytes |
@@ -401,7 +402,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
 | F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
-| F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
+| F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
 | F-VIE-004 | Safety function specification | V-TST-163 | Tested |

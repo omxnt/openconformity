@@ -24,6 +24,7 @@ import { zip } from './zip.js';
 const MAIN = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const RELATIONSHIPS = 'http://schemas.openxmlformats.org/package/2006/relationships';
 const DOCUMENT = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+const EXTENDED = 'http://schemas.openxmlformats.org/officeDocument/2006/extended-properties';
 const PROLOGUE = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
 
 /**
@@ -163,9 +164,10 @@ export function sheetXml(sheet) {
 /**
  * The workbook's bytes: one sheet per table, in order.
  * @param {Sheet[]} sheets
+ * @param {string} [application]  the software that wrote the workbook, with its version, kept in the document properties
  * @returns {Uint8Array}
  */
-export function workbook(sheets) {
+export function workbook(sheets, application = '') {
   const taken = new Set();
   const names = sheets.map((sheet) => sheetName(sheet.name, taken));
   const parts = sheets.map((sheet, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, text: sheetXml(sheet) }));
@@ -180,13 +182,20 @@ export function workbook(sheets) {
         '<Default Extension="xml" ContentType="application/xml"/>' +
         '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
         '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+        (application ? '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' : '') +
         overrides +
         '</Types>',
     },
     {
       name: '_rels/.rels',
-      text: `${PROLOGUE}<Relationships xmlns="${RELATIONSHIPS}"><Relationship Id="rId1" Type="${DOCUMENT}/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+      text:
+        `${PROLOGUE}<Relationships xmlns="${RELATIONSHIPS}"><Relationship Id="rId1" Type="${DOCUMENT}/officeDocument" Target="xl/workbook.xml"/>` +
+        (application ? `<Relationship Id="rId2" Type="${DOCUMENT}/extended-properties" Target="docProps/app.xml"/>` : '') +
+        '</Relationships>',
     },
+    ...(application
+      ? [{ name: 'docProps/app.xml', text: `${PROLOGUE}<Properties xmlns="${EXTENDED}"><Application>${xmlText(application)}</Application></Properties>` }]
+      : []),
     {
       name: 'xl/workbook.xml',
       text: `${PROLOGUE}<workbook xmlns="${MAIN}" xmlns:r="${DOCUMENT}"><sheets>${names.map((name, i) => `<sheet name="${xmlText(name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets></workbook>`,
