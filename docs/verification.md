@@ -98,6 +98,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-037 | Headless | [test-files.js](../tests/test-files.js) | A wide project saves in one pass |
 | V-TST-038 | Headless | [test-files.js](../tests/test-files.js) | The blob path |
 | V-TST-039 | Headless | [test-files.js](../tests/test-files.js) | The project's attribute bag rides the file |
+| V-TST-190 | Headless | [test-files.js](../tests/test-files.js) | A full file of each schema version stays as a fixture |
 | V-TST-040 | Headless | [test-flows.js](../tests/test-flows.js) | The landing, one action to a project |
 | V-TST-041 | Headless | [test-flows.js](../tests/test-flows.js) | A pristine creation collapses on cancel |
 | V-TST-042 | Headless | [test-flows.js](../tests/test-flows.js) | A saved-once entity survives cancel |
@@ -419,10 +420,10 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-181, V-TST-076, V-INS-013, V-TST-157, V-DEM-017, V-DEM-018 | Partly |
 | F-PER-002 | Library persistence | V-TST-069 | Tested |
 | F-PER-003 | Schema version | V-TST-033 | Tested |
-| F-PER-004 | Version migration | V-TST-035 | Tested |
+| F-PER-004 | Version migration | V-TST-035, V-TST-190 | Tested |
 | F-PER-005 | Unsupported version | V-TST-035 | Tested |
 | F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-175, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-176, V-TST-170 | Tested |
-| F-PER-007 | Migration preservation | None | None |
+| F-PER-007 | Migration preservation | V-TST-190 | Tested |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
@@ -471,9 +472,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 50 | 32 | 13 | 2 | 3 |
+| Functional | 50 | 33 | 13 | 2 | 2 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 107 | 53 | 28 | 23 | 3 |
+| All | 107 | 54 | 28 | 23 | 2 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 
@@ -481,7 +482,6 @@ Every other test block says in its header that it names no requirement, and pins
 
 | Requirement | Why |
 |---|---|
-| F-PER-007 | Waits on the first migration |
 | F-PER-009 | Waits on the first migration |
 | F-PER-011 | Waits on the function |
 

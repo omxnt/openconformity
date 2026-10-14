@@ -191,4 +191,16 @@ deepEqual(opened.notices, [], 'with no migration notices while the chain is empt
   equal(serialise(reopened.model), serialise(model), 'byte-stable through the round trip');
 }
 
+// --- V-TST-190 A full file of each schema version stays as a fixture (F-PER-004, F-PER-007) ---
+
+{
+  const held = JSON.parse(readFile('fixtures/schema-1.json'));
+  equal(held.schemaVersion, 1, 'the fixture is the example as saved at schema version 1, never edited');
+  const opened = openProject(JSON.stringify(held));
+  ok(opened.ok, `and opens through every gate${opened.ok ? '' : `: ${opened.problems.join(' | ')}`}`);
+  deepEqual([held.name, held.folders.length, held.entities.length, held.relationships.length], ['Example project', 16, 91, 166], 'holding the example project, its sixteen folders, ninety-one entities and one hundred and sixty-six relationships');
+  equal(opened.model.nodes.size, 107, 'every folder and entity landing in the model');
+  equal(JSON.stringify(JSON.parse(serialise(opened.model))), JSON.stringify(held), 'and saving it again writes the same file, byte for byte in meaning');
+}
+
 summary('test-files');

@@ -196,6 +196,8 @@ While the diagram editor is open, every action stands disabled.
 | Demonstration | Drive | Outside the repository today | The panes in a real browser, driven by the headless Chrome driver |
 | Analysis | Review | `tests/manual.md` | The host, the accounts and the repository, read at each release |
 
+A full project file of each schema version stays in `tests/fixtures/` as `schema-N.json`, the example as saved by the software at that version and never edited after, so a migration from any version can always be tested against a real file. Version 1 is `schema-1.json`, and each later version adds its own file at the release that introduces it.
+
 Each activity carries an identifier, in the header of its test block or in a row of `tests/manual.md`, with the requirements it verifies. `tests/generate-verification.js` reads both and writes `docs/verification.md` at the end of every run, so the document is never edited by hand. Bringing the drives into the repository is the one open item the architecture review left.
 
 ## 8. Keeping it true
