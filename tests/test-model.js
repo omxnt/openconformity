@@ -405,6 +405,11 @@ function childIds(model, parentId) {
   const inside = copyNode(model, 'HAZ-001', 'ELM-001');
   allowed(inside, 'an entity copies beside its original');
   equal(nodeOf(model, inside.id).parent, 'ELM-001', 'filed where asked');
+  const count = model.nodes.size;
+  const self = copyNode(model, 'ELM-001', 'ELM-001');
+  allowed(self, 'a row copies into itself');
+  equal(model.nodes.size, count + 4, 'as one copy of the subtree as it stood, the copy never walked');
+  equal(nodeOf(model, self.id).parent, 'ELM-001', 'filed inside the original');
   refused(copyNode(model, 'HAZ-999', null), 'a row not in the project copies nothing');
   const size = model.nodes.size;
   const deep = createModel();

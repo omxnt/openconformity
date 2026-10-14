@@ -297,23 +297,26 @@ export function copyNode(model, id, parentId) {
   if (!root) return { ok: false, reason: 'It is not in the project.' };
   const before = new Map(model.nodes);
   const counters = { ...model.counters };
-  const copy = (node, parent) => {
-    const result = node.kind === 'folder' ? addFolder(model, node.name, { parent }) : addEntity(model, node.type, { parent, attributes: { ...node.attributes } });
-    if (!result.ok) return result;
-    const made = node.kind === 'folder' ? result.folder.id : result.entity.id;
-    for (const child of childrenOf(model, node.id)) {
-      const held = copy(child, made);
-      if (!held.ok) return held;
-    }
-    return { ok: true, id: made };
+  /** The subtree read before anything is made, so a copy filed inside it is never walked. */
+  const plan = [];
+  const read = (node) => {
+    plan.push(node);
+    for (const child of childrenOf(model, node.id)) read(child);
   };
-  const outcome = copy(root, parentId);
-  if (!outcome.ok) {
-    model.nodes = before;
-    model.counters = counters;
-    refiled(model);
+  read(root);
+  const made = new Map([[root.parent, parentId]]);
+  for (const node of plan) {
+    const parent = made.get(node.parent);
+    const result = node.kind === 'folder' ? addFolder(model, node.name, { parent }) : addEntity(model, node.type, { parent, attributes: { ...node.attributes } });
+    if (!result.ok) {
+      model.nodes = before;
+      model.counters = counters;
+      refiled(model);
+      return result;
+    }
+    made.set(node.id, node.kind === 'folder' ? result.folder.id : result.entity.id);
   }
-  return outcome;
+  return { ok: true, id: made.get(root.id) };
 }
 
 /**
