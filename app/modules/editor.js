@@ -705,11 +705,7 @@ export function createEditor({
   function renderProjectEdit() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(
-      el('div', { className: 'pane-head-actions' }, saveCancel(async () => {
-        if ((await onSaveProject(savedValues())) !== false) endEdit();
-      }))
-    );
+    head.appendChild(el('div', { className: 'pane-head-actions' }, saveCancel(save)));
     mount(null, 'PROJECT', projectValues(), true);
     followConditions();
   }
@@ -724,12 +720,18 @@ export function createEditor({
   }
 
   /**
-   * Save the open draft as the form's Save button does: the removal
-   * question first where a save clears values, then the save itself.
+   * Save the open draft as the form's Save button does, the project's or
+   * an entity's: the removal question first where a save clears values,
+   * then the save itself.
    * @returns {Promise<boolean>} whether the draft was applied and the edit ended
    */
   async function save() {
     if (mode !== 'edit') return false;
+    if (editingProject) {
+      if ((await onSaveProject(savedValues())) === false) return false;
+      endEdit();
+      return true;
+    }
     const removed = removals();
     if (removed.length > 0 && !(await onRemoval(removed))) return false;
     if (onSave(editingId, savedValues()) === false) return false;

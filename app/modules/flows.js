@@ -924,7 +924,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (editor.hasUnconfirmedEdit()) {
       const keep = await dialogs.confirm({
         title: 'Save the changes to the attributes first?',
-        message: 'The file name is asked next.',
+        message: 'The changes to the attributes are kept.',
         confirmLabel: 'Save them',
         cancelLabel: 'Keep editing',
       });
