@@ -2,6 +2,37 @@
 
 Every release of openconformity is recorded here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.4] - 2026-10-14
+
+Cut, copy and paste in the tree, and the check that now guards every release.
+
+### Added
+
+- Cut and paste in the tree, by key and by menu, filing the row as a drop would.
+- Copy and paste in the tree, a copy of the row and everything under it, with new identifiers and no relationships.
+- A saved view names the software and its version, in the line under a Markdown title and in a workbook's properties.
+- About links to the release of the version shown and to the changelog.
+- A warning before the page is left while an edit is unconfirmed.
+
+### Changed
+
+- Save to file offers to save an open draft first, for an entity and for the project.
+- A drawing is accepted only if it holds what draw.io writes, and refused by name otherwise.
+- A relationship that could not be added is told with the reason.
+
+### Fixed
+
+- A double click on a column handle returns the column to its default width.
+- The library preview shows a table attribute's row count.
+- Clear stored data opens the relationship pane again.
+- Alt Space picks one entity on a Mac.
+- Escape in the diagram editor cancels once, however many edits came before.
+- A workbook cell longer than Excel allows is cut with a mark.
+
+### Security
+
+- Every push runs the tests and the browser drives on GitHub, and main accepts only a commit that passed and is signed.
+
 ## [1.0.0-beta.3] - 2026-10-07
 
 The hazard checklist, and the hardening the October reviews asked for.
@@ -72,3 +103,4 @@ The first public beta, open to everyone at app.openconformity.org.
 [1.0.0-beta.3]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.2...v1.0.0-beta.3
 [1.0.0-beta.2]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.1...v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/omxnt/openconformity/releases/tag/v1.0.0-beta.1
+[1.0.0-beta.4]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.3...v1.0.0-beta.4
