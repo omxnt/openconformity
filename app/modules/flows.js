@@ -29,6 +29,7 @@ import {
   placeBeside,
   childrenOf,
   nodeOf,
+  relationshipsOf,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
@@ -573,17 +574,24 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   function completeRelate(subjectId, picks) {
     let related = 0;
+    const reasons = new Set();
     store.commit((model) => {
       for (const { id, form } of pickedRows(model, { subject: subjectId, picks })) {
-        if (form === null) continue;
+        if (form === null) {
+          const held = relationshipsOf(model, subjectId);
+          const between = held.outgoing.some((relationship) => relationship.target === id) || held.incoming.some((relationship) => relationship.source === id);
+          reasons.add(between ? `${id} is already related to ${subjectId}.` : `The metamodel allows nothing between ${subjectId} and ${id}.`);
+          continue;
+        }
         const outcome = form.direction === 'outgoing' ? relate(model, form.typeId, subjectId, id) : relate(model, form.typeId, id, subjectId);
         if (outcome.ok) related += 1;
+        else reasons.add(outcome.reason);
       }
       return related > 0 ? { ok: true } : { ok: false, reason: 'Nothing could be related.' };
     });
     if (related < picks.length) {
       const dropped = picks.length - related;
-      dialogs.toast(`Could not add ${plural(dropped, 'relationship')}`, `The metamodel no longer allows ${dropped === 1 ? 'it' : 'them'}.`);
+      dialogs.toast(`Could not add ${plural(dropped, 'relationship')}`, [...reasons].join(' '));
     }
     store.endPicking();
   }

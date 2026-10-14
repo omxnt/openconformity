@@ -235,8 +235,8 @@ function flowsOver(store) {
   equal(store.picker(), null, 'and Done ends the picking: the panel is gone, the flow closes the mode');
   deepEqual(
     toasts.pop(),
-    ['Could not add 1 relationship', 'The metamodel no longer allows it.'],
-    'and the shortfall is told in passing'
+    ['Could not add 1 relationship', 'HAZ-002 is already related to ELM-001.'],
+    'and the shortfall is told in passing, with the model\'s own reason'
   );
 
   await flows.createRelated('ELM-001', 'ELM', { typeId: 'elm-exhibits-haz', direction: 'outgoing' });

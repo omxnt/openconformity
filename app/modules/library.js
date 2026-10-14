@@ -23,7 +23,7 @@ import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { typeOf, groupAttributes } from './attributes.js';
-import { setValues, firstTabName } from './fields.js';
+import { setValues, firstTabName, tableRows } from './fields.js';
 import { plural } from './text.js';
 import { APPLE } from './platform.js';
 import { loadProject } from './files.js';
@@ -202,7 +202,7 @@ export function previewValue(definition, value) {
     return chosen.length > 0 ? chosen.join(', ') : null;
   }
   if (definition.kind === 'table') {
-    const rows = Array.isArray(value) ? value.length : 0;
+    const rows = tableRows(definition, value).length;
     return rows > 0 ? plural(rows, 'row') : null;
   }
   return String(value);
@@ -487,7 +487,7 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
           event.preventDefault();
           expanded.delete(node.id);
           focusRow(node.id);
-        } else if (event.key === ' ') {
+        } else if (event.code === 'Space') {
           event.preventDefault();
           togglePick(library, picks, node.id, event.altKey);
           focusRow(node.id);

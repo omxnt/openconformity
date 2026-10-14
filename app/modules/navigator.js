@@ -585,9 +585,9 @@ export function createNavigator({
     const row = index >= 0 ? rows[index] : null;
 
     if (picker !== null) {
-      if (event.key === ' ' || event.key === 'Enter') {
+      if (event.code === 'Space' || event.key === 'Enter') {
         event.preventDefault();
-        if (event.key === ' ' && row && pickerCandidates(store.model(), picker).has(row.id)) store.togglePick(row.id);
+        if (event.code === 'Space' && row && pickerCandidates(store.model(), picker).has(row.id)) store.togglePick(row.id);
         return;
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
@@ -635,7 +635,7 @@ export function createNavigator({
     } else if (event.key === 'End') {
       event.preventDefault();
       onSelect(rows[rows.length - 1].id);
-    } else if (event.key === 'Enter' || event.key === ' ') {
+    } else if (event.key === 'Enter' || event.code === 'Space') {
       if (row === null) return;
       event.preventDefault();
       onActivate(row.id);

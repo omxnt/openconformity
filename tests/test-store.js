@@ -863,6 +863,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   store.replaceProject(createModel());
   store.setTheme('g100');
   store.setConsented(true);
+  store.setRelationshipsCollapsed(true);
   await store.whenPersisted();
   ok(retention.records.has('project') && retention.records.has('aside') && storage.read(THEME_KEY) === 'g100' && session.read('openconformity.drawio-consent') === '1', 'a browser holding a project, a set-aside copy, a theme, the consent, and blobs from the previous generation');
   let told = 0;
@@ -874,6 +875,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.hasProject(), false, 'no project is open, as on the landing');
   equal(store.theme(), null, 'the theme follows the system again');
   equal(store.consented(), false, 'the consent is withdrawn');
+  equal(store.relationshipsCollapsed(), false, 'the relationship pane stands open again');
   equal(store.dirty(), false, 'and nothing is dirty');
   await store.whenPersisted();
   equal(retention.records.size, 0, 'nothing of the software is left in the retention, the set-aside copy included');

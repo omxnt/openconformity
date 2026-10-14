@@ -475,6 +475,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       }
       for (const key of [VIEW_KEY, COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY, LAYOUT_KEY]) sessionWrite(key, null);
       layout = {};
+      relationshipsCollapsed = false;
       model = createModel();
       savedSequence = history.reset(model);
       projectOpen = false;

@@ -39,12 +39,14 @@ export function columnGroup(key, defaults) {
 /**
  * Put a handle on the named column heads of a table, at the right edge
  * of each, dragged by pointer, stepped by arrow keys, returned to its
- * default by a double click.
+ * default width by a double click, the width the group was built from
+ * rather than one measured, since the table may not be on the page yet.
  * @param {HTMLTableElement} table
  * @param {string} key
  * @param {number[]} resizable  the columns that get a handle
+ * @param {string[]} defaults  the CSS width per column the group was built from, returned to by a double click
  */
-export function columnHandles(table, key, resizable) {
+export function columnHandles(table, key, resizable, defaults) {
   table.dataset.columns = key;
   const heads = [...table.querySelectorAll('thead tr:first-child th')];
   for (const i of resizable) {
@@ -56,7 +58,6 @@ export function columnHandles(table, key, resizable) {
       attributes: { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': `Resize the ${name} column`, tabindex: '0' },
     });
     head.appendChild(handle);
-    const preset = head.getBoundingClientRect().width;
     splitter({
       splitter: handle,
       sizeAt: (event) => event.clientX - head.getBoundingClientRect().left,
@@ -66,7 +67,14 @@ export function columnHandles(table, key, resizable) {
         return table.getBoundingClientRect().width - others;
       },
       minimum: MINIMUM,
-      preset,
+      preset: MINIMUM,
+      reset: () => {
+        dragged.get(key)?.delete(i);
+        for (const shared of document.querySelectorAll(`table[data-columns="${key}"]`)) {
+          const col = shared.querySelectorAll('col')[i];
+          if (col) col.style.width = defaults[i];
+        }
+      },
       apply: (width) => {
         const widths = dragged.get(key) ?? new Map();
         widths.set(i, Math.round(width));

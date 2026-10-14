@@ -464,7 +464,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       el('tbody', {}, rows.map((row) => (row.kind === 'pending' ? pendingRow(row, subject) : realRow(row, subject, picking)))),
     ]);
     held.appendChild(table);
-    columnHandles(table, 'relationships', [0, 1]);
+    columnHandles(table, 'relationships', [0, 1], LIST_COLUMNS);
     return held;
   }
 
@@ -610,7 +610,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       el('tbody', {}, rows.map(messageRow)),
     ]);
     messagesHost.appendChild(table);
-    columnHandles(table, 'messages', [0, 1]);
+    columnHandles(table, 'messages', [0, 1], MESSAGE_COLUMNS);
   }
 
   /** Refresh the body alone, so typing in the head's filter keeps its focus: the list, the messages, or the graph around its subject. */

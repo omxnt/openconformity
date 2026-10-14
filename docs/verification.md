@@ -288,6 +288,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-015 | Drive | The software in a browser | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
 | V-DEM-016 | Drive | The software in a browser | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
 | V-DEM-017 | Drive | The software in a browser | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
+| V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
 
 ### 2.4 Analyses
 
@@ -380,7 +381,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
 | F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
-| F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016 | Partly |
+| F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
 | F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105, V-TST-106 | Tested |
 | F-WSP-005 | Neutral filing | V-TST-014, V-TST-084 | Tested |
 | F-WSP-006 | Folder creation | V-TST-081 | Tested |
@@ -396,13 +397,13 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
-| F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072 | Tested |
+| F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
 | F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
 | F-VIE-004 | Safety function specification | V-TST-163 | Tested |
-| F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-181, V-TST-076, V-INS-013, V-TST-157, V-DEM-017 | Partly |
+| F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-181, V-TST-076, V-INS-013, V-TST-157, V-DEM-017, V-DEM-018 | Partly |
 | F-PER-002 | Library persistence | V-TST-069 | Tested |
 | F-PER-003 | Schema version | V-TST-033 | Tested |
 | F-PER-004 | Version migration | V-TST-035 | Tested |
@@ -457,9 +458,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 47 | 32 | 10 | 2 | 3 |
+| Functional | 47 | 31 | 11 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 104 | 53 | 25 | 23 | 3 |
+| All | 104 | 52 | 26 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

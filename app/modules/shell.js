@@ -258,7 +258,9 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
 
   const saveAction = actions.find((action) => action.id === 'save');
   if (saveAction) {
-    unsavedButton.addEventListener('click', () => saveAction.run({ anchor: unsavedButton }));
+    unsavedButton.addEventListener('click', () => {
+      if (saveAction.enabled()) saveAction.run({ anchor: unsavedButton });
+    });
     tooltipOn(unsavedButton, 'Save to file…', { align: 'end', label: 'Unsaved changes, save to file' });
   }
   const metamodelAction = actions.find((action) => action.id === 'metamodel');
@@ -306,7 +308,9 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   function notice(kind, title, text, onDismiss, buttons = []) {
     const actions = buttons.map((action) => {
       const button = el('button', { className: action.danger ? 'ghost-button ghost-danger' : 'ghost-button', text: action.label, attributes: { type: 'button' } });
-      button.addEventListener('click', () => action.run({}));
+      button.addEventListener('click', () => {
+        if (action.enabled()) action.run({});
+      });
       return button;
     });
     return paneNotice(kind, title, text, { actions, onDismiss });

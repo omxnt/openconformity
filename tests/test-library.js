@@ -240,7 +240,8 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, 'Crushing'), 'Crushing', 'a text shows as stored');
   equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, ''), null, 'an empty one shows nowhere');
   equal(previewValue({ key: 'technologies', name: 'Technologies', kind: 'set', values: ['Mechanical', 'Hydraulic', 'Electrical'] }, 'Electrical;Mechanical'), 'Mechanical, Electrical', 'a set as its values in the order defined');
-  equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [] }, [{}, {}]), '2 rows', 'a table as its row count');
+  equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [{ key: 'date' }, { key: 'by' }] }, '2026-01-01\tAnn\n2026-02-01\tBo'), '2 rows', 'a table as its row count, read from the stored text');
+  equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [{ key: 'date' }] }, '\n'), null, 'a stored table without a row shows nowhere');
   equal(previewValue({ key: 'rating', name: 'Rating', kind: 'computed' }, 'High'), null, 'a computed value shows nowhere');
 
   const sections = previewSections(nodeOf(library.model, CLAUSE));

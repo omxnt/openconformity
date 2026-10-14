@@ -14,12 +14,13 @@
  * @param {() => number} spec.limit     the largest size the container allows
  * @param {number} spec.minimum
  * @param {number} spec.preset  the default size a double click returns to, so resizing needs no drag
+ * @param {() => void} [spec.reset]  returns the pane to its default in place of applying the preset, where the default is a rule rather than a size
  * @param {(size: number) => void} spec.apply
  * @param {[string, string]} spec.keys  the arrow keys that shrink and grow
  * @param {() => boolean} [spec.collapsed]  whether the pane stands collapsed, where it can
  * @param {(collapsed: boolean) => void} [spec.collapse]  collapse the pane or expand it: a drag past half the minimum snaps it closed, and back past the same point snaps it open
  */
-export function splitter({ splitter: element, sizeAt, size, limit, minimum, preset, apply, keys, collapsed = () => false, collapse }) {
+export function splitter({ splitter: element, sizeAt, size, limit, minimum, preset, reset, apply, keys, collapsed = () => false, collapse }) {
   const clamp = (value) => Math.min(Math.max(value, minimum), Math.max(limit(), minimum));
   let snapped = false;
   /** The size the pane had when the drag began, kept as its size while it stands collapsed so that reopening returns to it. */
@@ -51,7 +52,8 @@ export function splitter({ splitter: element, sizeAt, size, limit, minimum, pres
   });
   element.addEventListener('dblclick', () => {
     if (collapsed()) collapse(false);
-    apply(clamp(preset));
+    if (reset) reset();
+    else apply(clamp(preset));
   });
   element.addEventListener('keydown', (event) => {
     const step = event.key === keys[0] ? -16 : event.key === keys[1] ? 16 : 0;
