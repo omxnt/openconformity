@@ -54,11 +54,14 @@ equal(titleFor(true, 'Mixer line'), 'Mixer line · openconformity', 'a named pro
 equal(titleFor(true, '   '), 'openconformity', 'a blank name is no name');
 equal(titleFor(false, 'Stale'), 'openconformity', 'no project, no name, whatever lingers');
 
-// --- V-TST-129 The leave-prompt fires exactly when leaving costs something (F-SES-005) ---
+// --- V-TST-129 The leave-prompt fires exactly when leaving costs something (F-SES-005, F-SES-007) ---
 
 equal(shouldWarnBeforeUnload(true, true), true, 'unsaved work that persistence is failing to keep warns');
 equal(shouldWarnBeforeUnload(true, false), false, 'unsaved work the blob holds does not: closing loses nothing');
 equal(shouldWarnBeforeUnload(false, true), false, 'a clean project warns of nothing, kept or not');
 equal(shouldWarnBeforeUnload(false, false), false, 'and neither does the quiet case');
+equal(shouldWarnBeforeUnload(false, false, true), true, 'an unconfirmed edit warns, since the draft lives in the form alone');
+equal(shouldWarnBeforeUnload(true, false, true), true, 'whatever the storage holds');
+equal(shouldWarnBeforeUnload(false, false, false), false, 'and no draft leaves the rules as they were');
 
 summary('test-shell');

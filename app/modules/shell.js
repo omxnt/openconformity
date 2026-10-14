@@ -49,16 +49,18 @@ export function titleFor(hasProject, name) {
 }
 
 /**
- * Whether leaving costs something: only while there is unsaved work that
- * persistence is failing to keep. While the blob holds it, closing the
- * tab loses nothing, and a prompt saying otherwise would be a lie the
- * user learns to dismiss.
+ * Whether leaving costs something: while an edit is unconfirmed, since
+ * the draft lives in the form and nowhere else, and while there is
+ * unsaved work that persistence is failing to keep. While the blob holds
+ * the work, closing the tab loses nothing, and a prompt saying otherwise
+ * would be a lie the user learns to dismiss.
  * @param {boolean} dirty
  * @param {boolean} persistFailed
+ * @param {boolean} [draft]  whether an edit is unconfirmed
  * @returns {boolean}
  */
-export function shouldWarnBeforeUnload(dirty, persistFailed) {
-  return dirty && persistFailed;
+export function shouldWarnBeforeUnload(dirty, persistFailed, draft = false) {
+  return draft || (dirty && persistFailed);
 }
 
 /** The statement made when the stored session cannot be read back. */
@@ -83,7 +85,7 @@ export const PERSIST_DETAIL =
  * @param {Array<import('./actions.js').Action>} [context.actions]
  * @param {(title: string, message: string) => void} [context.toast]
  */
-export function createShell({ store, overlay, actions = [], toast = () => {}, onMessages = () => {} }) {
+export function createShell({ store, overlay, actions = [], toast = () => {}, onMessages = () => {}, draft = () => false }) {
   const themeButton = document.getElementById('shell-theme');
   const themeIcon = document.getElementById('shell-theme-icon');
   const fileButton = document.getElementById('shell-file');
@@ -427,10 +429,10 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     wasFailingToPersist = store.persistFailed();
   }
 
-  // The browser's own leave-prompt, kept for the one case where leaving
+  // The browser's own leave-prompt, kept for the cases where leaving
   // still costs something.
   document.defaultView.addEventListener('beforeunload', (event) => {
-    if (!shouldWarnBeforeUnload(store.dirty(), store.persistFailed())) return;
+    if (!shouldWarnBeforeUnload(store.dirty(), store.persistFailed(), draft())) return;
     event.preventDefault();
   });
 

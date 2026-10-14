@@ -525,6 +525,16 @@ While browser storage stands past eight tenths of its quota, the software shall 
 
 > *A write refused for want of space is the failure F-SES-005 handles, and the warning before it lets the user save to a file first. Eight tenths leaves room to save before a write is refused.*
 
+---
+
+#### F-SES-007 Unconfirmed edit on leaving
+
+`unwanted behaviour`
+
+If the page is about to be left while an edit is unconfirmed, then the software shall warn before the page is left.
+
+> *A draft lives in the form until the user confirms it, so it is the one thing browser storage does not hold. A reload or a closed tab would lose it silently, and the browser's own leave prompt is the only warning that can reach the user then.*
+
 ### 4.3 Workspace
 
 ---

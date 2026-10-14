@@ -382,6 +382,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
+| F-SES-007 | Unconfirmed edit on leaving | V-TST-129 | Tested |
 | F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
 | F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
@@ -461,9 +462,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 47 | 31 | 11 | 2 | 3 |
+| Functional | 48 | 32 | 11 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 104 | 52 | 26 | 23 | 3 |
+| All | 105 | 53 | 26 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

@@ -66,6 +66,7 @@ createShell({
     if (store.view()) flows.closeView();
     store.setMessagesOpen(true);
   },
+  draft: () => editor.hasUnconfirmedEdit(),
 });
 createNavigator({
   store,
