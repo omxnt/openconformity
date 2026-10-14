@@ -7,11 +7,12 @@ cd "$(dirname "$0")" || exit 1
 JSC="${JSC:-/System/Library/Frameworks/JavaScriptCore.framework/Versions/Current/Helpers/jsc}"
 
 # The shell: jsc runs a module with -m, Node with the preamble node.mjs that
-# defines readFile, print and arguments as jsc has them.
+# defines readFile, print and arguments as jsc has them, and reads a .js
+# file as a module by its syntax, which Node before 22 does not by default.
 if [ -x "$JSC" ]; then
   run() { "$JSC" -m "$@"; }
 elif command -v node >/dev/null 2>&1; then
-  run() { node --import ./node.mjs "$@"; }
+  run() { node --experimental-detect-module --no-warnings --import ./node.mjs "$@"; }
 else
   echo "Neither jsc nor node was found. Set JSC to the JavaScriptCore shell or install Node." >&2
   exit 1
