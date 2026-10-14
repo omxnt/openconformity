@@ -296,6 +296,12 @@ async function consent(dialogs, store) {
  * @param {{ setDrawingOpen: (open: boolean) => void }} spec.store
  */
 export function createDrawingSurface({ workspace, pane, head, body, store }) {
+  /** The Escape handler of the open edit, removed when the surface closes. */
+  let onKey = null;
+  const forgetKey = () => {
+    if (onKey !== null) pane.removeEventListener('keydown', onKey);
+    onKey = null;
+  };
   return {
     /**
      * @param {{ title: string, content: HTMLElement, onApply: () => void, onCancel: () => void }} spec
@@ -312,14 +318,17 @@ export function createDrawingSurface({ workspace, pane, head, body, store }) {
       pane.hidden = false;
       workspace.classList.add('drawing');
       store.setDrawingOpen(true);
-      pane.addEventListener('keydown', (event) => {
+      forgetKey();
+      onKey = (event) => {
         if (event.key !== 'Escape') return;
         event.preventDefault();
         onCancel();
-      });
+      };
+      pane.addEventListener('keydown', onKey);
       apply.focus();
     },
     close() {
+      forgetKey();
       pane.hidden = true;
       workspace.classList.remove('drawing');
       head.textContent = '';

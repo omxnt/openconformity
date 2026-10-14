@@ -49,6 +49,18 @@ export function fakeDocument() {
         element.children.push(child);
         return child;
       },
+      listeners: [],
+      addEventListener(type, handler) {
+        element.listeners.push({ type, handler });
+      },
+      removeEventListener(type, handler) {
+        element.listeners = element.listeners.filter((held) => held.type !== type || held.handler !== handler);
+      },
+      append(...nodes) {
+        element.children.push(...nodes);
+      },
+      focus() {},
+      classList: { add() {}, remove() {} },
       querySelectorAll(selector) {
         const found = [];
         const walk = (node) => {

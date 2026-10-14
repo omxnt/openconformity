@@ -5,7 +5,7 @@
  * their merges, their few styles and frozen heads. Run from this directory.
  */
 
-import { xmlText, sheetName, columnLetters, sheetXml, workbook } from '../app/modules/xlsx.js';
+import { xmlText, sheetName, columnLetters, sheetXml, workbook, cellText, CELL_LIMIT, CUT_MARK } from '../app/modules/xlsx.js';
 import { utf8, crc32, zip } from '../app/modules/zip.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -102,6 +102,18 @@ function unzip(bytes) {
   ok(parts.every((entry) => text(entry.data).startsWith('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')), 'and every part is XML in UTF-8');
   const styles = part('xl/styles.xml');
   ok(styles.includes('<cellXfs count="4">') && !styles.includes('patternType="solid"') && !styles.includes('<b/>') && !styles.includes('style="thin"'), 'the formatting is wrapping and alignment only, with no fill, no bold and no borders');
+}
+
+// --- V-TST-183 A cell is cut at Excel's limit (F-VIE-001) ---------------------
+
+{
+  const long = 'x'.repeat(40000);
+  const cut = cellText(long);
+  equal(cut.length, CELL_LIMIT, 'a cell past the limit is cut to exactly the limit');
+  ok(cut.endsWith(CUT_MARK), 'and ends with the mark that says so');
+  equal(cellText('x'.repeat(CELL_LIMIT)), 'x'.repeat(CELL_LIMIT), 'a cell at the limit is untouched');
+  const xml = sheetXml({ name: 'Long', groups: [''], headers: ['Text'], rows: [[{ text: long }]] });
+  ok(xml.includes(`${xmlText(CUT_MARK)}</t>`) && !xml.includes('x'.repeat(CELL_LIMIT)), 'and the sheet writes the cut cell, the mark escaped as text');
 }
 
 // --- V-TST-173 Sheet names and column widths hold on hostile values (N-SEC-011) ---

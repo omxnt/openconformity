@@ -19,7 +19,9 @@ import {
   textOfUtf8,
   decodeExport,
   createSession,
+  createDrawingSurface,
 } from '../app/modules/drawing-editor.js';
+import { fakeDocument } from './helpers.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
 const fixture = readFile('fixtures/example.drawio.svg');
@@ -237,6 +239,29 @@ function drive(drawing) {
   ok(timers[0].cleared && session.state() === 'done', 'Cancel ends a loading session and its period');
   session.hear({ event: 'init' });
   deepEqual(posted, [], 'and nothing is posted after it');
+}
+
+// --- V-TST-182 The surface's Escape handler leaves with the edit (F-DRW-002) ---
+
+{
+  globalThis.document = fakeDocument();
+  const make = () => document.createElement('div');
+  const pane = make();
+  let open = null;
+  const surface = createDrawingSurface({ workspace: make(), pane, head: make(), body: make(), store: { setDrawingOpen: (held) => { open = held; } } });
+  const escapes = () => pane.listeners.filter((held) => held.type === 'keydown');
+  let cancelled = 0;
+  surface.open({ title: 'First', content: make(), onApply() {}, onCancel: () => { cancelled += 1; } });
+  equal(escapes().length, 1, 'an open edit listens for Escape once');
+  equal(open, true, 'and the store knows the drawing is open');
+  surface.open({ title: 'Second', content: make(), onApply() {}, onCancel: () => { cancelled += 1; } });
+  equal(escapes().length, 1, 'a second edit replaces the handler rather than adding one');
+  escapes()[0].handler({ key: 'Escape', preventDefault() {} });
+  equal(cancelled, 1, 'so Escape cancels once');
+  surface.close();
+  equal(escapes().length, 0, 'and the close removes it');
+  equal(open, false, 'with the store told');
+  delete globalThis.document;
 }
 
 summary('test-drawing-editor');

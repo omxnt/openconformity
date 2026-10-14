@@ -87,6 +87,23 @@ function stylesheet() {
   );
 }
 
+/** The most characters Excel takes in one cell. */
+export const CELL_LIMIT = 32767;
+
+/** The mark a cut cell ends with. */
+export const CUT_MARK = " [cut at Excel's limit]";
+
+/**
+ * A cell's text within Excel's limit: cut so that the cell with its mark
+ * is exactly the limit, or as it is when it fits.
+ * @param {string} text
+ * @returns {string}
+ */
+export function cellText(text) {
+  if (text.length <= CELL_LIMIT) return text;
+  return text.slice(0, CELL_LIMIT - CUT_MARK.length) + CUT_MARK;
+}
+
 /**
  * One sheet's XML: the head rows frozen above the body, columns wide
  * enough for their longest line within bounds, the groups merged.
@@ -98,7 +115,7 @@ export function sheetXml(sheet) {
   const cell = (row, column, text, style) =>
     text === ''
       ? `<c r="${columnLetters(column)}${row}" s="${style}"/>`
-      : `<c r="${columnLetters(column)}${row}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${xmlText(text)}</t></is></c>`;
+      : `<c r="${columnLetters(column)}${row}" s="${style}" t="inlineStr"><is><t xml:space="preserve">${xmlText(cellText(text))}</t></is></c>`;
   const rows = [];
   const merges = [];
   if (grouped) {
