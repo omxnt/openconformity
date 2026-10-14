@@ -191,10 +191,12 @@ While the diagram editor is open, every action stands disabled.
 
 | Method | Technique | Where | What it reaches |
 |---|---|---|---|
-| Test | Headless | `tests/test-*.js`, run by `./run.sh` in the JavaScriptCore shell | The layers below the page, and the flows over a stub page |
+| Test | Headless | `tests/test-*.js`, run by `./run.sh` in the JavaScriptCore shell, or in Node where that shell is missing | The layers below the page, and the flows over a stub page |
 | Inspection | Pin | `tests/test-pins.js` | Facts read from the source, the page and the file list, such as the policy, the imports and who writes filing |
 | Demonstration | Drive | Outside the repository today | The panes in a real browser, driven by the headless Chrome driver |
 | Analysis | Review | `tests/manual.md` | The host, the accounts and the repository, read at each release |
+
+The suite runs with `./run.sh` from `tests/`. The script uses the JavaScriptCore shell at its macOS path, or the path in `JSC`, and falls back to Node where neither exists, loading `tests/node.mjs` first, which defines `readFile`, `print` and `arguments` as the shell has them. The tests and the generator are written against those three and nothing else of either runtime, so no package is installed for either. The script exits non-zero when any test fails, or when neither runtime is found.
 
 A full project file of each schema version stays in `tests/fixtures/` as `schema-N.json`, the example as saved by the software at that version and never edited after, so a migration from any version can always be tested against a real file. Version 1 is `schema-1.json`, and each later version adds its own file at the release that introduces it.
 
