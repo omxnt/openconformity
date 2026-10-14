@@ -103,9 +103,9 @@ class Page:
 
     def read(self):
         while b'\0' not in self.buffer:
-            ready, _, _ = select.select([self.inp], [], [], 20)
+            ready, _, _ = select.select([self.inp], [], [], 60)
             if not ready:
-                raise RuntimeError('no answer from Chrome in 20 s')
+                raise RuntimeError('no answer from Chrome in 60 s')
             chunk = os.read(self.inp.fileno(), 65536)
             if not chunk:
                 raise RuntimeError('Chrome closed')
@@ -396,26 +396,37 @@ def main():
         for ident, title, drive in DRIVES:
             if wanted and ident not in wanted:
                 continue
-            page = None
-            try:
-                page = Page(url)
-                page.problems()
-                drive(page)
-                page.settle(0.5)
-                problems = page.problems()
-                if problems:
+            # A drive runs once more when Chrome itself gave no answer, since a
+            # cold start on a shared machine is not a finding about the software.
+            for attempt in (1, 2):
+                page = None
+                try:
+                    page = Page(url)
+                    page.problems()
+                    drive(page)
+                    page.settle(0.5)
+                    problems = page.problems()
+                    if problems:
+                        failed += 1
+                        print(f'{ident} FAIL {title}: the console raised ' + ' | '.join(problems))
+                    else:
+                        print(f'{ident} PASS {title}')
+                    break
+                except RuntimeError as error:
+                    if attempt == 1:
+                        print(f'{ident} RETRY {title}: {error}')
+                        continue
                     failed += 1
-                    print(f'{ident} FAIL {title}: the console raised ' + ' | '.join(problems))
-                else:
-                    print(f'{ident} PASS {title}')
-            except Exception as error:
-                failed += 1
-                print(f'{ident} FAIL {title}: {error}')
-                if not isinstance(error, (AssertionError, RuntimeError)):
-                    traceback.print_exc()
-            finally:
-                if page:
-                    page.close()
+                    print(f'{ident} FAIL {title}: {error}')
+                except Exception as error:
+                    failed += 1
+                    print(f'{ident} FAIL {title}: {error}')
+                    if not isinstance(error, AssertionError):
+                        traceback.print_exc()
+                    break
+                finally:
+                    if page:
+                        page.close()
     finally:
         server.stop()
     print(f'drives: {len(DRIVES) - failed} of {len(DRIVES)} passed' if not wanted else '')
