@@ -35,6 +35,9 @@ The keys and modified clicks the software answers to, one table per place, with 
 | Enter, Space, F2 | Enter, Space, F2 | Edits the selected entity, or renames the folder |
 | ⌘⌫, Delete | Delete | Deletes the selection, asking first |
 | ⌥↑ ⌥↓ | Alt ↑ Alt ↓ | Moves the selection among its siblings |
+| ⌘X | Ctrl X | Cuts the selection, and a second time forgets the cut |
+| ⌘V | Ctrl V | Pastes the cut row inside the selection |
+| Escape | Escape | Forgets the cut |
 | ⇧F10 | Shift F10, Menu | Opens the context menu |
 | Escape in the filter | Escape in the filter | Clears the filter |
 | Double click | Double click | Edits the entity, or renames the folder |

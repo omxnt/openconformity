@@ -464,6 +464,41 @@ function flowsOver(store) {
   equal(asked.length, 3, 'and asks nothing, the three questions being the three earlier saves');
 }
 
+// --- V-TST-186 Cut and paste file a row as a drop would (F-WSP-010) -----------
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const flows = createFlows({ store, overlay: {}, dialogs: { toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  flows.cutSelection();
+  equal(store.cut(), null, 'cutting with nothing selected cuts nothing');
+  store.select('HAZ-001');
+  flows.cutSelection();
+  equal(store.cut(), 'HAZ-001', 'cut marks the selection');
+  flows.cutSelection();
+  equal(store.cut(), null, 'and a second cut on the same row forgets it');
+  flows.cutSelection();
+  store.select('ELM-001');
+  flows.pasteCut();
+  equal(nodeOf(store.model(), 'HAZ-001').parent, 'ELM-001', 'paste files the cut row inside the selection');
+  equal(store.cut(), null, 'and forgets the cut');
+  equal(toasts.length, 0, 'saying nothing');
+  store.undo();
+  equal(nodeOf(store.model(), 'HAZ-001').parent, null, 'one undo returns the row');
+  store.redo();
+  store.select('ELM-001');
+  flows.cutSelection();
+  store.select('HAZ-001');
+  flows.pasteCut();
+  equal(nodeOf(store.model(), 'ELM-001').parent, null, 'a paste inside the cut row itself is refused and files nothing');
+  equal(toasts.at(-1)?.[0], 'Could not paste', 'and is told');
+  ok(toasts.at(-1)?.[1].length > 0, 'with the model\'s own reason');
+  equal(store.cut(), 'ELM-001', 'while the cut stays for another target');
+}
+
 // --- V-TST-051 A changed record marked reviewed (F-MOD-011) ------------------
 
 {

@@ -408,6 +408,7 @@ export function createNavigator({
     if (picking.subject === row.id) classes.push('picker-subject');
     if (picking.subject !== null && !pickable && picking.subject !== row.id) classes.push('pick-dim');
     if (excluded(row.node)) classes.push('excluded');
+    if (row.id === store.cut()) classes.push('cut');
     const rowElement = el('div', { className: classes.join(' '), attributes });
     rowElement.style.paddingLeft = `${16 + (row.depth + 1) * 16}px`;
 
@@ -597,7 +598,10 @@ export function createNavigator({
       }
     }
 
-    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'v'].includes(event.key.toLowerCase())) {
+      event.preventDefault();
+      runAction(event.key.toLowerCase() === 'x' ? 'cut' : 'paste');
+    } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
       runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
     } else if (event.key === 'F2') {

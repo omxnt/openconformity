@@ -62,6 +62,8 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-move-up` | `arrow--up` | 16 | `arrow--up.svg` |
 | `i-move-down` | `arrow--down` | 16 | `arrow--down.svg` |
 | `i-move-to` | `move` | 32 | `move.svg` |
+| `i-cut` | `cut` | 32 | `cut.svg` |
+| `i-paste` | `paste` | 32 | `paste.svg` |
 | `i-undo` | `undo` | 32 | `undo.svg` |
 | `i-redo` | `redo` | 32 | `redo.svg` |
 | `i-new-project` | `document--add` | 32 | `document--add.svg` |

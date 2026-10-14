@@ -197,6 +197,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let navigatorFilter = '';
   /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
   let picker = null;
+  /** The row cut and not yet pasted: session state, never persisted, one mark for the keys and the menus. */
+  let cut = null;
   const listeners = new Set();
 
   function notify() {
@@ -291,6 +293,11 @@ export function createStore({ storage, session = null, retention = memoryRetenti
    * A change that removes a picked entity clears that pick; one that
    * removes the subject closes the workflow.
    */
+  /** A change that removes the cut row forgets the cut. */
+  function repairCut() {
+    if (cut !== null && !model.nodes.has(cut)) cut = null;
+  }
+
   function repairPicker() {
     if (picker === null) return;
     if (!model.nodes.has(picker.subject)) {
@@ -486,6 +493,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       projectCollapsed = false;
       navigatorFilter = '';
       picker = null;
+      cut = null;
       openView = null;
       viewReturn = null;
       theme = null;
@@ -525,6 +533,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       history.record(model);
       repairSelection(trail);
       repairPicker();
+      repairCut();
       persist();
       notify();
       return outcome;
@@ -552,6 +561,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       model = rolled;
       repairSelection(trail);
       repairPicker();
+      repairCut();
       persist();
       notify();
       return true;
@@ -570,6 +580,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       model = history.undo(model);
       repairSelection(trail);
       repairPicker();
+      repairCut();
       persist();
       notify();
       return true;
@@ -582,6 +593,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       model = history.redo(model);
       repairSelection(trail);
       repairPicker();
+      repairCut();
       persist();
       notify();
       return true;
@@ -601,6 +613,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       projectCollapsed = false;
       navigatorFilter = '';
       picker = null;
+      cut = null;
       openView = null;
       viewReturn = null;
       keepOpenView();
@@ -616,6 +629,24 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       picker === null
         ? null
         : { subject: picker.subject, picks: picker.picks.map((pick) => ({ ...pick })) },
+
+    // --- The cut ------------------------------------------------------
+
+    /** The row cut and not yet pasted, or null. */
+    cut: () => cut,
+
+    /**
+     * Mark a row as cut, or forget the mark with null. Session state,
+     * never persisted, never in history.
+     * @param {string|null} id
+     */
+    setCut(id) {
+      if (!projectOpen) return;
+      const next = id !== null && model.nodes.has(id) ? id : null;
+      if (next === cut) return;
+      cut = next;
+      notify();
+    },
 
     /**
      * Start an add-relationship workflow pinned to this entity.

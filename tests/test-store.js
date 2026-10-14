@@ -427,6 +427,29 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal((await blobIn(store, retention)).project.name, 'Fixture project', 'the replacement is persisted');
 }
 
+// --- V-TST-185 The cut is session state, never persisted, repaired on deletion (F-WSP-010, F-SES-001) ---
+
+{
+  const retention = memoryRetention();
+  const store = createStore({ storage: fakeStorage(), retention });
+  store.setCut('ELM-001');
+  equal(store.cut(), null, 'nothing is cut without a project');
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.setCut('ELM-999');
+  equal(store.cut(), null, 'an identifier not in the model cuts nothing');
+  store.setCut('ELM-001');
+  equal(store.cut(), 'ELM-001', 'a row can be cut');
+  equal(store.dirty(), true, 'the project was dirty from its commits');
+  ok(!JSON.stringify(await blobIn(store, retention)).includes('"cut"'), 'and the cut never reaches the blob');
+  store.commit((model) => removeEntity(model, 'ELM-001'));
+  equal(store.cut(), null, 'deleting the cut row forgets the cut');
+  store.setCut('HAZ-001');
+  store.replaceProject(createModel());
+  equal(store.cut(), null, 'and so does replacing the project');
+}
+
 // --- Picker mode (no requirement) -------------------------------------------------
 
 {

@@ -6,7 +6,7 @@
  * business.
  */
 
-import { nodeOf } from './model.js';
+import { nodeOf, canFile } from './model.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
 import { VIEWS } from './view-registry.js';
 import { APPLE } from './platform.js';
@@ -36,6 +36,8 @@ const SAVE_HINT = APPLE ? '⌘S' : 'Ctrl S';
 const UNDO_HINT = APPLE ? '⌘Z' : 'Ctrl Z';
 const REDO_HINT = APPLE ? '⇧⌘Z' : 'Ctrl Y';
 const DELETE_HINT = APPLE ? '⌘⌫' : 'Del';
+const CUT_HINT = APPLE ? '⌘X' : 'Ctrl X';
+const PASTE_HINT = APPLE ? '⌘V' : 'Ctrl V';
 const UP_HINT = APPLE ? '⌥↑' : 'Alt ↑';
 const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
 
@@ -262,6 +264,28 @@ export function createActions({ store, flows }) {
       context: true,
       enabled: () => selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
       run: () => flows.moveToSelection(),
+    },
+    {
+      id: 'cut',
+      icon: 'i-cut',
+      label: 'Cut',
+      group: 'arrange',
+      toolbar: false,
+      context: true,
+      hint: CUT_HINT,
+      enabled: () => selected() !== null,
+      run: () => flows.cutSelection(),
+    },
+    {
+      id: 'paste',
+      icon: 'i-paste',
+      label: 'Paste',
+      group: 'arrange',
+      toolbar: false,
+      context: true,
+      hint: PASTE_HINT,
+      enabled: () => store.cut() !== null && canFile(store.model(), store.cut(), store.selection()).ok,
+      run: () => flows.pasteCut(),
     },
     {
       id: 'delete',

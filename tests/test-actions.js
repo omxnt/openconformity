@@ -39,12 +39,12 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'delete', 'undo', 'redo'],
+    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'cut', 'paste', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
     Object.fromEntries(actions.filter((action) => action.hint).map((action) => [action.id, action.hint])),
-    { save: 'Ctrl S', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', delete: 'Del', undo: 'Ctrl Z', redo: 'Ctrl Y' },
+    { save: 'Ctrl S', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', cut: 'Ctrl X', paste: 'Ctrl V', delete: 'Del', undo: 'Ctrl Z', redo: 'Ctrl Y' },
     'the key hints ride on the actions the keys reach, the save one as the platform writes it'
   );
   ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');
@@ -103,6 +103,8 @@ function enabledIds(actions) {
       'move-up': false,
       'move-down': false,
       'move-to': false,
+      cut: false,
+      paste: false,
       delete: false,
       undo: false,
       redo: false,
@@ -119,6 +121,13 @@ function enabledIds(actions) {
   equal(one['move-up'], false, 'an only child moves neither way');
   equal(one['move-down'], false, 'either way');
   equal(one['move-to'], false, 'and alone at the root it has nowhere else to file');
+  equal(one.cut, true, 'a selected row can be cut');
+  equal(one.paste, false, 'and nothing is pasted while nothing is cut');
+  store.setCut('ELM-001');
+  equal(enabled().paste, false, 'a cut row is not pasted into itself');
+  store.select(null);
+  equal(enabled().paste, false, 'nor to the root where it already stands');
+  store.setCut(null);
   equal(one.undo, true, 'a change can be undone');
   equal(one.edit, true, 'an entity is edited, its title among its attributes');
 

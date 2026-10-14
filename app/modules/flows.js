@@ -324,6 +324,20 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     toastRefusal('Could not move', store.commit((model) => file(model, id, parentId)));
   }
 
+  /** Mark the selection as cut, or forget the mark when the selection is the cut row. */
+  function cutSelection() {
+    const id = store.selection();
+    if (id === null) return;
+    store.setCut(store.cut() === id ? null : id);
+  }
+
+  /** File the cut row under the selection as a drop would, then forget the cut. A refusal is told and keeps the cut. */
+  function pasteCut() {
+    const id = store.cut();
+    if (id === null) return;
+    if (toastRefusal('Could not paste', store.commit((model) => file(model, id, store.selection())))) store.setCut(null);
+  }
+
   /**
    * Place a node directly before or after another, adopting its parent.
    * @param {string} id
@@ -998,6 +1012,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     toggleRelatedMenu,
     selectNode,
     fileNode,
+    cutSelection,
+    pasteCut,
     placeNode,
     moveUp,
     moveDown,

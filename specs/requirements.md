@@ -627,6 +627,16 @@ The software shall keep the order of the things filed in one place as the user s
 
 > *Filing carries no meaning, but order carries the user's reading of their own work, a list of hazards in the order they were found or the requirements in the order of a standard. The order is the user's and the software never sorts it for them.*
 
+---
+
+#### F-WSP-010 Cut and paste
+
+`event driven`
+
+When the user pastes a cut row, the software shall file the row under the selected row as a drop would, and forget the cut.
+
+> *Filing by drag and by the Alt arrows exists, and a cut and a paste are the same move by keyboard and menu, which any tree is expected to offer. The checks and the undo are those of filing, so nothing new can go wrong, and the cut row stays where it is until the paste, since a cut that removed it would be a delete.*
+
 ### 4.4 Model
 
 ---
