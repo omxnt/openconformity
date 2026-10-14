@@ -13,7 +13,7 @@ The drives and the reviews that verify a requirement where no test can. Each row
 | V-ANA-007 | Review | The host's dashboard and its responses | The host project is on Cloudflare Pages | C-DEV-002 |
 | V-ANA-008 | Review | The site and the page | `sources/visual-assets.fig` holds the wordmark and the marks | C-DEV-004 |
 | V-ANA-009 | Review | The host's dashboard and its responses | The host serves `app/` at `app.openconformity.org` | C-DEV-005 |
-| V-ANA-010 | Review | The repository on GitHub | Each merge to main follows a run with every test file passed and a clean console, and the release notes name the run | C-DEV-006 |
+| V-ANA-010 | Review | The repository on GitHub | The rule on main requires the check of `.github/workflows/check.yml` and a signed commit, applied to administrators, and the check on the release commit shows every test file and every drive passed | C-DEV-006 |
 | V-ANA-011 | Review | The host's dashboard and its responses | Each file under `app/` fetched from the host hashes as in the released commit. Rocket Loader, Auto Minify, Email Address Obfuscation and Web Analytics injection are off | C-DEV-007 |
 | V-ANA-012 | Review | The repository on GitHub | Every commit on main was reviewed by the maintainer before it was merged, read from the history at each release | C-DEV-008 |
 | V-ANA-013 | Review | The accounts | Both accounts show a second factor, read at each release | C-DEV-009 |

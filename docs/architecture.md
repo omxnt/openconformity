@@ -198,6 +198,8 @@ While the diagram editor is open, every action stands disabled.
 
 The drives run with `python3 drives.py` from `tests/`. The script serves `app/` on a free local port, opens a fresh headless Chrome profile for each drive over the DevTools pipe, acts on the page as a user would, and reports each drive as passed or failed with any console error, exception or failed request the page raised, exiting non-zero when any drive fails. Each drive is named by its activity in `tests/manual.md`, whose Where column points to the script for the activities it covers and to the browser for those still driven by hand. Python's standard library and a local Chrome are all it needs, found at Chrome's usual path or through `CHROME`.
 
+Both run on GitHub for every push to develop and main, from `.github/workflows/check.yml`, and a rule on main requires that check on the commit pushed.
+
 The suite runs with `./run.sh` from `tests/`. The script uses the JavaScriptCore shell at its macOS path, or the path in `JSC`, and falls back to Node where neither exists, loading `tests/node.mjs` first, which defines `readFile`, `print` and `arguments` as the shell has them. The tests and the generator are written against those three and nothing else of either runtime, so no package is installed for either. The script exits non-zero when any test fails, or when neither runtime is found.
 
 A full project file of each schema version stays in `tests/fixtures/` as `schema-N.json`, the example as saved by the software at that version and never edited after, so a migration from any version can always be tested against a real file. Version 1 is `schema-1.json`, and each later version adds its own file at the release that introduces it.

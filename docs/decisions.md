@@ -1013,6 +1013,16 @@ Pasting a copied row creates a copy of the row with everything filed under it, e
 
 ---
 
+### D-118 The check runs on GitHub before a push reaches main
+
+`2026-10-14` `repository`
+
+Every push to develop and main runs the test suite and the browser drives on GitHub Actions, from `.github/workflows/check.yml`, with the type check added once it exists. A rule on main requires that check to have passed on the commit pushed, applied to the maintainer too, and requires the commit to be signed. The maintainer signs with the SSH key already in use. The software is deployed from main as before, and no pull request is required, since a commit that passed on develop carries its result to main under a fast-forward merge.
+
+> *The host serves main the moment it is pushed, so the only place a check can stop a bad commit is before that push, and a rule on main is the only thing that makes the check unskippable, by the maintainer as much as by a stolen credential. A workflow runs on GitHub's machines and adds nothing to the software, so the stack holds. Node runs the suite where the runner has no JavaScriptCore, which the test script's fallback allows, and the drives run under the runner's Chrome. A tag deployment would add a step without adding a guarantee the rule does not give. Signing costs two lines of configuration and lets a commit's author be checked rather than assumed, which the review of 6 October asked for. Settles #42.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

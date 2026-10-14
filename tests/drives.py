@@ -72,9 +72,11 @@ class Page:
             r0 = os.dup(r0)
         while w1 < 5:
             w1 = os.dup(w1)
+        flags = ['--headless=new', '--disable-gpu', '--no-first-run', '--window-size=1400,900', f'--user-data-dir={self.profile}']
+        if os.environ.get('CI'):
+            flags += ['--no-sandbox', '--disable-dev-shm-usage']
         self.proc = subprocess.Popen(
-            [chrome_path(), '--headless=new', '--disable-gpu', '--no-first-run', '--window-size=1400,900',
-             f'--user-data-dir={self.profile}', '--remote-debugging-pipe', 'about:blank'],
+            [chrome_path(), *flags, '--remote-debugging-pipe', 'about:blank'],
             pass_fds=(3, 4), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             preexec_fn=lambda: (os.dup2(r0, 3), os.dup2(w1, 4)))
         os.close(r0)

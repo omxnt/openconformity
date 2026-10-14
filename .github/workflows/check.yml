@@ -1,0 +1,25 @@
+# The check every commit passes before it may reach main: the test suite
+# under Node, since the runner has no JavaScriptCore, and the browser
+# drives under the runner's Chrome. A rule on main requires this check on
+# the commit pushed. Nothing here enters the software.
+name: check
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test suite
+        run: ./run.sh
+        working-directory: tests
+      - name: Browser drives
+        run: python3 drives.py
+        working-directory: tests
