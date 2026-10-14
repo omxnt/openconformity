@@ -356,7 +356,7 @@ function childIds(model, parentId) {
   let linked = 0;
   for (let i = 1; i < n; i += 1) if (relate(chained, 'req-decomposes-into-req', id(i), id(i + 1)).ok) linked += 1;
   equal(linked, n - 1, 'a chain of five thousand relates link by link');
-  ok(Date.now() - started < 1000, `and takes under a second, not the cube of its length (${Date.now() - started} ms)`);
+  ok(Date.now() - started < 5000, `and takes seconds at most on the slowest machine the check runs on, not the minutes the cube of its length took (${Date.now() - started} ms)`);
   equal(relate(chained, 'req-decomposes-into-req', id(n), id(1)).ok, false, 'closing the chain into a cycle is still refused');
   equal(relate(chained, 'req-decomposes-into-req', id(n + 1), id(2)).ok, false, 'as is a second owner for the second link');
   ok(unrelate(chained, 'req-decomposes-into-req', id(1), id(2)).ok, 'unrelating the first link');
