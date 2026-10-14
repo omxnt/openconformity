@@ -7,6 +7,7 @@
 import './shim.js';
 import { parseXml, checkDrawing, embeddedModel, pageCount, dataUrl, sizeText, DRAWING_LIMIT, DIMENSION_LIMIT } from '../app/modules/drawing.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
+import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 
 const fixture = readFile('fixtures/example.drawio.svg');
 
@@ -94,23 +95,23 @@ const reason = (text) => {
   equal(reason('<svg xmlns="http://www.w3.org/2000/svg"><rect onClick="x"/></svg>'), 'holds an event handler', 'a handler in any case');
   equal(reason('<svg xmlns="http://www.w3.org/2000/svg"><SCRIPT/></svg>'), 'holds a script element', 'an element in any case');
   equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="https://x/a.png"/></div></foreignObject>')), 'references a resource outside the diagram', 'a source in embedded HTML');
-  equal(reason(svg('<foreignObject><video xmlns="http://www.w3.org/1999/xhtml" src="https://x/v.mp4"></video></foreignObject>')), 'references a resource outside the diagram', 'a video source');
+  equal(reason(svg('<foreignObject><video xmlns="http://www.w3.org/1999/xhtml" src="https://x/v.mp4"></video></foreignObject>')), 'holds an element the editor does not write, video', 'a video, which the editor never writes');
   equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="data:image/png;base64,AAAA"/></div></foreignObject>')), 'accepted', 'an embedded image source passes');
   equal(reason(svg('<rect style="fill: url(\\68 ttps://x/p.png)"/>')), 'references a resource outside the diagram', 'an escaped url in a style');
   equal(reason(svg('<style>.a { background: \\75rl(\\68\\74\\74\\70\\73://x/y) }</style>')), 'references a resource outside the diagram', 'an escaped url in a stylesheet, its name escaped too');
-  equal(reason(svg('<a><animate attributeName="href" to="javascript:alert(1)"/><rect/></a>')), 'animates a link or a handler', 'an animation of a link');
-  equal(reason(svg('<rect><set attributeName="onload" to="x()"/></rect>')), 'animates a link or a handler', 'a set of a handler');
-  equal(reason(svg('<rect><animate attributeName="xlink:href" to="javascript:alert(1)"/></rect>')), 'animates a link or a handler', 'a link in the linking namespace');
-  equal(reason(svg('<rect><animate attributeName="opacity" from="0" to="1"/></rect>')), 'accepted', 'an animation of anything else passes');
+  equal(reason(svg('<a><animate attributeName="href" to="javascript:alert(1)"/><rect/></a>')), 'holds an element the editor does not write, animate', 'an animation, which the editor never writes');
+  equal(reason(svg('<rect><set attributeName="onload" to="x()"/></rect>')), 'holds an element the editor does not write, set', 'a set, likewise');
+  equal(reason(svg('<rect><animate attributeName="xlink:href" to="javascript:alert(1)"/></rect>')), 'holds an element the editor does not write, animate', 'in any namespace');
+  equal(reason(svg('<rect><animate attributeName="opacity" from="0" to="1"/></rect>')), 'holds an element the editor does not write, animate', 'an animation of anything else is refused too, since the editor writes none');
   const outside = 'references a resource outside the diagram';
-  equal(reason(svg('<filter id="f"><feImage href="https://x/a.png"/></filter>')), outside, 'a filter image on the web');
+  equal(reason(svg('<filter id="f"><feImage href="https://x/a.png"/></filter>')), 'holds an element the editor does not write, feImage', 'a filter image, which the editor never writes');
   equal(reason(svg('<pattern id="p" xlink:href="https://x/p.svg#q"/>')), outside, 'a pattern taken from another file');
-  equal(reason(svg('<foreignObject><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="https://x/s.css"/></foreignObject>')), outside, 'a link element in embedded HTML');
-  equal(reason(svg('<foreignObject><img xmlns="http://www.w3.org/1999/xhtml" srcset="https://x/a.png 1x"/></foreignObject>')), outside, 'a source set');
-  equal(reason(svg('<foreignObject><video xmlns="http://www.w3.org/1999/xhtml" poster="https://x/p.png"></video></foreignObject>')), outside, 'a poster');
+  equal(reason(svg('<foreignObject><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="https://x/s.css"/></foreignObject>')), 'holds an element the editor does not write, link', 'a link element in embedded HTML');
+  equal(reason(svg('<foreignObject><img xmlns="http://www.w3.org/1999/xhtml" srcset="https://x/a.png 1x"/></foreignObject>')), 'holds an attribute the editor does not write, srcset', 'a source set');
+  equal(reason(svg('<foreignObject><img xmlns="http://www.w3.org/1999/xhtml" poster="https://x/p.png"/></foreignObject>')), 'holds an attribute the editor does not write, poster', 'a poster');
   equal(reason(svg('<rect style="fill: image-set(\'https://x/a.png\' 1x)"/>')), outside, 'an image set in a style, with no url');
   equal(reason(svg('<a href="https://example.org"><rect/></a>')), 'accepted', 'a link to a page passes, since a picture follows no link');
-  equal(reason(svg('<pattern id="p"/><pattern id="q" href="#p"/><filter id="f"><feImage href="data:image/png;base64,AAAA"/></filter>')), 'accepted', 'references inside the drawing, and an image as data, pass');
+  equal(reason(svg('<pattern id="p"/><pattern id="q" href="#p"/><image href="data:image/png;base64,AAAA" width="1" height="1"/>')), 'accepted', 'references inside the drawing, and an image as data, pass');
   const html = (inner) => svg(`<foreignObject width="1" height="1"><div xmlns="http://www.w3.org/1999/xhtml">${inner}</div></foreignObject>`);
   equal(reason(html('<meta http-equiv="refresh" content="0;url=https://x/"/>')), 'holds a meta element', 'a refresh, which a saved diagram opened on its own would follow');
   equal(reason(html('<form><input name="a"/></form>')), 'holds a form element', 'a form');
@@ -123,16 +124,17 @@ const reason = (text) => {
   equal(reason(svg('<rect style="mask:url(\'https://x/m)\')"/>')), outside, 'a url whose quotes do not match');
   equal(reason(svg('<style>rect { mask: url("https://x/m\')") }</style>')), outside, 'a url in a stylesheet whose quotes do not match');
   equal(reason(svg('<rect style="mask:url(  \'  https://x/m\')"/>')), outside, 'a url with spaces inside its quote');
-  for (const held of ['fill', 'stroke', 'mask', 'clip-path', 'filter', 'marker-start', 'cursor']) {
+  equal(reason(svg('<rect cursor="url(https://x/c.cur)"/>')), 'holds an attribute the editor does not write, cursor', 'a cursor attribute, which the editor never writes');
+  for (const held of ['fill', 'stroke', 'mask', 'clip-path', 'filter', 'marker-start']) {
     equal(reason(svg(`<rect ${held}="url(https://x/p#g)"/>`)), outside, `a url in the ${held} attribute`);
   }
   equal(reason(svg('<rect fill="URL( \'https://x/p#g\' )"/>')), outside, 'a url in an attribute, quoted and in capitals');
   equal(reason(svg('<rect fill="u\\72l(https://x/p#g)"/>')), outside, 'a url in an attribute, its name escaped');
-  equal(reason(svg('<rect><set attributeName="fill" to="url(https://x/p#g)"/></rect>')), outside, 'a url an animation sets');
+  equal(reason(svg('<rect><set attributeName="fill" to="url(https://x/p#g)"/></rect>')), 'holds an element the editor does not write, set', 'a url an animation would set, the animation refused first');
   equal(reason(svg('<rect fill="url(#g)" stroke="url(\'#g\')"/>')), 'accepted', 'local paint in attributes passes');
-  equal(reason(html('<table background="https://x/b.png"><tr><td background="https://x/c.png">x</td></tr></table>')), outside, 'a background in embedded HTML');
-  equal(reason(html('<img lowsrc="https://x/a.png"/>')), outside, 'a low source');
-  equal(reason(html('<link rel="preload" as="image" imagesrcset="https://x/a.png 1x"/>')), outside, 'an image source set on a link');
+  equal(reason(html('<table background="https://x/b.png"><tr><td background="https://x/c.png">x</td></tr></table>')), 'holds an attribute the editor does not write, background', 'a background in embedded HTML');
+  equal(reason(html('<img lowsrc="https://x/a.png"/>')), 'holds an attribute the editor does not write, lowsrc', 'a low source');
+  equal(reason(html('<link rel="preload" as="image" imagesrcset="https://x/a.png 1x"/>')), 'holds an element the editor does not write, link', 'an image source set on a link, the link refused first');
   equal(reason(svg('<rect style="background-image: src(\'https://x/a.png\')"/>')), outside, 'a source function');
   equal(reason(svg('<a href="data:application/xhtml+xml,x"><rect/></a>')), 'links to data', 'a link to a document held as data');
   equal(reason(svg('<a href="&#9;java&#10;script:alert(1)"><rect/></a>')), 'links to code', 'a link to code broken by spaces');
@@ -151,6 +153,25 @@ const reason = (text) => {
   equal(reason(svg('<text>&#xD800;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'a reference to a surrogate is refused');
   equal(reason(svg('<text>&#x110000;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'and one past the last code point');
   equal(reason(svg('<text>&#65;&#x42;</text>')), 'accepted', 'while a reference to a character passes');
+}
+
+// --- V-TST-189 Only what the editor writes is accepted (F-DRW-001, N-SEC-003) ---
+
+{
+  equal(reason(svg('<marquee>x</marquee>')), 'holds an element the editor does not write, marquee', 'an element off the list is refused by name');
+  equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><dialog open="open">x</dialog></div></foreignObject>')), 'holds an element the editor does not write, dialog', 'inside a label too');
+  equal(reason(svg('<rect width="1" height="1" contenteditable="true"/>')), 'holds an attribute the editor does not write, contenteditable', 'an attribute off the list is refused by name');
+  equal(reason(svg('<foreignObject><div xmlns="http://www.w3.org/1999/xhtml" tabindex="0">x</div></foreignObject>')), 'holds an attribute the editor does not write, tabindex', 'in a label too');
+  equal(reason(svg('<rect width="1" height="1" xmlns:ev="http://www.w3.org/2001/xml-events"/>')), 'accepted', 'while a namespace declaration passes, its handlers refused by their own rule');
+  const drawings = EXAMPLE_PROJECT.entities.map((entity) => entity.attributes.drawing).filter((held) => typeof held === 'string' && held !== '');
+  ok(drawings.length >= 30, `the example carries ${drawings.length} drawings`);
+  deepEqual(drawings.map((held) => reason(held)).filter((held) => held !== 'accepted'), [], 'and every one passes the list, as does the fixture');
+  equal(reason(fixture), 'accepted', 'the fixture export passes the list');
+  const hostile = ['style-mismatched-quotes.svg', 'fill-attribute.svg', 'mask-attribute.svg', 'cursor-style.svg', 'html-background.svg', 'style-import.svg'];
+  for (const name of hostile) {
+    const held = reason(readFile(`fixtures/hostile/${name}`));
+    ok(held !== 'accepted', `${name} is refused, ${held}`);
+  }
 }
 
 summary('test-drawing');

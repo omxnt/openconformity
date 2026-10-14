@@ -28,6 +28,40 @@ const SOURCE_SETS = new Set(['srcset', 'imagesrcset']);
 /** Elements that rewrite another element's attribute over time. */
 const ANIMATIONS = new Set(['animate', 'set', 'animatetransform', 'animatemotion', 'animatecolor', 'discard']);
 
+/**
+ * The elements draw.io's SVG canvas writes, the shapes, text, images,
+ * links, paint servers, clips, masks, markers and filters, and the HTML
+ * its label editor allows inside a foreignObject. A drawing may hold no
+ * other, so a pattern not yet known cannot pass by being unknown.
+ */
+const ALLOWED_ELEMENTS = new Set([
+  'svg', 'g', 'defs', 'switch', 'foreignobject', 'title', 'desc', 'style',
+  'rect', 'path', 'ellipse', 'circle', 'line', 'polyline', 'polygon', 'text', 'tspan', 'textpath', 'image', 'a', 'use', 'symbol',
+  'clippath', 'mask', 'marker', 'pattern', 'lineargradient', 'radialgradient', 'stop',
+  'filter', 'fegaussianblur', 'feoffset', 'feblend', 'feflood', 'fecomposite', 'femerge', 'femergenode', 'fecolormatrix', 'fedropshadow', 'fecomponenttransfer', 'fefunca', 'fefuncr', 'fefuncg', 'fefuncb',
+  'div', 'span', 'p', 'br', 'hr', 'b', 'strong', 'i', 'em', 'u', 's', 'strike', 'del', 'ins', 'sub', 'sup', 'small', 'big', 'font', 'code', 'pre', 'blockquote', 'center',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption', 'img',
+]);
+
+/**
+ * The attributes those elements carry as draw.io writes them, geometry,
+ * presentation, text, links, paint servers, filters, the HTML attributes
+ * of a label, and the editor's own on the root. A drawing may hold no
+ * other. A listed attribute is still read for references and styles.
+ */
+const ALLOWED_ATTRIBUTES = new Set([
+  'id', 'class', 'style', 'xmlns', 'xmlns:xlink', 'xml:space', 'xml:lang', 'lang', 'version', 'viewbox', 'preserveaspectratio',
+  'width', 'height', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'd', 'points', 'dx', 'dy', 'rotate', 'transform',
+  'fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit',
+  'opacity', 'visibility', 'display', 'overflow', 'pointer-events', 'color', 'vector-effect', 'paint-order', 'shape-rendering', 'text-rendering', 'image-rendering', 'color-rendering', 'color-interpolation', 'color-interpolation-filters',
+  'font-family', 'font-size', 'font-weight', 'font-style', 'font-variant', 'text-anchor', 'text-decoration', 'dominant-baseline', 'alignment-baseline', 'baseline-shift', 'letter-spacing', 'word-spacing', 'writing-mode', 'direction', 'unicode-bidi', 'textlength', 'lengthadjust', 'startoffset', 'method', 'spacing',
+  'href', 'xlink:href', 'target', 'requiredfeatures', 'requiredextensions', 'systemlanguage', 'data-cell-id', 'content', 'host', 'name', 'agent',
+  'gradientunits', 'gradienttransform', 'spreadmethod', 'offset', 'stop-color', 'stop-opacity', 'patternunits', 'patterncontentunits', 'patterntransform', 'clippathunits', 'clip-path', 'clip-rule', 'maskunits', 'maskcontentunits', 'mask',
+  'filter', 'filterunits', 'primitiveunits', 'in', 'in2', 'result', 'stddeviation', 'flood-color', 'flood-opacity', 'mode', 'operator', 'type', 'values', 'k1', 'k2', 'k3', 'k4', 'tablevalues', 'slope', 'intercept', 'amplitude', 'exponent',
+  'marker-start', 'marker-mid', 'marker-end', 'markerwidth', 'markerheight', 'markerunits', 'refx', 'refy', 'orient',
+  'align', 'valign', 'border', 'cellpadding', 'cellspacing', 'colspan', 'rowspan', 'bgcolor', 'face', 'size', 'src', 'alt', 'title', 'dir', 'start', 'nowrap',
+]);
+
 /** The five entities XML predefines; a drawing may use no other by name. */
 const ENTITIES = { lt: '<', gt: '>', amp: '&', quot: '"', apos: "'" };
 
@@ -214,14 +248,13 @@ function cssFault(text) {
 
 /**
  * Whether a drawing may be accepted: an SVG document, within the size
- * limit, declaring no entities, linking no stylesheet, holding no
- * element that runs code, embeds a document, refreshes to another
- * address or sends a form, no event handler, no attribute that pings or
- * navigates, and no animation of a link or a handler, referencing nothing
- * outside itself by link, source, stylesheet or any attribute but the
- * editor's own model, and no larger than the
- * dimension limit, so that it stays inert even when opened on its own.
- * The reason completes the sentence "The drawing …".
+ * limit, declaring no entities, linking no stylesheet, holding only the
+ * elements and attributes the editor writes, no event handler, no
+ * attribute that pings or navigates, and no animation of a link or a
+ * handler, referencing nothing outside itself by link, source,
+ * stylesheet or any attribute but the editor's own model, and no larger
+ * than the dimension limit, so that it stays inert even when opened on
+ * its own. The reason completes the sentence "The drawing …".
  * @param {string} text
  * @returns {{ ok: true } | { ok: false, reason: string }}
  */
@@ -259,10 +292,12 @@ export function checkDrawing(text) {
 function walk(element) {
   const name = local(element.name).toLowerCase();
   if (FORBIDDEN_ELEMENTS.has(name)) return `holds a ${name} element`;
+  if (!ALLOWED_ELEMENTS.has(name)) return `holds an element the editor does not write, ${local(element.name)}`;
   for (const attribute of element.attributes) {
     const key = attribute.name.toLowerCase();
     if (local(key).startsWith('on')) return 'holds an event handler';
     if (FORBIDDEN_ATTRIBUTES.has(local(key))) return 'holds an attribute that sends or navigates';
+    if (!ALLOWED_ATTRIBUTES.has(key) && !ALLOWED_ATTRIBUTES.has(local(key)) && !key.startsWith('xmlns:')) return `holds an attribute the editor does not write, ${attribute.name}`;
     if (ANIMATIONS.has(name) && local(key) === 'attributename') {
       const animated = local(attribute.value.trim().toLowerCase());
       if (animated === 'href' || animated.startsWith('on')) return 'animates a link or a handler';

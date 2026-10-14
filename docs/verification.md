@@ -81,6 +81,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-022 | Headless | [test-drawing.js](../tests/test-drawing.js) | What is accepted |
 | V-TST-023 | Headless | [test-drawing.js](../tests/test-drawing.js) | What is refused, and why |
 | V-TST-171 | Headless | [test-drawing.js](../tests/test-drawing.js) | The gaps the October reviews found |
+| V-TST-189 | Headless | [test-drawing.js](../tests/test-drawing.js) | Only what the editor writes is accepted |
 | V-TST-024 | Headless | [test-editor.js](../tests/test-editor.js) | The draft against the entity |
 | V-TST-025 | Headless | [test-editor.js](../tests/test-editor.js) | A hyperlink is presented as a link only when it is a web address |
 | V-TST-026 | Headless | [test-editor.js](../tests/test-editor.js) | The field helpers over the definitions |
@@ -427,7 +428,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
 | F-PER-012 | Shipped library | V-TST-069, V-TST-180, V-TST-178 | Tested |
-| F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171 | Tested |
+| F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171, V-TST-189 | Tested |
 | F-DRW-002 | Drawing storage | V-TST-019, V-TST-182, V-TST-021 | Tested |
 | F-DRW-003 | External drawing editor | V-TST-003, V-TST-016, V-TST-018, V-TST-019, V-DEM-008 | Partly |
 
@@ -447,7 +448,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-PRV-007 | Data minimisation | V-TST-019, V-INS-003 | Tested |
 | N-SEC-001 | Safe parsing | V-TST-020, V-INS-001, V-INS-002, V-TST-172, V-TST-154, V-TST-155, V-TST-176, V-TST-170 | Tested |
 | N-SEC-002 | Safe rendering | V-TST-025, V-INS-001, V-INS-002 | Tested |
-| N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-INS-006 | Tested |
+| N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-TST-189, V-INS-006 | Tested |
 | N-SEC-004 | External application isolation | V-TST-016, V-TST-017, V-INS-003 | Tested |
 | N-SEC-005 | No hidden content | V-TST-027, V-TST-031, V-TST-048, V-TST-055, V-TST-056, V-TST-057, V-TST-083, V-INS-014, V-TST-098, V-TST-099 | Tested |
 | N-SEC-006 | Content security policy | V-INS-001, V-INS-011, V-ANA-027 | Partly |
