@@ -280,12 +280,12 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 
 | Id | Technique | Where | What it checks |
 |---|---|---|---|
-| V-DEM-001 | Drive | The software in a browser | Pane headers are landmarks. Open a project and find the shell bar, the navigator at full height, and the editor over the relationship pane |
-| V-DEM-002 | Drive | The software in a browser | The minimum viewport. Narrow the window below 1000 pixels and find the notice |
+| V-DEM-001 | Drive | [drives.py](../tests/drives.py) | Pane headers are landmarks. Open a project and find the shell bar, the navigator at full height, and the editor over the relationship pane |
+| V-DEM-002 | Drive | [drives.py](../tests/drives.py) | The minimum viewport. Narrow the window below 1000 pixels and find the notice |
 | V-DEM-003 | Drive | The software in a browser | The tests use an in-memory stand-in for browser storage. Reload the page and find the project, the selection and the expansion |
-| V-DEM-004 | Drive | The software in a browser | Make a change, reload, and find it kept |
-| V-DEM-005 | Drive | The software in a browser | Clear browser data asks, then forgets. Clear browser data forgets everything. Clear stored data, then find no record in the database and no session key in the storage inspector |
-| V-DEM-006 | Drive | The software in a browser | Select an entity in the tree and find its attributes in the editor pane |
+| V-DEM-004 | Drive | [drives.py](../tests/drives.py) | Make a change, reload, and find it kept |
+| V-DEM-005 | Drive | [drives.py](../tests/drives.py) | Clear browser data asks, then forgets. Clear browser data forgets everything. Clear stored data, then find no record in the database and no session key in the storage inspector |
+| V-DEM-006 | Drive | [drives.py](../tests/drives.py) | Select an entity in the tree and find its attributes in the editor pane |
 | V-DEM-007 | Drive | The software in a browser | at , , , , , . at , , , , . Open each view, save it in every format it offers, and open the saved files |
 | V-DEM-008 | Drive | The software in a browser | Create a drawing in the real editor, apply it, save the entity and edit it again. Press the editor's save shortcut once and find the drawing taken |
 | V-DEM-009 | Drive | The software in a browser | The page states its content security policy first. Nothing leaves the page but by a link the user follows. With the network panel open, load and work, and find requests to the host only until the editor is opened |
@@ -294,12 +294,12 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-012 | Drive | The software in a browser | Walk every row of `docs/shortcuts.md` with the pointer unused |
 | V-DEM-013 | Drive | The software in a browser | The minimum viewport. Work at 1000 by 356 pixels and find every pane usable |
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
-| V-DEM-015 | Drive | The software in a browser | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
-| V-DEM-016 | Drive | The software in a browser | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
-| V-DEM-017 | Drive | The software in a browser | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
+| V-DEM-015 | Drive | [drives.py](../tests/drives.py) | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
+| V-DEM-016 | Drive | [drives.py](../tests/drives.py) | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
+| V-DEM-017 | Drive | [drives.py](../tests/drives.py) | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
 | V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
-| V-DEM-019 | Drive | The software in a browser | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
-| V-DEM-020 | Drive | The software in a browser | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
+| V-DEM-019 | Drive | [drives.py](../tests/drives.py) | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
+| V-DEM-020 | Drive | [drives.py](../tests/drives.py) | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
 
 ### 2.4 Analyses
 

@@ -193,8 +193,10 @@ While the diagram editor is open, every action stands disabled.
 |---|---|---|---|
 | Test | Headless | `tests/test-*.js`, run by `./run.sh` in the JavaScriptCore shell, or in Node where that shell is missing | The layers below the page, and the flows over a stub page |
 | Inspection | Pin | `tests/test-pins.js` | Facts read from the source, the page and the file list, such as the policy, the imports and who writes filing |
-| Demonstration | Drive | Outside the repository today | The panes in a real browser, driven by the headless Chrome driver |
+| Demonstration | Drive | `tests/drives.py`, run by `python3 drives.py` with a local Chrome, or by hand where no drive exists yet | The panes in a real browser, driven over the DevTools pipe |
 | Analysis | Review | `tests/manual.md` | The host, the accounts and the repository, read at each release |
+
+The drives run with `python3 drives.py` from `tests/`. The script serves `app/` on a free local port, opens a fresh headless Chrome profile for each drive over the DevTools pipe, acts on the page as a user would, and reports each drive as passed or failed with any console error, exception or failed request the page raised, exiting non-zero when any drive fails. Each drive is named by its activity in `tests/manual.md`, whose Where column points to the script for the activities it covers and to the browser for those still driven by hand. Python's standard library and a local Chrome are all it needs, found at Chrome's usual path or through `CHROME`.
 
 The suite runs with `./run.sh` from `tests/`. The script uses the JavaScriptCore shell at its macOS path, or the path in `JSC`, and falls back to Node where neither exists, loading `tests/node.mjs` first, which defines `readFile`, `print` and `arguments` as the shell has them. The tests and the generator are written against those three and nothing else of either runtime, so no package is installed for either. The script exits non-zero when any test fails, or when neither runtime is found.
 
