@@ -413,6 +413,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
 | F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
+| F-MOD-012 | Bulk edit | None | None |
 | F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
@@ -472,9 +473,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 50 | 33 | 13 | 2 | 2 |
+| Functional | 51 | 33 | 13 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 107 | 54 | 28 | 23 | 2 |
+| All | 108 | 54 | 28 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 
@@ -482,6 +483,7 @@ Every other test block says in its header that it names no requirement, and pins
 
 | Requirement | Why |
 |---|---|
+| F-MOD-012 | Waits on the function |
 | F-PER-009 | Waits on the first migration |
 | F-PER-011 | Waits on the function |
 

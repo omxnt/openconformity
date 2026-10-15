@@ -759,6 +759,16 @@ When a scenario's residual risk estimation or a hazard's elimination is saved, t
 
 > *A rating is a judgement about the measures in place, and the software cannot know whether a changed set of measures changes the judgement. It keeps the ground the judgement was made on and points at it, in the entity, in the tab the judgement stands on, and in Messages, without deciding. Recording afresh is a decision of the user's, made by saving the judgement again with its value changed or by marking the record reviewed, and it is a change in the model that undo takes back.*
 
+---
+
+#### F-MOD-012 Bulk edit
+
+`event driven`
+
+When the user saves a bulk edit of an entity type below a row, the software shall apply the filled attributes to every entity of that type filed below the row, leave the other attributes as they stand, and record the change as one step.
+
+> *Many entities share a value that is set once per project, such as which essential requirements apply, and setting it one entity at a time is the slowest thing the software asks of a user. One form applied to many is the general mechanism, so no attribute needs a function of its own. Filing is the scope because what is set together is filed together, and one step keeps undo honest.*
+
 ### 4.5 Views
 
 ---
