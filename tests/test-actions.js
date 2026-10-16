@@ -132,6 +132,13 @@ function enabledIds(actions) {
   equal(enabled().paste, true, 'a copied row pastes anywhere, the root included');
   equal(store.cut(), null, 'and the copy forgot the cut');
   store.setCopied(null);
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.selectMany(['ELM-001', 'ELM-002'], 'ELM-002');
+  const many = enabled();
+  ok(['edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'cut', 'copy', 'paste', 'delete'].every((id) => many[id] === false), 'with several rows selected every action on the selection stands down, until it learns the set');
+  ok(many.undo && many.about, 'while the actions that need no selection stay');
+  store.select('ELM-001');
+  store.undo();
   equal(one.undo, true, 'a change can be undone');
   equal(one.edit, true, 'an entity is edited, its title among its attributes');
 

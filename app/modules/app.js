@@ -70,6 +70,8 @@ createShell({
 });
 createNavigator({
   store,
+  onSelectMany: (ids, anchorId) => flows.selectRows(ids, anchorId),
+  onToggle: (id) => flows.toggleRow(id),
   container: document.getElementById('navigator-body'),
   toolbar: document.getElementById('navigator-toolbar'),
   search: document.getElementById('navigator-search'),

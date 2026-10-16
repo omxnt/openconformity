@@ -450,6 +450,47 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(store.cut(), null, 'and so does replacing the project');
 }
 
+// --- V-TST-193 Several rows selected, with an anchor (F-WSP-012, F-SES-001) ---
+
+{
+  const retention = memoryRetention();
+  const store = createStore({ storage: fakeStorage(), retention });
+  store.selectMany(['ELM-001'], 'ELM-001');
+  deepEqual(store.selected(), [], 'nothing is selected without a project');
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  deepEqual([store.selection(), store.selected()], ['ELM-001', ['ELM-001']], 'one selection is the anchor alone');
+  store.selectMany(['ELM-001', 'ELM-002', 'HAZ-001', 'ELM-999'], 'HAZ-001');
+  deepEqual([store.selection(), store.selected()], ['HAZ-001', ['ELM-001', 'ELM-002', 'HAZ-001']], 'several rows select at once, the anchor among them, a row not in the model left out');
+  store.toggleSelected('ELM-002');
+  deepEqual([store.selection(), store.selected()], ['HAZ-001', ['ELM-001', 'HAZ-001']], 'a toggle removes a row and keeps the anchor');
+  store.toggleSelected('HAZ-001');
+  deepEqual([store.selection(), store.selected()], ['ELM-001', ['ELM-001']], 'removing the anchor makes the last one left the anchor');
+  store.toggleSelected('ELM-002');
+  deepEqual([store.selection(), store.selected()], ['ELM-002', ['ELM-001', 'ELM-002']], 'and adding a row makes it the anchor');
+  store.setExpanded('F-1', false);
+  store.toggleSelected('HAZ-001');
+  equal(store.isExpanded('F-1'), false, 'adding a root row opens nothing');
+  store.toggleSelected('ELM-001');
+  store.toggleSelected('ELM-001');
+  equal(store.isExpanded('F-1'), true, 'adding a filed row opens what is above it');
+  equal((await blobIn(store, retention)).session.selection, 'ELM-001', 'the blob keeps the anchor alone');
+  store.commit((model) => removeEntity(model, 'ELM-002'));
+  deepEqual(store.selected().includes('ELM-002'), false, 'a deleted row leaves the set');
+  store.commit((model) => removeEntity(model, 'ELM-001'));
+  deepEqual([store.selection(), store.selected()], ['F-1', ['F-1']], 'a deleted anchor lands on the nearest survivor, alone');
+  store.select('F-1');
+  store.selectMany(['F-1', 'HAZ-001'], 'F-1');
+  store.select('F-1');
+  deepEqual(store.selected(), ['F-1'], 'selecting the anchor alone collapses the set');
+  store.toggleSelected('F-1');
+  deepEqual([store.selection(), store.selected()], [null, []], 'and removing the last row selects nothing');
+}
+
 // --- Picker mode (no requirement) -------------------------------------------------
 
 {

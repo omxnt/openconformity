@@ -107,6 +107,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let projectOpen = false;
   /** @type {string|null} */
   let selection = null;
+  /** The rows selected, the anchor among them: several when the user extended the selection, else the anchor alone or none. In memory only. */
+  let selectedSet = new Set();
   /** @type {Set<string>} */
   let expanded = new Set();
   /** Whether the project row is collapsed over the whole tree. */
@@ -287,8 +289,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
    * @param {string[]} trail
    */
   function repairSelection(trail) {
+    for (const id of selectedSet) if (!model.nodes.has(id)) selectedSet.delete(id);
     if (selection === null || model.nodes.has(selection)) return;
     selection = trail.find((id) => model.nodes.has(id)) ?? null;
+    selectedSet = selection === null ? new Set() : new Set([selection]);
+  }
+
+  /** Open every node above a row and the project row, so the row is in the tree. */
+  function reveal(id) {
+    projectCollapsed = false;
+    const seen = new Set();
+    for (let held = model.nodes.get(id); held && held.parent !== null && !seen.has(held.parent); held = model.nodes.get(held.parent)) {
+      seen.add(held.parent);
+      expanded.add(held.parent);
+    }
   }
 
   /**
@@ -335,6 +349,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       savedSequence = blob.session?.dirty ? UNREACHABLE : seeded;
       const wanted = blob.session?.selection;
       selection = typeof wanted === 'string' && model.nodes.has(wanted) ? wanted : null;
+      selectedSet = selection === null ? new Set() : new Set([selection]);
       const openIds = Array.isArray(blob.session?.expanded) ? blob.session.expanded : [];
       expanded = new Set(openIds.filter((id) => model.nodes.has(id)));
       projectCollapsed = blob.session?.projectCollapsed === true;
@@ -492,6 +507,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       asideHeld = false;
       restoration = 'fresh';
       selection = null;
+      selectedSet = new Set();
       expanded = new Set();
       projectCollapsed = false;
       navigatorFilter = '';
@@ -613,6 +629,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       model = next;
       savedSequence = history.reset(model);
       selection = null;
+      selectedSet = new Set();
       expanded = new Set();
       projectCollapsed = false;
       navigatorFilter = '';
@@ -760,16 +777,55 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       if (!projectOpen) return;
       const next = id !== null && model.nodes.has(id) ? id : null;
       if (viewReturn !== null && next !== viewReturn.rowId) viewReturn = null;
-      if (next === selection) return;
+      if (next === selection && selectedSet.size <= 1) return;
       selection = next;
-      if (next !== null) {
-        projectCollapsed = false;
-        const seen = new Set();
-        for (let held = model.nodes.get(next); held && held.parent !== null && !seen.has(held.parent); held = model.nodes.get(held.parent)) {
-          seen.add(held.parent);
-          expanded.add(held.parent);
-        }
+      selectedSet = next === null ? new Set() : new Set([next]);
+      if (next !== null) reveal(next);
+      persist();
+      notify();
+    },
+
+    /** The rows selected, the anchor among them, in the order they were taken. */
+    selected: () => [...selectedSet],
+
+    /**
+     * Select several rows at once, the anchor among them, as a range or
+     * a Cmd A does. Rows not in the model are left out, and the project
+     * row is never among them. In memory only, the blob keeping the
+     * anchor alone.
+     * @param {string[]} ids
+     * @param {string} anchorId
+     */
+    selectMany(ids, anchorId) {
+      if (!projectOpen) return;
+      const held = ids.filter((id) => typeof id === 'string' && model.nodes.has(id));
+      if (held.length === 0) return;
+      const anchor = held.includes(anchorId) ? anchorId : held[held.length - 1];
+      if (viewReturn !== null && anchor !== viewReturn.rowId) viewReturn = null;
+      selection = anchor;
+      selectedSet = new Set(held);
+      reveal(anchor);
+      persist();
+      notify();
+    },
+
+    /**
+     * Add a row to the selection or remove it, the row becoming the
+     * anchor when added and the last one left becoming the anchor when
+     * the anchor is removed. Removing the last row selects nothing.
+     * @param {string} id
+     */
+    toggleSelected(id) {
+      if (!projectOpen || !model.nodes.has(id)) return;
+      if (selectedSet.has(id)) {
+        selectedSet.delete(id);
+        if (selection === id) selection = [...selectedSet].at(-1) ?? null;
+      } else {
+        selectedSet.add(id);
+        selection = id;
+        reveal(id);
       }
+      if (viewReturn !== null && selection !== viewReturn.rowId) viewReturn = null;
       persist();
       notify();
     },

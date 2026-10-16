@@ -368,6 +368,7 @@ body {
   background: var(--layer);
   border-top: 1px solid var(--border-subtle);
 }
+.status-selection { margin-left: 16px; color: var(--text-second); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .status-bar[hidden] { display: none; }
 .status-messages {
   display: inline-flex;
@@ -580,6 +581,7 @@ body {
   font-weight: 600;
 }
 .tree-row.selected:hover { background: var(--active); }
+.tree-row.anchor { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tree-row.cut { opacity: 0.5; }
 .tree-row.drop-target { outline: 2px solid var(--accent); outline-offset: -2px; }
 .tree-row.drop-before { box-shadow: inset 0 2px 0 var(--accent); }

@@ -300,6 +300,28 @@ function flowsOver(store) {
   equal(ended, 0, 'with no edit open, Escape passes by');
 }
 
+// --- V-TST-195 Selecting several rows passes the draft guard (F-WSP-012, F-MOD-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  const editor = { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => true, editing: () => true };
+  const dialogs = { confirm: async (question) => { asked.push(question.title); return answer; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.select('ELM-001');
+  equal(await flows.selectRows(['ELM-001', 'ELM-002'], 'ELM-002'), false, 'a range over a dirty draft asks and lands nothing when declined');
+  deepEqual([asked, store.selected()], [['Discard the changes?'], ['ELM-001']], 'with the standard question');
+  answer = true;
+  equal(await flows.selectRows(['ELM-001', 'ELM-002'], 'ELM-002'), true, 'accepting lands the range');
+  deepEqual(store.selected(), ['ELM-001', 'ELM-002'], 'both rows selected');
+  equal(await flows.toggleRow('ELM-001'), true, 'a toggle passes the same guard');
+  deepEqual(store.selected(), ['ELM-002'], 'and removes the row');
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {

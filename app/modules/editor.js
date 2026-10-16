@@ -697,6 +697,19 @@ export function createEditor({
 
 
   /** The project, on the standard surface: its tabs, view fields and Edit. */
+  /**
+   * Several rows selected: the head names the set by type and count, the
+   * body says what to do to see one.
+   */
+  function renderManyView() {
+    const ids = store.selected();
+    const types = new Set(ids.map((id) => nodeOf(store.model(), id)).map((node) => (node?.kind === 'entity' ? node.type : 'folder')));
+    const kind = types.size === 1 && !types.has('folder') ? ENTITY_TYPES[[...types][0]].name : 'Selection';
+    head.hidden = false;
+    head.appendChild(el('div', { className: 'pane-head-name' }, [el('span', { className: 'subhead-kind', text: kind }), el('span', { className: 'subhead-title', text: `${ids.length} selected` })]));
+    body.appendChild(emptyState('Several selected', 'Select one row to see its attributes.'));
+  }
+
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
@@ -769,6 +782,10 @@ export function createEditor({
     if (!store.hasProject()) {
       head.hidden = true;
       body.appendChild(landing(onAction));
+      return;
+    }
+    if (store.selected().length > 1) {
+      renderManyView();
       return;
     }
     if (!node) {

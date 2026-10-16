@@ -97,6 +97,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   const notices = document.getElementById('notices');
   const statusBar = document.getElementById('status-bar');
   const statusSize = document.getElementById('status-size');
+  const statusSelection = document.getElementById('status-selection');
   const statusMessages = document.getElementById('status-messages');
   const statusMessagesText = document.getElementById('status-messages-text');
   const actionById = new Map(actions.map((action) => [action.id, action]));
@@ -356,6 +357,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     if (statusBar.hidden) return;
     const model = store.model();
     statusSize.textContent = sizeText(model);
+    const chosen = store.selected();
+    if (statusSelection) statusSelection.textContent = chosen.length > 1 ? `${chosen.join(', ')} selected` : '';
     const found = findings(model);
     statusMessages.hidden = found.length === 0;
     statusMessagesText.textContent = messagesText(found);

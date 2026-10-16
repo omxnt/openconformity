@@ -108,6 +108,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-045 | Headless | [test-flows.js](../tests/test-flows.js) | Activation and the pointerless filing path |
 | V-TST-046 | Headless | [test-flows.js](../tests/test-flows.js) | The project saves like an entity |
 | V-TST-047 | Headless | [test-flows.js](../tests/test-flows.js) | Escape leaves the edit, asking only when it costs |
+| V-TST-195 | Headless | [test-flows.js](../tests/test-flows.js) | Selecting several rows passes the draft guard |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -163,6 +164,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-091 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row |
 | V-TST-092 | Headless | [test-navigator.js](../tests/test-navigator.js) | The project row collapses over the whole tree |
 | V-TST-093 | Headless | [test-navigator.js](../tests/test-navigator.js) | The filter |
+| V-TST-194 | Headless | [test-navigator.js](../tests/test-navigator.js) | The range a Shift click selects |
 | V-TST-094 | Headless | [test-navigator.js](../tests/test-navigator.js) | The labels |
 | V-TST-095 | Headless | [test-overlay.js](../tests/test-overlay.js) | A dialog is known wherever it stands in the stack |
 | V-TST-096 | Headless | [test-overlay.js](../tests/test-overlay.js) | Escape goes to the top entry |
@@ -213,6 +215,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-139 | Headless | [test-store.js](../tests/test-store.js) | A stale selection in the blob |
 | V-TST-140 | Headless | [test-store.js](../tests/test-store.js) | A blob the previous generation kept in web storage is moved over |
 | V-TST-185 | Headless | [test-store.js](../tests/test-store.js) | The cut is session state, never persisted, repaired on deletion |
+| V-TST-193 | Headless | [test-store.js](../tests/test-store.js) | Several rows selected, with an anchor |
 | V-TST-141 | Headless | [test-store.js](../tests/test-store.js) | Picker mode is never persisted |
 | V-TST-142 | Headless | [test-store.js](../tests/test-store.js) | The open view is session state with a way back |
 | V-TST-143 | Headless | [test-store.js](../tests/test-store.js) | A failing persist |
@@ -386,7 +389,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|
 | F-APP-001 | Small-viewport notice | V-INS-021, V-DEM-002 | Partly |
 | F-APP-002 | Direct entry | V-TST-001, V-TST-040, V-INS-018 | Tested |
-| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-185, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-DEM-003 | Partly |
+| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-185, V-TST-193, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-DEM-003 | Partly |
 | F-SES-002 | Model retention | V-TST-037, V-TST-128, V-TST-131, V-TST-132, V-TST-135, V-TST-143, V-DEM-004 | Partly |
 | F-SES-003 | Browser removal | V-TST-060, V-TST-150, V-DEM-005 | Partly |
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
@@ -404,10 +407,11 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
 | F-WSP-010 | Cut and paste | V-TST-186, V-TST-185, V-DEM-019 | Partly |
 | F-WSP-011 | Copy and paste | V-TST-188, V-TST-187, V-DEM-020 | Partly |
+| F-WSP-012 | Selecting many | V-TST-195, V-TST-194, V-TST-193 | Tested |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
+| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
@@ -475,9 +479,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 51 | 33 | 13 | 2 | 3 |
+| Functional | 52 | 34 | 13 | 2 | 3 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 108 | 54 | 28 | 23 | 3 |
+| All | 109 | 55 | 28 | 23 | 3 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

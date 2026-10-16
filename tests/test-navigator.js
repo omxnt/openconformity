@@ -4,7 +4,7 @@
  * rendered tree is checked in the browser. Run from this directory.
  */
 
-import { treeRows, labelParts, visibleRows, matchingIds, revealSet } from '../app/modules/navigator.js';
+import { treeRows, labelParts, visibleRows, matchingIds, revealSet, rowsBetween } from '../app/modules/navigator.js';
 import { createModel, addEntity, addFolder, updateEntity, file } from '../app/modules/model.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -141,6 +141,17 @@ function drawn(model, expanded) {
   const filtered = visibleRows(model, collapsed, true, 'crush');
   equal(filtered[0].kind, 'project', 'the project row stays first while filtering');
   deepEqual(filtered.slice(1).map((row) => row.id), ['F-1', 'ELM-001', 'HAZ-001'], 'with the filtered tree beneath it');
+}
+
+// --- V-TST-194 The range a Shift click selects (F-WSP-012) --------------------
+
+{
+  const rows = [{ id: null }, { id: 'F-1' }, { id: 'ELM-001' }, { id: 'HAZ-001' }, { id: 'F-2' }];
+  deepEqual(rowsBetween(rows, 'F-1', 'HAZ-001'), ['F-1', 'ELM-001', 'HAZ-001'], 'from the anchor down to the row, both included');
+  deepEqual(rowsBetween(rows, 'HAZ-001', 'F-1'), ['F-1', 'ELM-001', 'HAZ-001'], 'and up, in the same order');
+  deepEqual(rowsBetween(rows, 'ELM-001', 'ELM-001'), ['ELM-001'], 'a row to itself is the row');
+  deepEqual(rowsBetween(rows, 'ELM-999', 'F-2'), ['F-2'], 'an anchor out of view gives the row alone');
+  deepEqual(rowsBetween(rows, 'F-1', 'ELM-999'), [], 'and a row out of view gives nothing');
 }
 
 // --- The transient reveal (no requirement) ----------------------------------------

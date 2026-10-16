@@ -641,14 +641,17 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       return;
     }
     messagesHost.hidden = true;
-    if (!subject || subject.kind !== 'entity') {
+    const several = picker === null && store.selected().length > 1;
+    if (!subject || subject.kind !== 'entity' || several) {
       renderHead(false, true);
       listHost.hidden = false;
       graph.element.hidden = true;
       listHost.textContent = '';
       listHost.appendChild(
         store.hasProject()
-          ? emptyState('Nothing selected', 'Select an entity to see its relationships.')
+          ? several
+            ? emptyState('Several selected', 'Select one entity to see its relationships.')
+            : emptyState('Nothing selected', 'Select an entity to see its relationships.')
           : emptyState('No project', '')
       );
       return;

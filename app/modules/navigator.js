@@ -176,6 +176,24 @@ export function revealSet(model, ids) {
 }
 
 /**
+ * The identifiers from one row to another in the order the tree shows
+ * them, both ends included, the project row never among them. The
+ * range a Shift click selects.
+ * @param {Array<{ id: string|null }>} rows  the visible rows in order
+ * @param {string} fromId
+ * @param {string} toId
+ * @returns {string[]}
+ */
+export function rowsBetween(rows, fromId, toId) {
+  const ids = rows.map((row) => row.id);
+  const from = ids.indexOf(fromId);
+  const to = ids.indexOf(toId);
+  if (from < 0 || to < 0) return to >= 0 ? [toId] : [];
+  const [a, b] = from <= to ? [from, to] : [to, from];
+  return ids.slice(a, b + 1).filter((id) => id !== null);
+}
+
+/**
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.container
@@ -200,12 +218,18 @@ export function createNavigator({
   overlay,
   actions,
   onSelect,
+  onSelectMany = async () => true,
+  onToggle = async () => true,
   onActivate,
   onFile,
   onPlace,
 }) {
   /** The id being dragged; dataTransfer is unreadable during dragover. */
   let draggedId = null;
+  /** The rows selected, read once per render. */
+  let chosen = new Set();
+  /** The visible rows in order, for a range. */
+  const visible = () => visibleRows(store.model(), openWithReveal(store.picker()), store.hasProject(), filter(), store.projectExpanded());
 
   /**
    * The open-branch predicate the tree draws and walks with: the durable
@@ -229,7 +253,7 @@ export function createNavigator({
    * @param {{ x: number, y: number }} at
    */
   async function onContextMenu(id, at) {
-    if (!(await onSelect(id))) return;
+    if (!(id !== null && chosen.has(id)) && !(await onSelect(id))) return;
     openMenu({
       overlay,
       label: 'Actions',
@@ -387,7 +411,8 @@ export function createNavigator({
   }
 
   function renderRow(row, picking) {
-    const selected = row.id === store.selection();
+    const selected = chosen.has(row.id);
+    const anchor = selected && chosen.size > 1 && row.id === store.selection();
     const pickable = picking.candidates.has(row.id);
     const picked = picking.picks.has(row.id);
     const attributes = {
@@ -403,6 +428,7 @@ export function createNavigator({
 
     const classes = ['tree-row'];
     if (selected) classes.push('selected');
+    if (anchor) classes.push('anchor');
     if (pickable) classes.push('pickable');
     if (picked) classes.push('picked');
     if (picking.subject === row.id) classes.push('picker-subject');
@@ -441,11 +467,13 @@ export function createNavigator({
     if (excluded(row.node)) rowElement.appendChild(el('span', { className: 'visually-hidden', text: 'excluded' }));
 
     rowElement.addEventListener('mousedown', (event) => {
-      if (pickable && event.shiftKey) event.preventDefault();
+      if (event.shiftKey) event.preventDefault();
     });
     rowElement.addEventListener('click', (event) => {
       if (!pickable) {
-        onSelect(row.id);
+        if (event.shiftKey && store.selection() !== null) onSelectMany(rowsBetween(visible(), store.selection(), row.id), row.id);
+        else if (event.metaKey || event.ctrlKey) onToggle(row.id);
+        else onSelect(row.id);
         return;
       }
       const anchor = lastPick !== null && lastPick.subject === picking.subject && lastPick.id !== row.id ? lastPick : null;
@@ -528,6 +556,7 @@ export function createNavigator({
     }
 
     const picker = store.picker();
+    chosen = new Set(store.selected());
     const picking = {
       candidates: pickerCandidates(store.model(), picker),
       picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
@@ -601,6 +630,19 @@ export function createNavigator({
     if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'c', 'v'].includes(event.key.toLowerCase())) {
       event.preventDefault();
       runAction({ x: 'cut', c: 'copy', v: 'paste' }[event.key.toLowerCase()]);
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      if (row === null || row.kind !== 'node') return;
+      const siblings = rows.filter((held) => held.kind === 'node' && held.node.parent === row.node.parent).map((held) => held.id);
+      onSelectMany(siblings, row.id);
+    } else if (event.shiftKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      const next = rows[index + (event.key === 'ArrowDown' ? 1 : -1)];
+      if (!next || next.id === null) return;
+      onSelectMany([...store.selected(), next.id], next.id);
+    } else if (event.key === 'Escape' && store.selected().length > 1) {
+      event.preventDefault();
+      onSelect(selection);
     } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
       runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');

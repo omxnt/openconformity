@@ -29,6 +29,10 @@ The keys and modified clicks the software answers to, one table per place, with 
 | Mac | PC | Does |
 |---|---|---|
 | ↑ ↓ | ↑ ↓ | Moves the selection |
+| ⇧click, ⇧↑ ⇧↓ | Shift click, Shift ↑ ↓ | Extends the selection from the anchor, in tree order |
+| ⌘click | Ctrl click | Adds the row to the selection, or removes it |
+| ⌘A | Ctrl A | Selects the anchor's siblings |
+| Escape with several selected | Escape with several selected | Returns to the anchor alone |
 | → | → | Opens the row, or moves into it |
 | ← | ← | Closes the row, or moves to its parent |
 | Home, End | Home, End | First and last row |

@@ -296,10 +296,35 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @returns {Promise<boolean>} whether the selection landed
    */
   async function selectNode(id) {
-    if (store.selection() === id) return true;
+    if (store.selection() === id && store.selected().length <= 1) return true;
     if (!(await confirmDiscard())) return false;
     endEditSession();
     store.select(id);
+    return true;
+  }
+
+  /**
+   * Select several rows, the draft guard first.
+   * @param {string[]} ids
+   * @param {string} anchorId
+   * @returns {Promise<boolean>} whether the selection landed
+   */
+  async function selectRows(ids, anchorId) {
+    if (!(await confirmDiscard())) return false;
+    endEditSession();
+    store.selectMany(ids, anchorId);
+    return true;
+  }
+
+  /**
+   * Add a row to the selection or remove it, the draft guard first.
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  async function toggleRow(id) {
+    if (!(await confirmDiscard())) return false;
+    endEditSession();
+    store.toggleSelected(id);
     return true;
   }
 
@@ -1029,6 +1054,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     toggleCreateMenu,
     toggleRelatedMenu,
     selectNode,
+    selectRows,
+    toggleRow,
     fileNode,
     cutSelection,
     copySelection,

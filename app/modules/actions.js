@@ -50,6 +50,8 @@ const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
  */
 export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
+  /** Whether one row at most is selected, which every action on the selection needs until it learns the set. */
+  const single = () => store.selected().length <= 1;
 
   /** @type {Action[]} */
   const actions = [
@@ -176,7 +178,7 @@ export function createActions({ store, flows }) {
       group: 'edit',
       toolbar: false,
       context: true,
-      enabled: () => store.hasProject(),
+      enabled: () => single() && store.hasProject(),
       run: () => flows.editSelection(),
     },
     {
@@ -187,7 +189,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       menu: true,
-      enabled: () => store.hasProject(),
+      enabled: () => single() && store.hasProject(),
       run: (invocation) => flows.toggleCreateMenu(invocation),
     },
     {
@@ -199,7 +201,7 @@ export function createActions({ store, flows }) {
       context: true,
       menu: true,
       enabled: () =>
-        selected()?.kind === 'entity' && relatedTypeOffer(store.model(), store.selection()).length > 0,
+        single() && selected()?.kind === 'entity' && relatedTypeOffer(store.model(), store.selection()).length > 0,
       run: (invocation) => flows.toggleRelatedMenu(invocation),
     },
     {
@@ -209,7 +211,7 @@ export function createActions({ store, flows }) {
       group: 'create',
       toolbar: true,
       context: true,
-      enabled: () => store.hasProject(),
+      enabled: () => single() && store.hasProject(),
       run: () => flows.createFolder(),
     },
     {
@@ -220,7 +222,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       enabled: () =>
-        selected()?.kind === 'entity' &&
+        single() && selected()?.kind === 'entity' &&
         relationshipOptions(store.model(), store.selection()).length > 0,
       run: () => flows.relateSelection(),
     },
@@ -231,7 +233,7 @@ export function createActions({ store, flows }) {
       group: 'library',
       toolbar: true,
       context: false,
-      enabled: () => store.hasProject(),
+      enabled: () => single() && store.hasProject(),
       run: () => flows.importFromLibrary(),
     },
     {
@@ -242,7 +244,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: UP_HINT,
-      enabled: () => store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
+      enabled: () => single() && store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
       run: () => flows.moveUp(),
     },
     {
@@ -253,7 +255,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: DOWN_HINT,
-      enabled: () => store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
+      enabled: () => single() && store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
     },
     {
@@ -263,7 +265,7 @@ export function createActions({ store, flows }) {
       group: 'arrange',
       toolbar: true,
       context: true,
-      enabled: () => selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
+      enabled: () => single() && selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
       run: () => flows.moveToSelection(),
     },
     {
@@ -274,7 +276,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: CUT_HINT,
-      enabled: () => selected() !== null,
+      enabled: () => single() && selected() !== null,
       run: () => flows.cutSelection(),
     },
     {
@@ -285,7 +287,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: COPY_HINT,
-      enabled: () => selected() !== null,
+      enabled: () => single() && selected() !== null,
       run: () => flows.copySelection(),
     },
     {
@@ -297,7 +299,7 @@ export function createActions({ store, flows }) {
       context: true,
       hint: PASTE_HINT,
       enabled: () =>
-        store.copied() !== null
+        single() && store.copied() !== null
           ? store.hasProject() && (store.selection() === null || selected() !== null)
           : store.cut() !== null && canFile(store.model(), store.cut(), store.selection()).ok,
       run: () => flows.pasteHeld(),
@@ -312,7 +314,7 @@ export function createActions({ store, flows }) {
       danger: true,
       hint: DELETE_HINT,
       describe: () => (selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
-      enabled: () => selected() !== null,
+      enabled: () => single() && selected() !== null,
       run: () => flows.deleteSelection(),
     },
     {
