@@ -274,4 +274,29 @@ function enabledIds(actions) {
   ok(many.undo && many.about, 'and the actions that need no selection stay');
 }
 
+// --- V-TST-199 The clipboard is a group of its own, and picking stands the model actions down (F-MOD-002, F-WSP-012) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
+  const actions = createActions({ store, flows: {} });
+  deepEqual(actions.filter((action) => action.group === 'clipboard').map((action) => action.id), ['cut', 'copy', 'paste'], 'cut, copy and paste form the clipboard group, so a divider parts them from the ordering');
+  const groups = [];
+  for (const action of actions.filter((offered) => offered.context)) if (groups.at(-1) !== action.group) groups.push(action.group);
+  deepEqual(groups, ['edit', 'create', 'arrange', 'clipboard', 'delete'], 'the context menu runs the groups in order, the clipboard after the ordering, the import living in the toolbar alone');
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  const enabled = () => Object.fromEntries(actions.map((action) => [action.id, action.enabled()]));
+  const guarded = ['edit', 'select-below', 'new-entity', 'new-related', 'new-folder', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'delete'];
+  const before = enabled();
+  ok(before.edit && before['new-entity'] && before.delete && before.cut, 'with a row selected the model actions are offered');
+  store.beginPicking('ELM-001');
+  const picking = enabled();
+  ok(guarded.every((id) => picking[id] === false), 'while a relationship picker is open every one of them stands down, since picking is a mode');
+  ok(picking.undo && picking.about && picking.save, 'while undo, the file surface and the help surface stay');
+  store.endPicking();
+  deepEqual(enabled(), before, 'and they return as they were when the picking ends');
+}
+
 summary('test-actions');

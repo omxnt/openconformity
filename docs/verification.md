@@ -61,6 +61,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-003 | Headless | [test-actions.js](../tests/test-actions.js) | Nothing acts while a diagram is open |
 | V-TST-004 | Headless | [test-actions.js](../tests/test-actions.js) | Reorder stands down while the tree is filtered |
 | V-TST-198 | Headless | [test-actions.js](../tests/test-actions.js) | The actions over a selection of several |
+| V-TST-199 | Headless | [test-actions.js](../tests/test-actions.js) | The clipboard is a group of its own, and picking stands the model actions down |
 | V-TST-005 | Headless | [test-attributes.js](../tests/test-attributes.js) | Parse the document |
 | V-TST-006 | Headless | [test-attributes.js](../tests/test-attributes.js) | The project |
 | V-TST-007 | Headless | [test-attributes.js](../tests/test-attributes.js) | The shared help |
@@ -410,9 +411,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
 | F-WSP-010 | Cut and paste | V-TST-197, V-TST-186, V-TST-185, V-DEM-019 | Partly |
 | F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
-| F-WSP-012 | Selecting many | V-TST-198, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
+| F-WSP-012 | Selecting many | V-TST-198, V-TST-199, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
-| F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
+| F-MOD-002 | Relationship creation | V-TST-199, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
