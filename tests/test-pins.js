@@ -13,6 +13,8 @@ import { hiddenContent, unknownContent } from '../app/modules/project.js';
 import { loadProject } from '../app/modules/files.js';
 import { LIBRARY } from '../app/library/data.js';
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
+import { ENTITY_TYPES, RELATIONSHIP_TYPES } from '../app/modules/metamodel.js';
+import { attributesFor } from '../app/modules/attributes.js';
 import { LANDING_OFFER } from '../app/modules/landing.js';
 import { ok, deepEqual, summary } from './harness.js';
 import { fakeStorage } from './helpers.js';
@@ -384,6 +386,32 @@ const POLICY = "default-src 'self'; script-src 'self'; style-src 'self'; img-src
   const version = readFile('../app/modules/version.js');
   ok(/export const VERSION = '\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?';/.test(version) && /export const PHASE = '[A-Z][a-z]+( beta)?';/.test(version), 'the version is a semantic version and the phase one word, two constants in one module');
   ok(!readFile('../app/modules/columns.js').includes('Storage'), 'the column widths dragged in a table die with the visit, never stored');
+}
+
+// --- V-INS-025 Every name a version 1 file can contain still exists (F-PER-004, F-PER-007) ---
+
+{
+  const published = JSON.parse(readFile('fixtures/schema-1-names.json'));
+  const missing = [];
+  for (const code of published.entityTypes) if (!Object.hasOwn(ENTITY_TYPES, code)) missing.push(`entity type ${code}`);
+  for (const [id, ends] of Object.entries(published.relationshipTypes)) {
+    const type = RELATIONSHIP_TYPES[id];
+    if (!type) missing.push(`relationship type ${id}`);
+    else if (type.source !== ends.source || type.target !== ends.target) missing.push(`relationship type ${id} from ${ends.source} to ${ends.target}`);
+  }
+  for (const [code, keys] of Object.entries(published.attributes)) {
+    const definitions = new Map(attributesFor(code).map((definition) => [definition.key, definition]));
+    for (const [key, values] of Object.entries(keys)) {
+      const definition = definitions.get(key);
+      if (!definition) {
+        missing.push(`${code} attribute ${key}`);
+        continue;
+      }
+      for (const value of values) if (!(definition.values ?? []).includes(value)) missing.push(`${code} attribute ${key} value ${value}`);
+    }
+  }
+  ok(published.schemaVersion === 1 && published.entityTypes.length === 18 && Object.keys(published.relationshipTypes).length === 44, 'the frozen list is the one version 1 published, eighteen entity types and forty-four relationship types');
+  ok(missing.length === 0, `every type code, relationship type with its ends, attribute key and choice value version 1 published still exists, so a version 1 file keeps its meaning${missing.length > 0 ? ` (missing: ${missing.join(', ')})` : ''}`);
 }
 
 summary('test-pins');

@@ -275,6 +275,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-INS-022 | Pin | [test-pins.js](../tests/test-pins.js) | Pointer targets |
 | V-INS-023 | Pin | [test-pins.js](../tests/test-pins.js) | Text carries AA contrast in both themes |
 | V-INS-024 | Pin | [test-pins.js](../tests/test-pins.js) | The typefaces, vendored and applied |
+| V-INS-025 | Pin | [test-pins.js](../tests/test-pins.js) | Every name a version 1 file can contain still exists |
 
 ### 2.3 Demonstrations
 
@@ -421,10 +422,10 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-001 | Project persistence | V-TST-029, V-TST-030, V-TST-032, V-TST-033, V-TST-034, V-TST-037, V-TST-039, V-TST-050, V-TST-181, V-TST-076, V-INS-013, V-TST-157, V-DEM-017, V-DEM-018 | Partly |
 | F-PER-002 | Library persistence | V-TST-069 | Tested |
 | F-PER-003 | Schema version | V-TST-033 | Tested |
-| F-PER-004 | Version migration | V-TST-035, V-TST-190 | Tested |
+| F-PER-004 | Version migration | V-TST-035, V-TST-190, V-INS-025 | Tested |
 | F-PER-005 | Unsupported version | V-TST-035 | Tested |
 | F-PER-006 | Invalid file | V-TST-029, V-TST-035, V-TST-036, V-TST-058, V-TST-085, V-TST-175, V-TST-138, V-TST-152, V-TST-153, V-TST-154, V-TST-155, V-TST-176, V-TST-170 | Tested |
-| F-PER-007 | Migration preservation | V-TST-190 | Tested |
+| F-PER-007 | Migration preservation | V-TST-190, V-INS-025 | Tested |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |

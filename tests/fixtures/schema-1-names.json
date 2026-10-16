@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 1,
+  "entityTypes": [
+    "LEG",
+    "HST",
+    "OSP",
+    "CAS",
+    "NTB",
+    "ESR",
+    "HSR",
+    "OSR",
+    "REQ",
+    "VER",
+    "HAZ",
+    "SCN",
+    "PRM",
+    "SAF",
+    "ELM",
+    "ACT",
+    "TSK",
+    "PHS"
+  ],
+  "relationshipTypes": {
+    "leg-contains-esr": {
+      "source": "LEG",
+      "target": "ESR"
+    },
+    "hst-contains-hsr": {
+      "source": "HST",
+      "target": "HSR"
+    },
+    "osp-contains-osr": {
+      "source": "OSP",
+      "target": "OSR"
+    },
+    "req-decomposes-into-req": {
+      "source": "REQ",
+      "target": "REQ"
+    },
+    "saf-decomposes-into-saf": {
+      "source": "SAF",
+      "target": "SAF"
+    },
+    "elm-decomposes-into-elm": {
+      "source": "ELM",
+      "target": "ELM"
+    },
+    "hst-harmonised-under-leg": {
+      "source": "HST",
+      "target": "LEG"
+    },
+    "cas-conducted-under-leg": {
+      "source": "CAS",
+      "target": "LEG"
+    },
+    "elm-subject-to-leg": {
+      "source": "ELM",
+      "target": "LEG"
+    },
+    "elm-applies-hst": {
+      "source": "ELM",
+      "target": "HST"
+    },
+    "elm-applies-osp": {
+      "source": "ELM",
+      "target": "OSP"
+    },
+    "hsr-covers-esr": {
+      "source": "HSR",
+      "target": "ESR"
+    },
+    "osr-supports-esr": {
+      "source": "OSR",
+      "target": "ESR"
+    },
+    "esr-triggered-by-haz": {
+      "source": "ESR",
+      "target": "HAZ"
+    },
+    "req-derives-from-esr": {
+      "source": "REQ",
+      "target": "ESR"
+    },
+    "req-derives-from-hsr": {
+      "source": "REQ",
+      "target": "HSR"
+    },
+    "req-derives-from-osr": {
+      "source": "REQ",
+      "target": "OSR"
+    },
+    "req-expresses-prm": {
+      "source": "REQ",
+      "target": "PRM"
+    },
+    "req-expresses-saf": {
+      "source": "REQ",
+      "target": "SAF"
+    },
+    "elm-satisfies-esr": {
+      "source": "ELM",
+      "target": "ESR"
+    },
+    "elm-satisfies-hsr": {
+      "source": "ELM",
+      "target": "HSR"
+    },
+    "elm-satisfies-osr": {
+      "source": "ELM",
+      "target": "OSR"
+    },
+    "elm-satisfies-req": {
+      "source": "ELM",
+      "target": "REQ"
+    },
+    "prm-implements-hsr": {
+      "source": "PRM",
+      "target": "HSR"
+    },
+    "prm-implements-osr": {
+      "source": "PRM",
+      "target": "OSR"
+    },
+    "ver-verifies-esr": {
+      "source": "VER",
+      "target": "ESR"
+    },
+    "ver-verifies-hsr": {
+      "source": "VER",
+      "target": "HSR"
+    },
+    "ver-verifies-osr": {
+      "source": "VER",
+      "target": "OSR"
+    },
+    "ver-verifies-req": {
+      "source": "VER",
+      "target": "REQ"
+    },
+    "prm-allocated-to-elm": {
+      "source": "PRM",
+      "target": "ELM"
+    },
+    "saf-allocated-to-elm": {
+      "source": "SAF",
+      "target": "ELM"
+    },
+    "saf-realises-prm": {
+      "source": "SAF",
+      "target": "PRM"
+    },
+    "ntb-performs-cas": {
+      "source": "NTB",
+      "target": "CAS"
+    },
+    "cas-assesses-elm": {
+      "source": "CAS",
+      "target": "ELM"
+    },
+    "elm-exhibits-haz": {
+      "source": "ELM",
+      "target": "HAZ"
+    },
+    "haz-contributes-to-scn": {
+      "source": "HAZ",
+      "target": "SCN"
+    },
+    "tsk-gives-rise-to-scn": {
+      "source": "TSK",
+      "target": "SCN"
+    },
+    "act-exposed-in-scn": {
+      "source": "ACT",
+      "target": "SCN"
+    },
+    "prm-eliminates-haz": {
+      "source": "PRM",
+      "target": "HAZ"
+    },
+    "prm-reduces-risk-of-scn": {
+      "source": "PRM",
+      "target": "SCN"
+    },
+    "elm-undergoes-phs": {
+      "source": "ELM",
+      "target": "PHS"
+    },
+    "act-interacts-with-elm": {
+      "source": "ACT",
+      "target": "ELM"
+    },
+    "act-performs-tsk": {
+      "source": "ACT",
+      "target": "TSK"
+    },
+    "tsk-occurs-during-phs": {
+      "source": "TSK",
+      "target": "PHS"
+    }
+  },
+  "attributes": {
+    "PROJECT": {
+      "designation": [],
+      "organisation": [],
+      "description": [],
+      "version": [],
+      "date": [],
+      "author": [],
+      "role": [],
+      "changes": [],
+      "estimationMethod": [
+        "Risk matrix (ISO/TR 14121-2:2012, 6.2.2)",
+        "Risk graph (ISO/TR 14121-2:2012, 6.3.2)",
+        "Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)"
+      ],
+      "notes": []
+    },
+    "LEG": {
+      "reference": [],
+      "title": [],
+      "link": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "HST": {
+      "reference": [],
+      "title": [],
+      "link": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "OSP": {
+      "reference": [],
+      "title": [],
+      "link": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "CAS": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "notes": []
+    },
+    "NTB": {
+      "reference": [],
+      "title": [],
+      "address": [],
+      "website": [],
+      "legislation": [],
+      "memberState": [],
+      "register": [],
+      "procedures": [],
+      "products": [],
+      "notes": []
+    },
+    "ESR": {
+      "reference": [],
+      "title": [],
+      "requirement": [],
+      "guidanceSource": [],
+      "guidanceSection": [],
+      "guidance": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "HSR": {
+      "reference": [],
+      "title": [],
+      "requirement": [],
+      "guidanceSource": [],
+      "guidanceSection": [],
+      "guidance": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "OSR": {
+      "reference": [],
+      "title": [],
+      "requirement": [],
+      "guidanceSource": [],
+      "guidanceSection": [],
+      "guidance": [],
+      "applicable": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "REQ": {
+      "reference": [],
+      "title": [],
+      "type": [
+        "Function/Performance",
+        "Fit/Operational",
+        "Form",
+        "Quality",
+        "Compliance"
+      ],
+      "verificationMethod": [
+        "Inspection",
+        "Analysis",
+        "Demonstration",
+        "Test"
+      ],
+      "description": [],
+      "rationale": [],
+      "drawing": [],
+      "notes": []
+    },
+    "VER": {
+      "reference": [],
+      "title": [],
+      "method": [
+        "Inspection",
+        "Analysis",
+        "Demonstration",
+        "Test"
+      ],
+      "responsible": [],
+      "setup": [],
+      "description": [],
+      "acceptanceCriteria": [],
+      "runs": [],
+      "drawing": [],
+      "notes": []
+    },
+    "HAZ": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "measures": [],
+      "eliminated": [
+        "Yes",
+        "No"
+      ],
+      "rationale": [],
+      "notes": []
+    },
+    "SCN": {
+      "reference": [],
+      "title": [],
+      "hazardousEvent": [],
+      "consequence": [],
+      "initialSeverity": [
+        "Catastrophic",
+        "Serious",
+        "Moderate",
+        "Minor"
+      ],
+      "initialSeverityRationale": [],
+      "initialProbability": [
+        "Very likely",
+        "Likely",
+        "Unlikely",
+        "Remote"
+      ],
+      "initialProbabilityRationale": [],
+      "initialLevel": [],
+      "initialS": [
+        "S1",
+        "S2"
+      ],
+      "initialSRationale": [],
+      "initialF": [
+        "F1",
+        "F2"
+      ],
+      "initialFRationale": [],
+      "initialO": [
+        "O1",
+        "O2",
+        "O3"
+      ],
+      "initialORationale": [],
+      "initialA": [
+        "A1",
+        "A2"
+      ],
+      "initialARationale": [],
+      "initialIndex": [],
+      "initialSeverityScore": [],
+      "initialSeverityScoreRationale": [],
+      "initialProbabilityScore": [],
+      "initialProbabilityScoreRationale": [],
+      "initialScore": [],
+      "initialRating": [],
+      "residualSeverity": [
+        "Catastrophic",
+        "Serious",
+        "Moderate",
+        "Minor"
+      ],
+      "residualSeverityRationale": [],
+      "residualProbability": [
+        "Very likely",
+        "Likely",
+        "Unlikely",
+        "Remote"
+      ],
+      "residualProbabilityRationale": [],
+      "residualLevel": [],
+      "residualS": [
+        "S1",
+        "S2"
+      ],
+      "residualSRationale": [],
+      "residualF": [
+        "F1",
+        "F2"
+      ],
+      "residualFRationale": [],
+      "residualO": [
+        "O1",
+        "O2",
+        "O3"
+      ],
+      "residualORationale": [],
+      "residualA": [
+        "A1",
+        "A2"
+      ],
+      "residualARationale": [],
+      "residualIndex": [],
+      "residualSeverityScore": [],
+      "residualSeverityScoreRationale": [],
+      "residualProbabilityScore": [],
+      "residualProbabilityScoreRationale": [],
+      "residualScore": [],
+      "residualRating": [],
+      "measures": [],
+      "evaluation": [],
+      "notes": []
+    },
+    "PRM": {
+      "reference": [],
+      "title": [],
+      "step": [
+        "1. Safe design",
+        "2. Protection",
+        "3. Information"
+      ],
+      "kind": [],
+      "description": [],
+      "drawing": [],
+      "notes": []
+    },
+    "SAF": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "priority": [],
+      "operatingMode": [],
+      "trigger": [],
+      "reaction": [],
+      "safeState": [],
+      "feedback": [],
+      "muting": [],
+      "restart": [],
+      "standard": [
+        "EN ISO 13849-1:2023",
+        "EN IEC 62061:2021"
+      ],
+      "designTargets": [],
+      "responseTime": [],
+      "stoppingTime": [],
+      "technology": [
+        "Mechanical",
+        "Hydraulic",
+        "Pneumatic",
+        "Electrical",
+        "Electronic",
+        "Optoelectronic",
+        "Software",
+        "Configurable",
+        "Networked",
+        "Wireless"
+      ],
+      "interfaces": [],
+      "independence": [],
+      "defeating": [],
+      "environment": [],
+      "plr": [
+        "PL a",
+        "PL b",
+        "PL c",
+        "PL d",
+        "PL e"
+      ],
+      "sil": [
+        "SIL 1",
+        "SIL 2",
+        "SIL 3"
+      ],
+      "ownLevel": [],
+      "faultsDetected": [],
+      "detectionMeans": [],
+      "faultHandling": [],
+      "faultDetectionTime": [],
+      "faultReactionTime": [],
+      "faultIndication": [],
+      "faultRecovery": [],
+      "powerDisturbances": [],
+      "drawing": [],
+      "notes": []
+    },
+    "ELM": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "manufacturer": [],
+      "model": [],
+      "datasheet": [],
+      "characteristics": [],
+      "drawing": [],
+      "notes": []
+    },
+    "ACT": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "abilities": [],
+      "restrictions": [],
+      "training": [],
+      "competence": [],
+      "familiarity": [],
+      "notes": []
+    },
+    "TSK": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "location": [],
+      "frequency": [],
+      "tools": [],
+      "misuse": [],
+      "notes": []
+    },
+    "PHS": {
+      "reference": [],
+      "title": [],
+      "description": [],
+      "notes": []
+    }
+  }
+}
