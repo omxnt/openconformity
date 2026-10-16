@@ -10,7 +10,7 @@
 import './shim.js';
 import { createFlows } from '../app/modules/flows.js';
 import { createStore } from '../app/modules/store.js';
-import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf, updateEntity, renameProject } from '../app/modules/model.js';
+import { createModel, addEntity, addFolder, relate, nodeOf, childrenOf, setProjectAttribute, updateEntity, renameProject } from '../app/modules/model.js';
 import { serialise } from '../app/modules/files.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 import { fakeStorage, stubEditor, fakeDocument } from './helpers.js';
@@ -322,6 +322,81 @@ function flowsOver(store) {
   deepEqual(store.selected(), ['ELM-002'], 'and removes the row');
 }
 
+// --- V-TST-196 A bulk edit sets the filled fields on every entity of the type (F-MOD-012, F-MOD-004, N-SEC-005) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const asked = [];
+  let answer = true;
+  const dialogs = { confirm: async (question) => { asked.push(question); return answer; }, toast: (title, message, action) => toasts.push([title, message, action]) };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ESR', { attributes: { title: 'Noise', rationale: 'Own words' } }));
+  store.commit((model) => addEntity(model, 'ESR', { attributes: { title: 'Guards' } }));
+  store.commit((model) => addEntity(model, 'HAZ', { attributes: { title: 'Crush' } }));
+  equal(flows.bulkType(['ESR-001', 'ESR-002']), 'ESR', 'two requirements are one type');
+  equal(flows.bulkType(['ESR-001', 'HAZ-001']), null, 'a requirement and a hazard are not');
+  equal(await flows.saveBulkEdit('ESR', ['ESR-001', 'ESR-002'], { applicable: 'No', notes: 'Set together' }), true, 'the filled fields apply');
+  deepEqual(nodeOf(store.model(), 'ESR-001').attributes, { title: 'Noise', rationale: 'Own words', applicable: 'No', notes: 'Set together' }, 'on the first, the untouched fields as they were');
+  deepEqual(nodeOf(store.model(), 'ESR-002').attributes, { title: 'Guards', applicable: 'No', notes: 'Set together' }, 'and on the second');
+  equal(toasts.at(-1)?.[0], 'Applicable and Notes set on 2 essential requirements', 'the toast names what was set on how many');
+  equal(toasts.at(-1)?.[2]?.label, 'Undo', 'and offers Undo');
+  toasts.at(-1)[2].onPick();
+  deepEqual(nodeOf(store.model(), 'ESR-002').attributes, { title: 'Guards' }, 'which returns both as one step');
+  equal(await flows.saveBulkEdit('ESR', ['ESR-001', 'ESR-002'], {}), true, 'nothing filled applies nothing');
+  equal(asked.length, 0, 'and no question was asked so far');
+  store.commit((model) => addEntity(model, 'SCN', { attributes: { title: 'Fall', initialSeverity: 'Serious' } }));
+  store.commit((model) => addEntity(model, 'SCN', { attributes: { title: 'Trip' } }));
+  store.commit((model) => setProjectAttribute(model, 'estimationMethod', 'Risk matrix (ISO/TR 14121-2:2012, 6.2.2)'));
+  answer = false;
+  equal(await flows.saveBulkEdit('SCN', ['SCN-001', 'SCN-002'], { initialSeverity: 'Minor' }), true, 'a filled field under the choice in force asks nothing');
+  equal(asked.length, 0, 'since nothing is hidden by it');
+}
+
+// --- V-TST-197 Delete, cut, copy and paste act on the set (F-WSP-012, F-MOD-005, F-WSP-010, F-WSP-011) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  const dialogs = { confirm: async (question) => { asked.push(question); return true; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'HAZ', { parent: 'ELM-001' }));
+  store.commit((model) => addEntity(model, 'HAZ', { parent: 'F-1' }));
+  store.commit((model) => addFolder(model, 'Other'));
+  store.selectMany(['HAZ-001', 'ELM-001', 'HAZ-002'], 'HAZ-002');
+  flows.cutSelection();
+  deepEqual(store.cut(), ['HAZ-001', 'ELM-001', 'HAZ-002'], 'cut marks the set');
+  store.select('F-2');
+  flows.pasteHeld();
+  deepEqual([nodeOf(store.model(), 'ELM-001').parent, nodeOf(store.model(), 'HAZ-002').parent, nodeOf(store.model(), 'HAZ-001').parent], ['F-2', 'F-2', 'ELM-001'], 'paste files the rows in tree order, a row carried by its cut ancestor left where it is');
+  deepEqual(childrenOf(store.model(), 'F-2').map((node) => node.id), ['ELM-001', 'HAZ-002'], 'in the order the tree showed them');
+  deepEqual(store.cut(), [], 'and forgets the cut');
+  store.undo();
+  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'one undo returns the whole paste');
+  store.selectMany(['ELM-001', 'HAZ-002'], 'HAZ-002');
+  flows.copySelection();
+  store.select('F-2');
+  flows.pasteHeld();
+  deepEqual(childrenOf(store.model(), 'F-2').map((node) => node.type), ['ELM', 'HAZ'], 'a copied set pastes as copies in tree order');
+  equal(childrenOf(store.model(), childrenOf(store.model(), 'F-2')[0].id).length, 1, 'each with its subtree');
+  deepEqual(store.selected().length, 2, 'the copies selected');
+  store.undo();
+  store.selectMany(['ELM-001', 'HAZ-002'], 'HAZ-002');
+  globalThis.document = fakeDocument();
+  await flows.deleteSelection();
+  delete globalThis.document;
+  equal(asked.at(-1).title, 'Delete 2 rows?', 'deleting a set asks once with the count');
+  ok(asked.at(-1).message.startsWith('2 entities are deleted'), `naming the entities that go: ${asked.at(-1).message}`);
+  deepEqual(['ELM-001', 'HAZ-002'].map((id) => nodeOf(store.model(), id)), [null, null], 'and both are gone');
+  equal(nodeOf(store.model(), 'HAZ-001').parent, 'F-1', 'while a hazard filed under the element, not part of it, moves up as a single deletion moves it');
+  store.undo();
+  equal(nodeOf(store.model(), 'ELM-001') !== null && nodeOf(store.model(), 'HAZ-002') !== null, true, 'one undo returns both');
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {
@@ -498,17 +573,17 @@ function flowsOver(store) {
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   flows.cutSelection();
-  equal(store.cut(), null, 'cutting with nothing selected cuts nothing');
+  deepEqual(store.cut(), [], 'cutting with nothing selected cuts nothing');
   store.select('HAZ-001');
   flows.cutSelection();
-  equal(store.cut(), 'HAZ-001', 'cut marks the selection');
+  deepEqual(store.cut(), ['HAZ-001'], 'cut marks the selection');
   flows.cutSelection();
-  equal(store.cut(), null, 'and a second cut on the same row forgets it');
+  deepEqual(store.cut(), [], 'and a second cut on the same row forgets it');
   flows.cutSelection();
   store.select('ELM-001');
   flows.pasteHeld();
   equal(nodeOf(store.model(), 'HAZ-001').parent, 'ELM-001', 'paste files the cut row inside the selection');
-  equal(store.cut(), null, 'and forgets the cut');
+  deepEqual(store.cut(), [], 'and forgets the cut');
   equal(toasts.length, 0, 'saying nothing');
   store.undo();
   equal(nodeOf(store.model(), 'HAZ-001').parent, null, 'one undo returns the row');
@@ -520,7 +595,7 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001').parent, null, 'a paste inside the cut row itself is refused and files nothing');
   equal(toasts.at(-1)?.[0], 'Could not paste', 'and is told');
   ok(toasts.at(-1)?.[1].length > 0, 'with the model\'s own reason');
-  equal(store.cut(), 'ELM-001', 'while the cut stays for another target');
+  deepEqual(store.cut(), ['ELM-001'], 'while the cut stays for another target');
 }
 
 // --- V-TST-188 Copy and paste make a copy inside the selection (F-WSP-011) ----
@@ -535,14 +610,14 @@ function flowsOver(store) {
   store.select('ELM-001');
   flows.cutSelection();
   flows.copySelection();
-  equal(store.copied(), 'ELM-001', 'copy marks the selection');
-  equal(store.cut(), null, 'and forgets a cut');
+  deepEqual(store.copied(), ['ELM-001'], 'copy marks the selection');
+  deepEqual(store.cut(), [], 'and forgets a cut');
   store.select(null);
   flows.pasteHeld();
   equal(store.selection(), 'ELM-002', 'paste makes the copy and selects it');
   deepEqual([nodeOf(store.model(), 'ELM-002').parent, nodeOf(store.model(), 'ELM-002').attributes.title], [null, 'Press'], 'at the root, with its attributes');
   deepEqual(childrenOf(store.model(), 'ELM-002').map((node) => node.attributes.title), ['Crushing'], 'and what was filed under it');
-  equal(store.copied(), 'ELM-001', 'the mark is kept');
+  deepEqual(store.copied(), ['ELM-001'], 'the mark is kept');
   flows.pasteHeld();
   equal(store.model().nodes.size, 6, 'so a second paste makes another copy');
   store.undo();

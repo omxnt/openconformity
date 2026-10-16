@@ -193,7 +193,38 @@ export function moveTargets(model, id) {
  * @param {string} id
  * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
  */
+/**
+ * The question before several rows are deleted at once: every entity
+ * that goes, listed once, and the relationships severed, counted once.
+ * @param {import('./model.js').Model} model
+ * @param {string[]} ids
+ * @returns {{ title: string, message: string, doomed: import('./model.js').Entity[] }}
+ */
+function deletionQuestionOver(model, ids) {
+  const seen = new Set();
+  const doomed = [];
+  for (const id of ids) {
+    for (const entity of deletionOf(model, id)) {
+      if (seen.has(entity.id)) continue;
+      seen.add(entity.id);
+      doomed.push(entity);
+    }
+  }
+  const severed = [...model.relationships.values()].filter((relationship) => seen.has(relationship.source) || seen.has(relationship.target)).length;
+  const folders = ids.filter((id) => nodeOf(model, id)?.kind === 'folder').length;
+  const parts = [];
+  if (doomed.length > 0) parts.push(plural(doomed.length, 'entity'));
+  if (folders > 0) parts.push(plural(folders, 'folder'));
+  const removed = severed > 0 ? `, and ${plural(severed, 'relationship')} ${severed === 1 ? 'is' : 'are'} removed` : '';
+  return {
+    title: `Delete ${plural(ids.length, 'row')}?`,
+    message: `${parts.join(' and ')} ${doomed.length + folders === 1 ? 'is' : 'are'} deleted${removed}${doomed.length > 0 ? ':' : '.'}`,
+    doomed,
+  };
+}
+
 export function deletionQuestion(model, id) {
+  if (Array.isArray(id)) return deletionQuestionOver(model, id);
   const node = nodeOf(model, id);
   const doomed = deletionOf(model, id);
   const doomedIds = new Set(doomed.map((entity) => entity.id));

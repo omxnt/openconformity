@@ -434,7 +434,7 @@ export function createNavigator({
     if (picking.subject === row.id) classes.push('picker-subject');
     if (picking.subject !== null && !pickable && picking.subject !== row.id) classes.push('pick-dim');
     if (excluded(row.node)) classes.push('excluded');
-    if (row.id === store.cut()) classes.push('cut');
+    if (store.cut().includes(row.id)) classes.push('cut');
     const rowElement = el('div', { className: classes.join(' '), attributes });
     rowElement.style.paddingLeft = `${16 + (row.depth + 1) * 16}px`;
 

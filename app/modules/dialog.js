@@ -227,19 +227,24 @@ export function createDialogs({ overlay, toastRegion = null }) {
   }
 
   /**
-   * A passing remark: told in the corner, closed by itself or by hand.
+   * A passing remark: told in the corner, closed by itself or by hand,
+   * with one action offered where the remark names something undoable.
    * @param {string} title
    * @param {string} message
+   * @param {{ label: string, onPick: () => void }} [action]
    */
-  function toast(title, message) {
+  function toast(title, message, action = null) {
     if (!toastRegion) return;
-    const item = el('div', { className: 'toast', attributes: { role: 'status' } }, [
-      icon('i-information'),
-      el('div', { className: 'toast-content' }, [
-        el('p', { className: 'toast-title', text: title }),
-        el('p', { className: 'toast-body', text: message }),
-      ]),
-    ]);
+    const content = [el('p', { className: 'toast-title', text: title }), el('p', { className: 'toast-body', text: message })];
+    if (action) {
+      const button = el('button', { className: 'ghost-button toast-action', text: action.label, attributes: { type: 'button' } });
+      button.addEventListener('click', () => {
+        action.onPick();
+        item.remove();
+      });
+      content.push(button);
+    }
+    const item = el('div', { className: 'toast', attributes: { role: 'status' } }, [icon('i-information'), el('div', { className: 'toast-content' }, content)]);
     item.querySelector('.icon').classList.add('toast-icon');
     const timer = setTimeout(() => item.remove(), TOAST_MS);
     const close = el(

@@ -41,6 +41,7 @@ const editor = createEditor({
   body: document.getElementById('editor-body'),
   onSave: (id, values) => flows.saveEdit(id, values),
   onSaveProject: (values) => flows.saveProjectEdit(values),
+  onSaveMany: (code, ids, values) => flows.saveBulkEdit(code, ids, values),
   onRemoval: (entries) => flows.confirmRemoval(entries),
   onCancel: () => flows.cancelEdit(),
   onRename: () => flows.renameSelection(),
@@ -187,8 +188,8 @@ document.addEventListener('keydown', (event) => {
 
 // Escape forgets a cut or copied row, once nothing above has taken the key.
 document.addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape' || event.defaultPrevented || (store.cut() === null && store.copied() === null) || store.drawingOpen()) return;
+  if (event.key !== 'Escape' || event.defaultPrevented || (store.cut().length === 0 && store.copied().length === 0) || store.drawingOpen()) return;
   event.preventDefault();
-  store.setCut(null);
-  store.setCopied(null);
+  store.setCut([]);
+  store.setCopied([]);
 });

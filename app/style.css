@@ -1673,6 +1673,8 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .toast-icon { flex: none; margin: 16px 0 0 12px; fill: var(--support-info); }  /* $spacing-05, $spacing-04 */
 .toast-content { flex: 1; padding: 12px 8px 12px 12px; min-width: 0; }  /* $spacing-04, $spacing-03 */
 .toast-title { font-weight: 600; }  /* $heading-compact-01 */
+.toast-action { margin-top: 4px; padding: 2px 8px; height: auto; }
+.bulk-hint { margin: 0; padding: 8px 16px; color: var(--text-helper); font-size: 12px; }
 .toast-body { margin-top: 2px; color: var(--text-second); }
 .toast-close {
   flex: none;

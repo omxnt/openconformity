@@ -58,6 +58,7 @@ export function createEditor({
   body,
   onSave,
   onSaveProject = () => true,
+  onSaveMany = async () => true,
   onCancel,
   onRename,
   onReturn = () => {},
@@ -77,6 +78,8 @@ export function createEditor({
   let editingId = null;
   /** Whether the open draft edits the project itself. */
   let editingProject = false;
+  /** The bulk edit open, its type and the entities it applies to, or null. */
+  let bulk = null;
 
   /** @type {Array<() => void>} what recomputes each computed field of the open edit */
   let refreshers = [];
@@ -468,17 +471,20 @@ export function createEditor({
    * @param {Object<string, string>} values
    * @param {boolean} editing
    */
-  function mount(id, code, stored, editing) {
+  function mount(id, code, stored, editing, options = {}) {
     const type = typeOf(code) ?? { attributes: [], groups: [] };
+    const offered = options.bulk ? (definition) => definition.kind !== 'table' && definition.kind !== 'drawing' : () => true;
     panelOfGroup = new Map();
     groupOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, group.name])));
     definitionOfKey = new Map(groupsOf(code).flatMap((group) => group.attributes.map((definition) => [definition.key, definition])));
     const values = { ...stored, ...projectReads(code) };
     const lead = id === null ? fieldCell(PROJECT_FIELDS[0], values, editing) : identifierCell(id);
     const ahead = id === null ? NAME_AFTER : 0;
-    const first = el('div', { className: 'cells' }, [...cellsOf(type.attributes.slice(0, ahead), values, editing), lead, ...cellsOf(type.attributes.slice(ahead), values, editing)]);
+    const first = el('div', { className: 'cells' }, [...cellsOf(type.attributes.slice(0, ahead).filter(offered), values, editing), lead, ...cellsOf(type.attributes.slice(ahead).filter(offered), values, editing)]);
     const panels = [{ name: firstTabName(code), grid: first }];
-    for (const group of type.groups) {
+    for (const held of type.groups) {
+      const group = options.bulk ? { ...held, attributes: held.attributes.filter(offered) } : held;
+      if (options.bulk && group.attributes.length === 0) continue;
       if (!group.tab) {
         groupInto(first, code, group, values, editing, true);
         for (const name of namesIn(group)) panelOfGroup.set(name, first);
@@ -704,10 +710,17 @@ export function createEditor({
   function renderManyView() {
     const ids = store.selected();
     const types = new Set(ids.map((id) => nodeOf(store.model(), id)).map((node) => (node?.kind === 'entity' ? node.type : 'folder')));
-    const kind = types.size === 1 && !types.has('folder') ? ENTITY_TYPES[[...types][0]].name : 'Selection';
+    const one = types.size === 1 && !types.has('folder');
+    const kind = one ? ENTITY_TYPES[[...types][0]].name : 'Selection';
     head.hidden = false;
     head.appendChild(el('div', { className: 'pane-head-name' }, [el('span', { className: 'subhead-kind', text: kind }), el('span', { className: 'subhead-title', text: `${ids.length} selected` })]));
-    body.appendChild(emptyState('Several selected', 'Select one row to see its attributes.'));
+    if (one) {
+      head.appendChild(el('div', { className: 'pane-head-actions' }, [headIcon('Edit attributes', 'i-edit', onAction ? () => onAction('edit') : beginEdit)]));
+      body.appendChild(emptyState(`${ids.length} ${ENTITY_TYPES[[...types][0]].name.toLowerCase()}s selected`, 'Edit attributes opens one form for all of them. What you fill is set on each, and what you leave empty stays as each one has it.'));
+    } else {
+      const counts = [...types].map((type) => `${ids.filter((id) => (nodeOf(store.model(), id)?.kind === 'entity' ? nodeOf(store.model(), id).type : 'folder') === type).length} ${type === 'folder' ? 'folder' : ENTITY_TYPES[type].name.toLowerCase()}`);
+      body.appendChild(emptyState('Not one type', `${counts.join(', ')} selected. Edit works on entities of one type. Delete, Cut and Copy work on all of them.`));
+    }
   }
 
   function renderProjectView() {
@@ -742,6 +755,12 @@ export function createEditor({
    */
   async function save() {
     if (mode !== 'edit') return false;
+    if (bulk !== null) {
+      const filled = Object.fromEntries(Object.entries(fieldValues()).filter(([, value]) => value !== ''));
+      if ((await onSaveMany(bulk.code, bulk.ids, filled)) === false) return false;
+      endEdit();
+      return true;
+    }
     if (editingProject) {
       if ((await onSaveProject(savedValues())) === false) return false;
       endEdit();
@@ -766,11 +785,13 @@ export function createEditor({
     const node = nodeOf(store.model(), id);
 
     if (mode === 'edit') {
-      if (editingProject && id === null && store.hasProject()) return;
-      if (!editingProject && id === editingId && node && node.kind === 'entity') return;
+      if (bulk !== null && store.selected().join() === bulk.ids.join()) return;
+      if (bulk === null && editingProject && id === null && store.hasProject()) return;
+      if (bulk === null && !editingProject && id === editingId && node && node.kind === 'entity') return;
       mode = 'view';
       editingId = null;
       editingProject = false;
+      bulk = null;
     }
 
     if (store.libraryOpen() && store.hasProject()) return;
@@ -828,7 +849,34 @@ export function createEditor({
     mode = 'view';
     editingId = null;
     editingProject = false;
+    bulk = null;
     render();
+  }
+
+  /**
+   * Open the bulk edit: the type's form with every field empty for the
+   * entities named, Save setting what is filled on all of them.
+   * @param {string} code
+   * @param {string[]} ids
+   */
+  function beginBulkEdit(code, ids) {
+    if (store.libraryOpen()) store.setLibraryOpen(false);
+    mode = 'edit';
+    editingId = null;
+    editingProject = false;
+    bulk = { code, ids: [...ids] };
+    head.textContent = '';
+    body.textContent = '';
+    current = null;
+    head.hidden = false;
+    head.appendChild(el('div', { className: 'pane-head-name' }, [el('span', { className: 'subhead-kind', text: ENTITY_TYPES[code].name }), el('span', { className: 'subhead-title', text: `${ids.length} selected` })]));
+    const [cancel, saveButton] = saveCancel(save);
+    saveButton.textContent = `Save for ${ids.length}`;
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [cancel, saveButton]));
+    body.appendChild(el('p', { className: 'bulk-hint', text: `What you fill is set on all ${ids.length}. What you leave empty stays as each one has it.` }));
+    mount(`${ids.length} selected`, code, {}, true, { bulk: true });
+    followConditions();
+    body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])')?.focus();
   }
 
   /**
@@ -837,6 +885,7 @@ export function createEditor({
    */
   function hasUnconfirmedEdit() {
     if (mode !== 'edit') return false;
+    if (bulk !== null) return Object.values(fieldValues()).some((value) => value !== '');
     if (editingProject) {
       if (!store.hasProject()) return false;
       return draftChanged([...PROJECT_FIELDS, ...attributesFor('PROJECT')], projectValues(), fieldValues());
@@ -864,5 +913,5 @@ export function createEditor({
   /** Save the open edit as its Save button would, for the keys that mean save. */
   const submit = () => head.querySelector('.form-button.button-primary')?.click();
 
-  return { render, beginEdit, endEdit, hasUnconfirmedEdit, submit, save, editing: () => mode === 'edit' };
+  return { render, beginEdit, beginBulkEdit, endEdit, hasUnconfirmedEdit, submit, save, editing: () => mode === 'edit' };
 }

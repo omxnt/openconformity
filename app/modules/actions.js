@@ -50,8 +50,13 @@ const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
  */
 export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
-  /** Whether one row at most is selected, which every action on the selection needs until it learns the set. */
+  /** Whether one row at most is selected, which the actions that create, relate or reorder need. */
   const single = () => store.selected().length <= 1;
+  /** The one entity type a selection of several holds, or null where the rows differ in type or a folder is among them. */
+  const bulkType = () => {
+    const types = new Set(store.selected().map((id) => nodeOf(store.model(), id)).map((node) => (node?.kind === 'entity' ? node.type : null)));
+    return types.size === 1 && !types.has(null) ? [...types][0] : null;
+  };
 
   /** @type {Action[]} */
   const actions = [
@@ -178,7 +183,8 @@ export function createActions({ store, flows }) {
       group: 'edit',
       toolbar: false,
       context: true,
-      enabled: () => single() && store.hasProject(),
+      enabled: () => store.hasProject() && (single() || bulkType() !== null),
+      describe: () => (store.selected().length > 1 ? `Edit ${store.selected().length} selected` : 'Edit attributes'),
       run: () => flows.editSelection(),
     },
     {
@@ -276,7 +282,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: CUT_HINT,
-      enabled: () => single() && selected() !== null,
+      enabled: () => selected() !== null,
       run: () => flows.cutSelection(),
     },
     {
@@ -287,7 +293,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: COPY_HINT,
-      enabled: () => single() && selected() !== null,
+      enabled: () => selected() !== null,
       run: () => flows.copySelection(),
     },
     {
@@ -299,9 +305,9 @@ export function createActions({ store, flows }) {
       context: true,
       hint: PASTE_HINT,
       enabled: () =>
-        single() && store.copied() !== null
+        single() && store.copied().length > 0
           ? store.hasProject() && (store.selection() === null || selected() !== null)
-          : store.cut() !== null && canFile(store.model(), store.cut(), store.selection()).ok,
+          : single() && store.cut().length > 0 && store.cut().every((id) => canFile(store.model(), id, store.selection()).ok),
       run: () => flows.pasteHeld(),
     },
     {
@@ -313,8 +319,8 @@ export function createActions({ store, flows }) {
       context: true,
       danger: true,
       hint: DELETE_HINT,
-      describe: () => (selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
-      enabled: () => single() && selected() !== null,
+      describe: () => (store.selected().length > 1 ? `Delete ${store.selected().length} rows` : selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
+      enabled: () => selected() !== null,
       run: () => flows.deleteSelection(),
     },
     {

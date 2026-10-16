@@ -31,8 +31,10 @@ import {
   nodeOf,
   relationshipsOf,
   copyNode,
+  filedBeneath,
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
+import { groupsOf, groupShown, attributesFor } from './attributes.js';
 import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
 import { pickedRows } from './relate.js';
 import { recordOf } from './records.js';
@@ -183,10 +185,81 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * the rename prompt.
    */
   function editSelection() {
+    if (editor.editing()) return;
+    const ids = store.selected();
+    if (ids.length > 1) {
+      const code = bulkType(ids);
+      if (code !== null) editor.beginBulkEdit(code, ids);
+      return;
+    }
     const node = nodeOf(store.model(), store.selection());
     if (node?.kind === 'folder') return renameSelection();
-    if (editor.editing()) return;
     return editor.beginEdit();
+  }
+
+  /**
+   * The one entity type a selection of several holds, or null where the
+   * rows are of several types or a folder is among them.
+   * @param {string[]} ids
+   * @returns {string|null}
+   */
+  function bulkType(ids) {
+    const types = new Set(ids.map((id) => nodeOf(store.model(), id)).map((node) => (node?.kind === 'entity' ? node.type : null)));
+    return types.size === 1 && !types.has(null) ? [...types][0] : null;
+  }
+
+  /**
+   * Apply a bulk edit: the filled fields on every entity named, as one
+   * step. A filled choice that hides a group holding values on some of
+   * them clears those, after one question with the count, as a single
+   * save does. The toast after names what was set on how many and
+   * offers Undo.
+   * @param {string} code
+   * @param {string[]} ids
+   * @param {Object<string, string>} values  the filled fields alone
+   * @returns {Promise<boolean>}
+   */
+  async function saveBulkEdit(code, ids, values) {
+    const keys = Object.keys(values);
+    if (keys.length === 0) return true;
+    const groups = groupsOf(code).filter((group) => group.when);
+    const clearing = new Map();
+    for (const id of ids) {
+      const node = nodeOf(store.model(), id);
+      if (!node || node.kind !== 'entity') continue;
+      const merged = { ...node.attributes, ...values };
+      const doomed = groups
+        .filter((group) => groupShown(group, node.attributes) && !groupShown(group, merged))
+        .flatMap((group) => group.attributes.map((definition) => definition.key))
+        .filter((key) => (node.attributes[key] ?? '') !== '' && !(key in values));
+      if (doomed.length > 0) clearing.set(id, doomed);
+    }
+    if (clearing.size > 0) {
+      const confirmed = await dialogs.confirm({
+        title: 'Clear values that no longer apply?',
+        message: `Saving clears values under a choice no longer in force on ${plural(clearing.size, 'entity')}.`,
+        confirmLabel: 'Save',
+        cancelLabel: 'Keep editing',
+        danger: true,
+      });
+      if (!confirmed) return false;
+    }
+    const outcome = store.commit((model) => {
+      for (const id of ids) {
+        const updated = updateEntity(model, id, values);
+        if (!updated.ok) return updated;
+        const doomed = clearing.get(id);
+        if (doomed) {
+          const removed = removeAttributes(model, id, doomed);
+          if (!removed.ok) return removed;
+        }
+      }
+      return { ok: true };
+    });
+    if (!toastRefusal('Could not save', outcome)) return false;
+    const named = keys.map((key) => attributesFor(code).find((definition) => definition.key === key)?.name ?? key);
+    dialogs.toast(`${named.join(' and ')} set on ${plural(ids.length, ENTITY_TYPES[code].name.toLowerCase())}`, 'Every one of them holds the values now.', { label: 'Undo', onPick: () => store.undo() });
+    return true;
   }
 
   /** Rename the selected folder. A blank or unchanged name changes nothing. */
@@ -352,33 +425,64 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** Mark the selection as cut, or forget the mark when the selection is the cut row. */
   function cutSelection() {
-    const id = store.selection();
-    if (id === null) return;
-    store.setCut(store.cut() === id ? null : id);
+    const ids = store.selected();
+    if (ids.length === 0) return;
+    store.setCut(ids.join() === store.cut().join() ? [] : ids);
   }
 
   /** Mark the selection as copied, held for a paste. */
   function copySelection() {
-    const id = store.selection();
-    if (id !== null) store.setCopied(id);
+    const ids = store.selected();
+    if (ids.length > 0) store.setCopied(ids);
   }
 
   /**
-   * Paste what is held: a copy of the copied row inside the selection,
+   * The marked rows in the tree's own order, a row whose ancestor is
+   * marked too left out, since the ancestor carries it.
+   * @param {string[]} ids
+   * @returns {string[]}
+   */
+  function inTreeOrder(ids) {
+    const marked = new Set(ids);
+    const carried = (id) => {
+      for (let held = nodeOf(store.model(), id)?.parent; held !== null && held !== undefined; held = nodeOf(store.model(), held)?.parent) if (marked.has(held)) return true;
+      return false;
+    };
+    return filedBeneath(store.model(), null).map((node) => node.id).filter((id) => marked.has(id) && !carried(id));
+  }
+
+  /**
+   * Paste what is held: copies of the copied rows inside the selection,
    * selected once made and the mark kept for another paste, or the cut
-   * row filed under the selection as a drop would, the cut then
-   * forgotten. A refusal is told and keeps the mark.
+   * rows filed under the selection as a drop would, the cut then
+   * forgotten. One step either way. A refusal is told and keeps the mark.
    */
   function pasteHeld() {
-    const copied = store.copied();
-    if (copied !== null) {
-      const outcome = store.commit((model) => copyNode(model, copied, store.selection()));
-      if (toastRefusal('Could not paste', outcome)) store.select(outcome.id);
+    const target = store.selection();
+    const copied = inTreeOrder(store.copied());
+    if (copied.length > 0) {
+      const made = [];
+      const outcome = store.commit((model) => {
+        for (const id of copied) {
+          const held = copyNode(model, id, target);
+          if (!held.ok) return held;
+          made.push(held.id);
+        }
+        return { ok: true };
+      });
+      if (toastRefusal('Could not paste', outcome)) store.selectMany(made, made[made.length - 1]);
       return;
     }
-    const id = store.cut();
-    if (id === null) return;
-    if (toastRefusal('Could not paste', store.commit((model) => file(model, id, store.selection())))) store.setCut(null);
+    const cut = inTreeOrder(store.cut());
+    if (cut.length === 0) return;
+    const outcome = store.commit((model) => {
+      for (const id of cut) {
+        const held = file(model, id, target);
+        if (!held.ok) return held;
+      }
+      return { ok: true };
+    });
+    if (toastRefusal('Could not paste', outcome)) store.setCut([]);
   }
 
   /**
@@ -487,6 +591,29 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * gets the discard question instead.
    */
   async function deleteSelection() {
+    const ids = store.selected();
+    if (ids.length > 1) {
+      const question = deletionQuestion(store.model(), ids);
+      const confirmed = await dialogs.confirm({
+        title: question.title,
+        message: question.message,
+        body: question.doomed.length > 0 ? el('ul', { className: 'doomed-list' }, question.doomed.map((entity) => el('li', { className: 'mono', text: designated(entity) }))) : undefined,
+        confirmLabel: 'Delete',
+        danger: true,
+      });
+      if (!confirmed) return;
+      endEditSession();
+      store.commit((model) => {
+        for (const id of inTreeOrder(ids)) {
+          const node = nodeOf(model, id);
+          if (!node) continue;
+          const removed = node.kind === 'folder' ? removeFolder(model, id) : removeEntity(model, id);
+          if (!removed.ok) return removed;
+        }
+        return { ok: true };
+      });
+      return;
+    }
     const id = store.selection();
     const node = nodeOf(store.model(), id);
     if (!node) return;
@@ -1060,6 +1187,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     cutSelection,
     copySelection,
     pasteHeld,
+    saveBulkEdit,
+    bulkType,
     placeNode,
     moveUp,
     moveDown,

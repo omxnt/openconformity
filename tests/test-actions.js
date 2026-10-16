@@ -124,21 +124,14 @@ function enabledIds(actions) {
   equal(one['move-to'], false, 'and alone at the root it has nowhere else to file');
   equal(one.cut, true, 'a selected row can be cut');
   equal(one.paste, false, 'and nothing is pasted while nothing is cut');
-  store.setCut('ELM-001');
+  store.setCut(['ELM-001']);
   equal(enabled().paste, false, 'a cut row is not pasted into itself');
   store.select(null);
   equal(enabled().paste, false, 'nor to the root where it already stands');
-  store.setCopied('ELM-001');
+  store.setCopied(['ELM-001']);
   equal(enabled().paste, true, 'a copied row pastes anywhere, the root included');
-  equal(store.cut(), null, 'and the copy forgot the cut');
-  store.setCopied(null);
-  store.commit((model) => addEntity(model, 'ELM'));
-  store.selectMany(['ELM-001', 'ELM-002'], 'ELM-002');
-  const many = enabled();
-  ok(['edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'cut', 'copy', 'paste', 'delete'].every((id) => many[id] === false), 'with several rows selected every action on the selection stands down, until it learns the set');
-  ok(many.undo && many.about, 'while the actions that need no selection stay');
-  store.select('ELM-001');
-  store.undo();
+  deepEqual(store.cut(), [], 'and the copy forgot the cut');
+  store.setCopied([]);
   equal(one.undo, true, 'a change can be undone');
   equal(one.edit, true, 'an entity is edited, its title among its attributes');
 
@@ -254,6 +247,28 @@ function enabledIds(actions) {
   equal(enabled('move-to'), true, 'Move to stays: its list is complete regardless of the filter');
   store.setNavigatorFilter('');
   equal(enabled('move-up'), true, 'clearing the filter restores the moves');
+}
+
+// --- V-TST-198 The actions over a selection of several (F-WSP-012, F-MOD-012) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
+  const actions = createActions({ store, flows: {} });
+  const enabled = () => Object.fromEntries(actions.map((action) => [action.id, action.enabled()]));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.selectMany(['ELM-001', 'ELM-002'], 'ELM-002');
+  const many = enabled();
+  ok(['new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'paste'].every((id) => many[id] === false), 'with several rows selected the actions that need one row stand down');
+  ok(many.edit && many.delete && many.cut && many.copy, 'while edit, delete, cut and copy act on the set');
+  equal(actions.find((action) => action.id === 'edit').describe(), 'Edit 2 selected', 'edit says how many');
+  equal(actions.find((action) => action.id === 'delete').describe(), 'Delete 2 rows', 'as does delete');
+  store.selectMany(['ELM-001', 'F-1'], 'F-1');
+  equal(enabled().edit, false, 'edit stands down over a mixed selection');
+  equal(enabled().delete, true, 'where delete still acts');
+  ok(many.undo && many.about, 'and the actions that need no selection stay');
 }
 
 summary('test-actions');

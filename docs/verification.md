@@ -60,6 +60,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-002 | Headless | [test-actions.js](../tests/test-actions.js) | The action list against a live store |
 | V-TST-003 | Headless | [test-actions.js](../tests/test-actions.js) | Nothing acts while a diagram is open |
 | V-TST-004 | Headless | [test-actions.js](../tests/test-actions.js) | Reorder stands down while the tree is filtered |
+| V-TST-198 | Headless | [test-actions.js](../tests/test-actions.js) | The actions over a selection of several |
 | V-TST-005 | Headless | [test-attributes.js](../tests/test-attributes.js) | Parse the document |
 | V-TST-006 | Headless | [test-attributes.js](../tests/test-attributes.js) | The project |
 | V-TST-007 | Headless | [test-attributes.js](../tests/test-attributes.js) | The shared help |
@@ -109,6 +110,8 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-046 | Headless | [test-flows.js](../tests/test-flows.js) | The project saves like an entity |
 | V-TST-047 | Headless | [test-flows.js](../tests/test-flows.js) | Escape leaves the edit, asking only when it costs |
 | V-TST-195 | Headless | [test-flows.js](../tests/test-flows.js) | Selecting several rows passes the draft guard |
+| V-TST-196 | Headless | [test-flows.js](../tests/test-flows.js) | A bulk edit sets the filled fields on every entity of the type |
+| V-TST-197 | Headless | [test-flows.js](../tests/test-flows.js) | Delete, cut, copy and paste act on the set |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -405,21 +408,21 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-007 | Folder deletion | V-TST-015, V-TST-052, V-TST-089, V-TST-107 | Tested |
 | F-WSP-008 | Tree filter | V-TST-093, V-TST-108 | Tested |
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
-| F-WSP-010 | Cut and paste | V-TST-186, V-TST-185, V-DEM-019 | Partly |
-| F-WSP-011 | Copy and paste | V-TST-188, V-TST-187, V-DEM-020 | Partly |
-| F-WSP-012 | Selecting many | V-TST-195, V-TST-194, V-TST-193 | Tested |
+| F-WSP-010 | Cut and paste | V-TST-197, V-TST-186, V-TST-185, V-DEM-019 | Partly |
+| F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
+| F-WSP-012 | Selecting many | V-TST-198, V-TST-195, V-TST-197, V-TST-194, V-TST-193 | Tested |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
-| F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-052, V-TST-088 | Tested |
+| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
+| F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
 | F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
-| F-MOD-012 | Bulk edit | None | None |
+| F-MOD-012 | Bulk edit | V-TST-198, V-TST-196 | Tested |
 | F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
@@ -458,7 +461,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-002 | Safe rendering | V-TST-025, V-INS-001, V-INS-002 | Tested |
 | N-SEC-003 | Drawing rendering | V-TST-023, V-TST-171, V-TST-189, V-INS-006 | Tested |
 | N-SEC-004 | External application isolation | V-TST-016, V-TST-017, V-INS-003 | Tested |
-| N-SEC-005 | No hidden content | V-TST-027, V-TST-031, V-TST-048, V-TST-055, V-TST-056, V-TST-057, V-TST-083, V-INS-014, V-TST-098, V-TST-099 | Tested |
+| N-SEC-005 | No hidden content | V-TST-027, V-TST-031, V-TST-196, V-TST-048, V-TST-055, V-TST-056, V-TST-057, V-TST-083, V-INS-014, V-TST-098, V-TST-099 | Tested |
 | N-SEC-006 | Content security policy | V-INS-001, V-INS-011, V-ANA-027 | Partly |
 | N-SEC-007 | Framing | V-INS-011, V-ANA-027 | Partly |
 | N-SEC-008 | Hyperlink presentation | V-TST-025 | Tested |
@@ -479,9 +482,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 52 | 34 | 13 | 2 | 3 |
+| Functional | 52 | 35 | 13 | 2 | 2 |
 | Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 109 | 55 | 28 | 23 | 3 |
+| All | 109 | 56 | 28 | 23 | 2 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 
@@ -489,7 +492,6 @@ Every other test block says in its header that it names no requirement, and pins
 
 | Requirement | Why |
 |---|---|
-| F-MOD-012 | Waits on the function |
 | F-PER-009 | Waits on the first migration |
 | F-PER-011 | Waits on the function |
 

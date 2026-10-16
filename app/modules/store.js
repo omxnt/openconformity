@@ -199,10 +199,10 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let navigatorFilter = '';
   /** @type {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: 'outgoing'|'incoming' }|null }> }|null} */
   let picker = null;
-  /** The row cut and not yet pasted: session state, never persisted, one mark for the keys and the menus. */
-  let cut = null;
-  /** The row copied and held for a paste: session state like the cut, and never held together with one. */
-  let copied = null;
+  /** The rows cut and not yet pasted: session state, never persisted, one mark for the keys and the menus. */
+  let cut = [];
+  /** The rows copied and held for a paste: session state like the cut, and never held together with one. */
+  let copied = [];
   const listeners = new Set();
 
   function notify() {
@@ -311,8 +311,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
    */
   /** A change that removes the cut row forgets the cut. */
   function repairCut() {
-    if (cut !== null && !model.nodes.has(cut)) cut = null;
-    if (copied !== null && !model.nodes.has(copied)) copied = null;
+    cut = cut.filter((id) => model.nodes.has(id));
+    copied = copied.filter((id) => model.nodes.has(id));
   }
 
   function repairPicker() {
@@ -512,8 +512,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       projectCollapsed = false;
       navigatorFilter = '';
       picker = null;
-      cut = null;
-      copied = null;
+      cut = [];
+      copied = [];
       openView = null;
       viewReturn = null;
       theme = null;
@@ -634,8 +634,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       projectCollapsed = false;
       navigatorFilter = '';
       picker = null;
-      cut = null;
-      copied = null;
+      cut = [];
+      copied = [];
       openView = null;
       viewReturn = null;
       keepOpenView();
@@ -654,38 +654,38 @@ export function createStore({ storage, session = null, retention = memoryRetenti
 
     // --- The cut ------------------------------------------------------
 
-    /** The row cut and not yet pasted, or null. */
-    cut: () => cut,
+    /** The rows cut and not yet pasted, empty when none. */
+    cut: () => [...cut],
 
     /**
-     * Mark a row as cut, or forget the mark with null. Session state,
-     * never persisted, never in history.
-     * @param {string|null} id
+     * Mark rows as cut, or forget the mark with none. Session state,
+     * never persisted, never in history, and never held with a copy.
+     * @param {string[]} ids
      */
-    setCut(id) {
+    setCut(ids) {
       if (!projectOpen) return;
-      const next = id !== null && model.nodes.has(id) ? id : null;
-      if (next === cut && (next === null || copied === null)) return;
+      const next = ids.filter((id) => model.nodes.has(id));
+      if (next.join() === cut.join() && (next.length === 0 || copied.length === 0)) return;
       cut = next;
-      if (next !== null) copied = null;
+      if (next.length > 0) copied = [];
       notify();
     },
 
-    /** The row copied and held for a paste, or null. */
-    copied: () => copied,
+    /** The rows copied and held for a paste, empty when none. */
+    copied: () => [...copied],
 
     /**
-     * Mark a row as copied, or forget the mark with null. One mark is
+     * Mark rows as copied, or forget the mark with none. One mark is
      * held at a time, so a copy forgets a cut. Session state, never
      * persisted, never in history.
-     * @param {string|null} id
+     * @param {string[]} ids
      */
-    setCopied(id) {
+    setCopied(ids) {
       if (!projectOpen) return;
-      const next = id !== null && model.nodes.has(id) ? id : null;
-      if (next === copied && (next === null || cut === null)) return;
+      const next = ids.filter((id) => model.nodes.has(id));
+      if (next.join() === copied.join() && (next.length === 0 || cut.length === 0)) return;
       copied = next;
-      if (next !== null) cut = null;
+      if (next.length > 0) cut = [];
       notify();
     },
 
