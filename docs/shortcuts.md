@@ -29,19 +29,23 @@ The keys and modified clicks the software answers to, one table per place, with 
 | Mac | PC | Does |
 |---|---|---|
 | ↑ ↓ | ↑ ↓ | Moves the selection |
-| ⇧click, ⇧↑ ⇧↓ | Shift click, Shift ↑ ↓ | Extends the selection from the anchor, in tree order |
-| ⌘click | Ctrl click | Adds the row to the selection, or removes it |
-| ⌘A | Ctrl A | Selects the anchor's siblings |
+| ⇧↑ ⇧↓, ⇧click | Shift ↑ ↓, Shift click | Extends the selection from the anchor, in tree order |
+| ⌘↑ ⌘↓ | Ctrl ↑ ↓ | Moves the focus without changing the selection |
+| ⌘Space, ⌘click | Ctrl Space, Ctrl click | Adds the focused row to the selection, or removes it |
+| ⇧Space | Shift Space | Selects from the anchor to the focused row |
+| ⇧⌘Home, ⇧⌘End | Ctrl Shift Home, Ctrl Shift End | Selects from the focused row to the first or last row |
+| ⌘A | Ctrl A | Selects every row shown |
+| ⇧⌘A | Ctrl Shift A | Selects the focused row with everything under it, the software's own key beyond the pattern |
 | Escape with several selected | Escape with several selected | Returns to the anchor alone |
 | → | → | Opens the row, or moves into it |
 | ← | ← | Closes the row, or moves to its parent |
 | Home, End | Home, End | First and last row |
-| Enter, Space, F2 | Enter, Space, F2 | Edits the selected entity, or renames the folder |
+| Enter, Space, F2 | Enter, Space, F2 | Edits the selected entity, or the selected entities of one type together, or renames the folder |
 | ⌘⌫, Delete | Delete | Deletes the selection, asking first |
 | ⌥↑ ⌥↓ | Alt ↑ Alt ↓ | Moves the selection among its siblings |
 | ⌘X | Ctrl X | Cuts the selection, and a second time forgets the cut |
 | ⌘C | Ctrl C | Copies the selection, held for a paste |
-| ⌘V | Ctrl V | Pastes a copy of the copied row, or the cut row, inside the selection |
+| ⌘V | Ctrl V | Pastes a copy of the copied rows, or the cut rows, inside the selection |
 | Escape | Escape | Forgets the cut or the copy |
 | ⇧F10 | Shift F10, Menu | Opens the context menu |
 | Escape in the filter | Escape in the filter | Clears the filter |

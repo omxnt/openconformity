@@ -180,7 +180,6 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-103 | Headless | [test-queries.js](../tests/test-queries.js) | The full surface |
 | V-TST-104 | Headless | [test-queries.js](../tests/test-queries.js) | The new-related offer |
 | V-TST-105 | Headless | [test-queries.js](../tests/test-queries.js) | The move predicates |
-| V-TST-106 | Headless | [test-queries.js](../tests/test-queries.js) | Every legal destination |
 | V-TST-107 | Headless | [test-queries.js](../tests/test-queries.js) | The cascade question counts what it takes |
 | V-TST-108 | Headless | [test-queries.js](../tests/test-queries.js) | A filter's one rule |
 | V-TST-109 | Headless | [test-records.js](../tests/test-records.js) | What a record is |
@@ -308,6 +307,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
 | V-DEM-019 | Drive | [drives.py](../tests/drives.py) | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
 | V-DEM-020 | Drive | [drives.py](../tests/drives.py) | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
+| V-DEM-021 | Drive | [drives.py](../tests/drives.py) | Select several rows with Shift click, Cmd click, Shift ↑ ↓, Cmd ↑ ↓ with Cmd Space, Cmd A and Shift Cmd A, and find the set drawn with its anchor and the focus. Edit with several entities of one type opens the form empty, Save for N sets what is filled on all, the toast offers Undo, and a mixed selection disables Edit with the types named. Delete, Cut, Copy and drag act on the set, a folder with its contents and an entity alone |
 
 ### 2.4 Analyses
 
@@ -402,7 +402,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
 | F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
-| F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105, V-TST-106 | Tested |
+| F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105 | Tested |
 | F-WSP-005 | Neutral filing | V-TST-014, V-TST-084 | Tested |
 | F-WSP-006 | Folder creation | V-TST-081 | Tested |
 | F-WSP-007 | Folder deletion | V-TST-015, V-TST-052, V-TST-089, V-TST-107 | Tested |
@@ -410,7 +410,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
 | F-WSP-010 | Cut and paste | V-TST-197, V-TST-186, V-TST-185, V-DEM-019 | Partly |
 | F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
-| F-WSP-012 | Selecting many | V-TST-198, V-TST-195, V-TST-197, V-TST-194, V-TST-193 | Tested |
+| F-WSP-012 | Selecting many | V-TST-198, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
@@ -422,7 +422,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
 | F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
-| F-MOD-012 | Bulk edit | V-TST-198, V-TST-196 | Tested |
+| F-MOD-012 | Bulk edit | V-TST-198, V-TST-196, V-DEM-021 | Partly |
 | F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
@@ -471,6 +471,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028, V-DEM-015 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
 | N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012 | Partly |
+| N-ACC-004 | Tree selection pattern | V-DEM-021 | Manual |
 | N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013 | Partly |
 | N-CMP-002 | Browser support | V-INS-013, V-INS-020, V-TST-144, V-DEM-014 | Partly |
 
@@ -482,9 +483,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 52 | 35 | 13 | 2 | 2 |
-| Non-functional | 26 | 12 | 10 | 4 | 0 |
-| All | 109 | 56 | 28 | 23 | 2 |
+| Functional | 52 | 33 | 15 | 2 | 2 |
+| Non-functional | 27 | 12 | 10 | 5 | 0 |
+| All | 110 | 54 | 30 | 24 | 2 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

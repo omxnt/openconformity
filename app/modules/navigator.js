@@ -220,14 +220,19 @@ export function createNavigator({
   onSelect,
   onSelectMany = async () => true,
   onToggle = async () => true,
+  onSelectBelow = () => {},
   onActivate,
   onFile,
   onPlace,
 }) {
-  /** The id being dragged; dataTransfer is unreadable during dragover. */
-  let draggedId = null;
+  /** The ids being dragged, the whole selection when a selected row is taken; dataTransfer is unreadable during dragover. */
+  let dragged = [];
   /** The rows selected, read once per render. */
   let chosen = new Set();
+  /** The row the keyboard focus stands on when it has parted from the selection, as Cmd ↑ ↓ part it, or null while they agree. */
+  let keyboardFocus = null;
+  /** The drag can go where every dragged row can. */
+  const canDrop = (check) => dragged.length > 0 && dragged.every((id) => check(id).ok);
   /** The visible rows in order, for a range. */
   const visible = () => visibleRows(store.model(), openWithReveal(store.picker()), store.hasProject(), filter(), store.projectExpanded());
 
@@ -413,13 +418,14 @@ export function createNavigator({
   function renderRow(row, picking) {
     const selected = chosen.has(row.id);
     const anchor = selected && chosen.size > 1 && row.id === store.selection();
+    const focused = keyboardFocus !== null && row.id === keyboardFocus;
     const pickable = picking.candidates.has(row.id);
     const picked = picking.picks.has(row.id);
     const attributes = {
       role: 'treeitem',
       'aria-level': String(row.depth + 2),
       'aria-selected': String(selected),
-      tabindex: selected ? '0' : '-1',
+      tabindex: (keyboardFocus === null ? row.id === store.selection() : focused) ? '0' : '-1',
       'data-id': row.id,
     };
     if (!dragLocked()) attributes.draggable = 'true';
@@ -429,6 +435,7 @@ export function createNavigator({
     const classes = ['tree-row'];
     if (selected) classes.push('selected');
     if (anchor) classes.push('anchor');
+    if (focused) classes.push('focused');
     if (pickable) classes.push('pickable');
     if (picked) classes.push('picked');
     if (picking.subject === row.id) classes.push('picker-subject');
@@ -500,21 +507,21 @@ export function createNavigator({
         event.preventDefault();
         return;
       }
-      draggedId = row.id;
-      event.dataTransfer.setData('text/plain', row.id);
+      dragged = chosen.has(row.id) && chosen.size > 1 ? [...chosen] : [row.id];
+      event.dataTransfer.setData('text/plain', dragged.join(' '));
       event.dataTransfer.effectAllowed = 'move';
     });
     rowElement.addEventListener('dragend', () => {
-      draggedId = null;
+      dragged = [];
     });
     rowElement.addEventListener('dragover', (event) => {
-      if (draggedId === null) return;
+      if (dragged.length === 0) return;
       const rect = rowElement.getBoundingClientRect();
       const zone = dropZone((event.clientY - rect.top) / rect.height);
       const allowed =
         zone === 'into'
-          ? canFile(store.model(), draggedId, row.id).ok
-          : canPlaceBeside(store.model(), draggedId, row.id).ok;
+          ? canDrop((id) => canFile(store.model(), id, row.id))
+          : canDrop((id) => canPlaceBeside(store.model(), id, row.id));
       clearDropMarks(rowElement);
       if (!allowed) return;
       event.preventDefault();
@@ -526,11 +533,12 @@ export function createNavigator({
       event.preventDefault();
       event.stopPropagation();
       clearDropMarks(rowElement);
-      if (draggedId === null) return;
+      if (dragged.length === 0) return;
       const rect = rowElement.getBoundingClientRect();
       const zone = dropZone((event.clientY - rect.top) / rect.height);
-      if (zone === 'into') onFile(draggedId, row.id);
-      else onPlace(draggedId, row.id, zone);
+      const taken = dragged.length === 1 ? dragged[0] : dragged;
+      if (zone === 'into') onFile(taken, row.id);
+      else onPlace(taken, row.id, zone);
     });
 
     return rowElement;
@@ -557,6 +565,7 @@ export function createNavigator({
 
     const picker = store.picker();
     chosen = new Set(store.selected());
+    if (keyboardFocus !== null && (!store.hasProject() || store.selection() !== lastSelection)) keyboardFocus = null;
     const picking = {
       candidates: pickerCandidates(store.model(), picker),
       picks: new Set(picker?.picks.map((pick) => pick.id) ?? []),
@@ -586,12 +595,12 @@ export function createNavigator({
   // The space below the rows files to the top of the tree, and the
   // background context menu acts there too.
   container.addEventListener('dragover', (event) => {
-    if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
+    if (!canDrop((id) => canFile(store.model(), id, null))) return;
     event.preventDefault();
   });
   container.addEventListener('drop', (event) => {
     event.preventDefault();
-    if (draggedId !== null) onFile(draggedId, null);
+    if (dragged.length > 0) onFile(dragged.length === 1 ? dragged[0] : dragged, null);
   });
   container.addEventListener('contextmenu', (event) => {
     if (!store.hasProject()) return;
@@ -611,8 +620,15 @@ export function createNavigator({
     const rows = visibleRows(store.model(), openWithReveal(picker), store.hasProject(), filter(), store.projectExpanded());
     if (rows.length === 0) return;
     const selection = store.selection();
-    const index = rows.findIndex((row) => row.id === selection);
+    // The keyboard's row: the focus where it has parted from the selection, else the anchor.
+    const focus = keyboardFocus !== null && rows.some((held) => held.id === keyboardFocus) ? keyboardFocus : selection;
+    const index = rows.findIndex((row) => row.id === focus);
     const row = index >= 0 ? rows[index] : null;
+    const modifier = event.metaKey || event.ctrlKey;
+    const follow = (id) => {
+      keyboardFocus = null;
+      onSelect(id);
+    };
 
     if (picker !== null) {
       if (event.code === 'Space' || event.key === 'Enter') {
@@ -630,19 +646,41 @@ export function createNavigator({
     if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'c', 'v'].includes(event.key.toLowerCase())) {
       event.preventDefault();
       runAction({ x: 'cut', c: 'copy', v: 'paste' }[event.key.toLowerCase()]);
-    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+    } else if (modifier && event.shiftKey && event.key.toLowerCase() === 'a') {
       event.preventDefault();
-      if (row === null || row.kind !== 'node') return;
-      const siblings = rows.filter((held) => held.kind === 'node' && held.node.parent === row.node.parent).map((held) => held.id);
-      onSelectMany(siblings, row.id);
+      if (row === null) return;
+      onSelectBelow(row.kind === 'project' ? null : row.id);
+    } else if (modifier && event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      const shown = rows.filter((held) => held.kind === 'node').map((held) => held.id);
+      if (shown.length > 0) onSelectMany(shown, row && row.id !== null ? row.id : shown[0]);
+    } else if (modifier && event.shiftKey && (event.key === 'Home' || event.key === 'End')) {
+      event.preventDefault();
+      if (row === null || row.id === null) return;
+      const edge = event.key === 'Home' ? rows.find((held) => held.id !== null) : rows[rows.length - 1];
+      onSelectMany(rowsBetween(rows, row.id, edge.id), row.id);
+    } else if (modifier && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      const next = rows[index + (event.key === 'ArrowDown' ? 1 : -1)];
+      if (!next) return;
+      keyboardFocus = next.id;
+      render();
+      container.querySelector(`.tree-row[tabindex="0"]`)?.focus({ preventScroll: false });
+    } else if (modifier && event.code === 'Space') {
+      event.preventDefault();
+      if (row && row.id !== null) onToggle(row.id);
+    } else if (event.shiftKey && event.code === 'Space') {
+      event.preventDefault();
+      if (row && row.id !== null && selection !== null) onSelectMany(rowsBetween(rows, selection, row.id), row.id);
     } else if (event.shiftKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
       event.preventDefault();
       const next = rows[index + (event.key === 'ArrowDown' ? 1 : -1)];
       if (!next || next.id === null) return;
+      keyboardFocus = null;
       onSelectMany([...store.selected(), next.id], next.id);
-    } else if (event.key === 'Escape' && store.selected().length > 1) {
+    } else if (event.key === 'Escape' && (store.selected().length > 1 || keyboardFocus !== null)) {
       event.preventDefault();
-      onSelect(selection);
+      follow(selection);
     } else if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
       event.preventDefault();
       runAction(event.key === 'ArrowUp' ? 'move-up' : 'move-down');
@@ -654,18 +692,18 @@ export function createNavigator({
       runAction('delete');
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
-      if (index < 0) onSelect(rows[0].id);
-      else if (rows[index + 1]) onSelect(rows[index + 1].id);
+      if (index < 0) follow(rows[0].id);
+      else if (rows[index + 1]) follow(rows[index + 1].id);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      if (index > 0) onSelect(rows[index - 1].id);
+      if (index > 0) follow(rows[index - 1].id);
     } else if (event.key === 'ArrowRight' && row) {
       event.preventDefault();
       if (row.hasChildren && !row.expanded) {
         if (row.kind === 'project') store.setProjectExpanded(true);
         else store.setExpanded(row.id, true);
       } else if (row.expanded) {
-        onSelect(rows[index + 1].id);
+        follow(rows[index + 1].id);
       }
     } else if (event.key === 'ArrowLeft' && row) {
       event.preventDefault();
@@ -673,18 +711,19 @@ export function createNavigator({
         if (row.kind === 'project') store.setProjectExpanded(false);
         else store.setExpanded(row.id, false);
       } else if (row.kind === 'node') {
-        onSelect(row.node.parent);
+        follow(row.node.parent);
       }
     } else if (event.key === 'Home') {
       event.preventDefault();
-      onSelect(rows[0].id);
+      follow(rows[0].id);
     } else if (event.key === 'End') {
       event.preventDefault();
-      onSelect(rows[rows.length - 1].id);
+      follow(rows[rows.length - 1].id);
     } else if (event.key === 'Enter' || event.code === 'Space') {
       if (row === null) return;
       event.preventDefault();
-      onActivate(row.id);
+      if (store.selected().length > 1) runAction('edit');
+      else onActivate(row.id);
     } else if (event.key === 'Delete') {
       event.preventDefault();
       runAction('delete');

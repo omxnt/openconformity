@@ -6,8 +6,8 @@
  * business.
  */
 
-import { nodeOf, canFile } from './model.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets, canMoveUp, canMoveDown } from './queries.js';
+import { nodeOf, canFile, childrenOf } from './model.js';
+import { relationshipOptions, relatedTypeOffer, canMoveUp, canMoveDown } from './queries.js';
 import { VIEWS } from './view-registry.js';
 import { APPLE } from './platform.js';
 
@@ -39,6 +39,7 @@ const DELETE_HINT = APPLE ? '⌘⌫' : 'Del';
 const CUT_HINT = APPLE ? '⌘X' : 'Ctrl X';
 const PASTE_HINT = APPLE ? '⌘V' : 'Ctrl V';
 const COPY_HINT = APPLE ? '⌘C' : 'Ctrl C';
+const SELECT_BELOW_HINT = APPLE ? '⇧⌘A' : 'Ctrl Shift A';
 const UP_HINT = APPLE ? '⌥↑' : 'Alt ↑';
 const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
 
@@ -188,6 +189,18 @@ export function createActions({ store, flows }) {
       run: () => flows.editSelection(),
     },
     {
+      id: 'select-below',
+      icon: 'i-checkmark',
+      label: 'Select all below',
+      group: 'edit',
+      toolbar: false,
+      context: true,
+      menubar: false,
+      hint: SELECT_BELOW_HINT,
+      enabled: () => store.hasProject() && single() && childrenOf(store.model(), store.selection()).length > 0,
+      run: () => flows.selectBelow(store.selection()),
+    },
+    {
       id: 'new-entity',
       icon: 'i-new-entity',
       label: 'New entity',
@@ -263,16 +276,6 @@ export function createActions({ store, flows }) {
       hint: DOWN_HINT,
       enabled: () => single() && store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
-    },
-    {
-      id: 'move-to',
-      icon: 'i-move-to',
-      label: 'Move to…',
-      group: 'arrange',
-      toolbar: true,
-      context: true,
-      enabled: () => single() && selected() !== null && moveTargets(store.model(), store.selection()).length > 0,
-      run: () => flows.moveToSelection(),
     },
     {
       id: 'cut',

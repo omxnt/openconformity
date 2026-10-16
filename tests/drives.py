@@ -373,6 +373,47 @@ def drive_020(page):
     """))
 
 
+def drive_021(page):
+    page.eval(script("""
+      await loadExample();
+      const esr = await (async () => { for (let i = 0; i < 30; i += 1) { const all = [...document.querySelectorAll('.tree-row')].filter((r) => /^ESR-\\d{3}$/.test(r.dataset.id || '')); const levels = {}; for (const r of all) (levels[r.getAttribute('aria-level')] ??= []).push(r.dataset.id); const best = Object.values(levels).sort((a, b) => b.length - a.length)[0] ?? []; if (best.length >= 3) return best.slice(0, 3); const f = [...document.querySelectorAll('.tree-row')].find((r) => (r.dataset.id || '') && r.getAttribute('aria-expanded') === 'false'); must(f, 'a folder to open'); f.click(); await wait(100); key(row(f.dataset.id), { key: 'ArrowRight' }); await wait(200); } throw new Error('no three requirements'); })();
+      row(esr[0]).click(); await wait(200);
+      row(esr[2]).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })); await wait(300);
+      must(document.querySelectorAll('.tree-row.selected').length === 3 && row(esr[2]).classList.contains('anchor'), 'a Shift click selects the range with the last as anchor');
+      key(row(esr[2]), { key: 'ArrowUp', metaKey: true, ctrlKey: true }); await wait(300);
+      must(row(esr[1]).classList.contains('focused') && document.querySelectorAll('.tree-row.selected').length === 3, 'Cmd up moves the focus and keeps the selection');
+      key(row(esr[1]), { code: 'Space', key: ' ', metaKey: true, ctrlKey: true }); await wait(300);
+      must(document.querySelectorAll('.tree-row.selected').length === 2, 'Cmd Space removes the focused row from the selection');
+      key(document.querySelector('.tree-row.anchor'), { key: 'Escape' }); await wait(300);
+      must(document.querySelectorAll('.tree-row.selected').length === 1, 'Escape returns to the anchor');
+      key(document.querySelector('.tree-row.selected'), { key: 'a', metaKey: true, ctrlKey: true }); await wait(300);
+      must(document.querySelectorAll('.tree-row.selected').length > 3, 'Cmd A selects every row shown');
+      row(esr[0]).click(); await wait(200);
+      row(esr[2]).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })); await wait(300);
+      must(byText('#editor-body .empty-state-title', '3 essential requirements selected'), 'the editor names the set');
+      [...document.querySelectorAll('#editor-head button')].find((b) => b.querySelector('use[href="#i-edit"]')).click(); await wait(400);
+      must(byText('#editor-head .button-primary', 'Save for 3'), 'Edit opens the form for the three');
+      must(document.querySelectorAll('#editor-body table').length === 0, 'with no table offered');
+      const select = document.querySelector('#editor-body select[data-key="applicable"]'); select.value = 'No'; select.dispatchEvent(new Event('change', { bubbles: true }));
+      byText('#editor-head .button-primary', 'Save').click(); await wait(600);
+      must(document.querySelector('.toast-title')?.textContent === 'Applicable set on 3 essential requirements' && document.querySelector('.toast-action'), 'the toast names what was set and offers Undo');
+      row(esr[1]).click(); await wait(300);
+      must([...document.querySelectorAll('#editor-body .tag')].some((t) => t.textContent === 'No'), 'the second holds the value');
+      row(esr[0]).click(); await wait(200);
+      const folder = [...document.querySelectorAll('.tree-row')].find((r) => (r.dataset.id || '').startsWith('F-'));
+      must(folder, 'a folder in view');
+      folder.dispatchEvent(new MouseEvent('click', { bubbles: true, metaKey: true })); await wait(300);
+      must(byText('#editor-body .empty-state-title', 'Not one type'), 'a mixed selection names its types');
+      must([...document.querySelectorAll('#editor-head button')].every((b) => !b.querySelector('use[href="#i-edit"]')), 'and offers no Edit');
+      row(esr[0]).click(); await wait(200);
+      row(esr[1]).dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true })); await wait(300);
+      key(row(esr[1]), { key: 'Delete' }); await wait(400);
+      must(dialogTitle() === 'Delete 2 rows?', 'Delete asks once with the count');
+      byText('.dialog-button', 'Delete').click(); await wait(500);
+      must(!row(esr[0]) && !row(esr[1]) && row(esr[2]), 'and both are gone, the third kept');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -384,6 +425,7 @@ DRIVES = [
     ('V-DEM-017', 'Save to file offers to save an open draft first', drive_017),
     ('V-DEM-019', 'Cut and paste in the tree', drive_019),
     ('V-DEM-020', 'Copy and paste in the tree', drive_020),
+    ('V-DEM-021', 'Select several rows and act on the set', drive_021),
 ]
 
 

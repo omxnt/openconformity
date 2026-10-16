@@ -183,13 +183,13 @@ function flowsOver(store) {
   equal(editsBegun, 2, 'the project row activates into the editor, like an entity');
 
   store.select('ELM-001');
-  await flows.moveToSelection();
-  deepEqual(asked.pop(), ['choose', 'Move to'], 'Move to asks with a list');
-  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'and files to the chosen destination');
-
-  dialogs.choose = async () => null;
-  await flows.moveToSelection();
-  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'cancelling moves nothing');
+  flows.cutSelection();
+  store.select('F-1');
+  flows.pasteHeld();
+  equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'the keyboard files by cut and paste, which took over from Move to');
+  flows.selectBelow('F-1');
+  deepEqual(store.selected(), ['F-1', 'ELM-001'], 'select all below takes a row with everything under it');
+  equal(store.isExpanded('F-1'), true, 'opened so the selection is in view');
 }
 
 // --- Refusals are told in passing (no requirement) ---------------------------------
@@ -382,8 +382,22 @@ function flowsOver(store) {
   store.select('F-2');
   flows.pasteHeld();
   deepEqual(childrenOf(store.model(), 'F-2').map((node) => node.type), ['ELM', 'HAZ'], 'a copied set pastes as copies in tree order');
-  equal(childrenOf(store.model(), childrenOf(store.model(), 'F-2')[0].id).length, 1, 'each with its subtree');
+  equal(childrenOf(store.model(), childrenOf(store.model(), 'F-2')[0].id).length, 0, 'an entity copied alone, what was filed under it left');
   deepEqual(store.selected().length, 2, 'the copies selected');
+  store.undo();
+  store.selectMany(['F-1', 'HAZ-002'], 'F-1');
+  flows.copySelection();
+  store.select('F-2');
+  flows.pasteHeld();
+  const zone = childrenOf(store.model(), 'F-2');
+  deepEqual([zone.length, zone[0].kind, childrenOf(store.model(), zone[0].id).length], [1, 'folder', 2], 'a copied folder brings its contents, and a marked row inside it is carried by the copy rather than copied twice');
+  store.undo();
+  store.selectMany(['ELM-001', 'HAZ-001'], 'ELM-001');
+  flows.copySelection();
+  store.select('F-2');
+  flows.pasteHeld();
+  const copies = childrenOf(store.model(), 'F-2');
+  deepEqual([copies.map((node) => node.type), childrenOf(store.model(), copies[0].id).map((node) => node.type)], [['ELM'], ['HAZ']], 'a selected child lands under the copy of its selected parent');
   store.undo();
   store.selectMany(['ELM-001', 'HAZ-002'], 'HAZ-002');
   globalThis.document = fakeDocument();
@@ -616,12 +630,12 @@ function flowsOver(store) {
   flows.pasteHeld();
   equal(store.selection(), 'ELM-002', 'paste makes the copy and selects it');
   deepEqual([nodeOf(store.model(), 'ELM-002').parent, nodeOf(store.model(), 'ELM-002').attributes.title], [null, 'Press'], 'at the root, with its attributes');
-  deepEqual(childrenOf(store.model(), 'ELM-002').map((node) => node.attributes.title), ['Crushing'], 'and what was filed under it');
+  deepEqual(childrenOf(store.model(), 'ELM-002').map((node) => node.attributes.title), [], 'and nothing filed under it, since an entity stands for itself');
   deepEqual(store.copied(), ['ELM-001'], 'the mark is kept');
   flows.pasteHeld();
-  equal(store.model().nodes.size, 6, 'so a second paste makes another copy');
+  equal(store.model().nodes.size, 4, 'so a second paste makes another copy');
   store.undo();
-  equal(store.model().nodes.size, 4, 'one undo removes the whole paste');
+  equal(store.model().nodes.size, 3, 'one undo removes the whole paste');
   equal(toasts.length, 0, 'nothing was told');
 }
 

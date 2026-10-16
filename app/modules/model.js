@@ -281,18 +281,20 @@ export function addEntity(model, code, options = {}) {
 }
 
 /**
- * Copy a folder or an entity with everything filed under it, each copy
- * filed under the copy of what held the original, the root under the
- * parent given. An entity's attributes are copied as stored, a folder's
- * name with it, every identifier is issued anew, and no relationship is
- * copied, since a copy relates to nothing yet. The first refusal stops
- * the copy with the model as it was before it.
+ * Copy a folder or an entity, with everything filed under it unless the
+ * caller asks for the row alone, each copy filed under the copy of what
+ * held the original, the root under the parent given. An entity's
+ * attributes are copied as stored, a folder's name with it, every
+ * identifier is issued anew, and no relationship is copied, since a copy
+ * relates to nothing yet. The first refusal stops the copy with the
+ * model as it was before it.
  * @param {Model} model
  * @param {string} id
  * @param {string|null} parentId
+ * @param {{ subtree?: boolean }} [options]  subtree false copies the row alone
  * @returns {Outcome & { id?: string }}
  */
-export function copyNode(model, id, parentId) {
+export function copyNode(model, id, parentId, options = {}) {
   const root = nodeOf(model, id);
   if (!root) return { ok: false, reason: 'It is not in the project.' };
   const before = new Map(model.nodes);
@@ -301,6 +303,7 @@ export function copyNode(model, id, parentId) {
   const plan = [];
   const read = (node) => {
     plan.push(node);
+    if (options.subtree === false) return;
     for (const child of childrenOf(model, node.id)) read(child);
   };
   read(root);

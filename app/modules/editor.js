@@ -873,7 +873,6 @@ export function createEditor({
     const [cancel, saveButton] = saveCancel(save);
     saveButton.textContent = `Save for ${ids.length}`;
     head.appendChild(el('div', { className: 'pane-head-actions' }, [cancel, saveButton]));
-    body.appendChild(el('p', { className: 'bulk-hint', text: `What you fill is set on all ${ids.length}. What you leave empty stays as each one has it.` }));
     mount(`${ids.length} selected`, code, {}, true, { bulk: true });
     followConditions();
     body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])')?.focus();

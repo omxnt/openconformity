@@ -1005,7 +1005,7 @@ The library ships FMV's checklist of hazards and hazardous conditions, the secti
 
 ### D-117 A copy carries attributes and no relationships
 
-`2026-10-14` `product`
+`2026-10-14` `product` `superseded by D-119`
 
 Pasting a copied row creates a copy of the row with everything filed under it, each with a new identifier and every attribute as stored, and no relationship. The copy is taken from the model at the paste, and the mark is kept so a second paste makes another copy.
 
@@ -1020,6 +1020,16 @@ Pasting a copied row creates a copy of the row with everything filed under it, e
 Every push to develop and main runs the test suite and the browser drives on GitHub Actions, from `.github/workflows/check.yml`, with the type check added once it exists. A rule on main requires that check to have passed on the commit pushed, applied to the maintainer too, and requires the commit to be signed. The maintainer signs with the SSH key already in use. The software is deployed from main as before, and no pull request is required, since a commit that passed on develop carries its result to main under a fast-forward merge.
 
 > *The host serves main the moment it is pushed, so the only place a check can stop a bad commit is before that push, and a rule on main is the only thing that makes the check unskippable, by the maintainer as much as by a stolen credential. A workflow runs on GitHub's machines and adds nothing to the software, so the stack holds. Node runs the suite where the runner has no JavaScriptCore, which the test script's fallback allows, and the drives run under the runner's Chrome. A tag deployment would add a step without adding a guarantee the rule does not give. Signing costs two lines of configuration and lets a commit's author be checked rather than assumed, which the review of 6 October asked for. Settles #42.*
+
+---
+
+### D-119 The selection is the scope, and what a row stands for
+
+`2026-10-16` `product`
+
+The tree selects several rows after the ARIA tree view pattern's second model, where an arrow key moves the selection and a modifier keeps it, with one key of the software's own that selects a row with everything under it. An action acts on what the selected rows stand for. A folder stands for what is filed in it and an entity stands for itself. So a copy takes a folder with its contents and an entity alone, with a selected child under the copy of its selected parent, a deletion takes a folder with its contents and an entity alone, its parts by composition going with it as the model requires, and a cut or a drag moves the rows with what is filed under them, as moving one does. Edit with several entities of one type opens the type's form empty and sets only what is filled, with no question before the form, an empty field leaving a value alone, and no action for the bulk edit alone. Move to is removed, since Cut and Paste are the keyboard filing path.
+
+> *Each action had decided for itself what a selected row brought along, and the result felt arbitrary. One rule for what a row stands for, stated once, lets every action be read from it. A folder has no meaning but its contents, which is why it brings them. An entity is a thing in the model, so selecting it selects it, and what happens to what is filed under it depends on what the action does to filing. Copying and editing do nothing to filing, so they leave it alone. Moving changes where the row is filed, so what is filed under it comes along, as a drag has always done. Deleting removes the row, and the model says what else goes. The pattern is followed for the keys so that a keyboard can make every selection a pointer can, which N-ACC-003 requires, and its gap, a key for a subtree, is filled by one named as ours. Supersedes D-117 on what a copy carries.*
 
 ---
 

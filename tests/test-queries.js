@@ -10,7 +10,6 @@ import {
   relationshipOptions,
   formLabel,
   relatedTypeOffer,
-  moveTargets,
   deletionQuestion,
   designated,
   canMoveUp,
@@ -215,39 +214,6 @@ function offered(model, subjectId) {
   equal(canMoveDown(model, 'SCN-001'), false, 'in its own parent');
   equal(canMoveUp(model, 'ELM-9'), false, 'a missing node moves nowhere');
   equal(canMoveUp(model, null), false, 'nor does no selection');
-}
-
-// --- V-TST-106 Every legal destination (F-WSP-004) ---------------------------
-
-{
-  const model = createModel();
-  addFolder(model, 'Zone');
-  addEntity(model, 'ELM', { parent: 'F-1' });
-  updateEntity(model, 'ELM-001', { title: 'Assembly' });
-  addEntity(model, 'ELM', { parent: 'ELM-001' });
-  addEntity(model, 'HAZ');
-
-  deepEqual(
-    moveTargets(model, 'ELM-002').map((target) => [target.parentId, target.depth]),
-    [[null, 0], ['F-1', 1], ['HAZ-001', 1]],
-    'the offer is the root and every holder the model allows, in tree order'
-  );
-  ok(
-    !moveTargets(model, 'ELM-002').some((target) => target.parentId === 'ELM-001'),
-    'never the place it already stands'
-  );
-  deepEqual(
-    moveTargets(model, 'F-1').map((target) => target.parentId),
-    ['HAZ-001'],
-    'never itself, nothing inside itself, and not the root it already stands at'
-  );
-  deepEqual(moveTargets(model, 'ELM-9'), [], 'a missing node goes nowhere');
-  equal(moveTargets(model, 'ELM-002')[0].label, 'Untitled', 'the unnamed root offers itself as Untitled');
-  deepEqual(
-    moveTargets(model, 'HAZ-001').map((target) => target.label),
-    ['Zone', 'ELM-001  Assembly', 'ELM-002'],
-    'holders read as the tree reads them, and a root dweller is not offered the root'
-  );
 }
 
 // --- V-TST-107 The cascade question counts what it takes (F-MOD-007, F-WSP-007) ---

@@ -39,12 +39,12 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo'],
+    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'select-below', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
     Object.fromEntries(actions.filter((action) => action.hint).map((action) => [action.id, action.hint])),
-    { save: 'Ctrl S', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', cut: 'Ctrl X', copy: 'Ctrl C', paste: 'Ctrl V', delete: 'Del', undo: 'Ctrl Z', redo: 'Ctrl Y' },
+    { save: 'Ctrl S', 'select-below': 'Ctrl Shift A', 'move-up': 'Alt ↑', 'move-down': 'Alt ↓', cut: 'Ctrl X', copy: 'Ctrl C', paste: 'Ctrl V', delete: 'Del', undo: 'Ctrl Z', redo: 'Ctrl Y' },
     'the key hints ride on the actions the keys reach, the save one as the platform writes it'
   );
   ok(actions.every((action) => typeof action.icon === 'string' && action.icon.startsWith('i-')), 'every action carries its glyph');
@@ -95,6 +95,7 @@ function enabledIds(actions) {
       about: true,
       metamodel: true,
       edit: true,
+      'select-below': false,
       'new-entity': true,
       'new-related': false,
       'new-folder': true,
@@ -102,7 +103,6 @@ function enabledIds(actions) {
       relate: false,
       'move-up': false,
       'move-down': false,
-      'move-to': false,
       cut: false,
       copy: false,
       paste: false,
@@ -121,7 +121,6 @@ function enabledIds(actions) {
   equal(one['new-related'], true, 'though a related entity can always be newly made');
   equal(one['move-up'], false, 'an only child moves neither way');
   equal(one['move-down'], false, 'either way');
-  equal(one['move-to'], false, 'and alone at the root it has nowhere else to file');
   equal(one.cut, true, 'a selected row can be cut');
   equal(one.paste, false, 'and nothing is pasted while nothing is cut');
   store.setCut(['ELM-001']);
@@ -220,7 +219,7 @@ function enabledIds(actions) {
   const actions = createActions({ store, flows: {} });
   deepEqual(
     actions.filter((action) => action.toolbar).map((action) => action.id),
-    ['new-entity', 'new-related', 'new-folder', 'import', 'move-up', 'move-down', 'move-to', 'delete'],
+    ['new-entity', 'new-related', 'new-folder', 'import', 'move-up', 'move-down', 'delete'],
     'the tree toolbar holds the tree actions and the import from a library: relating lives in the relationship pane, undo and redo in the shell'
   );
   const runs = [];
@@ -244,7 +243,6 @@ function enabledIds(actions) {
   store.setNavigatorFilter('h');
   equal(enabled('move-up'), false, 'filtered, it does not: visual neighbours are not real siblings');
   equal(enabled('move-down'), false, 'nor down');
-  equal(enabled('move-to'), true, 'Move to stays: its list is complete regardless of the filter');
   store.setNavigatorFilter('');
   equal(enabled('move-up'), true, 'clearing the filter restores the moves');
 }
@@ -261,13 +259,18 @@ function enabledIds(actions) {
   store.commit((model) => addFolder(model, 'Zone'));
   store.selectMany(['ELM-001', 'ELM-002'], 'ELM-002');
   const many = enabled();
-  ok(['new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'move-to', 'paste'].every((id) => many[id] === false), 'with several rows selected the actions that need one row stand down');
+  ok(['new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'paste', 'select-below'].every((id) => many[id] === false), 'with several rows selected the actions that need one row stand down');
   ok(many.edit && many.delete && many.cut && many.copy, 'while edit, delete, cut and copy act on the set');
   equal(actions.find((action) => action.id === 'edit').describe(), 'Edit 2 selected', 'edit says how many');
   equal(actions.find((action) => action.id === 'delete').describe(), 'Delete 2 rows', 'as does delete');
   store.selectMany(['ELM-001', 'F-1'], 'F-1');
   equal(enabled().edit, false, 'edit stands down over a mixed selection');
   equal(enabled().delete, true, 'where delete still acts');
+  store.select('F-1');
+  equal(enabled()['select-below'], false, 'a folder with nothing under it offers no select all below');
+  store.commit((model) => addEntity(model, 'HAZ', { parent: 'F-1' }));
+  store.select('F-1');
+  equal(enabled()['select-below'], true, 'one with something under it does');
   ok(many.undo && many.about, 'and the actions that need no selection stay');
 }
 

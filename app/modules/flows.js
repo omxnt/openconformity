@@ -35,7 +35,7 @@ import {
 } from './model.js';
 import { ENTITY_TYPES, PILLARS, RELATIONSHIP_TYPES } from './metamodel.js';
 import { groupsOf, groupShown, attributesFor } from './attributes.js';
-import { relationshipOptions, relatedTypeOffer, moveTargets, deletionQuestion, designated, relatedIds } from './queries.js';
+import { relationshipOptions, relatedTypeOffer, deletionQuestion, designated, relatedIds } from './queries.js';
 import { pickedRows } from './relate.js';
 import { recordOf } from './records.js';
 import { removalText } from './fields.js';
@@ -420,7 +420,14 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @param {string|null} parentId
    */
   function fileNode(id, parentId) {
-    toastRefusal('Could not move', store.commit((model) => file(model, id, parentId)));
+    const ids = Array.isArray(id) ? inTreeOrder(id) : [id];
+    toastRefusal('Could not move', store.commit((model) => {
+      for (const held of ids) {
+        const outcome = file(model, held, parentId);
+        if (!outcome.ok) return outcome;
+      }
+      return { ok: true };
+    }));
   }
 
   /** Mark the selection as cut, or forget the mark when the selection is the cut row. */
@@ -459,18 +466,33 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   function pasteHeld() {
     const target = store.selection();
-    const copied = inTreeOrder(store.copied());
-    if (copied.length > 0) {
-      const made = [];
-      const outcome = store.commit((model) => {
-        for (const id of copied) {
-          const held = copyNode(model, id, target);
+    const marked = new Set(store.copied());
+    if (marked.size > 0) {
+      // A folder stands for its contents and an entity for itself: a
+      // marked folder is copied whole and whatever is marked inside it is
+      // carried by that copy, a marked entity is copied alone, and a
+      // marked row under a marked entity lands under that entity's copy.
+      const model = store.model();
+      const markedAbove = (id) => {
+        for (let held = nodeOf(model, id)?.parent; held !== null && held !== undefined; held = nodeOf(model, held)?.parent) if (marked.has(held)) return held;
+        return null;
+      };
+      const order = filedBeneath(model, null).map((node) => node.id).filter((id) => marked.has(id));
+      const made = new Map();
+      const roots = [];
+      const outcome = store.commit((live) => {
+        for (const id of order) {
+          const above = markedAbove(id);
+          if (above !== null && nodeOf(live, above)?.kind === 'folder') continue;
+          const node = nodeOf(live, id);
+          const held = copyNode(live, id, above === null ? target : made.get(above), { subtree: node.kind === 'folder' });
           if (!held.ok) return held;
-          made.push(held.id);
+          made.set(id, held.id);
+          if (above === null) roots.push(held.id);
         }
         return { ok: true };
       });
-      if (toastRefusal('Could not paste', outcome)) store.selectMany(made, made[made.length - 1]);
+      if (toastRefusal('Could not paste', outcome)) store.selectMany(roots, roots[roots.length - 1]);
       return;
     }
     const cut = inTreeOrder(store.cut());
@@ -492,7 +514,31 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @param {'before'|'after'} position
    */
   function placeNode(id, targetId, position) {
-    toastRefusal('Could not move', store.commit((model) => placeBeside(model, id, targetId, position)));
+    const ids = Array.isArray(id) ? inTreeOrder(id) : [id];
+    const ordered = position === 'after' ? [...ids].reverse() : ids;
+    toastRefusal('Could not move', store.commit((model) => {
+      for (const held of ordered) {
+        const outcome = placeBeside(model, held, targetId, position);
+        if (!outcome.ok) return outcome;
+      }
+      return { ok: true };
+    }));
+  }
+
+  /**
+   * Select a row with everything filed under it, opened so the selection
+   * is in view. The software's own addition to the tree pattern.
+   * @param {string|null} id  the row, or the project row for the whole tree
+   */
+  function selectBelow(id) {
+    if (!store.hasProject()) return;
+    const model = store.model();
+    const beneath = filedBeneath(model, id).map((node) => node.id);
+    if (id === null && beneath.length === 0) return;
+    for (const held of [id, ...beneath]) if (held !== null && childrenOf(model, held).length > 0 && !store.isExpanded(held)) store.setExpanded(held, true);
+    if (id === null) store.setProjectExpanded(true);
+    const ids = id === null ? beneath : [id, ...beneath];
+    store.selectMany(ids, ids[0]);
   }
 
   /** Change places with the sibling above. */
@@ -515,29 +561,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     const index = siblings.findIndex((sibling) => sibling.id === id);
     if (index < 0 || index >= siblings.length - 1) return;
     store.commit((model) => placeBeside(model, id, siblings[index + 1].id, 'after'));
-  }
-
-  /**
-   * File the selection somewhere chosen from a list of every legal
-   * destination: the pointerless filing path.
-   */
-  async function moveToSelection() {
-    const id = store.selection();
-    const targets = moveTargets(store.model(), id);
-    if (targets.length === 0) return;
-    const value = await dialogs.choose({
-      title: 'Move to',
-      label: 'Destination',
-      options: targets.map((target, index) => ({
-        value: String(index),
-        label: `${' '.repeat(target.depth * 4)}${target.label}`,
-      })),
-      value: '0',
-      confirmLabel: 'Move',
-    });
-    if (value === null) return;
-    const target = targets[Number(value)];
-    if (target) toastRefusal('Could not move', store.commit((model) => file(model, id, target.parentId)));
   }
 
   /**
@@ -1183,6 +1206,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     selectNode,
     selectRows,
     toggleRow,
+    selectBelow,
     fileNode,
     cutSelection,
     copySelection,
@@ -1192,7 +1216,6 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     placeNode,
     moveUp,
     moveDown,
-    moveToSelection,
     activateNode,
     saveEdit,
     saveProjectEdit,

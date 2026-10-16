@@ -159,33 +159,6 @@ export function designated(entity) {
 }
 
 /**
- * Every place a node could be filed, for the Move to… dialog: the top of
- * the tree and every folder and entity the model allows, in the order the
- * tree draws them — the same ground dragging covers, reachable without a
- * pointer.
- * @param {import('./model.js').Model} model
- * @param {string|null} id
- * @returns {Array<{ parentId: string|null, label: string, depth: number }>}
- */
-export function moveTargets(model, id) {
-  if (nodeOf(model, id) === null) return [];
-  const targets = [];
-  const span = spanOf(model, id);
-  const offer = (parentId, label, depth) => {
-    if (canFile(model, id, parentId, span).ok) targets.push({ parentId, label, depth });
-  };
-  offer(null, model.name.trim() || 'Untitled', 0);
-  const walk = (parentId, depth) => {
-    for (const child of childrenOf(model, parentId)) {
-      offer(child.id, child.kind === 'folder' ? child.name : designated(child), depth);
-      walk(child.id, depth + 1);
-    }
-  };
-  walk(null, 1);
-  return targets;
-}
-
-/**
  * What the confirmation says before a deletion: for an entity, what goes
  * with it and what is removed; for a folder, what is in it, what is part
  * of those entities elsewhere, and what is removed.

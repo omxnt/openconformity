@@ -411,6 +411,9 @@ function childIds(model, parentId) {
   equal(model.nodes.size, count + 4, 'as one copy of the subtree as it stood, the copy never walked');
   equal(nodeOf(model, self.id).parent, 'ELM-001', 'filed inside the original');
   refused(copyNode(model, 'HAZ-999', null), 'a row not in the project copies nothing');
+  const alone = copyNode(model, 'ELM-001', null, { subtree: false });
+  allowed(alone, 'an entity copies alone when asked');
+  equal(childrenOf(model, alone.id).length, 0, 'with nothing filed under the copy');
   const size = model.nodes.size;
   const deep = createModel();
   addEntity(deep, 'ELM', { id: 'ELM-001' });

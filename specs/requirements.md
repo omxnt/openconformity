@@ -647,6 +647,16 @@ When the user pastes a copied row, the software shall create a copy of the row w
 
 > *A hazard, a scenario or a requirement is written once and repeated with small changes, and a copy saves the retyping. The relationships are left out because a copy is a new thing that relates to nothing yet, and relating it is the user's work to do. The identifiers are new because an identifier names one entity.*
 
+---
+
+#### F-WSP-012 Selecting many
+
+`ubiquitous`
+
+The software shall let the user select several rows of the tree, and an action on the selection shall act on every selected row where the action admits several, and be disabled otherwise.
+
+> *A model is worked on in sets, the requirements of an act, the hazards of a zone, and a tree that selects one row at a time makes every set a loop. Selecting many is what every tree offers, and the actions that already exist, edit, delete, cut and copy, gain their meaning over a set with no new button. An action that creates or relates needs one row and says so rather than guessing.*
+
 ### 4.4 Model
 
 ---
@@ -765,9 +775,9 @@ When a scenario's residual risk estimation or a hazard's elimination is saved, t
 
 `event driven`
 
-When the user saves a bulk edit of an entity type below a row, the software shall apply the filled attributes to every entity of that type filed below the row, leave the other attributes as they stand, and record the change as one step.
+When the user saves a bulk edit of the selected entities, which are of one type, the software shall apply the filled attributes to every one of them, leave the other attributes as they stand, and record the change as one step.
 
-> *Many entities share a value that is set once per project, such as which essential requirements apply, and setting it one entity at a time is the slowest thing the software asks of a user. One form applied to many is the general mechanism, so no attribute needs a function of its own. Filing is the scope because what is set together is filed together, and one step keeps undo honest.*
+> *Many entities share a value that is set once per project, such as which essential requirements apply, and setting it one entity at a time is the slowest thing the software asks of a user. One form applied to many is the general mechanism, so no attribute needs a function of its own. The selection is the scope, so the entities need not be filed together, and one step keeps undo honest.*
 
 ### 4.5 Views
 
@@ -1215,6 +1225,16 @@ The software shall be fully operable by keyboard.
 
 > *A modelling software is navigated constantly, through the tree, the entities, and their attributes. Full keyboard operability serves both accessibility and speed. It is required for users who cannot use a pointer, and it is faster for those building a large model.*
 
+---
+
+#### N-ACC-004 Tree selection pattern
+
+`ubiquitous`
+
+The navigator's tree shall follow the ARIA tree view pattern for focus, selection and their keys [5].
+
+> *A tree that selects several rows has a known set of keys, and a user who knows them from any other tree expects them here. Of the pattern's two models the tree follows the second, where an arrow key moves the selection and a modifier keeps it, which every desktop tree uses and the tree had already. Following it in full gives the keyboard every selection a pointer can make, as N-ACC-003 requires. One key the pattern lacks, selecting a row with everything under it, is the software's own and `docs/shortcuts.md` says so.*
+
 ### 5.5 Compatibility
 
 ---
@@ -1245,3 +1265,4 @@ The software shall be compatible with evergreen major web browsers.
 | [2] | Easy Approach to Requirements Syntax (EARS) | https://alistairmavin.com/ears/ |
 | [3] | SEBoK System Requirements Definition | https://sebokwiki.org/wiki/System_Requirements_Definition |
 | [4] | Web Content Accessibility Guidelines (WCAG) 2.2 | https://www.w3.org/TR/WCAG22/ |
+| [5] | ARIA Authoring Practices Guide, Tree View pattern | https://www.w3.org/WAI/ARIA/apg/patterns/treeview/ |

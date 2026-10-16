@@ -61,7 +61,6 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-delete` | `trash-can` | 32 | `trash-can.svg` |
 | `i-move-up` | `arrow--up` | 16 | `arrow--up.svg` |
 | `i-move-down` | `arrow--down` | 16 | `arrow--down.svg` |
-| `i-move-to` | `move` | 32 | `move.svg` |
 | `i-cut` | `cut` | 32 | `cut.svg` |
 | `i-copy` | `copy` | 32 | `copy.svg` |
 | `i-paste` | `paste` | 32 | `paste.svg` |
