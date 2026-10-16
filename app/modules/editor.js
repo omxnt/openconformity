@@ -10,7 +10,7 @@
  */
 
 import { attributesFor, typeOf, groupsOf, SHARED_HELP, isOutcome, isRationale, leaderOf, groupShown } from './attributes.js';
-import { firstTabName, setValues, joinSet, tableRows, linkable, draftChanged } from './fields.js';
+import { firstTabName, setValues, joinSet, tableRows, linkable, draftChanged , choiceOptions } from './fields.js';
 import { statusIcon } from './rating.js';
 import { openMultiSelect } from './multiselect.js';
 import { nodeOf } from './model.js';
@@ -613,8 +613,10 @@ export function createEditor({
         attributes: { 'data-key': definition.key, id: `field-${definition.key}` },
       });
       select.appendChild(el('option', { text: '–', attributes: { value: '' } }));
-      for (const choice of choices) select.appendChild(el('option', { text: choice, attributes: { value: choice } }));
-      select.value = choices.includes(value) ? value : '';
+      for (const option of choiceOptions(definition, value)) {
+        select.appendChild(el('option', { text: option.outside ? `${option.value} (not an option)` : option.value, attributes: { value: option.value } }));
+      }
+      select.value = typeof value === 'string' ? value : '';
       return select;
     }
     if (definition.kind === 'set') {

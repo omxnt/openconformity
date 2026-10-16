@@ -95,7 +95,8 @@ export function hiddenContent(model) {
 /**
  * What a file holds that no definition of this revision presents: for
  * the project and for every entity, the attribute keys none of its
- * type's definitions name, where they hold a value. The project comes
+ * type's definitions name, where they hold a value, and the keys of a
+ * choice whose stored value is not among its options. The project comes
  * first, as null.
  * @param {import('./model.js').Model} model
  * @returns {Array<{ id: string|null, keys: string[] }>}
@@ -103,8 +104,14 @@ export function hiddenContent(model) {
 export function unknownContent(model) {
   const found = [];
   const strange = (code, attributes) => {
-    const known = new Set(attributesFor(code).map((definition) => definition.key));
-    return Object.keys(attributes).filter((key) => !known.has(key) && (attributes[key] ?? '') !== '');
+    const definitions = new Map(attributesFor(code).map((definition) => [definition.key, definition]));
+    return Object.keys(attributes).filter((key) => {
+      const value = attributes[key] ?? '';
+      if (value === '') return false;
+      const definition = definitions.get(key);
+      if (!definition) return true;
+      return definition.kind === 'choice' && !(definition.values ?? []).includes(value);
+    });
   };
   const project = strange('PROJECT', model.attributes);
   if (project.length > 0) found.push({ id: null, keys: project });

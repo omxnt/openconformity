@@ -79,6 +79,9 @@ ok(projectSweep(model, { ...same, estimationMethod: '' }).entities.every((held) 
   addEntity(strange, 'ELM', { attributes: { title: 'Drive', colour: 'red', weight: '3 kg' } });
   addEntity(strange, 'HAZ', { attributes: { title: 'Crushing' } });
   deepEqual(unknownContent(strange), [{ id: null, keys: ['budget'] }, { id: 'ELM-001', keys: ['colour', 'weight'] }], 'the project first, as null, then each entity holding a key no definition of its type names, empty values passing');
+  addEntity(strange, 'ESR', { attributes: { title: 'Noise', applicable: 'Maybe' } });
+  addEntity(strange, 'ESR', { attributes: { title: 'Guards', applicable: 'No' } });
+  deepEqual(unknownContent(strange).slice(2), [{ id: 'ESR-001', keys: ['applicable'] }], 'and a choice whose stored value is not among its options, by its key, while a stored option is known');
 }
 
 summary('test-project');

@@ -123,6 +123,23 @@ export function joinSet(definition, chosen) {
 const quoteCell = (cell) => (/[\t\n"]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell);
 
 /**
+ * The options a choice field offers for a stored value: the definition's
+ * values, and first among them a stored value outside those values, so a
+ * value the options do not offer is shown as it stands and kept by a
+ * save that does not change it, as F-PER-010 asks of content the
+ * software does not know. Picking another option replaces it.
+ * @param {{ values?: string[] }} definition
+ * @param {string|undefined} value
+ * @returns {Array<{ value: string, outside: boolean }>}
+ */
+export function choiceOptions(definition, value) {
+  const values = definition.values ?? [];
+  const held = typeof value === 'string' ? value : '';
+  const outside = held !== '' && !values.includes(held);
+  return [...(outside ? [{ value: held, outside: true }] : []), ...values.map((choice) => ({ value: choice, outside: false }))];
+}
+
+/**
  * A table as it is stored, read back as rows: one row per line, the
  * cells parted by tabs in column order, a quoted cell holding what it
  * holds, breaks and tabs among it; cells trimmed, missing cells empty,

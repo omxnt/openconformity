@@ -85,6 +85,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-024 | Headless | [test-editor.js](../tests/test-editor.js) | The draft against the entity |
 | V-TST-025 | Headless | [test-editor.js](../tests/test-editor.js) | A hyperlink is presented as a link only when it is a web address |
 | V-TST-026 | Headless | [test-editor.js](../tests/test-editor.js) | The field helpers over the definitions |
+| V-TST-191 | Headless | [test-editor.js](../tests/test-editor.js) | A choice keeps a stored value its options do not offer |
 | V-TST-027 | Headless | [test-editor.js](../tests/test-editor.js) | what a save removes, as the notice tells it |
 | V-TST-028 | Headless | [test-editor.js](../tests/test-editor.js) | The measures a residual rating was made against |
 | V-TST-029 | Headless | [test-example.js](../tests/test-example.js) | The example passes the gates a user's file passes |
@@ -405,7 +406,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-011 | Copy and paste | V-TST-188, V-TST-187, V-DEM-020 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
-| F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
+| F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
@@ -428,7 +429,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-007 | Migration preservation | V-TST-190, V-INS-025 | Tested |
 | F-PER-008 | Version increment | V-ANA-022 | Manual |
 | F-PER-009 | Migration notice | None | None |
-| F-PER-010 | Attribute preservation | V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
+| F-PER-010 | Attribute preservation | V-TST-191, V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
 | F-PER-012 | Shipped library | V-TST-069, V-TST-180, V-TST-178 | Tested |
 | F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171, V-TST-189 | Tested |

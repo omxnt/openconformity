@@ -308,6 +308,7 @@ function flowsOver(store) {
   held.attributes.budget = '12';
   addEntity(held, 'SCN', { attributes: { title: 'Fall', initialSeverity: 'Serious', initialS: 'S2' } });
   addEntity(held, 'SAF', { attributes: { title: 'Stop', standard: 'EN ISO 13849-1:2023', plr: 'PL c', sil: 'SIL 2', colour: 'red' } });
+  addEntity(held, 'HAZ', { attributes: { title: 'Crush', eliminated: 'Maybe' } });
   const text = serialise(held);
   const fileInput = { files: [{ text: async () => text }], value: '', onchange: null, oncancel: null, click() { this.onchange?.(); } };
   globalThis.document = fakeDocument();
@@ -335,7 +336,8 @@ function flowsOver(store) {
   deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SCN-001').attributes), ['title', 'initialSeverity'], 'with the hidden rating cleared and the shown one kept');
   deepEqual(Object.keys(nodeOf(accepted.store.model(), 'SAF-001').attributes), ['title', 'standard', 'plr', 'colour'], 'the hidden level cleared, the unknown key kept');
   equal(accepted.opened[0].title, 'The file holds content this version does not show', 'then the unknown content is stated');
-  deepEqual([...accepted.opened[0].body.querySelectorAll('li')].map((li) => li.textContent), ['Project  budget', 'SAF-001  Stop  colour'], 'by where it sits, the project first');
+  deepEqual([...accepted.opened[0].body.querySelectorAll('li')].map((li) => li.textContent), ['Project  budget', 'SAF-001  Stop  colour', 'HAZ-001  Crush  eliminated'], 'by where it sits, the project first, a choice value outside its options named by its key');
+  equal(nodeOf(accepted.store.model(), 'HAZ-001').attributes.eliminated, 'Maybe', 'and the value is kept as written');
   const clean = createModel();
   addEntity(clean, 'ELM', { attributes: { title: 'Drive' } });
   fileInput.files = [{ text: async () => serialise(clean) }];

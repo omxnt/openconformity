@@ -4,7 +4,7 @@
  * browser. Run from this directory.
  */
 
-import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText } from '../app/modules/fields.js';
+import { draftChanged, linkable, ratingView, codeShown, firstTabName, setValues, joinSet, tableRows, joinTable, removalText, choiceOptions } from '../app/modules/fields.js';
 import { recordedStates, recordOf, staleText } from '../app/modules/records.js';
 import { createModel, addEntity, relate, removeEntity, unrelate } from '../app/modules/model.js';
 import { ATTRIBUTES, attributesFor, groupsOf } from '../app/modules/attributes.js';
@@ -118,6 +118,16 @@ equal(linkable(''), false, 'and an empty value is nothing');
     ['RS 100 (low)', 'negligible', ['SS 95', 'PS 80']],
     "under the scoring a rating reads as its total and category under the report's RS, negligible wearing the neutral tone as under the matrix, the scores its codes under SS and PS"
   );
+}
+
+// --- V-TST-191 A choice keeps a stored value its options do not offer (F-MOD-003, F-PER-010) ---
+
+{
+  const applicable = { key: 'applicable', kind: 'choice', values: ['Yes', 'No'] };
+  deepEqual(choiceOptions(applicable, 'No'), [{ value: 'Yes', outside: false }, { value: 'No', outside: false }], 'a stored option offers the options as they are');
+  deepEqual(choiceOptions(applicable, ''), [{ value: 'Yes', outside: false }, { value: 'No', outside: false }], 'as does an empty value');
+  deepEqual(choiceOptions(applicable, 'Maybe'), [{ value: 'Maybe', outside: true }, { value: 'Yes', outside: false }, { value: 'No', outside: false }], 'a value outside the options is offered first, marked as outside, so a save without a change keeps it');
+  deepEqual(choiceOptions({ key: 'x', kind: 'choice' }, 'Any'), [{ value: 'Any', outside: true }], 'a choice without values offers the stored value alone');
 }
 
 // --- V-TST-027 what a save removes, as the notice tells it (N-SEC-005) -------
