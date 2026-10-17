@@ -10,7 +10,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 | ⌘Enter | Ctrl Enter | Finishes what is open. Saves an edit, relates the picks, applies a diagram. |
 | ⌘Z | Ctrl Z | Undo |
 | ⇧⌘Z | Ctrl Y, Shift Ctrl Z | Redo |
-| ⌘F | Ctrl F | Focuses the tree's filter |
+| ⌘F | Ctrl F | Focuses the tree's filter, opening the navigator where it stands collapsed |
 | Escape | Escape | Closes what is open, innermost first. A menu, a tooltip, a dialog, an edit, a mode. |
 | Tab | Tab | Moves through the controls. A dialog keeps it inside. |
 
@@ -51,6 +51,8 @@ The keys and modified clicks the software answers to, one table per place, with 
 | Escape in the filter | Escape in the filter | Clears the filter |
 | Double click | Double click | Edits the entity, or renames the folder |
 | Drag | Drag | Files the row where it is dropped |
+| Click on the chevron | Click on the chevron | Collapses the navigator to its toolbar, stood on end, or expands it |
+| Click in the collapsed toolbar | Click in the collapsed toolbar | Opens the navigator, then runs the action, or focuses the filter from the magnifier |
 
 ## 4. Picking relationships
 

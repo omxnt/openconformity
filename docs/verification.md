@@ -236,6 +236,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-149 | Headless | [test-store.js](../tests/test-store.js) | The tab chosen per type is the session's |
 | V-TST-150 | Headless | [test-store.js](../tests/test-store.js) | Clear browser data forgets everything |
 | V-TST-151 | Headless | [test-store.js](../tests/test-store.js) | The set-aside copy can be read back and discarded |
+| V-TST-208 | Headless | [test-store.js](../tests/test-store.js) | The collapsed navigator is session state |
 | V-TST-152 | Headless | [test-validator.js](../tests/test-validator.js) | The fixtures |
 | V-TST-153 | Headless | [test-validator.js](../tests/test-validator.js) | The filing depth |
 | V-TST-154 | Headless | [test-validator.js](../tests/test-validator.js) | A prototype key pollutes nothing |
@@ -318,6 +319,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-022 | Drive | [drives.py](../tests/drives.py) | Open Add relationship on an entity, then click a row that is not a candidate, press the arrows and Home and End, and find the selection still on the subject and the focus moving. Space picks the focused candidate, and Escape leaves |
 | V-DEM-023 | Drive | [drives.py](../tests/drives.py) | Open each mode in turn, an edit, a picking, the library and a view, and find the Edit menu's changers and the views greyed under each, Add relationship and Import among them. Leave each by its own button or Escape |
 | V-DEM-024 | Drive | [drives.py](../tests/drives.py) | Open the library and highlight an act, then a catalogue. The preview shows the act as the editor shows it, its tabs and every field of the type, an empty tab with its dashes and no notice, and a catalogue row says what checking it does |
+| V-DEM-025 | Drive | [drives.py](../tests/drives.py) | Click the chevron at the end of the navigator toolbar and find the pane folded to a strip one button wide, the chevron at the top, the tree gone and the column wider. Reload and find it still folded. Press Cmd F on a Mac or Ctrl F elsewhere and find the pane open with the filter focused. Fold it, press the magnifier at the foot of the strip and find the pane open on the filter. Fold it, press New folder in the strip and find the pane open with the question up. Open it again by the chevron |
 
 ### 2.4 Analyses
 
@@ -402,14 +404,14 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|
 | F-APP-001 | Small-viewport notice | V-INS-021, V-DEM-002 | Partly |
 | F-APP-002 | Direct entry | V-TST-001, V-TST-040, V-INS-018 | Tested |
-| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-185, V-TST-193, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-DEM-003 | Partly |
+| F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-185, V-TST-193, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-TST-208, V-DEM-003, V-DEM-025 | Partly |
 | F-SES-002 | Model retention | V-TST-037, V-TST-128, V-TST-131, V-TST-132, V-TST-135, V-TST-143, V-DEM-004 | Partly |
 | F-SES-003 | Browser removal | V-TST-060, V-TST-150, V-DEM-005 | Partly |
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
 | F-SES-007 | Unconfirmed edit on leaving | V-TST-206, V-TST-129 | Tested |
-| F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
+| F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-TST-208, V-DEM-016, V-DEM-025 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
 | F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
 | F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105 | Tested |
@@ -480,9 +482,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-SEC-011 | Safe export | V-TST-073, V-TST-169, V-TST-174, V-TST-164, V-TST-167, V-TST-173 | Tested |
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028, V-DEM-015 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
-| N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012 | Partly |
+| N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012, V-DEM-025 | Partly |
 | N-ACC-004 | Tree selection pattern | V-TST-200, V-TST-203, V-DEM-021, V-DEM-022 | Partly |
-| N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013 | Partly |
+| N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013, V-DEM-025 | Partly |
 | N-CMP-002 | Browser support | V-INS-013, V-INS-020, V-TST-144, V-DEM-014 | Partly |
 
 ## 4. Summary

@@ -1028,4 +1028,30 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(session.read('openconformity.relationships-collapsed'), null, 'clearing browser data forgets the choice');
 }
 
+// --- V-TST-208 The collapsed navigator is session state (F-SES-001, F-WSP-001) ---
+
+{
+  const storage = fakeStorage();
+  const session = fakeStorage();
+  const retention = memoryRetention();
+  const store = createStore({ storage, session, retention });
+  store.replaceProject(createModel());
+  equal(store.navigatorCollapsed(), false, 'the navigator opens expanded');
+  let notified = 0;
+  store.subscribe(() => { notified += 1; });
+  store.setNavigatorCollapsed(true);
+  equal(store.navigatorCollapsed(), true, 'it can be collapsed to its toolbar');
+  equal(session.read('openconformity.navigator-collapsed'), 'true', 'and the choice rides the browser session');
+  equal(notified, 1, 'the panes are told once');
+  store.setNavigatorCollapsed(true);
+  equal(notified, 1, 'and not again for the same state');
+  ok(!(await blobIn(store, retention)).session.navigatorCollapsed, 'the blob never carries it');
+  const reloaded = createStore({ storage, session, retention });
+  equal(reloaded.navigatorCollapsed(), true, 'a reload within the session keeps it');
+  const fresh = createStore({ storage, session: fakeStorage(), retention });
+  equal(fresh.navigatorCollapsed(), false, 'a new session opens expanded');
+  await reloaded.clearBrowserData();
+  equal(reloaded.navigatorCollapsed(), false, 'and clearing the browser data opens it with the rest');
+}
+
 summary('test-store');

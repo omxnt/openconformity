@@ -371,6 +371,8 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
 
   /** The editor's floor: its head, its tab bar and one row of fields. */
   const EDITOR_FLOOR = 160;
+  /** The navigator's floor and preset: the toolbar, seven buttons, three dividers, the spacer and the collapse toggle, 313 pixels, rounded up. */
+  const NAVIGATOR_FLOOR = 320;
   /** The column's floor: the relationship pane's head at its widest, the two tabs, the filter, Done and Cancel while picking, and the chevron. */
   const COLUMN_FLOOR = 508;
   /** The splitters' own width. */
@@ -381,8 +383,10 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     sizeAt: (event) => event.clientX - workspace.getBoundingClientRect().left,
     size: () => navigatorPane.getBoundingClientRect().width,
     limit: () => workspace.getBoundingClientRect().width - SPLITTER - COLUMN_FLOOR,
-    minimum: 300,
-    preset: 320,
+    minimum: NAVIGATOR_FLOOR,
+    collapsed: () => store.navigatorCollapsed(),
+    collapse: (state) => store.setNavigatorCollapsed(state),
+    preset: NAVIGATOR_FLOOR,
     apply: (width) => {
       workspace.style.setProperty('--navigator-width', `${Math.round(width)}px`);
       store.setLayout({ navigator: Math.round(width) });
@@ -428,6 +432,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     unsavedButton.hidden = !store.dirty();
     unsavedButton.disabled = !(actions.find((action) => action.id === 'save')?.enabled() ?? false);
     relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed());
+    navigatorPane.classList.toggle('collapsed', store.navigatorCollapsed());
     document.title = titleFor(store.hasProject(), store.model().name);
 
     if (wasFailingToPersist && !store.persistFailed()) {

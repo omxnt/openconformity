@@ -349,18 +349,41 @@ export function createNavigator({
         { className: `ghost-button ghost-icon${action.danger ? ' ghost-danger' : ''}`, attributes },
         [icon(action.icon)]
       );
-      button.addEventListener('click', () => action.run({ anchor: button }));
+      button.addEventListener('click', () => {
+        store.setNavigatorCollapsed(false);
+        action.run({ anchor: button });
+      });
       tooltipOn(button, action.label);
       toolbar.appendChild(button);
       toolbarButtons.set(action, button);
     }
   }
 
+  // The collapse toggle, last in the toolbar after a spacer, as the
+  // relationship pane's stands last in its head. Collapsed, the pane is
+  // its toolbar stood on end, the toggle at the top pointing right, and
+  // the strip is a launcher: an action opens the pane before it runs,
+  // and a magnifier shown only then opens it on the filter.
+  const collapseToggle = el('button', { className: 'ghost-button ghost-icon pane-collapse', attributes: { type: 'button' } }, [icon('i-chevron-down')]);
+  collapseToggle.addEventListener('click', () => store.setNavigatorCollapsed(!store.navigatorCollapsed()));
+  const filterOpener = el('button', { className: 'ghost-button ghost-icon strip-filter', attributes: { type: 'button' } }, [icon('i-search')]);
+  tooltipOn(filterOpener, 'Filter the model');
+  filterOpener.addEventListener('click', () => {
+    store.setNavigatorCollapsed(false);
+    filterInput.focus();
+    filterInput.select();
+  });
+  toolbar.append(el('span', { className: 'toolbar-spacer' }), collapseToggle, el('span', { className: 'toolbar-divider strip-filter-rule' }), filterOpener);
+
   function syncToolbar() {
     for (const [action, button] of toolbarButtons) {
       button.disabled = !action.enabled();
       if (action.describe) tooltipOn(button, action.describe());
     }
+    const collapsed = store.navigatorCollapsed();
+    collapseToggle.setAttribute('aria-expanded', String(!collapsed));
+    tooltipOn(collapseToggle, collapsed ? 'Expand the pane' : 'Collapse the pane', { align: 'end' });
+    container.closest('.pane')?.classList.toggle('collapsed', collapsed);
   }
 
   // --- The rows --------------------------------------------------------

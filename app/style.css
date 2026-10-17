@@ -398,8 +398,26 @@ body {
 
 .pane-navigator {
   flex: 0 0 var(--navigator-width, 320px);
-  min-width: 300px;  /* the toolbar: eight 32px buttons, two dividers of 1px with 8px margins, nine 2px gaps, 4px padding each side */
+  min-width: 320px;  /* the toolbar: seven 32px buttons, three dividers of 1px with 8px margins, the spacer, the 32px collapse toggle, eleven 2px gaps, 4px padding each side, 313px rounded up */
 }
+/* Collapsed, the navigator is its toolbar stood on end: a strip one
+   button wide on the toolbar's own surface, the toggle at the top
+   pointing right, the buttons square beneath it, the dividers turned to
+   rules, the filter and the tree gone. The column takes the width, and
+   the strip clips nothing, so a tooltip hangs out over the column. */
+.pane-navigator.collapsed { flex: 0 0 40px; min-width: 40px; background: var(--layer); overflow: visible; }
+.pane-navigator.collapsed .pane-toolbar { flex-direction: column; height: auto; padding: 4px 4px; border-bottom: none; }
+.pane-navigator.collapsed .pane-toolbar .ghost-icon { flex: none; align-self: auto; height: 32px; }
+.pane-toolbar .strip-filter, .pane-toolbar .strip-filter-rule { display: none; }  /* the magnifier and its rule stand in the strip alone, the open pane having its filter row */
+.pane-navigator.collapsed .pane-toolbar .strip-filter-rule { display: block; order: 1; }
+.pane-navigator.collapsed .pane-toolbar .strip-filter { display: inline-flex; order: 2; }
+.pane-navigator.collapsed .pane-toolbar .pane-collapse { order: -1; }
+.pane-navigator.collapsed .pane-toolbar .toolbar-spacer { display: none; }
+.pane-navigator.collapsed .pane-toolbar .toolbar-divider { width: 16px; height: 1px; margin: 4px 0; }
+.pane-navigator .pane-collapse .icon { transform: rotate(90deg); }  /* open, the chevron points at the edge the pane folds to */
+.pane-navigator .pane-collapse .icon { transform: rotate(90deg); }  /* open, the chevron points at the edge the pane folds to */
+.pane-navigator.collapsed .pane-collapse .icon { transform: rotate(-90deg); }
+.pane-navigator.collapsed .search, .pane-navigator.collapsed .pane-body { display: none; }
 
 .column {
   flex: 1;

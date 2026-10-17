@@ -142,7 +142,7 @@ A pane subscribes to the store and rebuilds its content from it on every notific
 |---|---|---|---|---|
 | Model | The project, its folders, entities, relationships and attributes | The store, and the retention record `project` in IndexedDB | A reload, and a file once saved | Yes |
 | Session, with the project | The selection, the tree's expansion, the project row, whether the project is unsaved | The same record | A reload | No |
-| Session, per tab | The relationship view, the collapsed relationship pane, the tab per type, the open view, the pane layout, the consent to draw.io | Session storage | A reload in the same tab | No |
+| Session, per tab | The relationship view, the collapsed panes, the tab per type, the open view, the pane layout, the consent to draw.io | Session storage | A reload in the same tab | No |
 | Preference | The theme | Local storage | Until cleared | No |
 | Set aside | A stored project that failed to load | The retention record `aside` | Until discarded | No |
 | Transient | The relate picker, the library, the diagram editor, the messages, the column widths | Memory | Nothing | No |

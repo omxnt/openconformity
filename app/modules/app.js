@@ -158,6 +158,7 @@ document.addEventListener('keydown', (event) => {
     const filter = /** @type {HTMLInputElement|null} */ (document.getElementById('navigator-filter'));
     if (!store.hasProject() || !filter) return;
     event.preventDefault();
+    store.setNavigatorCollapsed(false);
     filter.focus();
     filter.select();
     return;

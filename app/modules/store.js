@@ -67,6 +67,8 @@ const THEME_KEY = 'openconformity.theme';
 const VIEW_KEY = 'openconformity.view';
 /** Session storage: whether the relationship pane is collapsed to its head. */
 const COLLAPSE_KEY = 'openconformity.relationships-collapsed';
+/** Session storage: whether the navigator is collapsed to its toolbar, stood on end. */
+const NAVIGATOR_COLLAPSE_KEY = 'openconformity.navigator-collapsed';
 
 /** The consent key in the browser session: the user's choice not to be asked before the external drawing editor loads, until the session ends. */
 const CONSENT_KEY = 'openconformity.drawio-consent';
@@ -155,6 +157,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   }
   /** Whether the relationship pane stands collapsed to its head: session state, a reload keeping it */
   let relationshipsCollapsed = sessionRead(COLLAPSE_KEY) === 'true';
+  /** Whether the navigator stands collapsed to its toolbar: session state, a reload keeping it */
+  let navigatorCollapsed = sessionRead(NAVIGATOR_COLLAPSE_KEY) === 'true';
   /** Whether the messages stand over the relationship pane: opened from the status bar, closed by its X or Escape, never kept across a reload. */
   let messagesOpen = false;
   /** Whether the library picker stands over the editor pane: opened from the toolbar, closed by its X or Escape, never kept across a reload. */
@@ -501,9 +505,10 @@ export function createStore({ storage, session = null, retention = memoryRetenti
           // Storage that refuses has nothing left to keep either way.
         }
       }
-      for (const key of [VIEW_KEY, COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY, LAYOUT_KEY]) sessionWrite(key, null);
+      for (const key of [VIEW_KEY, COLLAPSE_KEY, NAVIGATOR_COLLAPSE_KEY, TABS_KEY, OPEN_VIEW_KEY, CONSENT_KEY, LAYOUT_KEY]) sessionWrite(key, null);
       layout = {};
       relationshipsCollapsed = false;
+      navigatorCollapsed = false;
       model = createModel();
       savedSequence = history.reset(model);
       projectOpen = false;
@@ -1048,6 +1053,22 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     setRelationshipsCollapsed(collapsed) {
       if (collapsed === relationshipsCollapsed) return;
       collapseRelationships(collapsed);
+      notify();
+    },
+
+    /** Whether the navigator stands collapsed to its toolbar. */
+    navigatorCollapsed: () => navigatorCollapsed,
+
+    /**
+     * Collapse the navigator to its toolbar, or expand it again. Session
+     * state like the relationship pane's, kept for a reload within the
+     * session, gone with it, never in a file.
+     * @param {boolean} collapsed
+     */
+    setNavigatorCollapsed(collapsed) {
+      if (collapsed === navigatorCollapsed) return;
+      navigatorCollapsed = collapsed;
+      sessionWrite(NAVIGATOR_COLLAPSE_KEY, String(collapsed));
       notify();
     },
 

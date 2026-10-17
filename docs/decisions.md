@@ -1067,6 +1067,14 @@ The library shows its catalogues as the open groups at the root of one tree, the
 
 > *Catalogues as tabs kept the picks of one apart from the picks of another, and an import had to be repeated per catalogue. One tree is the shape the navigator already teaches, and one pick set makes the import across catalogues fall out of it. The preview had its own rendering, every tab of the type as a fold, which said more about the type than the entity and was a second form to keep in step with the editor. The editor's own view costs tabs that hold nothing for a catalogue entity and a wider floor for the preview, and buys one form, one mental model, and the certainty that what is seen is what lands. Amends D-086 on one catalogue at a time. Settles #51.*
 
+### D-124 The navigator folds to its toolbar
+
+`2026-10-17` `product`
+
+The navigator collapses to a strip one button wide, its toolbar stood on end with the collapse chevron at the top, the filter and the tree hidden, and the editor column taking the width. The chevron stands last in the toolbar after a spacer, as the relationship pane's stands last in its head. There is no state between open and folded, a drag of the splitter snaps the pane shut past half its floor and open again past the same point, and the filter key opens the pane before it focuses the filter. The folded state is session state like the relationship pane's, kept across a reload and never in a file. The strip is a launcher, not a place to work. An action pressed in it opens the pane before it runs, and a magnifier shown in the strip alone opens the pane on the filter.
+
+> *The relationship pane folds to its head with every control still working, so the navigator folds to its toolbar with every button still working, and the two panes answer the same gesture the same way. The folded strip is Carbon's rail, the side navigation at icon width with its items in a column, and the binary form is what every tool with a collapsible side pane does, nothing reflows item by item. The toolbar had room for the chevron once Move to had gone, so the floor stayed where the preset was. An action run while the tree is hidden would be run blind, the new row unseen, the question asked about a selection out of view, so the strip opens the pane first, which is what VS Code's activity bar does. Settles #73.*
+
 ---
 
 ## 3. Undecided

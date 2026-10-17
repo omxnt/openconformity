@@ -532,6 +532,42 @@ def drive_024(page):
     """))
 
 
+def drive_025(page):
+    page.eval(script("""
+      await loadExample();
+      const pane = document.querySelector('#pane-navigator');
+      const toggle = document.querySelector('#navigator-toolbar .pane-collapse');
+      must(toggle && toggle.getAttribute('aria-expanded') === 'true', 'the toolbar ends with the collapse chevron, expanded');
+      const wide = pane.getBoundingClientRect().width;
+      toggle.click(); await wait(300);
+      must(pane.classList.contains('collapsed') && pane.getBoundingClientRect().width <= 40, 'the pane folds to a strip: ' + pane.getBoundingClientRect().width);
+      must(document.querySelector('#navigator-body').offsetParent === null, 'the tree is hidden');
+      must(toggle.getBoundingClientRect().top < document.querySelector('#navigator-toolbar [data-action]').getBoundingClientRect().top, 'the chevron stands at the top of the strip, the buttons below it');
+      must(document.querySelector('#pane-editor').getBoundingClientRect().width > 0 && pane.getBoundingClientRect().width < wide, 'and the column took the width');
+    """))
+    page.reload()
+    page.eval(script("""
+      await wait(300);
+      const pane = document.querySelector('#pane-navigator');
+      must(pane.classList.contains('collapsed'), 'the strip survives a reload');
+      key(document.body, { key: 'f', metaKey: true, ctrlKey: true }); await wait(300);
+      must(!pane.classList.contains('collapsed') && document.activeElement === document.querySelector('#navigator-filter'), 'the filter key opens the pane and focuses the filter');
+      document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
+      must(pane.classList.contains('collapsed'), 'and the chevron folds it again');
+      must(document.querySelector('#navigator-toolbar .strip-filter').offsetParent !== null, 'the strip ends in a magnifier');
+      document.querySelector('#navigator-toolbar .strip-filter').click(); await wait(300);
+      must(!pane.classList.contains('collapsed') && document.activeElement === document.querySelector('#navigator-filter'), 'which opens the pane on the filter');
+      must(document.querySelector('#navigator-toolbar .strip-filter').offsetParent === null, 'and is not shown in the open pane');
+      document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
+      document.querySelector('#navigator-toolbar [data-action="new-folder"]').click(); await wait(400);
+      must(!pane.classList.contains('collapsed') && dialogTitle() !== null, 'an action in the strip opens the pane and then runs: ' + dialogTitle());
+      key(document.body, { key: 'Escape' }); await wait(300);
+      document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
+      document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
+      must(!pane.classList.contains('collapsed'), 'and the chevron opens it');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -547,6 +583,7 @@ DRIVES = [
     ('V-DEM-022', 'Picking owns the tree', drive_022),
     ('V-DEM-023', 'One mode at a time', drive_023),
     ('V-DEM-024', 'The library preview is the editor\'s view', drive_024),
+    ('V-DEM-025', 'The navigator folds to its toolbar', drive_025),
 ]
 
 
