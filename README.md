@@ -16,7 +16,18 @@ Artefacts can be generated as views of the model, exported and intended as input
 
 ## Technology
 
-Built with vanilla HTML, CSS, and JavaScript using ES modules. No framework, no build step, no package manager. Projects are saved as a single local file, and views of the model are exported from the tool.
+Plain web platform, nothing added. The software is static files served as they are in the repository, and everything it does happens in the browser.
+
+| Aspect | What |
+|---|---|
+| Stack | Vanilla HTML, CSS and JavaScript as ES modules. No framework, no build step, no package manager, no third-party code. |
+| Design | IBM's Carbon Design System, its tokens copied into the stylesheet by value. IBM Plex for the type and Carbon Icons for the glyphs, both vendored with the software. |
+| Network | Nothing is fetched at runtime. The one external application is the draw.io editor a diagram opens in, loaded only when the user consents, in a sandboxed frame. |
+| Project | Kept in the browser between sessions and saved as a single local file in a versioned schema. |
+| Views | Exported as Excel workbooks and Markdown bundles, written by the software itself. |
+| Types | JSDoc comments, checked by TypeScript's checker over the plain files, with no build. |
+| Tests | Headless tests under JavaScriptCore or Node, and browser drives in headless Chrome, run on GitHub before a change reaches the published branch. |
+| Hosting | Static files on Cloudflare Pages, straight from the repository, with the security headers sent by the host. |
 
 ## Structure
 
@@ -52,6 +63,7 @@ openconformity/
 | [security.md](docs/security.md) | How the software is kept secure |
 | [verification.md](docs/verification.md) | How each requirement is verified |
 | [shortcuts.md](docs/shortcuts.md) | Every keyboard path through the software |
+| [template.md](docs/template.md) | How a document is written |
 
 ## Disclaimer
 
@@ -65,11 +77,13 @@ Provided as-is, without warranty of any kind. Outputs may contain errors and sho
 
 Vulnerabilities go by GitHub's private vulnerability reporting or to the address below, as [SECURITY.md](SECURITY.md) describes.
 
+## Contribution
+
+This is a hobby project maintained by one person, and it does not take code contributions for now. Feedback is welcome and shapes what comes next, as [CONTRIBUTING.md](CONTRIBUTING.md) describes.
+
 ## Contact
 
 [info@openconformity.org](mailto:info@openconformity.org)
-
-How to give feedback is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Links
 
