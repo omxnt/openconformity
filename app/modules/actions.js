@@ -51,8 +51,8 @@ const DOWN_HINT = APPLE ? '⌥↓' : 'Alt ↓';
  */
 export function createActions({ store, flows }) {
   const selected = () => nodeOf(store.model(), store.selection());
-  /** Whether no relationship picker is open, which every action that changes the model needs, since picking is a mode of the tree. */
-  const idle = () => store.picker() === null;
+  /** Whether the interface is free for an action that changes the model or starts a mode: no mode is open. An edit is left by Save, Cancel or Escape like any other mode. */
+  const free = () => store.mode() === null;
   /** Whether one row at most is selected, which the actions that create, relate or reorder need. */
   const single = () => store.selected().length <= 1;
   /** The one entity type a selection of several holds, or null where the rows differ in type or a folder is among them. */
@@ -71,7 +71,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => store.hasProject(),
+      enabled: () => store.hasProject() && (free() || store.mode() === 'view'),
       checked: () => store.view()?.id === view.id,
       run: () => flows.openView(view.id),
     })),
@@ -186,7 +186,7 @@ export function createActions({ store, flows }) {
       group: 'edit',
       toolbar: false,
       context: true,
-      enabled: () => idle() && store.hasProject() && (single() || bulkType() !== null),
+      enabled: () => free() && store.hasProject() && (single() || bulkType() !== null),
       describe: () => (store.selected().length > 1 ? `Edit ${store.selected().length} selected` : 'Edit attributes'),
       run: () => flows.editSelection(),
     },
@@ -199,7 +199,7 @@ export function createActions({ store, flows }) {
       context: true,
       menubar: false,
       hint: SELECT_BELOW_HINT,
-      enabled: () => idle() && store.hasProject() && single() && childrenOf(store.model(), store.selection()).length > 0,
+      enabled: () => free() && store.hasProject() && single() && childrenOf(store.model(), store.selection()).length > 0,
       run: () => flows.selectBelow(store.selection()),
     },
     {
@@ -210,7 +210,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       menu: true,
-      enabled: () => idle() && single() && store.hasProject(),
+      enabled: () => free() && single() && store.hasProject(),
       run: (invocation) => flows.toggleCreateMenu(invocation),
     },
     {
@@ -222,7 +222,7 @@ export function createActions({ store, flows }) {
       context: true,
       menu: true,
       enabled: () =>
-        idle() && single() && selected()?.kind === 'entity' && relatedTypeOffer(store.model(), store.selection()).length > 0,
+        free() && single() && selected()?.kind === 'entity' && relatedTypeOffer(store.model(), store.selection()).length > 0,
       run: (invocation) => flows.toggleRelatedMenu(invocation),
     },
     {
@@ -232,7 +232,7 @@ export function createActions({ store, flows }) {
       group: 'create',
       toolbar: true,
       context: true,
-      enabled: () => idle() && single() && store.hasProject(),
+      enabled: () => free() && single() && store.hasProject(),
       run: () => flows.createFolder(),
     },
     {
@@ -243,7 +243,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       enabled: () =>
-        single() && selected()?.kind === 'entity' &&
+        free() && single() && selected()?.kind === 'entity' &&
         relationshipOptions(store.model(), store.selection()).length > 0,
       run: () => flows.relateSelection(),
     },
@@ -254,7 +254,7 @@ export function createActions({ store, flows }) {
       group: 'library',
       toolbar: true,
       context: false,
-      enabled: () => idle() && single() && store.hasProject(),
+      enabled: () => free() && single() && store.hasProject(),
       run: () => flows.importFromLibrary(),
     },
     {
@@ -265,7 +265,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: UP_HINT,
-      enabled: () => idle() && single() && store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
+      enabled: () => free() && single() && store.navigatorFilter().trim() === '' && canMoveUp(store.model(), store.selection()),
       run: () => flows.moveUp(),
     },
     {
@@ -276,7 +276,7 @@ export function createActions({ store, flows }) {
       toolbar: true,
       context: true,
       hint: DOWN_HINT,
-      enabled: () => idle() && single() && store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
+      enabled: () => free() && single() && store.navigatorFilter().trim() === '' && canMoveDown(store.model(), store.selection()),
       run: () => flows.moveDown(),
     },
     {
@@ -287,7 +287,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: CUT_HINT,
-      enabled: () => idle() && selected() !== null,
+      enabled: () => free() && selected() !== null,
       run: () => flows.cutSelection(),
     },
     {
@@ -298,7 +298,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: true,
       hint: COPY_HINT,
-      enabled: () => idle() && selected() !== null,
+      enabled: () => free() && selected() !== null,
       run: () => flows.copySelection(),
     },
     {
@@ -310,7 +310,7 @@ export function createActions({ store, flows }) {
       context: true,
       hint: PASTE_HINT,
       enabled: () =>
-        idle() && single() && store.copied().length > 0
+        free() && single() && store.copied().length > 0
           ? store.hasProject() && (store.selection() === null || selected() !== null)
           : single() && store.cut().length > 0 && store.cut().every((id) => canFile(store.model(), id, store.selection()).ok),
       run: () => flows.pasteHeld(),
@@ -325,7 +325,7 @@ export function createActions({ store, flows }) {
       danger: true,
       hint: DELETE_HINT,
       describe: () => (store.selected().length > 1 ? `Delete ${store.selected().length} rows` : selected()?.kind === 'folder' ? 'Delete folder' : 'Delete entity'),
-      enabled: () => idle() && selected() !== null,
+      enabled: () => free() && selected() !== null,
       run: () => flows.deleteSelection(),
     },
     {

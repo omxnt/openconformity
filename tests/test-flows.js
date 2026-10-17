@@ -432,6 +432,30 @@ function flowsOver(store) {
   equal(await flows.selectNode('HAZ-001'), true, 'and once the picking ends the tree is free again');
 }
 
+// --- V-TST-202 A picker asked for over a draft goes through the question (F-MOD-002, F-MOD-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  let answer = false;
+  let ended = 0;
+  const editor = { endEdit() { ended += 1; }, beginEdit() {}, hasUnconfirmedEdit: () => true, editing: () => true };
+  const dialogs = { confirm: async (question) => { asked.push(question.title); return answer; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  await flows.relateSelection();
+  deepEqual([asked, store.picker()], [['Discard the changes?'], null], 'Add relationship over a dirty draft asks, and declining opens no picker');
+  answer = true;
+  await flows.relateSelection();
+  equal(store.picker()?.subject, 'ELM-001', 'accepting ends the edit and opens the picker');
+  equal(ended, 1, 'the edit ended once');
+  await flows.relateSelection();
+  equal(store.picker()?.subject, 'ELM-001', 'asked again while picking it does nothing, since the action stands down and the pane ends the picking');
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {

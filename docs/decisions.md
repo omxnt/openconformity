@@ -1033,6 +1033,16 @@ The tree selects several rows after the ARIA tree view pattern's second model, w
 
 ---
 
+### D-120 One mode at a time
+
+`2026-10-17` `product`
+
+The software has five modes, an edit in the editor, a picking of relationships in the tree, the library over the editor, the diagram editor over the workspace, and a view over the workspace. One is open at a time, and a mode is left by its own buttons, Save, Done, Apply, Cancel or Close, or by Escape. While a mode is open, the actions that change the model or would start another mode stand down in the menus, the toolbar and the keys, and the mode's own actions stay with Undo, Redo, the file surface and the help surface. Editing is a mode like the others and is left by Save, Cancel or Escape. The one softening is the tree, where selecting another row over an open draft asks whether to discard it, since that question is Cancel with a safety belt and looking at another entity mid-edit is common. The messages over the relationship pane are not a mode, since they own nothing. The store answers which mode is open, from its own flags and from what the editor tells it.
+
+> *Each mode had been built on its own and every action checked what it thought of, so two modes could open together and an action could run under a mode that should have owned the interface. One rule stated once lets every action be read from it, and one place that answers the question keeps the actions honest. The tree is treated more gently under an edit because its draft is typed work and looking at another entity mid-edit is common, so a question is kinder than a locked tree, while a picking holds a few clicks that a frozen tree protects without a word. Settles #76.*
+
+---
+
 ## 3. Undecided
 
 The questions below are raised but not yet decided. Each stays here until it is settled and entered as a decision.

@@ -715,7 +715,9 @@ export function createEditor({
     head.hidden = false;
     head.appendChild(el('div', { className: 'pane-head-name' }, [el('span', { className: 'subhead-kind', text: kind }), el('span', { className: 'subhead-title', text: `${ids.length} selected` })]));
     if (one) {
-      head.appendChild(el('div', { className: 'pane-head-actions' }, [headIcon('Edit attributes', 'i-edit', onAction ? () => onAction('edit') : beginEdit)]));
+      const editMany = headIcon('Edit attributes', 'i-edit', onAction ? () => onAction('edit') : beginEdit);
+      editMany.disabled = store.mode() !== null;
+      head.appendChild(el('div', { className: 'pane-head-actions' }, [editMany]));
       body.appendChild(emptyState(`${ids.length} ${ENTITY_TYPES[[...types][0]].name.toLowerCase()}s selected`, 'Edit attributes opens one form for all of them. What you fill is set on each, and what you leave empty stays as each one has it.'));
     } else {
       const counts = [...types].map((type) => `${ids.filter((id) => (nodeOf(store.model(), id)?.kind === 'entity' ? nodeOf(store.model(), id).type : 'folder') === type).length} ${type === 'folder' ? 'folder' : ENTITY_TYPES[type].name.toLowerCase()}`);
@@ -726,7 +728,9 @@ export function createEditor({
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    head.appendChild(el('div', { className: 'pane-head-actions' }, [headIcon('Edit attributes', 'i-edit', beginEdit)]));
+    const editProject = headIcon('Edit attributes', 'i-edit', beginEdit);
+    editProject.disabled = store.mode() !== null;
+    head.appendChild(el('div', { className: 'pane-head-actions' }, [editProject]));
     mount(null, 'PROJECT', projectValues(), false);
   }
 
@@ -742,6 +746,7 @@ export function createEditor({
     current = node;
     const back = store.viewReturn();
     const actions = [headIcon('Edit attributes', 'i-edit', beginEdit)];
+    actions[0].disabled = store.mode() !== null;
     if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));
     renderHead(node, actions);
     mount(node.id, node.type, node.attributes, false);
@@ -792,6 +797,7 @@ export function createEditor({
       editingId = null;
       editingProject = false;
       bulk = null;
+      store.setEditing(false);
     }
 
     if (store.libraryOpen() && store.hasProject()) return;
@@ -824,7 +830,7 @@ export function createEditor({
   }
 
   function beginEdit() {
-    if (store.libraryOpen()) store.setLibraryOpen(false);
+    if (store.mode() !== null) return;
     const id = store.selection();
     const node = nodeOf(store.model(), id);
     if (id === null && store.hasProject()) {
@@ -833,12 +839,14 @@ export function createEditor({
       head.textContent = '';
       body.textContent = '';
       renderProjectEdit();
+      store.setEditing(true);
     } else if (node && node.kind === 'entity') {
       mode = 'edit';
       editingId = id;
       head.textContent = '';
       body.textContent = '';
       renderEdit(node);
+      store.setEditing(true);
     } else {
       return;
     }
@@ -850,6 +858,7 @@ export function createEditor({
     editingId = null;
     editingProject = false;
     bulk = null;
+    store.setEditing(false);
     render();
   }
 
@@ -860,7 +869,7 @@ export function createEditor({
    * @param {string[]} ids
    */
   function beginBulkEdit(code, ids) {
-    if (store.libraryOpen()) store.setLibraryOpen(false);
+    if (store.mode() !== null) return;
     mode = 'edit';
     editingId = null;
     editingProject = false;
@@ -875,6 +884,7 @@ export function createEditor({
     head.appendChild(el('div', { className: 'pane-head-actions' }, [cancel, saveButton]));
     mount(`${ids.length} selected`, code, {}, true, { bulk: true });
     followConditions();
+    store.setEditing(true);
     body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])')?.focus();
   }
 

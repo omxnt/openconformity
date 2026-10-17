@@ -774,14 +774,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * Start the add-relationship workflow pinned to the selected entity.
    * Asking again for the same subject closes it instead.
    */
-  function relateSelection() {
+  async function relateSelection() {
+    if (store.picker() !== null) return;
     const subjectId = store.selection();
-    const picker = store.picker();
-    if (picker !== null && picker.subject === subjectId) {
-      store.endPicking();
-      return;
-    }
     if (relationshipOptions(store.model(), subjectId).length === 0) return;
+    if (!(await confirmDiscard())) return;
+    endEditSession();
     store.beginPicking(subjectId);
   }
 

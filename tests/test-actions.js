@@ -299,4 +299,49 @@ function enabledIds(actions) {
   deepEqual(enabled(), before, 'and they return as they were when the picking ends');
 }
 
+// --- V-TST-201 One mode at a time (F-MOD-002, F-MOD-004, F-MOD-010, F-VIE-001) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  store.replaceProject(createModel());
+  const actions = createActions({ store, flows: {} });
+  const enabled = () => Object.fromEntries(actions.map((action) => [action.id, action.enabled()]));
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  const changers = ['edit', 'select-below', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'delete'];
+  const stay = ['undo', 'redo', 'save', 'open', 'new-project', 'about', 'metamodel'];
+  equal(store.mode(), null, 'with nothing open there is no mode');
+  const open = enabled();
+  ok(open.edit && open.relate && open['new-entity'] && open['view-risk'], 'and the actions are offered');
+  store.beginPicking('ELM-001');
+  equal(store.mode(), 'picking', 'a picker opens the picking mode');
+  const picking = enabled();
+  ok(changers.every((id) => picking[id] === false) && picking['view-risk'] === false, 'which stands every changer and the views down, Add relationship among them');
+  ok(stay.every((id) => picking[id] === open[id]), 'and leaves undo, the file surface and the help surface as they were');
+  store.endPicking();
+  store.setLibraryOpen(true);
+  equal(store.mode(), 'library', 'the library over the editor is a mode');
+  ok(changers.every((id) => enabled()[id] === false), 'that stands the changers down');
+  store.setLibraryOpen(false);
+  store.openView('risk');
+  equal(store.mode(), 'view', 'an open view is a mode');
+  const viewing = enabled();
+  ok(changers.every((id) => viewing[id] === false), 'that stands the changers down');
+  ok(viewing['view-risk'] && viewing['view-safety'], 'while switching views stays, since that is the view mode\'s own action');
+  store.closeView();
+  store.setEditing(true);
+  equal(store.mode(), 'editing', 'an edit is a mode the editor tells the store about');
+  const editing = enabled();
+  ok(changers.every((id) => editing[id] === false) && editing['view-risk'] === false, 'that stands the changers and the views down like any other mode, the edit left by Save, Cancel or Escape');
+  ok(stay.every((id) => editing[id] === open[id]), 'and leaves undo, the file surface and the help surface');
+  store.setEditing(false);
+  store.setDrawingOpen(true);
+  equal(store.mode(), 'drawing', 'and the diagram editor stands over all of them');
+  store.setDrawingOpen(false);
+  store.beginPicking('ELM-001');
+  store.setEditing(true);
+  equal(store.mode(), 'picking', 'where two flags stand, the one over the other names the mode');
+}
+
 summary('test-actions');

@@ -443,6 +443,49 @@ def drive_022(page):
     """))
 
 
+def drive_023(page):
+    page.eval(script("""
+      await loadExample();
+      const entity = await firstEntity();
+      entity.click(); await wait(300);
+      const menuState = async () => { byText('.menubar-item', 'Edit').click(); await wait(250); const state = Object.fromEntries([...document.querySelectorAll('.menu-entry')].map((e) => [e.textContent.trim().split(/\\s|\u2318/)[0], e.disabled])); document.body.click(); await wait(200); return state; };
+      const free = await menuState();
+      must(free.Edit === false && free.Add === false && free.New === false && free.Delete === false, 'with nothing open the changers are offered: ' + JSON.stringify(free));
+      [...document.querySelectorAll('#pane-relationships button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Add relationship')).click(); await wait(400);
+      const picking = await menuState();
+      must(picking.Edit === true && picking.Add === true && picking.New === true && picking.Delete === true && picking.Cut === true, 'while picking the changers stand down, Add relationship among them: ' + JSON.stringify(picking));
+      const headEdit = [...document.querySelectorAll('#editor-head button')].find((b) => b.querySelector('use[href="#i-edit"]'));
+      must(headEdit && headEdit.disabled, 'and the Edit button in the editor head is disabled');
+      key(document.querySelector('.tree-row.selected'), { key: 'Enter' }); await wait(300);
+      must(!document.querySelector('#editor-head .button-primary'), 'and Enter on the row opens no edit');
+      key(document.body, { key: 'Escape' }); await wait(300);
+      must(document.querySelectorAll('.tree-row.pickable').length === 0, 'Escape leaves the picking');
+      await menu('Edit', 'Import from library'); await wait(300);
+      const library = await menuState();
+      must(library.Edit === true && library.New === true && library.Delete === true, 'while the library is open the changers stand down: ' + JSON.stringify(library));
+      const closeLibrary = [...document.querySelectorAll('#pane-editor button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Close'));
+      must(closeLibrary, 'the library offers Close');
+      closeLibrary.click(); await wait(300);
+      await menu('View', 'Risk assessment'); await wait(400);
+      const viewing = await menuState();
+      must(viewing.Edit === true && viewing.New === true && viewing.Delete === true, 'while a view is open the changers stand down: ' + JSON.stringify(viewing));
+      const viewEntry = async () => { for (let i = 0; i < 2; i += 1) { byText('.menubar-item', 'View').click(); await wait(250); const e = byText('.menu-entry', 'Risk assessment'); if (e) { const state = e.disabled; document.body.click(); await wait(200); return state; } } return 'absent'; };
+      must((await viewEntry()) === false, 'while switching views stays offered');
+      const closeView = [...document.querySelectorAll('#pane-view button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Close'));
+      must(closeView, 'the view offers Close');
+      closeView.click(); await wait(400);
+      must(document.querySelector('#pane-view').hidden, 'and closes');
+      [...document.querySelectorAll('#editor-head button')].find((b) => b.querySelector('use[href="#i-edit"]')).click(); await wait(300);
+      const editing = await menuState();
+      must(editing.Add === true && editing.Import === true && editing.New === true && editing.Delete === true, 'while editing the changers stand down, Add relationship and Import among them: ' + JSON.stringify(editing));
+      byText('.menubar-item', 'View').click(); await wait(250);
+      must(byText('.menu-entry', 'Risk assessment')?.disabled === true, 'and the views stand down too');
+      document.body.click(); await wait(200);
+      byText('#editor-head .ghost-button', 'Cancel').click(); await wait(300);
+      must(!document.querySelector('#editor-head .button-primary'), 'Cancel leaves the edit');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -456,6 +499,7 @@ DRIVES = [
     ('V-DEM-020', 'Copy and paste in the tree', drive_020),
     ('V-DEM-021', 'Select several rows and act on the set', drive_021),
     ('V-DEM-022', 'Picking owns the tree', drive_022),
+    ('V-DEM-023', 'One mode at a time', drive_023),
 ]
 
 

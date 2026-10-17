@@ -160,6 +160,8 @@ export function createStore({ storage, session = null, retention = memoryRetenti
   let libraryOpen = false;
   /** Whether the diagram editor stands over the whole workspace: opened from a diagram in an edit, closed by Apply or Cancel, never kept across a reload. */
   let drawingOpen = false;
+  /** Whether the editor holds an open edit, told by the editor so the actions can ask the store alone. */
+  let editing = false;
   /** @type {Object<string, string>} the tab chosen per entity type, by name: session state, a reload keeping it */
   const chosenTabs = {};
   try {
@@ -514,6 +516,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       picker = null;
       cut = [];
       copied = [];
+      editing = false;
       openView = null;
       viewReturn = null;
       theme = null;
@@ -636,6 +639,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       picker = null;
       cut = [];
       copied = [];
+      editing = false;
       openView = null;
       viewReturn = null;
       keepOpenView();
@@ -956,6 +960,34 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       relationshipView = view;
       sessionWrite(VIEW_KEY, view);
       collapseRelationships(false);
+      notify();
+    },
+
+    /**
+     * The mode open, one at a time, in the order one stands over another:
+     * the diagram editor over the workspace, a picking in the tree, the
+     * library over the editor, a view over the workspace, or an edit in
+     * the editor. Null when none. The messages are not a mode, they are a
+     * view of the relationship pane that owns nothing.
+     * @returns {'drawing'|'picking'|'library'|'view'|'editing'|null}
+     */
+    mode: () => {
+      if (drawingOpen) return 'drawing';
+      if (picker !== null) return 'picking';
+      if (libraryOpen) return 'library';
+      if (projectOpen && openView !== null) return 'view';
+      if (editing) return 'editing';
+      return null;
+    },
+
+    /**
+     * Told by the editor when an edit begins or ends, so the mode is read
+     * from one place.
+     * @param {boolean} open
+     */
+    setEditing(open) {
+      if (open === editing) return;
+      editing = open;
       notify();
     },
 

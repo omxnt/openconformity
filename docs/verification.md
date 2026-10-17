@@ -62,6 +62,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-004 | Headless | [test-actions.js](../tests/test-actions.js) | Reorder stands down while the tree is filtered |
 | V-TST-198 | Headless | [test-actions.js](../tests/test-actions.js) | The actions over a selection of several |
 | V-TST-199 | Headless | [test-actions.js](../tests/test-actions.js) | The clipboard is a group of its own, and picking stands the model actions down |
+| V-TST-201 | Headless | [test-actions.js](../tests/test-actions.js) | One mode at a time |
 | V-TST-005 | Headless | [test-attributes.js](../tests/test-attributes.js) | Parse the document |
 | V-TST-006 | Headless | [test-attributes.js](../tests/test-attributes.js) | The project |
 | V-TST-007 | Headless | [test-attributes.js](../tests/test-attributes.js) | The shared help |
@@ -114,6 +115,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-196 | Headless | [test-flows.js](../tests/test-flows.js) | A bulk edit sets the filled fields on every entity of the type |
 | V-TST-197 | Headless | [test-flows.js](../tests/test-flows.js) | Delete, cut, copy and paste act on the set |
 | V-TST-200 | Headless | [test-flows.js](../tests/test-flows.js) | Picking pins the selection to its subject |
+| V-TST-202 | Headless | [test-flows.js](../tests/test-flows.js) | A picker asked for over a draft goes through the question |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -311,6 +313,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-020 | Drive | [drives.py](../tests/drives.py) | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
 | V-DEM-021 | Drive | [drives.py](../tests/drives.py) | Select several rows with Shift click, Cmd click, Shift ↑ ↓, Cmd ↑ ↓ with Cmd Space, Cmd A and Shift Cmd A, and find the set drawn with its anchor and the focus. Edit with several entities of one type opens the form empty, Save for N sets what is filled on all, the toast offers Undo, and a mixed selection disables Edit with the types named. Delete, Cut, Copy and drag act on the set, a folder with its contents and an entity alone |
 | V-DEM-022 | Drive | [drives.py](../tests/drives.py) | Open Add relationship on an entity, then click a row that is not a candidate, press the arrows and Home and End, and find the selection still on the subject and the focus moving. Space picks the focused candidate, and Escape leaves |
+| V-DEM-023 | Drive | [drives.py](../tests/drives.py) | Open each mode in turn, an edit, a picking, the library and a view, and find the Edit menu's changers and the views greyed under each, Add relationship and Import among them. Leave each by its own button or Escape |
 
 ### 2.4 Analyses
 
@@ -415,18 +418,18 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
 | F-WSP-012 | Selecting many | V-TST-198, V-TST-199, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
-| F-MOD-002 | Relationship creation | V-TST-199, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022 | Partly |
+| F-MOD-002 | Relationship creation | V-TST-199, V-TST-201, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-202, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022, V-DEM-023 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
+| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
-| F-MOD-010 | Library import | V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018 | Partly |
+| F-MOD-010 | Library import | V-TST-201, V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018, V-DEM-023 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
 | F-MOD-012 | Bulk edit | V-TST-198, V-TST-196, V-DEM-021 | Partly |
-| F-VIE-001 | Model views | V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007 | Partly |
+| F-VIE-001 | Model views | V-TST-201, V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007, V-DEM-023 | Partly |
 | F-VIE-002 | Messages | V-TST-112, V-TST-122 | Tested |
 | F-VIE-003 | Risk assessment | V-TST-159, V-TST-160 | Tested |
 | F-VIE-004 | Safety function specification | V-TST-163 | Tested |
