@@ -17,7 +17,7 @@ import { nodeOf } from './model.js';
 import { ENTITY_TYPES } from './metamodel.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { el, icon, tabKeys, tooltipTag } from './dom.js';
-import { entityLabel, relatedIds } from './queries.js';
+import { entityLabel, projectLabel, relatedIds } from './queries.js';
 import { staleText, recordOf, recordedStates, recordWritten, reviewText } from './records.js';
 import { headIcon, emptyState, notice } from './pane.js';
 import { ratingCell } from './rating-cell.js';
@@ -589,12 +589,12 @@ export function createEditor({
 
   /** The project head: its icon, its kind, and its name as it stands. */
   function projectHeadName() {
-    const name = store.model().name.trim();
+    const label = projectLabel(store.model());
     return el('div', { className: 'pane-head-name' }, [
       icon(PROJECT_ICON),
       el('span', { className: 'subhead-kind', text: 'Project' }),
-      name
-        ? el('span', { className: 'subhead-title', text: name })
+      label
+        ? el('span', { className: 'subhead-title', text: label })
         : el('span', { className: 'subhead-title untitled', text: 'Untitled' }),
     ]);
   }

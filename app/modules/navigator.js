@@ -29,7 +29,7 @@ import { childrenOf, nodeOf, canFile, canPlaceBeside } from './model.js';
 import { pickerCandidates } from './relate.js';
 import { TYPE_ICONS, FOLDER_ICON, PROJECT_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { entityLabel, excluded } from './queries.js';
+import { entityLabel, projectLabel, excluded } from './queries.js';
 import { el, icon, tooltipOn } from './dom.js';
 import { openMenu } from './menu.js';
 import { emptyState } from './pane.js';
@@ -389,10 +389,10 @@ export function createNavigator({
     rowElement.appendChild(twisty);
     rowElement.appendChild(icon(PROJECT_ICON));
 
-    const name = store.model().name.trim();
+    const label = projectLabel(store.model());
     rowElement.appendChild(
-      name
-        ? el('span', { className: 'row-title', text: name })
+      label
+        ? el('span', { className: 'row-title', text: label })
         : el('span', { className: 'row-title untitled', text: 'Untitled' })
     );
 

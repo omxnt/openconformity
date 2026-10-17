@@ -7,6 +7,7 @@
 
 import {
   entityLabel,
+  projectLabel,
   relationshipOptions,
   formLabel,
   relatedTypeOffer,
@@ -20,7 +21,7 @@ import {
 import { EXAMPLE_PROJECT } from '../app/modules/example.js';
 import { loadProject } from '../app/modules/files.js';
 import { ENTITY_TYPES, relationshipsFrom, relationshipsTo } from '../app/modules/metamodel.js';
-import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf } from '../app/modules/model.js';
+import { createModel, addEntity, addFolder, updateEntity, relate, unrelate, nodeOf, renameProject, setProjectAttribute } from '../app/modules/model.js';
 import { excluded, EXCLUSIONS } from '../app/modules/queries.js';
 import { ok, equal, deepEqual, summary } from './harness.js';
 
@@ -310,6 +311,17 @@ function offered(model, subjectId) {
 {
   const node = { id: 'SAF-001', type: 'SAF', attributes: { reference: 'SF1', title: 'Emergency Stop' } };
   equal(entityLabel(node), '[SF1] Emergency Stop', "a safety function's designation composes its label, as any reference does");
+}
+
+{
+  const model = createModel();
+  equal(projectLabel(model), '', 'a project with neither designation nor name has no label');
+  renameProject(model, 'Mixer line');
+  equal(projectLabel(model), 'Mixer line', 'its name alone stands');
+  setProjectAttribute(model, 'designation', 'P-12');
+  equal(projectLabel(model), '[P-12] Mixer line', 'its designation in brackets before the name, as an entity composes');
+  renameProject(model, '');
+  equal(projectLabel(model), '[P-12]', 'and the designation alone stands too');
 }
 
 // --- V-TST-108 A filter's one rule (F-WSP-001, F-WSP-008) --------------------

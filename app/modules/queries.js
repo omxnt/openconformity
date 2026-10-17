@@ -117,6 +117,20 @@ export function entityLabel(entity) {
 }
 
 /**
+ * What the project is called where its label is shown, the tree's top
+ * row and the editor's head: its designation in square brackets, then a
+ * space, then its name, as an entity's reference and title compose, and
+ * either alone when the other is unset.
+ * @param {import('./model.js').Model} model
+ * @returns {string}  the label, empty when the project carries neither part
+ */
+export function projectLabel(model) {
+  const designation = (model.attributes?.designation ?? '').trim();
+  const name = (model.name ?? '').trim();
+  return [designation ? `[${designation}]` : '', name].filter(Boolean).join(' ');
+}
+
+/**
  * Whether an entity answers a filter: its identifier or its label holds
  * the text, case aside; an empty filter matches everything.
  * @param {import('./model.js').Entity} entity
