@@ -49,6 +49,7 @@ License: Apache License 2.0, see LICENSE.txt.
 | `i-req` | `list--checked` | 32 | `list--checked.svg` |
 | `i-ver` | `checkmark--outline` | 32 | `checkmark--outline.svg` |
 | `i-folder` | `folder` | 32 | `folder.svg` |
+| `i-catalogue` | `archive` | 32 | `archive.svg` |
 | `i-project` | `portfolio` | 32 | `portfolio.svg` |
 | `i-metamodel` | `model--alt` | 32 | `model--alt.svg` |
 | `i-search` | `search` | 16 | `search.svg` |

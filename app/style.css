@@ -1358,6 +1358,7 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .library-row.highlighted { background: var(--layer-accent); }
 .library-row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .library-row.folder .row-title { color: var(--text-second); }
+.library-row.catalogue .row-title { font-weight: 600; color: var(--text); }  /* $heading-compact-01, the group row */
 .library-row .pick { position: relative; display: flex; align-items: center; cursor: pointer; }
 .library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .library-row .row-title { overflow: hidden; text-overflow: ellipsis; }

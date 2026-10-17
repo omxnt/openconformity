@@ -31,5 +31,8 @@ export const TYPE_ICONS = {
 /** The folder's own glyph, unlike any type's. */
 export const FOLDER_ICON = 'i-folder';
 
+/** The catalogue's own glyph in the library, unlike a folder's or any type's. */
+export const CATALOGUE_ICON = 'i-catalogue';
+
 /** The project's own glyph, unlike any type's. */
 export const PROJECT_ICON = 'i-project';

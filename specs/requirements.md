@@ -755,7 +755,7 @@ When redo is invoked, the software shall reapply the most recently undone model 
 
 `event driven`
 
-When the user imports picks from a catalogue, the software shall copy the picked entities and folders into the project under the selected node, with their filing among themselves and the relationships among them.
+When the user imports picks from the library, the software shall copy the picked entities and folders into the project under the selected node, with their filing among themselves and the relationships among them.
 
 > *A catalogue is a project file used as a source, and an import is a copy where the user stands, the rule New entity already follows. The picked entities keep their filing among themselves and the relationships among them, since an act owning its clauses is the catalogue's fact and the copies would not cascade without it. A relationship to anything not picked has no other end and stays behind. Nothing is recognised as already in the project, so picking the same act twice gives two, which is simpler to explain and to undo than a second identity beside the identifier. A folder travels so that a catalogue can hold a project structure, which is folders alone.*
 
@@ -939,7 +939,7 @@ When the user chooses a project template, the software shall fetch it from the h
 
 `ubiquitous`
 
-The software shall ship a library with it, and shall offer each root folder of the library as a catalogue to import from.
+The software shall ship a library with it, and shall offer each root folder of the library as a catalogue to import from, the picks of all catalogues importing together.
 
 > *The library is what makes a new project start from something, the legislation, a project structure, the phases of a machine's life. It ships as a module because the software fetches nothing (N-OPS-002), and it is one project file so that one schema and one loader serve it (F-PER-002). What an import copies is F-MOD-010.*
 

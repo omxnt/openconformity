@@ -16,7 +16,7 @@ import { createActions } from './actions.js';
 import { createViewsPane } from './views.js';
 import { createLibraryPane } from './library.js';
 import { createDrawingSurface } from './drawing-editor.js';
-import { LIBRARIES } from '../library/index.js';
+import { LIBRARY } from '../library/data.js';
 
 const retention = createRetention({ indexedDB: window.indexedDB, storageManager: window.navigator.storage ?? null });
 const store = createStore({ storage: window.localStorage, session: window.sessionStorage, retention });
@@ -107,7 +107,7 @@ createLibraryPane({
   store,
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
-  libraries: LIBRARIES,
+  library: LIBRARY,
   onImport: (chosen) => flows.importPicks(chosen),
   onClose: () => flows.closeLibrary(),
 });

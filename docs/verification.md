@@ -145,6 +145,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-070 | Headless | [test-library.js](../tests/test-library.js) | The picks |
 | V-TST-071 | Headless | [test-library.js](../tests/test-library.js) | The plan and the copy |
 | V-TST-072 | Headless | [test-library.js](../tests/test-library.js) | A project structure, folders alone |
+| V-TST-205 | Headless | [test-library.js](../tests/test-library.js) | Picks across the catalogues |
 | V-TST-178 | Headless | [test-library.js](../tests/test-library.js) | The acts the library ships, as About names them |
 | V-TST-073 | Headless | [test-markdown.js](../tests/test-markdown.js) | A cell and its text |
 | V-TST-074 | Headless | [test-markdown.js](../tests/test-markdown.js) | A document of tables |
@@ -426,7 +427,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
-| F-MOD-010 | Library import | V-TST-201, V-TST-203, V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018, V-DEM-023 | Partly |
+| F-MOD-010 | Library import | V-TST-201, V-TST-203, V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-TST-205, V-DEM-018, V-DEM-023 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
 | F-MOD-012 | Bulk edit | V-TST-198, V-TST-196, V-DEM-021 | Partly |
 | F-VIE-001 | Model views | V-TST-201, V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007, V-DEM-023 | Partly |
@@ -444,7 +445,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-PER-009 | Migration notice | None | None |
 | F-PER-010 | Attribute preservation | V-TST-191, V-TST-032, V-TST-048, V-TST-080, V-TST-100 | Tested |
 | F-PER-011 | Project templates | None | None |
-| F-PER-012 | Shipped library | V-TST-069, V-TST-180, V-TST-178 | Tested |
+| F-PER-012 | Shipped library | V-TST-069, V-TST-180, V-TST-205, V-TST-178 | Tested |
 | F-DRW-001 | Drawing check | V-TST-020, V-TST-021, V-TST-022, V-TST-023, V-TST-171, V-TST-189 | Tested |
 | F-DRW-002 | Drawing storage | V-TST-019, V-TST-182, V-TST-021 | Tested |
 | F-DRW-003 | External drawing editor | V-TST-003, V-TST-016, V-TST-018, V-TST-019, V-DEM-008 | Partly |
