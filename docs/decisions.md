@@ -1005,7 +1005,7 @@ The library ships FMV's checklist of hazards and hazardous conditions, the secti
 
 ### D-117 A copy carries attributes and no relationships
 
-`2026-10-14` `product` `superseded by D-119`
+`2026-10-14` `product` `superseded by D-121`
 
 Pasting a copied row creates a copy of the row with everything filed under it, each with a new identifier and every attribute as stored, and no relationship. The copy is taken from the model at the paste, and the mark is kept so a second paste makes another copy.
 
@@ -1040,6 +1040,16 @@ The tree selects several rows after the ARIA tree view pattern's second model, w
 The software has five modes, an edit in the editor, a picking of relationships in the tree, the library over the editor, the diagram editor over the workspace, and a view over the workspace. One is open at a time, and a mode is left by its own buttons, Save, Done, Apply, Cancel or Close, or by Escape. While a mode is open, every action but the mode's own and the help surface stands down in the menus, the toolbar and the keys, the file surface, Undo and Redo among them, so no file is saved and no history moves with work half done. Editing is a mode like the others and is left by Save, Cancel or Escape. Every mode has the same shape. A primary action and Cancel stand in the head of the pane the mode owns, Cancel to the left as Carbon places it, Save and Cancel for an edit, Done and Cancel for a picking, Import and Cancel for the library, Apply and Cancel for a diagram, Close for a view, and Escape is Cancel from anywhere on the page, asking only where a draft is dirty. The tree under a mode does only what the mode asks of it. Under a picking a click picks a candidate, under the library a click sets the import target, and under every mode any other click, a right click and a drag do nothing. The messages over the relationship pane are not a mode, since they own nothing. The store answers which mode is open, from its own flags and from what the editor tells it.
 
 > *Each mode had been built on its own and every action checked what it thought of, so two modes could open together and an action could run under a mode that should have owned the interface. One rule stated once lets every action be read from it, and one place that answers the question keeps the actions honest. The discard question stays, but in one place, leaving the edit by Escape or Cancel, so it never fires from a stray click in the tree, and a user who wants to look at another entity leaves the edit first, as in any form. Settles #76 and #77.*
+
+---
+
+### D-121 A copy carries the relationships between the copied rows
+
+`2026-10-17` `product`
+
+A paste of copied rows makes, between the copies, every relationship whose both ends were among the copied rows, a folder's contents counting as copied, and makes no relationship to anything left behind. A copied composition keeps one owner, since both ends are new.
+
+> *A connection between two copied things has one meaning, and a connection to something left behind has several, whether the copy should relate to the same outside entity, to another or to none, so the first is copied and the second is left to the user, who relates in one pick. This is what every tool where things are connected and copied does, diagram editors first. Supersedes D-117 on what a copy carries, and completes D-119, which left the relationships for later.*
 
 ---
 

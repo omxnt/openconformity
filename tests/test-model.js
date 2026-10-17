@@ -396,6 +396,7 @@ function childIds(model, parentId) {
   const copied = copyNode(model, 'F-1', null);
   allowed(copied, 'a folder copies');
   equal(copied.id, 'F-2', 'under a new identifier');
+  deepEqual([...copied.mapping.entries()], [['F-1', 'F-2'], ['ELM-001', 'ELM-002'], ['HAZ-001', 'HAZ-003'], ['HAZ-002', 'HAZ-004']], 'and reports each original with its copy, so the caller can relate the copies');
   equal(nodeOf(model, 'F-2').name, 'Zone', 'with its name');
   deepEqual(childrenOf(model, 'F-2').map((node) => node.id), ['ELM-002'], 'and what was filed in it, copied too');
   deepEqual(nodeOf(model, 'ELM-002').attributes, { title: 'Press', description: 'Hydraulic' }, 'every attribute as stored');

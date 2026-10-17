@@ -643,7 +643,7 @@ When the user pastes a cut row, the software shall file the row under the select
 
 `event driven`
 
-When the user pastes a copied row, the software shall create a copy of the row with everything filed under it inside the selected row, each copy with a new identifier, every attribute as stored, and no relationship.
+When the user pastes copied rows, the software shall create a copy of each inside the selected row, a folder with its contents and an entity alone, each copy with a new identifier, every attribute as stored, and the relationships between the copied rows and no other.
 
 > *A hazard, a scenario or a requirement is written once and repeated with small changes, and a copy saves the retyping. The relationships are left out because a copy is a new thing that relates to nothing yet, and relating it is the user's work to do. The identifiers are new because an identifier names one entity.*
 

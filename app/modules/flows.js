@@ -505,8 +505,15 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
           const node = nodeOf(live, id);
           const held = copyNode(live, id, above === null ? target : made.get(above), { subtree: node.kind === 'folder' });
           if (!held.ok) return held;
-          made.set(id, held.id);
+          for (const [original, copy] of held.mapping) made.set(original, copy);
           if (above === null) roots.push(held.id);
+        }
+        // A relationship travels with the pair: where both ends were copied
+        // it is made between the copies, and one to anything left behind is not.
+        for (const relationship of [...live.relationships.values()]) {
+          if (!made.has(relationship.source) || !made.has(relationship.target)) continue;
+          const related = relate(live, relationship.type, made.get(relationship.source), made.get(relationship.target));
+          if (!related.ok) return related;
         }
         return { ok: true };
       });

@@ -286,13 +286,14 @@ export function addEntity(model, code, options = {}) {
  * held the original, the root under the parent given. An entity's
  * attributes are copied as stored, a folder's name with it, every
  * identifier is issued anew, and no relationship is copied, since a copy
- * relates to nothing yet. The first refusal stops the copy with the
- * model as it was before it.
+ * relates to nothing yet. The caller relates the copies where both ends
+ * were copied, from the mapping returned. The first refusal stops the
+ * copy with the model as it was before it.
  * @param {Model} model
  * @param {string} id
  * @param {string|null} parentId
  * @param {{ subtree?: boolean }} [options]  subtree false copies the row alone
- * @returns {Outcome & { id?: string }}
+ * @returns {Outcome & { id?: string, mapping?: Map<string, string> }}  each original's id to its copy's
  */
 export function copyNode(model, id, parentId, options = {}) {
   const root = nodeOf(model, id);
@@ -319,7 +320,8 @@ export function copyNode(model, id, parentId, options = {}) {
     }
     made.set(node.id, node.kind === 'folder' ? result.folder.id : result.entity.id);
   }
-  return { ok: true, id: made.get(root.id) };
+  made.delete(root.parent);
+  return { ok: true, id: made.get(root.id), mapping: made };
 }
 
 /**
