@@ -411,6 +411,27 @@ function flowsOver(store) {
   equal(nodeOf(store.model(), 'ELM-001') !== null && nodeOf(store.model(), 'HAZ-002') !== null, true, 'one undo returns both');
 }
 
+// --- V-TST-200 Picking pins the selection to its subject (F-MOD-002, N-ACC-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const flows = createFlows({ store, overlay: {}, dialogs: noDialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  store.beginPicking('ELM-001');
+  equal(await flows.selectNode('HAZ-001'), false, 'while picking, selecting another row is refused');
+  equal(await flows.selectRows(['HAZ-001', 'HAZ-002'], 'HAZ-002'), false, 'a range too');
+  equal(await flows.toggleRow('HAZ-001'), false, 'and a toggle');
+  equal(await flows.selectNode(null), false, 'and the project row');
+  deepEqual([store.selection(), store.selected()], ['ELM-001', ['ELM-001']], 'the selection stays on the subject throughout');
+  equal(await flows.selectNode('ELM-001'), true, 'while the subject itself is still selectable');
+  store.endPicking();
+  equal(await flows.selectNode('HAZ-001'), true, 'and once the picking ends the tree is free again');
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {

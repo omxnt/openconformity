@@ -113,6 +113,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-195 | Headless | [test-flows.js](../tests/test-flows.js) | Selecting several rows passes the draft guard |
 | V-TST-196 | Headless | [test-flows.js](../tests/test-flows.js) | A bulk edit sets the filled fields on every entity of the type |
 | V-TST-197 | Headless | [test-flows.js](../tests/test-flows.js) | Delete, cut, copy and paste act on the set |
+| V-TST-200 | Headless | [test-flows.js](../tests/test-flows.js) | Picking pins the selection to its subject |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -309,6 +310,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-019 | Drive | [drives.py](../tests/drives.py) | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
 | V-DEM-020 | Drive | [drives.py](../tests/drives.py) | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
 | V-DEM-021 | Drive | [drives.py](../tests/drives.py) | Select several rows with Shift click, Cmd click, Shift ↑ ↓, Cmd ↑ ↓ with Cmd Space, Cmd A and Shift Cmd A, and find the set drawn with its anchor and the focus. Edit with several entities of one type opens the form empty, Save for N sets what is filled on all, the toast offers Undo, and a mixed selection disables Edit with the types named. Delete, Cut, Copy and drag act on the set, a folder with its contents and an entity alone |
+| V-DEM-022 | Drive | [drives.py](../tests/drives.py) | Open Add relationship on an entity, then click a row that is not a candidate, press the arrows and Home and End, and find the selection still on the subject and the focus moving. Space picks the focused candidate, and Escape leaves |
 
 ### 2.4 Analyses
 
@@ -413,7 +415,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
 | F-WSP-012 | Selecting many | V-TST-198, V-TST-199, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
-| F-MOD-002 | Relationship creation | V-TST-199, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156 | Tested |
+| F-MOD-002 | Relationship creation | V-TST-199, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-181, V-TST-053, V-TST-082, V-DEM-017 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
@@ -472,7 +474,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028, V-DEM-015 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
 | N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012 | Partly |
-| N-ACC-004 | Tree selection pattern | V-DEM-021 | Manual |
+| N-ACC-004 | Tree selection pattern | V-TST-200, V-DEM-021, V-DEM-022 | Partly |
 | N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013 | Partly |
 | N-CMP-002 | Browser support | V-INS-013, V-INS-020, V-TST-144, V-DEM-014 | Partly |
 
@@ -484,9 +486,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 52 | 33 | 15 | 2 | 2 |
-| Non-functional | 27 | 12 | 10 | 5 | 0 |
-| All | 110 | 54 | 30 | 24 | 2 |
+| Functional | 52 | 32 | 16 | 2 | 2 |
+| Non-functional | 27 | 12 | 11 | 4 | 0 |
+| All | 110 | 53 | 32 | 23 | 2 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

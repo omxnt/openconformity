@@ -56,7 +56,8 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 | Mac | PC | Does |
 |---|---|---|
-| Click, Space | Click, Space | Picks or unpicks the row |
+| Click, Space | Click, Space | Picks or unpicks the row, the selection staying on the subject |
+| ↑ ↓, Home, End | ↑ ↓, Home, End | Move the focus among the rows, the selection staying on the subject |
 | ⇧click | Shift click | Applies the last click to the range |
 | ⌘A | Ctrl A | Picks every candidate shown |
 | ⌘Enter | Ctrl Enter | Done |

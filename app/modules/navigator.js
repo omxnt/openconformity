@@ -258,6 +258,7 @@ export function createNavigator({
    * @param {{ x: number, y: number }} at
    */
   async function onContextMenu(id, at) {
+    if (store.picker() !== null && id !== store.picker().subject) return;
     if (!(id !== null && chosen.has(id)) && !(await onSelect(id))) return;
     openMenu({
       overlay,
@@ -393,7 +394,9 @@ export function createNavigator({
         : el('span', { className: 'row-title untitled', text: 'Untitled' })
     );
 
-    rowElement.addEventListener('click', () => onSelect(null));
+    rowElement.addEventListener('click', () => {
+      if (store.picker() === null) onSelect(null);
+    });
     rowElement.addEventListener('dblclick', () => onActivate(null));
     rowElement.addEventListener('contextmenu', (event) => {
       event.preventDefault();
@@ -478,6 +481,7 @@ export function createNavigator({
     });
     rowElement.addEventListener('click', (event) => {
       if (!pickable) {
+        if (picking.subject !== null) return;
         if (event.shiftKey && store.selection() !== null) onSelectMany(rowsBetween(visible(), store.selection(), row.id), row.id);
         else if (event.metaKey || event.ctrlKey) onToggle(row.id);
         else onSelect(row.id);
@@ -631,6 +635,8 @@ export function createNavigator({
     };
 
     if (picker !== null) {
+      // Picking owns the tree: the selection stays on the subject, the
+      // arrows move the focus alone, and Space picks what the focus is on.
       if (event.code === 'Space' || event.key === 'Enter') {
         event.preventDefault();
         if (event.code === 'Space' && row && pickerCandidates(store.model(), picker).has(row.id)) store.togglePick(row.id);
@@ -641,6 +647,16 @@ export function createNavigator({
         store.pickAll([...container.querySelectorAll('.tree-row.pickable')].map((held) => held.dataset.id));
         return;
       }
+      const step = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: rows.length - 1 }[event.key];
+      if (step !== undefined) {
+        event.preventDefault();
+        const next = rows[Math.min(rows.length - 1, Math.max(0, step))];
+        if (!next) return;
+        keyboardFocus = next.id;
+        render();
+        container.querySelector(`.tree-row[tabindex="0"]`)?.focus({ preventScroll: false });
+      }
+      return;
     }
 
     if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && ['x', 'c', 'v'].includes(event.key.toLowerCase())) {

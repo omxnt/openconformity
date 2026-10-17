@@ -370,10 +370,22 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   async function selectNode(id) {
     if (store.selection() === id && store.selected().length <= 1) return true;
+    if (pinned(id)) return false;
     if (!(await confirmDiscard())) return false;
     endEditSession();
     store.select(id);
     return true;
+  }
+
+  /**
+   * Whether the selection is pinned to a picker's subject, so a move to
+   * any other row is refused while the picking is open. Picking is a mode
+   * of the tree, and the subject is what the editor shows throughout.
+   * @param {string|null} id  the row asked for
+   */
+  function pinned(id) {
+    const picker = store.picker();
+    return picker !== null && id !== picker.subject;
   }
 
   /**
@@ -383,6 +395,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @returns {Promise<boolean>} whether the selection landed
    */
   async function selectRows(ids, anchorId) {
+    if (pinned(anchorId)) return false;
     if (!(await confirmDiscard())) return false;
     endEditSession();
     store.selectMany(ids, anchorId);
@@ -395,6 +408,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * @returns {Promise<boolean>}
    */
   async function toggleRow(id) {
+    if (pinned(id)) return false;
     if (!(await confirmDiscard())) return false;
     endEditSession();
     store.toggleSelected(id);

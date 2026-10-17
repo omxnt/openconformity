@@ -414,6 +414,35 @@ def drive_021(page):
     """))
 
 
+def drive_022(page):
+    page.eval(script("""
+      await loadExample();
+      const entity = await firstEntity();
+      const subject = entity.dataset.id;
+      entity.click(); await wait(300);
+      const add = [...document.querySelectorAll('#pane-relationships button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Add relationship'));
+      must(add && !add.disabled, 'the subject offers Add relationship');
+      add.click(); await wait(400);
+      must(document.querySelectorAll('.tree-row.pickable').length > 0, 'picking opens with candidates in the tree');
+      const other = [...document.querySelectorAll('.tree-row')].find((r) => r.dataset.id && r.dataset.id !== subject && !r.classList.contains('pickable'));
+      must(other, 'a row that is not a candidate');
+      other.click(); await wait(300);
+      must(document.querySelector('.tree-row.selected')?.dataset.id === subject, 'a click on it leaves the selection on the subject');
+      key(row(subject), { key: 'ArrowDown' }); await wait(300);
+      must(document.querySelector('.tree-row.selected')?.dataset.id === subject && document.querySelector('.tree-row.focused'), 'an arrow moves the focus and not the selection');
+      key(document.querySelector('.tree-row.focused'), { key: 'End' }); await wait(300);
+      must(document.querySelector('.tree-row.focused') === [...document.querySelectorAll('.tree-row')].at(-1), 'End moves the focus to the last row');
+      const candidate = document.querySelector('.tree-row.pickable');
+      key(candidate, { key: 'Home' }); await wait(200);
+      for (let i = 0; i < 40 && !document.querySelector('.tree-row.focused')?.classList.contains('pickable'); i += 1) { key(document.querySelector('.tree-row.focused') ?? row(subject), { key: 'ArrowDown' }); await wait(80); }
+      must(document.querySelector('.tree-row.focused')?.classList.contains('pickable'), 'the focus reaches a candidate');
+      key(document.querySelector('.tree-row.focused'), { code: 'Space', key: ' ' }); await wait(300);
+      must(document.querySelectorAll('.tree-row.picked').length === 1, 'Space picks the focused candidate');
+      key(document.body, { key: 'Escape' }); await wait(300);
+      must(document.querySelectorAll('.tree-row.pickable').length === 0, 'Escape leaves the picking');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -426,6 +455,7 @@ DRIVES = [
     ('V-DEM-019', 'Cut and paste in the tree', drive_019),
     ('V-DEM-020', 'Copy and paste in the tree', drive_020),
     ('V-DEM-021', 'Select several rows and act on the set', drive_021),
+    ('V-DEM-022', 'Picking owns the tree', drive_022),
 ]
 
 
