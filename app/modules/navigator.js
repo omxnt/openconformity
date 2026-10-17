@@ -405,7 +405,7 @@ export function createNavigator({
       onContextMenu(null, { x: event.clientX, y: event.clientY });
     });
     rowElement.addEventListener('dragover', (event) => {
-      if (draggedId === null || !canFile(store.model(), draggedId, null).ok) return;
+      if (!canDrop((id) => canFile(store.model(), id, null))) return;
       event.preventDefault();
       event.stopPropagation();
       rowElement.classList.add('drop-target');
@@ -415,7 +415,7 @@ export function createNavigator({
       event.preventDefault();
       event.stopPropagation();
       clearDropMarks(rowElement);
-      if (draggedId !== null) onFile(draggedId, null);
+      if (dragged.length > 0) onFile(dragged.length === 1 ? dragged[0] : dragged, null);
     });
     return rowElement;
   }

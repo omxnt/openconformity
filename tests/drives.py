@@ -361,6 +361,12 @@ def drive_019(page):
       key(row(id), { key: 'x', metaKey: true, ctrlKey: true }); await wait(200);
       key(document.body, { key: 'Escape' }); await wait(300);
       must(!row(id).classList.contains('cut'), 'Escape forgets the cut');
+      const drag = (from, to, type) => { const data = new DataTransfer(); from.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: data })); const over = new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: data, clientY: to.getBoundingClientRect().top + 8 }); to.dispatchEvent(over); const allowed = over.defaultPrevented; to.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: data, clientY: to.getBoundingClientRect().top + 8 })); from.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data })); return allowed; };
+      const project = document.querySelector('.tree-row.project-row') || document.querySelector('.tree-row[aria-level="1"]');
+      must(project, 'the project row stands at the top');
+      must(drag(row(id), project, 'drop'), 'a drag over the project row is allowed');
+      await wait(400);
+      must(row(id).getAttribute('aria-level') === '2', 'and the drop files the row at the root: level ' + row(id).getAttribute('aria-level'));
     """))
 
 
