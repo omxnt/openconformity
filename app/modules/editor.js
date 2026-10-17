@@ -718,10 +718,10 @@ export function createEditor({
     head.hidden = false;
     head.appendChild(el('div', { className: 'pane-head-name' }, [el('span', { className: 'subhead-kind', text: kind }), el('span', { className: 'subhead-title', text: `${ids.length} selected` })]));
     if (one) {
-      const editMany = headIcon('Edit attributes', 'i-edit', onAction ? () => onAction('edit') : beginEdit);
+      const editMany = headIcon(`Edit ${ids.length} selected`, 'i-edit', onAction ? () => onAction('edit') : beginEdit);
       editMany.disabled = store.mode() !== null;
       head.appendChild(el('div', { className: 'pane-head-actions' }, [editMany]));
-      body.appendChild(emptyState(`${ids.length} ${ENTITY_TYPES[[...types][0]].name.toLowerCase()}s selected`, 'Edit attributes opens one form for all of them. What you fill is set on each, and what you leave empty stays as each one has it.'));
+      body.appendChild(emptyState(`${ids.length} ${ENTITY_TYPES[[...types][0]].name.toLowerCase()}s selected`, 'Edit opens one form for all of them. What you fill is set on each, and what you leave empty stays as each one has it.'));
     } else {
       const counts = [...types].map((type) => `${ids.filter((id) => (nodeOf(store.model(), id)?.kind === 'entity' ? /** @type {import('./model.js').Entity} */ (nodeOf(store.model(), id)).type : 'folder') === type).length} ${type === 'folder' ? 'folder' : ENTITY_TYPES[type].name.toLowerCase()}`);
       body.appendChild(emptyState('Not one type', `${counts.join(', ')} selected. Edit works on entities of one type. Delete, Cut and Copy work on all of them.`));
@@ -731,7 +731,7 @@ export function createEditor({
   function renderProjectView() {
     head.hidden = false;
     head.appendChild(projectHeadName());
-    const editProject = headIcon('Edit attributes', 'i-edit', beginEdit);
+    const editProject = headIcon('Edit project', 'i-edit', beginEdit);
     editProject.disabled = store.mode() !== null;
     head.appendChild(el('div', { className: 'pane-head-actions' }, [editProject]));
     mount(null, 'PROJECT', projectValues(), false);
@@ -748,7 +748,7 @@ export function createEditor({
   function renderView(node) {
     current = node;
     const back = store.viewReturn();
-    const actions = [headIcon('Edit attributes', 'i-edit', beginEdit)];
+    const actions = [headIcon('Edit entity', 'i-edit', beginEdit)];
     actions[0].disabled = store.mode() !== null;
     if (back !== null && back.rowId === node.id) actions.unshift(headButton(`Back to ${back.name}`, onReturn));
     renderHead(node, actions);
@@ -836,7 +836,7 @@ export function createEditor({
       return;
     }
     if (node.kind === 'folder') {
-      renderHead(node, [headIcon('Rename folder', 'i-edit', onRename)]);
+      renderHead(node, [headIcon('Rename folder…', 'i-edit', onRename)]);
       body.appendChild(
         emptyState('Folder', 'A folder groups entities in the navigator and has no attributes.')
       );

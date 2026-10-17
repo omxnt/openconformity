@@ -188,7 +188,7 @@ function flowsOver(store) {
   flows.pasteHeld();
   equal(nodeOf(store.model(), 'ELM-001').parent, 'F-1', 'the keyboard files by cut and paste, which took over from Move to');
   flows.selectBelow('F-1');
-  deepEqual(store.selected(), ['F-1', 'ELM-001'], 'select all below takes a row with everything under it');
+  deepEqual(store.selected(), ['F-1', 'ELM-001'], 'select subtree takes a row with everything under it');
   equal(store.isExpanded('F-1'), true, 'opened so the selection is in view');
 }
 

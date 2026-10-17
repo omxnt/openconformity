@@ -39,7 +39,7 @@ function enabledIds(actions) {
 
   deepEqual(
     actions.map((action) => action.id),
-    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'select-below', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'delete', 'undo', 'redo'],
+    ['view-risk', 'view-safety', 'new-project', 'open', 'save', 'load-example', 'clear-browser-data', 'save-aside-copy', 'discard-aside', 'about', 'metamodel', 'edit', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'select-below', 'delete', 'undo', 'redo'],
     'the list holds every offer once, in surface order'
   );
   deepEqual(
@@ -268,7 +268,7 @@ function enabledIds(actions) {
   equal(enabled().edit, false, 'edit stands down over a mixed selection');
   equal(enabled().delete, true, 'where delete still acts');
   store.select('F-1');
-  equal(enabled()['select-below'], false, 'a folder with nothing under it offers no select all below');
+  equal(enabled()['select-below'], false, 'a folder with nothing under it offers no select subtree');
   store.commit((model) => addEntity(model, 'HAZ', { parent: 'F-1' }));
   store.select('F-1');
   equal(enabled()['select-below'], true, 'one with something under it does');
@@ -282,9 +282,10 @@ function enabledIds(actions) {
   store.replaceProject(createModel());
   const actions = createActions({ store, flows: {} });
   deepEqual(actions.filter((action) => action.group === 'clipboard').map((action) => action.id), ['cut', 'copy', 'paste'], 'cut, copy and paste form the clipboard group, so a divider parts them from the ordering');
+  deepEqual(actions.filter((action) => action.group === 'select').map((action) => action.id), ['select-below'], 'and select subtree stands in a group of its own after them, as Select All does on a Mac');
   const groups = [];
   for (const action of actions.filter((offered) => offered.context)) if (groups.at(-1) !== action.group) groups.push(action.group);
-  deepEqual(groups, ['edit', 'create', 'library', 'arrange', 'clipboard', 'delete'], 'the context menu runs the groups in order, the import between dividers and the clipboard after the ordering');
+  deepEqual(groups, ['edit', 'create', 'library', 'arrange', 'clipboard', 'select', 'delete'], 'the context menu runs the groups in order, the import between dividers and the clipboard after the ordering');
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.select('ELM-001');
@@ -351,11 +352,11 @@ function enabledIds(actions) {
 {
   const store = createStore({ storage: fakeStorage() });
   const actions = createActions({ store, flows: {} });
-  const modelGroups = ['edit', 'create', 'library', 'arrange', 'clipboard', 'delete', 'history'];
+  const modelGroups = ['edit', 'create', 'library', 'arrange', 'clipboard', 'select', 'delete', 'history'];
   const editMenu = actions.filter((action) => modelGroups.includes(action.group) && action.menubar !== false).map((action) => action.id);
   const contextMenu = actions.filter((action) => action.context).map((action) => action.id);
   deepEqual(contextMenu, editMenu.filter((id) => !['undo', 'redo'].includes(id)), 'the context menu holds the Edit menu\'s entries less undo and redo, in the same order, so the dividers fall alike');
-  ok(contextMenu.includes('import') && editMenu.includes('select-below'), 'the import files under the row clicked and select all below reaches the menu bar');
+  ok(contextMenu.includes('import') && editMenu.includes('select-below'), 'the import files under the row clicked and select subtree reaches the menu bar');
 }
 
 summary('test-actions');
