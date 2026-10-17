@@ -458,7 +458,7 @@ def drive_023(page):
       await loadExample();
       const entity = await firstEntity();
       entity.click(); await wait(300);
-      const menuState = async () => { byText('.menubar-item', 'Edit').click(); await wait(250); const state = Object.fromEntries([...document.querySelectorAll('.menu-entry')].map((e) => [e.textContent.trim().split(/\\s|\u2318/)[0], e.disabled])); document.body.click(); await wait(200); return state; };
+      const menuState = async () => { byText('.menubar-item', 'Edit').click(); await wait(250); const state = Object.fromEntries([...document.querySelectorAll('.menu-entry')].map((e) => [(e.querySelector('.menu-entry-label') || e).textContent.trim().split(' ')[0], e.disabled])); document.body.click(); await wait(200); return state; };
       const free = await menuState();
       must(free.Edit === false && free.Add === false && free.New === false && free.Delete === false, 'with nothing open the changers are offered: ' + JSON.stringify(free));
       [...document.querySelectorAll('#pane-relationships button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Add relationship')).click(); await wait(400);
