@@ -102,6 +102,8 @@ export async function showAbout(dialogs, store = null) {
         ['IBM Carbon', 'Design system, followed without its packages', [link('https://carbondesignsystem.com', 'carbondesignsystem.com')]],
         ['IBM Plex', 'Typeface, self-hosted', [link('assets/fonts/LICENSE.txt', 'SIL Open Font License 1.1')]],
         ['Carbon Icons', 'Icon set, self-hosted', [link('assets/icons/LICENSE.txt', 'Apache License 2.0')]],
+        ['WCAG 2.2', 'Accessibility guidelines followed, at Level AA', [link('https://www.w3.org/TR/WCAG22/', 'w3.org')]],
+        ['ARIA APG', 'Tree view pattern, followed by the navigator', [link('https://www.w3.org/WAI/ARIA/apg/patterns/treeview/', 'w3.org')]],
       ]),
       fold('External services', [
         ['draw.io', [consentLine], [forget, link('https://www.drawio.com', 'drawio.com')]],
