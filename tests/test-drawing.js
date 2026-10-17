@@ -153,6 +153,9 @@ const reason = (text) => {
   equal(reason(svg('<text>&#xD800;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'a reference to a surrogate is refused');
   equal(reason(svg('<text>&#x110000;</text>')), 'is not well-formed XML, holding a numeric reference to nothing', 'and one past the last code point');
   equal(reason(svg('<text>&#65;&#x42;</text>')), 'accepted', 'while a reference to a character passes');
+  equal(reason(svg('<a:b:c/>')), 'is not well-formed XML, holding a name with two colons', 'a name with two colons is refused, as the review of 9 October asked');
+  equal(reason(svg('<rect a:b:c="1"/>')), 'is not well-formed XML, holding a name with two colons', 'in an attribute too');
+  equal(reason(svg('<svg:marquee/>')), 'holds an element the editor does not write, marquee', 'while one prefix is read as a prefix and the local name judged');
 }
 
 // --- V-TST-189 Only what the editor writes is accepted (F-DRW-001, N-SEC-003) ---

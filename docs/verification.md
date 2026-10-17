@@ -340,7 +340,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-ANA-024 | Review | The files of the repository | Every module runs in the page, and the pins of N-PRV-002 rule out sending |
 | V-ANA-025 | Review | The files of the repository | No module counts, records or reports use |
 | V-ANA-026 | Review | The files of the repository | The store writes to IndexedDB, web storage, session storage and downloaded files only |
-| V-ANA-027 | Review | The host's dashboard and its responses | The responses from both hosts carry every header of the headers file, the policy, transport security, no sniffing, no referrer, no opener and no device feature, and an unknown path answers not found. A page on another origin that frames the software is refused by the browser |
+| V-ANA-027 | Review | The host's dashboard and its responses | The responses from both hosts carry every header of the headers file, the policy, transport security, no sniffing, no referrer, no opener, no embedding of the files by another origin and no device feature, and an unknown path answers not found. Read directly rather than through a scanner, which the review of 9 October found following the www redirect. A page on another origin that frames the software is refused by the browser |
 | V-ANA-028 | Review | The host's dashboard and its responses | Pane headers are landmarks. Pointer targets. Text carries AA contrast in both themes. The other criteria of WCAG 2.2 AA need an audit in the browser with a screen reader |
 | V-ANA-029 | Review | The files of the repository | One distinct glyph per entity type. Each entity type's icon in the sprite is a distinct shape |
 

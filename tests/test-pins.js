@@ -167,9 +167,10 @@ const POLICY = "default-src 'self'; script-src 'self'; style-src 'self'; img-src
     '  X-Content-Type-Options: nosniff',
     '  Referrer-Policy: no-referrer',
     '  Cross-Origin-Opener-Policy: same-origin',
+    '  Cross-Origin-Resource-Policy: same-origin',
     "  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()",
   ];
-  deepEqual(readFile('../app/_headers').trimEnd().split('\n'), expected(POLICY), 'every path of the software carries the page policy with framing forbidden, transport security for 180 days without preload, no type sniffing, no referrer, no opener and no device feature');
+  deepEqual(readFile('../app/_headers').trimEnd().split('\n'), expected(POLICY), 'every path of the software carries the page policy with framing forbidden, transport security for 180 days without preload, no type sniffing, no referrer, no opener, no embedding of its files by another origin and no device feature');
   const sitePage = readFile('../site/index.html');
   const sitePolicy = /<meta http-equiv="Content-Security-Policy" content="([^"]*)">/.exec(sitePage)?.[1];
   ok(typeof sitePolicy === 'string' && sitePolicy.includes("frame-src 'none'") && sitePolicy.includes("trusted-types 'none'"), 'the site states a policy of its own that frames nothing');

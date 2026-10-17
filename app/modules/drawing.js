@@ -97,6 +97,7 @@ export function parseXml(text) {
     NAME.lastIndex = at;
     const match = NAME.exec(text);
     if (!match) fail(`a name was expected at ${at}`);
+    if (match[0].indexOf(':') !== match[0].lastIndexOf(':')) fail('a name with two colons');
     at += match[0].length;
     return match[0];
   };
