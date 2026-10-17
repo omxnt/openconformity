@@ -542,6 +542,29 @@ function flowsOver(store) {
   deepEqual(asked, [], 'no question was asked along the way');
 }
 
+// --- V-TST-210 A paste refused partway leaves every row where it was (F-WSP-010, F-MOD-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const toasts = [];
+  const dialogs = { confirm: async () => true, toast: (title, message) => { toasts.push([title, message]); } };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'A'));
+  store.commit((model) => addFolder(model, 'B'));
+  store.commit((model) => addFolder(model, 'C', { parent: 'F-2' }));
+  const sequence = store.sequence();
+  store.setCut(['F-1', 'F-2']);
+  store.select('F-3');
+  flows.pasteHeld();
+  equal(nodeOf(store.model(), 'F-1').parent, null, 'A, filed first into C, stands at the root again once B could not follow');
+  equal(nodeOf(store.model(), 'F-2').parent, null, 'B is where it was');
+  equal(store.sequence(), sequence, 'the history did not move');
+  deepEqual(store.cut(), ['F-1', 'F-2'], 'the cut is still held');
+  equal(toasts.length, 1, 'and the user was told why');
+  ok(toasts[0][1].includes('into itself'), toasts[0][1]);
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {

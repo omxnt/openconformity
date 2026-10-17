@@ -147,6 +147,16 @@ export function createHistory(model) {
       return modelWith(entries[cursor].content, current);
     },
 
+    /**
+     * The model as the entry at the cursor holds it, carrying the given
+     * model's counters, for a change that refused after it had begun.
+     * @param {import('./model.js').Model} current
+     * @returns {import('./model.js').Model}
+     */
+    current(current) {
+      return modelWith(entries[cursor].content, current);
+    },
+
     /** The sequence of the entry the cursor stands at. */
     sequence: () => entries[cursor].sequence,
 

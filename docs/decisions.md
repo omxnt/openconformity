@@ -1075,6 +1075,14 @@ The navigator collapses to a strip one button wide, its toolbar stood on end wit
 
 > *The relationship pane folds to its head with every control still working, so the navigator folds to its toolbar with every button still working, and the two panes answer the same gesture the same way. The folded strip is Carbon's rail, the side navigation at icon width with its items in a column, and the binary form is what every tool with a collapsible side pane does, nothing reflows item by item. The toolbar had room for the chevron once Move to had gone, so the floor stayed where the preset was. An action run while the tree is hidden would be run blind, the new row unseen, the question asked about a selection out of view, so the strip opens the pane first, which is what VS Code's activity bar does. Settles #73.*
 
+### D-125 A refused change is rolled back by the store
+
+`2026-10-17` `repository`
+
+A commit whose change refuses after an earlier step has already changed the model is undone by the store, which puts back the model as the history holds it at the cursor and the counters as they stood before the change. No flow tries its steps on a copy for the sake of atomicity, and the import keeps its trial copy for the question it asks before it commits.
+
+> *Three flows could refuse after a step, and a copy per flow would have been three copies to keep right and a fourth the next time a flow grew a second step. The history already holds a clone of the model as it stands, so putting it back on a refusal costs one function and holds for every flow, those three and any written later. The counters are restored with it so that a refused change skips no identifier. Settles #29, by the store rather than by the copies the issue proposed.*
+
 ---
 
 ## 3. Undecided

@@ -235,6 +235,7 @@ function enabledIds(actions) {
   store.commit((model) => {
     addEntity(model, 'ELM');
     addEntity(model, 'HAZ');
+    return { ok: true };
   });
   store.select('HAZ-001');
   const actions = createActions({ store, flows: {} });

@@ -112,7 +112,7 @@ Most of the first layer is data. The library and the example are about 6,000 lin
 1. The user acts through a menu, a toolbar, a key or a pane. Each surface calls an action from the one list, or a flow directly.
 2. The flow asks what it must, through dialogs that resolve a promise, and stops if the user cancels.
 3. The flow calls the store's commit with one function. The function runs the model's changes and returns an outcome.
-4. On a refusal the store records nothing, writes nothing and redraws nothing, and the flow tells the user why in a toast. Each change of the model checks before it acts, so a refused change leaves the model as it was. A flow whose commit makes several changes that could be refused, such as an import, tries them on a copy first.
+4. On a refusal the store records nothing, writes nothing and redraws nothing, and the flow tells the user why in a toast. Each change of the model checks before it acts, and where a commit makes several changes and a later one refuses, the store puts back the model as the history holds it, with the counters as they were, so a refused change leaves the model as it was by construction. The import tries its copies on a copy first as well, since it asks a question before it commits.
 5. On success the store takes a snapshot for the history, marks the project unsaved and writes the project to browser storage. Where changes come faster than writes, only the newest is written.
 6. The store notifies its subscribers, and every pane redraws from what the store now holds.
 

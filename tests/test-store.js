@@ -104,6 +104,40 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   equal(notified, 1, 'and tells no one');
 }
 
+// --- V-TST-209 A change that refuses after it began leaves nothing behind (F-MOD-004, F-SES-002) ---
+
+{
+  const retention = memoryRetention();
+  const store = openStore(retention);
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.select('ELM-001');
+  await store.whenPersisted();
+  const sequence = store.sequence();
+  const before = retention.records.get('project');
+  let notified = 0;
+  store.subscribe(() => { notified += 1; });
+
+  const refused = store.commit((model) => {
+    addEntity(model, 'HAZ');
+    addFolder(model, 'Zone');
+    updateEntity(model, 'ELM-001', { title: 'Changed' });
+    return { ok: false, reason: 'The last step was refused.' };
+  });
+  equal(refused.ok, false, 'the refusal is returned as given');
+  equal(store.model().nodes.size, 1, 'the entity and the folder added before it are gone again');
+  equal(store.model().nodes.get('ELM-001').attributes.title, undefined, 'and the update with them');
+  deepEqual([store.model().counters.HAZ, store.model().counters.F], [1, 1], 'the counters stand where they were, so no identifier is skipped');
+  equal(store.sequence(), sequence, 'the history did not move');
+  equal(store.canUndo(), true, 'and still holds the step before');
+  equal(store.selection(), 'ELM-001', 'the selection stands');
+  await store.whenPersisted();
+  equal(retention.records.get('project'), before, 'nothing was persisted');
+  equal(notified, 0, 'and no one was told');
+
+  const landed = store.commit((model) => addEntity(model, 'HAZ'));
+  equal(landed.entity.id, 'HAZ-001', 'the next change issues the identifier the refused one would have taken');
+}
+
 // --- V-TST-132 A burst of changes costs one write (F-SES-002) ----------------
 
 {

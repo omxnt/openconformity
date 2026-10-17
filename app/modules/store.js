@@ -548,7 +548,9 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     /**
      * Run one model change and make it a step: on success the change is
      * recorded in history, the selection repaired if the change removed
-     * it, and the session persisted. A refused change touches nothing.
+     * it, and the session persisted. A refused change touches nothing:
+     * whatever it changed before it refused is undone by putting back
+     * the model as the history holds it, with the counters as they were.
      * @template {{ ok: boolean, reason?: string }} T
      * @param {(model: import('./model.js').Model) => T} action
      * @returns {T}
@@ -556,8 +558,11 @@ export function createStore({ storage, session = null, retention = memoryRetenti
     commit(action) {
       if (!projectOpen) return /** @type {T} */ ({ ok: false, reason: 'No project is open.' });
       const trail = ancestorsOf(selection);
+      const counters = { ...model.counters };
       const outcome = action(model);
       if (!outcome || outcome.ok !== true) {
+        model = history.current(model);
+        model.counters = counters;
         return outcome ?? /** @type {T} */ ({ ok: false, reason: 'The change returned no outcome.' });
       }
       history.record(model);

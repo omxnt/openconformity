@@ -119,6 +119,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-202 | Headless | [test-flows.js](../tests/test-flows.js) | A picker asked for over a draft goes through the question |
 | V-TST-203 | Headless | [test-flows.js](../tests/test-flows.js) | The tree under a mode does only what the mode asks |
 | V-TST-206 | Headless | [test-flows.js](../tests/test-flows.js) | Undo and redo stand down under a mode |
+| V-TST-210 | Headless | [test-flows.js](../tests/test-flows.js) | A paste refused partway leaves every row where it was |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -213,6 +214,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-129 | Headless | [test-shell.js](../tests/test-shell.js) | The leave-prompt fires exactly when leaving costs something |
 | V-TST-130 | Headless | [test-store.js](../tests/test-store.js) | A fresh session has no project |
 | V-TST-131 | Headless | [test-store.js](../tests/test-store.js) | Commit records, persists and notifies |
+| V-TST-209 | Headless | [test-store.js](../tests/test-store.js) | A change that refuses after it began leaves nothing behind |
 | V-TST-132 | Headless | [test-store.js](../tests/test-store.js) | A burst of changes costs one write |
 | V-TST-179 | Headless | [test-store.js](../tests/test-store.js) | Selecting a node opens the tree above it |
 | V-TST-133 | Headless | [test-store.js](../tests/test-store.js) | Session state beside model state |
@@ -405,7 +407,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-APP-001 | Small-viewport notice | V-INS-021, V-DEM-002 | Partly |
 | F-APP-002 | Direct entry | V-TST-001, V-TST-040, V-INS-018 | Tested |
 | F-SES-001 | Working state | V-TST-038, V-TST-130, V-TST-179, V-TST-133, V-TST-135, V-TST-136, V-TST-137, V-TST-138, V-TST-139, V-TST-140, V-TST-185, V-TST-193, V-TST-141, V-TST-142, V-TST-146, V-TST-147, V-TST-148, V-TST-208, V-DEM-003, V-DEM-025 | Partly |
-| F-SES-002 | Model retention | V-TST-037, V-TST-128, V-TST-131, V-TST-132, V-TST-135, V-TST-143, V-DEM-004 | Partly |
+| F-SES-002 | Model retention | V-TST-037, V-TST-128, V-TST-131, V-TST-209, V-TST-132, V-TST-135, V-TST-143, V-DEM-004 | Partly |
 | F-SES-003 | Browser removal | V-TST-060, V-TST-150, V-DEM-005 | Partly |
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
@@ -420,13 +422,13 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-007 | Folder deletion | V-TST-015, V-TST-052, V-TST-089, V-TST-107 | Tested |
 | F-WSP-008 | Tree filter | V-TST-093, V-TST-108 | Tested |
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
-| F-WSP-010 | Cut and paste | V-TST-197, V-TST-185, V-DEM-019 | Partly |
+| F-WSP-010 | Cut and paste | V-TST-197, V-TST-210, V-TST-185, V-DEM-019 | Partly |
 | F-WSP-011 | Copy and paste | V-TST-197, V-TST-187, V-DEM-020 | Partly |
 | F-WSP-012 | Selecting many | V-TST-198, V-TST-199, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-199, V-TST-201, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-202, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022, V-DEM-023, V-DEM-025 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-206, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
+| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-206, V-TST-210, V-TST-181, V-TST-053, V-TST-082, V-TST-209, V-DEM-017, V-DEM-023 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
