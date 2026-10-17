@@ -839,14 +839,14 @@ export function createEditor({
       head.textContent = '';
       body.textContent = '';
       renderProjectEdit();
-      store.setEditing(true);
+        store.setEditing(true);
     } else if (node && node.kind === 'entity') {
       mode = 'edit';
       editingId = id;
       head.textContent = '';
       body.textContent = '';
       renderEdit(node);
-      store.setEditing(true);
+        store.setEditing(true);
     } else {
       return;
     }

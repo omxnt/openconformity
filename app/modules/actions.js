@@ -83,7 +83,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => true,
+      enabled: () => free() && true,
       run: () => flows.newProject(),
     },
     {
@@ -94,7 +94,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => true,
+      enabled: () => free() && true,
       run: () => flows.openProjectFlow(),
     },
     {
@@ -106,7 +106,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => store.hasProject(),
+      enabled: () => free() && store.hasProject(),
       run: () => flows.saveProject(),
     },
     {
@@ -117,7 +117,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => true,
+      enabled: () => free() && true,
       run: () => flows.loadExample(),
     },
     {
@@ -128,7 +128,7 @@ export function createActions({ store, flows }) {
       toolbar: false,
       context: false,
       menubar: true,
-      enabled: () => true,
+      enabled: () => free() && true,
       danger: true,
       run: () => flows.clearBrowserData(),
     },
@@ -141,7 +141,7 @@ export function createActions({ store, flows }) {
       context: false,
       menubar: false,
       notice: true,
-      enabled: () => store.hasAside(),
+      enabled: () => free() && store.hasAside(),
       run: () => flows.saveAsideCopy(),
     },
     {
@@ -153,7 +153,7 @@ export function createActions({ store, flows }) {
       context: false,
       menubar: false,
       notice: true,
-      enabled: () => store.hasAside(),
+      enabled: () => free() && store.hasAside(),
       danger: true,
       run: () => flows.discardAside(),
     },
@@ -341,7 +341,7 @@ export function createActions({ store, flows }) {
         const { back } = store.historyDepth();
         return back === 0 ? 'Nothing to undo' : `Undo (${back} ${back === 1 ? 'step' : 'steps'})`;
       },
-      enabled: () => store.canUndo(),
+      enabled: () => free() && store.canUndo(),
       run: () => flows.undo(),
     },
     {
@@ -357,7 +357,7 @@ export function createActions({ store, flows }) {
         const { forward } = store.historyDepth();
         return forward === 0 ? 'Nothing to redo' : `Redo (${forward} ${forward === 1 ? 'step' : 'steps'})`;
       },
-      enabled: () => store.canRedo(),
+      enabled: () => free() && store.canRedo(),
       run: () => flows.redo(),
     },
   ];

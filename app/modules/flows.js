@@ -378,14 +378,18 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Whether the selection is pinned to a picker's subject, so a move to
-   * any other row is refused while the picking is open. Picking is a mode
-   * of the tree, and the subject is what the editor shows throughout.
+   * Whether the selection is pinned by the mode open, so a move to any
+   * other row is refused. A picking pins its subject, an edit the row
+   * being edited, and the library pins nothing, since under it the
+   * selection is the import target. The tree under a mode does only what
+   * the mode asks of it, and the mode is left by its own buttons.
    * @param {string|null} id  the row asked for
    */
   function pinned(id) {
-    const picker = store.picker();
-    return picker !== null && id !== picker.subject;
+    const mode = store.mode();
+    if (mode === 'picking') return id !== store.picker().subject;
+    if (mode === 'editing' || mode === 'view' || mode === 'drawing') return id !== store.selection();
+    return false;
   }
 
   /**
@@ -1134,23 +1138,12 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * Save the project as a downloaded file, asking every time for the
    * file's name, prefilled from the project's name and previewed live
    * as the filename it makes. The project's own name is never touched.
-   * Cancel costs nothing, no download and no pointer move. An open draft
-   * with changes is offered to be saved first, since the file holds the
-   * project as committed, and a clean draft ends silently.
+   * Cancel costs nothing, no download and no pointer move. Under a mode
+   * the action stands down, so no file is saved with work half done.
    */
   async function saveProject() {
     if (!store.hasProject()) return;
-    if (editor.hasUnconfirmedEdit()) {
-      const keep = await dialogs.confirm({
-        title: 'Save the changes to the attributes first?',
-        message: 'The changes to the attributes are kept.',
-        confirmLabel: 'Save them',
-        cancelLabel: 'Keep editing',
-      });
-      if (!keep || !(await editor.save())) return;
-    } else if (editor.editing()) {
-      endEditSession();
-    }
+    if (store.mode() !== null) return;
     const fallback = store.model().name;
     const typed = await dialogs.prompt({
       title: 'Save to file',

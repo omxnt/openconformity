@@ -67,7 +67,7 @@ createShell({
     if (store.view()) flows.closeView();
     store.setMessagesOpen(true);
   },
-  draft: () => editor.hasUnconfirmedEdit(),
+  draft: () => editor.hasUnconfirmedEdit() || (store.picker()?.picks.length ?? 0) > 0 || store.libraryOpen() || store.drawingOpen(),
 });
 createNavigator({
   store,
@@ -177,6 +177,15 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
     flows.redo();
   }
+});
+
+// Escape leaves an edit from anywhere on the page, asking when the draft
+// is dirty, once no menu, dialog or diagram has taken the key first. The
+// editor takes it itself while the focus is inside it.
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape' || event.defaultPrevented || !editor.editing() || store.drawingOpen() || overlay.dialogOpen()) return;
+  event.preventDefault();
+  flows.escapeEdit();
 });
 
 // Escape leaves a picking without relating, once no menu, dialog, edit,

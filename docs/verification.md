@@ -116,12 +116,11 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-197 | Headless | [test-flows.js](../tests/test-flows.js) | Delete, cut, copy and paste act on the set |
 | V-TST-200 | Headless | [test-flows.js](../tests/test-flows.js) | Picking pins the selection to its subject |
 | V-TST-202 | Headless | [test-flows.js](../tests/test-flows.js) | A picker asked for over a draft goes through the question |
+| V-TST-203 | Headless | [test-flows.js](../tests/test-flows.js) | The tree under a mode does only what the mode asks |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
-| V-TST-181 | Headless | [test-flows.js](../tests/test-flows.js) | Save to file offers to save an open draft first |
-| V-TST-186 | Headless | [test-flows.js](../tests/test-flows.js) | Cut and paste file a row as a drop would |
-| V-TST-188 | Headless | [test-flows.js](../tests/test-flows.js) | Copy and paste make a copy inside the selection |
+| V-TST-181 | Headless | [test-flows.js](../tests/test-flows.js) | Save to file waits for an open edit |
 | V-TST-051 | Headless | [test-flows.js](../tests/test-flows.js) | A changed record marked reviewed |
 | V-TST-052 | Headless | [test-flows.js](../tests/test-flows.js) | Every deletion asks first |
 | V-TST-053 | Headless | [test-flows.js](../tests/test-flows.js) | Cancel asks like Escape when the draft is dirty |
@@ -307,7 +306,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
 | V-DEM-015 | Drive | [drives.py](../tests/drives.py) | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
 | V-DEM-016 | Drive | [drives.py](../tests/drives.py) | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
-| V-DEM-017 | Drive | [drives.py](../tests/drives.py) | Edit an entity, type a value, and choose Save to file from the menu. The question offers to save the attributes first, Save them closes the form, the file name is asked, and the file holds the value. Keep editing leaves the form open and downloads nothing |
+| V-DEM-017 | Drive | [drives.py](../tests/drives.py) | Edit an entity and type a value. Save to file stands down in the File menu, Escape from the tree asks to discard, and once the edit is left Save to file is offered again |
 | V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
 | V-DEM-019 | Drive | [drives.py](../tests/drives.py) | Select a row in the tree, press Cmd X on a Mac or Ctrl X elsewhere, and find the row dimmed. Select a folder, press Cmd V, and find the row filed inside it and the dimming gone. Cut a row, press Escape, and find the cut forgotten. Find Cut and Paste in the context menu and the Edit menu, Paste greyed while nothing is cut |
 | V-DEM-020 | Drive | [drives.py](../tests/drives.py) | Select an entity holding others, press Cmd C on a Mac or Ctrl C elsewhere, select a folder, press Cmd V, and find a copy with new identifiers, the same attributes and no relationships filed inside the folder and selected. Press Cmd V again and find a second copy. Find Copy in the context menu and the Edit menu |
@@ -414,19 +413,19 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-WSP-007 | Folder deletion | V-TST-015, V-TST-052, V-TST-089, V-TST-107 | Tested |
 | F-WSP-008 | Tree filter | V-TST-093, V-TST-108 | Tested |
 | F-WSP-009 | Sibling order | V-TST-087 | Tested |
-| F-WSP-010 | Cut and paste | V-TST-197, V-TST-186, V-TST-185, V-DEM-019 | Partly |
-| F-WSP-011 | Copy and paste | V-TST-197, V-TST-188, V-TST-187, V-DEM-020 | Partly |
+| F-WSP-010 | Cut and paste | V-TST-197, V-TST-185, V-DEM-019 | Partly |
+| F-WSP-011 | Copy and paste | V-TST-197, V-TST-187, V-DEM-020 | Partly |
 | F-WSP-012 | Selecting many | V-TST-198, V-TST-199, V-TST-195, V-TST-197, V-TST-194, V-TST-193, V-DEM-021 | Partly |
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-199, V-TST-201, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-202, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022, V-DEM-023 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
+| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
 | F-MOD-009 | Redo action | V-TST-002, V-TST-062, V-TST-063, V-TST-064, V-TST-067 | Tested |
-| F-MOD-010 | Library import | V-TST-201, V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018, V-DEM-023 | Partly |
+| F-MOD-010 | Library import | V-TST-201, V-TST-203, V-TST-057, V-TST-059, V-TST-180, V-TST-070, V-TST-071, V-TST-072, V-DEM-018, V-DEM-023 | Partly |
 | F-MOD-011 | Record of related measures | V-TST-028, V-TST-051, V-TST-109, V-TST-110, V-TST-111, V-TST-112 | Tested |
 | F-MOD-012 | Bulk edit | V-TST-198, V-TST-196, V-DEM-021 | Partly |
 | F-VIE-001 | Model views | V-TST-201, V-TST-054, V-TST-073, V-TST-074, V-INS-009, V-TST-158, V-TST-159, V-TST-160, V-TST-161, V-TST-162, V-TST-163, V-TST-184, V-TST-164, V-TST-165, V-TST-166, V-TST-167, V-TST-168, V-TST-183, V-DEM-007, V-DEM-023 | Partly |
@@ -477,7 +476,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028, V-DEM-015 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
 | N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012 | Partly |
-| N-ACC-004 | Tree selection pattern | V-TST-200, V-DEM-021, V-DEM-022 | Partly |
+| N-ACC-004 | Tree selection pattern | V-TST-200, V-TST-203, V-DEM-021, V-DEM-022 | Partly |
 | N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013 | Partly |
 | N-CMP-002 | Browser support | V-INS-013, V-INS-020, V-TST-144, V-DEM-014 | Partly |
 

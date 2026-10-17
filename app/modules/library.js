@@ -247,7 +247,7 @@ const TREE_PRESET = 400;
  * closed, the two halves split by a splitter kept for the session. The
  * copies are filed where the navigator's selection stands. While open, the picker takes the whole column, the
  * relationship pane and its splitter hidden. Opened from the toolbar,
- * closed by its X or Escape, never kept across a reload.
+ * closed by its Cancel or Escape, never kept across a reload.
  * @param {Object} context
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head  the editor pane's head
@@ -362,14 +362,13 @@ export function createLibraryPane({ store, head, body, libraries, onImport, onCl
       picks = new Set();
       onImport(chosen);
     });
-    const close = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon('i-close')]);
-    close.addEventListener('click', onClose);
-    tooltipOn(close, 'Close the library', { align: 'end' });
+    const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
+    cancel.addEventListener('click', onClose);
     head.append(
       el('span', { className: 'head-title', text: 'Import from library' }),
       count,
       el('span', { className: 'toolbar-spacer' }),
-      el('div', { className: 'pane-head-actions' }, [searchControl(), importButton, close])
+      el('div', { className: 'pane-head-actions' }, [searchControl(), cancel, importButton])
     );
     renderCount();
   }

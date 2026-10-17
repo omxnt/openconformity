@@ -294,7 +294,7 @@ function enabledIds(actions) {
   store.beginPicking('ELM-001');
   const picking = enabled();
   ok(guarded.every((id) => picking[id] === false), 'while a relationship picker is open every one of them stands down, since picking is a mode');
-  ok(picking.undo && picking.about && picking.save, 'while undo, the file surface and the help surface stay');
+  ok(!picking.undo && !picking.save && picking.about && picking.metamodel, 'while the file surface and the history stand down with them and the help surface stays');
   store.endPicking();
   deepEqual(enabled(), before, 'and they return as they were when the picking ends');
 }
@@ -310,7 +310,8 @@ function enabledIds(actions) {
   store.commit((model) => addEntity(model, 'HAZ'));
   store.select('ELM-001');
   const changers = ['edit', 'select-below', 'new-entity', 'new-related', 'new-folder', 'relate', 'import', 'move-up', 'move-down', 'cut', 'copy', 'paste', 'delete'];
-  const stay = ['undo', 'redo', 'save', 'open', 'new-project', 'about', 'metamodel'];
+  const stay = ['about', 'metamodel'];
+  const waits = ['undo', 'redo', 'save', 'open', 'new-project', 'load-example'];
   equal(store.mode(), null, 'with nothing open there is no mode');
   const open = enabled();
   ok(open.edit && open.relate && open['new-entity'] && open['view-risk'], 'and the actions are offered');
@@ -318,7 +319,7 @@ function enabledIds(actions) {
   equal(store.mode(), 'picking', 'a picker opens the picking mode');
   const picking = enabled();
   ok(changers.every((id) => picking[id] === false) && picking['view-risk'] === false, 'which stands every changer and the views down, Add relationship among them');
-  ok(stay.every((id) => picking[id] === open[id]), 'and leaves undo, the file surface and the help surface as they were');
+  ok(stay.every((id) => picking[id] === open[id]) && waits.every((id) => picking[id] === false), 'the help surface stays, and the file surface and the history wait with the rest');
   store.endPicking();
   store.setLibraryOpen(true);
   equal(store.mode(), 'library', 'the library over the editor is a mode');
@@ -334,7 +335,7 @@ function enabledIds(actions) {
   equal(store.mode(), 'editing', 'an edit is a mode the editor tells the store about');
   const editing = enabled();
   ok(changers.every((id) => editing[id] === false) && editing['view-risk'] === false, 'that stands the changers and the views down like any other mode, the edit left by Save, Cancel or Escape');
-  ok(stay.every((id) => editing[id] === open[id]), 'and leaves undo, the file surface and the help surface');
+  ok(stay.every((id) => editing[id] === open[id]) && waits.every((id) => editing[id] === false), 'the help surface staying and the file surface waiting, so no file is saved with a draft open');
   store.setEditing(false);
   store.setDrawingOpen(true);
   equal(store.mode(), 'drawing', 'and the diagram editor stands over all of them');

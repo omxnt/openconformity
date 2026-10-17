@@ -258,7 +258,7 @@ export function createNavigator({
    * @param {{ x: number, y: number }} at
    */
   async function onContextMenu(id, at) {
-    if (store.picker() !== null && id !== store.picker().subject) return;
+    if (store.mode() !== null) return;
     if (!(id !== null && chosen.has(id)) && !(await onSelect(id))) return;
     openMenu({
       overlay,
@@ -281,7 +281,7 @@ export function createNavigator({
   const filter = () => store.navigatorFilter();
 
   /** Whether dragging is off: picks own the tree's clicks, and a filtered view's neighbours are not real siblings. */
-  const dragLocked = () => store.picker() !== null || filter().trim() !== '';
+  const dragLocked = () => store.mode() !== null || filter().trim() !== '';
   /** @type {{ subject: string, id: string, picked: boolean }|null} the row last toggled by a plain click and what it became, the anchor whose act a Shift+click applies to a range */
   let lastPick = null;
   /** @type {string|null} the selection at the last render, so a render after the selection moved puts the focus on it */

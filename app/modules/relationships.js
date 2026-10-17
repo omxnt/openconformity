@@ -301,10 +301,10 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       });
       const cancel = el('button', { className: 'ghost-button', text: 'Cancel', attributes: { type: 'button' } });
       cancel.addEventListener('click', () => store.endPicking());
-      actions.push(done, cancel);
+      actions.push(cancel, done);
     } else {
       const can = addEnabled();
-      const add = headIcon(can ? 'Add relationship' : 'Nothing to relate to', 'i-add-relationship', onAdd);
+      const add = headIcon('Add relationship', 'i-add-relationship', onAdd);
       add.disabled = !can;
       actions.push(add);
     }

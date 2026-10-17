@@ -70,7 +70,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 |---|---|---|
 | Enter, F2 on a row | Enter, F2 on a row | Begins the edit |
 | ⌘S, ⌘Enter | Ctrl S, Ctrl Enter | Saves the edit, from a text area too |
-| Escape | Escape | Cancels the edit, asking when it is dirty |
+| Escape | Escape | Cancels the edit from anywhere on the page, asking when it is dirty |
 | Tab | Tab | Moves through the fields |
 | ← → in the tab bar | ← → in the tab bar | Moves between the tabs |
 | Enter, Space on a rating | Enter, Space on a rating | Opens the rating dialog |

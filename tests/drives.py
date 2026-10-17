@@ -320,15 +320,16 @@ def drive_017(page):
       [...document.querySelectorAll('button')].find((b) => b.querySelector('use[href="#i-edit"]')).click(); await wait(300);
       const input = document.querySelector('input.field-input, textarea.field-input');
       input.value = input.value + ' typed'; input.dispatchEvent(new Event('input', { bubbles: true }));
-      await menu('File', 'Save to file');
-      must(dialogTitle() === 'Save the changes to the attributes first?', 'the question offers to save the attributes first');
-      byText('.dialog-button', 'Keep editing')?.click(); await wait(300);
-      must(document.querySelector('.form-button.button-primary'), 'keep editing leaves the form open');
-      await menu('File', 'Save to file');
-      byText('.dialog-button', 'Save them')?.click(); await wait(600);
-      must(!document.querySelector('.form-button.button-primary'), 'save them closes the form');
-      must(dialogTitle() === 'Save to file', 'and the file name is asked next');
-      byText('.dialog-button', 'Cancel')?.click(); await wait(200);
+      byText('.menubar-item', 'File').click(); await wait(250);
+      must(byText('.menu-entry', 'Save to file')?.disabled === true, 'under an edit Save to file stands down');
+      document.body.click(); await wait(200);
+      key(document.querySelector('.tree-row.selected') ?? document.body, { key: 'Escape' }); await wait(300);
+      must(dialogTitle() === 'Discard the changes?', 'Escape from the tree asks to discard the dirty draft');
+      byText('.dialog-button', 'Discard').click(); await wait(300);
+      must(!document.querySelector('.form-button.button-primary'), 'and leaves the edit');
+      byText('.menubar-item', 'File').click(); await wait(250);
+      must(byText('.menu-entry', 'Save to file')?.disabled === false, 'Save to file is offered again');
+      document.body.click(); await wait(200);
     """))
 
 
@@ -463,9 +464,9 @@ def drive_023(page):
       await menu('Edit', 'Import from library'); await wait(300);
       const library = await menuState();
       must(library.Edit === true && library.New === true && library.Delete === true, 'while the library is open the changers stand down: ' + JSON.stringify(library));
-      const closeLibrary = [...document.querySelectorAll('#pane-editor button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Close'));
-      must(closeLibrary, 'the library offers Close');
-      closeLibrary.click(); await wait(300);
+      must(byText('#pane-editor .button-primary', 'Import') && byText('#pane-editor .ghost-button', 'Cancel'), 'the library head reads Import and Cancel');
+      byText('#pane-editor .ghost-button', 'Cancel').click(); await wait(300);
+      must(!byText('#pane-editor .button-primary', 'Import'), 'and Cancel closes it');
       await menu('View', 'Risk assessment'); await wait(400);
       const viewing = await menuState();
       must(viewing.Edit === true && viewing.New === true && viewing.Delete === true, 'while a view is open the changers stand down: ' + JSON.stringify(viewing));
@@ -481,6 +482,13 @@ def drive_023(page):
       byText('.menubar-item', 'View').click(); await wait(250);
       must(byText('.menu-entry', 'Risk assessment')?.disabled === true, 'and the views stand down too');
       document.body.click(); await wait(200);
+      const editedId = document.querySelector('.tree-row.selected').dataset.id;
+      const otherRow = [...document.querySelectorAll('.tree-row')].find((r) => r.dataset.id && r.dataset.id !== editedId);
+      otherRow.click(); await wait(300);
+      must(document.querySelector('.tree-row.selected')?.dataset.id === editedId && document.querySelector('#editor-head .button-primary'), 'a click on another row under an edit does nothing');
+      const menusBefore = document.querySelectorAll('.dropdown').length;
+      otherRow.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true })); await wait(300);
+      must(document.querySelectorAll('.dropdown').length === menusBefore, 'and a right click opens no menu');
       byText('#editor-head .ghost-button', 'Cancel').click(); await wait(300);
       must(!document.querySelector('#editor-head .button-primary'), 'Cancel leaves the edit');
     """))
@@ -494,7 +502,7 @@ DRIVES = [
     ('V-DEM-006', 'A selected entity shows its attributes', drive_006),
     ('V-DEM-015', 'The relationship pane keeps its head when nothing is selected', drive_015),
     ('V-DEM-016', 'Selecting from the list reveals the entity in the tree', drive_016),
-    ('V-DEM-017', 'Save to file offers to save an open draft first', drive_017),
+    ('V-DEM-017', 'Save to file waits for an open edit', drive_017),
     ('V-DEM-019', 'Cut and paste in the tree', drive_019),
     ('V-DEM-020', 'Copy and paste in the tree', drive_020),
     ('V-DEM-021', 'Select several rows and act on the set', drive_021),

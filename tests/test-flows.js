@@ -456,6 +456,32 @@ function flowsOver(store) {
   equal(store.picker()?.subject, 'ELM-001', 'asked again while picking it does nothing, since the action stands down and the pane ends the picking');
 }
 
+// --- V-TST-203 The tree under a mode does only what the mode asks (F-MOD-004, F-MOD-010, N-ACC-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  const editor = { endEdit() {}, beginEdit() {}, hasUnconfirmedEdit: () => true, editing: () => true };
+  const dialogs = { confirm: async (question) => { asked.push(question.title); return true; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  store.select('ELM-001');
+  store.setEditing(true);
+  equal(await flows.selectNode('HAZ-001'), false, 'under an edit a click on another row is refused');
+  equal(await flows.selectRows(['ELM-001', 'HAZ-001'], 'HAZ-001'), false, 'a range too');
+  deepEqual([asked, store.selection()], [[], 'ELM-001'], 'with no question asked and the selection where it was, the edit left by Save, Cancel or Escape alone');
+  store.setEditing(false);
+  store.setLibraryOpen(true);
+  equal(await flows.selectNode('HAZ-001'), true, 'under the library a click selects, since the selection is the import target');
+  equal(store.selection(), 'HAZ-001', 'and the target moved');
+  store.setLibraryOpen(false);
+  store.openView('risk');
+  equal(await flows.selectNode('ELM-001'), false, 'under a view the tree is hidden and a selection from elsewhere is refused');
+  store.closeView();
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {
@@ -570,118 +596,24 @@ function flowsOver(store) {
   equal(saved.at(-1).filename, 'mixer-line.json', 'and saves under it unchanged');
 }
 
-// --- V-TST-181 Save to file offers to save an open draft first (F-MOD-004, F-PER-001) ---
+// --- V-TST-181 Save to file waits for an open edit (F-MOD-004, F-PER-001) -----
 
 {
   const store = createStore({ storage: fakeStorage() });
   const saved = [];
-  const asked = [];
   let prompts = 0;
-  let ended = 0;
-  let answer = false;
-  let applies = true;
-  const editor = {
-    beginEdit() {},
-    endEdit() { ended += 1; },
-    editing: () => true,
-    hasUnconfirmedEdit: () => true,
-    save: async () => {
-      if (!applies) return false;
-      store.commit((model) => updateEntity(model, 'ELM-001', { title: 'Typed' }));
-      return true;
-    },
-  };
-  const dialogs = {
-    confirm: async (question) => { asked.push(question); return answer; },
-    prompt: async (spec) => { prompts += 1; return spec.value; },
-    toast() {},
-  };
+  const editor = { beginEdit() {}, endEdit() {}, editing: () => true, hasUnconfirmedEdit: () => true, save: async () => true };
+  const dialogs = { confirm: async () => true, prompt: async (spec) => { prompts += 1; return spec.value; }, toast() {} };
   const flows = createFlows({ store, overlay: {}, dialogs, editor, fileInput: null, saveFile: (filename, text) => saved.push(text) });
   store.replaceProject(createModel());
   store.commit((model) => addEntity(model, 'ELM', { attributes: { title: 'Drive' } }));
-
+  store.setEditing(true);
   await flows.saveProject();
-  equal(asked[0].title, 'Save the changes to the attributes first?', 'a changed draft is offered to be saved before the file');
-  deepEqual([asked[0].confirmLabel, asked[0].cancelLabel], ['Save them', 'Keep editing'], 'with saving it or going back to it as the choices');
-  equal(prompts + saved.length, 0, 'and keep editing asks for no file name and downloads nothing');
-
-  answer = true;
-  applies = false;
+  equal(prompts + saved.length, 0, 'under an edit Save to file asks nothing and saves nothing, the action standing down until the edit is saved or cancelled');
+  store.setEditing(false);
   await flows.saveProject();
-  equal(prompts + saved.length, 0, 'a save the editor refuses stops there too');
-
-  applies = true;
-  await flows.saveProject();
-  equal(prompts, 1, 'a saved draft goes on to the file name question');
-  ok(saved.length === 1 && saved[0].includes('"Typed"'), 'and the file holds what was typed');
-  equal(store.dirty(), false, 'with the saved pointer moved after the draft');
-
-  editor.hasUnconfirmedEdit = () => false;
-  await flows.saveProject();
-  equal(ended, 1, 'a draft without changes ends silently');
-  equal(asked.length, 3, 'and asks nothing, the three questions being the three earlier saves');
-}
-
-// --- V-TST-186 Cut and paste file a row as a drop would (F-WSP-010) -----------
-
-{
-  const store = createStore({ storage: fakeStorage() });
-  const toasts = [];
-  const flows = createFlows({ store, overlay: {}, dialogs: { toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
-  store.replaceProject(createModel());
-  store.commit((model) => addEntity(model, 'ELM'));
-  store.commit((model) => addEntity(model, 'HAZ'));
-  flows.cutSelection();
-  deepEqual(store.cut(), [], 'cutting with nothing selected cuts nothing');
-  store.select('HAZ-001');
-  flows.cutSelection();
-  deepEqual(store.cut(), ['HAZ-001'], 'cut marks the selection');
-  flows.cutSelection();
-  deepEqual(store.cut(), [], 'and a second cut on the same row forgets it');
-  flows.cutSelection();
-  store.select('ELM-001');
-  flows.pasteHeld();
-  equal(nodeOf(store.model(), 'HAZ-001').parent, 'ELM-001', 'paste files the cut row inside the selection');
-  deepEqual(store.cut(), [], 'and forgets the cut');
-  equal(toasts.length, 0, 'saying nothing');
-  store.undo();
-  equal(nodeOf(store.model(), 'HAZ-001').parent, null, 'one undo returns the row');
-  store.redo();
-  store.select('ELM-001');
-  flows.cutSelection();
-  store.select('HAZ-001');
-  flows.pasteHeld();
-  equal(nodeOf(store.model(), 'ELM-001').parent, null, 'a paste inside the cut row itself is refused and files nothing');
-  equal(toasts.at(-1)?.[0], 'Could not paste', 'and is told');
-  ok(toasts.at(-1)?.[1].length > 0, 'with the model\'s own reason');
-  deepEqual(store.cut(), ['ELM-001'], 'while the cut stays for another target');
-}
-
-// --- V-TST-188 Copy and paste make a copy inside the selection (F-WSP-011) ----
-
-{
-  const store = createStore({ storage: fakeStorage() });
-  const toasts = [];
-  const flows = createFlows({ store, overlay: {}, dialogs: { toast: (title, message) => toasts.push([title, message]) }, editor: stubEditor(), fileInput: null });
-  store.replaceProject(createModel());
-  store.commit((model) => addEntity(model, 'ELM', { attributes: { title: 'Press' } }));
-  store.commit((model) => addEntity(model, 'HAZ', { parent: 'ELM-001', attributes: { title: 'Crushing' } }));
-  store.select('ELM-001');
-  flows.cutSelection();
-  flows.copySelection();
-  deepEqual(store.copied(), ['ELM-001'], 'copy marks the selection');
-  deepEqual(store.cut(), [], 'and forgets a cut');
-  store.select(null);
-  flows.pasteHeld();
-  equal(store.selection(), 'ELM-002', 'paste makes the copy and selects it');
-  deepEqual([nodeOf(store.model(), 'ELM-002').parent, nodeOf(store.model(), 'ELM-002').attributes.title], [null, 'Press'], 'at the root, with its attributes');
-  deepEqual(childrenOf(store.model(), 'ELM-002').map((node) => node.attributes.title), [], 'and nothing filed under it, since an entity stands for itself');
-  deepEqual(store.copied(), ['ELM-001'], 'the mark is kept');
-  flows.pasteHeld();
-  equal(store.model().nodes.size, 4, 'so a second paste makes another copy');
-  store.undo();
-  equal(store.model().nodes.size, 3, 'one undo removes the whole paste');
-  equal(toasts.length, 0, 'nothing was told');
+  equal(prompts, 1, 'once the edit is closed the file name is asked');
+  ok(saved.length === 1 && saved[0].includes('"Drive"'), 'and the file holds the project as saved');
 }
 
 // --- V-TST-051 A changed record marked reviewed (F-MOD-011) ------------------

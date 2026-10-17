@@ -49,14 +49,15 @@ export function titleFor(hasProject, name) {
 }
 
 /**
- * Whether leaving costs something: while an edit is unconfirmed, since
- * the draft lives in the form and nowhere else, and while there is
+ * Whether leaving costs something: while a mode holds work not yet
+ * applied, an edit, a picking with picks, an import or a diagram, since
+ * that work lives in the mode and nowhere else, and while there is
  * unsaved work that persistence is failing to keep. While the blob holds
  * the work, closing the tab loses nothing, and a prompt saying otherwise
  * would be a lie the user learns to dismiss.
  * @param {boolean} dirty
  * @param {boolean} persistFailed
- * @param {boolean} [draft]  whether an edit is unconfirmed
+ * @param {boolean} [draft]  whether a mode holds work not yet applied
  * @returns {boolean}
  */
 export function shouldWarnBeforeUnload(dirty, persistFailed, draft = false) {
@@ -423,6 +424,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
     renderStatus();
     syncShellHistory();
     unsavedButton.hidden = !store.dirty();
+    unsavedButton.disabled = !(actions.find((action) => action.id === 'save')?.enabled() ?? false);
     relationshipsPane.classList.toggle('collapsed', store.relationshipsCollapsed());
     document.title = titleFor(store.hasProject(), store.model().name);
 
