@@ -96,16 +96,19 @@ export function libraryRows(library, filter = '', expanded = new Set()) {
 /**
  * The nodes a row stands for when checked: itself and everything filed
  * beneath it, entities and folders alike, a catalogue standing for what
- * is beneath it alone.
+ * is beneath it alone. Under a filter, only what the filter shows, so a
+ * check picks what is seen and nothing hidden.
  * @param {import('./model.js').Model} library
  * @param {string} id
+ * @param {Set<string>|null} [shown]  the rows a filter shows, or null for all
  * @returns {string[]}
  */
-function nodesUnder(library, id) {
+function nodesUnder(library, id, shown = null) {
   const node = nodeOf(library, id);
   if (!node) return [];
   const beneath = filedBeneath(library, id).map((held) => held.id);
-  return isCatalogue(node) ? beneath : [id, ...beneath];
+  const all = isCatalogue(node) ? beneath : [id, ...beneath];
+  return shown === null ? all : all.filter((held) => shown.has(held));
 }
 
 /**
@@ -113,16 +116,18 @@ function nodesUnder(library, id) {
  * when it is picked, mixed when it is not but something beneath it is,
  * none otherwise. A folder is checked when it and everything in it is
  * picked, mixed when it or some of it is, and a catalogue when
- * everything in it is.
+ * everything in it is. Under a filter the box answers for what is
+ * shown beneath the row.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
+ * @param {Set<string>|null} [shown]  the rows a filter shows, or null for all
  * @returns {'checked'|'mixed'|'none'}
  */
-export function checkState(library, picks, id) {
+export function checkState(library, picks, id, shown = null) {
   const node = nodeOf(library, id);
   if (!node) return 'none';
-  const under = nodesUnder(library, id);
+  const under = nodesUnder(library, id, shown);
   const picked = under.filter((held) => picks.has(held)).length;
   if (node.kind === 'entity') return picks.has(id) ? 'checked' : picked > 0 ? 'mixed' : 'none';
   if (under.length > 0 && picked === under.length) return 'checked';
@@ -131,22 +136,24 @@ export function checkState(library, picks, id) {
 
 /**
  * Toggle a row as a tree does: a checked row unpicks everything it
- * stands for, any other row picks all of it. Alone, the one entity is
- * picked or unpicked without what is beneath it.
+ * stands for, any other row picks all of it, under a filter only what
+ * it shows. Alone, the one entity is picked or unpicked without what is
+ * beneath it.
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string} id
  * @param {boolean} [alone]
+ * @param {Set<string>|null} [shown]  the rows a filter shows, or null for all
  */
-export function togglePick(library, picks, id, alone = false) {
+export function togglePick(library, picks, id, alone = false, shown = null) {
   if (alone) {
     if (nodeOf(library, id)?.kind !== 'entity') return;
     if (picks.has(id)) picks.delete(id);
     else picks.add(id);
     return;
   }
-  const under = nodesUnder(library, id);
-  const checked = checkState(library, picks, id) === 'checked';
+  const under = nodesUnder(library, id, shown);
+  const checked = checkState(library, picks, id, shown) === 'checked';
   for (const held of under) {
     if (checked) picks.delete(held);
     else picks.add(held);
@@ -392,12 +399,13 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
     }
     const library = held.model;
     const rows = libraryRows(library, filter, expanded);
+    const shown = filter.trim() === '' ? null : new Set(rows.map((row) => row.node.id));
     if (rows.length === 0) {
       list.appendChild(el('p', { className: 'library-note', text: filter.trim() === '' ? 'The library is empty.' : 'Nothing matches the filter.' }));
     }
     const focusable = rows.some((row) => row.node.id === highlight) ? highlight : rows[0]?.node.id;
     for (const { node, depth, hasChildren, expanded: open } of rows) {
-      const state = checkState(library, picks, node.id);
+      const state = checkState(library, picks, node.id, shown);
       const attributes = {
         role: 'treeitem',
         'aria-level': String(depth + 1),
@@ -428,7 +436,7 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
       check.addEventListener('click', (event) => {
         event.stopPropagation();
         event.preventDefault();
-        togglePick(library, picks, node.id, event.altKey);
+        togglePick(library, picks, node.id, event.altKey, shown);
         focusRow(node.id);
         renderCount();
       });
@@ -464,7 +472,7 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
           focusRow(node.id);
         } else if (event.code === 'Space') {
           event.preventDefault();
-          togglePick(library, picks, node.id, event.altKey);
+          togglePick(library, picks, node.id, event.altKey, shown);
           focusRow(node.id);
           renderCount();
         }

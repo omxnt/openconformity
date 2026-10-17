@@ -237,6 +237,27 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   deepEqual([nodeOf(bare, alone.added[0]).name, childrenOf(bare, alone.added[0]).length], ['1. Legislation and standards', 0], 'with its name and nothing in it');
 }
 
+// --- V-TST-207 A check under a filter picks what the filter shows (F-MOD-010) ---
+
+{
+  const POINT = byRef('Annex III, Part B, point 1.3.7').id;
+  const rows = libraryRows(library.model, '1.3.7');
+  const shown = new Set(rows.map(({ node }) => node.id));
+  const chain = [];
+  for (let held = nodeOf(library.model, POINT); held && !isCatalogue(held); held = nodeOf(library.model, held.parent)) chain.unshift(held.id);
+  ok(chain[0] === MR && chain.at(-1) === POINT && chain.every((id) => shown.has(id)), 'the filter shows the act, the path down to the point, and the point');
+  const picks = new Set();
+  togglePick(library.model, picks, MR, false, shown);
+  deepEqual(importPlan(library.model, picks).map((node) => node.id), chain, 'checking the act under the filter picks what is shown and nothing hidden');
+  equal(checkState(library.model, picks, MR, shown), 'checked', 'the act stands checked while the filter shows only that');
+  equal(checkState(library.model, picks, MR), 'checked', 'and checked once the filter is cleared too, since the act itself is picked and travels');
+  equal(checkState(library.model, picks, LEGISLATION), 'mixed', 'while the catalogue above it stands partly checked, most of the act not being picked');
+  togglePick(library.model, picks, MR, false, shown);
+  equal(picks.size, 0, 'checking it again under the filter unpicks the same');
+  togglePick(library.model, picks, MR);
+  equal(picks.size, 214, 'and with no filter the act picks everything in it, as before');
+}
+
 // --- V-TST-205 Picks across the catalogues (F-MOD-010, F-PER-012) --------------
 
 {
