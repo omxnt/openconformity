@@ -482,10 +482,10 @@ def drive_023(page):
       must(byText('#pane-editor .button-primary', 'Import') && byText('#pane-editor .ghost-button', 'Cancel'), 'the library head reads Import and Cancel');
       byText('#pane-editor .ghost-button', 'Cancel').click(); await wait(300);
       must(!byText('#pane-editor .button-primary', 'Import'), 'and Cancel closes it');
-      await menu('View', 'Risk assessment'); await wait(400);
+      await menu('View', 'Risk assessment report'); await wait(400);
       const viewing = await menuState();
       must(viewing.Edit === true && viewing.New === true && viewing.Delete === true, 'while a view is open the changers stand down: ' + JSON.stringify(viewing));
-      const viewEntry = async () => { for (let i = 0; i < 2; i += 1) { byText('.menubar-item', 'View').click(); await wait(250); const e = byText('.menu-entry', 'Risk assessment'); if (e) { const state = e.disabled; document.body.click(); await wait(200); return state; } } return 'absent'; };
+      const viewEntry = async () => { for (let i = 0; i < 2; i += 1) { byText('.menubar-item', 'View').click(); await wait(250); const e = byText('.menu-entry', 'Risk assessment report'); if (e) { const state = e.disabled; document.body.click(); await wait(200); return state; } } return 'absent'; };
       must((await viewEntry()) === false, 'while switching views stays offered');
       const closeView = [...document.querySelectorAll('#pane-view button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Close'));
       must(closeView, 'the view offers Close');
@@ -495,7 +495,7 @@ def drive_023(page):
       const editing = await menuState();
       must(editing.Add === true && editing.Import === true && editing.New === true && editing.Delete === true, 'while editing the changers stand down, Add relationship and Import among them: ' + JSON.stringify(editing));
       byText('.menubar-item', 'View').click(); await wait(250);
-      must(byText('.menu-entry', 'Risk assessment')?.disabled === true, 'and the views stand down too');
+      must(byText('.menu-entry', 'Risk assessment report')?.disabled === true, 'and the views stand down too');
       document.body.click(); await wait(200);
       const editedId = document.querySelector('.tree-row.selected').dataset.id;
       const otherRow = [...document.querySelectorAll('.tree-row')].find((r) => r.dataset.id && r.dataset.id !== editedId);

@@ -33,7 +33,7 @@ const labelOf = (id) => entityLabel(model.nodes.get(id));
 
 // --- V-TST-158 The registry (F-VIE-001) --------------------------------------
 
-deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment', 'function'], ['safety', 'Safety function specification', 'function']], 'the risk assessment, then the safety function specification, each built by a function of the model');
+deepEqual(VIEWS.map((view) => [view.id, view.name, typeof view.build]), [['risk', 'Risk assessment report', 'function'], ['safety', 'Safety function specification', 'function']], 'the risk assessment, then the safety function specification, each built by a function of the model');
 equal(RISK_VIEW.build, buildRiskView, 'registered under its builder');
 
 // --- V-TST-159 The risk assessment over the example (F-VIE-001, F-VIE-003) ---
@@ -43,7 +43,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
 
 {
   const view = buildRiskView(model);
-  equal(view.title, 'Risk assessment', 'titled, which names the saved file');
+  equal(view.title, 'Risk assessment report', 'titled, which names the saved file');
   deepEqual(
     view.sections.map((section) => [section.name, section.tables[0].rows.length]),
     [['All scenarios (4)', 4], ['[L-1] Installation (0)', 0], ['[L-2] Operation (1)', 1], ['[L-3] Maintenance (3)', 3], ['[L-4] Decommissioning (0)', 0]],
@@ -173,9 +173,9 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   equal(sheets[0].rows[0][0].text, 'SCN-001 [S-1] Contact with Moving Parts', 'and each cell as the exports write it');
   const view = buildRiskView(model);
   const whole = savedPart(view, 0);
-  deepEqual([whole.filename, whole.built.sections.length], ['Risk assessment.xlsx', 5], 'saved from the first tab, which holds every row, the whole view goes, every tab a sheet');
+  deepEqual([whole.filename, whole.built.sections.length], ['Risk assessment report.xlsx', 5], 'saved from the first tab, which holds every row, the whole view goes, every tab a sheet');
   const phase = savedPart(view, 3);
-  deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - [L-3] Maintenance.xlsx', ['[L-3] Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
+  deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment report - [L-3] Maintenance.xlsx', ['[L-3] Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
 }
 
 // --- V-TST-163 The safety function specification over the example (F-VIE-001, F-VIE-004) ---

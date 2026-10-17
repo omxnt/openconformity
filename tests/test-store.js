@@ -724,7 +724,7 @@ async function restored(retention, storage = fakeStorage(), session = null) {
   const second = await restored(retention, storage, session);
   deepEqual(second.view(), { id: 'risk', section: 2 }, 'a reload returns to the view');
 
-  store.setViewReturn({ id: 'risk', name: 'Risk assessment', section: 2, rowId: 'SCN-002' });
+  store.setViewReturn({ id: 'risk', name: 'Risk assessment report', section: 2, rowId: 'SCN-002' });
   store.closeView();
   equal(store.view(), null, 'closed');
   equal(session.read('openconformity.open-view'), null, 'and forgotten by the session');

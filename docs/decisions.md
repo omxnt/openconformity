@@ -1083,6 +1083,14 @@ A commit whose change refuses after an earlier step has already changed the mode
 
 > *Three flows could refuse after a step, and a copy per flow would have been three copies to keep right and a fourth the next time a flow grew a second step. The history already holds a clone of the model as it stands, so putting it back on a refusal costs one function and holds for every flow, those three and any written later. The counters are restored with it so that a refused change skips no identifier. Settles #29, by the store rather than by the copies the issue proposed.*
 
+### D-126 A view is named for the artefact it exports
+
+`2026-10-17` `product`
+
+A view carries the name of the artefact it exports, the subject and the kind of document, the risk assessment report and the safety function specification. A view added later is named the same way.
+
+> *The views are the documents a reader outside the tool takes away, and a document is known by its kind, a report tells what was found and a specification what is to be built. The risk assessment view was named for the activity and read as one. The principle that the software draws no conclusion is untouched by the word, the report holds what the model holds and nothing the model does not. Names the rule the candidates of #65 will follow.*
+
 ---
 
 ## 3. Undecided

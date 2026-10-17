@@ -850,7 +850,7 @@ function flowsOver(store) {
   flows.openFromView('SCN-002');
   equal(store.view(), null, 'choosing an entity in the view closes it');
   equal(store.selection(), 'SCN-002', 'and selects the entity');
-  deepEqual(store.viewReturn(), { id: 'risk', name: 'Risk assessment', section: 1, rowId: 'SCN-002' }, 'keeping the way back to the view, its section and the row');
+  deepEqual(store.viewReturn(), { id: 'risk', name: 'Risk assessment report', section: 1, rowId: 'SCN-002' }, 'keeping the way back to the view, its section and the row');
 
   editor.hasUnconfirmedEdit = () => true;
   await flows.returnToView();

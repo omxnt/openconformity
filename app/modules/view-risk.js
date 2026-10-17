@@ -170,7 +170,7 @@ export function buildRiskView(model) {
       tables: [table(unplaced)],
     });
   }
-  return { id: 'risk', title: 'Risk assessment', exports: ['excel'], sections };
+  return { id: 'risk', title: 'Risk assessment report', exports: ['excel'], sections };
 }
 
-export const RISK_VIEW = { id: 'risk', name: 'Risk assessment', build: buildRiskView };
+export const RISK_VIEW = { id: 'risk', name: 'Risk assessment report', build: buildRiskView };
