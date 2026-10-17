@@ -12,9 +12,7 @@ The project is named `openconformity`. It is a free, open-source, browser-based 
 
 ## Design
 
-The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, and component patterns. Token values are copied into the CSS. The Carbon packages are not used.
-
-IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbon Icons is the icon set. Both are vendored as files, nothing is imported or fetched.
+The interface follows the IBM Carbon Design System, its colour tokens, spacing scale, type scale, and component patterns. Token values are copied into the CSS. The Carbon packages are not used. IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbon Icons is the icon set. Both are vendored as files, nothing is imported or fetched.
 
 ## Structure
 
@@ -51,7 +49,7 @@ IBM Plex Sans is the typeface for prose and IBM Plex Mono for identifiers. Carbo
 
 ## Verification
 
-Run the test suite with `./run.sh` from `tests`, and every file must report all checks passed. Then run a local server with `python3 -m http.server 8000` from `app`, open the page, and check the browser console shows no errors or warnings.
+Run the test suite with `./run.sh` from `tests`, and every file must report all checks passed. Run the drives with `python3 drives.py` from `tests`, and every drive must pass. Then run a local server with `python3 -m http.server 8000` from `app`, open the page, and check the browser console shows no errors or warnings.
 
 ## Rules
 

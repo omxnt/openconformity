@@ -70,7 +70,6 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 | Mac | PC | Does |
 |---|---|---|
-| Enter, F2 on a row | Enter, F2 on a row | Begins the edit |
 | ⌘S, ⌘Enter | Ctrl S, Ctrl Enter | Saves the edit, from a text area too |
 | Escape | Escape | Cancels the edit from anywhere on the page, asking when it is dirty |
 | Tab | Tab | Moves through the fields |
@@ -92,7 +91,7 @@ The keys and modified clicks the software answers to, one table per place, with 
 
 | Mac | PC | Does |
 |---|---|---|
-| Enter in a dialog | Enter in a dialog | The primary action, unless the focus is in a text area |
+| Enter in a dialog | Enter in a dialog | The default action from a field or a list, the focused button's own action on a button, a new line in a text area |
 | Escape in a dialog | Escape in a dialog | Cancel |
 | ← → on a splitter | ← → on a splitter | Moves it 16 pixels |
 | Double click on a splitter | Double click on a splitter | Returns it to its preset |
