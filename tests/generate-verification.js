@@ -4,7 +4,9 @@
  * in the files named as arguments, and the manual activities in
  * manual.md. Run by run.sh from this directory after the suite, which
  * redirects the output into the document. Nothing in the document is
- * written by hand.
+ * written by hand. The file names are read from the global the shell
+ * sets, since this file imports nothing and Node then runs it as a
+ * script, where a bare `arguments` is the module wrapper's own.
  */
 
 const ID = /[A-Z]-[A-Z]{3}-\d{3}/g;
@@ -20,7 +22,7 @@ for (const line of readFile('../specs/requirements.md').split('\n')) {
 
 /** @type {Array<{ id: string, technique: string, where: string, what: string, requirements: string[] }>} */
 const activities = [];
-for (const file of [...arguments].filter((name) => /^test-.*\.js$/.test(name)).sort()) {
+for (const file of [...globalThis.arguments].filter((name) => /^test-.*\.js$/.test(name)).sort()) {
   for (const line of readFile(file).split('\n')) {
     const match = /^\/\/ --- (V-(?:TST|INS)-\d{3}) (.*?) \(([^)]*)\) -+$/.exec(line);
     if (!match) continue;
