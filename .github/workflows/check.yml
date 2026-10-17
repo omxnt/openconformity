@@ -20,6 +20,8 @@ jobs:
       - name: Test suite
         run: ./run.sh
         working-directory: tests
+      - name: Verification document is the generated one
+        run: git diff --exit-code docs/verification.md
       - name: Browser drives
         run: python3 drives.py
         working-directory: tests
