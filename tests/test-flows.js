@@ -503,6 +503,45 @@ function flowsOver(store) {
   store.closeView();
 }
 
+// --- V-TST-206 Undo and redo stand down under a mode (F-MOD-004, F-SES-007) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const asked = [];
+  const dialogs = { confirm: async (question) => { asked.push(question.title); return true; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addEntity(model, 'ELM'));
+  store.commit((model) => addEntity(model, 'HAZ'));
+  const size = () => store.model().nodes.size;
+  store.setLibraryOpen(true);
+  await flows.undo();
+  equal(size(), 2, 'under the library undo changes nothing, as the greyed menu says');
+  store.setLibraryOpen(false);
+  store.openView('risk');
+  await flows.undo();
+  equal(size(), 2, 'nor under a view');
+  store.closeView();
+  store.select('ELM-001');
+  store.beginPicking('ELM-001');
+  await flows.undo();
+  equal(size(), 2, 'nor under a picking');
+  store.endPicking();
+  store.setEditing(true);
+  await flows.undo();
+  equal(size(), 2, 'nor under an edit, which Escape and Cancel leave');
+  store.setEditing(false);
+  await flows.undo();
+  equal(size(), 1, 'with no mode on, undo undoes');
+  store.setLibraryOpen(true);
+  await flows.redo();
+  equal(size(), 1, 'and redo stands down the same way');
+  store.setLibraryOpen(false);
+  await flows.redo();
+  equal(size(), 2, 'until the mode is left');
+  deepEqual(asked, [], 'no question was asked along the way');
+}
+
 // --- V-TST-048 A file holding hidden or unknown content is cleared and stated on opening (F-PER-010, N-SEC-005) ---
 
 {

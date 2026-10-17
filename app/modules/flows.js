@@ -1185,6 +1185,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * of the one change standing.
    */
   async function undo() {
+    if (store.mode() !== null) return;
     if (!(await confirmDiscard())) return;
     if (freshCreation !== null) {
       endEditSession();
@@ -1196,6 +1197,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   async function redo() {
+    if (store.mode() !== null) return;
     if (!(await confirmDiscard())) return;
     if (freshCreation !== null) {
       endEditSession();

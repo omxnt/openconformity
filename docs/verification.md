@@ -118,6 +118,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-200 | Headless | [test-flows.js](../tests/test-flows.js) | Picking pins the selection to its subject |
 | V-TST-202 | Headless | [test-flows.js](../tests/test-flows.js) | A picker asked for over a draft goes through the question |
 | V-TST-203 | Headless | [test-flows.js](../tests/test-flows.js) | The tree under a mode does only what the mode asks |
+| V-TST-206 | Headless | [test-flows.js](../tests/test-flows.js) | Undo and redo stand down under a mode |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
 | V-TST-050 | Headless | [test-flows.js](../tests/test-flows.js) | Save asks every time, and cancel costs nothing |
@@ -406,7 +407,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-SES-004 | Restoration failure | V-TST-061, V-TST-137, V-TST-151 | Tested |
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
-| F-SES-007 | Unconfirmed edit on leaving | V-TST-129 | Tested |
+| F-SES-007 | Unconfirmed edit on leaving | V-TST-206, V-TST-129 | Tested |
 | F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-DEM-016 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
 | F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
@@ -422,7 +423,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-001 | Entity creation | V-TST-002, V-TST-031, V-TST-041, V-TST-044, V-TST-077, V-TST-079, V-TST-177, V-TST-104, V-TST-156 | Tested |
 | F-MOD-002 | Relationship creation | V-TST-199, V-TST-201, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-202, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022, V-DEM-023 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
-| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
+| F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-206, V-TST-181, V-TST-053, V-TST-082, V-DEM-017, V-DEM-023 | Partly |
 | F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
