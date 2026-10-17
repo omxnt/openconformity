@@ -792,6 +792,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (relationshipOptions(store.model(), subjectId).length === 0) return;
     if (!(await confirmDiscard())) return;
     endEditSession();
+    store.setNavigatorCollapsed(false);
     store.beginPicking(subjectId);
   }
 

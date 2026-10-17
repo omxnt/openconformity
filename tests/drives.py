@@ -565,6 +565,12 @@ def drive_025(page):
       document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
       document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
       must(!pane.classList.contains('collapsed'), 'and the chevron opens it');
+      const entity = await firstEntity();
+      entity.click(); await wait(300);
+      document.querySelector('#navigator-toolbar .pane-collapse').click(); await wait(300);
+      [...document.querySelectorAll('#pane-relationships button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Add relationship')).click(); await wait(400);
+      must(!pane.classList.contains('collapsed') && document.querySelectorAll('.tree-row.pickable').length > 0, 'Add relationship opens the pane with the candidates pickable');
+      key(document.body, { key: 'Escape' }); await wait(300);
     """))
 
 
