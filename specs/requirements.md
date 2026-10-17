@@ -531,7 +531,7 @@ While browser storage stands past eight tenths of its quota, the software shall 
 
 `unwanted behaviour`
 
-If the page is about to be left while a mode holds work not yet applied, an edit, a picking, an import or a diagram, then the software shall warn before the page is left.
+If the page is about to be left while a mode holds work not yet applied, an edit, picks for a relationship or an import, or a diagram, then the software shall warn before the page is left.
 
 > *A draft lives in the form until the user confirms it, so it is the one thing browser storage does not hold. A reload or a closed tab would lose it silently, and the browser's own leave prompt is the only warning that can reach the user then.*
 

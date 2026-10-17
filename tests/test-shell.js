@@ -60,7 +60,8 @@ equal(shouldWarnBeforeUnload(true, true), true, 'unsaved work that persistence i
 equal(shouldWarnBeforeUnload(true, false), false, 'unsaved work the blob holds does not: closing loses nothing');
 equal(shouldWarnBeforeUnload(false, true), false, 'a clean project warns of nothing, kept or not');
 equal(shouldWarnBeforeUnload(false, false), false, 'and neither does the quiet case');
-equal(shouldWarnBeforeUnload(false, false, true), true, 'a mode holding work not yet applied warns, an edit, a picking with picks, an import or a diagram, since that work lives in the mode alone');
+equal(shouldWarnBeforeUnload(false, false, true), true, 'a mode holding work not yet applied warns, an edit, picks for a relationship or an import, or a diagram, since that work lives in the mode alone');
+equal(shouldWarnBeforeUnload(false, false, false), false, 'the library open with nothing picked holds no work, so the draft is false and nothing warns');
 equal(shouldWarnBeforeUnload(true, false, true), true, 'whatever the storage holds');
 equal(shouldWarnBeforeUnload(false, false, false), false, 'and no draft leaves the rules as they were');
 

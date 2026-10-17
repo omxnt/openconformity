@@ -549,5 +549,8 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
   store.subscribe(render);
   render();
 
-  return { render };
+  /** Whether the open library holds picks, the work the leave warning guards. */
+  const hasPicks = () => store.libraryOpen() && picks.size > 0;
+
+  return { render, hasPicks };
 }

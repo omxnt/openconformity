@@ -67,7 +67,7 @@ createShell({
     if (store.view()) flows.closeView();
     store.setMessagesOpen(true);
   },
-  draft: () => editor.hasUnconfirmedEdit() || (store.picker()?.picks.length ?? 0) > 0 || store.libraryOpen() || store.drawingOpen(),
+  draft: () => editor.hasUnconfirmedEdit() || (store.picker()?.picks.length ?? 0) > 0 || library.hasPicks() || store.drawingOpen(),
 });
 createNavigator({
   store,
@@ -103,7 +103,7 @@ createRelationshipsView({
   onSelect: (id) => flows.selectNode(id),
   addEnabled: () => relateAction.enabled(),
 });
-createLibraryPane({
+const library = createLibraryPane({
   store,
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
