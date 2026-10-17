@@ -4,5 +4,5 @@
  * tags a release.
  */
 
-export const VERSION = '1.0.0-beta.4';
+export const VERSION = '1.0.0-beta.5';
 export const PHASE = 'Beta';

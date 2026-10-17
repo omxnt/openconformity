@@ -2,6 +2,53 @@
 
 Every release of openconformity is recorded here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-beta.5] - 2026-10-18
+
+Several rows at once, one mode at a time, and the library as one tree.
+
+### Added
+
+- Several rows selected in the tree, by Shift and Cmd as the ARIA tree pattern has it. Shift click and Shift arrows extend from the anchor, Cmd click and Cmd Space add or take one row, Cmd A selects every row shown, and Escape returns to the anchor. The status bar says how many are selected.
+- The actions acting on the set. Delete, cut and copy take every selected row, and Edit opens one form for several entities of one type, setting what is filled on each and leaving the rest as each one has it.
+- Select subtree, the row with everything under it, in the Edit menu and by Shift Cmd A.
+- The navigator folds to its toolbar, stood on end, and opens again from any button in it, from the magnifier at its foot, by the filter key, or when a relationship is picked.
+- Edit project in the Edit menu and the context menu when the project row is selected.
+- The project's designation in its label, before the name.
+- A warning before the page is left while a picking, an import or a diagram holds work, as there was for an edit.
+- A clear button in the head filters of the relationship pane and the library.
+- About names WCAG 2.2 and the ARIA tree view pattern among the design assets.
+- A check on GitHub that the committed verification document is the generated one, beside the suite and the drives.
+
+### Changed
+
+- The reference stands in square brackets in every label, before the title, as written.
+- One mode at a time. An edit, a picking, an import or a view is left by its own buttons or by Escape, and the changers, the file actions, undo and redo stand down meanwhile. Each mode has the same shape, its head carrying its own Done, Save or Import and its Cancel.
+- Picking a relationship pins the selection to the subject, and the arrows move the focus among the candidates.
+- The context menu is the Edit menu less the history, the clipboard actions are a group of their own, and the Edit entry names what it acts on, Edit entity, Rename folder or Edit 3 selected.
+- The library is one tree, its four catalogues open at the root with their own icon, and picks across them are imported together. The entity under the highlight is previewed as the editor shows it, its tabs and every field, and the filter stands on the catalogues' head.
+- A copy carries the relationships between the copied rows, and none to anything left behind.
+- A check in the library under a filter picks what the filter shows, and nothing hidden.
+- A choice value the options do not offer is kept and shown, not dropped.
+- A change refused after it had begun is undone whole, the model, the counters and the history as they were.
+- The risk assessment view is named for the report it exports, as the specification is for its kind.
+- The type annotations are checked and in step with the code.
+
+### Removed
+
+- Move to. A row moves by drag, or by cut and paste.
+
+### Fixed
+
+- A drag onto the project row files at the root again.
+- Undo and redo stand down under a mode by key as they do by menu.
+- The leave warning fires for the library only when something is picked.
+
+### Security
+
+- The responses carry Cross-Origin-Resource-Policy same-origin on both hosts.
+- A drawing naming an element with two colons is refused.
+- The security review of 9 October 2026 is recorded, and what it found is closed.
+
 ## [1.0.0-beta.4] - 2026-10-14
 
 Cut, copy and paste in the tree, and the check that now guards every release.
@@ -104,3 +151,4 @@ The first public beta, open to everyone at app.openconformity.org.
 [1.0.0-beta.2]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.1...v1.0.0-beta.2
 [1.0.0-beta.1]: https://github.com/omxnt/openconformity/releases/tag/v1.0.0-beta.1
 [1.0.0-beta.4]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.3...v1.0.0-beta.4
+[1.0.0-beta.5]: https://github.com/omxnt/openconformity/compare/v1.0.0-beta.4...v1.0.0-beta.5
