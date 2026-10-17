@@ -102,18 +102,18 @@ export function relatedTypeOffer(model, subjectId) {
 
 /**
  * What an entity is called, wherever a label is shown. A type carrying a
- * reference composes reference then title, separated by a single space —
- * `(EU) 2023/1230 Machinery Regulation` — the citation's own format
- * standing as the delimiter, so nothing is bracketed or punctuated
- * around it; either part alone stands when the other is unset. The
- * composition happens at display and is never stored.
+ * reference composes the reference as written in square brackets, then a
+ * space, then the title, `[Regulation (EU) 2023/1230] Machinery Regulation
+ * (MR)`, so the two parts stay apart in plain text. Either part alone
+ * stands when the other is unset. The composition happens at display and
+ * is never stored.
  * @param {import('./model.js').Entity} entity
  * @returns {string}  the label, empty when the entity carries neither part
  */
 export function entityLabel(entity) {
   const reference = (entity.attributes.reference ?? '').trim();
   const title = (entity.attributes.title ?? '').trim();
-  return [reference, title].filter(Boolean).join(' ');
+  return [reference ? `[${reference}]` : '', title].filter(Boolean).join(' ');
 }
 
 /**

@@ -282,17 +282,17 @@ function offered(model, subjectId) {
   updateEntity(model, 'LEG-001', { reference: '(EU) 2023/1230' });
   equal(
     entityLabel(nodeOf(model, 'LEG-001')),
-    '(EU) 2023/1230 Machinery Regulation',
-    'reference then title, one space between: the citation format is the delimiter, nothing is bracketed'
+    '[(EU) 2023/1230] Machinery Regulation',
+    'the reference in brackets, then the title'
   );
   equal(
     designated(nodeOf(model, 'LEG-001')),
-    'LEG-001  (EU) 2023/1230 Machinery Regulation',
+    'LEG-001  [(EU) 2023/1230] Machinery Regulation',
     'and the designation carries the composed label'
   );
 
   updateEntity(model, 'LEG-001', { title: '' });
-  equal(entityLabel(nodeOf(model, 'LEG-001')), '(EU) 2023/1230', 'a reference alone stands too');
+  equal(entityLabel(nodeOf(model, 'LEG-001')), '[(EU) 2023/1230]', 'a reference alone stands too, in its brackets');
 
   addEntity(model, 'ELM');
   updateEntity(model, 'ELM-001', { title: 'Machine' });
@@ -309,7 +309,7 @@ function offered(model, subjectId) {
 
 {
   const node = { id: 'SAF-001', type: 'SAF', attributes: { reference: 'SF1', title: 'Emergency Stop' } };
-  equal(entityLabel(node), 'SF1 Emergency Stop', "a safety function's designation composes its label, as any reference does");
+  equal(entityLabel(node), '[SF1] Emergency Stop', "a safety function's designation composes its label, as any reference does");
 }
 
 // --- V-TST-108 A filter's one rule (F-WSP-001, F-WSP-008) --------------------

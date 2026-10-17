@@ -46,7 +46,7 @@ const at = (columns, name, group = null) => columns.map(asColumn).findIndex((col
   equal(view.title, 'Risk assessment', 'titled, which names the saved file');
   deepEqual(
     view.sections.map((section) => [section.name, section.tables[0].rows.length]),
-    [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]],
+    [['All scenarios (4)', 4], ['[L-1] Installation (0)', 0], ['[L-2] Operation (1)', 1], ['[L-3] Maintenance (3)', 3], ['[L-4] Decommissioning (0)', 0]],
     'every scenario on the first tab, then each phase holding the scenarios its tasks give rise to, each tab counting its rows in its name'
   );
   ok(view.sections.every((section) => !('lead' in section)), 'and no text above a table, the tab naming what it holds');
@@ -131,7 +131,7 @@ equal(columnText({ text: 'S', title: 'Severity', group: 'Initial risk estimation
 equal(columnText({ text: 'V1', sub: 'Emergency Stop Test', group: 'Test' }), 'V1 Emergency Stop Test', 'a sub-line follows');
 
 equal(cellText('plain', labelOf), 'plain', 'text is itself');
-equal(cellText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts; HAZ-001 H-1 Moving Parts', 'entities read as identifier and label');
+equal(cellText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 [S-1] Contact with Moving Parts; HAZ-001 [H-1] Moving Parts', 'entities read as identifier and label');
 equal(cellText({ code: 'S2', title: 'Severity: S2' }, labelOf), 'S2', 'a parameter is its code');
 equal(cellText({ outcome: { outcome: '6 (highest)', tone: 'high', parameters: [] } }, labelOf), '6 (highest)', 'a rating is its outcome');
 equal(cellText({ outcome: null }, labelOf), '', 'an unrated one is empty');
@@ -162,21 +162,21 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 // --- V-TST-162 Saved as an Excel workbook (F-VIE-001) ------------------------
 
 {
-  equal(exportText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 S-1 Contact with Moving Parts\nHAZ-001 H-1 Moving Parts', 'entities on lines of their own');
+  equal(exportText({ entities: ['SCN-001', 'HAZ-001'] }, labelOf), 'SCN-001 [S-1] Contact with Moving Parts\nHAZ-001 [H-1] Moving Parts', 'entities on lines of their own');
   equal(exportText({ code: 'Serious', title: 'Severity: Serious', note: 'An injury that does not heal.' }, labelOf), 'Serious: An injury that does not heal.', 'a rating value followed by its rationale');
   equal(exportText({ outcome: { outcome: 'Low', tone: 'low', parameters: [] }, note: 'Acceptable.' }, labelOf), 'Low: Acceptable.', 'a rating followed by the evaluation');
   equal(exportText({ code: 'Serious', title: '', note: '' }, labelOf), 'Serious', 'a value alone where no text is given');
   equal(exportText({ outcome: null, note: '' }, labelOf), '', 'an unrated one empty');
   equal(exportText({ lines: ['Crushing.', ''] }, labelOf), 'Crushing.', 'text as written');
   const sheets = viewSheets(buildRiskView(model), labelOf);
-  deepEqual(sheets.map((sheet) => [sheet.name, sheet.rows.length]), [['All scenarios (4)', 4], ['L-1 Installation (0)', 0], ['L-2 Operation (1)', 1], ['L-3 Maintenance (3)', 3], ['L-4 Decommissioning (0)', 0]], 'a sheet per tab, named as the tab');
+  deepEqual(sheets.map((sheet) => [sheet.name, sheet.rows.length]), [['All scenarios (4)', 4], ['[L-1] Installation (0)', 0], ['[L-2] Operation (1)', 1], ['[L-3] Maintenance (3)', 3], ['[L-4] Decommissioning (0)', 0]], 'a sheet per tab, named as the tab');
   deepEqual([sheets[0].groups.slice(0, 4), sheets[0].headers.slice(0, 4)], [['Accident scenario', 'Accident scenario', 'Accident scenario', 'Hazardous situation'], ['Accident scenario', 'Hazardous event', 'Potential consequence', 'Single hazards']], 'with the groups and the column names');
-  equal(sheets[0].rows[0][0].text, 'SCN-001 S-1 Contact with Moving Parts', 'and each cell as the exports write it');
+  equal(sheets[0].rows[0][0].text, 'SCN-001 [S-1] Contact with Moving Parts', 'and each cell as the exports write it');
   const view = buildRiskView(model);
   const whole = savedPart(view, 0);
   deepEqual([whole.filename, whole.built.sections.length], ['Risk assessment.xlsx', 5], 'saved from the first tab, which holds every row, the whole view goes, every tab a sheet');
   const phase = savedPart(view, 3);
-  deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - L-3 Maintenance.xlsx', ['L-3 Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
+  deepEqual([phase.filename, phase.built.sections.map((section) => section.name)], ['Risk assessment - [L-3] Maintenance.xlsx', ['[L-3] Maintenance (3)']], 'saved from another tab, that tab alone, the file named for it');
 }
 
 // --- V-TST-163 The safety function specification over the example (F-VIE-001, F-VIE-004) ---
@@ -184,7 +184,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
 {
   const view = buildSafetyView(model);
   deepEqual([view.title, view.exports], ['Safety function specification', ['markdown', 'excel']], 'titled, and saved as Markdown or as Excel');
-  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', 'SF-1 Emergency Stop', 'SF-2 Door Interlock', 'SF-2.1 Position Detection', 'SF-2.2 Safe Torque Off'], 'a tab holding every function, then a tab each, a function followed by those it decomposes into');
+  deepEqual(view.sections.map((section) => section.name), ['All functions (4)', '[SF-1] Emergency Stop', '[SF-2] Door Interlock', '[SF-2.1] Position Detection', '[SF-2.2] Safe Torque Off'], 'a tab holding every function, then a tab each, a function followed by those it decomposes into');
   const heads = (section) => section.tables.filter((table) => table.heading).map((table) => table.heading);
   deepEqual([heads(view.sections[0]), heads(view.sections[2])], [['SAF-001', 'SAF-002', 'SAF-003', 'SAF-004'], ['SAF-002']], 'the first tab in the same order, and a function\'s tab holding it alone');
   const block = view.sections[1].tables;
@@ -201,7 +201,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   equal(view.sections[0].tables.find((table) => table.heading === 'SAF-002').number, '2.1', 'its parts numbered under its chapter');
   deepEqual([block[0].heading, block[0].prose], ['SAF-001', model.nodes.get('SAF-001').attributes.description.trim()], 'the block opens on the function, its description the first part');
   deepEqual([block[1].columns, block[1].rows], [['Identifier', 'Title'], [{ id: null, cells: ['', ''] }]], 'a kind with nothing related shows one empty row');
-  deepEqual(block[3].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, 'PM-3 Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
+  deepEqual(block[3].rows, [{ id: null, cells: [{ identifier: 'PRM-003' }, '[PM-3] Emergency Stop'] }], 'and a kind with entities one row each, by identifier and title');
   const saf2 = view.sections[2].tables;
   const partOfSaf3 = view.sections[3].tables[1];
   deepEqual([saf2[2].rows.map((row) => row.cells[0].identifier), partOfSaf3.subcaption, partOfSaf3.rows[0].cells[0].identifier], [['SAF-003', 'SAF-004'], 'Part of', 'SAF-002'], 'a function lists the functions it decomposes into, and each of those the one it is part of');
@@ -217,16 +217,16 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   ok(block.every((table) => 'figure' in table || 'prose' in table || (table.spec && table.sortable === false)), 'each table reads as a form, never sorted');
   equal(view.sections[0].tables.length, 44, 'the first tab holds every function, eleven parts each');
   const saved = sectionMarkdown(view, view.sections[1], labelOf, 'Example project, saved 27 September 2026');
-  ok(saved.text.startsWith('# Safety function specification\n\nExample project, saved 27 September 2026\n\n## 1 SAF-001 SF-1 Emergency Stop\n\n### 1.1 Description\n\n'), 'the Markdown opens on the view, the line under it, then the function as chapter 1 and its description, with no contents for one chapter');
-  ok(saved.text.includes('### 1.2 Relationships\n\n#### 1.2.1 Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### 1.2.3 Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | PM-3 Emergency Stop |'), 'each kind of relationship a numbered sub-part, by identifier and title');
+  ok(saved.text.startsWith('# Safety function specification\n\nExample project, saved 27 September 2026\n\n## 1 SAF-001 \\[SF-1\\] Emergency Stop\n\n### 1.1 Description\n\n'), 'the Markdown opens on the view, the line under it, then the function as chapter 1 and its description, with no contents for one chapter');
+  ok(saved.text.includes('### 1.2 Relationships\n\n#### 1.2.1 Part of\n\n| Identifier | Title |\n|---|---|\n| – | – |') && saved.text.includes('#### 1.2.3 Realises\n\n| Identifier | Title |\n|---|---|\n| PRM-003 | \\[PM-3\\] Emergency Stop |'), 'each kind of relationship a numbered sub-part, by identifier and title');
   ok(saved.text.includes('### 1.3 Behaviour\n\n| Field | Value |\n|---|---|\n| Priority | '), 'then the numbered tabs');
   ok(saved.text.includes('### 1.6 Diagram\n\n![Diagram of SAF-001 SF-1 Emergency Stop](diagrams/SAF-001.svg)'), 'the diagram as an image linked to its file');
   const whole = sectionMarkdown(view, view.sections[0], labelOf).text;
-  ok(whole.includes('## Contents\n\n1. [SAF-001 SF-1 Emergency Stop](#1-saf-001-sf-1-emergency-stop)\n2. [SAF-002 SF-2 Door Interlock](#2-saf-002-sf-2-door-interlock)\n3. [SAF-003 SF-2.1 Position Detection](#3-saf-003-sf-21-position-detection)\n') && whole.includes('\n## 3 SAF-003 SF-2.1 Position Detection\n'), 'the whole view lists its chapters, each linked to its heading');
+  ok(whole.includes('## Contents\n\n1. [SAF-001 SF-1 Emergency Stop](#1-saf-001-sf-1-emergency-stop)\n2. [SAF-002 SF-2 Door Interlock](#2-saf-002-sf-2-door-interlock)\n3. [SAF-003 SF-2.1 Position Detection](#3-saf-003-sf-21-position-detection)\n') && whole.includes('\n## 3 SAF-003 \\[SF-2.1\\] Position Detection\n'), 'the whole view lists its chapters, each linked to its heading');
   deepEqual(saved.diagrams.map((file) => file.name), ['diagrams/SAF-001.svg'], 'which comes with the text');
   deepEqual(sectionMarkdown(view, view.sections[2], labelOf).diagrams.map((file) => file.name), ['diagrams/SAF-002.svg'], "and a function's tab brings its own diagram alone");
   equal(sectionMarkdown(buildSafetyView(bare), buildSafetyView(bare).sections[1], labelOf).diagrams.length, 0, 'and nothing comes where there is no diagram');
-  deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 2, 'md').filename], ['Safety function specification.md', 'Safety function specification - SF-2 Door Interlock.md'], 'saved from the first tab under the view, from a function under its name');
+  deepEqual([savedPart(view, 0, 'md').filename, savedPart(view, 2, 'md').filename], ['Safety function specification.md', 'Safety function specification - [SF-2] Door Interlock.md'], 'saved from the first tab under the view, from a function under its name');
   const register = view.sections[0].register;
   deepEqual(register.columns.slice(0, 7).map(asColumn).map((column) => [column.text, column.group ?? null]), [['Safety function', null], ['Description', null], ['Part of', 'Relationships'], ['Decomposes into', 'Relationships'], ['Realises', 'Relationships'], ['Allocated to', 'Relationships'], ['Expressed by', 'Relationships']], 'the register opens on the function, its description and its relationships under one group');
   const names = register.columns.map(asColumn);
@@ -236,7 +236,7 @@ deepEqual(groupEdges(['A', { text: 'b', group: 'G' }, { text: 'c', group: 'G' },
   deepEqual([register.rows[1].cells[3], register.rows[1].cells[level]], [{ entities: ['SAF-003', 'SAF-004'] }, { choice: model.nodes.get('SAF-002').attributes.plr }], 'a row holds its relationships and the level of its standard');
   ok(register.rows.every((row) => row.cells.length === register.columns.length), 'every row fills every column');
   deepEqual(viewSheets(savedPart(view, 0).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['All functions (4)', 4]], 'saved whole, the workbook is the one register of every function');
-  deepEqual(viewSheets(savedPart(view, 2).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['SF-2 Door Interlock', 1]], 'and from a function, its row alone');
+  deepEqual(viewSheets(savedPart(view, 2).built, labelOf).map((sheet) => [sheet.name, sheet.rows.length]), [['[SF-2] Door Interlock', 1]], 'and from a function, its row alone');
 }
 
 // --- V-TST-174 A section name is trimmed without backtracking (N-SEC-011) ---

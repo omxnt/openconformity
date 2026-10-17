@@ -48,7 +48,7 @@ function unzip(bytes) {
 {
   const taken = new Set();
   equal(sheetName('All scenarios (4)', taken), 'All scenarios (4)', 'a tab name stands as it is');
-  equal(sheetName('Pumps/valves: [A]?*', taken), 'Pumps-valves- -A---', 'the characters Excel refuses become dashes');
+  equal(sheetName('Pumps/valves: [A]?*', taken), 'Pumps-valves- A--', 'the brackets go, the other characters Excel refuses become dashes');
   equal(sheetName('A name far longer than thirty-one characters', taken).length, 31, 'a name is cut to 31 characters');
   equal(sheetName('all scenarios (4)', taken), 'all scenarios (4) 2', 'a name already given, in any case, takes a number');
   equal(sheetName('', taken), 'Sheet', 'an empty name takes a plain one');

@@ -6,9 +6,9 @@
  * at the top of the tree, and its context menu is the background menu.
  * The tree presents the user's filing, folders and entities interleaved
  * in sibling order, every row under its type's icon, an entity labelled
- * by its designation then its label — reference and title composed for
- * the types that carry a reference, the designation alone when the entity
- * carries neither. The pane owns its transient state: scroll and focus
+ * by its designation then its label — the reference in brackets then the
+ * title for the types that carry a reference, the designation alone when
+ * the entity carries neither. The pane owns its transient state: scroll and focus
  * survive the full re-render.
  *
  * With no project open, the tree is the landing: one quiet line; the

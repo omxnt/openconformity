@@ -44,13 +44,14 @@ export function xmlText(text) {
 }
 
 /**
- * A sheet's name as Excel takes one: without the characters it refuses,
- * at most 31 characters, and not the same as a name before it.
+ * A sheet's name as Excel takes one: the brackets around a reference
+ * dropped, the other characters it refuses dashed, at most 31 characters,
+ * and not the same as a name before it.
  * @param {string} name
  * @param {Set<string>} taken  names already given, compared without case
  */
 export function sheetName(name, taken) {
-  const base = (name.replace(/[\\/?*:[\]]/g, '-').replace(/\s+/g, ' ').replace(/^'+|'+$/g, '').trim() || 'Sheet').slice(0, 31);
+  const base = (name.replace(/[[\]]/g, '').replace(/[\\/?*:]/g, '-').replace(/\s+/g, ' ').replace(/^'+|'+$/g, '').trim() || 'Sheet').slice(0, 31);
   let held = base;
   for (let n = 2; taken.has(held.toLowerCase()) || held.toLowerCase() === 'history'; n += 1) held = `${base.slice(0, 31 - ` ${n}`.length)} ${n}`;
   taken.add(held.toLowerCase());

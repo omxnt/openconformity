@@ -1,6 +1,6 @@
 # References
 
-How the `reference` attribute is written for each entity type that carries one, and how an identifier is derived from it. The entity types are those of the metamodel and the attributes those of `specs/attributes.md`, and the library in `sources/library.json` follows this document. Tree rows show the Shown column. Identifiers are derived, never stored.
+How the `reference` attribute is written for each entity type that carries one, and how an identifier is derived from it. The entity types are those of the metamodel and the attributes those of `specs/attributes.md`, and the library in `sources/library.json` follows this document. A label shows the reference as written, in square brackets, then the title. Identifiers are derived, never stored.
 
 ## 1. European Legislation
 
@@ -8,10 +8,10 @@ How the `reference` attribute is written for each entity type that carries one, 
 
 The attribute reference shall be written according to [1].
 
-| Case | Reference | Shown |
-|---|---|---|
-| Regulation | `Regulation (EU) 2023/1230` | `Regulation (EU) 2023/1230` |
-| Directive | `Directive 2014/35/EU` | `Directive 2014/35/EU` |
+| Case | Reference |
+|---|---|
+| Regulation | `Regulation (EU) 2023/1230` |
+| Directive | `Directive 2014/35/EU` |
 
 ### 1.2 Attribute Title
 
@@ -63,18 +63,18 @@ Example `http://data.europa.eu/eli/reg/2023/1230`
 
 The attribute reference shall be written according to [1]. Numbered headings are entities. Lettered items are entities where standards cite them, otherwise they stay in the text. Unnumbered entries are named as the act prints them.
 
-| Case | Reference | Shown |
-|---|---|---|
-| Annex | `Annex III` | `Annex III` |
-| Part | `Annex III, Part B` | `Part B` |
-| Point | `Annex III, Part B, point 1.7.4.2` | `1.7.4.2` |
-| Lettered point | `Annex III, Part B, point 1.7.4.2(a)` | `1.7.4.2(a)` |
-| Annex without parts | `Annex I, point 2(a)` | `2(a)` |
-| Part with bracketed numbering | `Annex I, Part I, point (2)(a)` | `(2)(a)` |
-| Unnumbered entry | `Annex II, Lead` | `Lead` |
-| Indent | `Annex III, Part B, point 1.2.1, first indent` | `1.2.1, first indent` |
-| Article | `Article 4` | `Article 4` |
-| Paragraph | `Article 4(1)` | `Article 4(1)` |
+| Case | Reference |
+|---|---|
+| Annex | `Annex III` |
+| Part | `Annex III, Part B` |
+| Point | `Annex III, Part B, point 1.7.4.2` |
+| Lettered point | `Annex III, Part B, point 1.7.4.2(a)` |
+| Annex without parts | `Annex I, point 2(a)` |
+| Part with bracketed numbering | `Annex I, Part I, point (2)(a)` |
+| Unnumbered entry | `Annex II, Lead` |
+| Indent | `Annex III, Part B, point 1.2.1, first indent` |
+| Article | `Article 4` |
+| Paragraph | `Article 4(1)` |
 
 ### 2.2 Attribute Title
 
@@ -123,11 +123,11 @@ Example `http://data.europa.eu/eli/reg/2023/1230/anx_III/prt_B/pnt_1.7.4.2/pnt_a
 
 The attribute reference shall be written according to [4].
 
-| Case | Reference | Shown |
-|---|---|---|
-| ISO adopted as EN | `EN ISO 13849-1:2023` | `EN ISO 13849-1:2023` |
-| IEC adopted as EN | `EN IEC 60204-1:2018` | `EN IEC 60204-1:2018` |
-| CEN only | `EN 1005-2:2003+A1:2008` | `EN 1005-2:2003+A1:2008` |
+| Case | Reference |
+|---|---|
+| ISO adopted as EN | `EN ISO 13849-1:2023` |
+| IEC adopted as EN | `EN IEC 60204-1:2018` |
+| CEN only | `EN 1005-2:2003+A1:2008` |
 
 ### 3.2 Uniform Resource Identifier
 
@@ -148,11 +148,11 @@ Example `urn:iso:std:iso:13849:-1:ed-4:en`
 
 The attribute reference shall be written according to [5].
 
-| Case | Reference | Shown |
-|---|---|---|
-| Clause | `Clause 4.5.2` | `4.5.2` |
-| Annex clause | `Annex A, A.2` | `A.2` |
-| Table | `Table 3` | `3` |
+| Case | Reference |
+|---|---|
+| Clause | `Clause 4.5.2` |
+| Annex clause | `Annex A, A.2` |
+| Table | `Table 3` |
 
 ### 4.2 Uniform Resource Identifier
 
@@ -173,10 +173,10 @@ Example `urn:iso:std:iso:13849:-1:ed-4:en:clause:4.5.2`
 
 The attribute reference shall be the number of the item in the checklist it is taken from, as the checklist numbers it. A group carries its number and a hazard carries its number under the group. The examples are from [6].
 
-| Case | Reference | Shown |
-|---|---|---|
-| Group | `1` | `1` |
-| Hazard | `1.1` | `1.1` |
+| Case | Reference |
+|---|---|
+| Group | `1` |
+| Hazard | `1.1` |
 
 ### 5.2 Attribute Title
 

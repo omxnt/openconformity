@@ -798,7 +798,7 @@ The scenario's Risk evaluation field, the modeller's own judgement whether the r
 
 `2026-09-26` `product`
 
-A type's own attributes stand on its first tab, named by the last word of the type's name, and every type ends with a Notes tab. A group earns a tab by a distinct task, such as a verdict or an estimate, or by a set of fields about one concern, never by a single field and never by the identity alone. An entity is labelled by its reference and its title with a space between, or by its title alone. An entity set out of play by a decision, Applicable No or Eliminated Yes, stays in the model and is shown in the one grey the interface uses for everything out of play, Carbon's disabled strength.
+A type's own attributes stand on its first tab, named by the last word of the type's name, and every type ends with a Notes tab. A group earns a tab by a distinct task, such as a verdict or an estimate, or by a set of fields about one concern, never by a single field and never by the identity alone. An entity is labelled by its reference and its title with a space between, or by its title alone, superseded on the label by D-122. An entity set out of play by a decision, Applicable No or Eliminated Yes, stays in the model and is shown in the one grey the interface uses for everything out of play, Carbon's disabled strength.
 
 > *Recorded from the attributes document when its prose was cut to the tables. A first tab named for the type reads as the thing itself, and a Notes tab on every type gives every pane its tab bar and a place for what fits nowhere. The reference's own citation form is the label's delimiter, so nothing is bracketed. The grey stands below the contrast floor for text on purpose, so out of play reads at a glance, the row staying selectable and the editor showing it at full strength.*
 
@@ -1050,6 +1050,14 @@ The software has five modes, an edit in the editor, a picking of relationships i
 A paste of copied rows makes, between the copies, every relationship whose both ends were among the copied rows, a folder's contents counting as copied, and makes no relationship to anything left behind. A copied composition keeps one owner, since both ends are new.
 
 > *A connection between two copied things has one meaning, and a connection to something left behind has several, whether the copy should relate to the same outside entity, to another or to none, so the first is copied and the second is left to the user, who relates in one pick. This is what every tool where things are connected and copied does, diagram editors first. Supersedes D-117 on what a copy carries, and completes D-119, which left the relationships for later.*
+
+### D-122 The reference stands in brackets
+
+`2026-10-17` `product`
+
+An entity carrying a reference is labelled by the reference as written, in square brackets, then a space, then the title, or by either part alone, everywhere a label is shown. Nothing is shortened or derived from the reference.
+
+> *A reference and a title in one face and one colour ran together, and a colour or a face cannot tell them apart once the label leaves the tree for a toast, a question, the graph or a view. Brackets keep the distinction in the string, and they are the tag and citation form the readers of standards and safety files know. The reference is free text, so a derived short form would guess at a form the user may not have used. Nested brackets at a lettered point are the price. Supersedes the label sentence of D-097. Settles #52.*
 
 ---
 
