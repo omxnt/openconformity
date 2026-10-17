@@ -71,7 +71,7 @@ export function groupedRelationships(model, id) {
 export function relationshipRows(model, id) {
   const groups = groupedRelationships(model, id);
   const rows = [];
-  for (const [direction, groupList] of [['outgoing', groups.outgoing], ['incoming', groups.incoming]]) {
+  for (const [direction, groupList] of /** @type {Array<['outgoing'|'incoming', typeof groups.outgoing]>} */ ([['outgoing', groups.outgoing], ['incoming', groups.incoming]])) {
     for (const group of groupList) {
       for (const { relationship, other } of group.rows) {
         rows.push({ direction, label: group.label, relationship, other });
@@ -185,7 +185,7 @@ export function messageRows(found, sort, filter) {
  * @param {ReturnType<import('./store.js').createStore>} context.store
  * @param {HTMLElement} context.head
  * @param {HTMLElement} context.body
- * @param {{ element: HTMLElement, render: () => void }} context.graph
+ * @param {{ element: HTMLElement, render: (filter?: string) => void }} context.graph
  * @param {() => void} context.onAdd
  * @param {(subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }>) => void} context.onDone
  * @param {(relationship: import('./model.js').Relationship) => void} context.onUnrelate
@@ -198,6 +198,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
    * filter behind the head's magnifier, and each table's fold.
    * @type {{ outgoing: { column: string, direction: string }|null, incoming: { column: string, direction: string }|null }}
    */
+  /** @type {{ outgoing: { column: 'entity'|'relationship', direction: 'asc'|'desc' }|null, incoming: { column: 'entity'|'relationship', direction: 'asc'|'desc' }|null }} */
   const tableSort = { outgoing: null, incoming: null };
   let tableFilter = '';
   let searchOpen = false;
@@ -231,7 +232,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       onOpen: () => {
         searchOpen = true;
         render();
-        head.querySelector('.head-search')?.focus();
+        /** @type {HTMLElement|null} */ (head.querySelector('.head-search'))?.focus();
       },
       onChange: (value) => {
         tableFilter = value;
@@ -267,6 +268,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     head.hidden = false;
 
     const view = store.relationshipView();
+    /** @type {Array<['graph'|'list', string]>} */
     const views = [['graph', 'Graph'], ['list', 'List']];
     const tabs = el('div', { className: 'tabs head-tabs', attributes: { role: 'tablist', 'aria-label': 'Relationship view' } });
     for (const [value, label] of views) {
@@ -282,13 +284,13 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
     if (!idle) {
       tabKeys(tabs, (i) => {
         store.setRelationshipView(views[i][0]);
-        head.querySelector('.tab[aria-selected="true"]')?.focus();
+        /** @type {HTMLElement|null} */ (head.querySelector('.tab[aria-selected="true"]'))?.focus();
       });
     }
     head.appendChild(tabs);
 
     const search = idle ? headIcon('Filter the relationships', 'i-search', () => {}) : searchControl();
-    if (idle) search.disabled = true;
+    if (idle) /** @type {HTMLButtonElement} */ (search).disabled = true;
     const actions = [search];
     if (picking) {
       const picked = store.picker().picks.length;
@@ -585,7 +587,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
       choose();
     });
     rowElement.append(
-      el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entity ? entityParts(entity) : [el('span', { className: 'mono designation', text: finding.id })])]),
+      el('td', { className: 'wrap' }, [el('span', { className: 'cell-entity' }, entity ? entityParts(/** @type {import('./model.js').Entity} */ (entity)) : [el('span', { className: 'mono designation', text: finding.id })])]),
       el('td', { className: 'wrap tags' }, [el('span', { className: 'cell-tags' }, tags)]),
       el('td', { className: 'wrap', text: finding.text })
     );

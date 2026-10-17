@@ -85,6 +85,8 @@ export const PERSIST_DETAIL =
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {Array<import('./actions.js').Action>} [context.actions]
  * @param {(title: string, message: string) => void} [context.toast]
+ * @param {() => void} [context.onMessages]  opens the messages over the workspace, closing a view first
+ * @param {() => boolean} [context.draft]  whether a mode holds work not yet applied, for the leave warning
  */
 export function createShell({ store, overlay, actions = [], toast = () => {}, onMessages = () => {}, draft = () => false }) {
   const themeButton = document.getElementById('shell-theme');
@@ -94,7 +96,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   const viewButton = document.getElementById('shell-view');
   const helpButton = document.getElementById('shell-help');
   const metamodelButton = document.getElementById('shell-metamodel');
-  const unsavedButton = document.getElementById('shell-unsaved');
+  const unsavedButton = /** @type {HTMLButtonElement} */ (document.getElementById('shell-unsaved'));
   const notices = document.getElementById('notices');
   const statusBar = document.getElementById('status-bar');
   const statusSize = document.getElementById('status-size');
@@ -281,11 +283,11 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
 
   // Undo and redo are global, so they live in the shell's global-action
   // cluster: enablement and the step-counting tooltip follow the action.
-  /** @type {Array<{ action: import('./actions.js').Action, button: HTMLElement }>} */
+  /** @type {Array<{ action: import('./actions.js').Action, button: HTMLButtonElement }>} */
   const shellHistory = [];
   for (const id of ['undo', 'redo']) {
     const action = actions.find((offered) => offered.id === id);
-    const button = document.getElementById(`shell-${id}`);
+    const button = /** @type {HTMLButtonElement|null} */ (document.getElementById(`shell-${id}`));
     if (!action || !button) continue;
     button.addEventListener('click', () => action.run({ anchor: button }));
     shellHistory.push({ action, button });
@@ -307,7 +309,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
    * @param {string} title
    * @param {string} text
    * @param {(() => void)|null} onDismiss
-   * @param {Action[]} [buttons]  actions offered on the notice, as ghost buttons after the text
+   * @param {Array<import('./actions.js').Action>} [buttons]  actions offered on the notice, as ghost buttons after the text
    */
   function notice(kind, title, text, onDismiss, buttons = []) {
     const actions = buttons.map((action) => {

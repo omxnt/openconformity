@@ -169,6 +169,7 @@ export function openGroups(groups, opened = new Map(), filtered = false) {
  * @returns {{ rows: Array<{ kind: 'box'|'strip', group: Object, entry?: Object, y: number, height: number, mid?: number, top?: number }>, height: number }}
  */
 export function sideRows(groups) {
+  /** @type {Array<{ kind: 'box'|'strip', group: Object, entry?: Object, y: number, height: number, mid?: number, top?: number }>} */
   const rows = [];
   let y = 0;
   let height = 0;
@@ -430,8 +431,8 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
    * horizontal, upright; a composition carries the filled diamond at the
    * owner's end, the drawn start, and every other form the plain
    * arrowhead.
-   * @param {{ x1: number, y1: number, channel: number, x2: number, y2: number,
-   *           label: string, composition: boolean, labelSide: 'start'|'end',
+   * @param {{ x1: number, y1: number, bendA: number, bendB: number, x2: number, y2: number,
+   *           label: string, composition: boolean, labelX: number, labelY: number,
    *           pending?: boolean, unpickId?: string|null }} spec
    */
   function edge({ x1, y1, bendA, bendB, x2, y2, label, composition, labelX, labelY, pending = false, unpickId = null }) {
@@ -604,7 +605,7 @@ export function createGraphView({ store, onSelect, onUnrelate }) {
 
     element.appendChild(canvas);
     if (focusKey !== null) {
-      canvas.querySelector(`[data-group="${focusKey}"]`)?.focus();
+      /** @type {HTMLElement|null} */ (canvas.querySelector(`[data-group="${focusKey}"]`))?.focus();
       focusKey = null;
     }
     if (pend.ambiguous > 0) {

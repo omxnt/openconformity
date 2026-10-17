@@ -147,6 +147,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       return;
     }
 
+    /** @type {import('./model.js').Outcome & { entity?: import('./model.js').Entity }} */
     const outcome = store.commit((model) => {
       const created = addEntity(model, code, { parent: subjectId });
       if (!created.ok) return created;
@@ -883,7 +884,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
       dialogs.toast('No copy found', 'Nothing is set aside in browser storage.');
       return;
     }
-    const text = typeof copy === 'string' ? copy : JSON.stringify(copy.project ?? copy, null, 2);
+    const text = typeof copy === 'string' ? copy : JSON.stringify(/** @type {{ project?: unknown }} */ (copy).project ?? copy, null, 2);
     const fallback = 'Set-aside copy';
     const typed = await dialogs.prompt({
       title: 'Save the copy',
@@ -1049,7 +1050,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   async function stateUnknown(model) {
     const unknown = unknownContent(model);
     if (unknown.length === 0) return;
-    const where = ({ id, keys }) => `${id === null ? 'Project' : designated(nodeOf(model, id))}  ${keys.join(', ')}`;
+    const where = ({ id, keys }) => `${id === null ? 'Project' : designated(/** @type {import('./model.js').Entity} */ (nodeOf(model, id)))}  ${keys.join(', ')}`;
     await dialogs.open({
       title: 'The file holds content this version does not show',
       message: 'It is kept as written and saved with the project. Where it sits:',

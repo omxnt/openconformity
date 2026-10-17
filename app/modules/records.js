@@ -22,6 +22,7 @@ export const staleText = (recorded) => ({ unlinked: `Removed since the ${recorde
  * @param {{ name: string, recorded: string }} definition
  * @returns {{ title: string, text: string }}
  */
+/** @param {{ name: string, recorded?: string }} definition  the record's definition */
 export const reviewText = (definition) => ({ title: `The ${definition.name.toLowerCase()} changed`, text: `Review the ${definition.recorded.toLowerCase()} and what rests on it.` });
 
 /** A record of entities as it is stored: the identifiers in ascending order, parted by semicolons. */
@@ -46,10 +47,11 @@ export function recordedStates(record, model, subjectId, relationship) {
   const named = new Set(ids);
   const recorded = ids.map((id) => {
     const entity = nodeOf(model, id);
+    /** @type {'deleted'|'linked'|'unlinked'} */
     const state = !entity ? 'deleted' : linked.has(id) ? 'linked' : 'unlinked';
-    return { id, label: entity ? entityLabel(entity) : id, state };
+    return { id, label: entity ? entityLabel(/** @type {import('./model.js').Entity} */ (entity)) : id, state };
   });
-  const added = [...linked].filter((id) => !named.has(id)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'added' }));
+  const added = [...linked].filter((id) => !named.has(id)).map((id) => ({ id, label: entityLabel(/** @type {import('./model.js').Entity} */ (nodeOf(model, id))), state: /** @type {const} */ ('added') }));
   return [...recorded, ...added];
 }
 
@@ -58,7 +60,7 @@ export function recordedStates(record, model, subjectId, relationship) {
  * attributes, its rationales, outcomes and records aside, is set. Until
  * then nothing was recorded.
  * @param {string} code  the entity type
- * @param {{ recorded: string }} definition  the record's definition
+ * @param {import('./attributes.js').AttributeDefinition} definition  the record's definition
  * @param {Object<string, string>} values  the entity's, or the draft's
  */
 export function recordWritten(code, definition, values) {

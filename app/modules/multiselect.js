@@ -39,7 +39,7 @@ export function openMultiSelect({ overlay, anchor, label, options, chosen, onCha
   for (const row of rows) list.appendChild(row);
 
   list.addEventListener('keydown', (event) => {
-    const from = rows.indexOf(document.activeElement);
+    const from = rows.indexOf(/** @type {HTMLButtonElement} */ (document.activeElement));
     const to =
       event.key === 'ArrowDown' ? (from + 1) % rows.length
       : event.key === 'ArrowUp' ? (from - 1 + rows.length) % rows.length

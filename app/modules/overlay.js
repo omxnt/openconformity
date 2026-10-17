@@ -15,6 +15,7 @@
  * @typedef {Object} Entry
  * @property {OverlayKind} kind
  * @property {unknown} [opener]
+ * @property {HTMLElement} [element]  what stands above the page, once bound to it
  * @property {(entry: Entry) => void} [onClose]
  */
 
@@ -91,9 +92,10 @@ export function createOverlay({ container }) {
   root.addEventListener('pointerdown', (event) => {
     for (const entry of stack.entries()) {
       if (entry.kind !== 'menu') continue;
+      const target = /** @type {Node} */ (event.target);
       const inside =
-        entry.element.contains(event.target) ||
-        (entry.opener instanceof Element && entry.opener.contains(event.target));
+        entry.element.contains(target) ||
+        (entry.opener instanceof Element && entry.opener.contains(target));
       if (!inside) stack.close(entry);
     }
   });
@@ -104,7 +106,7 @@ export function createOverlay({ container }) {
      * @param {Object} spec
      * @param {OverlayKind} spec.kind
      * @param {HTMLElement} spec.element
-     * @param {HTMLElement} [spec.opener]  focus returns here on close
+     * @param {Element|null} [spec.opener]  focus returns here on close
      * @param {() => void} [spec.onClose]
      * @returns {Entry}
      */
@@ -119,7 +121,7 @@ export function createOverlay({ container }) {
             element.contains(root.activeElement) || root.activeElement === root.body;
           element.remove();
           if (onClose) onClose();
-          if (opener && heldFocus) opener.focus();
+          if (opener && heldFocus) /** @type {HTMLElement} */ (opener).focus();
         },
       });
       container.appendChild(element);

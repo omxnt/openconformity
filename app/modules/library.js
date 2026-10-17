@@ -184,7 +184,7 @@ export function importPlan(library, picks) {
  * @param {import('./model.js').Model} library
  * @param {Set<string>} picks
  * @param {string|null} targetId  the node the copies are filed under, or null for the root
- * @returns {{ ok: true, added: string[], related: number } | { ok: false, reason: string }}
+ * @returns {{ ok: boolean, reason?: string, added?: string[], related?: number }}
  */
 export function importInto(project, library, picks, targetId = null) {
   const mapping = new Map();
@@ -193,6 +193,7 @@ export function importInto(project, library, picks, targetId = null) {
     let above = nodeOf(library, node.parent);
     while (above && !mapping.has(above.id)) above = nodeOf(library, above.parent);
     const parent = above ? mapping.get(above.id) : targetId;
+    /** @type {import('./model.js').Outcome & { entity?: import('./model.js').Entity, folder?: import('./model.js').Folder }} */
     const result = node.kind === 'folder' ? addFolder(project, node.name, { parent }) : addEntity(project, node.type, { parent, attributes: { ...node.attributes } });
     if (!result.ok) return result;
     const copy = node.kind === 'folder' ? result.folder.id : result.entity.id;
@@ -348,7 +349,7 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
     const folders = plan.length - entities;
     const parts = [entities > 0 ? plural(entities, 'entity') : '', folders > 0 ? plural(folders, 'folder') : ''].filter(Boolean);
     count.textContent = plan.length === 0 ? 'Nothing picked' : `${parts.join(' and ')} to import`;
-    const button = head.querySelector('.library-import');
+    const button = /** @type {HTMLButtonElement|null} */ (head.querySelector('.library-import'));
     if (button) button.disabled = plan.length === 0;
   }
 
@@ -429,7 +430,7 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
         });
       }
 
-      const box = el('input', { attributes: { type: 'checkbox', tabindex: '-1', 'aria-label': isCatalogue(node) ? `Pick everything in ${node.name}` : `Pick ${node.kind === 'folder' ? node.name : node.id}` } });
+      const box = el('input', { attributes: { type: 'checkbox', tabindex: '-1', 'aria-label': node.kind === 'folder' ? (isCatalogue(node) ? `Pick everything in ${node.name}` : `Pick ${node.name}`) : `Pick ${node.id}` } });
       box.checked = state === 'checked';
       box.indeterminate = state === 'mixed';
       const check = el('span', { className: 'pick' }, [box, el('span', { className: `checkbox${state === 'mixed' ? ' mixed' : ''}` }, [icon('i-checkmark')])]);
@@ -550,7 +551,7 @@ export function createLibraryPane({ store, head, body, library, showEntity, onIm
     list.scrollTop = scrollTop;
     if (!shown) {
       shown = true;
-      list.querySelector('.library-row[tabindex="0"]')?.focus();
+      /** @type {HTMLElement|null} */ (list.querySelector('.library-row[tabindex="0"]'))?.focus();
     }
   }
 

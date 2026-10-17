@@ -44,7 +44,7 @@ import { FILING_DEPTH } from './validator.js';
  * @property {Map<string, Relationship>} relationships  keyed by `type source target`
  * @property {Object<string, number>} counters  the next number to issue, per entity type code and F for folders
  *
- * @typedef {{ ok: true } | { ok: false, reason: string }} Outcome
+ * @typedef {{ ok: boolean, reason?: string }} Outcome  ok with no reason, or refused with the reason
  */
 
 /** @returns {Model} */
@@ -311,6 +311,7 @@ export function copyNode(model, id, parentId, options = {}) {
   const made = new Map([[root.parent, parentId]]);
   for (const node of plan) {
     const parent = made.get(node.parent);
+    /** @type {Outcome & { entity?: Entity, folder?: Folder }} */
     const result = node.kind === 'folder' ? addFolder(model, node.name, { parent }) : addEntity(model, node.type, { parent, attributes: { ...node.attributes } });
     if (!result.ok) {
       model.nodes = before;

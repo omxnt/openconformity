@@ -89,9 +89,9 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
   });
 
   menu.addEventListener('keydown', (event) => {
-    const entries = [...menu.querySelectorAll('.menu-entry')].filter((button) => !button.disabled);
+    const entries = [.../** @type {NodeListOf<HTMLButtonElement>} */ (menu.querySelectorAll('.menu-entry'))].filter((button) => !button.disabled);
     if (entries.length === 0) return;
-    const from = entries.indexOf(document.activeElement);
+    const from = entries.indexOf(/** @type {HTMLButtonElement} */ (document.activeElement));
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       const step = event.key === 'ArrowDown' ? 1 : entries.length - 1;
@@ -128,7 +128,7 @@ export function openMenu({ overlay, label, items, anchor = null, align = 'start'
   menu.style.left = `${clampedX}px`;
   menu.style.top = `${clampedY}px`;
 
-  const first = menu.querySelector('[aria-checked="true"]') ?? menu.querySelector('.menu-entry:not(:disabled)');
+  const first = /** @type {HTMLElement|null} */ (menu.querySelector('[aria-checked="true"]') ?? menu.querySelector('.menu-entry:not(:disabled)'));
   first?.focus();
 
   return entry;

@@ -92,7 +92,7 @@ export function tableControl(definition, value) {
       paint(rows.length - 1);
     });
     wrap.append(...(rows.length > 0 ? [table] : []), add, hidden);
-    if (focusRow >= 0) wrap.querySelector(`tbody tr:nth-child(${focusRow + 1}) .field-input`)?.focus();
+    if (focusRow >= 0) /** @type {HTMLElement|null} */ (wrap.querySelector(`tbody tr:nth-child(${focusRow + 1}) .field-input`))?.focus();
   };
   paint();
   return wrap;

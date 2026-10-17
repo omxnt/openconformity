@@ -10,7 +10,7 @@
  * attribute is the absence of its key.
  */
 
-/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'date'|'table'|'drawing'|'computed'|'rationale'} AttributeKind */
+/** @typedef {'text'|'multiline'|'choice'|'set'|'hyperlink'|'number'|'date'|'table'|'drawing'|'computed'|'rationale'|'entities'} AttributeKind */
 
 /**
  * @typedef {Object} AttributeDefinition
@@ -24,6 +24,8 @@
  * @property {Array<{ key: string, name: string, kind: 'text'|'multiline'|'date'|'choice'|'number', values?: string[] }>} [columns]  a table's columns, in order
  * @property {string} [help]  a sentence or two shown on the information glyph beside the name
  * @property {string} [parameter]  the parameter a rationale is given for, by key, within the same rating
+ * @property {string} [relationship]  the relationship type a record of entities reads, by id
+ * @property {string} [recorded]  the group whose values a record of entities is written with, by name
  */
 
 /**
@@ -42,7 +44,6 @@
  * @property {AttributeGroup[]} groups  the named groups, in render order
  */
 
-/** @type {Object<string, TypeAttributes>} */
 /**
  * The help a name carries where it names a rating or a slot rather than
  * an attribute, and the identifier's, recorded once as §1.7 of the
@@ -56,9 +57,13 @@ export const SHARED_HELP = {
   'Required integrity level': "The level the safety function must reach, in its standard's own terms.",
 };
 
-/** The Diagram tab three types carry: one drawing, held as SVG text and shown as an image. */
+/**
+ * The Diagram tab three types carry: one drawing, held as SVG text and shown as an image.
+ * @returns {AttributeGroup}
+ */
 const drawingTab = () => ({ name: 'Diagram', tab: true, attributes: [{ key: 'drawing', name: 'Diagram', kind: 'drawing', help: 'A diagram of it, made in draw.io and shown as an image.' }] });
 
+/** @type {Object<string, TypeAttributes>} */
 export const ATTRIBUTES = {
   ELM: {
     attributes: [

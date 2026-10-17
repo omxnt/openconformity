@@ -18,6 +18,7 @@ const DEPTH = 50;
 /**
  * @typedef {Object} Content
  * @property {string} name
+ * @property {Object<string, string>} attributes
  * @property {Map<string, import('./model.js').Node>} nodes
  * @property {Map<string, import('./model.js').Relationship>} relationships
  *

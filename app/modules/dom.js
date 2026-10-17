@@ -4,13 +4,14 @@
  */
 
 /**
- * @param {string} tag
+ * @template {keyof HTMLElementTagNameMap} K
+ * @param {K} tag
  * @param {Object} [options]
  * @param {string} [options.className]
  * @param {string} [options.text]
  * @param {Object<string, string>} [options.attributes]
  * @param {Node[]} [children]
- * @returns {HTMLElement}
+ * @returns {HTMLElementTagNameMap[K]}
  */
 export function el(tag, options = {}, children = []) {
   const element = document.createElement(tag);
@@ -59,7 +60,7 @@ export function svgText(tag, attributes, content) {
  * @param {string} type  the MIME type the blob carries
  */
 export function download(filename, text, type) {
-  const blob = new Blob([text], { type });
+  const blob = new Blob([/** @type {BlobPart} */ (text)], { type });
   const url = URL.createObjectURL(blob);
   const anchor = el('a', { attributes: { href: url, download: filename } });
   document.body.appendChild(anchor);
@@ -137,11 +138,13 @@ export function tooltipTag(className, content, { caption, main = '', note = '' }
  * again changes the text, for a label that follows the state. The
  * tooltip hangs from the edge asked for, and flips to the other edge
  * when it would run past the box that clips it.
- * @param {HTMLElement} button
+ * @template {HTMLElement} T
+ * @param {T} button
  * @param {string} text  the tooltip
  * @param {Object} [options]
  * @param {'start'|'end'} [options.align]  which edge of the button the tooltip hangs from; end for a button at the right of its row
  * @param {string} [options.label]  the accessible name where it says more than the tooltip
+ * @returns {T}
  */
 export function tooltipOn(button, text, { align = 'start', label = text } = {}) {
   let tip = [...button.children].find((held) => held.classList.contains('tooltip'));

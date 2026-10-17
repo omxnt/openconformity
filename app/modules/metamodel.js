@@ -124,11 +124,11 @@ const ASSOCIATIONS = [
  */
 export const RELATIONSHIP_TYPES = {};
 
-for (const [arrows, composition] of [
+for (const [arrows, composition] of /** @type {Array<[string[][], boolean]>} */ ([
   [COMPOSITIONS, true],
   [DEPENDENCIES, false],
   [ASSOCIATIONS, false],
-]) {
+])) {
   for (const [source, label, target] of arrows) {
     const id = `${source}-${label.replaceAll(' ', '-')}-${target}`.toLowerCase();
     RELATIONSHIP_TYPES[id] = { id, source, label, target, composition };

@@ -45,11 +45,11 @@ export function relationshipOptions(model, subjectId) {
   const options = [];
   for (const type of relationshipsFrom(subject.type)) {
     const candidates = entities.filter((node) => canRelate(model, type.id, subjectId, node.id).ok);
-    if (candidates.length > 0) options.push({ type, direction: 'outgoing', candidates });
+    if (candidates.length > 0) options.push({ type, direction: /** @type {const} */ ('outgoing'), candidates });
   }
   for (const type of relationshipsTo(subject.type)) {
     const candidates = entities.filter((node) => canRelate(model, type.id, node.id, subjectId).ok);
-    if (candidates.length > 0) options.push({ type, direction: 'incoming', candidates });
+    if (candidates.length > 0) options.push({ type, direction: /** @type {const} */ ('incoming'), candidates });
   }
   return options;
 }

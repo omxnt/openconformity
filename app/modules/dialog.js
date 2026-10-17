@@ -93,7 +93,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
           return;
         }
         if (event.key !== 'Tab') return;
-        const focusable = [...card.querySelectorAll('button, input, select, textarea')].filter(
+        const focusable = [.../** @type {NodeListOf<HTMLButtonElement|HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>} */ (card.querySelectorAll('button, input, select, textarea'))].filter(
           (control) => !control.disabled
         );
         if (focusable.length === 0) return;
@@ -139,6 +139,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
       attributes: { type: 'text', id: 'prompt-field' },
     });
     input.value = value;
+    /** @type {HTMLElement[]} */
     const parts = [
       el('label', { className: 'field-label', text: label, attributes: { for: 'prompt-field' } }),
       input,
@@ -235,6 +236,7 @@ export function createDialogs({ overlay, toastRegion = null }) {
    */
   function toast(title, message, action = null) {
     if (!toastRegion) return;
+    /** @type {HTMLElement[]} */
     const content = [el('p', { className: 'toast-title', text: title }), el('p', { className: 'toast-body', text: message })];
     if (action) {
       const button = el('button', { className: 'ghost-button toast-action', text: action.label, attributes: { type: 'button' } });

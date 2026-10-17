@@ -92,7 +92,8 @@ const UNREACHABLE = -1;
  *        localStorage in the browser, or a stand-in in tests: the theme,
  *        read before the first paint, and the previous generation's blob
  * @param {{ getItem: (key: string) => string|null,
- *           setItem: (key: string, value: string) => void }} [context.session]
+ *           setItem: (key: string, value: string) => void,
+ *           removeItem: (key: string) => void }} [context.session]
  *        sessionStorage: presentation choices that survive a reload but
  *        never a new session, and never enter the project blob
  * @param {import('./retention.js').Retention} [context.retention]
@@ -339,7 +340,7 @@ export function createStore({ storage, session = null, retention = memoryRetenti
    * Install a blob the retention or the previous generation held: the
    * project through the loader the file passes, the session state
    * beside it. False where the blob does not load.
-   * @param {unknown} blob
+   * @param {{ project: unknown, session?: { dirty?: boolean, selection?: unknown, expanded?: unknown, projectCollapsed?: unknown } }} blob
    * @returns {boolean}
    */
   function install(blob) {
@@ -543,15 +544,16 @@ export function createStore({ storage, session = null, retention = memoryRetenti
      * Run one model change and make it a step: on success the change is
      * recorded in history, the selection repaired if the change removed
      * it, and the session persisted. A refused change touches nothing.
-     * @param {(model: import('./model.js').Model) => { ok: boolean, reason?: string }} action
-     * @returns {{ ok: boolean, reason?: string }}
+     * @template {{ ok: boolean, reason?: string }} T
+     * @param {(model: import('./model.js').Model) => T} action
+     * @returns {T}
      */
     commit(action) {
-      if (!projectOpen) return { ok: false, reason: 'No project is open.' };
+      if (!projectOpen) return /** @type {T} */ ({ ok: false, reason: 'No project is open.' });
       const trail = ancestorsOf(selection);
       const outcome = action(model);
       if (!outcome || outcome.ok !== true) {
-        return outcome ?? { ok: false, reason: 'The change returned no outcome.' };
+        return outcome ?? /** @type {T} */ ({ ok: false, reason: 'The change returned no outcome.' });
       }
       history.record(model);
       repairSelection(trail);

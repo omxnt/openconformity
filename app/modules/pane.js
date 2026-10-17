@@ -16,6 +16,7 @@ import { entityLabel } from './queries.js';
  * @param {string} label
  * @param {string} iconId
  * @param {() => void} onPick
+ * @returns {HTMLButtonElement}
  */
 export function headIcon(label, iconId, onPick) {
   const button = el('button', { className: 'ghost-button ghost-icon', attributes: { type: 'button' } }, [icon(iconId)]);
@@ -88,7 +89,7 @@ export function emptyState(title, body = '', action = null) {
  * An entity as a row reads it: its type's icon in the pillar's colour,
  * its identifier in mono, and its label where it carries one.
  * @param {import('./model.js').Entity} entity
- * @returns {HTMLElement[]}
+ * @returns {Array<HTMLElement|SVGElement>}
  */
 export function entityParts(entity) {
   const parts = [icon(TYPE_ICONS[entity.type], ENTITY_TYPES[entity.type].pillar), el('span', { className: 'mono designation', text: entity.id })];

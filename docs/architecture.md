@@ -184,7 +184,7 @@ While the diagram editor is open, every action stands disabled.
 | Outcomes | A check or a change returns `{ ok: true }` or `{ ok: false, reason }`, the reason one sentence the user can read. |
 | Pure parts exported | A module exports its pure functions so the tests can call them without a page. |
 | Comments | A comment says what the code does. Why is written in `docs/decisions.md`. |
-| Types | JSDoc types, with no TypeScript and no build. |
+| Types | JSDoc types, with no TypeScript in the software and no build. They are checked, not trusted. `jsconfig.json` at the root turns the checker on for `app/modules` with strictness off, so VS Code shows a wrong type while editing, and TypeScript's own checker run over the plain files reports the same. A finding is a comment out of step with the code, or a bug the tests missed, and the checker reports nothing at a release. |
 | Tokens | Colours, spacing and type sizes are Carbon's, copied into `style.css` by value, with the token's name in a comment. |
 
 ## 7. Tests

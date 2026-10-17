@@ -103,7 +103,10 @@ export function graphLive(codes, ancestors) {
   return ancestors.every((ancestor, level) => codes[level] === '' || ancestor.codes.includes(codes[level]));
 }
 
-/** 6.4.2, Table 2: the category a score reaches, highest first. */
+/**
+ * 6.4.2, Table 2: the category a score reaches, highest first.
+ * @type {Array<[number, string]>}
+ */
 export const SCORING = [
   [160, 'high'],
   [120, 'medium'],

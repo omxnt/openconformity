@@ -124,9 +124,10 @@ export function visibleRows(model, isExpanded, hasProject, filter = '', projectE
   // A filter reveals through the collapsed root the way it reveals
   // through any collapsed branch.
   const open = projectExpanded || filter.trim() !== '';
+  /** @type {{ kind: 'project', id: null, hasChildren: boolean, expanded: boolean }} */
   const project = { kind: 'project', id: null, hasChildren, expanded: hasChildren && open };
   if (!project.expanded) return [project];
-  return [project, ...treeRows(model, isExpanded, filter).map((row) => ({ kind: 'node', ...row }))];
+  return [project, ...treeRows(model, isExpanded, filter).map((row) => ({ kind: /** @type {const} */ ('node'), ...row }))];
 }
 
 /**
@@ -204,6 +205,9 @@ export function rowsBetween(rows, fromId, toId) {
  * @param {ReturnType<import('./overlay.js').createOverlay>} context.overlay
  * @param {Array<import('./actions.js').Action>} context.actions
  * @param {(id: string|null) => Promise<boolean>} context.onSelect
+ * @param {(ids: string[], anchorId: string) => Promise<boolean>} [context.onSelectMany]  a range or a set selected, with its anchor
+ * @param {(id: string) => Promise<boolean>} [context.onToggle]  one row added to or taken from the selection
+ * @param {(id: string) => void} [context.onSelectBelow]  a row and everything beneath it selected
  * @param {(id: string|null) => void} context.onActivate
  * @param {(id: string, parentId: string|null) => void} context.onFile
  * @param {(id: string, targetId: string, position: 'before'|'after') => void} context.onPlace
@@ -291,7 +295,7 @@ export function createNavigator({
 
   /** The pickable rows shown between two rows, both included, in the tree's order. */
   function pickableBetween(fromId, toId) {
-    const ids = [...container.querySelectorAll('.tree-row.pickable')].map((row) => row.dataset.id);
+    const ids = [.../** @type {NodeListOf<HTMLElement>} */ (container.querySelectorAll('.tree-row.pickable'))].map((row) => row.dataset.id);
     const a = ids.indexOf(fromId);
     const b = ids.indexOf(toId);
     if (a < 0 || b < 0) return [];
@@ -559,7 +563,7 @@ export function createNavigator({
   function render() {
     const scroll = container.scrollTop;
     const hadFocus = container.contains(document.activeElement);
-    const focusedId = hadFocus ? document.activeElement.closest('.tree-row')?.dataset.id ?? null : null;
+    const focusedId = hadFocus ? /** @type {HTMLElement|null} */ (document.activeElement.closest('.tree-row'))?.dataset.id ?? null : null;
 
     container.textContent = '';
     search.hidden = !store.hasProject();
@@ -590,7 +594,7 @@ export function createNavigator({
     lastSelection = selected;
     if (hadFocus) {
       const again = focusedId === null || moved ? null : container.querySelector(`.tree-row[data-id="${focusedId}"]`);
-      (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: moved ? false : true });
+      /** @type {HTMLElement|null} */ (again ?? container.querySelector('.tree-row.selected'))?.focus({ preventScroll: moved ? false : true });
     } else if (moved) {
       container.querySelector('.tree-row.selected')?.scrollIntoView({ block: 'nearest' });
     }
@@ -610,7 +614,7 @@ export function createNavigator({
   });
   container.addEventListener('contextmenu', (event) => {
     if (!store.hasProject()) return;
-    if (event.target !== container && event.target.closest('.tree-row')) return;
+    if (event.target !== container && /** @type {Element} */ (event.target).closest('.tree-row')) return;
     event.preventDefault();
     onContextMenu(null, { x: event.clientX, y: event.clientY });
   });
@@ -646,7 +650,7 @@ export function createNavigator({
       }
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
         event.preventDefault();
-        store.pickAll([...container.querySelectorAll('.tree-row.pickable')].map((held) => held.dataset.id));
+        store.pickAll([.../** @type {NodeListOf<HTMLElement>} */ (container.querySelectorAll('.tree-row.pickable'))].map((held) => held.dataset.id));
         return;
       }
       const step = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: rows.length - 1 }[event.key];
@@ -656,7 +660,7 @@ export function createNavigator({
         if (!next) return;
         keyboardFocus = next.id;
         render();
-        container.querySelector(`.tree-row[tabindex="0"]`)?.focus({ preventScroll: false });
+        /** @type {HTMLElement|null} */ (container.querySelector(`.tree-row[tabindex="0"]`))?.focus({ preventScroll: false });
       }
       return;
     }
@@ -683,7 +687,7 @@ export function createNavigator({
       if (!next) return;
       keyboardFocus = next.id;
       render();
-      container.querySelector(`.tree-row[tabindex="0"]`)?.focus({ preventScroll: false });
+      /** @type {HTMLElement|null} */ (container.querySelector(`.tree-row[tabindex="0"]`))?.focus({ preventScroll: false });
     } else if (modifier && event.code === 'Space') {
       event.preventDefault();
       if (row && row.id !== null) onToggle(row.id);

@@ -91,8 +91,11 @@ export function cellText(held, labelOf) {
  * What a save from a section takes: the first section, which holds
  * every row, takes the whole view, and any other takes itself alone,
  * with the file named for what it holds.
- * @param {{ title: string, sections: Array<{ name: string }> }} built
+ * @template {{ title: string, wholeSheets?: 'first', sections: Array<{ name: string }> }} T
+ * @param {T} built
  * @param {number} section  the open section's index
+ * @param {string} [extension]
+ * @returns {{ built: T, filename: string }}
  */
 export function savedPart(built, section, extension = 'xlsx') {
   const whole = section <= 0 || built.sections.length <= 1;
@@ -142,7 +145,7 @@ export function sectionMarkdown(built, section, labelOf, subtitle = '') {
  * named for the section, or its register where it carries one, each
  * cell as the exports write it. A view saved whole whose sheets come
  * from its first section alone gives that section's sheet only.
- * @param {{ sections: Array<{ name: string, tables: Array<{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }> }> }} built
+ * @param {{ wholeSheets?: 'first', sections: Array<{ name: string, tables: Array<{ columns: Array<*>, rows: Array<{ cells: Array<*> }> }>, register?: { columns: Array<*>, rows: Array<{ cells: Array<*> }> } }> }} built
  * @param {(id: string) => string} labelOf
  * @returns {Array<import('./xlsx.js').Sheet>}
  */
@@ -219,11 +222,11 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
 
   const labelOf = (id) => {
     const node = store.model().nodes.get(id);
-    return node ? entityLabel(node) : '';
+    return node ? entityLabel(/** @type {import('./model.js').Entity} */ (node)) : '';
   };
 
   function entityRow(id) {
-    const node = store.model().nodes.get(id);
+    const node = /** @type {import('./model.js').Entity|undefined} */ (store.model().nodes.get(id));
     if (!node) return el('span', { className: 'entity gone' }, [el('span', { className: 'mono', text: id })]);
     const type = ENTITY_TYPES[node.type];
     const link = el('a', { className: 'entity', attributes: { href: `#${id}`, title: type.name } }, [

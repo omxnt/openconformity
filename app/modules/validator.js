@@ -19,7 +19,7 @@ export const FILING_DEPTH = 1000;
  * Judge a parsed file against a schema version.
  * @param {any} data
  * @param {number} version
- * @returns {{ ok: true } | { ok: false, problems: string[] }}
+ * @returns {{ ok: boolean, problems?: string[] }}
  */
 export function validate(data, version) {
   if (!Object.hasOwn(VERSIONS, version)) {
@@ -170,7 +170,7 @@ function isValidParent(parent) {
  * @returns {boolean}
  */
 function isValidOrder(order) {
-  return Number.isInteger(order) && order >= 0;
+  return Number.isInteger(order) && /** @type {number} */ (order) >= 0;
 }
 
 /**

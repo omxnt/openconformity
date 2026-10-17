@@ -257,7 +257,7 @@ function cssFault(text) {
  * than the dimension limit, so that it stays inert even when opened on
  * its own. The reason completes the sentence "The drawing …".
  * @param {string} text
- * @returns {{ ok: true } | { ok: false, reason: string }}
+ * @returns {{ ok: boolean, reason?: string }}
  */
 export function checkDrawing(text) {
   const refuse = (reason) => ({ ok: false, reason });

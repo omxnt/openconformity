@@ -159,7 +159,7 @@ export function buildRiskView(model) {
   for (const phase of phases) {
     const held = scenarios.filter((scenario) => phasesOf(scenario).includes(phase.id));
     sections.push({
-      name: named(entityLabel(phase) || phase.id, held),
+      name: named(entityLabel(/** @type {import('./model.js').Entity} */ (phase)) || phase.id, held),
       tables: [table(held)],
     });
   }

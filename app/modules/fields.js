@@ -144,7 +144,7 @@ export function choiceOptions(definition, value) {
  * cells parted by tabs in column order, a quoted cell holding what it
  * holds, breaks and tabs among it; cells trimmed, missing cells empty,
  * a blank line no row.
- * @param {{ columns: Array<{ key: string }> }} definition
+ * @param {{ columns?: Array<{ key: string }> }} definition  a table's definition
  * @param {string|undefined} value
  * @returns {string[][]}
  */
@@ -184,7 +184,7 @@ export function tableRows(definition, value) {
  * Rows as a table is stored: one line per row, the cells parted by
  * tabs, a cell holding a tab, a break or a quotation mark quoted; a
  * row with every cell empty is dropped.
- * @param {{ columns: Array<{ key: string }> }} definition
+ * @param {{ columns?: Array<{ key: string }> }} definition  a table's definition
  * @param {string[][]} rows
  * @returns {string}
  */

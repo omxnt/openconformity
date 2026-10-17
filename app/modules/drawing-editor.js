@@ -366,7 +366,10 @@ export async function editDrawing({ dialogs, store, surface, drawing, subject })
   const host = el('div', { className: 'drawing-editor' }, [note, frame]);
   const foreign = drawing !== '' && embeddedModel(drawing) === null;
   let settleApply = null;
-  /** Resolves the edit with the drawing the editor returned on its own save, before Apply was pressed. */
+  /**
+   * Resolves the edit with the drawing the editor returned on its own save, before Apply was pressed.
+   * @type {(value: string|null) => void}
+   */
   let finish = () => {};
   const session = createSession({
     drawing,

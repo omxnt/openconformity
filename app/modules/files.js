@@ -35,8 +35,13 @@ export const FILE_FORMAT = 'openconformity-project';
 const MIGRATIONS = {};
 
 /**
- * @typedef {{ ok: true, model: import('./model.js').Model, notices: string[] }
- *         | { ok: false, code: 'newer'|'invalid', statement: string, problems?: string[] }} LoadResult
+ * @typedef {Object} LoadResult
+ * @property {boolean} ok
+ * @property {import('./model.js').Model} [model]  on success
+ * @property {string[]} [notices]  on success, what the migrations said
+ * @property {'newer'|'invalid'} [code]  on refusal
+ * @property {string} [statement]  on refusal, the one sentence shown
+ * @property {string[]} [problems]  on refusal, what the checks found
  */
 
 // --- Writing -----------------------------------------------------------
@@ -141,7 +146,7 @@ const INVALID_STATEMENT = 'The file is not a valid project file.';
  * module, against the current metamodel. Behind the validator this is a
  * net that should never fire.
  * @param {any} data
- * @returns {{ ok: true, model: import('./model.js').Model } | { ok: false, problems: string[] }}
+ * @returns {{ ok: boolean, model?: import('./model.js').Model, problems?: string[] }}
  */
 function buildModel(data) {
   const problems = [];

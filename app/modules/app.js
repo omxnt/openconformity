@@ -55,7 +55,7 @@ const flows = createFlows({
   overlay,
   dialogs,
   editor,
-  fileInput: document.getElementById('file-input'),
+  fileInput: /** @type {HTMLInputElement} */ (document.getElementById('file-input')),
 });
 const actions = createActions({ store, flows });
 createShell({
@@ -77,7 +77,7 @@ createNavigator({
   container: document.getElementById('navigator-body'),
   toolbar: document.getElementById('navigator-toolbar'),
   search: document.getElementById('navigator-search'),
-  filterInput: document.getElementById('navigator-filter'),
+  filterInput: /** @type {HTMLInputElement} */ (document.getElementById('navigator-filter')),
   filterClear: document.getElementById('navigator-filter-clear'),
   overlay,
   actions,
@@ -135,7 +135,7 @@ document.addEventListener('keydown', (event) => {
   if (store.drawingOpen()) {
     if (key !== 'enter') return;
     event.preventDefault();
-    document.querySelector('#drawing-head .button-primary')?.click();
+    /** @type {HTMLElement|null} */ (document.querySelector('#drawing-head .button-primary'))?.click();
     return;
   }
   if (key === 's') {
@@ -155,7 +155,7 @@ document.addEventListener('keydown', (event) => {
     return;
   }
   if (key === 'f') {
-    const filter = document.getElementById('navigator-filter');
+    const filter = /** @type {HTMLInputElement|null} */ (document.getElementById('navigator-filter'));
     if (!store.hasProject() || !filter) return;
     event.preventDefault();
     filter.focus();

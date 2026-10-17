@@ -42,9 +42,10 @@ const NAME_AFTER = 2;
  * @param {ReturnType<import('./drawing-editor.js').createDrawingSurface>} [context.drawingSurface]  the pane over the workspace a diagram is edited on
  * @param {(id: string, definition: Object) => void} [context.onReview]  a changed record marked reviewed in view: written afresh from what is related now
  * @param {ReturnType<import('./dialog.js').createDialogs>} [context.dialogs]  the dialogs a rating, a drawing and a table open
- * @param {{ isOpen: () => boolean }} [context.overlay]  the overlay a multiselect stacks on
+ * @param {ReturnType<import('./overlay.js').createOverlay>} [context.overlay]  the overlay a multiselect stacks on
  * @param {(id: string, values: Object<string, string>) => boolean} context.onSave
  * @param {(values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveProject]  the project's draft, asked about first where it removes what entities hold
+ * @param {(code: string, ids: string[], values: Object<string, string>) => Promise<boolean>|boolean} [context.onSaveMany]  a bulk edit's filled fields, set on every entity of the type selected
  * @param {(entries: Array<{ name: string, value: string }>) => Promise<boolean>} [context.onRemoval]  asks before a save removes what hidden groups still hold
  * @param {() => void} context.onCancel
  * @param {() => void} context.onRename
@@ -83,7 +84,7 @@ export function createEditor({
 
   /** @type {Array<() => void>} what recomputes each computed field of the open edit */
   let refreshers = [];
-  /** @type {Array<{ held: HTMLElement, shown: (draft: Object<string, string>) => boolean }>} what is shown on a condition, this render, in document order */
+  /** @type {Array<{ held: HTMLElement, shown: (draft: Object<string, string>) => boolean, group?: import('./attributes.js').AttributeGroup }>} what is shown on a condition, this render, in document order, a group's wrapper naming its group */
   let conditionals = [];
   /** @type {Array<{ definition: Object, input: HTMLInputElement }>} the records of entities the open edit keeps, refreshed when the group each waits on changes */
   let records = [];
@@ -91,7 +92,7 @@ export function createEditor({
   let panelOfGroup = new Map();
   /** @type {Map<string, string>} the group each key of the mounted type stands in, by name */
   let groupOfKey = new Map();
-  /** @type {Map<string, AttributeDefinition>} the definition of each key of the mounted type */
+  /** @type {Map<string, import('./attributes.js').AttributeDefinition>} the definition of each key of the mounted type */
   let definitionOfKey = new Map();
   /** What the diagram on the surface is of, for its names. */
   const subject = () => (current ? entityLabel(current) || current.id : 'the entity');
@@ -109,7 +110,7 @@ export function createEditor({
    * @param {EventTarget|null} target
    */
   function recordFrom(target) {
-    const control = target instanceof Element ? target.closest('[data-key]') : null;
+    const control = target instanceof Element ? /** @type {HTMLElement|null} */ (target.closest('[data-key]')) : null;
     const key = control?.dataset.key;
     if (!key || editingId === null) return;
     const changed = definitionOfKey.get(key);
@@ -130,7 +131,7 @@ export function createEditor({
   function fieldValues() {
     /** @type {Object<string, string>} */
     const values = {};
-    for (const control of body.querySelectorAll('[data-key]')) {
+    for (const control of /** @type {NodeListOf<HTMLInputElement>} */ (body.querySelectorAll('[data-key]'))) {
       if (control.closest('.cell-group[hidden]')) continue;
       values[control.dataset.key] = control.value;
     }
@@ -144,7 +145,7 @@ export function createEditor({
    */
   function savedValues() {
     const values = fieldValues();
-    for (const control of body.querySelectorAll('.cell-group[hidden] [data-key]')) values[control.dataset.key] = '';
+    for (const control of /** @type {NodeListOf<HTMLElement>} */ (body.querySelectorAll('.cell-group[hidden] [data-key]'))) values[control.dataset.key] = '';
     return values;
   }
 
@@ -275,7 +276,7 @@ export function createEditor({
    * hyperlink as a link in a new tab, a multiline value as prose keeping
    * its breaks, anything else as its text, an unset value as the dash,
    * except a table or a drawing, which say there is none in words.
-   * @param {{ kind: string }} definition
+   * @param {import('./attributes.js').AttributeDefinition} definition
    * @param {string|undefined} value
    */
   function valueNode(definition, value, values = {}) {
@@ -312,7 +313,7 @@ export function createEditor({
    * stands; the dash where the record is empty.
    * Until the group that writes the record holds a value, nothing was
    * recorded, and the field shows what is related now, unmarked.
-   * @param {{ relationship: string, name: string, recorded: string }} definition
+   * @param {import('./attributes.js').AttributeDefinition} definition
    * @param {string} value
    * @param {Object<string, string>} values  the entity's, or the draft's
    * @param {string|null} [tipKey]
@@ -323,7 +324,7 @@ export function createEditor({
     const subject = current?.id ?? null;
     const states = written
       ? recordedStates(value, model, subject, definition.relationship)
-      : (subject === null ? [] : relatedIds(model, subject, definition.relationship)).map((id) => ({ id, label: entityLabel(nodeOf(model, id)), state: 'linked' }));
+      : (subject === null ? [] : relatedIds(model, subject, definition.relationship)).map((id) => ({ id, label: entityLabel(/** @type {import('./model.js').Entity} */ (nodeOf(model, id))), state: /** @type {const} */ ('linked') }));
     if (states.length === 0) return el('div', { className: 'cell-value empty', text: '–' });
     const glyph = (state) => {
       if (state === 'added') {
@@ -468,8 +469,9 @@ export function createEditor({
    * while the cells scroll.
    * @param {string} id
    * @param {string} code
-   * @param {Object<string, string>} values
+   * @param {Object<string, string>} stored  the values the surface shows or edits
    * @param {boolean} editing
+   * @param {{ bulk?: boolean, into?: HTMLElement }} [options]  a bulk edit's empty form, or a container other than the body
    */
   function mount(id, code, stored, editing, options = {}) {
     const into = options.into ?? body;
@@ -561,7 +563,7 @@ export function createEditor({
   function removals() {
     const leaderName = (key) => (leaderOf(current?.type ?? 'PROJECT', key)?.name ?? key).toLowerCase();
     return conditionals
-      .filter(({ held, group }) => group && held.hidden && [...held.querySelectorAll('[data-key]')].some((control) => control.value.trim() !== ''))
+      .filter(({ held, group }) => group && held.hidden && [.../** @type {NodeListOf<HTMLInputElement>} */ (held.querySelectorAll('[data-key]'))].some((control) => control.value.trim() !== ''))
       .map(({ group }) => ({ name: group.name, value: group.when.value || `no ${leaderName(group.when.key)}` }));
   }
 
@@ -721,7 +723,7 @@ export function createEditor({
       head.appendChild(el('div', { className: 'pane-head-actions' }, [editMany]));
       body.appendChild(emptyState(`${ids.length} ${ENTITY_TYPES[[...types][0]].name.toLowerCase()}s selected`, 'Edit attributes opens one form for all of them. What you fill is set on each, and what you leave empty stays as each one has it.'));
     } else {
-      const counts = [...types].map((type) => `${ids.filter((id) => (nodeOf(store.model(), id)?.kind === 'entity' ? nodeOf(store.model(), id).type : 'folder') === type).length} ${type === 'folder' ? 'folder' : ENTITY_TYPES[type].name.toLowerCase()}`);
+      const counts = [...types].map((type) => `${ids.filter((id) => (nodeOf(store.model(), id)?.kind === 'entity' ? /** @type {import('./model.js').Entity} */ (nodeOf(store.model(), id)).type : 'folder') === type).length} ${type === 'folder' ? 'folder' : ENTITY_TYPES[type].name.toLowerCase()}`);
       body.appendChild(emptyState('Not one type', `${counts.join(', ')} selected. Edit works on entities of one type. Delete, Cut and Copy work on all of them.`));
     }
   }
@@ -864,7 +866,7 @@ export function createEditor({
     } else {
       return;
     }
-    body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])')?.focus();
+    /** @type {HTMLElement|null} */ (body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])'))?.focus();
   }
 
   function endEdit() {
@@ -899,7 +901,7 @@ export function createEditor({
     mount(`${ids.length} selected`, code, {}, true, { bulk: true });
     followConditions();
     store.setEditing(true);
-    body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])')?.focus();
+    /** @type {HTMLElement|null} */ (body.querySelector('.cells:not([hidden]) [data-key]:not([type="hidden"])'))?.focus();
   }
 
   /**
@@ -934,7 +936,7 @@ export function createEditor({
   render();
 
   /** Save the open edit as its Save button would, for the keys that mean save. */
-  const submit = () => head.querySelector('.form-button.button-primary')?.click();
+  const submit = () => /** @type {HTMLElement|null} */ (head.querySelector('.form-button.button-primary'))?.click();
 
   return { render, beginEdit, beginBulkEdit, endEdit, hasUnconfirmedEdit, submit, save, showEntity, editing: () => mode === 'edit' };
 }

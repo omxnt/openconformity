@@ -42,7 +42,7 @@ const RELATIONSHIPS = [
 /**
  * A field's value as a cell: text as its lines, a choice as its tag, a
  * set as its tags, nothing as nothing.
- * @param {import('./attributes.js').AttributeDefinition} definition
+ * @param {{ kind: string, values?: string[] }} definition  the definition, or its kind alone
  * @param {string|undefined} value
  */
 function valueCell(definition, value) {
@@ -104,7 +104,7 @@ export function buildSafetyView(model) {
         spec: true,
         sortable: false,
         columns: ['Identifier', 'Title'],
-        rows: ids.length === 0 ? [{ id: null, cells: ['', ''] }] : ids.map((id) => ({ id: null, cells: [{ identifier: id }, entityLabel(model.nodes.get(id))] })),
+        rows: ids.length === 0 ? [{ id: null, cells: ['', ''] }] : ids.map((id) => ({ id: null, cells: [{ identifier: id }, entityLabel(/** @type {import('./model.js').Entity} */ (model.nodes.get(id)))] })),
       };
     });
     const fields = (names) =>
@@ -156,7 +156,7 @@ export function buildSafetyView(model) {
     id: 'safety',
     title: 'Safety function specification',
     exports: ['markdown', 'excel'],
-    wholeSheets: 'first',
+    wholeSheets: /** @type {const} */ ('first'),
     sections: [
       { name: `All functions (${all.length})`, tables: ordered.flatMap((saf, i) => block(saf, i + 1)), register: register(ordered) },
       ...ordered.map((saf) => ({ name: entityLabel(saf) || saf.id, tables: block(saf, 1), register: register([saf]) })),
