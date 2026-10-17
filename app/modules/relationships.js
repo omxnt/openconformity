@@ -1,7 +1,7 @@
 /**
  * The relationship pane: the selected entity's relationships as two
  * tables, Outgoing and Incoming, each behind a compact fold and both
- * sharing one fixed column skeleton so they can never misalign — or as
+ * sharing one fixed column skeleton so they can never misalign, or as
  * the neighbourhood graph, the pane's default view, behind a toggle in
  * the working header. Every row reads as the fact it records, the
  * subject standing in the source or the target column as the direction
@@ -9,7 +9,7 @@
  *
  * The table is also the picker: while the store holds a picker for this
  * pane's subject, each pick lands immediately as a provisional row in
- * its right place — pending-styled, its ambiguity choice inline — and
+ * its right place, pending-styled, its ambiguity choice inline, and
  * Done and Cancel sit in the pane head. The pane pins the picker's
  * subject: the selection may move while picking, the tables stay. All
  * of it is re-read from the model on every render; the chosen view is
@@ -131,7 +131,7 @@ export function relationshipTables(model, subjectId, picker) {
 /**
  * One section's rows as the table presents them: filtered by the far
  * end's designation, its title, or the relationship label, then sorted
- * by the chosen column — or left in the grouped order while no sort is
+ * by the chosen column, or left in the grouped order while no sort is
  * chosen. Pending rows take part like the rest.
  * @param {Array<Object>} rows
  * @param {{ column: 'entity'|'relationship', direction: 'asc'|'desc' }|null} sort
@@ -322,7 +322,7 @@ export function createRelationshipsView({ store, head, body, graph, onAdd, onDon
   /**
    * A real row: the recorded fact, selecting its far end. In the default
    * view it carries its unlink; while picking it recedes and the unlink
-   * is withheld — removals happen in the default view only.
+   * is withheld, removals happen in the default view only.
    */
   function realRow(row, subject, picking) {
     const { label, relationship, other } = row;

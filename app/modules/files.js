@@ -25,7 +25,7 @@ import { validate, isPlainObject } from './validator.js';
 export const SCHEMA_VERSION = 1;
 
 /** The format marker of a project file. */
-export const FILE_FORMAT = 'openconformity-project';
+const FILE_FORMAT = 'openconformity-project';
 
 /**
  * The migration chain: one step per schema version, from that version to
@@ -111,8 +111,8 @@ export function serialise(model) {
 }
 
 /**
- * The default filename a project saves under: the project name slugified —
- * lowercased, marks stripped, runs of anything else a single dash — and
+ * The default filename a project saves under: the project name slugified,
+ * lowercased, marks stripped, runs of anything else a single dash, and
  * `untitled.json` when no name survives that.
  * @param {string} name
  * @returns {string}

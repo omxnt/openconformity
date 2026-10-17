@@ -1,13 +1,13 @@
 /**
  * The flows: create, select, relate, file, arrange, delete, undo, redo,
  * and the project's own new, open, save, and rename. Each one asks its
- * questions as straight-line awaited code — the draft guard is one
- * awaited if — and then makes one commit through the store. Nothing here
+ * questions as straight-line awaited code, the draft guard is one
+ * awaited if, and then makes one commit through the store. Nothing here
  * writes to the model directly.
  *
  * A creation stays pristine until its first save: the flows remember it,
  * and any end of that edit session other than Save removes the entity
- * again — collapsing the creation out of history when nothing has
+ * again, collapsing the creation out of history when nothing has
  * committed since, deleting it as one step otherwise. Once saved, Cancel
  * means discard-edits-keep-entity.
  */
@@ -111,8 +111,8 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
   }
 
   /**
-   * Create an entity, filed into the selected container — at the top of
-   * the tree when nothing is selected — and open the editor on it.
+   * Create an entity, filed into the selected container, at the top of
+   * the tree when nothing is selected, and open the editor on it.
    * @param {string} code
    */
   async function createEntity(code) {
@@ -798,7 +798,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /**
    * Commit the picked relationships as one step: each pick as the
-   * relationship its pair means — its only option, the chosen one, or the
+   * relationship its pair means, its only option, the chosen one, or the
    * first on offer. One undo removes them all; a pick the model no longer
    * allows is dropped.
    * @param {string} subjectId

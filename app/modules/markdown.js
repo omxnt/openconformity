@@ -12,8 +12,9 @@
  * or Markdown's own syntax escaped, and a line of prose that would open
  * a heading, a list, a quote or a table escaped at its start, so what a
  * field holds reads as the text it is wherever the file is shown and
- * never becomes a link, an image or a structure. A pure function of its
- * input.
+ * never becomes an image or a structure. A viewer may still turn a bare
+ * web address into a link, which loads nothing by itself. A pure
+ * function of its input.
  */
 
 /**

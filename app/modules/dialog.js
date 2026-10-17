@@ -1,10 +1,10 @@
 /**
  * Promise-based dialogs over the overlay. A dialog resolves with the value of the chosen action, or with null
- * when it is dismissed — Escape, or a pointer down on the backdrop. Focus
+ * when it is dismissed, Escape, or a pointer down on the backdrop. Focus
  * stays inside the dialog and returns to the opener when it closes.
  *
  * A toast is the other voice: a passing remark in the corner for what
- * changes nothing and needs no answer — a refusal, a save that went
+ * changes nothing and needs no answer, a refusal, a save that went
  * through. It leaves by itself and never joins the overlay stack.
  */
 

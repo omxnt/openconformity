@@ -1,11 +1,11 @@
 /**
  * The model-query layer: pure derivations over the model and the
  * metamodel, shared by the flows, the action list, and the panes.
- * Nothing here holds state, touches the page, or writes to the model —
+ * Nothing here holds state, touches the page, or writes to the model,
  * each function reads what it is given and returns data.
  */
 
-import { nodeOf, childrenOf, canRelate, canFile, spanOf, deletionOf, filedBeneath } from './model.js';
+import { nodeOf, childrenOf, canRelate, deletionOf, filedBeneath } from './model.js';
 import { ENTITY_TYPES, RELATIONSHIP_TYPES, relationshipsFrom, relationshipsTo } from './metamodel.js';
 import { plural } from './text.js';
 
@@ -56,7 +56,7 @@ export function relationshipOptions(model, subjectId) {
 
 /**
  * What a form is called wherever one is offered: the relationship's
- * label and the type at the far end, in reading order — label first when
+ * label and the type at the far end, in reading order, label first when
  * the subject is the source, far type first when it is the target.
  * @param {{ typeId: string, direction: 'outgoing'|'incoming' }} form
  * @returns {string}

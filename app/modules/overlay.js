@@ -1,6 +1,6 @@
 /**
  * The one owner of everything above the page: dialogs, menus, and panels,
- * held in one stack. Menus are exclusive — opening anything closes them.
+ * held in one stack. Menus are exclusive, opening anything closes them.
  * Dialogs draw over panels; a commit closes menus and never dialogs, which
  * is `closeMenus`. Escape goes to the top entry. Every entry records its
  * opener, and focus returns to it when the entry closes.

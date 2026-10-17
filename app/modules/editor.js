@@ -1,7 +1,7 @@
 /**
  * The editor: the attributes of the selection, view-only until Edit, and
- * applied on Save. The pane's header is its working surface — the
- * selection's designation and the mode's actions — and hides when nothing
+ * applied on Save. The pane's header is its working surface, the
+ * selection's designation and the mode's actions, and hides when nothing
  * is selected. The pane renders only the attributes the definitions carry
  * for the type; content under any other key is never shown and never
  * touched. A draft lives only here and only until Save or Cancel: the
@@ -174,8 +174,8 @@ export function createEditor({
   }
 
   /**
-   * One attribute as a cell: its name over its value — or, in an edit,
-   * over its field — two cells to a row, a multiline one taking the row
+   * One attribute as a cell: its name over its value, or, in an edit,
+   * over its field, two cells to a row, a multiline one taking the row
    * to itself. Every cell has the one shape in either mode, so nothing
    * moves between them.
    * @param {Object} definition
@@ -207,7 +207,7 @@ export function createEditor({
   }
 
   /**
-   * A group's name over its cell — a rating's, or its slot's — with the
+   * A group's name over its cell, a rating's, or its slot's, with the
    * glyph where the name carries help on every type.
    * @param {string} name
    * @param {string} key  what the tooltip's id is made of
@@ -286,7 +286,7 @@ export function createEditor({
       const rows = tableRows(definition, value ?? '');
       if (rows.length === 0) return el('p', { className: 'cell-none', text: `No ${definition.name.toLowerCase()}.` });
       return el('div', { className: 'cell-table' }, [
-        tableOf(definition, rows.map((row, i) => row.map((cell, c) => tableCell(definition.columns[c], cell)))),
+        tableOf(definition, rows.map((row) => row.map((cell, c) => tableCell(definition.columns[c], cell)))),
       ]);
     }
     if (value === undefined || value === '') return el('div', { className: 'cell-value empty', text: '–' });
@@ -419,7 +419,7 @@ export function createEditor({
   /**
    * A group's cells into a grid: a rating as its cell; otherwise a legend
    * where the group is named within its tab and holds more than one
-   * attribute, its own cells, and its sub-groups in their order — after
+   * attribute, its own cells, and its sub-groups in their order, after
    * the last of its attributes any of them waits on, or after all its
    * attributes when none does. A group waiting on a condition is wrapped
    * and shown or hidden as one; sub-groups sharing a name and a condition's
@@ -507,8 +507,8 @@ export function createEditor({
   /**
    * Carbon's tabs over the panels: the one chosen for the type this
    * session selected, the others reached by click or arrow key. Choosing
-   * shows the panel in place — no re-render, so an open edit is left
-   * alone — and records the choice for the type.
+   * shows the panel in place, no re-render, so an open edit is left
+   * alone, and records the choice for the type.
    */
   function tabBar(code, panels) {
     const chosen = store.tabOf(code);

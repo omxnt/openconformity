@@ -1,7 +1,7 @@
 /**
  * Popup menus drawn from item lists, over the overlay: one open path for
  * the theme menu, the creation offer, and the context menu. A menu knows
- * nothing about the model — it renders labels, states, and picks.
+ * nothing about the model, it renders labels, states, and picks.
  */
 
 import { el, icon } from './dom.js';

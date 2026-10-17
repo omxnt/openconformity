@@ -29,7 +29,7 @@ import { ENTITY_TYPES } from './metamodel.js';
 import { plural } from './text.js';
 import { APPLE } from './platform.js';
 import { loadProject } from './files.js';
-import { el, icon, tooltipOn } from './dom.js';
+import { el, icon } from './dom.js';
 import { splitter } from './splitter.js';
 import { headSearch } from './pane.js';
 

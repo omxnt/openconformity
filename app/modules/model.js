@@ -2,8 +2,8 @@
  * The model, and the rules that hold it to the metamodel. Every mutation
  * goes through this module; nothing else in the software writes to a model.
  *
- * A model holds one collection of nodes — folders and entities, told apart
- * by their `kind` — the relationships keyed by their triple, and the
+ * A model holds one collection of nodes, folders and entities, told apart
+ * by their `kind`, the relationships keyed by their triple, and the
  * counters that issue identifiers. Sibling order is collection order: the
  * children of a parent, read in collection order, are the order the tree
  * draws, folders and entities interleaved.

@@ -9,7 +9,7 @@ import { el, icon } from './dom.js';
 import { tableRows, joinTable } from './fields.js';
 
 /** How wide a column is: as its values and no wider for a date, a choice or a number, brief for a text, and a multiline taking the rest. */
-export const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
+const columnWidth = (column) => (column.kind === 'date' || column.kind === 'choice' || column.kind === 'number' ? 'fit' : column.kind === 'text' ? 'brief' : '');
 
 /** A table attribute's table: the row number, then a head per column, the cells given per row, each column as wide as its kind wants. */
 export function tableOf(definition, rows, trailing = null) {

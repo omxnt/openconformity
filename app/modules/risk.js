@@ -42,7 +42,7 @@ export const GRAPH = {
 export const graphBand = (index) => (index <= 2 ? 'lowest' : index <= 4 ? 'medium' : 'highest');
 
 /** The classes of each parameter of the graph, in the report's order. */
-export const GRAPH_LEVELS = [
+const GRAPH_LEVELS = [
   ['S1', 'S2'],
   ['F1', 'F2'],
   ['O1', 'O2', 'O3'],
@@ -76,7 +76,7 @@ export const GRAPH_TREE = { label: 'Start', ...grow(GRAPH_LEVELS, []) };
 
 /**
  * The branch of the graph a rating follows: the nodes from the start,
- * as far as the codes given reach — to a leaf when all four are set.
+ * as far as the codes given reach, to a leaf when all four are set.
  * @param {string[]} codes  the codes chosen at each level, '' where unset
  * @param {Object} [tree]  the graph walked, the risk graph unless given
  * @returns {Array<Object>}
@@ -107,7 +107,7 @@ export function graphLive(codes, ancestors) {
  * 6.4.2, Table 2: the category a score reaches, highest first.
  * @type {Array<[number, string]>}
  */
-export const SCORING = [
+const SCORING = [
   [160, 'high'],
   [120, 'medium'],
   [90, 'low'],
@@ -130,7 +130,7 @@ export const SCORING_CLASSES = {
   ],
 };
 
-/** The code a choice value opens with — its first word, `S1`. */
+/** The code a choice value opens with, its first word, `S1`. */
 export const codeOf = (value) => String(value ?? '').trim().split(' ')[0];
 
 /** The score a number field holds, NaN where it holds none. */
@@ -140,7 +140,7 @@ export function scoreOf(value) {
 }
 
 /**
- * The tone an estimate is shown in — high, medium, low, or negligible —
+ * The tone an estimate is shown in, high, medium, low, or negligible,
  * read from the report's own word for it, whichever method said it, a
  * level, an index's band or a score's category; none while nothing is
  * rated or the rating is typed.

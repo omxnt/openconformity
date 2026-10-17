@@ -52,7 +52,7 @@ export function ratingView(definitions, values) {
   };
 }
 
-/** The initials of a name — `SS` of `Severity score` — as the report abbreviates its scores. */
+/** The initials of a name, `SS` of `Severity score`, as the report abbreviates its scores. */
 export const initials = (name) => String(name ?? '').split(/\s+/).filter(Boolean).map((word) => word[0].toUpperCase()).join('');
 
 /**

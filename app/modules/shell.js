@@ -70,8 +70,8 @@ export const RESTORATION_DETAIL =
   'The stored project could not be read back, and a copy was set aside in browser storage.';
 
 /** The statement made while the origin's storage stands nearly full. */
-export const STORAGE_NOTICE = 'Browser storage is nearly full.';
-export const STORAGE_DETAIL =
+const STORAGE_NOTICE = 'Browser storage is nearly full.';
+const STORAGE_DETAIL =
   'Save the project to a file so nothing is lost if storing stops.';
 
 /** The statement made while storing the session keeps failing. */
@@ -244,7 +244,7 @@ export function createShell({ store, overlay, actions = [], toast = () => {}, on
   }
 
   // About and the metamodel act in the tool; behind the separator,
-  // everything leaves it — the launch glyph marks each external link,
+  // everything leaves it, the launch glyph marks each external link,
   // and the email stands apart the way the demo held it.
   menubarMenu(helpButton, 'Help', () => [
     ...actions.filter((action) => action.menubar && action.group === 'help').map((action) => actionItem(action, helpButton)),

@@ -1788,7 +1788,6 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .data th.sortable:hover { background: var(--hover); }
 .data th .sort { width: 16px; height: 16px; vertical-align: -3px; margin-left: 4px; }
 .data td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
-.data td.mark { text-align: center; }
 .data td.wide { min-width: 16ch; }
 .data td p { margin: 0; min-width: 28ch; max-width: 40ch; white-space: pre-wrap; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.28572; letter-spacing: 0.16px; }  /* $body-compact-01 */
 .data td .cell-note .tag { margin-right: 8px; vertical-align: 1px; }

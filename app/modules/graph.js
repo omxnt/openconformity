@@ -3,8 +3,8 @@
  * relationships, never a whole-model graph. A pane presentation of the
  * selection, redrawn from the model on every render: incoming sources on
  * the left, outgoing targets on the right, the subject between them,
- * every edge a dogleg — horizontal out of its box, one slant across the
- * shared bend band, horizontal into the far one — labelled upright on
+ * every edge a dogleg, horizontal out of its box, one slant across the
+ * shared bend band, horizontal into the far one, labelled upright on
  * the neighbour-side run, compositions carrying the filled diamond at
  * the owner's end and every other form the plain arrowhead. Each side
  * stands grouped by relationship type, which binds the entity type at
@@ -14,8 +14,8 @@
  * left or closing the block from its end. A group opened stays open
  * while its subject is selected and closes on the next; nothing is
  * remembered beyond that. While the store holds a picker for the subject, the picks ride
- * as dashed provisional edges in their type's group, held open —
- * clicking one, or its box, lets go — and the standing neighbourhood
+ * as dashed provisional edges in their type's group, held open,
+ * clicking one, or its box, lets go, and the standing neighbourhood
  * recedes until Done.
  */
 
@@ -56,7 +56,7 @@ export function neighbourhood(model, id) {
 /**
  * The picks as provisional neighbours, per side: each with the label its
  * pair means and whether that pair still offers a choice. A pick whose
- * pair no longer admits anything stays off the canvas — the list's
+ * pair no longer admits anything stays off the canvas, the list's
  * stale strip carries it.
  * @param {import('./model.js').Model} model
  * @param {{ subject: string, picks: Array<Object> }} picker
@@ -83,7 +83,7 @@ export function pendingNeighbours(model, picker) {
 /**
  * The neighbourhood as a filter leaves it: the subject always, and on
  * each side the entries whose entity answers the filter or whose
- * relationship is labelled with it — a pending pick's label as it
+ * relationship is labelled with it, a pending pick's label as it
  * carries it, a standing relationship's as its type names it.
  * @param {{ subject: Object, outgoing: Array<Object>, incoming: Array<Object> }} around
  * @param {string} filter  as typed
@@ -106,7 +106,7 @@ export const PAGE = 5;
 export const SUBJECT_MAX = 20;
 
 /** The key a group is remembered by: the side it stands on and its relationship type. */
-export const groupKey = (direction, typeId) => `${direction}:${typeId}`;
+const groupKey = (direction, typeId) => `${direction}:${typeId}`;
 
 /**
  * A side's entries grouped by relationship type, which binds the entity
@@ -210,7 +210,7 @@ export function attachmentY(mid, span, height) {
  * A dogleg route: horizontal out of the box, one slanted run across the
  * shared bend band, horizontal into the far box. Every edge of a side
  * shares the same band, so with lanes and ports both monotone two
- * diagonals can never cross — no channel discipline needed. A port
+ * diagonals can never cross, no channel discipline needed. A port
  * level with its lane is simply a straight line.
  * @param {number} x1 @param {number} y1  where the edge leaves
  * @param {number} bendA  where the slant begins
@@ -246,7 +246,7 @@ export function boxSpan(side) {
 }
 
 /** What a group's strip says before the type's code: how many more the next page shows and how many stand folded, or that fewer can be shown once every member does. */
-export function stripWords(group) {
+function stripWords(group) {
   const left = group.members.length - group.shown;
   if (left <= 0) return 'Show fewer';
   const next = Math.min(PAGE, left);

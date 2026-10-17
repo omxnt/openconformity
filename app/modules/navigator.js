@@ -1,12 +1,12 @@
 /**
  * The navigator: the model as a tree of what is filed where, under its
  * toolbar, headed by the project's own row. The project row is
- * presentation only — no entity, no identifier, nothing a model
- * operation can address — selected as the null selection, filing drops
+ * presentation only, no entity, no identifier, nothing a model
+ * operation can address, selected as the null selection, filing drops
  * at the top of the tree, and its context menu is the background menu.
  * The tree presents the user's filing, folders and entities interleaved
  * in sibling order, every row under its type's icon, an entity labelled
- * by its designation then its label — the reference in brackets then the
+ * by its designation then its label, the reference in brackets then the
  * title for the types that carry a reference, the designation alone when
  * the entity carries neither. The pane owns its transient state: scroll and focus
  * survive the full re-render.
@@ -148,7 +148,7 @@ export function labelParts(node) {
  * @param {number} ratio  the pointer's height within the row, 0 at the top
  * @returns {'before'|'into'|'after'}
  */
-export function dropZone(ratio) {
+function dropZone(ratio) {
   if (ratio < 0.25) return 'before';
   if (ratio > 0.75) return 'after';
   return 'into';
@@ -256,7 +256,7 @@ export function createNavigator({
 
   /**
    * The context menu: the same action list the toolbar draws from, at
-   * the pointer. Opening it on a node selects the node first, guarded —
+   * the pointer. Opening it on a node selects the node first, guarded,
    * the menu opens only when the selection lands.
    * @param {string|null} id
    * @param {{ x: number, y: number }} at

@@ -1,7 +1,7 @@
 /**
  * The rating dialog: a method's parameters, each a control with its
- * rationale beneath it, then the method's figure — the matrix or the
- * graph as the report draws it — read-only, showing where the classes
+ * rationale beneath it, then the method's figure, the matrix or the
+ * graph as the report draws it, read-only, showing where the classes
  * chosen meet, then, under the name of the attribute it computes, what
  * the rating comes to. It resolves the parameter
  * and rationale values as chosen, or null when it is cancelled; nothing
@@ -29,7 +29,7 @@ import {
 } from './risk.js';
 
 /**
- * Carbon's status indicator for a tone: error, warning, or the check —
+ * Carbon's status indicator for a tone: error, warning, or the check,
  * the check in the secondary colour where the level is negligible.
  * @param {'high'|'medium'|'low'|'negligible'} tone
  */

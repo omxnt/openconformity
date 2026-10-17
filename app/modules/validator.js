@@ -136,7 +136,7 @@ function numberOf(id) {
 }
 
 /**
- * The keys an object must carry, no more and no fewer — beyond the keys
+ * The keys an object must carry, no more and no fewer, beyond the keys
  * the schema defines without requiring.
  * @param {Object} value
  * @param {string[]} keys

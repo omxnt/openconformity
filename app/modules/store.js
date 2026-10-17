@@ -1,20 +1,20 @@
 /**
- * The store: the one owner of what is open — the project, the selection,
+ * The store: the one owner of what is open, the project, the selection,
  * the session state, the history, and the browser persistence behind
  * `commit`. Panes read from it and flows write through it; nothing else
  * holds state that outlives a render.
  *
  * Model state travels through history and marks the project unsaved.
- * Session state — the selection, the tree expansion, the theme — persists
+ * Session state, the selection, the tree expansion, the theme, persists
  * on change, never enters history, and never dirties. Whether the project
  * is saved derives from one pointer: the history sequence the last save
  * stood at. Across sessions the derived boolean rides in the blob: a clean
  * restore seeds the pointer at the initial entry, a dirty one seeds it
  * unreachable.
  *
- * Picker mode is a third kind of state: the subject and the picks — each
+ * Picker mode is a third kind of state: the subject and the picks, each
  * an identifier with, where a pair admits more than one relationship, the
- * chosen one — of an add-relationship workflow in progress. It survives
+ * chosen one, of an add-relationship workflow in progress. It survives
  * commits, is never persisted, and never enters history. A change that
  * removes a picked entity clears that pick; one that removes the subject
  * closes the workflow.

@@ -9,9 +9,8 @@
  * saves it as the view offers: as an Excel workbook, a sheet per
  * section, or as Markdown. From the first section, which holds every
  * row, the save takes the whole view, and from any other only that
- * section. The cell kinds no view produces yet, a choice, choices and a
- * mark, are scaffolding for the views the proposal lists, kept and
- * tested until they land.
+ * section. A choice and a set of choices are the cells the safety
+ * function specification reads a field as.
  */
 
 import { el, icon, tooltipOn, download } from './dom.js';
@@ -82,7 +81,6 @@ export function cellText(held, labelOf) {
   if ('outcome' in held) return held.outcome?.outcome ?? '';
   if ('choice' in held) return held.choice;
   if ('choices' in held) return held.choices.join('; ');
-  if ('mark' in held) return held.mark ? 'x' : '';
   if ('lines' in held) return held.lines.join('; ');
   return String(held);
 }
@@ -275,7 +273,6 @@ export function createViewsPane({ store, overlay, workspace, pane, head, body, o
       if ('outcome' in held) return el('td', { className: narrow }, held.outcome?.outcome ? rated(outcomeTag(held.outcome), held.note) : [empty()]);
       if ('choice' in held) return el('td', { className: narrow }, [held.choice ? tag(held.choice) : empty()]);
       if ('choices' in held) return el('td', {}, held.choices.length === 0 ? [empty()] : [el('span', { className: 'tags' }, held.choices.map(tag))]);
-      if ('mark' in held) return el('td', { className: 'mark', text: held.mark ? '●' : '' });
       if ('lines' in held) return el('td', {}, held.lines.map((line) => el('p', { text: line || '–' })));
     }
     const text = held === null || held === undefined ? '' : String(held);

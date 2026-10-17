@@ -137,7 +137,6 @@ equal(cellText({ outcome: { outcome: '6 (highest)', tone: 'high', parameters: []
 equal(cellText({ outcome: null }, labelOf), '', 'an unrated one is empty');
 equal(cellText({ choice: 'Yes' }, labelOf), 'Yes', 'a choice is its value');
 equal(cellText({ choices: ['Mechanical', 'Software'] }, labelOf), 'Mechanical; Software', 'a set lists its values');
-equal(cellText({ mark: true }, labelOf), 'x', 'a mark is an x');
 equal(cellText({ lines: ['a', 'b'] }, labelOf), 'a; b', 'lines join');
 equal(cellText(null, labelOf), '', 'nothing is empty');
 

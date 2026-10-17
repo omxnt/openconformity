@@ -1,9 +1,9 @@
 /**
  * The picker's derivations, picks first: while picking, every entity
  * relatable to the subject in any form is a candidate, and the
- * relationship each pick means is inferred from the pair — silently
+ * relationship each pick means is inferred from the pair, silently
  * when the pair admits exactly one, through an inline choice when it
- * admits more. The mode — the pinned subject and the picks — is store
+ * admits more. The mode, the pinned subject and the picks, is store
  * state; everything here is re-derived from the model on every render.
  * The relationship
  * pane renders it: the picks land in the table as provisional rows.
@@ -43,8 +43,8 @@ export function pairOptions(model, subjectId, otherId) {
 
 /**
  * The picks as the table will land them: each with the relationship its
- * pair means right now — the chosen form while the model still admits
- * it, else the pair's first option, else nothing — and the options an
+ * pair means right now, the chosen form while the model still admits
+ * it, else the pair's first option, else nothing, and the options an
  * ambiguous pair offers inline.
  * @param {import('./model.js').Model} model
  * @param {{ subject: string, picks: Array<{ id: string, form: { typeId: string, direction: string }|null }> }} picker

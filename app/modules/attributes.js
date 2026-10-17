@@ -3,7 +3,7 @@
  * `specs/attributes.md` in the order the document records the types.
  *
  * Per type, the ungrouped definitions come first and the named groups
- * follow — a group tagged tab standing on a tab of its own — with keys
+ * follow, a group tagged tab standing on a tab of its own, with keys
  * unique across all of a type's tables. The
  * identifier is generated and read-only, so it is not an attribute. Every
  * attribute is optional and every value is stored as text: an unset
@@ -593,7 +593,7 @@ export const ATTRIBUTES = {
 };
 
 /** A group's definitions in render order: its own table, then each sub-group's. */
-export const groupAttributes = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(groupAttributes)];
+const groupAttributes = (group) => [...group.attributes, ...(group.groups ?? []).flatMap(groupAttributes)];
 
 /**
  * Every group of a type in render order, sub-groups following their group.

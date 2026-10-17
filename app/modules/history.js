@@ -4,8 +4,8 @@
  * forward, and a change recorded after an undo drops everything ahead of
  * the cursor.
  *
- * A snapshot holds the model's content — its name, nodes, and
- * relationships — copied object by object with its strings reused, and
+ * A snapshot holds the model's content, its name, nodes, and
+ * relationships, copied object by object with its strings reused, and
  * never the counters: undo and redo roll back content, not the next
  * number to issue.
  *

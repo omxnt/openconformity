@@ -1,6 +1,6 @@
 /**
- * One action list. Every surface that offers an action — the navigator
- * toolbar, the context menu — draws from this list, so no offer disagrees
+ * One action list. Every surface that offers an action, the navigator
+ * toolbar, the context menu, draws from this list, so no offer disagrees
  * with another or with the model. An action states where it appears, when
  * it is enabled, and what flow it runs; rendering is the surface's
  * business.

@@ -21,7 +21,7 @@ import { isOutcome } from './attributes.js';
  * @param {Object} view
  * @param {string|null} [tipKey]  what the tooltips' ids are made of; null within a field, where a tag cannot be a button
  */
-export function ratingTags(view, tipKey = null) {
+function ratingTags(view, tipKey = null) {
   const tag = (className, content, lines, key) => tooltipTag(className, content, lines, key, tipKey);
   const tags = [];
   if (view.outcome !== null) {
