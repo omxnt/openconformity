@@ -503,6 +503,29 @@ def drive_023(page):
     """))
 
 
+def drive_024(page):
+    page.eval(script("""
+      await loadExample();
+      const entity = await firstEntity();
+      entity.click(); await wait(300);
+      await menu('Edit', 'Import from library'); await wait(500);
+      const act = document.querySelector('.library-row[data-id="LEG-004"]');
+      must(act, 'the Machinery Regulation stands in the open legislation catalogue');
+      act.click(); await wait(300);
+      const tabs = [...document.querySelectorAll('.library-preview .tabs .tab')].map((t) => t.textContent);
+      must(tabs.join() === 'Legislation,Applicability,Notes', 'the preview carries the tabs the editor gives the type: ' + tabs.join());
+      const names = [...document.querySelectorAll('.library-preview .cells:not([hidden]) .cell-name > span:first-child')].map((n) => n.textContent);
+      must(names.join() === 'Identifier,Reference,Title,Link', 'and every field of the first tab, filled or not: ' + names.join());
+      must(document.querySelector('.library-preview .cell-value.mono').textContent === 'LEG-004', "with the library's identifier");
+      document.querySelectorAll('.library-preview .tabs .tab')[1].click(); await wait(200);
+      const empty = [...document.querySelectorAll('.library-preview .cells:not([hidden]) .cell-value')].map((n) => n.textContent);
+      must(empty.join() === '–,–', 'an empty tab shows its fields with the dash: ' + empty.join());
+      must(!document.querySelector('.library-preview .notice'), 'and no notice is placed');
+      document.querySelector('.library-row[data-id="F-19"]').click(); await wait(200);
+      must(document.querySelector('.library-preview .library-note').textContent === 'Check the catalogue to pick everything in it.', 'a catalogue row says what checking it does');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -517,6 +540,7 @@ DRIVES = [
     ('V-DEM-021', 'Select several rows and act on the set', drive_021),
     ('V-DEM-022', 'Picking owns the tree', drive_022),
     ('V-DEM-023', 'One mode at a time', drive_023),
+    ('V-DEM-024', 'The library preview is the editor\'s view', drive_024),
 ]
 
 

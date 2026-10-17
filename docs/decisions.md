@@ -1059,6 +1059,14 @@ An entity carrying a reference is labelled by the reference as written, in squar
 
 > *A reference and a title in one face and one colour ran together, and a colour or a face cannot tell them apart once the label leaves the tree for a toast, a question, the graph or a view. Brackets keep the distinction in the string, and they are the tag and citation form the readers of standards and safety files know. The reference is free text, so a derived short form would guess at a form the user may not have used. Nested brackets at a lettered point are the price. Supersedes the label sentence of D-097. Settles #52.*
 
+### D-123 The library is one tree and its preview the editor's view
+
+`2026-10-17` `product`
+
+The library shows its catalogues as the open groups at the root of one tree, the picks one set across them and one import landing them all. The entity under the highlight is shown as the editor shows it, its tabs and every field of the type, filled or not, with the dash where a field holds nothing and no record of related entities, since the entity is not the project's.
+
+> *Catalogues as tabs kept the picks of one apart from the picks of another, and an import had to be repeated per catalogue. One tree is the shape the navigator already teaches, and one pick set makes the import across catalogues fall out of it. The preview had its own rendering, every tab of the type as a fold, which said more about the type than the entity and was a second form to keep in step with the editor. The editor's own view costs tabs that hold nothing for a catalogue entity and a wider floor for the preview, and buys one form, one mental model, and the certainty that what is seen is what lands. Amends D-086 on one catalogue at a time. Settles #51.*
+
 ---
 
 ## 3. Undecided

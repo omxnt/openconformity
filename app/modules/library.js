@@ -26,8 +26,6 @@ import { nodeOf, childrenOf, filedBeneath, addEntity, addFolder, relate } from '
 import { entityLabel, entityMatches } from './queries.js';
 import { TYPE_ICONS, FOLDER_ICON, CATALOGUE_ICON } from './icons.js';
 import { ENTITY_TYPES } from './metamodel.js';
-import { typeOf, groupAttributes } from './attributes.js';
-import { setValues, firstTabName, tableRows } from './fields.js';
 import { plural } from './text.js';
 import { APPLE } from './platform.js';
 import { loadProject } from './files.js';
@@ -204,53 +202,12 @@ export function importInto(project, library, picks, targetId = null) {
   return { ok: true, added, related };
 }
 
-/**
- * What an entity's attribute shows in the preview, or null for one that
- * holds nothing or shows nowhere: a set as its values, a table as its
- * row count, the rest as stored.
- * @param {import('./attributes.js').AttributeDefinition} definition
- * @param {unknown} value
- * @returns {string|null}
- */
-export function previewValue(definition, value) {
-  if (value === undefined || value === null || value === '') return null;
-  if (definition.kind === 'computed' || definition.kind === 'entities' || definition.kind === 'drawing') return null;
-  if (definition.kind === 'set') {
-    const chosen = setValues(definition, value);
-    return chosen.length > 0 ? chosen.join(', ') : null;
-  }
-  if (definition.kind === 'table') {
-    const rows = tableRows(definition, value).length;
-    return rows > 0 ? plural(rows, 'row') : null;
-  }
-  return String(value);
-}
-
-/**
- * What the preview shows of an entity, by the editor's tabs: a section
- * per tab, every tab of the type whether filled or not, with the
- * attributes that hold a value in the editor's order.
- * @param {import('./model.js').Entity} entity
- * @returns {Array<{ name: string, fields: Array<{ name: string, value: string }> }>}
- */
-export function previewSections(entity) {
-  const type = typeOf(entity.type) ?? { attributes: [], groups: [] };
-  const tabs = [{ name: firstTabName(entity.type), definitions: [...type.attributes, ...type.groups.filter((group) => !group.tab).flatMap(groupAttributes)] }];
-  for (const group of type.groups) if (group.tab) tabs.push({ name: group.name, definitions: groupAttributes(group) });
-  return tabs.map(({ name, definitions }) => ({
-    name,
-    fields: definitions
-      .map((definition) => ({ name: definition.name, value: previewValue(definition, entity.attributes?.[definition.key]) }))
-      .filter((field) => field.value !== null),
-  }));
-}
-
 /** The modifier that picks one entity as the platform names it, Option on Apple's keyboards and Alt elsewhere. */
 const ALT_KEY = APPLE ? 'Option' : 'Alt';
 
-/** The tree's floor, the navigator's own, and the preview's, one sentence of a clause across; the splitter's width; the tree's preset. */
+/** The tree's floor, the navigator's own, and the preview's, the widest tab row of the shipped library, which the supported viewport still gives with the tree and the navigator at their floors; the splitter's width; the tree's preset. A tab row wider than the preview scrolls. */
 const TREE_FLOOR = 300;
-const PREVIEW_FLOOR = 320;
+const PREVIEW_FLOOR = 392;
 const SPLITTER = 4;
 const TREE_PRESET = 400;
 
@@ -261,9 +218,9 @@ const TREE_PRESET = 400;
  * body carries, on the left under a Catalogues head, the library as one
  * tree with the catalogues open at its root and a checkbox per row, the
  * picks one set across them, and on the right under a
- * Preview head the entity under the highlight as a sheet of what its
- * attributes hold, by the editor's tabs as folds, the first open until
- * closed, the two halves split by a splitter kept for the session. The
+ * Preview head the entity under the highlight as the editor shows it,
+ * its tabs and every field, the two halves split by a splitter kept
+ * for the session. The
  * copies are filed where the navigator's selection stands. While open, the picker takes the whole column, the
  * relationship pane and its splitter hidden. Opened from the toolbar,
  * closed by its Cancel or Escape, never kept across a reload.
@@ -272,10 +229,11 @@ const TREE_PRESET = 400;
  * @param {HTMLElement} context.head  the editor pane's head
  * @param {HTMLElement} context.body  the editor pane's body
  * @param {Object} context.library  the shipped library in the project file's shape
+ * @param {(node: import('./model.js').Entity, into: HTMLElement) => void} context.showEntity  the editor's view of an entity, into a container
  * @param {(chosen: { library: import('./model.js').Model, picks: Set<string> }) => void} context.onImport
  * @param {() => void} context.onClose
  */
-export function createLibraryPane({ store, head, body, library, onImport, onClose }) {
+export function createLibraryPane({ store, head, body, library, showEntity, onImport, onClose }) {
   /** @type {{ ok: boolean, model?: import('./model.js').Model, statement?: string }|null} the library once read, on first use */
   let loaded = null;
   const libraryOf = () => {
@@ -296,12 +254,10 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
   let expanded = new Set();
   /** @type {string|null} the row the preview shows */
   let highlight = null;
-  /** @type {Set<string>} the preview's open sections */
-  let openSections = new Set();
-  /** Whether the highlight moved since the sections were last opened, so the first opens afresh. */
-  let sectionsFresh = true;
   let list = null;
   let preview = null;
+  let treeHead = null;
+  let sheetHead = null;
   let count = null;
   let shown = false;
 
@@ -322,8 +278,9 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
   }
 
   /**
-   * The head's filter, on demand: a magnifier opens a compact field,
-   * focused; Escape closes and clears, so does leaving it empty.
+   * The tree's filter in the Catalogues head, on demand: a magnifier
+   * opens a compact field, focused; Escape closes and clears, so does
+   * leaving it empty.
    */
   function searchControl() {
     return headSearch({
@@ -332,8 +289,8 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
       value: filter,
       onOpen: () => {
         searchOpen = true;
-        renderHead();
-        head.querySelector('.head-search')?.focus();
+        renderTreeHead();
+        treeHead.querySelector('.head-search')?.focus();
       },
       onChange: (value) => {
         filter = value;
@@ -342,10 +299,39 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
       onClose: () => {
         searchOpen = false;
         filter = '';
-        renderHead();
+        renderTreeHead();
         renderList();
       },
     });
+  }
+
+  function renderTreeHead() {
+    treeHead.textContent = '';
+    treeHead.append(el('span', { className: 'library-side-title', text: 'Catalogues' }), el('span', { className: 'toolbar-spacer' }), el('div', { className: 'pane-head-actions' }, [searchControl()]));
+  }
+
+  /**
+   * The preview's head as the editor's: the highlighted entity's type,
+   * identifier and label, a folder's or a catalogue's icon and name, and
+   * the word Preview while nothing is highlighted.
+   * @param {import('./model.js').Node|null} node
+   */
+  function renderSheetHead(node) {
+    sheetHead.textContent = '';
+    if (!node) {
+      sheetHead.appendChild(el('span', { className: 'library-side-title', text: 'Preview' }));
+      return;
+    }
+    const parts = [];
+    if (node.kind === 'folder') {
+      parts.push(icon(isCatalogue(node) ? CATALOGUE_ICON : FOLDER_ICON), el('span', { className: 'subhead-kind', text: isCatalogue(node) ? 'Catalogue' : 'Folder' }), el('span', { className: 'subhead-title', text: node.name }));
+    } else {
+      const type = ENTITY_TYPES[node.type];
+      parts.push(icon(TYPE_ICONS[node.type], type.pillar), el('span', { className: 'subhead-kind', text: type.name }), el('span', { className: 'mono designation', text: node.id }));
+      const label = entityLabel(node);
+      if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
+    }
+    sheetHead.appendChild(el('div', { className: 'pane-head-name' }, parts));
   }
 
   function renderCount() {
@@ -377,7 +363,7 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
       el('span', { className: 'head-title', text: 'Import from library' }),
       count,
       el('span', { className: 'toolbar-spacer' }),
-      el('div', { className: 'pane-head-actions' }, [searchControl(), cancel, importButton])
+      el('div', { className: 'pane-head-actions' }, [cancel, importButton])
     );
     renderCount();
   }
@@ -390,7 +376,6 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
   }
 
   function focusRow(id) {
-    if (id !== highlight) sectionsFresh = true;
     highlight = id;
     renderList();
     renderPreview();
@@ -493,42 +478,16 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
     preview.textContent = '';
     const held = libraryOf();
     const node = held.ok ? nodeOf(held.model, highlight) : null;
+    renderSheetHead(node);
     if (!node) {
       preview.appendChild(el('p', { className: 'library-note', text: 'Select a row to see its attributes.' }));
       return;
     }
     if (node.kind === 'folder') {
-      preview.append(
-        el('div', { className: 'library-preview-head' }, [icon(isCatalogue(node) ? CATALOGUE_ICON : FOLDER_ICON), el('span', { text: node.name })]),
-        el('p', { className: 'library-note', text: isCatalogue(node) ? 'Check the catalogue to pick everything in it.' : 'Check the folder to pick it and everything in it.' })
-      );
+      preview.appendChild(el('p', { className: 'library-note', text: isCatalogue(node) ? 'Check the catalogue to pick everything in it.' : 'Check the folder to pick it and everything in it.' }));
       return;
     }
-    const type = ENTITY_TYPES[node.type];
-    const parts = [icon(TYPE_ICONS[node.type], type.pillar), el('span', { className: 'subhead-kind', text: type.name }), el('span', { className: 'mono designation', text: node.id })];
-    const label = entityLabel(node);
-    if (label) parts.push(el('span', { className: 'subhead-title', text: label }));
-    preview.appendChild(el('div', { className: 'library-preview-head' }, parts));
-    const sections = previewSections(node);
-    if (sectionsFresh) {
-      openSections = new Set([sections[0].name]);
-      sectionsFresh = false;
-    }
-    for (const section of sections) {
-      const open = openSections.has(section.name);
-      const fold = el('button', { className: 'library-fold', attributes: { type: 'button', 'aria-expanded': String(open) } }, [
-        el('span', { className: 'library-fold-chevron' }, [icon(open ? 'i-chevron-down' : 'i-chevron-right')]),
-        el('span', { text: section.name }),
-      ]);
-      fold.addEventListener('click', () => {
-        if (open) openSections.delete(section.name);
-        else openSections.add(section.name);
-        renderPreview();
-      });
-      const panel = el('div', { className: 'library-section' }, section.fields.length === 0 ? [el('p', { className: 'library-note', text: 'Nothing is filled in.' })] : section.fields.map((field) => el('div', { className: 'field' }, [el('span', { className: 'field-label', text: field.name }), el('div', { className: 'field-static', text: field.value })])));
-      panel.hidden = !open;
-      preview.append(fold, panel);
-    }
+    showEntity(node, preview);
   }
 
   /** Everything the picker holds for one opening, dropped when it closes so it opens fresh. */
@@ -539,7 +498,6 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
     highlight = null;
     filter = '';
     searchOpen = false;
-    sectionsFresh = true;
   }
 
   function render() {
@@ -554,9 +512,12 @@ export function createLibraryPane({ store, head, body, library, onImport, onClos
     body.textContent = '';
     list = el('div', { className: 'library-list', attributes: { role: 'tree', 'aria-label': 'The library' } });
     preview = el('div', { className: 'library-preview' });
-    const tree = el('div', { className: 'library-side library-tree' }, [el('div', { className: 'library-side-head', text: 'Catalogues' }), list]);
+    treeHead = el('div', { className: 'library-side-head' });
+    renderTreeHead();
+    const tree = el('div', { className: 'library-side library-tree' }, [treeHead, list]);
     if (treeWidth !== null) tree.style.flexBasis = `${treeWidth}px`;
-    const sheet = el('div', { className: 'library-side' }, [el('div', { className: 'library-side-head', text: 'Preview' }), preview]);
+    sheetHead = el('div', { className: 'library-side-head' });
+    const sheet = el('div', { className: 'library-side' }, [sheetHead, preview]);
     const divider = el('div', {
       className: 'splitter splitter-vertical',
       attributes: { role: 'separator', 'aria-orientation': 'vertical', 'aria-label': 'Resize the library', tabindex: '0' },

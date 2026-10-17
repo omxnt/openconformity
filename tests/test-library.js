@@ -6,7 +6,7 @@
  */
 
 import './shim.js';
-import { libraryRows, checkState, togglePick, importPlan, importInto, isCatalogue, previewValue, previewSections } from '../app/modules/library.js';
+import { libraryRows, checkState, togglePick, importPlan, importInto, isCatalogue } from '../app/modules/library.js';
 import { ACTS, addressOf } from '../app/library/index.js';
 import { LIBRARY } from '../app/library/data.js';
 import { loadProject } from '../app/modules/files.js';
@@ -257,25 +257,6 @@ equal([...library.model.relationships.values()].filter((held) => held.source ===
   equal(checkState(library.model, picks, PHASES), 'checked', 'every phase picked one by one shows the catalogue checked');
   togglePick(library.model, picks, PHASES);
   equal(picks.size, 0, 'and unchecking the catalogue then clears them all');
-}
-
-// --- The preview (no requirement) ------------------------------------------------------------------
-
-{
-  equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, 'Crushing'), 'Crushing', 'a text shows as stored');
-  equal(previewValue({ key: 'title', name: 'Title', kind: 'text' }, ''), null, 'an empty one shows nowhere');
-  equal(previewValue({ key: 'technologies', name: 'Technologies', kind: 'set', values: ['Mechanical', 'Hydraulic', 'Electrical'] }, 'Electrical;Mechanical'), 'Mechanical, Electrical', 'a set as its values in the order defined');
-  equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [{ key: 'date' }, { key: 'by' }] }, '2026-01-01\tAnn\n2026-02-01\tBo'), '2 rows', 'a table as its row count, read from the stored text');
-  equal(previewValue({ key: 'runs', name: 'Runs', kind: 'table', columns: [{ key: 'date' }] }, '\n'), null, 'a stored table without a row shows nowhere');
-  equal(previewValue({ key: 'rating', name: 'Rating', kind: 'computed' }, 'High'), null, 'a computed value shows nowhere');
-
-  const sections = previewSections(nodeOf(library.model, CLAUSE));
-  deepEqual(sections.map((section) => [section.name, section.fields.length > 0]), [['Requirement', true], ['Guidance', false], ['Applicability', false], ['Notes', false]], "a clause shows every tab of its type as a section, the first named as the editor's first tab, the empty ones empty");
-  deepEqual(sections[0].fields.map((field) => field.name).slice(0, 3), ['Reference', 'Title', 'Requirement'], "with its attributes in the editor's order");
-  const catalogue = createModel();
-  const hazard = addEntity(catalogue, 'HAZ', { attributes: { title: 'Crushing', eliminated: 'Yes' } }).entity;
-  deepEqual(previewSections(hazard).slice(0, 2).map((section) => [section.name, section.fields.map((field) => field.value)]), [['Hazard', ['Crushing']], ['Elimination', ['Yes']]], 'a hazard eliminated shows its Elimination tab as a second section');
-  deepEqual(previewSections(addEntity(catalogue, 'HAZ').entity).map((section) => section.fields.length), previewSections(hazard).map(() => 0), 'an entity holding nothing shows the same sections, each empty');
 }
 
 // --- V-TST-178 The acts the library ships, as About names them (C-PRJ-005, F-PER-012) ---

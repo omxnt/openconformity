@@ -1348,7 +1348,11 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .library-split { flex: 1; min-height: 0; display: flex; border-bottom: 1px solid var(--border-subtle); }
 .library-side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .library-side.library-tree { flex: 0 0 40%; }
-.library-side-head { display: flex; align-items: center; flex: none; height: 32px; padding: 0 16px; font-weight: 600; background: var(--layer); border-bottom: 1px solid var(--border-subtle); }  /* $spacing-07, $spacing-05, $heading-compact-01 */
+.library-side-head { display: flex; align-items: center; gap: 8px; flex: none; height: 32px; padding: 0 16px; background: var(--layer); border-bottom: 1px solid var(--border-subtle); }  /* $spacing-07, $spacing-05, $heading-compact-01 */
+.library-side-head .library-side-title { font-weight: 600; }  /* $heading-compact-01 */
+.library-side-head .pane-head-name { min-width: 0; font-weight: 400; }
+.library-side-head .designation { flex: none; white-space: nowrap; }
+.library-side-head .pane-head-actions { margin-right: -16px; }  /* the magnifier flush with the edge, as in a pane head */
 .library-list { flex: 1; min-height: 0; overflow: auto; padding: 8px 0; }  /* $spacing-03 */
 .library-preview { flex: 1; min-height: 0; overflow: auto; padding-bottom: 16px; }  /* $spacing-05 */
 /* The select-all box in a picker's head, with the count beside it: what is shown picked or cleared as one. */
@@ -1362,30 +1366,8 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .library-row .pick { position: relative; display: flex; align-items: center; cursor: pointer; }
 .library-row input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .library-row .row-title { overflow: hidden; text-overflow: ellipsis; }
-.library-preview-head { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 8px 16px 0; }  /* $spacing-03, $spacing-05, $spacing-07 */
-.library-preview .field-static { align-items: flex-start; white-space: pre-wrap; }
-.library-fold {
-  display: flex;
-  align-items: center;
-  gap: 8px;                 /* $spacing-03 */
-  width: 100%;
-  height: 32px;             /* Carbon accordion sm */
-  margin-top: 8px;          /* $spacing-03 */
-  padding: 0 16px;          /* $spacing-05 */
-  font: inherit;
-  font-weight: 600;         /* $heading-compact-01 */
-  color: var(--text);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--border-subtle);
-  cursor: pointer;
-  text-align: left;
-}
-.library-fold:hover { background: var(--hover); }
-.library-fold:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-.library-fold-chevron { display: inline-flex; width: 16px; height: 16px; }
-.library-fold-chevron .icon { width: 16px; height: 16px; fill: currentColor; }
-.library-section[hidden] { display: none; }
+.library-preview .cells { grid-template-columns: minmax(0, 1fr); }  /* one column, the preview being narrow */
+.library-preview .tabs { overflow-x: auto; scrollbar-width: none; }  /* a tab row wider than the preview scrolls */
 .library-note { margin: 0; padding: 16px; color: var(--text-second); }  /* $spacing-05 */
 .library-into { display: flex; justify-content: space-between; gap: 16px; margin: 8px 16px; color: var(--text-second); }  /* $spacing-03, $spacing-05 */
 .library-hint { font-size: 12px; letter-spacing: 0.32px; color: var(--text-helper); }  /* $helper-text-01 */

@@ -108,6 +108,7 @@ createLibraryPane({
   head: document.getElementById('editor-head'),
   body: document.getElementById('editor-body'),
   library: LIBRARY,
+  showEntity: (node, into) => editor.showEntity(node, into),
   onImport: (chosen) => flows.importPicks(chosen),
   onClose: () => flows.closeLibrary(),
 });

@@ -472,6 +472,7 @@ export function createEditor({
    * @param {boolean} editing
    */
   function mount(id, code, stored, editing, options = {}) {
+    const into = options.into ?? body;
     const type = typeOf(code) ?? { attributes: [], groups: [] };
     const offered = options.bulk ? (definition) => definition.kind !== 'table' && definition.kind !== 'drawing' : () => true;
     panelOfGroup = new Map();
@@ -495,8 +496,8 @@ export function createEditor({
       for (const name of namesIn(group)) panelOfGroup.set(name, grid);
       panels.push({ name: group.name, grid });
     }
-    if (panels.length > 1) body.appendChild(tabBar(code, panels));
-    body.appendChild(el('div', { className: 'form' }, panels.map((panel) => panel.grid)));
+    if (panels.length > 1) into.appendChild(tabBar(code, panels));
+    into.appendChild(el('div', { className: 'form' }, panels.map((panel) => panel.grid)));
     placeNotices(values);
     if (editing) refreshers.push(() => placeNotices(fieldValues()));
   }
@@ -778,6 +779,19 @@ export function createEditor({
     return true;
   }
 
+  /**
+   * An entity shown as the view mode shows it, tabs and every field,
+   * into a container of the caller's, for the library's preview. The
+   * entity is not the project's, so a record of related entities shows
+   * the dash and no notice is placed.
+   * @param {import('./model.js').Entity} node
+   * @param {HTMLElement} into
+   */
+  function showEntity(node, into) {
+    current = null;
+    mount(node.id, node.type, node.attributes, false, { into });
+  }
+
   function renderEdit(node) {
     current = node;
     renderHead(node, saveCancel(save));
@@ -922,5 +936,5 @@ export function createEditor({
   /** Save the open edit as its Save button would, for the keys that mean save. */
   const submit = () => head.querySelector('.form-button.button-primary')?.click();
 
-  return { render, beginEdit, beginBulkEdit, endEdit, hasUnconfirmedEdit, submit, save, editing: () => mode === 'edit' };
+  return { render, beginEdit, beginBulkEdit, endEdit, hasUnconfirmedEdit, submit, save, showEntity, editing: () => mode === 'edit' };
 }
