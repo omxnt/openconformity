@@ -283,7 +283,7 @@ function enabledIds(actions) {
   deepEqual(actions.filter((action) => action.group === 'clipboard').map((action) => action.id), ['cut', 'copy', 'paste'], 'cut, copy and paste form the clipboard group, so a divider parts them from the ordering');
   const groups = [];
   for (const action of actions.filter((offered) => offered.context)) if (groups.at(-1) !== action.group) groups.push(action.group);
-  deepEqual(groups, ['edit', 'create', 'arrange', 'clipboard', 'delete'], 'the context menu runs the groups in order, the clipboard after the ordering, the import living in the toolbar alone');
+  deepEqual(groups, ['edit', 'create', 'library', 'arrange', 'clipboard', 'delete'], 'the context menu runs the groups in order, the import between dividers and the clipboard after the ordering');
   store.commit((model) => addEntity(model, 'ELM'));
   store.commit((model) => addEntity(model, 'HAZ'));
   store.select('ELM-001');
@@ -343,6 +343,18 @@ function enabledIds(actions) {
   store.beginPicking('ELM-001');
   store.setEditing(true);
   equal(store.mode(), 'picking', 'where two flags stand, the one over the other names the mode');
+}
+
+// --- V-TST-204 The context menu is the Edit menu less the history (G-SYS-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const actions = createActions({ store, flows: {} });
+  const modelGroups = ['edit', 'create', 'library', 'arrange', 'clipboard', 'delete', 'history'];
+  const editMenu = actions.filter((action) => modelGroups.includes(action.group) && action.menubar !== false).map((action) => action.id);
+  const contextMenu = actions.filter((action) => action.context).map((action) => action.id);
+  deepEqual(contextMenu, editMenu.filter((id) => !['undo', 'redo'].includes(id)), 'the context menu holds the Edit menu\'s entries less undo and redo, in the same order, so the dividers fall alike');
+  ok(contextMenu.includes('import') && editMenu.includes('select-below'), 'the import files under the row clicked and select all below reaches the menu bar');
 }
 
 summary('test-actions');

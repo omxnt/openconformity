@@ -260,21 +260,23 @@ export function createNavigator({
   async function onContextMenu(id, at) {
     if (store.mode() !== null) return;
     if (!(id !== null && chosen.has(id)) && !(await onSelect(id))) return;
-    openMenu({
-      overlay,
-      label: 'Actions',
-      at,
-      items: actions
-        .filter((action) => action.context)
-        .map((action) => ({
-          label: action.describe ? action.describe() : action.label,
-          icon: action.icon,
-          hint: action.hint,
-          danger: action.danger,
-          disabled: !action.enabled(),
-          onPick: () => action.run({ at }),
-        })),
-    });
+    // The same groups and dividers as the Edit menu, since both draw from
+    // the one list in its order.
+    const items = [];
+    let lastGroup = null;
+    for (const action of actions.filter((offered) => offered.context)) {
+      if (lastGroup !== null && action.group !== lastGroup) items.push({ separator: true });
+      lastGroup = action.group;
+      items.push({
+        label: action.describe ? action.describe() : action.label,
+        icon: action.icon,
+        hint: action.hint,
+        danger: action.danger,
+        disabled: !action.enabled(),
+        onPick: () => action.run({ at }),
+      });
+    }
+    openMenu({ overlay, label: 'Actions', at, items });
   }
 
   /** The filter as typed lives in the store, one truth for the tree, the drag guards, and the move enablements. */

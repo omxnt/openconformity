@@ -537,22 +537,22 @@ body {
 .search-input::placeholder { color: var(--text-helper); }
 .search-input::-webkit-search-cancel-button { display: none; }
 .search-input:focus { outline: 2px solid var(--focus); outline-offset: -2px; }
+/* The filter's clear, a bare icon inside the field as Carbon's search clears, no box of its own. */
 .search-clear {
   position: absolute;
-  right: 0;
+  right: 8px;               /* $spacing-03 */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;              /* $spacing-07 */
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border: none;
   background: none;
-  color: var(--text);
+  color: var(--text-second);
   cursor: pointer;
-  transition: background-color var(--motion-fast) var(--motion-standard);
 }
-.search-clear:hover { background: var(--hover); }
-.search-clear:active { background: var(--active); }
+.search-clear:hover, .search-clear:active { color: var(--text); }
+.search-clear .icon { width: 16px; height: 16px; }
 .search-clear[hidden] { display: none; }
 
 /* ---------- Tree ---------- */
@@ -1323,6 +1323,10 @@ button.tag-trigger:focus-visible { outline: 2px solid var(--focus); outline-offs
 .rel-fold:hover { background: var(--hover); color: var(--text); }
 .rel-fold-still { cursor: default; }
 .rel-fold-still:hover { background: none; color: var(--text-second); }
+/* The head filter's clear, a bare icon inside the field as Carbon's search clears, sized to sit inside the focus ring. */
+.head-search-field { position: relative; display: inline-flex; align-items: center; }
+.head-search-clear { right: 6px; }
+.head-search-field .head-search { padding-right: 28px; }
 .head-search {
   align-self: center;
   width: 176px;

@@ -292,6 +292,15 @@ def drive_015(page):
       must(disabled.some((d) => d.startsWith('Filter the relationships:true')), 'the filter is disabled');
       must(disabled.includes('Collapse the pane:false'), 'and the collapse button works');
       must(byText('.empty-state-title', 'Nothing selected'), 'over the empty state');
+      const entity = await firstEntity();
+      entity.click(); await wait(300);
+      [...document.querySelectorAll('#pane-relationships .pane-head button')].find((b) => (b.getAttribute('aria-label') || '').startsWith('Filter the relationships')).click(); await wait(300);
+      const field = document.querySelector('#pane-relationships .head-search');
+      must(field && document.querySelector('#pane-relationships .head-search-clear')?.hidden === true, 'the filter opens with its clear button hidden while empty');
+      field.value = 'x'; field.dispatchEvent(new Event('input', { bubbles: true })); await wait(200);
+      must(document.querySelector('#pane-relationships .head-search-clear')?.hidden === false, 'and the button shows once it holds text');
+      document.querySelector('#pane-relationships .head-search-clear').click(); await wait(300);
+      must(!document.querySelector('#pane-relationships .head-search'), 'and clears and closes the filter');
     """))
 
 

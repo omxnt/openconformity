@@ -63,6 +63,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-198 | Headless | [test-actions.js](../tests/test-actions.js) | The actions over a selection of several |
 | V-TST-199 | Headless | [test-actions.js](../tests/test-actions.js) | The clipboard is a group of its own, and picking stands the model actions down |
 | V-TST-201 | Headless | [test-actions.js](../tests/test-actions.js) | One mode at a time |
+| V-TST-204 | Headless | [test-actions.js](../tests/test-actions.js) | The context menu is the Edit menu less the history |
 | V-TST-005 | Headless | [test-attributes.js](../tests/test-attributes.js) | Parse the document |
 | V-TST-006 | Headless | [test-attributes.js](../tests/test-attributes.js) | The project |
 | V-TST-007 | Headless | [test-attributes.js](../tests/test-attributes.js) | The shared help |
@@ -304,7 +305,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-012 | Drive | The software in a browser | Walk every row of `docs/shortcuts.md` with the pointer unused |
 | V-DEM-013 | Drive | The software in a browser | The minimum viewport. Work at 1000 by 356 pixels and find every pane usable |
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
-| V-DEM-015 | Drive | [drives.py](../tests/drives.py) | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity |
+| V-DEM-015 | Drive | [drives.py](../tests/drives.py) | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity. Select an entity, open the filter, and find its clear button once it holds text, clearing and closing it |
 | V-DEM-016 | Drive | [drives.py](../tests/drives.py) | Collapse a folder, then select one of its entities in the graph, and again from the risk assessment view. Each time the folder opens, the row is highlighted and the tree scrolls it into view |
 | V-DEM-017 | Drive | [drives.py](../tests/drives.py) | Edit an entity and type a value. Save to file stands down in the File menu, Escape from the tree asks to discard, and once the edit is left Save to file is offered again |
 | V-DEM-018 | Drive | The software in a browser | Drag a column of the relationship list and double click its handle, and find the column at its default width. With unsaved changes, press the shell's unsaved button and find the save question. On a Mac, in the library picker and in the tree while picking, press Alt Space on an entity and find it picked alone |
@@ -388,7 +389,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | G-SYS-001 | Design system | V-ANA-021 | Manual |
 | G-SYS-002 | Prose typeface | V-INS-024 | Tested |
 | G-SYS-003 | Data typeface | V-INS-024 | Tested |
-| G-SYS-004 | Iconography | V-TST-068, V-INS-017 | Tested |
+| G-SYS-004 | Iconography | V-TST-204, V-TST-068, V-INS-017 | Tested |
 | G-SYS-005 | Pane layout | V-INS-019, V-DEM-001 | Partly |
 
 ### 3.3 Functional

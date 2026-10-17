@@ -25,9 +25,10 @@ export function headIcon(label, iconId, onPick) {
 
 /**
  * The head's filter, on demand: closed, a magnifier that opens it; open,
- * a compact search field holding the filter. Escape closes it, and so
- * does leaving it empty. The pane renders the field again on each state
- * and focuses it once open.
+ * a compact search field holding the filter with a clear button while it
+ * holds text, as the tree's filter has. Escape and the button close it,
+ * and so does leaving it empty. The pane renders the field again on each
+ * state and focuses it once open.
  * @param {Object} spec
  * @param {boolean} spec.open
  * @param {string} spec.label  what the field filters, its accessible name
@@ -50,10 +51,17 @@ export function headSearch({ open, label, value, onOpen, onChange, onClose }) {
     event.stopPropagation();
     onClose();
   });
+  const clear = el('button', { className: 'search-clear head-search-clear', attributes: { type: 'button', 'aria-label': 'Clear the filter' } }, [icon('i-close')]);
+  clear.hidden = value === '';
+  clear.addEventListener('mousedown', (event) => event.preventDefault());
+  clear.addEventListener('click', onClose);
+  input.addEventListener('input', () => {
+    clear.hidden = input.value === '';
+  });
   input.addEventListener('blur', () => {
     if (input.value.trim() === '') onClose();
   });
-  return input;
+  return el('span', { className: 'head-search-field' }, [input, clear]);
 }
 
 /**
