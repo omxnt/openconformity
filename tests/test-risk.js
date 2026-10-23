@@ -1,5 +1,5 @@
 /**
- * The risk estimation methods against chapter 6 of the working draft:
+ * The risk estimation methods against chapter 7 of the attributes document:
  * every cell of every table, read through the scenario's own choice
  * values, so the code and the document cannot drift apart. Run from
  * this directory.
@@ -17,10 +17,10 @@ const SCORING_METHOD = 'Numerical scoring (ISO/TR 14121-2:2012, 6.4.2)';
 // --- V-TST-123 The methods and their source (C-PRJ-005, F-MOD-003) -----------
 
 const document = readFile('../specs/attributes.md');
-const chapter = document.slice(document.indexOf('## 6. Risk estimation'), document.indexOf('## 7. References'));
-ok(chapter.length > 0, 'the document carries the risk estimation chapter, before the references');
+const chapter = document.slice(document.indexOf('## 7. Risk estimation'), document.indexOf('## 8. Integrity levels'));
+ok(chapter.length > 0, 'the document carries the risk estimation chapter, before the integrity levels');
 
-/** The tables of one section of the chapter, each its header and its rows. */
+/** The tables of one section of the chapter, each its header and its rows, the parameters table first. */
 function tablesOf(title) {
   const start = chapter.indexOf(`### ${title}`);
   ok(start >= 0, `the chapter has a section ${title}`);
@@ -57,12 +57,12 @@ deepEqual(
   'the methods are those the project offers its scenarios, in order'
 );
 deepEqual(METHODS, [MATRIX_METHOD, GRAPH_METHOD, SCORING_METHOD], "three methods ship, the report's examples, each naming the report and its clause");
-ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hybrid tool is not transcribed");
+ok(!chapter.includes('Hybrid') && !chapter.includes('### 7.4'), "the report's hybrid tool is not transcribed");
 
 // --- V-TST-124 Risk matrix, 6.2.2 Table 1 (F-MOD-003) ------------------------
 
 {
-  const [table] = tablesOf('6.1 Risk matrix');
+  const [, table] = tablesOf('7.1 Risk matrix');
   const severities = table.header.slice(1);
   deepEqual(severities, MATRIX_SEVERITY, 'the severities across, as Table 1 has them');
   deepEqual(table.rows.map((row) => row[0]), MATRIX_PROBABILITY, 'the probabilities down, as Table 1 has them');
@@ -85,7 +85,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
 // --- V-TST-125 Risk graph, 6.3.2 Figures 3 and 4 (F-MOD-003) -----------------
 
 {
-  const [table, bands] = tablesOf('6.2 Risk graph');
+  const [, table, bands] = tablesOf('7.2 Risk graph');
   const [s, f, o, a] = rating(GRAPH_METHOD);
   deepEqual([s.values, f.values, o.values, a.values], [['S1', 'S2'], ['F1', 'F2'], ['O1', 'O2', 'O3'], ['A1', 'A2']], "the scenario's own values are the graph's codes, and nothing more");
   const bandOf = (index) => bands.rows.find(([indices]) => indices.split(';').map((held) => held.trim()).includes(String(index)))[1];
@@ -111,7 +111,7 @@ ok(!chapter.includes('Hybrid') && !chapter.includes('### 6.4'), "the report's hy
 // --- V-TST-126 Numerical scoring, 6.4.2 Table 2 (F-MOD-003) ------------------
 
 {
-  const [severityClasses, probabilityClasses, table] = tablesOf('6.3 Numerical scoring');
+  const [, severityClasses, probabilityClasses, table] = tablesOf('7.3 Numerical scoring');
   const classesOf = (held) => held.rows.map(([range, name]) => [Number(range.split(' ')[0]), name]);
   deepEqual(SCORING_CLASSES.severity, classesOf(severityClasses), 'the severity classes are as the document has them, highest first');
   deepEqual(SCORING_CLASSES.probability, classesOf(probabilityClasses), 'and the probability classes');
