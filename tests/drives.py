@@ -574,6 +574,22 @@ def drive_025(page):
     """))
 
 
+def drive_026(page):
+    page.eval(script("""
+      await loadExample();
+      const entity = await firstEntity();
+      entity.click(); await wait(300);
+      const id = entity.dataset.id;
+      const parent = [...document.querySelectorAll('.tree-row')].find((r) => r.getAttribute('aria-level') === '2' && r.getAttribute('aria-expanded') === 'true');
+      parent.querySelector('[class*="twist"]').click(); await wait(300);
+      must(!row(id), 'the selected row is out of view under its closed folder');
+      await menu('Edit', 'Delete entity'); await wait(400);
+      must(dialogTitle() !== null && row(id) && row(id).classList.contains('selected'), 'Delete opens the folder and the row stands selected in view under the question: ' + dialogTitle());
+      key(document.body, { key: 'Escape' }); await wait(300);
+      must(dialogTitle() === null && row(id), 'cancelled, with the row still in view');
+    """))
+
+
 DRIVES = [
     ('V-DEM-001', 'Pane headers are landmarks', drive_001),
     ('V-DEM-002', 'The minimum viewport notice', drive_002),
@@ -590,6 +606,7 @@ DRIVES = [
     ('V-DEM-023', 'One mode at a time', drive_023),
     ('V-DEM-024', 'The library preview is the editor\'s view', drive_024),
     ('V-DEM-025', 'The navigator folds to its toolbar', drive_025),
+    ('V-DEM-026', 'An action reveals the selection it acts on', drive_026),
 ]
 
 

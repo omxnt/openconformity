@@ -866,6 +866,20 @@ export function createStore({ storage, session = null, retention = memoryRetenti
       notify();
     },
 
+    /**
+     * Open the folders above every selected row, and the project row,
+     * so an action on the selection acts on rows in view. Session state
+     * like the expansion itself.
+     */
+    revealSelection() {
+      if (!projectOpen || selectedSet.size === 0) return;
+      const before = [projectCollapsed, expanded.size];
+      for (const id of selectedSet) reveal(id);
+      if (before[0] === projectCollapsed && before[1] === expanded.size) return;
+      persist();
+      notify();
+    },
+
     /** Whether the project row stands open over the tree. Open by default. */
     projectExpanded: () => !projectCollapsed,
 

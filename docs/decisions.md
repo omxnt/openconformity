@@ -1099,6 +1099,14 @@ Every entity type carries a Diagram tab before its Notes tab, one drawing held a
 
 > *Five types had the tab and thirteen did not, by a guess at which things get drawn. A hazard sketched where it arises, a task as a flow, a requirement's context or a standard's clause tree are as plausible as the five, and the user is the one who knows. One rule, every entity can carry a diagram and notes, is simpler to state and to remember than a list. The attribute key is the one the five used, so the schema stays at version 1 and every file opens as it was. The project stays without, its first tab being the file's own record rather than a thing in the model. Settles #90.*
 
+### D-128 An action reveals what it acts on
+
+`2026-10-23` `product`
+
+An action on the selection opens the folders above every selected row, and the project row, before it asks or changes anything. Delete, Edit, Cut, Copy, Paste, Move up, Move down, Add relationship and Select subtree all do, from the menu, the context menu, the toolbar and the keys alike.
+
+> *A selected row under a closed folder stays selected and out of view, and an action on it then ran blind, a question about rows nobody could see, a move among siblings out of sight. The rule the library strip follows, open the pane before the action, is the same rule one level down. Settles #92.*
+
 ---
 
 ## 3. Undecided

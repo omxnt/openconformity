@@ -187,6 +187,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   function editSelection() {
     if (editor.editing()) return;
+    store.revealSelection();
     const ids = store.selected();
     if (ids.length > 1) {
       const code = bulkType(ids);
@@ -451,6 +452,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** Mark the selection as cut, or forget the mark when the selection is the cut row. */
   function cutSelection() {
+    store.revealSelection();
     const ids = store.selected();
     if (ids.length === 0) return;
     store.setCut(ids.join() === store.cut().join() ? [] : ids);
@@ -458,6 +460,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** Mark the selection as copied, held for a paste. */
   function copySelection() {
+    store.revealSelection();
     const ids = store.selected();
     if (ids.length > 0) store.setCopied(ids);
   }
@@ -484,6 +487,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * forgotten. One step either way. A refusal is told and keeps the mark.
    */
   function pasteHeld() {
+    store.revealSelection();
     const target = store.selection();
     const marked = new Set(store.copied());
     if (marked.size > 0) {
@@ -558,6 +562,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    */
   function selectBelow(id) {
     if (!store.hasProject()) return;
+    store.revealSelection();
     const model = store.model();
     const beneath = filedBeneath(model, id).map((node) => node.id);
     if (id === null && beneath.length === 0) return;
@@ -569,6 +574,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** Change places with the sibling above. */
   function moveUp() {
+    store.revealSelection();
     const id = store.selection();
     const node = nodeOf(store.model(), id);
     if (!node) return;
@@ -580,6 +586,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
 
   /** Change places with the sibling below. */
   function moveDown() {
+    store.revealSelection();
     const id = store.selection();
     const node = nodeOf(store.model(), id);
     if (!node) return;
@@ -640,6 +647,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
    * gets the discard question instead.
    */
   async function deleteSelection() {
+    store.revealSelection();
     const ids = store.selected();
     if (ids.length > 1) {
       const question = deletionQuestion(store.model(), ids);
@@ -793,6 +801,7 @@ export function createFlows({ store, overlay, dialogs, editor, fileInput, saveFi
     if (!(await confirmDiscard())) return;
     endEditSession();
     store.setNavigatorCollapsed(false);
+    store.revealSelection();
     store.beginPicking(subjectId);
   }
 

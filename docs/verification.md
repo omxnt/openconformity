@@ -119,6 +119,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-TST-202 | Headless | [test-flows.js](../tests/test-flows.js) | A picker asked for over a draft goes through the question |
 | V-TST-203 | Headless | [test-flows.js](../tests/test-flows.js) | The tree under a mode does only what the mode asks |
 | V-TST-206 | Headless | [test-flows.js](../tests/test-flows.js) | Undo and redo stand down under a mode |
+| V-TST-211 | Headless | [test-flows.js](../tests/test-flows.js) | An action reveals the selection it acts on |
 | V-TST-210 | Headless | [test-flows.js](../tests/test-flows.js) | A paste refused partway leaves every row where it was |
 | V-TST-048 | Headless | [test-flows.js](../tests/test-flows.js) | A file holding hidden or unknown content is cleared and stated on opening |
 | V-TST-049 | Headless | [test-flows.js](../tests/test-flows.js) | A file the browser cannot read is told, not opened |
@@ -322,6 +323,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-023 | Drive | [drives.py](../tests/drives.py) | Open each mode in turn, an edit, a picking, the library and a view, and find the Edit menu's changers and the views greyed under each, Add relationship and Import among them. Leave each by its own button or Escape |
 | V-DEM-024 | Drive | [drives.py](../tests/drives.py) | Open the library and highlight an act, then a catalogue. The preview shows the act as the editor shows it, its tabs and every field of the type, an empty tab with its dashes and no notice, and a catalogue row says what checking it does |
 | V-DEM-025 | Drive | [drives.py](../tests/drives.py) | Click the chevron at the end of the navigator toolbar and find the pane folded to a strip one button wide, the chevron at the top, the tree gone and the column wider. Reload and find it still folded. Press Cmd F on a Mac or Ctrl F elsewhere and find the pane open with the filter focused. Fold it, press the magnifier at the foot of the strip and find the pane open on the filter. Fold it, press New folder in the strip and find the pane open with the question up. Open it again by the chevron. Select an entity, fold the pane, press Add relationship and find the pane open with the candidates pickable |
+| V-DEM-026 | Drive | [drives.py](../tests/drives.py) | Select a row inside a folder, collapse the folder, and press Delete. The folder opens and the row stands selected in view under the question. Cancel and find it still in view |
 
 ### 2.4 Analyses
 
@@ -413,7 +415,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-SES-005 | Persistence failure | V-TST-129, V-TST-134, V-TST-143 | Tested |
 | F-SES-006 | Storage nearly full | V-TST-145 | Tested |
 | F-SES-007 | Unconfirmed edit on leaving | V-TST-206, V-TST-129 | Tested |
-| F-WSP-001 | Model tree | V-TST-004, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-TST-208, V-DEM-016, V-DEM-025 | Partly |
+| F-WSP-001 | Model tree | V-TST-004, V-TST-211, V-TST-086, V-TST-090, V-TST-091, V-TST-092, V-TST-093, V-TST-094, V-INS-008, V-TST-108, V-TST-179, V-TST-208, V-DEM-016, V-DEM-025, V-DEM-026 | Partly |
 | F-WSP-002 | Entity attributes | V-DEM-006 | Manual |
 | F-WSP-003 | Entity relationships | V-TST-115, V-TST-117, V-TST-118, V-TST-119, V-TST-120, V-TST-121, V-DEM-015, V-DEM-016, V-DEM-018 | Partly |
 | F-WSP-004 | Free filing | V-TST-045, V-TST-058, V-TST-084, V-TST-085, V-TST-086, V-TST-087, V-INS-008, V-TST-105 | Tested |
@@ -429,7 +431,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | F-MOD-002 | Relationship creation | V-TST-199, V-TST-201, V-TST-010, V-TST-011, V-TST-031, V-TST-044, V-TST-200, V-TST-202, V-TST-078, V-TST-088, V-INS-004, V-TST-101, V-TST-102, V-TST-103, V-TST-104, V-TST-113, V-TST-114, V-TST-116, V-TST-156, V-DEM-022, V-DEM-023, V-DEM-025 | Partly |
 | F-MOD-003 | Attribute definition | V-TST-005, V-TST-006, V-TST-007, V-TST-008, V-TST-009, V-TST-026, V-TST-191, V-TST-031, V-TST-123, V-TST-124, V-TST-125, V-TST-126, V-TST-172 | Tested |
 | F-MOD-004 | Edit confirmation | V-TST-201, V-TST-024, V-TST-041, V-TST-042, V-TST-046, V-TST-047, V-TST-195, V-TST-196, V-TST-202, V-TST-203, V-TST-206, V-TST-210, V-TST-181, V-TST-053, V-TST-082, V-TST-209, V-DEM-017, V-DEM-023 | Partly |
-| F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-052, V-TST-088 | Tested |
+| F-MOD-005 | Entity deletion | V-TST-002, V-TST-013, V-TST-197, V-TST-211, V-TST-052, V-TST-088, V-DEM-026 | Partly |
 | F-MOD-006 | Composition deletion | V-TST-013, V-TST-014 | Tested |
 | F-MOD-007 | Cascade confirmation | V-TST-012, V-TST-052, V-TST-095, V-INS-004, V-TST-107 | Tested |
 | F-MOD-008 | Undo action | V-TST-002, V-TST-043, V-TST-062, V-TST-063, V-TST-064, V-TST-065, V-TST-066, V-TST-067, V-TST-131 | Tested |
@@ -485,7 +487,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | N-ACC-001 | Standard conformance | V-INS-019, V-INS-022, V-INS-023, V-ANA-028, V-DEM-015 | Partly |
 | N-ACC-002 | Colour independence | V-TST-068, V-ANA-029 | Partly |
 | N-ACC-003 | Keyboard operability | V-TST-002, V-TST-045, V-TST-095, V-TST-096, V-TST-097, V-INS-004, V-DEM-012, V-DEM-025 | Partly |
-| N-ACC-004 | Tree selection pattern | V-TST-200, V-TST-203, V-DEM-021, V-DEM-022 | Partly |
+| N-ACC-004 | Tree selection pattern | V-TST-200, V-TST-203, V-TST-211, V-DEM-021, V-DEM-022, V-DEM-026 | Partly |
 | N-CMP-001 | Desktop viewport | V-INS-021, V-DEM-013, V-DEM-025 | Partly |
 | N-CMP-002 | Browser support | V-INS-013, V-INS-020, V-TST-144, V-DEM-014 | Partly |
 
@@ -497,9 +499,9 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 |---|---|---|---|---|---|
 | Constraints | 24 | 6 | 4 | 14 | 0 |
 | Graphical | 7 | 3 | 1 | 3 | 0 |
-| Functional | 52 | 31 | 17 | 2 | 2 |
+| Functional | 52 | 30 | 18 | 2 | 2 |
 | Non-functional | 27 | 12 | 11 | 4 | 0 |
-| All | 110 | 52 | 33 | 23 | 2 |
+| All | 110 | 51 | 34 | 23 | 2 |
 
 Every other test block says in its header that it names no requirement, and pins a choice made within one.
 

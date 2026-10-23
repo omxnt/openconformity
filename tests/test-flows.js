@@ -542,6 +542,36 @@ function flowsOver(store) {
   deepEqual(asked, [], 'no question was asked along the way');
 }
 
+// --- V-TST-211 An action reveals the selection it acts on (F-WSP-001, F-MOD-005, N-ACC-004) ---
+
+{
+  const store = createStore({ storage: fakeStorage() });
+  const seen = [];
+  const dialogs = { confirm: async () => { seen.push(store.isExpanded('F-1') && store.projectExpanded()); return false; }, toast() {} };
+  const flows = createFlows({ store, overlay: {}, dialogs, editor: stubEditor(), fileInput: null });
+  store.replaceProject(createModel());
+  store.commit((model) => addFolder(model, 'Zone'));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.commit((model) => addEntity(model, 'ELM', { parent: 'F-1' }));
+  store.select('ELM-002');
+  store.setExpanded('F-1', false);
+  store.setProjectExpanded(false);
+  equal(store.isExpanded('F-1'), false, 'the selected row stands under a closed folder');
+  await flows.deleteSelection();
+  deepEqual(seen, [true], 'Delete opens the folder and the project row before it asks');
+  equal(store.model().nodes.size, 3, 'and the answer no deletes nothing');
+  store.setExpanded('F-1', false);
+  flows.cutSelection();
+  equal(store.isExpanded('F-1'), true, 'Cut opens it');
+  store.setCut([]);
+  store.setExpanded('F-1', false);
+  flows.moveUp();
+  equal(store.isExpanded('F-1') && store.selection() === 'ELM-002' && childrenOf(store.model(), 'F-1')[0].id === 'ELM-002', true, 'Move up opens it and moves the row');
+  store.setExpanded('F-1', false);
+  flows.selectBelow('F-1');
+  equal(store.isExpanded('F-1'), true, 'and Select subtree opens the row it starts from');
+}
+
 // --- V-TST-210 A paste refused partway leaves every row where it was (F-WSP-010, F-MOD-004) ---
 
 {
