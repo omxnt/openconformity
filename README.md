@@ -87,7 +87,8 @@ openconformity/
 | [metamodel.md](specs/metamodel.md) | What a model may contain |
 | [attributes.md](specs/attributes.md) | What each entity type carries |
 | [references.md](specs/references.md) | How a reference is written |
-| [project.schema.json](specs/project.schema.json) | What a project file holds |
+| [shortcuts.md](specs/shortcuts.md) | Every keyboard path through the software |
+| [template.md](specs/template.md) | How a document is written |
 
 ## Documentation
 
@@ -98,8 +99,6 @@ openconformity/
 | [architecture.md](docs/architecture.md) | How the software is built |
 | [security.md](docs/security.md) | How the software is kept secure |
 | [verification.md](docs/verification.md) | How each requirement is verified |
-| [shortcuts.md](docs/shortcuts.md) | Every keyboard path through the software |
-| [template.md](docs/template.md) | How a document is written |
 
 ## Disclaimer
 

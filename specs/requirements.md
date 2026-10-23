@@ -1233,7 +1233,7 @@ The software shall be fully operable by keyboard.
 
 The navigator's tree shall follow the ARIA tree view pattern for focus, selection and their keys [5].
 
-> *A tree that selects several rows has a known set of keys, and a user who knows them from any other tree expects them here. Of the pattern's two models the tree follows the second, where an arrow key moves the selection and a modifier keeps it, which every desktop tree uses and the tree had already. Following it in full gives the keyboard every selection a pointer can make, as N-ACC-003 requires. One key the pattern lacks, selecting a row with everything under it, is the software's own and `docs/shortcuts.md` says so.*
+> *A tree that selects several rows has a known set of keys, and a user who knows them from any other tree expects them here. Of the pattern's two models the tree follows the second, where an arrow key moves the selection and a modifier keeps it, which every desktop tree uses and the tree had already. Following it in full gives the keyboard every selection a pointer can make, as N-ACC-003 requires. One key the pattern lacks, selecting a row with everything under it, is the software's own and `specs/shortcuts.md` says so.*
 
 ### 5.5 Compatibility
 

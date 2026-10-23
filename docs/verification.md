@@ -309,7 +309,7 @@ Chapters 2 and 3 shall be generated from the sources of 1.4 by `tests/generate-v
 | V-DEM-009 | Drive | The software in a browser | The page states its content security policy first. Nothing leaves the page but by a link the user follows. With the network panel open, load and work, and find requests to the host only until the editor is opened |
 | V-DEM-010 | Drive | The software in a browser | The tab chosen per type: the session's. Create a drawing and find the dialog naming the origin and the diagram |
 | V-DEM-011 | Drive | The software in a browser | The tab chosen per type: the session's. Tick the box, open About, press Forget, and find the dialog on the next edit |
-| V-DEM-012 | Drive | The software in a browser | Walk every row of `docs/shortcuts.md` with the pointer unused |
+| V-DEM-012 | Drive | The software in a browser | Walk every row of `specs/shortcuts.md` with the pointer unused |
 | V-DEM-013 | Drive | The software in a browser | The minimum viewport. Work at 1000 by 356 pixels and find every pane usable |
 | V-DEM-014 | Drive | The software in a browser | The file surface stays on the baseline. The pre-paint theme script speaks the store's literals. A browser without IndexedDB. Run the example and a drawing in the current Chrome, Edge, Firefox and Safari |
 | V-DEM-015 | Drive | [drives.py](../tests/drives.py) | Open a project and select nothing. The relationship pane keeps its head, with the Graph and List tabs, the filter and Add relationship disabled and the collapse button working, over the empty state that asks for an entity. Select an entity, open the filter, and find its clear button once it holds text, clearing and closing it |

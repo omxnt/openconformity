@@ -44,8 +44,8 @@ The interface follows the IBM Carbon Design System, its colour tokens, spacing s
 | `docs/architecture.md` | Layers, modules, state and the page | Adding or moving a module |
 | `docs/security.md` | Security model, threats and controls | Changing what enters, leaves or is stored |
 | `docs/verification.md` | Each requirement mapped to its tests | Adding a requirement or a test block |
-| `docs/shortcuts.md` | Every keyboard path through the software | Adding or changing a key |
-| `docs/template.md` | Document form and structure | Writing or updating a document |
+| `specs/shortcuts.md` | Every keyboard path through the software | Adding or changing a key |
+| `specs/template.md` | Document form and structure | Writing or updating a document |
 
 ## Verification
 
