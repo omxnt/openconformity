@@ -176,7 +176,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Competence | multiline |  | What the person in the role is assumed to be able to do. | competence |
 | Familiarity | multiline |  | How well the person is assumed to know this or similar machinery and its hazards. | familiarity |
 
-#### 2.2.3 Notes
+#### 2.2.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 2.2.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -201,7 +207,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Tools and equipment needed | multiline |  | What is needed to do the task. | tools |
 | Reasonably foreseeable misuse | multiline |  | How the task is foreseeably done other than intended. | misuse |
 
-#### 2.3.3 Notes
+#### 2.3.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 2.3.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -217,7 +229,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Title | text |  | The name of the system phase. | title |
 | Description | multiline |  | What happens to the machinery in the system phase. | description |
 
-#### 2.4.2 Notes
+#### 2.4.2 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 2.4.3 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -242,7 +260,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 3.1.3 Notes
+#### 3.1.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 3.1.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -265,7 +289,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 3.2.3 Notes
+#### 3.2.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 3.2.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -288,7 +318,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 3.3.3 Notes
+#### 3.3.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 3.3.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -304,7 +340,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Title | text |  | The name of the conformity assessment procedure. | title |
 | Description | multiline |  | What the conformity assessment involves for this product. | description |
 
-#### 3.4.2 Notes
+#### 3.4.2 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 3.4.3 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -331,7 +373,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Procedures | multiline |  | The conformity assessment procedures the notified body is notified for, as the register lists them. | procedures |
 | Products | multiline |  | The kinds of machinery and related products the notified body may assess, as the register lists them. | products |
 
-#### 3.5.3 Notes
+#### 3.5.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 3.5.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -362,7 +410,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 |---|---|---|---|---|
 | Rationale | multiline |  | Why the hazard counts as eliminated, or why it could not be. | rationale |
 
-#### 4.1.3 Notes
+#### 4.1.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 4.1.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -477,7 +531,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 |---|---|---|---|---|
 | Risk evaluation | multiline |  | Your judgement whether the accident scenario's residual risk is acceptable, and why. | evaluation |
 
-#### 4.2.3 Notes
+#### 4.2.3 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 4.2.4 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -616,7 +676,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 5.1.4 Notes
+#### 5.1.4 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 5.1.5 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -647,7 +713,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 5.2.4 Notes
+#### 5.2.4 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 5.2.5 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|
@@ -678,7 +750,13 @@ The project has attributes of its own. Its name is the model's own, not an attri
 | Applicable | choice | Yes; No | Whether it applies to this product. | applicable |
 | Rationale | multiline |  | Why it applies, or why not. | rationale |
 
-#### 5.3.4 Notes
+#### 5.3.4 Diagram
+
+| Attribute | Kind | Values | Help | Key |
+|---|---|---|---|---|
+| Diagram | drawing |  | A diagram of it, made in draw.io and shown as an image. | drawing |
+
+#### 5.3.5 Notes
 
 | Attribute | Kind | Values | Help | Key |
 |---|---|---|---|---|

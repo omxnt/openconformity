@@ -171,7 +171,7 @@ if (loaded.ok) {
     const slotOf = new Map(groupsOf(code).filter((group) => group.when).flatMap((group) => group.attributes.map((definition) => [definition.key, `${group.name}/${group.when.key}`])));
     const slotFilled = (key) => [...slotOf].some(([other, slot]) => slot === slotOf.get(key) && filled(other));
     for (const definition of attributesFor(code)) {
-      if (definition.kind === 'computed') continue;
+      if (definition.kind === 'computed' || definition.kind === 'drawing') continue;
       if (!(slotOf.has(definition.key) ? slotFilled(definition.key) : filled(definition.key))) empty.push(`${code}.${definition.key}`);
     }
     for (const entity of entities) {
@@ -182,7 +182,7 @@ if (loaded.ok) {
       }
     }
   }
-  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, and a slot shown by a choice counts through whichever of its variants is filled');
+  deepEqual(empty, [], 'every attribute of every type holds a value somewhere, a slot shown by a choice counting through whichever of its variants is filled, a diagram being an illustration the example need not carry on every type');
   deepEqual(hidden, [], 'and no entity holds a value under a choice it has not made, since a save would ask to clear it');
   const refused = EXAMPLE_PROJECT.entities.filter((entity) => entity.attributes.drawing).map((entity) => [entity.id, checkDrawing(entity.attributes.drawing).ok && embeddedModel(entity.attributes.drawing) !== null]).filter(([, fine]) => !fine);
   deepEqual(refused, [], 'and every drawing passes the check and carries the editor\'s model, so each is shown and can be edited again');

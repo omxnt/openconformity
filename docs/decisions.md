@@ -1091,6 +1091,14 @@ A view carries the name of the artefact it exports, the subject and the kind of 
 
 > *The views are the documents a reader outside the tool takes away, and a document is known by its kind, a report tells what was found and a specification what is to be built. The risk assessment view was named for the activity and read as one. The principle that the software draws no conclusion is untouched by the word, the report holds what the model holds and nothing the model does not. Names the rule the candidates of #65 will follow.*
 
+### D-127 Every entity carries a diagram
+
+`2026-10-23` `product`
+
+Every entity type carries a Diagram tab before its Notes tab, one drawing held as SVG text and shown as an image, as five types did before. The project does not.
+
+> *Five types had the tab and thirteen did not, by a guess at which things get drawn. A hazard sketched where it arises, a task as a flow, a requirement's context or a standard's clause tree are as plausible as the five, and the user is the one who knows. One rule, every entity can carry a diagram and notes, is simpler to state and to remember than a list. The attribute key is the one the five used, so the schema stays at version 1 and every file opens as it was. The project stays without, its first tab being the file's own record rather than a thing in the model. Settles #90.*
+
 ---
 
 ## 3. Undecided
